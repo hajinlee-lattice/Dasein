@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -136,6 +137,9 @@ public class PlayResource {
         if (play == null) {
             throw new NullPointerException("Play is null");
         }
+        if (StringUtils.isEmpty(play.getUpdatedBy())) {
+            play.setUpdatedBy(MultiTenantContext.getEmailAddress());
+        }
         return playProxy.createOrUpdatePlay(tenant.getId(), play);
     }
 
@@ -158,7 +162,12 @@ public class PlayResource {
             @PathVariable("playName") String playName, @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
-
+        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
+            playLaunch.setCreatedBy(MultiTenantContext.getEmailAddress());
+        }
+        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
+            playLaunch.setUpdatedBy(MultiTenantContext.getEmailAddress());
+        }
         return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
     }
 
@@ -172,6 +181,12 @@ public class PlayResource {
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
+        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
+            playLaunch.setCreatedBy(MultiTenantContext.getEmailAddress());
+        }
+        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
+            playLaunch.setUpdatedBy(MultiTenantContext.getEmailAddress());
+        }
         return playProxy.updatePlayLaunch(tenant.getId(), playName, launchId, playLaunch);
     }
 

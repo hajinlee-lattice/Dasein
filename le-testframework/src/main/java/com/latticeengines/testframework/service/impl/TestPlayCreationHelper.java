@@ -244,6 +244,7 @@ public class TestPlayCreationHelper {
             playTypes = playProxy.getPlayTypes(tenant.getId());
         }
         play.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        play.setUpdatedBy(CREATED_BY);
         play.setPlayType(playTypes.get(0));
         play.setDisplayName("TestPlay_" + new Date().toString());
         play.setDescription("TestPlay description");
@@ -293,6 +294,8 @@ public class TestPlayCreationHelper {
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
         playLaunch.setTopNCount(topNCount);
+        playLaunch.setCreatedBy(CREATED_BY);
+        playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;
     }
 

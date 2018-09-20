@@ -37,7 +37,7 @@ BEGIN
   DECLARE tenantId INT;
   DECLARE playId INT;
   DECLARE finished INT DEFAULT 0;
-  DECLARE ratingEngineType varchar(255);
+  DECLARE ratingEngineType VARCHAR(255);
 
   DECLARE curs CURSOR FOR SELECT p.PID, p.FK_TENANT_ID, re.TYPE
 	FROM PLS_MultiTenant.PLAY p
@@ -65,61 +65,69 @@ DELIMITER;
 
 CREATE PROCEDURE `UpdatePLSTables`()
   BEGIN
-    ALTER TABLE `PLS_MultiTenant`.`TENANT` ADD COLUMN `CONTRACT` varchar(255) DEFAULT NULL;
-    update `PLS_MultiTenant`.`TENANT` set STATUS='ACTIVE' where STATUS is NULL;
-    ALTER TABLE `PLS_MultiTenant`.`TENANT` MODIFY `STATUS` varchar(255) NOT NULL;
+    ALTER TABLE `PLS_MultiTenant`.`TENANT` ADD COLUMN `CONTRACT` VARCHAR(255) DEFAULT NULL;
+     UPDATE `PLS_MultiTenant`.`TENANT` set STATUS='ACTIVE' WHERE STATUS is NULL;
+    ALTER TABLE `PLS_MultiTenant`.`TENANT` MODIFY `STATUS` VARCHAR(255) NOT NULL;
 
-    update `PLS_MultiTenant`.`TENANT` set TENANT_TYPE = 'CUSTOMER' where TENANT_TYPE is NULL;
-    ALTER TABLE `PLS_MultiTenant`.`TENANT` MODIFY `TENANT_TYPE` varchar(255) NOT NULL;
+     UPDATE `PLS_MultiTenant`.`TENANT` set TENANT_TYPE = 'CUSTOMER' WHERE TENANT_TYPE is NULL;
+    ALTER TABLE `PLS_MultiTenant`.`TENANT` MODIFY `TENANT_TYPE` VARCHAR(255) NOT NULL;
 
-    ALTER TABLE `PLS_MultiTenant`.`PLAY` MODIFY COLUMN `DESCRIPTION` varchar(255) default NULL;
+    ALTER TABLE `PLS_MultiTenant`.`PLAY` MODIFY COLUMN `DESCRIPTION` VARCHAR(255) DEFAULT NULL;
 
-    create table `PLS_MultiTenant`.`PLAY_TYPE` (
-    `PID` bigint not null auto_increment,
-    `CREATED` datetime not null,
-    `CREATED_BY` varchar(255) not null,
-    `DESCRIPTION` varchar(8192),
-    `DISPLAY_NAME` varchar(255) not null,
-    `ID` varchar(255) not null,
-    `TENANT_ID` bigint not null,
-    `UPDATED` datetime not null,
-    `UPDATED_BY` varchar(255) not null,
-    `FK_TENANT_ID` bigint not null,
-    primary key (`PID`))
+    CREATE TABLE `PLS_MultiTenant`.`PLAY_TYPE` (
+    `PID` bigint NOT NULL auto_increment,
+    `CREATED` datetime NOT NULL,
+    `CREATED_BY` VARCHAR(255) NOT NULL,
+    `DESCRIPTION` VARCHAR(8192),
+    `DISPLAY_NAME` VARCHAR(255) NOT NULL,
+    `ID` VARCHAR(255) NOT NULL,
+    `TENANT_ID` bigint NOT NULL,
+    `UPDATED` datetime NOT NULL,
+    `UPDATED_BY` VARCHAR(255) NOT NULL,
+    `FK_TENANT_ID` bigint NOT NULL,
+    PRIMARY KEY (`PID`))
     engine=InnoDB;
 
-    alter table `PLS_MultiTenant`.`PLAY_TYPE` add constraint `FK_PLAYTYPE_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_TYPE` ADD CONSTRAINT `FK_PLAYTYPE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
 
     CALL `CreatePlayTypes`();
 
-    alter table `PLS_MultiTenant`.`PLAY` add column `FK_PLAY_TYPE` bigint;
-    alter table `PLS_MultiTenant`.`PLAY` add constraint `FK_PLAY_FKPLAYTYPE_PLAYTYPE` foreign key (`FK_PLAY_TYPE`) references `PLS_MultiTenant`.`PLAY_TYPE` (`PID`);
+    ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `FK_PLAY_TYPE` bigint;
+    ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CONSTRAINT `FK_PLAY_FKPLAYTYPE_PLAYTYPE` FOREIGN KEY (`FK_PLAY_TYPE`) REFERENCES `PLS_MultiTenant`.`PLAY_TYPE` (`PID`);
+    ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `UPDATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
+    UPDATE `PLS_MultiTenant`.`PLAY` DET UPDATED_BY = CREATED_BY WHERE UPDATED_BY = 'placeholderForUpdate';
 
     CALL `AttachPlayTypes`();
 
     -- IMPORTANT NOTE: Following ddl should only be executed after the active stack switches to the M23 release candidate
     ALTER `PLS_MultiTenant`.`PLAY` Modify `FK_PLAY_TYPE` bigint NOT NULL;
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` ADD COLUMN `CREATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` ADD COLUMN `UPDATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
+    UPDATE `PLS_MultiTenant`.`PLAY_LAUNCH` pl, `PLS_MultiTenant`.`PLAY` p
+    SET pl.UPDATED_BY = p.UPDATED_BY, pl.CREATED_BY = p.CREATED_BY
+    WHERE pl.FK_PLAY_ID = p.PID;
+
   END;
 //
 DELIMITER;
 
 CREATE PROCEDURE `CreateDropBoxTable`()
   BEGIN
-    create table `ATLAS_DROPBOX` (
-      `PID`              bigint not null auto_increment,
-      `ACCESS_MODE`      varchar(20),
-      `DROPBOX`          varchar(8),
-      `EXTERNAL_ACCOUNT` varchar(20),
-      `LATTICE_USER`     varchar(20),
-      `FK_TENANT_ID`     bigint not null,
-      primary key (`PID`)
+    CREATE TABLE `ATLAS_DROPBOX` (
+      `PID`              bigint NOT NULL auto_increment,
+      `ACCESS_MODE`      VARCHAR(20),
+      `DROPBOX`          VARCHAR(8),
+      `EXTERNAL_ACCOUNT` VARCHAR(20),
+      `LATTICE_USER`     VARCHAR(20),
+      `FK_TENANT_ID`     bigint NOT NULL,
+      PRIMARY KEY (`PID`)
     )
       engine = InnoDB;
-    alter table `ATLAS_DROPBOX`
-      add constraint UX_DROPBOX unique (`DROPBOX`);
-    alter table `ATLAS_DROPBOX`
-      add constraint `FK_ATLASDROPBOX_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`)
-      on delete cascade;
+    ALTER TABLE `ATLAS_DROPBOX`
+      ADD CONSTRAINT UX_DROPBOX UNIQUE (`DROPBOX`);
+    ALTER TABLE `ATLAS_DROPBOX`
+      ADD CONSTRAINT `FK_ATLASDROPBOX_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`)
+      ON DELETE CASCADE;
 
   END;
 //

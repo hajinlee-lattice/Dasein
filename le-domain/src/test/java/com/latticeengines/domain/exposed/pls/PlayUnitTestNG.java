@@ -30,6 +30,7 @@ public class PlayUnitTestNG {
         play.setDisplayName(DISPLAY_NAME);
         play.setDescription(DESCRIPTION);
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
 
         LaunchHistory launchHistory = new LaunchHistory();
         launchHistory.setNewAccountsNum(300L);

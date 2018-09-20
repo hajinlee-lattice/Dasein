@@ -136,6 +136,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
+    @JsonProperty("updatedBy")
+    @Column(name = "UPDATED_BY", nullable = false)
+    private String updatedBy;
+
     @JsonProperty("playType")
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_PLAY_TYPE", nullable = false)
@@ -252,6 +256,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
+    public String getUpdatedBy() { return updatedBy; }
+
+    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
 
     public void setPlayStatus(PlayStatus playStatus) {
         this.playStatus = playStatus;

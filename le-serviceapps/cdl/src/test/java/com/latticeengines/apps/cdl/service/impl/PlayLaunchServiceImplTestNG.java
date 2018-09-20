@@ -89,6 +89,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setCreated(timestamp);
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
         play.setPlayType(playTypes.get(0));
 
         playEntityMgr.create(play);
@@ -104,6 +105,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
         playLaunch1.setDestinationOrgId(org1);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch1.setCreatedBy(CREATED_BY);
+        playLaunch1.setUpdatedBy(CREATED_BY);
 
         bucketsToLaunch2 = new TreeSet<>();
         bucketsToLaunch2.add(RatingBucketName.A);
@@ -117,6 +120,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setDestinationAccountId("SFDC_ACC2");
         playLaunch2.setDestinationOrgId(org2);
         playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch2.setCreatedBy(CREATED_BY);
+        playLaunch2.setUpdatedBy(CREATED_BY);
+
     }
 
     private void cleanupPlayLunches() {
@@ -231,8 +237,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     public void testCountDashboard() {
 
         Long badPlayId = System.currentTimeMillis();
-        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
-        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
+        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching);
 
         checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L);
 
@@ -266,8 +272,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
     public void testEntriesDashboard() {
         Long badPlayId = System.currentTimeMillis();
-        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
-        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
+        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching);
 
         checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L);
 
@@ -317,6 +323,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch3.setDestinationAccountId("SFDC_ACC2");
         playLaunch3.setDestinationOrgId(org2);
         playLaunch3.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch3.setCreatedBy(CREATED_BY);
+        playLaunch3.setUpdatedBy(CREATED_BY);
         playLaunchService.create(playLaunch3);
 
         PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId());

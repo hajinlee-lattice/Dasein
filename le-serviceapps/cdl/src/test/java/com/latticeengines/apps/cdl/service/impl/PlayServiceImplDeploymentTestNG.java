@@ -277,6 +277,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     private Play createDefaultPlay() {
         Play play = new Play();
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);

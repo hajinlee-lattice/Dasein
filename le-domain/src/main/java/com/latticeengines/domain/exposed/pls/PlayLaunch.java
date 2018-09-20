@@ -83,6 +83,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
+    @JsonProperty("createdBy")
+    @Column(name = "CREATED_BY", nullable = false)
+    private String createdBy;
+
+    @JsonProperty("updatedBy")
+    @Column(name = "UPDATED_BY", nullable = false)
+    private String updatedBy;
+
     @JsonProperty("launchState")
     @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
@@ -191,17 +199,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     }
 
     @Override
-    public void setId(String launchId) {
-        this.launchId = launchId;
-    }
+    public void setId(String launchId) { this.launchId = launchId; }
 
-    public Date getCreated() {
-        return created;
-    }
+    public Date getCreated() { return created; }
 
-    public void setCreated(Date created) {
-        this.created = created;
-    }
+    public void setCreated(Date created) { this.created = created; }
 
     public Date getUpdated() {
         return updated;
@@ -210,6 +212,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public void setUpdated(Date updated) {
         this.updated = updated;
     }
+
+    public String getCreatedBy() { return createdBy; }
+
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public String getUpdatedBy() { return updatedBy; }
+
+    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
 
     public LaunchState getLaunchState() {
         return launchState;

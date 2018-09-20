@@ -85,18 +85,19 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setCreated(timestamp);
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
 
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
-        playLaunch1 = createPlay(null, null, null);
-        playLaunch2 = createPlay(null, null, null);
+        playLaunch1 = createPlayLaunch(null, null, null);
+        playLaunch2 = createPlayLaunch(null, null, null);
 
-        playLaunch_org1_1 = createPlay(org1, externalSystemType, destinationAccountIdColumn_1);
-        playLaunch_org1_2 = createPlay(org1, externalSystemType, destinationAccountIdColumn_1);
+        playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
+        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
 
-        playLaunch_org2_1 = createPlay(org2, externalSystemType, destinationAccountIdColumn_2);
-        playLaunch_org2_2 = createPlay(org2, externalSystemType, destinationAccountIdColumn_2);
+        playLaunch_org2_1 = createPlayLaunch(org2, externalSystemType, destinationAccountIdColumn_2);
+        playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, destinationAccountIdColumn_2);
 
         allPlayLaunches = Arrays.asList(playLaunch1, playLaunch2, playLaunch_org1_1, playLaunch_org1_2,
                 playLaunch_org2_1, playLaunch_org2_2);
@@ -471,8 +472,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         }
     }
 
-    private PlayLaunch createPlay(String org, CDLExternalSystemType externalSystemType,
-            String destinationAccountIdColumn) {
+    private PlayLaunch createPlayLaunch(String org, CDLExternalSystemType externalSystemType,
+                                        String destinationAccountIdColumn) {
         PlayLaunch launch = new PlayLaunch();
         launch.setTenant(mainTestTenant);
         launch.setLaunchState(LaunchState.UnLaunched);
@@ -480,6 +481,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         launch.setDestinationOrgId(org);
         launch.setDestinationSysType(externalSystemType);
         launch.setDestinationAccountId(destinationAccountIdColumn);
+        launch.setCreatedBy(CREATED_BY);
+        launch.setUpdatedBy(CREATED_BY);
         return launch;
     }
 

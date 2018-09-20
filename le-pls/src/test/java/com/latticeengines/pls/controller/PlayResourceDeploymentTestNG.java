@@ -401,7 +401,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         try {
             launch = restTemplate.postForObject(getRestAPIHostPort() + //
                     "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
-            launch = restTemplate.postForObject(
+            restTemplate.postForObject(
                     getRestAPIHostPort() + //
                             "/pls/play/" + name + "/launches/" + launch.getId() + "/launch",
                     new Object(), PlayLaunch.class);
@@ -573,6 +573,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private Play createDefaultPlay() {
         Play play = new Play();
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ruleBasedRatingEngine.getId());
         if (CollectionUtils.isEmpty(playTypes)) {
@@ -626,6 +627,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
         playLaunch.setTopNCount(topNCount);
+        playLaunch.setCreatedBy(CREATED_BY);
+        playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;
     }
 

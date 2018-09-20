@@ -85,6 +85,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setDescription(DESCRIPTION);
         play.setPlayType(types.get(0));
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);
