@@ -83,6 +83,13 @@ angular.module('lp.playbook.wizard.rating', [])
         return true;
     }
 
+    vm.hasAccountCount = function(rating) {
+        if(vm.getAccountCount(rating)) {
+            return true;
+        }
+        return false;
+    }
+
     var textSearch = function(haystack, needle, case_insensitive) {
         var case_insensitive = (case_insensitive === false ? false : true);
 

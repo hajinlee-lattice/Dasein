@@ -12,7 +12,8 @@
         <button
             ng-if="(vm.secondaryLink || vm.item.secondaryLink || vm.item.secondaryFn) && vm.item.lastRoute"
             class="button white-button"
-            ng-click="vm.clickSecondary()">
+            ng-click="vm.clickSecondary()"
+            ng-disabled="(vm.item.secondaryLinkValidation && !vm.isValid())">
             {{vm.item.secondaryLinkLabel}}
         </button>
         <button 

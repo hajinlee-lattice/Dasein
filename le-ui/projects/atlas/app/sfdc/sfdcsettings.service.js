@@ -43,7 +43,6 @@ angular.module('lp.sfdc', [])
         var deferred = $q.defer();
 
         SfdcService.getOrgs().then(function(data) {
-            console.log(data);
             SfdcStore.setOrgs(data);
             deferred.resolve(data);
         });

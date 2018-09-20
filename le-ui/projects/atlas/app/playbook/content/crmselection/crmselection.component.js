@@ -2,6 +2,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
 .component('crmSelection', {
     templateUrl: 'app/playbook/content/crmselection/crmselection.component.html',
     bindings: {
+        play: '<',
         featureflags: '<',
         orgs: '<'
     },
@@ -43,7 +44,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
         }
 
         vm.checkValid = function(form, accountId, isRegistered) {
-
             vm.orgIsRegistered = isRegistered;
 
             $scope.excludeItemsWithoutSalesforceId = false;

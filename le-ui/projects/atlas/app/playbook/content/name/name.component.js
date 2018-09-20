@@ -5,7 +5,7 @@ angular.module('lp.playbook.wizard.name', [])
         types: '<'
     },
     controller: function(
-        $scope, $state, $stateParams,
+        $scope, $state, $stateParams, $timeout,
         ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService
     ) {
         var vm = this;
@@ -24,14 +24,23 @@ angular.module('lp.playbook.wizard.name', [])
             return typeObj[0];
         }
 
-        vm.change = function() {
+        var getTypeByName = function(type) {
+            var ret = vm.types.filter(function(value) {
+                return (value.displayName === type);
+            });
+            return ret[0];
+        }
+
+        vm.change = function(form) {
             if(vm.updatedPlay.typeId) {
                 vm.updatedPlay.playType = getTypeObj(vm.updatedPlay.typeId); // add the type object to the update play (needed to save)
             }
             PlaybookWizardStore.setSettings(vm.updatedPlay);
+            vm.checkValid(form);
         }
 
         vm.$onInit = function() {
+            vm.updatedPlay.typeId = getTypeByName('List').id;
             if(vm.currentPlay) {
                 if(vm.currentPlay.displayName) {
                     vm.updatedPlay.displayName = vm.currentPlay.displayName;
@@ -45,4 +54,17 @@ angular.module('lp.playbook.wizard.name', [])
             }
         }
 
-    }});
+        vm.checkFieldsDelay = function(form) {
+            var mapped = [];
+            $timeout(function() {
+                vm.checkValid(form);
+            }, 1);
+        }
+
+        vm.checkValid = function(form) {
+            if(form) {
+                PlaybookWizardStore.setValidation('name', form.$valid);
+            }
+        }
+
+}});

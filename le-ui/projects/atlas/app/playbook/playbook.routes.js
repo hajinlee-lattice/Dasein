@@ -52,7 +52,7 @@ angular
             url: '/list',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Campaign Playbook'
             },
             resolve: {
                 PlayList: function($q, PlaybookWizardStore) {
@@ -570,7 +570,7 @@ angular
             url: '/create/:play_name',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook',
+                pageTitle: 'Campaign Playbook',
                 play_name: ''
             },
             onExit: function($transition$, PlaybookWizardStore){
@@ -600,6 +600,7 @@ angular
                         },{
                             label: 'Name', 
                             state: 'rating.name', 
+                            secondaryLinkValidation: true,
                             secondaryLinkLabel: 'Save & Create Insights',
                             secondaryFn: function() {
                                 PlaybookWizardStore.nextSaveAndGoto('home.playbook.dashboard.insights', {
@@ -658,7 +659,7 @@ angular
             url: '/rating/:rating_id',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook',
+                pageTitle: 'Campaign Playbook',
                 rating_id: ''
             },
             resolve: {
@@ -679,7 +680,7 @@ angular
             params: {
                 section: 'wizard.insights',
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Campaign Playbook',
             },
             resolve: {
                 types: function($q, PlaybookWizardStore) {
@@ -700,7 +701,7 @@ angular
             url: '/launch/:play_name',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook',
+                pageTitle: 'Campaign Playbook',
                 play_name: ''
             },
             onEnter: function($stateParams, PlaybookWizardStore) {
@@ -711,7 +712,6 @@ angular
                         createdBy: play.createdBy,
                         ratingEngine: {
                             id: play.ratingEngine.id,
-
                         }
                     });
                 }
@@ -806,9 +806,19 @@ angular
             params: {
                 section: 'wizard.insights',
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Campaign Playbook'
             },
             resolve: {
+                play: function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(play) {
+                        PlaybookWizardStore.setRating(play.ratingEngine);
+                        deferred.resolve(play);
+                    });
+
+                    return deferred.promise;
+                },
                 featureflags: function($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
@@ -844,7 +854,7 @@ angular
                 section: 'wizard.targets',
                 currentTargetTab: 'accounts',
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Campaign Playbook'
             },
             resolve: {
                 Config: [function() {
@@ -957,7 +967,7 @@ angular
             params: {
                 section: 'wizard.insights',
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Campaign Playbook'
             },
             resolve: {},
             views: {

@@ -50,6 +50,7 @@ angular.module('lp.playbook')
         };
 
         this.validation = {
+            name: false,
             settings: false,
             rating: true,
             targets: false,

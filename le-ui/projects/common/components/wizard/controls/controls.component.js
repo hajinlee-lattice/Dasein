@@ -38,8 +38,12 @@ angular.module('common.wizard.controls', [])
         vm.rootState = vm.next + '.';
         vm.setButtons();
 
-        if (WizardControlsOptions.secondaryLink){
+        if (WizardControlsOptions.secondaryLink) {
             vm.secondaryLink = true;
+        };
+
+        if (WizardControlsOptions.secondaryLinkValidation) {
+            vm.secondaryLinkValidation = true;
         };
 
         vm.items.forEach(function(item) {

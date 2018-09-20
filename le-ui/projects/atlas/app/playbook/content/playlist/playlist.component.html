@@ -12,7 +12,7 @@
                 <a
                     class="button blue-button"
                     ui-sref="home.playbook.create">
-                    Add Play
+                    Create
                 </a>
             </div>
         </div>
@@ -34,6 +34,7 @@
                     ng-click="vm.tileClick($event, play)"
                     ng-mouseleave="vm.current.tileStates[play.name].showCustomMenu ? vm.customMenuClick($event, play) : null"
                     ng-if="vm.current.plays.length > 0"
+                    class="playtype-{{play.playType.displayName|lowercase}}"
                     ng-class="{editing: vm.current.tileStates[play.name].editPlay}">
                     
 
@@ -108,23 +109,20 @@
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
-
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch === null"
+                            ng-if="play.launchHistory.mostRecentLaunch === null && !play.talkingPoints.length"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
-                        <!-- <button 
+                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="!play.launchHistory.mostRecentLaunch && play.ratingEngine && !vm.tileStates[play.name].launching"
-                            ng-disabled="vm.lockLaunching || play.ratingEngine.status != 'ACTIVE'"
-                            ng-click="vm.launchPlay($event, play)">
+                            ng-if="play.launchHistory.mostRecentLaunch === null && play.talkingPoints.length"
+                            ui-sref="home.playbook.launch({play_name:play.name})">
                             Launch
-                        </button> -->
-
+                        </button>
                         <button
                             type="button"
                             class="button gray-button pull-right"
@@ -136,7 +134,7 @@
                                 class="launch-success pull-left"
                                 ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
                                 <i class="fa fa-check" aria-hidden="true"></i>
-                                Launched {{play.launchHistory.playLaunch.updated | date}}
+                                Launched {{play.launchHistory.lastCompletedLaunch.updated | date}}
                             </span>
                             <button 
                                 type="button"
