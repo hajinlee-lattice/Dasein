@@ -110,6 +110,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         int threadPoolSize = Math.min(6, requests.size());
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-export-history", threadPoolSize);
         ThreadPoolUtils.runRunnablesInParallel(executorService, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
+        executorService.shutdown();
         log.info(String.format("Finished to export from hdfs to s3. tenantIds=%s", StringUtils.join(tenants, ",")));
     }
 
