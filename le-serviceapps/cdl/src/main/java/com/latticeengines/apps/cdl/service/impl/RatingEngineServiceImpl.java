@@ -713,26 +713,22 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             return new ArrayList<>();
         }
 
-        Map<String, HashMap<Long, List<BucketMetadata>>> bucketsGroupedByCreationTime = Flux.fromIterable(allBuckets)
-                .collect(HashMap<String, HashMap<Long, List<BucketMetadata>>>::new, (returnMap, bucket) -> {
-                    if (!returnMap.containsKey(bucket.getModelSummaryId())) {
-                        returnMap.put(bucket.getModelSummaryId(), new HashMap<>());
-                    }
+        List<AIModel> models = getRatingModelService(ratingEngine.getType())
+                .getAllRatingModelsByRatingEngineId(ratingEngineId);
 
-                    if (!returnMap.get(bucket.getModelSummaryId()).containsKey(bucket.getCreationTimestamp())) {
-                        returnMap.get(bucket.getModelSummaryId()).put(bucket.getCreationTimestamp(), new ArrayList<>());
+        Map<Long, RatingModelWithPublishedHistoryDTO> bucketsGroupedByTime = Flux.fromIterable(allBuckets)
+                .collect(HashMap<Long, RatingModelWithPublishedHistoryDTO>::new, (returnMap, bucket) -> {
+                    if (!returnMap.containsKey(bucket.getCreationTimestamp())) {
+                        AIModel model = models.stream()
+                                .filter(rm -> rm.getModelSummaryId().equals(bucket.getModelSummaryId())).findFirst()
+                                .get();
+                        returnMap.put(bucket.getCreationTimestamp(), new RatingModelWithPublishedHistoryDTO(model,
+                                bucket.getCreationTimestamp(), new ArrayList<>(), bucket.getLastModifiedByUser()));
                     }
-                    returnMap.get(bucket.getModelSummaryId()).get(bucket.getCreationTimestamp()).add(bucket);
+                    returnMap.get(bucket.getCreationTimestamp()).getPublishedMetadata().add(bucket);
                 }).block();
 
-        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
-        return Flux.fromIterable(ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId))
-                .map(iteration -> (AIModel) iteration)
-                .filter(iteration -> StringUtils.isNotEmpty(iteration.getModelSummaryId()))
-                .map(iteration -> new RatingModelWithPublishedHistoryDTO(iteration,
-                        bucketsGroupedByCreationTime.get(iteration.getModelSummaryId())))
-                .filter(iteration -> MapUtils.isNotEmpty(iteration.getPublishedHistory())) //
-                .collectList().block();
+        return new ArrayList(bucketsGroupedByTime.values());
     }
 
     @VisibleForTesting

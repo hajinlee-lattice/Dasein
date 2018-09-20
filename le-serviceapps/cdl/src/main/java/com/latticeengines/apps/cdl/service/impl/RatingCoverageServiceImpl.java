@@ -462,7 +462,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     tenant.getId(), //
                     accountFrontEndQuery);
 
-            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(Map.Entry::getValue)
                     .reduce((x, y) -> x + y);
 
             CoverageInfo coverageInfo = new CoverageInfo();
@@ -476,7 +476,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             } catch (Exception ex) {
                 log.info("Got error in fetching contact count", ex);
             }
-            
+
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
             for (RatingBucketName bucket : RatingBucketName.values()) {
                 Long countInBucket = 0L;

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -354,10 +355,13 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createPlayLaunch(boolean isDryRunMode) {
         logInterceptor();
 
+        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
+
         playLaunch = restTemplate.postForObject(
                 getRestAPIHostPort() + //
-                        "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
-                createDefaultPlayLaunch(), PlayLaunch.class);
+                        "/pls/play/" + name + "/launches/" + playLaunch.getId() + "/launch?dry-run=" + isDryRunMode,
+                new Object(), PlayLaunch.class);
 
         assertPlayLaunch(playLaunch, isDryRunMode);
 
@@ -397,6 +401,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         try {
             launch = restTemplate.postForObject(getRestAPIHostPort() + //
                     "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
+            launch = restTemplate.postForObject(
+                    getRestAPIHostPort() + //
+                            "/pls/play/" + name + "/launches/" + launch.getId() + "/launch",
+                    new Object(), PlayLaunch.class);
             Assert.fail("Play launch submission should fail");
         } catch (Exception ex) {
             Assert.assertTrue(ex.getMessage().contains(LedpCode.LEDP_18176.name()));
@@ -433,7 +441,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 "/pls/play/" + name + "/launches", List.class);
 
         Assert.assertNotNull(launchList);
-        Assert.assertEquals(launchList.size(), 1);
+        Assert.assertEquals(launchList.size(), 2);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);

@@ -141,10 +141,10 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play is null" });
         }
         // TODO: Activate this in M24
-//        if (StringUtils.isEmpty(play.getDisplayName())) {
-//            throw new LedpException(LedpCode.LEDP_32000,
-//                    new String[] { "Play's Display Name cannot be blank is null" });
-//        }
+        // if (StringUtils.isEmpty(play.getDisplayName())) {
+        // throw new LedpException(LedpCode.LEDP_32000,
+        // new String[] { "Play's Display Name cannot be blank is null" });
+        // }
 
         return playService.createOrUpdate(play, shouldLoadCoverage, tenant.getId());
     }
@@ -255,6 +255,7 @@ public class PlayResource {
         if (playLaunch == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
+        playLaunch.setPlay(play);
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
         validateNonEmptyTargetsForLaunch(play, playName, playLaunch, //
                 playLaunch.getDestinationAccountId());
