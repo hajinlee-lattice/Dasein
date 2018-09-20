@@ -172,7 +172,7 @@
         </tbody>
     </table>
 
-    <table ng-if="vm.section === 'dashboard.targets' || vm.section !== 'wizard.targets'">
+    <table ng-if="vm.section === 'dashboard.targets' && vm.section !== 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <!-- <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse"> -->
