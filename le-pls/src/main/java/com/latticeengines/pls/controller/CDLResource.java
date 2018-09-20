@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -19,8 +21,10 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -86,17 +90,13 @@ public class CDLResource {
 
     @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")
-    public ResponseDocument<String> cleanup(@RequestParam(value = "fileName") String fileName,
+    public ModelAndView cleanup(@RequestParam(value = "fileName") String fileName,
                                             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
                                             @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        try {
-            ApplicationId applicationId = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
-            return ResponseDocument.successResponse(applicationId.toString());
-        } catch (RuntimeException e) {
-            log.error(String.format("Failed to submit cleanup by upload job: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] {"Cleanup", e.getMessage()});
-        }
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        UIAction uiAction = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @RequestMapping(value = "/cleanupbyrange", method = RequestMethod.POST)

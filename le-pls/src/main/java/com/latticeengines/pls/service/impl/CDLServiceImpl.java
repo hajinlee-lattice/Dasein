@@ -17,8 +17,12 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -35,7 +39,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private CDLProxy cdlProxy;
-
+    private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
+    private static final String DELETE_FAIL_TITLE = "Validation Error";
+    public static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         return cdlProxy.processAnalyze(customerSpace, request);
@@ -56,9 +62,10 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public ApplicationId cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
+    public UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
                                  CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
+        UIAction uiAction = new UIAction();
         switch (schemaInterpretation) {
             case DeleteAccountTemplate:
                 entity = BusinessEntity.Account;
@@ -70,18 +77,54 @@ public class CDLServiceImpl implements CDLService {
                 entity = BusinessEntity.Transaction;
                 break;
             default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg(
+                    String.format("<p>Cleanup operation does not support schema: %s </p>" + schemaInterpretation.name(),
+                            schemaInterpretation.name())));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile == null) {
-            throw new RuntimeException("Cannot find source file with name: " + sourceFileName);
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg(
+                    String.format("<p>Cannot find source file with name: %s </p>", sourceFileName)));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         if (StringUtils.isEmpty(sourceFile.getTableName())) {
-            throw new RuntimeException(String.format("Source file %s doesn't have a schema.", sourceFileName));
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(
+                    generateDeleteResultMsg(
+                            String.format("<p>Source file %s doesn't have a schema.</p>", sourceFileName)));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         String email = MultiTenantContext.getEmailAddress();
-        return cdlProxy.cleanupByUpload(customerSpace, sourceFile, entity,
-                cleanupOperationType, email);
+        try {
+            cdlProxy.cleanupByUpload(customerSpace, sourceFile, entity, cleanupOperationType, email);
+        } catch (RuntimeException e) {
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg(e.getMessage()));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
+        }
+        uiAction.setTitle(DELETE_SUCCESS_TITLE);
+        uiAction.setView(View.Banner);
+        uiAction.setStatus(Status.Success);
+        uiAction.setMessage(generateDeleteResultMsg(DELETE_SUCCESSE_MSG));
+        return uiAction;
+    }
+
+    @VisibleForTesting
+    String generateDeleteResultMsg(String message) {
+        StringBuilder html = new StringBuilder();
+        html.append(message);
+        return html.toString();
     }
 
     @Override
