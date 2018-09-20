@@ -14,49 +14,37 @@ angular.module('lp.ratingsengine.remodel.list', [])
             sortBy: 'DisplayName'
         });
 
-        // $scope.$watch('category', function(newValue, oldValue) {
-        //     if(newValue != oldValue) {
-        //         vm.filters.currentPage = 1;
-        //     }
-        // });
-
         vm.$onInit = function() {
 
-            // console.log(vm.filters);
+            vm.associatedRules = AtlasRemodelStore.get('associatedRules');
 
         };
 
         vm.getCategoryAttributes = function(){
             var category = AtlasRemodelStore.get('category'),
-                categoryAttributes = vm.allAttributes[category],
-                associatedRules = AtlasRemodelStore.get('associatedRules');
+                categoryAttributes = vm.allAttributes[category];
 
             angular.forEach(categoryAttributes, function(attribute){
-
-                var attributeRules = attribute.AssociatedDataRules;
-
-                if(attributeRules.length > 0){
-                    var filtered = associatedRules.filter(function (e) {
-                        return attributeRules.indexOf(e.name) >= 0; 
-                    });
-
-                    console.log(filtered);
-                    attribute.ruleTooptips = filtered;
-                }
-
-                // attribute.hasWarning = (attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule) ? true : false;
-
-                // if(attribute.hasWarning){
-                //     console.log(attribute);
-                // }
+                attribute.hasWarning = (attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule) ? true : false;
             });
 
             return categoryAttributes;
         }
 
-        vm.searchFilter = function(attr) {
+        vm.filterRules = function(attr) {
 
-            // vm.filters.currentPage = 1;
+            vm.attrTooltipContent = [];
+
+            angular.forEach(vm.associatedRules, function(rule){
+                angular.forEach(attr.AssociatedDataRules, function(attrRule){
+                    if(rule.name === attrRule){
+                        vm.attrTooltipContent.push(rule);
+                    }
+                });
+            });
+        }
+
+        vm.searchFilter = function(attr) {
 
             var text = vm.filters.queryText;
             if (text) {

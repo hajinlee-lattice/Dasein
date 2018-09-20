@@ -356,10 +356,11 @@ angular.module('lp.models.ratings', [
 
         if(vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') {
             var aiModelId = vm.ratingModelId;
+            
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
 
-                    RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE').then(function(result){
+                    RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', false).then(function(result){
                         vm.chartNotUpdated = true;
                         vm.updateContent = true;
                         vm.savingConfiguration = false;
@@ -386,6 +387,7 @@ angular.module('lp.models.ratings', [
                 }
             });
         } else {
+
             ModelRatingsService.CreateABCDBuckets(vm.modelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
                     vm.chartNotUpdated = true;
@@ -453,6 +455,8 @@ angular.module('lp.models.ratings', [
             }
 
             vm.publishedHistory = vm.activeIteration.publishedHistory;
+
+            console.log(vm.publishedHistory);
 
         } else {
 

@@ -1079,14 +1079,14 @@ angular.module('lp.ratingsengine')
         return deferred.promise;  
     };
 
-    this.saveRatingStatus = function(rating_id, status){
+    this.saveRatingStatus = function(rating_id, status, action){
 
         var deferred = $q.defer();
         var newRating = {
             id: rating_id,
             status: status
         };
-        RatingsEngineService.saveRating(newRating).then(function(data){
+        RatingsEngineService.saveRating(newRating, {}, action).then(function(data){
             deferred.resolve({success: true});
         });
         return deferred.promise;
@@ -1200,12 +1200,13 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    this.saveRating = function(opts, params) {
-        var deferred = $q.defer();
+    this.saveRating = function(opts, params, action) {
+        var deferred = $q.defer(),
+            createAction = !action ? action : true;
 
         $http({
             method: 'POST',
-            url: '/pls/ratingengines',
+            url: '/pls/ratingengines?create-action=' + createAction,
             data: opts,
             params: params || {}
         }).then(

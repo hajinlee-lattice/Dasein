@@ -44,12 +44,14 @@
                 <td>
                     <span 
                         class="ico ico-warning show-tooltip top delay" 
-                        ng-if="attribute.ruleTooptips">
+                        ng-if="attribute.hasWarning"
+                        ng-mouseover="$ctrl.filterRules(attribute)">
                         <div class="tooltip_ small">
                             <div class="cover">
 
-                                <div ng-repeat="rule in attribute.ruleTooltips">
-                                    <h4>rule</h4>
+                                <div ng-repeat="rule in $ctrl.attrTooltipContent">
+                                    <h4 class="white text-left">{{ rule.displayName }}</h4>
+                                    <p>{{ rule.description }}</p>
                                 </div>
 
                             </div>
