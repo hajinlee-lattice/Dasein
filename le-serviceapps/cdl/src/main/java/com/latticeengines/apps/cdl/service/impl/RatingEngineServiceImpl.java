@@ -713,15 +713,17 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             return new ArrayList<>();
         }
 
-        List<AIModel> models = getRatingModelService(ratingEngine.getType())
-                .getAllRatingModelsByRatingEngineId(ratingEngineId);
+        Map<String, AIModel> modelMap = ((Flux<AIModel>) Flux.fromIterable(
+                getRatingModelService(ratingEngine.getType()).getAllRatingModelsByRatingEngineId(ratingEngineId)))
+                        .filter(rm -> StringUtils.isNotEmpty(rm.getModelSummaryId()))
+                        .collect(HashMap<String, AIModel>::new,
+                                (returnMap, am) -> returnMap.put(am.getModelSummaryId(), am))
+                        .block();
 
         Map<Long, RatingModelWithPublishedHistoryDTO> bucketsGroupedByTime = Flux.fromIterable(allBuckets)
                 .collect(HashMap<Long, RatingModelWithPublishedHistoryDTO>::new, (returnMap, bucket) -> {
                     if (!returnMap.containsKey(bucket.getCreationTimestamp())) {
-                        AIModel model = models.stream()
-                                .filter(rm -> rm.getModelSummaryId().equals(bucket.getModelSummaryId())).findFirst()
-                                .get();
+                        AIModel model = modelMap.get(bucket.getModelSummaryId());
                         returnMap.put(bucket.getCreationTimestamp(), new RatingModelWithPublishedHistoryDTO(model,
                                 bucket.getCreationTimestamp(), new ArrayList<>(), bucket.getLastModifiedByUser()));
                     }
