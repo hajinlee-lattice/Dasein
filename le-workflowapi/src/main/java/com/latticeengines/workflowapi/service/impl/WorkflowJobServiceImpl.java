@@ -433,13 +433,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
             long currentTimeMillis = System.currentTimeMillis();
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
-            if (jobUpdate != null
-                    && (jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime() >= HEARTBEAT_FAILURE_THRESHOLD)
+            /*
+             * Fail the job because the last heartbeat is received over HEARTBEAT_FAILURE_THRESHOLD ago.
+             *
+             * NOTE:
+             * 1. Initially, createTime == lastUpdateTime
+             * 2. lastUpdateTime != createTime is used to make sure we only fail jobs that have sent at least one
+             * heartbeat. DO NOT CHANGE THIS because if there are a lot of jobs in queue, currentTime - lastUpdateTime
+             * can be greater than the threshold but the job is not actually failed (hasn't even started yet).
+             *
+             * TODO have a better way to determine whether the first heartbeat has been sent
+             */
+            if (jobUpdate != null && jobUpdate.getLastUpdateTime() != null
+                    && !jobUpdate.getLastUpdateTime().equals(jobUpdate.getCreateTime())
                     && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
                 log.warn(String.format(
-                        "First heartbeat failed. WorkflowId=%s. Heartbeat created time=%s. "
+                        "Heartbeat failure threshold exceeded, failing the job. "
+                                + "WorkflowId=%s. Heartbeat created time=%s. "
                                 + "Heartbeat update time=%s. Heartbeat failure threshold=%s. Current time=%s. "
                                 + "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
                         workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
