@@ -2,11 +2,6 @@ package com.latticeengines.graph;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.tinkerpop.gremlin.driver.Cluster;
-import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

@@ -22,6 +22,7 @@ import com.latticeengines.oauth2db.exposed.util.OAuth2RefreshTokenDeserializer;
 
 public class JsonJdbcTokenStore extends JdbcTokenStore {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(JsonJdbcTokenStore.class);
 
     public JsonJdbcTokenStore(DataSource dataSource) {

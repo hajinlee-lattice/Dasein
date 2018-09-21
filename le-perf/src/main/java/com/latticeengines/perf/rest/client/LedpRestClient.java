@@ -2,6 +2,7 @@ package com.latticeengines.perf.rest.client;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,6 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -119,7 +120,7 @@ public class LedpRestClient {
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
 
-            String responseBody = IOUtils.toString(response.getBody());
+            String responseBody = IOUtils.toString(response.getBody(), Charset.defaultCharset());
 
             log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText()
                     + " " + responseBody);

@@ -2,8 +2,8 @@ package com.latticeengines.dellebi.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +30,6 @@ public class DellEbiConfigDaoImpl extends BaseDaoImpl<DellEbiConfig>implements D
     }
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public DellEbiConfig getConfig(String type) {
 
         Session session = getSessionFactory().getCurrentSession();
@@ -38,8 +37,8 @@ public class DellEbiConfigDaoImpl extends BaseDaoImpl<DellEbiConfig>implements D
         Class<DellEbiConfig> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Type = :type", entityClz.getSimpleName());
 
-        Query query = session.createQuery(queryStr);
-        query.setString("type", type);
+        Query<DellEbiConfig> query = session.createQuery(queryStr, DellEbiConfig.class);
+        query.setParameter("type", type);
         List<DellEbiConfig> list = query.list();
         if (list.size() == 0) {
             throw new LedpException(LedpCode.LEDP_29000, new String[] { type });
@@ -49,7 +48,6 @@ public class DellEbiConfigDaoImpl extends BaseDaoImpl<DellEbiConfig>implements D
     }
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public List<DellEbiConfig> queryConfigs() {
 
         Session session = getSessionFactory().getCurrentSession();
@@ -57,7 +55,7 @@ public class DellEbiConfigDaoImpl extends BaseDaoImpl<DellEbiConfig>implements D
         Class<DellEbiConfig> entityClz = getEntityClass();
         String queryStr = String.format("from %s ", entityClz.getSimpleName());
 
-        Query query = session.createQuery(queryStr);
+        Query<DellEbiConfig> query = session.createQuery(queryStr, DellEbiConfig.class);
         List<DellEbiConfig> list = query.list();
         if (list.size() == 0) {
             throw new LedpException(LedpCode.LEDP_29001);

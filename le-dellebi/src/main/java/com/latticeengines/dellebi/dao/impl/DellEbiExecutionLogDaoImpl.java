@@ -2,8 +2,8 @@ package com.latticeengines.dellebi.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -18,7 +18,6 @@ public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
         return DellEbiExecutionLog.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public DellEbiExecutionLog getEntryByFile(String file) {
         Session session = getSessionFactory().getCurrentSession();
@@ -26,8 +25,8 @@ public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
         Class<DellEbiExecutionLog> entityClz = getEntityClass();
         String queryStr = String.format("from %s where FileName = :file order by id desc", entityClz.getSimpleName());
 
-        Query query = session.createQuery(queryStr);
-        query.setString("file", file);
+        Query<DellEbiExecutionLog> query = session.createQuery(queryStr, DellEbiExecutionLog.class);
+        query.setParameter("file", file);
         List<DellEbiExecutionLog> list = query.list();
         if (list.size() == 0) {
             return null;
@@ -36,7 +35,6 @@ public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
         return list.get(0);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<DellEbiExecutionLog> getEntriesByFile(String file) {
         Session session = getSessionFactory().getCurrentSession();
@@ -44,8 +42,8 @@ public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
         Class<DellEbiExecutionLog> entityClz = getEntityClass();
         String queryStr = String.format("from %s where FileName = :file order by id desc", entityClz.getSimpleName());
 
-        Query query = session.createQuery(queryStr);
-        query.setString("file", file);
+        Query<DellEbiExecutionLog> query = session.createQuery(queryStr, DellEbiExecutionLog.class);
+        query.setParameter("file", file);
         List<DellEbiExecutionLog> list = query.list();
         if (list.size() == 0) {
             return null;

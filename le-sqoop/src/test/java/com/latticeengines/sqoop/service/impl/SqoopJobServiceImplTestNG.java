@@ -15,12 +15,12 @@ import org.apache.avro.Schema.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,14 +29,14 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.functionalframework.SqoopFunctionalTestNGBase;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
+import com.latticeengines.sqoop.functionalframework.SqoopFunctionalTestNGBase;
 
 public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
@@ -87,6 +87,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional", enabled = false)
     public void importDataForFile() throws Exception {
         URL inputUrl = ClassLoader
@@ -281,6 +282,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional", enabled = true)
     public void exportDataToSQLServerWithEnclosure() throws Exception {
         URL inputUrl = ClassLoader
@@ -311,6 +313,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional", enabled = true)
     public void exportDataToSQLServerWithDelimiter() throws Exception {
         URL inputUrl = ClassLoader
@@ -338,6 +341,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional", enabled = true)
     public void exportDataToSQLServer() throws Exception {
         URL inputUrl = ClassLoader

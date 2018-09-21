@@ -4,15 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -173,7 +174,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             contextFileName = contextFileName.replaceFirst("/", "-");
             String dir = containerProperties.getProperty(ContainerProperty.JOBDIR.name());
             File contextFile = new File(dir + "/" + contextFileName);
-            FileUtils.write(contextFile, sb);
+            FileUtils.write(contextFile, sb, Charset.defaultCharset(), false);
             return contextFile.getAbsolutePath();
         } catch (IOException e) {
             throw new IllegalStateException(e);

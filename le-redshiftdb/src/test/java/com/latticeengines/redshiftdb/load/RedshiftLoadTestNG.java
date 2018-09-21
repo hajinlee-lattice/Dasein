@@ -2,6 +2,7 @@ package com.latticeengines.redshiftdb.load;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +46,8 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
             if (badColumns.size() > 0) {
 
                 String dropColumnSql = FileUtils.readFileToString(new File(ClassLoader
-                        .getSystemResource("load/" + LoadTestStatementType.DDL_Drop.getScriptFileName()).getFile()));
+                        .getSystemResource("load/" + LoadTestStatementType.DDL_Drop.getScriptFileName()).getFile()),
+                        Charset.defaultCharset());
 
                 for (String column : badColumns) {
                     redshiftJdbcTemplate.execute(dropColumnSql.replaceAll("load_test_column", column));

@@ -85,6 +85,7 @@ public abstract class BaseDocumentEntity<T> implements DocumentEntity<T> {
     }
 
     // managed by jpa auditing
+    @SuppressWarnings("unused")
     private void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
@@ -94,6 +95,7 @@ public abstract class BaseDocumentEntity<T> implements DocumentEntity<T> {
     }
 
     // managed by jpa auditing
+    @SuppressWarnings("unused")
     private void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }

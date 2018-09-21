@@ -36,10 +36,9 @@ public class OAuthUserDaoImpl extends BaseDaoImpl<OAuthUser> implements OAuthUse
         Class<OAuthUser> entityClz = getEntityClass();
 
         String queryStr = String.format("from %s where UserId = :userId", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("userId", userId);
+        Query<OAuthUser> query = session.createQuery(queryStr, OAuthUser.class);
+        query.setParameter("userId", userId);
         query.setMaxResults(1);
-        @SuppressWarnings("unchecked")
         List<OAuthUser> list = query.list();
         if (!CollectionUtils.isEmpty(list)) {
             return list.get(0);
@@ -112,8 +111,8 @@ public class OAuthUserDaoImpl extends BaseDaoImpl<OAuthUser> implements OAuthUse
         Class<OAuthUser> entityClz = getEntityClass();
 
         String queryStr = String.format("delete from %s where UserId = :userId", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("userId", userId);
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("userId", userId);
         query.executeUpdate();
     }
 

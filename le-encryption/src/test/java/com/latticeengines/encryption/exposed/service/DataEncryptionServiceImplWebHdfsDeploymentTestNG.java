@@ -2,6 +2,7 @@ package com.latticeengines.encryption.exposed.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -106,7 +107,8 @@ public class DataEncryptionServiceImplWebHdfsDeploymentTestNG extends Encryption
         String fileContents;
         try {
             fileContents = FileUtils.readFileToString(
-                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()),
+                    Charset.defaultCharset());
             WebHdfsUtils.writeToFile(webHdfsUrl, yarnConfiguration, String.format("%s/%s", hdfsDir, FILE_NAME),
                     fileContents);
         } catch (IOException e) {
@@ -123,7 +125,8 @@ public class DataEncryptionServiceImplWebHdfsDeploymentTestNG extends Encryption
                     String.format("%s/%s", hdfsDir, FILE_NAME));
             Assert.assertTrue(fileStatus.isFile());
             String expectedFileContents = FileUtils.readFileToString(
-                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()),
+                    Charset.defaultCharset());
             log.info("file contents are: " + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
                     String.format("%s/%s", hdfsDir, FILE_NAME)));
             Assert.assertEquals(expectedFileContents, WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,

@@ -3,9 +3,9 @@ package com.latticeengines.yarn.exposed.dao.impl;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +30,14 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     @Transactional(propagation = Propagation.REQUIRED)
     public Job findByObjectId(String id) {
         Session session = sessionFactory.getCurrentSession();
-        Query query = session.createQuery("from " + Job.class.getSimpleName() + " J where J.id=:aJobId");
-        query.setString("aJobId", id);
+        Query<Job> query = session.createQuery("from " + Job.class.getSimpleName() + " J where J.id=:aJobId",
+                Job.class);
+        query.setParameter("aJobId", id);
         Job job = (Job) query.uniqueResult();
         return job;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public List<Job> findAllByObjectIds(List<String> ids) {

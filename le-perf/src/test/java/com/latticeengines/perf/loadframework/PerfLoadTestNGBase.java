@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -12,10 +13,10 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 
@@ -87,7 +88,7 @@ public class PerfLoadTestNGBase {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(new File(propertyPath));
-            String props = IOUtils.toString(inputStream);
+            String props = IOUtils.toString(inputStream, Charset.defaultCharset());
             String apiTomcat = System.getenv("API_TOMCAT");
             if (StringUtils.isNotBlank(apiTomcat)) {
                 props = props.replace("${API_TOMCAT}", apiTomcat);
@@ -96,7 +97,7 @@ public class PerfLoadTestNGBase {
             if (StringUtils.isNotBlank(privateLb)) {
                 props = props.replace("${AWS_PRIVATE_LB}", privateLb);
             }
-            prop.load(IOUtils.toInputStream(props));
+            prop.load(IOUtils.toInputStream(props, Charset.defaultCharset()));
         } catch (FileNotFoundException e) {
             log.error("property file '" + propertyPath + "' not found in the classpath");
             log.error(e.getMessage(), e);

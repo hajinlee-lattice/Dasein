@@ -7,7 +7,6 @@ import org.joda.time.DateTime;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.encryption.functionalframework.EncryptionTestNGBase;
 
 public class DataEncryptionServiceImplTestNG extends EncryptionTestNGBase {
@@ -20,12 +19,12 @@ public class DataEncryptionServiceImplTestNG extends EncryptionTestNGBase {
         try {
             assertFalse(dataEncryptionService.isEncrypted(space));
 
-            Tenant tenant = createEncryptedTenant(space);
+            createEncryptedTenant(space);
             assertTrue(dataEncryptionService.isEncrypted(space));
 
             // Encrypt this contract again but with a different space
             assertFalse(dataEncryptionService.isEncrypted(secondSpace));
-            Tenant secondTenant = createEncryptedTenant(secondSpace);
+            createEncryptedTenant(secondSpace);
             assertTrue(dataEncryptionService.isEncrypted(secondSpace));
         } finally {
             cleanup(space);

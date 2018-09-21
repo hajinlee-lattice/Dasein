@@ -7,6 +7,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.latticeengines.perf.job.properties.CommandLineProperties;
 
+@SuppressWarnings("deprecation")
 public abstract class CommandLineSetup<T> implements CommandLineProperties {
 
     protected CommandLineParser clp = new GnuParser();

@@ -2,17 +2,18 @@ package com.latticeengines.redshiftdb.load;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -84,7 +85,8 @@ public abstract class AbstractLoadTest implements Callable<String> {
     protected String getSqlStatementFromType(LoadTestStatementType sqlStatementType) {
         try {
             return FileUtils.readFileToString(
-                    new File(ClassLoader.getSystemResource("load/" + sqlStatementType.getScriptFileName()).getFile()));
+                    new File(ClassLoader.getSystemResource("load/" + sqlStatementType.getScriptFileName()).getFile()),
+                    Charset.defaultCharset());
         } catch (IOException ex) {
             return null;
         }

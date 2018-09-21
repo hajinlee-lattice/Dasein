@@ -4,7 +4,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -15,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -54,6 +54,7 @@ public class EncryptionTestNGBase extends AbstractTestNGSpringContextTests {
         assertTrue(EncryptionGlobalState.isEnabled(), "Encryption is not enabled (encryption.enabled is false)");
     }
 
+    @SuppressWarnings("deprecation")
     protected Tenant createEncryptedTenant(CustomerSpace space) {
         Tenant tenant = createTenant(space);
         dataEncryptionService.encrypt(space);

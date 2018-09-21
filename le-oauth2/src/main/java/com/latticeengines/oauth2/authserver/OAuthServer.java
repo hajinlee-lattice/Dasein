@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.provider.client.ClientCredentialsToke
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 
@@ -32,9 +31,6 @@ import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
         "classpath:oauth2-authserver-context.xml", //
         "classpath:common-properties-context.xml" })
 public class OAuthServer extends SpringBootServletInitializer {
-
-    @Autowired
-    private StatsService statsService;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {

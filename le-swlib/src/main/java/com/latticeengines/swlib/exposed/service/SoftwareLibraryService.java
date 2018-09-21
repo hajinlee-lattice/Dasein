@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 
 public interface SoftwareLibraryService {

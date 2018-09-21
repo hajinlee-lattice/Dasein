@@ -26,17 +26,14 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-hdfs</artifactId>
-			<version>${hadoop.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-api</artifactId>
-			<version>${hadoop.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
-			<version>${hadoop.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -94,7 +91,6 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-hdfs2</artifactId>
-			<version>${camel.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.jackson</groupId>
@@ -119,7 +115,6 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-salesforce</artifactId>
-			<version>${camel.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.jackson</groupId>
@@ -165,7 +160,6 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-mapreduce-client-core</artifactId>
-			<version>${hadoop.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.sun.jersey</groupId>
@@ -176,7 +170,6 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-			<version>${hadoop.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.sun.jersey</groupId>
@@ -192,7 +185,6 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-mapreduce-client-common</artifactId>
-			<version>${hadoop.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.kenai.nbpwr</groupId>
@@ -291,18 +283,15 @@
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
-			<version>${avro.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro-mapred</artifactId>
-			<version>${avro.version}</version>
 			<classifier>hadoop2</classifier>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.connector.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

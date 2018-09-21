@@ -95,6 +95,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
         dropSqlTable();
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "deployment")
     public void testExport() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
@@ -117,6 +118,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
         Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "deployment", dependsOnMethods = "testExport")
     public void testImport() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
@@ -142,6 +144,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
         Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "deployment")
     public void testExportCsv() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
@@ -167,6 +170,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
         Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "deployment", dependsOnMethods = "testExportCsv")
     public void testImportCsv() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();

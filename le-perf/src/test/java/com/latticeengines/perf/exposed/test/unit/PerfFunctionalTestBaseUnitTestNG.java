@@ -4,6 +4,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.metrics2.MetricsRecord;
@@ -66,7 +67,7 @@ public class PerfFunctionalTestBaseUnitTestNG {
         testBase.beforeMethod();
         sink.putMetrics(record);
         testBase.flushToFile();
-        String contents = FileUtils.readFileToString(new File("/tmp/metricfile.txt"));
+        String contents = FileUtils.readFileToString(new File("/tmp/metricfile.txt"), Charset.defaultCharset());
         assertTrue(contents.contains("ledpjob.metric1:Queue=Priority0.0,Priority=0,ContainerWaitTime=1234"));
     }
 

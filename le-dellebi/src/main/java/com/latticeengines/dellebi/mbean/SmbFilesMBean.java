@@ -140,7 +140,8 @@ public class SmbFilesMBean {
 
     private String getPriorityByFileName(String fileName) {
         String type = smbFileFlowService.getFileType(fileName);
-        return ObjectUtils.toString(dellEbiConfigEntityMgr.getPriority(type));
+        int priority = dellEbiConfigEntityMgr.getPriority(type);
+        return String.valueOf(priority);
     }
 
     private Boolean verifyParsedStr(String parsedStr) {

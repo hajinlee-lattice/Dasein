@@ -3,8 +3,8 @@ package com.latticeengines.oauth2db.dao.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
@@ -23,10 +23,9 @@ public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> impleme
         Class<PlaymakerTenant> entityClz = getEntityClass();
 
         String queryStr = String.format("from %s where TENANT_NAME = :tenantName", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("tenantName", tenantName);
+        Query<PlaymakerTenant> query = session.createQuery(queryStr, PlaymakerTenant.class);
+        query.setParameter("tenantName", tenantName);
         query.setMaxResults(1);
-        @SuppressWarnings("unchecked")
         List<PlaymakerTenant> list = query.list();
         if (!CollectionUtils.isEmpty(list)) {
             return list.get(0);
@@ -41,8 +40,8 @@ public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> impleme
         Class<PlaymakerTenant> entityClz = getEntityClass();
 
         String queryStr = String.format("delete from %s where TENANT_NAME = :tenantName", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("tenantName", tenantName);
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("tenantName", tenantName);
         int result = query.executeUpdate();
         return result > 0;
 

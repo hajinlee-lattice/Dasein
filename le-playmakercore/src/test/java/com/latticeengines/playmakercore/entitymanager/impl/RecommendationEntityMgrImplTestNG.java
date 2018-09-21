@@ -37,6 +37,7 @@ import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 @ContextConfiguration(locations = { "classpath:test-playmakercore-context.xml" })
 public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(RecommendationEntityMgrImplTestNG.class);
 
     @Inject
@@ -490,6 +491,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         lastModificationDate = lastModificationDate / 1000;
 
         Date lastModificationDate2 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate + 1);
+        @SuppressWarnings("unused")
         Date lastModificationDate3 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate - 1);
 
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //

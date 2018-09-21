@@ -21,16 +21,8 @@ public class MultiConditionalQueryLoadTest extends AbstractLoadTest {
             return columnName;
         }
 
-        public void setColumnName(String columnName) {
-            this.columnName = columnName;
-        }
-
         public String getColumnType() {
             return columnType;
-        }
-
-        public void setColumnType(String columnType) {
-            this.columnType = columnType;
         }
 
         private String columnName;
