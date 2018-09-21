@@ -153,7 +153,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
             metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTable.getName(),
                     trainingTable);
         }
-        log.info("Modeling parameters: " + parameters.toString());
+        log.debug("Modeling parameters: " + parameters.toString());
 
         String schemaInterpretation = sourceFile.getSchemaInterpretation().toString();
         TransformationGroup transformationGroup = parameters.getTransformationGroup();
