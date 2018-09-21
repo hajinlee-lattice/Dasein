@@ -8,7 +8,7 @@
                         <h2>
                             <!-- <div ng-keydown="vm.keydown($event)" contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'displayName')">{{ vm.play.displayName||'Play Name' }}</div> -->
                             <div class="contenteditable title" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
-                                <span ng-show="!focus.title">{{ vm.play.displayName||'Play Name' }}</span>
+                                <span ng-show="!focus.title">{{ vm.play.displayName||'Campain Name' }}</span>
                                 <div class="editor" ng-show="focus.title">
                                     <input autofocus maxlength="50" ng-blur="vm.edited('displayName'); focus = {};" name="displayName" ng-model="vm.editing.displayName" ng-value="vm.play.displayName" />
                                 </div>

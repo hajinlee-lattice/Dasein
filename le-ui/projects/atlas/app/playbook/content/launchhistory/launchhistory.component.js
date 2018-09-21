@@ -1,6 +1,7 @@
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
-    $scope, $state, $stateParams, $filter, $timeout, $q, ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData
+    $scope, $state, $stateParams, $q, $filter, $timeout, $interval,  
+    ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData
 ) {
     var vm = this;
 
@@ -28,11 +29,11 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 value: {},
                 items: FilterData
             }
-        }
+        },
+        systemNameMap: {}
     });
 
     vm.init = function() {
-
         vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
@@ -41,8 +42,19 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
 
         vm.updateLaunchData();
+
+        makeSystemNameMap(LaunchHistoryData.uniqueLookupIdMapping);
     };
 
+    var makeSystemNameMap = function(uniqueLookupIdMapping) {
+        var uniqueLookupIdMapping = uniqueLookupIdMapping || {};
+
+        for(var i in uniqueLookupIdMapping) {
+            for(var j in uniqueLookupIdMapping[i]) {
+                vm.systemNameMap[uniqueLookupIdMapping[i][j].orgId] = uniqueLookupIdMapping[i][j].orgName;
+            }
+        }
+    }
 
     // Set sort
     vm.sort = function(header) {
@@ -141,9 +153,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     });
 
     vm.filterChange = function(org) {
-
-        console.log("filter");
-
         var orgData = org[1];
 
         vm.orgId = orgData.destinationOrgId;

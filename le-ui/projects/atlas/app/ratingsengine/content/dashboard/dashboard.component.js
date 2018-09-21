@@ -120,7 +120,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 name: "rating_engine_deactivate",
                 icon: 'ico ico-model ico-black',
                 title: "Deactivate Model",
-                message: $sce.trustAsHtml('<section class=rating-engine-deactivate style=margin-top:0><p>Deactivating a model will prevent all of the plays which use it from launching. This model is currently being used by the following plays:<ul class=plays-used-list>' + plays + '</ul></section>'),
+                message: $sce.trustAsHtml('<section class=rating-engine-deactivate style=margin-top:0><p>Deactivating a model will prevent all of the campaigns which use it from launching. This model is currently being used by the following campaigns:<ul class=plays-used-list>' + plays + '</ul></section>'),
                 confirmtext: "Deactivate",
                 confirmcolor: "blue-button",
                 headerconfig: { "background-color":"white", "color":"black" },

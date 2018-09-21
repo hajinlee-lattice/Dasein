@@ -172,7 +172,7 @@ angular
             url: '/dashboard/:play_name',
             params: {
                 pageIcon: 'ico-insights',
-                pageTitle: 'Play Overview',
+                pageTitle: 'Campaign Overview',
                 play_name: ''
             },
             onEnter: ['Play', 'BackStore', function(Play, BackStore) {

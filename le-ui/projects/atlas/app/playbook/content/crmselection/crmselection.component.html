@@ -10,6 +10,7 @@
                     <thead>
                         <tr>
                             <th>System Org ID</th>
+                            <th>System Type</th>
                             <th>System Org Name</th>
                             <th>Account ID</th>
                         </tr>
@@ -28,6 +29,7 @@
                                     ng-model="$ctrl.stored.crm_selection" />
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
+                            <td>{{org.externalSystemType}}</td>
                             <td>{{ org.orgName }}</td>
                             <td>
                                 <span ng-if="org.accountId !== null">{{ org.accountId }}</span>

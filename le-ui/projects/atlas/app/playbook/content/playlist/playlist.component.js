@@ -27,7 +27,7 @@ angular.module('lp.playbook.plays', [
                 items: [
                     { label: 'Modified Date',   icon: 'numeric',    property: 'updated' },
                     { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
-                    { label: 'Play Name',      icon: 'alpha',      property: 'displayName' }
+                    { label: 'Campaign Name',      icon: 'alpha',      property: 'displayName' }
                 ]
             },
             filter: {

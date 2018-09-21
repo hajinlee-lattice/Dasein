@@ -64,9 +64,11 @@
                         class="tile-metadata"
                         ng-if="!vm.current.tileStates[play.name].editPlay">
                         <ul>
-                            <li>Created by <span class="blue-text">{{play.createdBy}}</span></li>
-                            <li>Created on <span class="blue-text">{{play.created | date}}</span></li>
-                            <li class="text-ellipsis">
+                            <li>Last Edited by: <span class="blue-text">{{play.updatedBy}}</span></li>
+                            <li>Last Edited: <span class="blue-text">{{play.updated | date}}</span></li>
+                            <li>Model: <span class="blue-text">{{play.ratingEngine.displayName}}</span></li>
+<!--
+                             <li class="text-ellipsis">
                                 Segment: 
                                 <span ng-if="play.ratingEngine.segment != null" class="blue-text">{{play.ratingEngine.segment.display_name}}</span>
                                 <span ng-if="play.ratingEngine.segment == null" class="gray-text">Segment not selected</span>
@@ -76,7 +78,8 @@
                                 <span class="red-text" ng-if="!play.ratingEngine.lastRefreshedDate">No refresh data yet</span></span>
                                 <span class="blue-text" ng-if="play.ratingEngine.lastRefreshedDate">{{play.ratingEngine.lastRefreshedDate | date}}</span></span>
                             </li>
-                        </ul>
+ -->
+                         </ul>
 
                     </div><!-- End .tile-metadata -->
 
@@ -112,11 +115,11 @@
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch === null && !play.talkingPoints.length"
+                            ng-if="play.launchHistory.mostRecentLaunch === null"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
-                         <button 
+<!--                          <button 
                             type="button"
                             class="button blue-button pull-right"
                             ng-if="play.launchHistory.mostRecentLaunch === null && play.talkingPoints.length"
@@ -129,14 +132,14 @@
                             ng-if="vm.current.tileStates[play.name].launching == true">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
-                        <span ng-if="!vm.current.tileStates[play.name].launching">
+ -->                        <span ng-if="!vm.current.tileStates[play.name].launching">
                             <span 
                                 class="launch-success pull-left"
                                 ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
                                 <i class="fa fa-check" aria-hidden="true"></i>
                                 Launched {{play.launchHistory.lastCompletedLaunch.updated | date}}
                             </span>
-                            <button 
+<!--                             <button 
                                 type="button"
                                 class="button white-button pull-right"
                                 ng-if="(play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'UnLaunched') || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
@@ -144,7 +147,7 @@
                                 ui-sref="home.playbook.launch({play_name:play.name})">
                                 Relaunch
                             </button>
-                        </span>
+ -->                        </span>
 
                     </div><!-- End .tile-footer -->
                     <form

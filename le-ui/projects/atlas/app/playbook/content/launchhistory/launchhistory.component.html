@@ -15,7 +15,6 @@
         ng-if="!vm.noData" 
         class="card-content" 
         ng-class="{'has-footer': !vm.allPlaysHistory}">
-
         <menu-filter-by 
             config="vm.header.filter"
             callback-function="vm.filterChange(args)"
@@ -23,7 +22,7 @@
         </menu-filter-by>
         <chips 
             ng-show="vm.allPlaysHistory"
-            placeholder="All Launched Plays" 
+            placeholder="All Launched Campaigns" 
             datasource="vm.defaultPlayLaunchList" 
             callback-function="vm.playSelectChange(args)"
             single-selection="true"
@@ -65,13 +64,12 @@
         </ul>
 
     	<div class="table-metadata">
-    		{{vm.launchesCount}} play launch<span ng-if="vm.launchesCount > 1">es</span>
+    		{{vm.launchesCount}} campaign launch<span ng-if="vm.launchesCount > 1">es</span>
     	</div>
 
     	<table>
     		<thead>
     			<tr>
-
     				<th class="sortable" ng-click="vm.sort('created'); vm.sortDesc = !vm.sortDesc">
                         Launch Date
                         <i  aria-hidden="true" 
@@ -81,12 +79,15 @@
                                 'fa fa-sort-asc': vm.sortBy === 'created' && !vm.sortDesc}"></i>
                     </th>
                     <th ng-if="vm.allPlaysHistory">
-                        Play Name
+                        Campaign Name
                         <!-- <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'playDisplayName',
                                 'fa fa-sort-desc': vm.sortBy === 'playDisplayName' && vm.sortDesc, 
                                 'fa fa-sort-asc': vm.sortBy === 'playDisplayName' && !vm.sortDesc}"></i> -->
+                    </th>
+                    <th>
+                        System Name
                     </th>
     				<th class="sortable" ng-click="vm.sort('accountsSelected'); vm.sortDesc = !vm.sortDesc">
                         Selected Recommendations
@@ -132,6 +133,7 @@
     			<tr ng-repeat="launch in vm.launches.launchSummaries">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
                     <td ng-if="vm.allPlaysHistory" class="text-ellipsis">{{launch.playDisplayName}}</td>
+                    <td>{{vm.systemNameMap[launch.destinationOrgId]}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
     				<td class="red-text">{{launch.stats.errors | number}}</td>
@@ -147,7 +149,7 @@
     		</tbody>
             <tbody ng-if="vm.noFilteredData">
                 <tr>
-                    <td colspan="8">No play launches matches your criteria.</td>
+                    <td colspan="8">No campaign launches matches your criteria.</td>
                 </tr>
             </tbody>
     	</table>
