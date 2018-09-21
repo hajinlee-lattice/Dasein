@@ -137,6 +137,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         play.setDisplayName(PLAY_DISPLAY_NAME);
         play.setRatingEngine(testRatingEngine);
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
         play.setTenant(mainTestTenant);
         play.setTenantId(mainTestTenant.getPid());
         play.setUpdated(new Date());
@@ -184,9 +185,11 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         playLaunch.setLaunchId(NamingUtils.uuid("WorkFlowTestPlayLaunch"));
         playLaunch.setPlay(play);
         playLaunch.setCreated(new Date());
+        playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setTenantId(mainTestTenant.getPid());
         playLaunch.setTenant(mainTestTenant);
         playLaunch.setUpdated(new Date());
+        playLaunch.setUpdatedBy(CREATED_BY);
         playLaunch.setLaunchState(LaunchState.Launching);
 
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,6 +22,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -29,7 +31,9 @@ import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -177,7 +181,28 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
                 null, String.class);
+        play = playProxy.getPlay(mainTestTenant.getId(), play.getName());
+        Assert.assertNull(play.getLastTalkingPointPublishTime());
 
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setLaunchId(NamingUtils.uuid("TalkingPointTestPlayLaunch"));
+        playLaunch.setPlay(play);
+        playLaunch.setCreated(new Date());
+        playLaunch.setCreatedBy(CREATED_BY);
+        playLaunch.setUpdated(new Date());
+        playLaunch.setUpdatedBy(CREATED_BY);
+        playLaunch.setTenantId(mainTestTenant.getPid());
+        playLaunch.setTenant(mainTestTenant);
+        playLaunch.setLaunchState(LaunchState.Launched);
+        playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch);
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),
+                LaunchState.Launching);
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),
+                LaunchState.Launched);
+
+        restTemplate.postForObject( //
+                getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
+                null, String.class);
         play = playProxy.getPlay(mainTestTenant.getId(), play.getName());
         Assert.assertNotNull(play.getLastTalkingPointPublishTime());
 
@@ -264,6 +289,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         Play play = new Play();
         play.setDisplayName(PLAY_DISPLAY_NAME);
         play.setCreatedBy(CREATED_BY);
+        play.setUpdatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);
