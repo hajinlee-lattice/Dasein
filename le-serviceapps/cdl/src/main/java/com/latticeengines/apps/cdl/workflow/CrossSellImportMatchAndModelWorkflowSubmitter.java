@@ -84,7 +84,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
         String moduleName = parameters.getModuleName();
         final String pivotFileName = parameters.getPivotFileName();
         Artifact pivotArtifact = getPivotArtifact(moduleName, pivotFileName);
-        log.info("Modeling parameters: " + parameters.toString());
+        log.debug("Modeling parameters: " + parameters.toString());
 
         TransformationGroup transformationGroup = parameters.getTransformationGroup();
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
