@@ -14,9 +14,18 @@ angular.module('lp.cg.talkingpoint.attributepane', [
                 $element[0].style.top = '';
             });
         },
-        controller: function($scope, $element, $window, CgTalkingPointStore) {
-            // console.log($scope.entities);
+        controller: function($scope, $element, $filter, $window, CgTalkingPointStore) {
+            console.log($scope.entities);
+
             $scope.selected = $scope.entities[0];//Object.keys($scope.opts)[0];
+            $scope.categories = new Set($scope.opts['account'].map(function(attr) {
+                return attr.category;
+            }));
+            $scope.categories = Array.from($scope.categories);
+            $scope.search = {};
+            $scope.search.name = '';
+            $scope.search.category = $scope.categories[0];
+            $scope.priorSelectedCategory = null;
 
             $window.addEventListener('scroll', handleWindowScroll);
 
@@ -25,6 +34,20 @@ angular.module('lp.cg.talkingpoint.attributepane', [
             });
 
             var originalTop = $element[0].offsetTop;
+
+            $scope.changeEntity = function() {
+                if ($scope.selected != 'account') {
+                    $scope.priorSelectedCategory = $scope.search.category;
+                    delete $scope.search.category;
+                } else {
+                    $scope.search.category = $scope.priorSelectedCategory ? $scope.priorSelectedCategory : $scope.categories[0];
+                }
+            }
+
+            $scope.getAttributes = function() {
+                return $scope.opts[$scope.selected];
+
+            }
 
             function handleWindowScroll(evt) {
 
