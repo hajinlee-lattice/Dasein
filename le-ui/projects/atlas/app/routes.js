@@ -260,7 +260,6 @@ angular
                 toggleRatings: false
             },
             onEnter: ['$stateParams', 'IsCdl', 'Model', 'RatingEngine', 'BackStore', function($stateParams, IsCdl, Model, RatingEngine, BackStore) {
-                
                 if ($stateParams.viewingIteration){
                     var backState =  'home.ratingsengine.dashboard',
                         backParams = {
@@ -458,7 +457,7 @@ angular
 
                     return deferred.promise;
                 },
-                Iterations: function($q, $stateParams, FeatureFlags, ModelRatingsService) {
+                ScoringHistory: function($q, $stateParams, FeatureFlags, ModelRatingsService) {
 
                     var cdlIsEnabled = FeatureFlags.EnableCdl,
                         deferred = $q.defer();

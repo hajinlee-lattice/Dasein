@@ -360,7 +360,7 @@ angular.module('lp.models.ratings', [
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
 
-                    RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', false).then(function(result){
+                    RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
                         vm.chartNotUpdated = true;
                         vm.updateContent = true;
                         vm.savingConfiguration = false;
@@ -417,50 +417,58 @@ angular.module('lp.models.ratings', [
 })
 .controller('ModelRatingsHistoryController', function (
     $scope, $rootScope, $state, $stateParams, $window,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, Iterations, FeatureFlags) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, ScoringHistory, FeatureFlags) {
 
     var vm = this;
     angular.extend(vm, {
         model: Model,
+        rating_id: $stateParams.rating_id,
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         data: ModelStore,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         ResourceUtility: ResourceUtility,
         cdlIsEnabled: FeatureFlags.EnableCdl,
-        iterations: Iterations,
-        scoringHistory: [],
-        math: window.Math
+        scoringHistory: ScoringHistory,
+        math: window.Math,
+        currentPage: 1,
+        header: {
+            sort: {
+                label: 'Sort By',
+                icon: 'numeric',
+                order: '-',
+                property: 'publishedTimestamp',
+                items: [
+                    { label: 'Publish Date', icon: 'numeric', property: 'publishedTimestamp' },
+                    { label: 'Publisher', icon: 'alpha', property: 'publishedBy' }
+                ]
+            },
+            filter: {
+                label: 'Filter By',
+                value: {},
+                items: [
+                    { label: "All", action: {}, total: vm.totalLength }
+                ]
+            }
+        }
     });
 
     vm.init = function() {
 
-        if(vm.cdlIsEnabled){
-            // Create published history list from all created iterations
-            angular.forEach(vm.iterations, function(iteration){
-                if(iteration.publishedHistory){
-                    vm.scoringHistory.push(iteration);
-                }
-            });
+        vm.header.filter.unfiltered = vm.scoringHistory;
+        vm.header.filter.filtered = vm.scoringHistory;
 
-            if(vm.scoringHistory.length == 1){
-                vm.activeIteration = vm.scoringHistory[0];
-            } else {
-                // Set correct iteration as default for select menu
-                for(var i = 0; i < vm.scoringHistory.length; i++) {
-                    if (vm.scoringHistory[i].modelSummaryId === $stateParams.modelId) {
-                        vm.activeIteration = vm.scoringHistory[i];
-                    }
-                }
-            }
+        let uniqueIterations = [...new Set(vm.scoringHistory.map(item => item.iteration).sort())];
+        uniqueIterations.sort(function(a, b) {
+          return b - a;
+        });
 
-            vm.publishedHistory = vm.activeIteration.publishedHistory;
+        angular.forEach(uniqueIterations, function(iterationOption){
+            var iterationFilter = { label: iterationOption, action: { iteration: iterationOption } }
+            vm.header.filter.items.push(iterationFilter);    
+        });
 
-            console.log(vm.publishedHistory);
-
-        } else {
-
-            vm.publishedHistory = vm.iterations;
+        if(!vm.cdlIsEnabled) {
 
             if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
                 vm.modelType = "Leads";
@@ -480,47 +488,19 @@ angular.module('lp.models.ratings', [
 
          // Set value for total leads in set
         // This will need to get changed when we're saving configurations
-        vm.historyTotalLeads = pluckDeepKey("num_leads", vm.publishedHistory);
+        // vm.historyTotalLeads = pluckDeepKey("num_leads", vm.publishedHistory);
 
         // Add values for a specific key in object  
-        function pluckDeepKey(key, obj) {
-            if (_.has(obj, key)) {
-                return obj[key];
-            }
-            return _.reduce(_.flatten(_.map(obj, function(v) {
-                return _.isObject(v) ? pluckDeepKey(key, v) : [];
-            }), false), function(a,b) { return a + b });
-        }
+        // function pluckDeepKey(key, obj) {
+        //     if (_.has(obj, key)) {
+        //         return obj[key];
+        //     }
+        //     return _.reduce(_.flatten(_.map(obj, function(v) {
+        //         return _.isObject(v) ? pluckDeepKey(key, v) : [];
+        //     }), false), function(a,b) { return a + b });
+        // }
 
     };
-
-    vm.changeIterationData = function(){
-        $state.go('home.model.ratings.history', {
-            modelId: vm.activeIteration.modelSummaryId,
-            rating_id: $stateParams.rating_id,
-            viewingIteration: false,
-            toggleRatings: true
-        }, { reload: true });
-    }
-
-    // $window.addEventListener('scroll', handleWindowScroll);
-
-    // $scope.$on('$destroy', function() {
-    //     $window.removeEventListener('scroll', handleWindowScroll);
-    // });
-
-    // function handleWindowScroll() {
-
-    //     var historyHeader = document.getElementById('historyHeader'),
-    //         windowTop = $window.pageYOffset,
-    //         offsetTop = historyHeader.getBoundingClientRect().top;
-
-    //     console.log(windowTop, offsetTop);
-
-    //     vm.stickHeader = (windowTop >= offsetTop) ? true : false;
-
-    //     console.log(vm.stickHeader);
-    // }
 
     vm.init();
 })

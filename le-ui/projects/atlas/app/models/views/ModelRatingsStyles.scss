@@ -333,9 +333,9 @@
     justify-content: 			center;
     li {
 	   	width: 14%;
-	   	padding: 6px 18px;
-    	margin: 10px;
-    	background: url('/assets/images/ico-ratings-published.png') 97% 4px/18px no-repeat;
+	   	padding: 6px 10px;
+	   	margin: 4px;
+    	background: #fff url('/assets/images/ico-ratings-published.png') 97% 4px/18px no-repeat;
 		border: solid 1px #e8e8e8;
 		text-align: center;
     }
@@ -553,6 +553,9 @@
 	}
 	.list-data {
 		font-size: 14px;
+		a {
+			font-weight: bold;
+		}
 	}
 }
 

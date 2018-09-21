@@ -1202,7 +1202,7 @@ angular.module('lp.ratingsengine')
 
     this.saveRating = function(opts, params, action) {
         var deferred = $q.defer(),
-            createAction = !action ? action : true;
+            createAction = action ? action : 'true';
 
         $http({
             method: 'POST',
