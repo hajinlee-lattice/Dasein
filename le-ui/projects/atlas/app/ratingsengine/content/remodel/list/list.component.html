@@ -4,7 +4,7 @@
         No Results.
     </div>
 
-    <table class="attr-list-results noselect-children">
+    <table class="attr-list-results noselect-children" ng-if="filteredList.length != 0">
         <thead>
             <tr>
                 <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'hasWarning'">
@@ -72,11 +72,12 @@
             </tr>
         </tbody>
     </table>
+    
     <ul class="attr-pagination-bottom" ng-show="max > 1">
         <li class="attr-pagination pull-right">
             <pd-pagination-controls
                 current="$ctrl.filters.currentPage"
-                max="max = ($ctrl.getCategoryAttributes() | filter: $ctrl.filters.queryText).length / $ctrl.filters.pageSize">
+                max="max = ($ctrl.getCategoryAttributes() | filter: $ctrl.searchFilter).length / $ctrl.filters.pageSize">
             </pd-pagination-controls>
         </li>
     </ul>
