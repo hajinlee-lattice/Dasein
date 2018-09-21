@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -78,7 +79,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         };
 
         String eventTableName = "";
-        if (!StringUtils.isEmpty(summary.getEventTableName())) {
+        if (StringUtils.isNotEmpty(summary.getEventTableName())) {
             eventTableName = summary.getEventTableName();
         }
 
@@ -88,7 +89,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         if (HdfsUtils.fileExists(yarnConfiguration, singularIdPath)) {
             paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, singularIdPath, fileFilter));
         }
-        if (!CollectionUtils.isEmpty(paths)) {
+        if (CollectionUtils.isNotEmpty(paths)) {
             return paths.get(0);
         }
 
@@ -97,8 +98,11 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         if (HdfsUtils.fileExists(yarnConfiguration, tupleIdPath)) {
             paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, tupleIdPath, fileFilter));
         }
-        if (!CollectionUtils.isEmpty(paths)) {
-            return paths.get(0);
+        if (CollectionUtils.isNotEmpty(paths)) {
+            String applicationIdDirectory = summary.getApplicationId().substring("application_".length());
+            Optional<String> completedModelingPath = paths.stream()
+                    .filter(path -> path.contains(applicationIdDirectory)).findFirst();
+            return completedModelingPath.isPresent() ? completedModelingPath.get() : paths.get(0);
         }
 
         String postMatchEventTablePath = modelingServiceHdfsBaseDir + customer + "/data/" + eventTableName
@@ -106,7 +110,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         if (HdfsUtils.fileExists(yarnConfiguration, postMatchEventTablePath)) {
             paths.addAll(HdfsUtils.getFilesForDir(yarnConfiguration, postMatchEventTablePath, filter));
         }
-        if (!CollectionUtils.isEmpty(paths)) {
+        if (CollectionUtils.isNotEmpty(paths)) {
             return paths.get(0);
         }
 

@@ -40,9 +40,12 @@ public class PlayTypeFunctionalTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateDefaultsAndGet" })
-    public void testCrud() {
+    public void testCrud() throws InterruptedException {
+        log.info("Start Test");
         PlayType newPlayType = new PlayType(mainTestTenant, "NewPlayType", "ToTest", "jlm@le.com", "jlm@le.com");
         playTypeEntityMgr.create(newPlayType);
+        Thread.sleep(1000); // To ensure rds reader instance has the time to
+                            // sync with the writer instance
 
         newPlayType = playTypeEntityMgr.findById(newPlayType.getId());
         Assert.assertNotNull(newPlayType);
@@ -52,13 +55,20 @@ public class PlayTypeFunctionalTestNG extends CDLFunctionalTestNGBase {
         newPlayType.setUpdatedBy("jm@le.com");
 
         playTypeEntityMgr.update(newPlayType);
+        Thread.sleep(1000); // To ensure rds reader instance has the time to
+                            // sync with the writer instance
+
         newPlayType = playTypeEntityMgr.findByPid(newPlayType.getPid());
         Assert.assertNotNull(newPlayType);
         Assert.assertEquals(newPlayType.getDisplayName(), "NewPlayType1");
         Assert.assertEquals(newPlayType.getUpdatedBy(), "jm@le.com");
 
         playTypeEntityMgr.delete(newPlayType);
+        Thread.sleep(1000); // To ensure rds reader instance has the time to
+                            // sync with the writer instance
+
         newPlayType = playTypeEntityMgr.findByPid(newPlayType.getPid());
         Assert.assertNull(newPlayType);
+        log.info("Done");
     }
 }
