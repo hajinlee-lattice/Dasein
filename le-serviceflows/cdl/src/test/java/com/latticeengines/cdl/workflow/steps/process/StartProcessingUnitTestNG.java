@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.batch.item.ExecutionContext;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -37,12 +38,12 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class StartProcessingUnitTestNG {
-    @Test(groups = { "unit" })
-    public void testRebuildOnDataCloudVersionChange() {
+    @Test(groups = { "unit" }, dataProvider = "DataCloudBuildNumber")
+    public void testRebuildOnDataCloudVersionChange(String dcBuildNumber) {
         Long actionPid = 1L, ownerId = 100L;
 
         DataCollectionStatus dataCollectionStatus = new DataCollectionStatus();
-        dataCollectionStatus.setDataCloudBuildNumber("2.12.8.7654321");
+        dataCollectionStatus.setDataCloudBuildNumber(dcBuildNumber);
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
         when(dataCollectionProxy.getOrCreateDataCollectionStatus(anyString(), any())).thenReturn(dataCollectionStatus);
         Action mockAction = new Action();
@@ -80,6 +81,14 @@ public class StartProcessingUnitTestNG {
         assertEquals(actionIds.size(), 1);
         assertEquals(actionIds.get(0), actionPid);
     }
+
+    @DataProvider(name = "DataCloudBuildNumber")
+    private Object[][] getDCBuildNumber(){
+        return new Object[][] {
+                { "2.12.8.7654321" }, //
+            { DataCollectionStatus.NOT_SET } //
+        };
+    };
 
     @Test(groups = { "unit" })
     public void testRebuildOnDeleteJobTemplate() {

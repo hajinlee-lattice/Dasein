@@ -243,8 +243,8 @@ public class DataCloudVersion implements HasPid, Serializable {
     }
 
     public static DataCloudVersion parseBuildNumber(String buildNumber) {
-        if (buildNumber == null) {
-            throw new IllegalArgumentException("Cannot parse null build number");
+        if (StringUtils.isBlank(buildNumber)) {
+            return null;
         }
 
         Pattern pattern = Pattern.compile("^(\\d+).(\\d+).(\\d+).?(\\d+)?$");

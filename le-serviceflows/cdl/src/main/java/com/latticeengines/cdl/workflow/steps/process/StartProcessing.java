@@ -211,9 +211,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
             if (status != null
                     && (status.getDataCloudBuildNumber() == null
-                    || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
+                            || DataCollectionStatus.NOT_SET.equals(status.getDataCloudBuildNumber())
+                            || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
-                statusBuildNumber = status.getDataCloudBuildNumber();
+                statusBuildNumber = DataCollectionStatus.NOT_SET.equals(status.getDataCloudBuildNumber()) ? null
+                        : status.getDataCloudBuildNumber();
                 changed = true;
             }
             log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
@@ -228,7 +230,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (changed) {
             DataCloudVersion currentVersion = DataCloudVersion.parseBuildNumber(currentBuildNumber);
             DataCloudVersion statusVersion = DataCloudVersion.parseBuildNumber(statusBuildNumber);
-            if (DataCloudVersion.versionComparator.compare(currentVersion, statusVersion) != 0) {
+            if (statusVersion == null
+                    || DataCloudVersion.versionComparator.compare(currentVersion, statusVersion) != 0) {
                 createSystemAction(ActionType.DATA_CLOUD_CHANGE, ActionType.DATA_CLOUD_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
                 status = DataCollectionStatusUtils.updateTimeForDCChange(status,

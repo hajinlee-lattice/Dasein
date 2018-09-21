@@ -45,6 +45,8 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
 
     private static final long serialVersionUID = 3180682380551859839L;
 
+    public static final String NOT_SET = "not set";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -220,9 +222,9 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         @JsonProperty("MaxTxnDate")
         private Integer maxTxnDate = 0;
         @JsonProperty("EvaluationDate")
-        private String evaluationDate = "not set";
+        private String evaluationDate = NOT_SET;
         @JsonProperty("DataCloudBuildNumber")
-        private String dataCloudBuildNumber = "not set";
+        private String dataCloudBuildNumber = NOT_SET;
         @JsonProperty("AccountCount")
         private Long accountCount = 0L;
         @JsonProperty("ContactCount")
