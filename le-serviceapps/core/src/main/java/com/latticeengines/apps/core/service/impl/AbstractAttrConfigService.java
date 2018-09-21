@@ -525,6 +525,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             if (AttrType.Internal.equals(type)) {
                 if (renderedAttrNames.contains(metadata.getAttrName())) {
                     renderedAttrNames.remove(metadata.getAttrName());
+                    map.remove(metadata.getAttrName());
                 }
                 continue;
             }
