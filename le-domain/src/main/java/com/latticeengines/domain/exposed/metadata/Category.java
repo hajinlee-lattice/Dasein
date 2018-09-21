@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -41,6 +42,15 @@ public enum Category {
             ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES);
     private static Set<Category> hiddenFromUiCategories = new HashSet<>(
             Arrays.asList(LEAD_INFORMATION, DEFAULT, ACCOUNT_INFORMATION));
+    private static Set<Category> ldcReservedCategories = Sets.newHashSet(
+            FIRMOGRAPHICS, //
+            GROWTH_TRENDS, //
+            INTENT, //
+            ONLINE_PRESENCE, //
+            TECHNOLOGY_PROFILE, //
+            WEBSITE_KEYWORDS, //
+            WEBSITE_PROFILE //
+    );
 
     static {
         nameMap = new HashMap<>();
