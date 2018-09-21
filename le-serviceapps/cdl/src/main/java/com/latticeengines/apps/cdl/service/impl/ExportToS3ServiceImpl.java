@@ -64,6 +64,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
 
+    @Value("${hadoop.yarn.application.classpath}")
+    protected String yarnclasspath;
+
     @Inject
     private Configuration yarnConfiguration;
 
@@ -228,6 +231,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
         private Configuration createConfiguration() {
             Properties properties = new Properties();
+            if (StringUtils.isNotBlank(yarnclasspath)) {
+                properties.setProperty("yarn.application.classpath", yarnclasspath);
+            }
             Configuration hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
             String jobName = StringUtils.isNotBlank(tableName) ? tenantId + "~" + tableName : tenantId;
             hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
