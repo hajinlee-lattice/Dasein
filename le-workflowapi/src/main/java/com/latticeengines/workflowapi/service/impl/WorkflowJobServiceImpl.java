@@ -222,6 +222,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
+    @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
             List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowIds = Optional.ofNullable(workflowIds);

@@ -133,7 +133,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     public void testFindByJobIds() {
         List<String> jobIdStrs = Arrays.stream(jobIds).map(String::valueOf).collect(Collectors.toList());
         log.info(String.format("jobIdStrs are %s", jobIdStrs));
-        List<Job> jobs = workflowJobService.findByJobIds(jobIdStrs);
+        List<Job> jobs = workflowJobService.findByJobIds(jobIdStrs, true, false);
         assertNotNull(jobs);
         assertEquals(jobs.size(), jobIds.length);
     }

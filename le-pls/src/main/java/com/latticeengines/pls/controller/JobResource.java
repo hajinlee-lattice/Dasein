@@ -47,17 +47,20 @@ public class JobResource {
             @RequestParam(value = "type", required = false) List<String> types, //
             @RequestParam(value = "status", required = false) List<String> jobStatuses, //
             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails, //
-            @RequestParam(value = "hasParentId", required = false) Boolean hasParentId //
+            @RequestParam(value = "hasParentId", required = false) Boolean hasParentId, //
+            @RequestParam(value = "filterNonUiJobs", required = false, defaultValue = "true") Boolean filterNonUiJobs, //
+            @RequestParam(value = "includeEmptyPA", required = false, defaultValue = "true") Boolean includeEmptyPA //
     ) {
         if (jobIds == null && types == null && includeDetails == null && hasParentId == null && jobStatuses == null) {
-            return workflowJobService.findAll();
+            return workflowJobService.findAll(filterNonUiJobs, includeEmptyPA);
         }
         // TODO ygao this if statement will be removed when le-workflow work
         // service layer is completed
         if (jobIds != null && types == null && includeDetails == null && hasParentId == null && jobStatuses == null) {
-            return workflowJobService.findByJobIds(jobIds);
+            return workflowJobService.findByJobIds(jobIds, filterNonUiJobs, includeEmptyPA);
         }
-        return workflowJobService.findJobs(jobIds, types, jobStatuses, includeDetails, false);
+        return workflowJobService.findJobs(jobIds, types, jobStatuses, includeDetails, false, filterNonUiJobs,
+                includeEmptyPA);
     }
 
     @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

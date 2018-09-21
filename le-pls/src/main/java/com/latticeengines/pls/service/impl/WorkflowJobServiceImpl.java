@@ -202,29 +202,42 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public List<Job> findByJobIds(List<String> jobIds) {
+    public List<Job> findByJobIds(List<String> jobIds, Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
         List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobIds(jobIds,
                 MultiTenantContext.getCustomerSpace().toString());
         if (jobs == null) {
             return Collections.emptyList();
         }
-        return jobs;
+        return applyUiFriendlyFilters(jobs, filterNonUiJobs, generateEmptyPAJob);
     }
 
     @Override
-    public List<Job> findAll() {
+    public List<Job> findAll(Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(MultiTenantContext.getTenant());
         if (jobs == null) {
             return Collections.emptyList();
         }
+        return applyUiFriendlyFilters(jobs, filterNonUiJobs, generateEmptyPAJob);
+    }
 
-        jobs.removeIf(job -> (job == null) || (job.getJobType() == null)
-                || (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase())));
-        updateAllJobs(jobs);
-        Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
-        if (unstartedPnAJob != null) {
-            jobs.add(unstartedPnAJob);
+    private List<Job> applyUiFriendlyFilters(List<Job> jobs, Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
+        if (jobs == null) {
+            return Collections.emptyList();
         }
+
+        if (filterNonUiJobs != null && filterNonUiJobs) {
+            jobs.removeIf(job -> (job == null) || (job.getJobType() == null)
+                    || (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase())));
+        }
+        updateAllJobs(jobs);
+
+        if (generateEmptyPAJob != null && generateEmptyPAJob) {
+            Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
+            if (unstartedPnAJob != null) {
+                jobs.add(unstartedPnAJob);
+            }
+        }
+
         return jobs;
     }
 
@@ -656,12 +669,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId) {
+    public List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails,
+            Boolean hasParentId, Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
         List<Job> jobs = workflowProxy.getJobs(jobIds, types, jobStatuses, includeDetails,
                 MultiTenantContext.getCustomerSpace().toString());
         if (jobs == null) {
             return Collections.emptyList();
         }
-        return jobs;
+        return applyUiFriendlyFilters(jobs, filterNonUiJobs, generateEmptyPAJob);
     }
 }

@@ -25,13 +25,14 @@ public interface WorkflowJobService {
 
     Job find(String jobId, boolean useCustomerSpace);
 
-    List<Job> findByJobIds(List<String> jobIds);
+    List<Job> findByJobIds(List<String> jobIds, Boolean filterNonUiJobs, Boolean generateEmptyPAJob);
 
-    List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId);
+    List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails,
+            Boolean hasParentId, Boolean filterNonUiJobs, Boolean generateEmptyPAJob);
 
     List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType);
 
-    List<Job> findAll();
+    List<Job> findAll(Boolean filterNonUiJobs, Boolean generateEmptyPAJob);
 
     String generateCSVReport(String jobId);
 
