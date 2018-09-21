@@ -34,7 +34,7 @@
         <ul class="history-metadata">
         	<li>
         		<dl>
-        			<dt>Selected Targets</dt>
+        			<dt>Selected Recommendations</dt>
         			<dd class="blue-text">{{vm.summaryData.selectedTargets | number}}</dd>
         		</dl>
         	</li>
@@ -89,7 +89,7 @@
                                 'fa fa-sort-asc': vm.sortBy === 'playDisplayName' && !vm.sortDesc}"></i> -->
                     </th>
     				<th class="sortable" ng-click="vm.sort('accountsSelected'); vm.sortDesc = !vm.sortDesc">
-                        Selected Targets
+                        Selected Recommendations
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'accountsSelected',
