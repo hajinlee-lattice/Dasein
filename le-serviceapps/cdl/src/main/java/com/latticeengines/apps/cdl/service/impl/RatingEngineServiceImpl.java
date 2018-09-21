@@ -683,7 +683,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
             modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
-            log.info(String.format("Custom event modelling job submitted with parameters %s",
+            log.debug(String.format("Custom event modelling job submitted with parameters %s",
                     modelingParameters.toString()));
             jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
                     modelingParameters);
