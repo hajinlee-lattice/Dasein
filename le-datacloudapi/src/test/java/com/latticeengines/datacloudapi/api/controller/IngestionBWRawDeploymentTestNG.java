@@ -17,10 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
@@ -76,7 +72,7 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
     }
 
     // IngestionName, ExpectedCreatedProgressNum, Version
-    @DataProvider(name = "ExpectedResult")
+    //@DataProvider(name = "ExpectedResult")
     private static Object[][] getExpectedResult() {
         return new Object[][] { //
                 { INGESTION, 1, ING_VERSION, null }, //
@@ -85,7 +81,7 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
 
     private List<Ingestion> ingestions = new ArrayList<>();
 
-    @BeforeClass(groups = "deployment")
+    //@BeforeClass(groups = "deployment")
     public void init() throws Exception {
         //prepareCleanPod(POD_ID);
         Object[] ingestionData = getIngestions();
@@ -110,7 +106,7 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
         BWRawConfiguration config = (BWRawConfiguration)ingestion.getProviderConfiguration();
     }
 
-    @Test(groups = "deployment", priority = 1)
+    //@Test(groups = "deployment", priority = 1)
     public void testCreateDraftProgresses() {
         IngestionRequest request = new IngestionRequest();
         request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
@@ -123,7 +119,7 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
         Assert.assertTrue(CollectionUtils.isNotEmpty(progresses));
     }
 
-    @Test(groups = "deployment", priority = 2, dataProvider = "ExpectedResult")
+    //@Test(groups = "deployment", priority = 2, dataProvider = "ExpectedResult")
     public void testIngest(String name, int expectedProgresses, String version, Integer size) {
         Ingestion ingestion = ingestionEntityMgr.getIngestionByName(name);
         Map<String, Object> fields = new HashMap<>();
@@ -158,7 +154,7 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
         }
     }
 
-    @AfterClass(groups = "deployment")
+    //@AfterClass(groups = "deployment")
     public void destroy() throws Exception {
         for (Ingestion ingestion : ingestions) {
             ingestionEntityMgr.delete(ingestion);
