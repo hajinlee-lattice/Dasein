@@ -137,6 +137,10 @@ public class PlayResource {
         if (play == null) {
             throw new NullPointerException("Play is null");
         }
+
+        if (StringUtils.isEmpty(play.getCreatedBy())) {
+            play.setCreatedBy(MultiTenantContext.getEmailAddress());
+        }
         if (StringUtils.isEmpty(play.getUpdatedBy())) {
             play.setUpdatedBy(MultiTenantContext.getEmailAddress());
         }
@@ -165,7 +169,7 @@ public class PlayResource {
         if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
             playLaunch.setCreatedBy(MultiTenantContext.getEmailAddress());
         }
-        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
+        if (StringUtils.isEmpty(playLaunch.getUpdatedBy())) {
             playLaunch.setUpdatedBy(MultiTenantContext.getEmailAddress());
         }
         return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
@@ -184,7 +188,7 @@ public class PlayResource {
         if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
             playLaunch.setCreatedBy(MultiTenantContext.getEmailAddress());
         }
-        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
+        if (StringUtils.isEmpty(playLaunch.getUpdatedBy())) {
             playLaunch.setUpdatedBy(MultiTenantContext.getEmailAddress());
         }
         return playProxy.updatePlayLaunch(tenant.getId(), playName, launchId, playLaunch);
