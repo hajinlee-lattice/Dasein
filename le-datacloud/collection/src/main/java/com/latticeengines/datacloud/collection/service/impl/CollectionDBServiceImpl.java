@@ -30,6 +30,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,6 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
-
-import javafx.util.Pair;
 
 @Component
 public class CollectionDBServiceImpl implements CollectionDBService {
@@ -608,7 +607,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             log.error("timestamp range wrong: [" + minTs + ", " + maxTs + "]");
             throw new Exception("wrong timestamp range");
         }
-        return new Pair<>(minTs, maxTs);
+        return Pair.of(minTs, maxTs);
     }
 
     private Schema getSchema(String vendor) throws Exception {
