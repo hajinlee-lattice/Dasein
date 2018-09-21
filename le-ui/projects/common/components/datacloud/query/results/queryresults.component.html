@@ -16,7 +16,7 @@
             <strong>{{vm.recommendationCounts.supressed}}</strong>
         </li>
         <li class="launching">
-            <h3>Recommentions to be launched</h3>
+            <h3>Recommendations to be launched</h3>
             <strong>{{vm.recommendationCounts.launched}}</strong>
         </li>
         <li class="contacts">
@@ -55,7 +55,7 @@
                 ng-max="::vm.topNCount"
                 ng-change="topNCount && vm.updateTopNCount()"
                 class="form-control" />
-            <span> highest rated {{vm.section === 'wizard.targets' ? 'recommentions' : 'targets'}}</span>
+            <span> highest rated {{vm.section === 'wizard.targets' ? 'recommendations' : 'targets'}}</span>
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
         </div>
 
