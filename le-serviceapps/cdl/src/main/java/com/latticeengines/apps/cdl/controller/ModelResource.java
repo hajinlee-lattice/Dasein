@@ -90,7 +90,7 @@ public class ModelResource {
             throw new RuntimeException(message);
         }
         modelSummaryProxy.setDownloadFlag(customerSpace);
-        log.info(String.format("Rating Engine model endpoint called with parameters %s",
+        log.debug(String.format("Rating Engine model endpoint called with parameters %s",
                 ratingEngineModelingParameters.toString()));
         return crossSellImportMatchAndModelWorkflowSubmitter.submit(ratingEngineModelingParameters).toString();
     }
