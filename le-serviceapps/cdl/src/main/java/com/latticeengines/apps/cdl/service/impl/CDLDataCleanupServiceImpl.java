@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
@@ -33,7 +34,8 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         if (configuration instanceof CleanupByDateRangeConfiguration) {
             verifyCleanupByDataRangeConfiguration((CleanupByDateRangeConfiguration) configuration);
         }
-        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), configuration);
+        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), configuration,
+                new WorkflowPidWrapper(-1L));
     }
 
     private void verifyCleanupByDataRangeConfiguration(

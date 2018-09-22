@@ -272,6 +272,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Job> jobs = new ArrayList<>();
         jobs.add(createJob(jobIds[0]));
         jobs.add(createJob(jobIds[1]));
+        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(jobs);
         when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(jobs);
     }
 
@@ -310,12 +311,12 @@ public class WorkflowJobServiceImplUnitTestNG {
         action2.setPid(2L);
         action2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action2.setActionConfiguration(new ImportActionConfiguration());
-        action2.setTrackingId(jobIds[0]);
+        action2.setTrackingPid(jobIds[0]);
         Action action3 = new Action();
         action3.setPid(3L);
         action3.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action3.setActionConfiguration(new ImportActionConfiguration());
-        action3.setTrackingId(jobIds[1]);
+        action3.setTrackingPid(jobIds[1]);
         Action action4 = new Action();
         action4.setPid(4L);
         action4.setType(ActionType.METADATA_CHANGE);

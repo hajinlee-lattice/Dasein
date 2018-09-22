@@ -17,7 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -53,9 +52,14 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "OWNER_ID")
     private Long ownerId;
 
+    @Deprecated
     @JsonProperty("trackingId")
     @Column(name = "TRACKING_ID")
     private Long trackingId;
+
+    @JsonProperty("trackingPid")
+    @Column(name = "TRACKING_PID")
+    private Long trackingPid;
 
     @JsonProperty("actionInitiator")
     @Column(name = "ACTION_INITIATOR")
@@ -119,6 +123,14 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
 
     public void setTrackingId(Long id) {
         this.trackingId = id;
+    }
+
+    public Long getTrackingPid() {
+        return this.trackingPid;
+    }
+
+    public void setTrackingPid(Long trackingPid) {
+        this.trackingPid = trackingPid;
     }
 
     public String getActionInitiator() {

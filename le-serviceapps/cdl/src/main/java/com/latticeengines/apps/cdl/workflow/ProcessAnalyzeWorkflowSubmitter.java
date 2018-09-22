@@ -22,8 +22,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
-import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
@@ -190,11 +190,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
                 ActionType.CDL_OPERATION_WORKFLOW);
         // TODO add status filter to filter out running ones
-        List<String> importAndDeleteJobIdStrs = actions.stream()
-                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingId() != null)
-                .map(action -> action.getTrackingId().toString()).collect(Collectors.toList());
-        log.info(String.format("importAndDeleteJobIdStrs are %s", importAndDeleteJobIdStrs));
-        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobIds(importAndDeleteJobIdStrs,
+        List<String> importAndDeleteJobPidStrs = actions.stream()
+                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null)
+                .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
+        log.info(String.format("importAndDeleteJobPidStrs are %s", importAndDeleteJobPidStrs));
+        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
                 customerSpace);
 
         List<Long> completedImportAndDeleteJobIds = CollectionUtils.isEmpty(importAndDeleteJobs)
@@ -221,8 +221,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
 
         List<Long> businessCalendarChangeActionIds = actions.stream()
-                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE))
-                .map(Action::getPid)
+                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE)).map(Action::getPid)
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(businessCalendarChangeActionIds)) {
             log.info(String.format("Actions that associated with business calendar change are: %s",
@@ -284,7 +283,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (selectedTypes.contains(action.getType())) {
             // special check if is selected type
             isComplete = false;
-            if (completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
+            if (completedImportAndDeleteJobIds.contains(action.getTrackingPid())) {
                 isComplete = true;
             } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
                 ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action

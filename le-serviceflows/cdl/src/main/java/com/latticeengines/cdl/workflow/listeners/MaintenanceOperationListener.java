@@ -30,10 +30,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
-import com.latticeengines.workflow.service.impl.WorkflowReportServiceImpl;
 
 @Component("maintenanceOperationListener")
 public class MaintenanceOperationListener extends LEJobListener {
@@ -61,9 +59,6 @@ public class MaintenanceOperationListener extends LEJobListener {
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
-        log.info(String.format("Update job %s", jobExecution.getId()));
-        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        updateMaintenanceAction(job);
     }
 
     @Override
@@ -106,7 +101,8 @@ public class MaintenanceOperationListener extends LEJobListener {
         if (report == null) {
             return;
         }
-        String impactedEntities = job.getOutputContextValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
+        String impactedEntities = job
+                .getOutputContextValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
         if (StringUtils.isEmpty(impactedEntities)) {
             log.warn("Impacted Entities is Empty!");
             return;
@@ -119,8 +115,8 @@ public class MaintenanceOperationListener extends LEJobListener {
             log.info(String.format("Updating an actionPid=%d for job=%d", pid, job.getWorkflowId()));
             Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid))
                     .get(0);
-            CleanupActionConfiguration config = action.getActionConfiguration() == null ?
-                    new CleanupActionConfiguration() : (CleanupActionConfiguration) action.getActionConfiguration();
+            CleanupActionConfiguration config = action.getActionConfiguration() == null
+                    ? new CleanupActionConfiguration() : (CleanupActionConfiguration) action.getActionConfiguration();
             try {
                 ObjectMapper om = JsonUtils.getObjectMapper();
                 ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
@@ -134,26 +130,7 @@ public class MaintenanceOperationListener extends LEJobListener {
                 log.error("Cannot get delete count for report: " + report.getName());
             }
             action.setActionConfiguration(config);
-            actionProxy.updateAction(job.getTenant().getId(),action);
-        } else {
-            log.warn(String.format("ActionPid is not correctly registered by workflow job=%d", job.getWorkflowId()));
-        }
-    }
-
-    private void updateMaintenanceAction(WorkflowJob job) {
-        String ActionPidStr = job.getInputContextValue(WorkflowContextConstants.Inputs.ACTION_ID);
-        if (ActionPidStr != null) {
-            Long pid = Long.parseLong(ActionPidStr);
-            log.info(String.format("Updating an actionPid=%d for job=%d", pid, job.getWorkflowId()));
-            Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid))
-                    .get(0);
-            if (action != null) {
-                log.info(String.format("Action=%s", action));
-                action.setTrackingId(job.getWorkflowId());
-                actionProxy.updateAction(job.getTenant().getId(), action);
-            } else {
-                log.warn(String.format("Action with pid=%d cannot be found", pid));
-            }
+            actionProxy.updateAction(job.getTenant().getId(), action);
         } else {
             log.warn(String.format("ActionPid is not correctly registered by workflow job=%d", job.getWorkflowId()));
         }

@@ -127,7 +127,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentPro
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
+public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
@@ -411,7 +411,7 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setActionInitiator(INITIATOR);
         action.setDescription(feedTaskId);
-        action.setTrackingId(null);
+        action.setTrackingPid(null);
         action.setActionConfiguration(configuration);
         actionProxy.createAction(mainCustomerSpace, action);
     }
@@ -643,7 +643,7 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
     }
 
     private void verifyConsolidateSummaryReport(Report summaryReport,
-                                                Map<BusinessEntity, Map<String, Object>> expectedReport) {
+            Map<BusinessEntity, Map<String, Object>> expectedReport) {
         Assert.assertNotNull(summaryReport);
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
@@ -658,11 +658,10 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
                 Assert.assertTrue(entitiesSummaryNode.has(entity.name()));
                 ObjectNode entityNode = (ObjectNode) entitiesSummaryNode.get(entity.name());
                 Assert.assertNotNull(entityNode);
-                ObjectNode consolidateSummaryNode = (ObjectNode) entityNode.get(
-                        ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+                ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
+                        .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
                 Assert.assertNotNull(consolidateSummaryNode);
-                ObjectNode entityNumberNode = (ObjectNode) entityNode.get(
-                        ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
+                ObjectNode entityNumberNode = (ObjectNode) entityNode.get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
                 if (entity != BusinessEntity.Product) {
                     Assert.assertNotNull(entityNumberNode);
                 }
@@ -1015,16 +1014,18 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
         Assert.assertNotNull(ratingEngine,
                 "Cannot find rating engine " + engineId + " in tenant " + mainTestTenant.getId());
         System.out.println(JsonUtils.pprint(ratingEngine));
-//        Map<String, Long> counts = ratingEngine.getCountsAsMap();
-//        Assert.assertTrue(MapUtils.isNotEmpty(counts));
-//        expectedCounts.forEach((bkt, count) -> {
-//            if (count > 0) {
-//                Assert.assertNotNull(counts.get(bkt.getName()),
-//                        "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
-//                Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine count " + bkt.getName()
-//                        + " expected " + counts.get(bkt.getName()) + " found " + count);
-//            }
-//        });
+        // Map<String, Long> counts = ratingEngine.getCountsAsMap();
+        // Assert.assertTrue(MapUtils.isNotEmpty(counts));
+        // expectedCounts.forEach((bkt, count) -> {
+        // if (count > 0) {
+        // Assert.assertNotNull(counts.get(bkt.getName()),
+        // "Cannot find count for bucket " + bkt.getName() + " in rating
+        // engine.");
+        // Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine
+        // count " + bkt.getName()
+        // + " expected " + counts.get(bkt.getName()) + " found " + count);
+        // }
+        // });
     }
 
     List<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity) {

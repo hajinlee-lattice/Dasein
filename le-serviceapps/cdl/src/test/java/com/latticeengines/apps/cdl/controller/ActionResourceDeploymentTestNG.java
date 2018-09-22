@@ -72,7 +72,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         action.setTenant(mainTestTenant);
         Random r = new Random();
         int trackingId = r.ints(0, (10000 + 1)).findFirst().getAsInt();
-        action.setTrackingId((long) trackingId);
+        action.setTrackingPid((long) trackingId);
         return action;
     }
 

@@ -63,8 +63,6 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
-        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        updateImportAction(job);
     }
 
     @Override
@@ -74,8 +72,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
         String importJobIdentifier = job
                 .getInputContextValue(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
         String customerSpace = job.getTenant().getId();
-        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy
-                .getImportJobDetailByAppId(applicationId);
+        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
             log.warn(String.format("Cannot find the job detail for %s", applicationId));
             return;
@@ -129,15 +126,15 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     if (extracts.size() == 1) {
                         log.info(String.format("Register single extract: %s", extracts.get(0).getName()));
                         totalRecords = extracts.get(0).getProcessedRecords();
-                        registeredTables = dataFeedProxy.registerExtract(customerSpace, importJobIdentifier, templateName,
-                                extracts.get(0));
+                        registeredTables = dataFeedProxy.registerExtract(customerSpace, importJobIdentifier,
+                                templateName, extracts.get(0));
                     } else {
                         log.info(String.format("Register %d extracts.", extracts.size()));
                         for (Extract extract : extracts) {
                             totalRecords += extract.getProcessedRecords();
                         }
-                        registeredTables = dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier, templateName,
-                                extracts);
+                        registeredTables = dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier,
+                                templateName, extracts);
                     }
                     importActionConfiguration.setImportCount(totalRecords);
                     importActionConfiguration.setRegisteredTables(registeredTables);
@@ -204,28 +201,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
         String ActionPidStr = job.getInputContextValue(WorkflowContextConstants.Inputs.ACTION_ID);
         if (ActionPidStr != null) {
             Long pid = Long.parseLong(ActionPidStr);
-            Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid)).get(0);
-            if (action != null) {
-                action.setActionConfiguration(importActionConfiguration);
-                actionProxy.updateAction(job.getTenant().getId(),action);
-            } else {
-                log.warn(String.format("Action with pid=%d cannot be found", pid));
-            }
-        } else {
-            log.warn(String.format("ActionPid is not correctly registered by workflow job=%d", job.getWorkflowId()));
-        }
-    }
-
-    private void updateImportAction(WorkflowJob job) {
-        String ActionPidStr = job.getInputContextValue(WorkflowContextConstants.Inputs.ACTION_ID);
-        if (ActionPidStr != null) {
-            Long pid = Long.parseLong(ActionPidStr);
-            log.info(String.format("Updating an actionPid=%d for job=%d", pid, job.getWorkflowId()));
             Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid))
                     .get(0);
             if (action != null) {
-                log.info(String.format("Action=%s", action));
-                action.setTrackingId(job.getWorkflowId());
+                action.setActionConfiguration(importActionConfiguration);
                 actionProxy.updateAction(job.getTenant().getId(), action);
             } else {
                 log.warn(String.format("Action with pid=%d cannot be found", pid));

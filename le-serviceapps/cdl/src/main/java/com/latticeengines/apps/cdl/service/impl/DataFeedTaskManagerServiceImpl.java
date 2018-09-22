@@ -44,6 +44,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
@@ -107,12 +108,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
-                                          DataFeedProxy dataFeedProxy, TenantService tenantService,
-                                          DLTenantMappingService dlTenantMappingService,
-                                          CDLExternalSystemService cdlExternalSystemService,
-                                          ActionService actionService,
-                                          MetadataProxy metadataProxy, AttrConfigEntityMgr attrConfigEntityMgr,
-                                          S3Service s3Service, S3ImportFolderService s3ImportFolderService) {
+            DataFeedProxy dataFeedProxy, TenantService tenantService, DLTenantMappingService dlTenantMappingService,
+            CDLExternalSystemService cdlExternalSystemService, ActionService actionService, MetadataProxy metadataProxy,
+            AttrConfigEntityMgr attrConfigEntityMgr, S3Service s3Service, S3ImportFolderService s3ImportFolderService) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.dataFeedProxy = dataFeedProxy;
         this.tenantService = tenantService;
@@ -126,8 +124,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @Override
-    public synchronized String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,
-            CDLImportConfig importConfig) {
+    public synchronized String createDataFeedTask(String customerSpaceStr, String feedType, String entity,
+            String source, CDLImportConfig importConfig) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(importConfig);
         if (dlTenantMappingEnabled) {
@@ -162,11 +160,12 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
             }
-            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
+            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
+                    customerSpace.toString());
             return dataFeedTask.getUniqueId();
         } else {
-            dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(),
-                    newMeta, schemaTable);
+            dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
+                    schemaTable);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
             if (!finalSchemaCheck(newMeta, entity)) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
@@ -191,7 +190,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());
                 }
             }
-            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
+            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
+                    customerSpace.toString());
             return dataFeedTask.getUniqueId();
         }
     }
@@ -238,7 +238,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
-                csvImportFileInfo);
+                csvImportFileInfo, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
@@ -282,8 +282,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (importConfig.getEntity() == null || StringUtils.isEmpty(importConfig.getFeedType())) {
             throw new IllegalArgumentException("Entity & Template name cannot be empty for S3 import!");
         }
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName()
-                , importConfig.getFeedType(), importConfig.getEntity().name());
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
+                importConfig.getFeedType(), importConfig.getEntity().name());
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
         }
@@ -291,7 +291,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 importConfig.getEntity().name(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setS3FilePath(newFilePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
-        //validate
+        // validate
         validateS3File(dataFeedTask.getImportTemplate(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
@@ -301,7 +301,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
-                JsonUtils.serialize(importConfig), csvImportFileInfo);
+                JsonUtils.serialize(importConfig), csvImportFileInfo, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
@@ -316,9 +316,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             Set<String> headerFields = parser.getHeaderMap().keySet();
-            for(String header : headerFields) {
+            for (String header : headerFields) {
                 if (StringUtils.length(header) > MAX_HEADER_LENGTH) {
-                    throw new LedpException(LedpCode.LEDP_18188, new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
+                    throw new LedpException(LedpCode.LEDP_18188,
+                            new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
                 }
             }
             Map<String, Attribute> displayNameMap = template.getAttributes().stream()
@@ -340,13 +341,15 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 }
             }
             if (CollectionUtils.isNotEmpty(templateMissing)) {
-                log.warn(String.format("Template doesn't contains the following columns: %s", String.join(",", templateMissing)));
+                log.warn(String.format("Template doesn't contains the following columns: %s",
+                        String.join(",", templateMissing)));
             }
             if (CollectionUtils.isNotEmpty(csvMissing)) {
-                log.warn(String.format("S3File doesn't contains the following columns: %s", String.join(",", csvMissing)));
+                log.warn(String.format("S3File doesn't contains the following columns: %s",
+                        String.join(",", csvMissing)));
             }
             if (CollectionUtils.isNotEmpty(requiredMissing)) {
-                throw new LedpException(LedpCode.LEDP_40043, new String[] {String.join(",", requiredMissing)});
+                throw new LedpException(LedpCode.LEDP_40043, new String[] { String.join(",", requiredMissing) });
             }
             parser.close();
         } catch (LedpException e) {
@@ -443,7 +446,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @VisibleForTesting
     void updateTableAttributeName(Table templateTable, Table metaTable) {
         Map<String, Attribute> templateAttrs = new HashMap<>();
-        templateTable.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName().toLowerCase(), attribute));
+        templateTable.getAttributes()
+                .forEach(attribute -> templateAttrs.put(attribute.getName().toLowerCase(), attribute));
         for (Attribute attr : metaTable.getAttributes()) {
             if (templateAttrs.containsKey(attr.getName().toLowerCase())) {
                 attr.setName(templateAttrs.get(attr.getName().toLowerCase()).getName());
@@ -471,7 +475,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @VisibleForTesting
-    boolean finalSchemaCheck(Table finalTemplate, String entity){
+    boolean finalSchemaCheck(Table finalTemplate, String entity) {
         if (finalTemplate == null) {
             log.error("Template cannot be null!");
             return false;
@@ -485,7 +489,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
-        for(Map.Entry<String, Attribute> attrEntry : standardAttrs.entrySet()) {
+        for (Map.Entry<String, Attribute> attrEntry : standardAttrs.entrySet()) {
             if (attrEntry.getValue().getRequired() && attrEntry.getValue().getDefaultValueStr() == null) {
                 if (!templateAttrs.containsKey(attrEntry.getKey())) {
                     log.error("Missing required field: " + attrEntry.getKey());
@@ -501,17 +505,17 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         return true;
     }
 
-    private void updateAttrConfig(Table templateTable, List<AttrConfig> attrConfigs, String entity, CustomerSpace customerSpace) {
+    private void updateAttrConfig(Table templateTable, List<AttrConfig> attrConfigs, String entity,
+            CustomerSpace customerSpace) {
         try {
-            if (CollectionUtils.isEmpty(attrConfigs)
-                    || templateTable == null
+            if (CollectionUtils.isEmpty(attrConfigs) || templateTable == null
                     || CollectionUtils.isEmpty(templateTable.getAttributes())) {
                 if (CollectionUtils.isEmpty(attrConfigs)) {
                     log.info(String.format("Attr config setting is empty for tenant %s", customerSpace.toString()));
                 }
                 if (templateTable == null) {
-                    log.info(String.format("Template table is empty for tenant %s, entity %s",
-                            customerSpace.toString(), entity));
+                    log.info(String.format("Template table is empty for tenant %s, entity %s", customerSpace.toString(),
+                            entity));
                 }
                 if (CollectionUtils.isEmpty(templateTable.getAttributes())) {
                     log.info(String.format("Template table does not contain any attributes, tenant %s, entity %s",
@@ -522,13 +526,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             List<AttrConfig> originalAttrConfigs = attrConfigEntityMgr.findAllForEntity(customerSpace.getTenantId(),
                     BusinessEntity.getByName(entity));
 
-            Map<String, Attribute> attributeMap = templateTable.getAttributes()
-                    .stream().collect(Collectors.toMap(Attribute::getSourceAttrName, attr -> attr));
+            Map<String, Attribute> attributeMap = templateTable.getAttributes().stream()
+                    .collect(Collectors.toMap(Attribute::getSourceAttrName, attr -> attr));
             attrConfigs.forEach(attrConfig -> {
                 if (attributeMap.containsKey(attrConfig.getAttrName())) {
                     attrConfig.setAttrName(attributeMap.get(attrConfig.getAttrName()).getName());
                 } else {
-                    throw new RuntimeException("Template table doesn't contains source Attribute: " + attrConfig.getAttrName());
+                    throw new RuntimeException(
+                            "Template table doesn't contains source Attribute: " + attrConfig.getAttrName());
                 }
             });
 
@@ -558,11 +563,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             // A temp fix for schema update in maint_4.8.0.
             if (InterfaceName.Amount.equals(attr1.getInterfaceName())
                     || InterfaceName.Quantity.equals(attr1.getInterfaceName())
-                    || InterfaceName.Cost.equals(attr1.getInterfaceName()))
-            {
+                    || InterfaceName.Cost.equals(attr1.getInterfaceName())) {
                 if (!attr2.getPhysicalDataType().equalsIgnoreCase("int")
                         && !attr2.getPhysicalDataType().equalsIgnoreCase("double")) {
-                    log.error(String.format("Attribute %s has wrong physicalDataType %s", attr2.getName(), attr2.getPhysicalDataType()));
+                    log.error(String.format("Attribute %s has wrong physicalDataType %s", attr2.getName(),
+                            attr2.getPhysicalDataType()));
                     return false;
                 }
             } else {

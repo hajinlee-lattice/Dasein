@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
@@ -46,11 +48,14 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private ActionService actionService;
 
+    @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace,
-            MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+            MaintenanceOperationConfiguration maintenanceOperationConfiguration, WorkflowPidWrapper pidWrapper) {
         if (customerSpace == null) {
             throw new IllegalArgumentException("The CustomerSpace cannot be null!");
         }
+        log.info(String.format("CDLOperation WorkflowJob created for customer=%s with pid=%s", customerSpace,
+                pidWrapper.getPid()));
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
@@ -70,13 +75,13 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed.Status initialStatus = getInitialDataFeedStatus(dataFeedStatus);
         log.info(String.format("data feed %s initial status: %s", dataFeed.getName(), initialStatus.getName()));
 
-        Action action = registerAction(customerSpace, maintenanceOperationConfiguration);
+        Action action = registerAction(customerSpace, maintenanceOperationConfiguration, pidWrapper.getPid());
         log.info(String.format("Action=%s", action));
         CDLOperationWorkflowConfiguration configuration = generateConfiguration(customerSpace,
                 maintenanceOperationConfiguration, action.getPid(), initialStatus);
 
         log.info(String.format("Submitting CDL operation workflow for customer %s", customerSpace));
-        return workflowJobService.submit(configuration);
+        return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
     private DataFeed.Status getInitialDataFeedStatus(DataFeed.Status status) {
@@ -88,10 +93,11 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private Action registerAction(CustomerSpace customerSpace,
-            MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+            MaintenanceOperationConfiguration maintenanceOperationConfiguration, Long workflowPid) {
         log.info(String.format("Registering an operation action for tenant=%s", customerSpace.toString()));
         Action action = new Action();
         action.setType(ActionType.CDL_OPERATION_WORKFLOW);
+        action.setTrackingPid(workflowPid);
         action.setActionInitiator(maintenanceOperationConfiguration.getOperationInitiator());
         if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
             CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
@@ -155,8 +161,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
-                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName())
-                        .build())
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()).build())
                 .build();
     }
 
@@ -178,8 +183,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 }
             }
         } else if (maintenanceOperationConfiguration instanceof CleanupByDateRangeConfiguration) {
-            CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration =
-                    ((CleanupByDateRangeConfiguration) maintenanceOperationConfiguration);
+            CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration = ((CleanupByDateRangeConfiguration) maintenanceOperationConfiguration);
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             String start = dateFormat.format(cleanupByDateRangeConfiguration.getStartTime());
             String end = dateFormat.format(cleanupByDateRangeConfiguration.getEndTime());

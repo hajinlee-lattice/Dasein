@@ -88,12 +88,12 @@ public class CDLDataFeedImportWorkflowSubmitterUnitTestNG {
 
     @Test(groups = "unit")
     public void testRegisterAction() {
-        Action action = cdlDataFeedImportWorkflowSubmitter.registerAction(cs, dataFeedTask, csvImportFileInfo);
+        Action action = cdlDataFeedImportWorkflowSubmitter.registerAction(cs, dataFeedTask, csvImportFileInfo, 100L);
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         Assert.assertEquals(action.getActionInitiator(), INITIATOR);
         Assert.assertEquals(action.getTenant().getId(), tenantId);
-        Assert.assertNull(action.getTrackingId());
+        Assert.assertNotNull(action.getTrackingPid());
         Assert.assertNotNull(action.getUpdated());
         Assert.assertNotNull(action.getCreated());
         log.info(String.format("Action is %s", action));

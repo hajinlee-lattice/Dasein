@@ -12,6 +12,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -34,24 +36,29 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private ActionService actionService;
 
+    @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
-            CSVImportFileInfo csvImportFileInfo) {
-        Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo);
+            CSVImportFileInfo csvImportFileInfo, WorkflowPidWrapper pidWrapper) {
+        log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
+                pidWrapper.getPid()));
+        Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
                 connectorConfig, csvImportFileInfo, action.getPid());
 
-        ApplicationId appId = workflowJobService.submit(configuration);
+        ApplicationId appId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return appId;
     }
 
     @VisibleForTesting
-    Action registerAction(CustomerSpace customerSpace, DataFeedTask dataFeedTask, CSVImportFileInfo csvImportFileInfo) {
+    Action registerAction(CustomerSpace customerSpace, DataFeedTask dataFeedTask, CSVImportFileInfo csvImportFileInfo,
+            Long workflowPid) {
         log.info(String.format("Registering an import action for datafeedTask=%s, tenant=%s",
                 dataFeedTask.getUniqueId(), customerSpace.toString()));
         Action action = new Action();
         ImportActionConfiguration config = new ImportActionConfiguration();
         config.setDataFeedTaskId(dataFeedTask.getUniqueId());
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action.setTrackingPid(workflowPid);
         action.setActionInitiator(csvImportFileInfo.getFileUploadInitiator());
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         if (tenant == null) {

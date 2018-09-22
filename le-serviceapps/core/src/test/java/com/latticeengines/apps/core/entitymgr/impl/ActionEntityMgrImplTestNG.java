@@ -64,37 +64,39 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         action.setTenant(mainTestTenant);
         Random r = new Random();
         int trackingId = r.ints(0, (10000 + 1)).findFirst().getAsInt();
-        action.setTrackingId((long) trackingId);
+        action.setTrackingPid((long) trackingId);
         return action;
     }
 
     private ActionConfiguration generateActionConfig(int n) {
         ActionConfiguration ac;
         switch (n) {
-            case 0:
-                ac = new SegmentActionConfiguration();
-                ((SegmentActionConfiguration) ac).setSegmentName("Segment_abc");
-                break;
-            case 1:
-                ac = new RatingEngineActionConfiguration();
-                ((RatingEngineActionConfiguration) ac).setRatingEngineId("RatingEngine_abc");
-                ((RatingEngineActionConfiguration) ac).setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
-                ((RatingEngineActionConfiguration) ac).setModelId("RatingModel_abc");
-                break;
-            case 2:
-                ac = new ActivityMetricsActionConfiguration();
+        case 0:
+            ac = new SegmentActionConfiguration();
+            ((SegmentActionConfiguration) ac).setSegmentName("Segment_abc");
+            break;
+        case 1:
+            ac = new RatingEngineActionConfiguration();
+            ((RatingEngineActionConfiguration) ac).setRatingEngineId("RatingEngine_abc");
+            ((RatingEngineActionConfiguration) ac)
+                    .setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+            ((RatingEngineActionConfiguration) ac).setModelId("RatingModel_abc");
+            break;
+        case 2:
+            ac = new ActivityMetricsActionConfiguration();
             ((ActivityMetricsActionConfiguration) ac).setActivated(Collections.emptyList());
             ((ActivityMetricsActionConfiguration) ac).setUpdated(Collections.emptyList());
             ((ActivityMetricsActionConfiguration) ac).setDeactivated(Collections.emptyList());
-                break;
-            case 3:
-                ac = new AttrConfigLifeCycleChangeConfiguration();
-                ((AttrConfigLifeCycleChangeConfiguration) ac).setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
-                ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
-                ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
-                default:
-                    ac = null;
-                    break;
+            break;
+        case 3:
+            ac = new AttrConfigLifeCycleChangeConfiguration();
+            ((AttrConfigLifeCycleChangeConfiguration) ac)
+                    .setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
+            ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
+            ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
+        default:
+            ac = null;
+            break;
         }
         return ac;
     }
@@ -121,8 +123,10 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         Assert.assertEquals(actionsWithoutOwner.size(), 2);
         Assert.assertNotNull(actionsWithoutOwner.get(0).getActionConfiguration());
         Assert.assertNotNull(actionsWithoutOwner.get(1).getActionConfiguration());
-        Assert.assertTrue(actionsWithoutOwner.get(0).getActionConfiguration() instanceof RatingEngineActionConfiguration);
-        Assert.assertTrue(actionsWithoutOwner.get(1).getActionConfiguration() instanceof ActivityMetricsActionConfiguration);
+        Assert.assertTrue(
+                actionsWithoutOwner.get(0).getActionConfiguration() instanceof RatingEngineActionConfiguration);
+        Assert.assertTrue(
+                actionsWithoutOwner.get(1).getActionConfiguration() instanceof ActivityMetricsActionConfiguration);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGet" })
