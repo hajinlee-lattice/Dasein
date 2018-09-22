@@ -31,17 +31,20 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
 
     private String stackName;
 
+    private String condaEnv;
+
     public PythonMRJob(Configuration config) {
         setConf(config);
     }
 
     public PythonMRJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry,
-            VersionManager versionManager, String stackName) {
+            VersionManager versionManager, String stackName, String condaEnv) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
         this.stackName = stackName;
+        this.condaEnv = condaEnv;
     }
 
     @VisibleForTesting
@@ -64,12 +67,12 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         mrJob.setOutputFormatClass(NullOutputFormat.class);
 
         String jobType = config.get(MapReduceProperty.JOB_TYPE.name());
-        if (jobType == PythonMRJobType.MODELING_JOB.jobType()) {
+        if (PythonMRJobType.MODELING_JOB.jobType().equals(jobType)) {
             mrJob.setMapperClass(PythonModelingMapper.class);
             mrJob.setReducerClass(PythonReducer.class);
             mrJob.setNumReduceTasks(1);
 
-        } else if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
+        } else if (PythonMRJobType.PROFILING_JOB.jobType().equals(jobType)) {
             mrJob.setMapperClass(PythonProfilingMapper.class);
             mrJob.setReducerClass(PythonReducer.class);
             mrJob.setNumReduceTasks(2);
@@ -109,6 +112,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
 
+        config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {

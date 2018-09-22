@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 public class PythonInvoker {
@@ -26,8 +27,10 @@ public class PythonInvoker {
         int exitValue = 0;
         try {
             PythonMRUtils.writeMetadataJsonToLocal(classifier);
+            String condaEnv = config.get(PythonContainerProperty.CONDA_ENV.name());
+            log.info("Use conda env " + condaEnv);
             runtimeConfigFile = runtimeConfigFile != null ? runtimeConfigFile : "None";
-            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice",
+            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", condaEnv,
                     "launcher.py", "metadata.json", runtimeConfigFile);
             setupEnvironment(pb.environment(), config);
 

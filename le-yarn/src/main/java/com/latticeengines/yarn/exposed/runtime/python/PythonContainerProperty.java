@@ -17,6 +17,7 @@ public enum PythonContainerProperty {
     CONFIGMETADATA, //
     VERSION, //
     SWLIBARTIFACT, //
-    RUNTIME_CONFIG
+    RUNTIME_CONFIG, //
+    CONDA_ENV,
 
 }

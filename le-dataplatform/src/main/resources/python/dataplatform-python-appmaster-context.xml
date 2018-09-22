@@ -46,11 +46,10 @@
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"
             priority="$$PRIORITY$$" />
-
         <yarn:container-command>
                         <![CDATA[
                         ./pythonlauncher.sh
-                        lattice launcher.py metadata.json ${dataplatform.yarn.job.runtime.config}
+                        ${dataplatform.python.conda.env} launcher.py metadata.json ${dataplatform.yarn.job.runtime.config}
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

@@ -37,8 +37,11 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
     private static final Logger log = LoggerFactory.getLogger(PythonClientCustomization.class);
 
-    @Value("${dataplatform.hdfs.stack:}")
+    @Value("${dataplatform.hdfs.stack}")
     private String stackName;
+
+    @Value("${dataplatform.python.conda.env}")
+    private String condaEnv;
 
     public PythonClientCustomization() {
         super(null, null, null, null, null, null);
@@ -91,6 +94,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
+            properties.put(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

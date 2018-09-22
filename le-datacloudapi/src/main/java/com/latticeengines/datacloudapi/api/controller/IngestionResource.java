@@ -2,11 +2,12 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +24,10 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/ingestions")
 public class IngestionResource {
 
-    @Autowired
+    @Inject
     private IngestionService ingestionService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Scan and trigger all ingestions that can proceed.")
     public List<IngestionProgress> scan(
@@ -34,7 +35,7 @@ public class IngestionResource {
         return ingestionService.scan(hdfsPod);
     }
 
-    @RequestMapping(value = "/internal/{ingestionName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/internal/{ingestionName}")
     @ResponseBody
     @ApiOperation(value = "Forcefully start an ingestion. "
             + "If an ingestion for same file/data is going on, skip the operation. "
