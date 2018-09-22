@@ -22,7 +22,8 @@ public enum MetadataSegmentExportType {
     ACCOUNT("Accounts", BusinessEntity.Account), //
     CONTACT("Contacts", BusinessEntity.Contact), //
     ACCOUNT_AND_CONTACT("Accounts and Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
-    ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"); // ;
+    ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"), // ;
+    ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact, BusinessEntity.Account);
 
     String displayName;
 

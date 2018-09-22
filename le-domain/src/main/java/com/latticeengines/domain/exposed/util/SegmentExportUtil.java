@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,17 +39,15 @@ public class SegmentExportUtil {
 
     public static Table constructSegmentExportTable(//
             Tenant tenant, MetadataSegmentExport metadataSegmentExportJob, //
-            List<Attribute> configuredAccountAttributes, //
-            List<Attribute> configuredContactAttributes, //
-            List<Attribute> configuredRatingAttributes) {
+            Map<BusinessEntity,List<Attribute>> configuredBusEntityAttrMap) {
 
         String tableName = metadataSegmentExportJob.getTableName();
         String displayName = metadataSegmentExportJob.getFileName();
 
         List<Attribute> combinedAttributes = new ArrayList<>();
-        combineAttributes(configuredContactAttributes, combinedAttributes);
-        combineAttributes(configuredAccountAttributes, combinedAttributes);
-        combineAttributes(configuredRatingAttributes, combinedAttributes);
+        for (List<Attribute> configuredAttributes:configuredBusEntityAttrMap.values()){
+            combineAttributes(configuredAttributes, combinedAttributes);
+        }
 
         log.info(String.format("Combined list of fields for export: %s", JsonUtils.serialize(combinedAttributes)));
 

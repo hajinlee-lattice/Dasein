@@ -29,7 +29,7 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
 
     @Override
     public boolean accepts(MetadataSegmentExportType type) {
-        return type == MetadataSegmentExportType.CONTACT;
+        return MetadataSegmentExportType.CONTACT.equals(type) || MetadataSegmentExportType.ORPHAN_CONTACT.equals(type);
     }
 
     @Override
