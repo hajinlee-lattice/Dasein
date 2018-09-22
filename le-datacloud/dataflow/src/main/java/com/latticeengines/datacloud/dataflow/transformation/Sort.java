@@ -18,9 +18,6 @@ import com.latticeengines.dataflow.runtime.cascading.SortPartitionFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SorterParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-import cascading.operation.Buffer;
-import cascading.operation.Function;
-
 @Component(BEAN_NAME)
 public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
 
@@ -65,7 +62,7 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
         Node node = source.retain(new FieldList(parameters.getSortingField(), DUMMY_GROUP, DUMMY_JOIN_KEY));
         String sortField = parameters.getSortingField();
         Class<?> sortFieldClz = source.getSchema(sortField).getJavaType();
-        Buffer buffer = new SortPartitionBuffer(sortField, DUMMY_JOIN_KEY, SORTED_GROUPS, sortFieldClz,
+        SortPartitionBuffer buffer = new SortPartitionBuffer(sortField, DUMMY_JOIN_KEY, SORTED_GROUPS, sortFieldClz,
                 parameters.getPartitions());
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(DUMMY_JOIN_KEY, String.class));
@@ -75,7 +72,8 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
 
     private Node markPartition(Node node, String sortingField, String partitionField,
             Class<Comparable<?>> sortingFieldClz) {
-        Function function = new SortPartitionFunction(partitionField, SORTED_GROUPS, sortingField, sortingFieldClz);
+        SortPartitionFunction function = new SortPartitionFunction(partitionField, SORTED_GROUPS, sortingField,
+                sortingFieldClz);
         List<String> outputFields = new ArrayList<>(node.getFieldNames());
         outputFields.add(partitionField);
         return node.apply(function, new FieldList(SORTED_GROUPS, sortingField),

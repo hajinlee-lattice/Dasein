@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class ManualSeedDunsEnrichTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ManualSeedDunsEnrichTestNG.class);
 
     GeneralSource source = new GeneralSource("ManualSeedEnrichedDuns");

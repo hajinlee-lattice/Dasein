@@ -371,7 +371,7 @@ public class PivotFlow extends ConfigurableFlowBase<PivotConfig> {
                 } else {
                     newValue = String.format("new %s(%s)", fieldMetadata.getJavaType().getSimpleName(), nullValue);
                 }
-                join = join.addFunction(String.format("%s == null ? %s : %s", field, newValue, field),
+                join = join.apply(String.format("%s == null ? %s : %s", field, newValue, field),
                         new FieldList(field), fieldMetadata);
             }
         }

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         }
         String queryStr = String.format("from %s where %s %s", entityClz.getSimpleName(),
                 sb.substring(0, sb.length() - 4), orderStr);
-        Query query = session.createQuery(queryStr);
+        Query<IngestionProgress> query = session.createQuery(queryStr);
         for (String column : fields.keySet()) {
             if (fields.get(column).getClass().isEnum()) {
                 query.setParameter(column, fields.get(column).toString());
@@ -78,7 +78,7 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         }
         String queryStr = String.format("delete from %s where " + sb.toString().substring(0, sb.length() - 4),
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         for (String column : fields.keySet()) {
             if (fields.get(column) instanceof ProgressStatus) {
                 query.setParameter(column, fields.get(column).toString());
@@ -96,7 +96,7 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         String queryStr = String
                 .format("select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND LastestStatusUpdateTime >= :latestScheduledTime",
                         entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("ingestionId", ingestion.getPid());
         query.setParameter("triggeredBy", PropDataConstants.SCAN_SUBMITTER);
         Date latestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression()).toDate();
@@ -119,10 +119,11 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         String queryStr = String
                 .format("from %s progress where progress.status = :status and progress.retries < progress.ingestion.newJobMaxRetry",
                         progressEntityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<IngestionProgress> query = session.createQuery(queryStr);
         query.setParameter("status", ProgressStatus.FAILED);
         return query.list();
     }
+
 
     @Override
     public boolean isDuplicateProgress(IngestionProgress progress) {
@@ -132,7 +133,7 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         String queryStr = String
                 .format("select 1 from %s lhs, %s rhs where lhs.IngestionId = rhs.PID and lhs.Destination = :destination and lhs.Status != :finishStatus and not (lhs.Status = :failedStatus and lhs.Retries >= rhs.NewJobMaxRetry)",
                         progressEntityClz.getSimpleName(), ingestionEntityClz.getSimpleName());
-        Query query = session.createSQLQuery(queryStr);
+        Query<?> query = session.createNativeQuery(queryStr);
         query.setParameter("destination", progress.getDestination());
         query.setParameter("finishStatus", ProgressStatus.FINISHED.toString());
         query.setParameter("failedStatus", ProgressStatus.FAILED.toString());

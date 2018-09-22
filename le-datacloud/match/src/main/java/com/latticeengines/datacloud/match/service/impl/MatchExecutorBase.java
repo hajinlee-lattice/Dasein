@@ -160,7 +160,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @VisibleForTesting
     @MatchStep
     MatchContext mergeResults(MatchContext matchContext) {

@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.collection.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import com.latticeengines.datacloud.collection.dao.ProgressDao;
 import com.latticeengines.datacloud.core.source.Source;
@@ -19,8 +19,8 @@ public abstract class ProgressDaoImplBase<P extends Progress>
     public P findByRootOperationUid(String uid) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where RootOperationUID = :rootUid", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("rootUid", uid.toUpperCase());
+        Query<P> query = session.createQuery(queryStr);
+        query.setParameter("rootUid", uid.toUpperCase());
         List<P> list = query.list();
         if (list.size() == 0) {
             return null;
@@ -35,8 +35,8 @@ public abstract class ProgressDaoImplBase<P extends Progress>
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName and Status = 'FAILED' order by LatestStatusUpdate asc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<P> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<P>) query.list();
     }
 
@@ -49,8 +49,8 @@ public abstract class ProgressDaoImplBase<P extends Progress>
                 "and Status != 'FINISHED' and Status != 'FAILED' " +
                 "order by CreateTime asc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<P> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<P>) query.list();
     }
 
@@ -61,8 +61,8 @@ public abstract class ProgressDaoImplBase<P extends Progress>
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<P> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<P>) query.list();
     }
 

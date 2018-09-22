@@ -581,6 +581,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         @JsonProperty("NumBits")
         private Integer numBits;
 
+        @SuppressWarnings("unused")
         public Boolean isProfile() {
             return isProfile;
         }

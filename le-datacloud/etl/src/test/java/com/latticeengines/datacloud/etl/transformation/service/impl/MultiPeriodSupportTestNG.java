@@ -279,6 +279,7 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
     
     @SuppressWarnings("serial")
     private void verifyBusinessYearOutput(Iterator<GenericRecord> records) {
+        @SuppressWarnings("unused")
         Map<String, Integer> expected = new HashMap<String, Integer>() {
             {
                 put("A1", 18);

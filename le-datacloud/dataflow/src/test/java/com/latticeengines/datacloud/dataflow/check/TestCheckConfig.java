@@ -7,6 +7,7 @@ public class TestCheckConfig extends TransformerConfig {
 
     private CheckParam checkParam;
 
+    @SuppressWarnings("unused")
     private TestCheckConfig(){}
 
     TestCheckConfig(CheckParam checkParam) {

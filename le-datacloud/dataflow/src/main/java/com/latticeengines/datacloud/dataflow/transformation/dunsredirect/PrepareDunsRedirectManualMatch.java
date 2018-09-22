@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.ValidationUtils;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.AddFieldFunction;
@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-import cascading.operation.Function;
 import cascading.tuple.Fields;
 
 /**
@@ -49,7 +48,8 @@ public class PrepareDunsRedirectManualMatch
         Node source = addSource(parameters.getBaseTables().get(0));
 
         // filter out invalid source rows and retain only required fields
-        Function populateFn = new ManualSeedKeyPartitionRowFunction(new Fields(getSourceFieldNames(config)), config);
+        ManualSeedKeyPartitionRowFunction populateFn = new ManualSeedKeyPartitionRowFunction(
+                new Fields(getSourceFieldNames(config)), config);
         FieldList srcFieldList = getSourceFieldList(config);
         source = preFilter(source, config).retain(srcFieldList);
         // generate rows for valid key partitions

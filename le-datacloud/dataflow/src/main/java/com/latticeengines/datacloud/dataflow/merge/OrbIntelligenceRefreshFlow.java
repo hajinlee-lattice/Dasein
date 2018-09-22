@@ -34,11 +34,12 @@ public class OrbIntelligenceRefreshFlow extends MostRecentFlow {
         source = renameFields(source);
         source = findMostRecent(source, parameters);
 
-        source = source.addFunction(
+        source = source.apply(
                 String.format("%s == null ? null : String.valueOf(%s)", YEAR_FOUNDED, YEAR_FOUNDED), new FieldList(
                         YEAR_FOUNDED), new FieldMetadata(YEAR_FOUNDED, String.class));
 
-        source = source.addFunction(String.format(
+        source = source.apply(
+                String.format(
                 "(\"0 - 1M\".equals(%s) || \"1M - 10M\".equals(%s)) ? \"0 - 10M\" : %s", REVENUE_RANGE, REVENUE_RANGE,
                 REVENUE_RANGE), new FieldList(REVENUE_RANGE), new FieldMetadata(REVENUE_RANGE, String.class));
 
@@ -55,8 +56,8 @@ public class OrbIntelligenceRefreshFlow extends MostRecentFlow {
 
     private Node addUrlExistsField(Node node, String urlField) {
         String booleanField = urlField + "_Exists";
-        node = node.addFunction(urlField + " != null ? true : false", new FieldList(urlField), new FieldMetadata(
-                booleanField, Boolean.class));
+        node = node.apply(urlField + " != null ? true : false", new FieldList(urlField),
+                new FieldMetadata(booleanField, Boolean.class));
         return node.renameBooleanField(booleanField, BooleanType.Y_N);
     }
 

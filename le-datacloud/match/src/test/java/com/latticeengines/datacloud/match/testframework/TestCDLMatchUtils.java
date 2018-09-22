@@ -52,7 +52,7 @@ public class TestCDLMatchUtils {
         InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(String.format("cdl/%s.json.gz", entity.name()));
         ObjectMapper om = new ObjectMapper();
-        List list;
+        List<?> list;
         try {
             GZIPInputStream gis = new GZIPInputStream(is);
             list = om.readValue(gis, List.class);

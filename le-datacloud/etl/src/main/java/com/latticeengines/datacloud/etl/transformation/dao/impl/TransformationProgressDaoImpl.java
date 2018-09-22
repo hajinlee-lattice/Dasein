@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.etl.transformation.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
@@ -25,8 +25,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     public TransformationProgress findByRootOperationUid(String uid) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where RootOperationUID = :rootUid", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("rootUid", uid.toUpperCase());
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("rootUid", uid.toUpperCase());
         List<TransformationProgress> list = query.list();
         if (list.size() == 0) {
             return null;
@@ -42,8 +42,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String queryStr = String.format(
                 "from %s where SourceName = :sourceName and Status = 'FAILED' order by LatestStatusUpdate asc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<TransformationProgress>) query.list();
     }
 
@@ -55,8 +55,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String queryStr = String.format("from %s where SourceName = :sourceName "
                         + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<TransformationProgress>) query.list();
     }
 
@@ -66,8 +66,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<TransformationProgress>) query.list();
     }
 
@@ -76,9 +76,9 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     public List<TransformationProgress> findAllForBaseSourceVersions(String sourceName, String baseVersions) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName and BaseSourceVersions = :baseVersions", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
-        query.setString("baseVersions", baseVersions);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
+        query.setParameter("baseVersions", baseVersions);
         return (List<TransformationProgress>) query.list();
     }
 
@@ -89,9 +89,9 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String queryStr = String.format(
                 "from %s where PipelineName = :pipelineName and Version = :version order by ProgressID desc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("pipelineName", pipelineName);
-        query.setString("version", version);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("pipelineName", pipelineName);
+        query.setParameter("version", version);
         List<TransformationProgress> list = query.list();
         if (list.size() == 0) {
             return null;
@@ -106,8 +106,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String queryStr = String.format(
                 "from %s where PipelineName = :pipelineName and Status = 'FAILED' order by LatestStatusUpdate asc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("pipelineName", pipelineName);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("pipelineName", pipelineName);
         return (List<TransformationProgress>) query.list();
     }
 
@@ -118,8 +118,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String queryStr = String.format("from %s where PipelineName = :pipelineName "
                         + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("pipelineName", pipelineName);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("pipelineName", pipelineName);
         return (List<TransformationProgress>) query.list();
     }
 
@@ -128,8 +128,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     public List<TransformationProgress> findAllforPipeline(String pipelineName) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where PipelineName = :pipelineName", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("pipelineName", pipelineName);
+        Query<TransformationProgress> query = session.createQuery(queryStr);
+        query.setParameter("pipelineName", pipelineName);
         return (List<TransformationProgress>) query.list();
     }
 

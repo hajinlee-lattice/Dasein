@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.core.dao.impl;
 
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.dao.CustomerReportDao;
@@ -24,8 +24,8 @@ public class CustomerReportDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         String queryStr = String
                 .format("from %s where ID = :id",
                         entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("id", id);
+        Query<CustomerReport> query = session.createQuery(queryStr, CustomerReport.class);
+        query.setParameter("id", id);
         return (CustomerReport) query.list().get(0);
     }
 

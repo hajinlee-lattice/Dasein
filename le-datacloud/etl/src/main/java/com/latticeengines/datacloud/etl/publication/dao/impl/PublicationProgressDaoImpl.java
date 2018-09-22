@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.etl.publication.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import com.latticeengines.datacloud.etl.publication.dao.PublicationProgressDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
@@ -18,14 +18,13 @@ public class PublicationProgressDaoImpl extends BaseDaoWithAssignedSessionFactor
         return PublicationProgress.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<PublicationProgress> findAllForPublication(Long publicationId) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where FK_Publication = :publicationId",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setLong("publicationId", publicationId);
+        Query<PublicationProgress> query = session.createQuery(queryStr, PublicationProgress.class);
+        query.setParameter("publicationId", publicationId);
         return query.list();
     }
 
@@ -36,7 +35,7 @@ public class PublicationProgressDaoImpl extends BaseDaoWithAssignedSessionFactor
         String queryStr = String.format(
                 "from %s p where p.publication.pid = :pid and sourceVersion = :sourceVersion order by pid desc",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<PublicationProgress> query = session.createQuery(queryStr);
         query.setParameter("pid", publication.getPid());
         query.setParameter("sourceVersion", version);
         query.setMaxResults(1);

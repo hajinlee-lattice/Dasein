@@ -30,6 +30,7 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
 
     private static String[] groupByFieldsForEncode = new String[] { "Domain" };
 
+    @SuppressWarnings("unused")
     private static String[] groupByFields = new String[] { "Domain", "Topic" };
 
     private static final String INTENT = "Intent";

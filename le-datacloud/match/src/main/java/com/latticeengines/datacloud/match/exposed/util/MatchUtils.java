@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 
 public class MatchUtils {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchUtils.class);
     private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
 

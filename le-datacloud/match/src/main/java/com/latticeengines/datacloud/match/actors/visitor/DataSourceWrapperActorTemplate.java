@@ -84,6 +84,7 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     private void sendResponseToCaller(DataSourceLookupRequest request, Response response) {
         ActorRef callerMicroEngineActorRef = context().actorFor(request.getCallerMicroEngineReference());
         if (log.isDebugEnabled()) {

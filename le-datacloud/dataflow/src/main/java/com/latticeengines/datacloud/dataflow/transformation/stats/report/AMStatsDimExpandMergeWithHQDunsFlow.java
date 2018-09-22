@@ -33,7 +33,6 @@ public class AMStatsDimExpandMergeWithHQDunsFlow extends AMStatsFlowBase {
                 dimensionDefinitionMap, dimensionIdFieldNames);
     }
 
-    @SuppressWarnings("unchecked")
     private Node createDimensionBasedExpandAndMergeNodes(Node node, //
             AccountMasterStatsParameters parameters, //
             Map<String, List<String>> dimensionDefinitionMap, //

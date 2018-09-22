@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -165,12 +165,13 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     protected void extractSchema(P progress) throws Exception {
         String version = getVersionString(progress);
-        String avscPath = hdfsPathBuilder.constructSchemaFile(getSource(), version).toString();
+        String avscPath = hdfsPathBuilder.constructSchemaFile(getSource().getSourceName(), version).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
 
-        String avroDir = hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
+        String avroDir = hdfsPathBuilder.constructSnapshotDir(getSource().getSourceName(), getVersionString(progress))
+                .toString();
         List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
         if (files.size() > 0) {
             String avroPath = files.get(0);

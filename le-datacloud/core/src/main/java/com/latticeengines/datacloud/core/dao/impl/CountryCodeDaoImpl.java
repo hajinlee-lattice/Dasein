@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.core.dao.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.dao.CountryCodeDao;
@@ -18,13 +18,12 @@ public class CountryCodeDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Co
         return CountryCode.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public String findCountryCode(String country) {
         Session session = getSessionFactory().getCurrentSession();
         Class<CountryCode> entityClz = getEntityClass();
         String queryStr = String.format("from %s where CountryName = :country", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<CountryCode> query = session.createQuery(queryStr, CountryCode.class);
         query.setParameter("country", country);
         List<CountryCode> list = query.list();
         if (CollectionUtils.isEmpty(list)) {
@@ -34,13 +33,12 @@ public class CountryCodeDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Co
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public String findCountry(String country) {
         Session session = getSessionFactory().getCurrentSession();
         Class<CountryCode> entityClz = getEntityClass();
         String queryStr = String.format("from %s where CountryName = :country", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<CountryCode> query = session.createQuery(queryStr, CountryCode.class);
         query.setParameter("country", country);
         List<CountryCode> list = query.list();
         if (CollectionUtils.isEmpty(list)) {

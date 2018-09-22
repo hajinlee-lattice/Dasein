@@ -37,9 +37,11 @@ public class IngestionValidatorImpl implements IngestionValidator {
     @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
+    @SuppressWarnings("unused")
     @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
+    @SuppressWarnings("unused")
     @Inject
     private S3Service s3Service;
 

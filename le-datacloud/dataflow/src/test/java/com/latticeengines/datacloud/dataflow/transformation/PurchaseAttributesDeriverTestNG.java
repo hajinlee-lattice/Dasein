@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class PurchaseAttributesDeriverTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PurchaseAttributesDeriverTestNG.class);
 
     private String[] periodTrxFields = new String[] {

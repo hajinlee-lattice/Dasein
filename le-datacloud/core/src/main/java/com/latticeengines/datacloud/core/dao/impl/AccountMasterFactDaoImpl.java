@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.core.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import com.latticeengines.datacloud.core.dao.AccountMasterFactDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
@@ -29,13 +29,13 @@ public class AccountMasterFactDaoImpl extends BaseDaoWithAssignedSessionFactoryI
                         + "and numLocRange = :numLocRange " //
                         + "and category = :category", //
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setLong("location", location);
-        query.setLong("industry", industry);
-        query.setLong("numEmpRange", numEmpRange);
-        query.setLong("revRange", revRange);
-        query.setLong("numLocRange", numLocRange);
-        query.setLong("category", category);
+        Query<AccountMasterFact> query = session.createQuery(queryStr, AccountMasterFact.class);
+        query.setParameter("location", location);
+        query.setParameter("industry", industry);
+        query.setParameter("numEmpRange", numEmpRange);
+        query.setParameter("revRange", revRange);
+        query.setParameter("numLocRange", numLocRange);
+        query.setParameter("category", category);
         List<?> results = query.list();
         if (results == null || results.isEmpty()) {
             return null;

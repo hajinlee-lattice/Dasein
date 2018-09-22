@@ -484,7 +484,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             List<ColumnMetadata> metadata = matchOutput.getMetadata();
             metadataFields = new ArrayList<>();
             for (ColumnMetadata column : metadata) {
-                metadataFields.add(column.getColumnId());
+                metadataFields.add(column.getAttrName());
             }
         }
         matchOutput.setOutputFields(metadataFields);

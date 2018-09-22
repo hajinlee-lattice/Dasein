@@ -39,6 +39,7 @@ public class TblDrivenTransformationTestNG
 
     private String[] sourceTypes;
     private GeneralSource[][] sources;
+    @SuppressWarnings("unused")
     private int[] numSources;
     private int numRecords;
     private String[][] keys;

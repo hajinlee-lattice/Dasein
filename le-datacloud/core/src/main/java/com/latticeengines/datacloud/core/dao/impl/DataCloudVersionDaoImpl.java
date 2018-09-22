@@ -25,8 +25,8 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
         String queryStr = String.format(
                 "from %s where MajorVersion = :majorVersion and Status = '%s' order by CONVERT(SUBSTRING_INDEX(Version, '.', -1), UNSIGNED) desc",
                 getEntityClass().getSimpleName(), DataCloudVersion.Status.APPROVED);
-        Query query = session.createQuery(queryStr);
-        query.setString("majorVersion", majorVersion);
+        Query<DataCloudVersion> query = session.createQuery(queryStr, DataCloudVersion.class);
+        query.setParameter("majorVersion", majorVersion);
         List<?> results = query.list();
         if (results == null || results.isEmpty()) {
             return null;
@@ -35,13 +35,12 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<String> allApprovedMajorVersions() {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
                 "select distinct majorVersion from %s where Status = '%s' order by MajorVersion desc",
                 getEntityClass().getSimpleName(), DataCloudVersion.Status.APPROVED);
-        Query query = session.createQuery(queryStr);
+        Query<String> query = session.createQuery(queryStr, String.class);
         List<String> results = (List<String>) query.list();
         if (CollectionUtils.isEmpty(results)) {
             return null;
@@ -50,12 +49,11 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<DataCloudVersion> allApprovedVerions() {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where Status = '%s'", getEntityClass().getSimpleName(),
                 DataCloudVersion.Status.APPROVED);
-        Query query = session.createQuery(queryStr);
+        Query<DataCloudVersion> query = session.createQuery(queryStr, DataCloudVersion.class);
         return (List<DataCloudVersion>) query.list();
     }
 

@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.dao.impl;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.transformation.dao.PipelineTransformationReportDao;
@@ -24,9 +24,9 @@ public class PipelineTransformationReportDaoImpl extends BaseDaoWithAssignedSess
         String queryStr = String.format(
                 "delete from %s where Pipeline = :pipeline and Version = :version",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("pipeline", pipeline);
-        query.setString("version", version);
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("pipeline", pipeline);
+        query.setParameter("version", version);
         query.executeUpdate();
     }
 }

@@ -14,13 +14,21 @@ import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @Component
 public class VendorConfigMgrImpl extends JpaEntityMgrRepositoryImpl<VendorConfig, Long> implements VendorConfigMgr {
+    @SuppressWarnings("unused")
     private static final String VENDOR_ALEXA = "ALEXA";
+    @SuppressWarnings("unused")
     private static final String VENDOR_BUILTWITH = "BUILTWITH";
+    @SuppressWarnings("unused")
     private static final String VENDOR_COMPETE = "COMPETE";
+    @SuppressWarnings("unused")
     private static final String VENDOR_FEATURE = "FEATURE";
+    @SuppressWarnings("unused")
     private static final String VENDOR_HPA_NEW = "HPA_NEW";
+    @SuppressWarnings("unused")
     private static final String VENDOR_ORBI_V2 = "ORBINTELLIGENCEV2";
+    @SuppressWarnings("unused")
     private static final String VENDOR_SEMRUSH = "SEMRUSH";
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(VendorConfigMgrImpl.class);
 
     @Inject

@@ -124,30 +124,33 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
         CleanupConfig.JoinedColumns joinedColumns = isBase ? config.getBaseJoinedColumns() : config.getDeleteJoinedColumns();
         String prefix = isBase ? "" : DELETE_PREFIX;
         switch (businessEntity) {
-            case Account:
+        case Account:
+            result.add(prefix + joinedColumns.getAccountId());
+            break;
+        case Contact:
+            result.add(prefix + joinedColumns.getContactId());
+            break;
+        case Transaction:
+            switch (type) {
+            case BYUPLOAD_ACPD:
                 result.add(prefix + joinedColumns.getAccountId());
-                break;
-            case Contact:
                 result.add(prefix + joinedColumns.getContactId());
+                result.add(prefix + joinedColumns.getProductId());
+                result.add(prefix + joinedColumns.getTransactionTime());
                 break;
-            case Transaction:
-                switch (type) {
-                    case BYUPLOAD_ACPD:
-                        result.add(prefix + joinedColumns.getAccountId());
-                        result.add(prefix + joinedColumns.getContactId());
-                        result.add(prefix + joinedColumns.getProductId());
-                        result.add(prefix + joinedColumns.getTransactionTime());
-                        break;
-                    case BYUPLOAD_MINDATE:
-                        result.add(prefix + joinedColumns.getTransactionTime());
-                        break;
-                    case BYUPLOAD_MINDATEANDACCOUNT:
-                        result.add(prefix + joinedColumns.getAccountId());
-                        result.add(prefix + joinedColumns.getTransactionTime());
-                        break;
-                    default:
-                        throw new RuntimeException("Transaction Cleanup does not support type: " + type.name());
-                }
+            case BYUPLOAD_MINDATE:
+                result.add(prefix + joinedColumns.getTransactionTime());
+                break;
+            case BYUPLOAD_MINDATEANDACCOUNT:
+                result.add(prefix + joinedColumns.getAccountId());
+                result.add(prefix + joinedColumns.getTransactionTime());
+                break;
+            default:
+                throw new RuntimeException("Transaction Cleanup does not support type: " + type.name());
+            }
+            break;
+        default:
+            break;
         }
         return result;
     }

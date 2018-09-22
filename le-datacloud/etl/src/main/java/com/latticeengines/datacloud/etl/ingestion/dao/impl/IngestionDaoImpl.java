@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.etl.ingestion.dao.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.ingestion.dao.IngestionDao;
@@ -18,13 +18,12 @@ public class IngestionDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Inge
         return Ingestion.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Ingestion getIngestionByName(String name) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Ingestion> entityClz = getEntityClass();
         String queryStr = String.format("from %s where IngestionName = :name", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<Ingestion> query = session.createQuery(queryStr, Ingestion.class);
         query.setParameter("name", name);
         List<Ingestion> resultList = query.list();
         if (CollectionUtils.isEmpty(resultList)) {

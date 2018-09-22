@@ -62,6 +62,7 @@ public class S3SourceEntityMgrImpl implements S3SourceEntityMgr {
         return s3Service.isNonEmptyDirectory(s3Bucket, path);
     }
 
+    @SuppressWarnings("unused")
     private boolean sourceSchemaExistsInS3(String sourceName, String version) {
         String path = hdfsPathBuilder.constructSchemaFile(sourceName, version).toS3Key();
         return s3Service.objectExist(s3Bucket, path);

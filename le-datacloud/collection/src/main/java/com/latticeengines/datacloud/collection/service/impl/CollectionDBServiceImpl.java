@@ -167,6 +167,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return tempFile;
     }
 
+    @SuppressWarnings("unused")
     private Map<String, String> constructLogOptions() {
         HashMap<String, String> ret = new HashMap<>();
         ret.put("awslogs-group", "/ecs/datacloud-collector");

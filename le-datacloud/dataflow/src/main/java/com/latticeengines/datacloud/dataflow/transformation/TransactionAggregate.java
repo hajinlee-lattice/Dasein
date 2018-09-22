@@ -13,17 +13,16 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.FillDefaultFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TransactionAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
-import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 
-import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
 @Component(TransactionAggregate.DATAFLOW_BEAN_NAME)
@@ -92,7 +91,7 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
             }
         }
 
-        Aggregator agg = new TransactionAggregator(new Fields(fields.toArray(new String[fields.size()])),
+        TransactionAggregator agg = new TransactionAggregator(new Fields(fields.toArray(new String[fields.size()])),
                                                        productIds, periods, metrics,
                                                        accountField, productField, dateField, quantityField, amountField);
         Node transactionHistory = transactions.groupByAndAggregate(new FieldList(accountField), agg, fms, Fields.RESULTS).renamePipe("TransactionAggregate");

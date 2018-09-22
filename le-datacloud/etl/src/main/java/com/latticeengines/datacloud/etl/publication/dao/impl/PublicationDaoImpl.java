@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.etl.publication.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import com.latticeengines.datacloud.etl.publication.dao.PublicationDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
@@ -23,8 +23,8 @@ public class PublicationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Pu
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<Publication> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return query.list();
     }
 

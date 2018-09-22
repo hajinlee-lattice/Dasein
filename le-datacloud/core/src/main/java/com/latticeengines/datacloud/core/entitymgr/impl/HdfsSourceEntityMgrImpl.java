@@ -183,7 +183,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                     "Cannot purge current version " + version + " for source" + source.getSourceName());
         }
 
-        String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        String path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, path)) {
                 HdfsUtils.rmdir(yarnConfiguration, path);
@@ -202,7 +202,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                     "Do not know how to extract versioned table for " + CollectedSource.class);
         }
         if (source instanceof HasSqlPresence) {
-            String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+            String path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
             return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         } else {
@@ -212,7 +212,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             } else if (source instanceof TransformedToAvroSource || source instanceof IngestedRawSource) {
                 path = hdfsPathBuilder.constructRawDir(source).append(version).toString();
             } else {
-                path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+                path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
             }
             return MetaDataTableUtils.createTable(yarnConfiguration, source.getSourceName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
@@ -234,9 +234,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 paths.add(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
                         + WILD_CARD + AVRO_FILE_EXTENSION);
             } else {
-                log.info(hdfsPathBuilder.constructSnapshotDir(source, version).toString() + HDFS_PATH_SEPARATOR
+                log.info(hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString()
+                        + HDFS_PATH_SEPARATOR
                         + WILD_CARD + AVRO_FILE_EXTENSION);
-                paths.add(hdfsPathBuilder.constructSnapshotDir(source, version).toString() + HDFS_PATH_SEPARATOR
+                paths.add(hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString()
+                        + HDFS_PATH_SEPARATOR
                         + WILD_CARD + AVRO_FILE_EXTENSION);
             }
         }
@@ -352,7 +354,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     public String getRequest(Source source, String requestName) {
         String request = null;
         try {
-            String requestFile = hdfsPathBuilder.constructSourceDir(source).append("requests")
+            String requestFile = hdfsPathBuilder.constructSourceDir(source.getSourceName()).append("requests")
                     .append(requestName + ".json").toString();
             request = HdfsUtils.getHdfsFileContents(yarnConfiguration, requestFile);
         } catch (Exception e) {
@@ -366,7 +368,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     public boolean saveReport(Source source, String reportName, String version, String report) {
 
         try {
-            Path reportPath = hdfsPathBuilder.constructSourceDir(source).append("reports");
+            Path reportPath = hdfsPathBuilder.constructSourceDir(source.getSourceName()).append("reports");
 
             if (!HdfsUtils.fileExists(yarnConfiguration, reportPath.toString())) {
                 HdfsUtils.mkdir(yarnConfiguration, reportPath.toString());
@@ -430,7 +432,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 CustomerSpace customerSpace = ((TableSource) source).getCustomerSpace();
                 avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
             } else {
-                avroDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+                avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
             }
             if (HdfsUtils.isDirectory(yarnConfiguration, avroDir)) {
                 String success = avroDir + HDFS_PATH_SEPARATOR + SUCCESS_FILE_SUFFIX;
@@ -458,7 +460,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             versionDir = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngestionName(), version)
                     .toString();
         } else {
-            versionDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+            versionDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
         }
         try {
             if (HdfsUtils.isDirectory(yarnConfiguration, versionDir)) {
@@ -492,7 +494,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public void initiateSource(Source source) {
-        String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        String sourceDir = hdfsPathBuilder.constructSourceDir(source.getSourceName()).toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, sourceDir)) {
                 return;
@@ -507,7 +509,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public void deleteSource(Source source) {
-        String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        String sourceDir = hdfsPathBuilder.constructSourceDir(source.getSourceName()).toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, sourceDir)) {
                 HdfsUtils.rmdir(yarnConfiguration, sourceDir);

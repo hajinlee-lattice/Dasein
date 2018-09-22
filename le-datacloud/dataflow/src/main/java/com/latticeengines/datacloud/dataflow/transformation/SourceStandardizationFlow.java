@@ -155,7 +155,6 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    @SuppressWarnings({ "unchecked" })
     private Node checksum(Node source, String[] excludeFields, String checksumField) {
         Set<String> toExclude = excludeFields == null ? new HashSet<>() : new HashSet<>(Arrays.asList(excludeFields));
         source = source
@@ -415,7 +414,7 @@ public class SourceStandardizationFlow
 
     private Node mark(Node source, String markExpression, String[] markerCheckFields, String markerField) {
         if (StringUtils.isNotEmpty(markExpression)) {
-            source = source.addFunction(markExpression + " ? true : false", new FieldList(markerCheckFields),
+            source = source.apply(markExpression + " ? true : false", new FieldList(markerCheckFields),
                     new FieldMetadata(markerField, Boolean.class));
         }
         return source;

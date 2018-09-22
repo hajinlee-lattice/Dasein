@@ -68,7 +68,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion).toString();
     }
 
     @Override
@@ -124,6 +124,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
 
     }
 
+    @SuppressWarnings("unused")
     private String getCleanupConfig() {
         OrbCacheSeedSecondaryDomainCleanupTransformerConfig confParam = new OrbCacheSeedSecondaryDomainCleanupTransformerConfig();
         confParam.setMarkerFieldName(MARKER_FIELD_NAME);
@@ -168,7 +169,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
     protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSource.getSourceName(), targetVersion).toString();
     }
 
     @Override

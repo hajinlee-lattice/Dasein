@@ -147,8 +147,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                 } else {
                     newValue = String.format("new %s(%s)", fieldMetadata.getJavaType().getSimpleName(), nullValue);
                 }
-                join = join.addFunction(String.format("%s == null ? %s : %s", field, newValue, field), new FieldList(
-                        field), fieldMetadata);
+                join = join.apply(String.format("%s == null ? %s : %s", field, newValue, field), new FieldList(field),
+                        fieldMetadata);
             }
         }
         return join;

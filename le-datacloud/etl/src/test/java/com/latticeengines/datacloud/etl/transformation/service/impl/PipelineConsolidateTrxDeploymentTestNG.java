@@ -689,6 +689,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     // verifyRecordsInHistoryTable(historyTableFullName);
     // }
 
+    @SuppressWarnings("unused")
     private void verifyRawRecords(Table table) {
         log.info("Start to verify records one by one.");
         List<GenericRecord> records = getRecordFromTable(table);

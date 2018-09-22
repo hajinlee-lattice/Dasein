@@ -105,7 +105,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
         for (ColumnMetadata columnMetadata : columnMetadatas) {
-            String fieldName = columnMetadata.getColumnId();
+            String fieldName = columnMetadata.getAttrName();
             fieldBuilder = fieldAssembler.name(StringUtils.strip(fieldName));
             fieldBuilder = fieldBuilder.prop("Tags", "[External]");
             fieldBuilder = fieldBuilder.prop("ApprovedUsage",
@@ -139,6 +139,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         return fieldAssembler.endRecord();
     }
 
+    @SuppressWarnings("deprecation")
     private Schema.Type getAvroTypeDataType(ColumnMetadata columnMetadata) {
         String javaClass = columnMetadata.getJavaClass();
         if (StringUtils.isNotEmpty(javaClass)) {

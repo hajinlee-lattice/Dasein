@@ -77,6 +77,7 @@ public class CDLMatchServiceImpl implements CDLMatchService {
         }
 
         String customerSpace = input.getTenant().getId();
+        @SuppressWarnings("unused")
         DataCollection.Version version = input.getDataCollectionVersion();
         // TODO: get metadata by version
         BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Rating, BusinessEntity.PurchaseHistory };

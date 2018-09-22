@@ -166,6 +166,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return result;
     }
 
+    @SuppressWarnings("rawtypes")
     private List<Schema> getBaseSourceSchemas(TransformStep step) {
         Transformer transformer = step.getTransformer();
         if (!(transformer instanceof AbstractDataflowTransformer)) {

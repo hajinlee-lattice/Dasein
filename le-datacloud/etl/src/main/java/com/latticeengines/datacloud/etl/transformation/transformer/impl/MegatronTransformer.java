@@ -381,6 +381,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             return accounts.size();
         }
 
+        @SuppressWarnings("unlikely-arg-type")
         public void addAccount(GenericData.Record parent, GenericData.Record child) {
 
             if (parent != null) {

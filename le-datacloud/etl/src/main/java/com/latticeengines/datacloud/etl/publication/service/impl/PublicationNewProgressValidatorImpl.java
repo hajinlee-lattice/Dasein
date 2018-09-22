@@ -3,9 +3,9 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -87,7 +87,7 @@ public class PublicationNewProgressValidatorImpl implements PublicationNewProgre
     private Boolean noSourceAvro(String sourceName, String version) {
         Source source = sourceService.findBySourceName(sourceName);
         if (source instanceof DerivedSource) {
-            String avroDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+            String avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
             try {
                 if (!HdfsUtils.fileExists(yarnConfiguration, avroDir)) {
                     log.warn("The avro dir " + avroDir + " does not exists.");

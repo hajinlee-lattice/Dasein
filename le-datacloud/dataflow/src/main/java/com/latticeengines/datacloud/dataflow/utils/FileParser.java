@@ -102,6 +102,7 @@ public class FileParser {
                 String empRangeStandard = record.get(EMP_RANGE_HEADER[1]);
                 EmpRangeMap.put(empRangeOrigin,empRangeStandard);
             }
+            csvFileParser.close();
         }catch (IOException e){
             throw new RuntimeException("Fail to parse EmpRangeMap.csv", e);
         }
@@ -187,6 +188,7 @@ public class FileParser {
                 config.put(AM_PROFILE_CONFIG_HEADER[4], algo);
                 configs.put(amId, config);
             }
+            csvFileParser.close();
         } catch (IOException e) {
             throw new RuntimeException("Fail to parse BomboraUniqueMetroCodes.csv", e);
         }

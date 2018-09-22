@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import cascading.operation.aggregator.Count;
-import cascading.tuple.Fields;
-
-import org.apache.avro.Schema.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,10 +17,14 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
+import cascading.operation.aggregator.Count;
+import cascading.tuple.Fields;
+
 // Description:  Transformation class for calculating the number of contacts associated with each account and
 //     generating a table of account ID and count of associated contacts.
 @Component(NumberOfContactsFlow.DATAFLOW_BEAN_NAME)
 public class NumberOfContactsFlow extends ConfigurableFlowBase<NumberOfContactsConfig> {
+    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(NumberOfContactsFlow.class);
 
     public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;

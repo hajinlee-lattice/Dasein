@@ -216,8 +216,6 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
             joinFieldLists.add(new FieldList(joinKeys));
         }
 
-        FieldList seedJoinFields = new FieldList(seedJoinKey.toArray(new String[seedJoinKey.size()]));
-
         String[] seedAttrs = new String[seedJoinKey.size() + 1];
         String[] seedOutputAttrs = new String[seedJoinKey.size() + 1];
         String[] seedJoinAttrs = new String[seedJoinKey.size()];

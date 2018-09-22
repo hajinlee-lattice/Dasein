@@ -115,7 +115,6 @@ public class OrbFileToSourceServiceTestNG
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");

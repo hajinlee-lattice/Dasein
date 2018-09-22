@@ -145,22 +145,24 @@ public class CleanupTestNG extends DataCloudDataFlowFunctionalTestNGBase {
     private CleanupConfig.JoinedColumns getJoinedColumns(CleanupOperationType type) {
         CleanupConfig.JoinedColumns joinedColumns = new CleanupConfig.JoinedColumns();
         switch (type) {
-            case BYUPLOAD_ID:
-                joinedColumns.setAccountId("AccountId");
-                break;
-            case BYUPLOAD_ACPD:
-                joinedColumns.setAccountId("AccountId");
-                joinedColumns.setContactId("ContactId");
-                joinedColumns.setProductId("ProductId");
-                joinedColumns.setTransactionTime("TransactionDayPeriod");
-                break;
-            case BYUPLOAD_MINDATE:
-                joinedColumns.setTransactionTime("TransactionDayPeriod");
-                break;
-            case BYUPLOAD_MINDATEANDACCOUNT:
-                joinedColumns.setAccountId("AccountId");
-                joinedColumns.setTransactionTime("TransactionDayPeriod");
-                break;
+        case BYUPLOAD_ID:
+            joinedColumns.setAccountId("AccountId");
+            break;
+        case BYUPLOAD_ACPD:
+            joinedColumns.setAccountId("AccountId");
+            joinedColumns.setContactId("ContactId");
+            joinedColumns.setProductId("ProductId");
+            joinedColumns.setTransactionTime("TransactionDayPeriod");
+            break;
+        case BYUPLOAD_MINDATE:
+            joinedColumns.setTransactionTime("TransactionDayPeriod");
+            break;
+        case BYUPLOAD_MINDATEANDACCOUNT:
+            joinedColumns.setAccountId("AccountId");
+            joinedColumns.setTransactionTime("TransactionDayPeriod");
+            break;
+        default:
+            break;
         }
         return joinedColumns;
     }

@@ -62,7 +62,9 @@ import com.latticeengines.domain.exposed.util.TransactionUtils;
 public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(TxnRebuildUpdateDeploymentTestNG.class);
 
+    @SuppressWarnings("unused")
     private static final String SORTED_DAILY_PREFIX = TableRoleInCollection.AggregatedTransaction.name();
+    @SuppressWarnings("unused")
     private static final String SORTED_PERIOD_TABLE_PREFIX = TableRoleInCollection.AggregatedPeriodTransaction.name();
 
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
@@ -326,6 +328,7 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         return steps;
     }
 
+    @SuppressWarnings("unused")
     private List<TransformationStepConfig> aggregateDailyTxnUpdate() {
         List<TransformationStepConfig> steps = new ArrayList<>();
         return steps;

@@ -77,7 +77,8 @@ public class BomboraWeeklyAggServiceImplTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getBaseSources()[0], baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getBaseSources()[0].getSourceName(), baseSourceVersion)
+                .toString();
     }
 
     @Override
@@ -92,14 +93,14 @@ public class BomboraWeeklyAggServiceImplTestNG
 
     @Override
     protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotDir(source, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     protected void uploadBaseAvro(Source baseSource, String baseSourceVersion, boolean isCurrentVersion) {
         try {
             InputStream baseAvroStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSource.getSourceName()
                     + "_" + baseSourceVersion.substring(0, 10).replace("-", "") + ".avro");
-            String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
+            String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion)
                     .append("part-0000.avro").toString();
 
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
@@ -107,7 +108,8 @@ public class BomboraWeeklyAggServiceImplTestNG
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
+            String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion)
+                    .append("_SUCCESS")
                     .toString();
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         } catch (Exception e) {

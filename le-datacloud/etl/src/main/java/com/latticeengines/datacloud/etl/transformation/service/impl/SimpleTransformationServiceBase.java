@@ -130,6 +130,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         return configuration;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected TransformationProgress transformHook(TransformationProgress progress, T transConf) {
         String workflowDir = initialDataFlowDirInHdfs(progress);

@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.etl.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.dao.SourceColumnDao;
@@ -25,8 +25,8 @@ public class SourceColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<S
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName order by SourceColumnID",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("sourceName", sourceName);
+        Query<SourceColumn> query = session.createQuery(queryStr);
+        query.setParameter("sourceName", sourceName);
         return (List<SourceColumn>) query.list();
     }
 

@@ -57,7 +57,7 @@ public class BomboraWeeklyAggService
 
     @Override
     protected List<String> parseBaseVersions(Source baseSource, String baseVersion) {
-        String sourceDir = hdfsPathBuilder.constructSnapshotRootDir(baseSource).toString();
+        String sourceDir = hdfsPathBuilder.constructSnapshotRootDir(baseSource.getSourceName()).toString();
         List<String> baseVersionList = new ArrayList<>();
         try {
             Date baseVersionDate = HdfsPathBuilder.dateFormat.parse(baseVersion);

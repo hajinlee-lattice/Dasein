@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.core.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 import com.latticeengines.datacloud.core.dao.CategoricalAttributeDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
@@ -22,9 +22,9 @@ public class CategoricalAttributeDaoImpl extends BaseDaoWithAssignedSessionFacto
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where attrName = :attrName and attrValue = :attrValue",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("attrName", attrName);
-        query.setString("attrValue", attrValue);
+        Query<CategoricalAttribute> query = session.createQuery(queryStr, CategoricalAttribute.class);
+        query.setParameter("attrName", attrName);
+        query.setParameter("attrValue", attrValue);
         List<?> results = query.list();
         if (results == null || results.isEmpty()) {
             return null;

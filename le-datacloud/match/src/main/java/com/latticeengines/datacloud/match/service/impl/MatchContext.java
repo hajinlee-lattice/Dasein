@@ -26,6 +26,7 @@ public class MatchContext implements Fact, Dimension {
     private MatchInput input;
     private MatchOutput output;
     private Map<String, Set<String>> partitionColumnsMap;
+    @SuppressWarnings("unused")
     private Map<String, List<Map<String, Object>>> resultsByPartition;
     private List<Map<String, Object>> resultSet;
     private List<InternalOutputRecord> internalResults;

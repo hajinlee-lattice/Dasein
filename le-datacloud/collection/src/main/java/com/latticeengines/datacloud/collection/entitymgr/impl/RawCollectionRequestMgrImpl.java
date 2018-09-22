@@ -17,6 +17,7 @@ import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 
 @Component
 public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawCollectionRequest, Long> implements RawCollectionRequestMgr {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(RawCollectionRequestMgrImpl.class);
 
     @Inject

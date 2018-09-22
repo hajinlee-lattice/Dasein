@@ -8,12 +8,15 @@ import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 
 public class PublishServiceFactory {
 
+    @SuppressWarnings("rawtypes")
     private static Map<Publication.PublicationType, PublishService> serviceMap = new ConcurrentHashMap<>();
 
+    @SuppressWarnings("rawtypes")
     public static PublishService getPublishServiceBean(Publication.PublicationType publicationType) {
         return serviceMap.get(publicationType);
     }
 
+    @SuppressWarnings("rawtypes")
     static void register(Publication.PublicationType publicationType, PublishService publishService) {
         serviceMap.put(publicationType, publishService);
     }

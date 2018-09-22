@@ -376,7 +376,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected String snapshotDirInHdfs(TransformationProgress progress) {
-        return hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
+        return hdfsPathBuilder.constructSnapshotDir(getSource().getSourceName(), getVersionString(progress)).toString();
     }
 
     protected boolean cleanupHdfsDir(String targetDir, TransformationProgress progress) {

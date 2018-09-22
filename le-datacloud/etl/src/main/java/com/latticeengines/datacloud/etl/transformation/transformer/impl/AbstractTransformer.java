@@ -78,7 +78,6 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         Source source = step.getBaseSources()[sourceIdx];
 
         List<String> baseSourceVersions = step.getBaseVersions();
-        String confStr = step.getConfig();
         String sourceDirInHdfs = null;
         if (!(source instanceof TableSource)) {
             sourceDirInHdfs = hdfsPathBuilder

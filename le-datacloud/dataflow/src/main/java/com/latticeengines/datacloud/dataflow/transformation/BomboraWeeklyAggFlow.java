@@ -96,9 +96,9 @@ public class BomboraWeeklyAggFlow
 
         bomboraWeeklyAgg = bomboraWeeklyAgg.rename(new FieldList(POSTAL_CODE),
                 new FieldList(ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE));
-        bomboraWeeklyAgg = bomboraWeeklyAgg.addFunction("Long.valueOf(" + TOTAL_VIEWS + ").intValue()",
+        bomboraWeeklyAgg = bomboraWeeklyAgg.apply("Long.valueOf(" + TOTAL_VIEWS + ").intValue()",
                 new FieldList(TOTAL_VIEWS), new FieldMetadata(TOTAL_VIEWS, Integer.class));
-        bomboraWeeklyAgg = bomboraWeeklyAgg.addFunction("Double.valueOf(" + TOTAL_AGGREGATED_SCORE + ").floatValue()",
+        bomboraWeeklyAgg = bomboraWeeklyAgg.apply("Double.valueOf(" + TOTAL_AGGREGATED_SCORE + ").floatValue()",
                 new FieldList(TOTAL_AGGREGATED_SCORE), new FieldMetadata(TOTAL_AGGREGATED_SCORE, Float.class));
 
         bomboraWeeklyAgg = bomboraWeeklyAgg.apply(

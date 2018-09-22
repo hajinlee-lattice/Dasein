@@ -114,7 +114,7 @@ public abstract class AbstractStatsDataflowTransformer
 
         for (ColumnMetadata meta : columnMetadatas) {
             FundamentalType type = meta.getFundamentalType();
-            String name = meta.getColumnId();
+            String name = meta.getAttrName();
             uniqueTypes.add(type);
             List<String> fieldList = typeFieldMap.get(type);
             if (type == FundamentalType.BOOLEAN || type == FundamentalType.ENUM) {

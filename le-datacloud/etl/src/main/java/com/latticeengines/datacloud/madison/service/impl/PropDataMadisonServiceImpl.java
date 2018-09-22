@@ -360,6 +360,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private boolean validateDate(Date today) {
         int dayOfWeek = today.getDay();
         log.info("Current day of the week=" + dayOfWeek + " fixed Date=" + fixedDate);

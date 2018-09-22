@@ -295,6 +295,7 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
         log.info("Start to verify records one by one.");
         Integer rowCount = 0;
         while (records.hasNext()) {
+            @SuppressWarnings("unused")
             GenericRecord record = records.next();
 //            if (rowCount < 10) {
 //                System.out.println(record);

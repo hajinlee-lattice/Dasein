@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +54,7 @@ public class PivotRatingsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         return params;
     }
 
+    @SuppressWarnings("unused")
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         Table table = getOutputSchema();

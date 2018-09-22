@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.core.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.dao.CustomerSourceAttributeDao;
@@ -18,7 +18,6 @@ public class CustomerSourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFa
         return CustomerSourceAttribute.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<CustomerSourceAttribute> getAttributes(String source, String stage, String transformer,
             String dataCloudVersion) {
@@ -27,12 +26,12 @@ public class CustomerSourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFa
                 "from %s where Stage = :stage And Transformer = :transformer And Source = :source And %s order by SourceAttributeID",
                 getEntityClass().getSimpleName(),
                 (dataCloudVersion == null ? "dataCloudVersion is null" : "dataCloudVersion = :version"));
-        Query query = session.createQuery(queryStr);
-        query.setString("stage", stage);
-        query.setString("transformer", transformer);
-        query.setString("source", source);
+        Query<CustomerSourceAttribute> query = session.createQuery(queryStr, CustomerSourceAttribute.class);
+        query.setParameter("stage", stage);
+        query.setParameter("transformer", transformer);
+        query.setParameter("source", source);
         if (dataCloudVersion != null) {
-            query.setString("version", dataCloudVersion);
+            query.setParameter("version", dataCloudVersion);
         }
         return (List<CustomerSourceAttribute>) query.list();
     }

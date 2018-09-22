@@ -152,7 +152,6 @@ public class AMStatsDimAggregateWithHQDunsFlow extends AMStatsFlowBase {
         return node;
     }
 
-    @SuppressWarnings("unchecked")
     private Node markRowsValidForHQDunsBasedDedupProcessing(Node node) {
 
         List<FieldMetadata> fms = new ArrayList<>();
@@ -170,7 +169,6 @@ public class AMStatsDimAggregateWithHQDunsFlow extends AMStatsFlowBase {
         return node.groupByAndBuffer(new FieldList(hqFields), buffer, fms);
     }
 
-    @SuppressWarnings("unchecked")
     private Node createHQDunsBasedNode(Node node, //
             AccountMasterStatsParameters parameters, //
             String[] dimensionIdFieldNames) {

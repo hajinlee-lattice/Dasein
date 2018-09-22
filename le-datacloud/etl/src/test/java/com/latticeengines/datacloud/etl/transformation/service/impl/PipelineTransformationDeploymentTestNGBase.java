@@ -8,6 +8,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class PipelineTransformationDeploymentTestNGBase extends PipelineTransformationTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PipelineTransformationDeploymentTestNGBase.class);
 
     @Autowired

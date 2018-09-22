@@ -31,13 +31,14 @@ public abstract class FixedIntervalTransformationServiceTestNGBase<T extends Tra
     @Override
     protected String getPathToUploadBaseData() {
         FixedIntervalSource sourceFixedInterval = (FixedIntervalSource) getSource();
-        String path = hdfsPathBuilder.constructSnapshotDir(sourceFixedInterval.getBaseSources()[0], baseSourceVersion)
+        String path = hdfsPathBuilder
+                .constructSnapshotDir(sourceFixedInterval.getBaseSources()[0].getSourceName(), baseSourceVersion)
                 .toString();
         return path.replace("/Snapshot/", "/Raw/");
     }
 
     @Override
     protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotRootDir(source) + "/" + baseSourceVersion;
+        return hdfsPathBuilder.constructSnapshotRootDir(source.getSourceName()) + "/" + baseSourceVersion;
     }
 }

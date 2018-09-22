@@ -129,6 +129,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "madison", dependsOnMethods = "importFromDB")
     public void transform() throws Exception {
 

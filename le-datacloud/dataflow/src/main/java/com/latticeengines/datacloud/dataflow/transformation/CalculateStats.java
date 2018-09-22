@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 
 import cascading.operation.Aggregator;
-import cascading.operation.Function;
 import cascading.operation.aggregator.Count;
 import cascading.tuple.Fields;
 
@@ -214,7 +213,8 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
                     f -> targetFields.add(new FieldMetadata(DEDUP_PREFIX + f, source.getSchema(f).getJavaType())));
             inputDedupFields.addAll(dedupFields);
         }
-        Function function = new BucketExpandFunction(encAttrs, excludeAttrs, dimFields, inputDedupFields, bktAttrs,
+        BucketExpandFunction function = new BucketExpandFunction(encAttrs, excludeAttrs, dimFields, inputDedupFields,
+                bktAttrs,
                 ATTR_ID, BKT_ID);
         List<String> fieldNames = DataFlowUtils.getFieldNames(targetFields);
         return source.applyToAllFields(function, targetFields, new FieldList(fieldNames));
@@ -253,7 +253,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         outputFms.add(node.getSchema(ATTR_ID));
         outputFms.add(new FieldMetadata(ATTR_COUNT, Long.class));
         outputFms.add(new FieldMetadata(ATTR_BKTS, String.class));
-        Aggregator aggregator = new BucketConsolidateAggregator( //
+        Aggregator<?> aggregator = new BucketConsolidateAggregator( //
                 groupby, BKT_ID, BKT_COUNT, ATTR_COUNT, ATTR_BKTS);
         return node.groupByAndAggregate(new FieldList(groupby), aggregator, outputFms);
     }
@@ -315,7 +315,8 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         outputFms.add(base.getSchema(ATTR_ID));
         outputFms.add(new FieldMetadata(ATTR_COUNT, Long.class));
         outputFms.add(new FieldMetadata(ATTR_BKTS, String.class));
-        Aggregator aggregator = new StatsRollupAggregator(groupby, dimension.getName(), ATTR_COUNT, ATTR_BKTS, dedup);
+        Aggregator<?> aggregator = new StatsRollupAggregator(groupby, dimension.getName(), ATTR_COUNT, ATTR_BKTS,
+                dedup);
         Node rollup = base.groupByAndAggregate(new FieldList(groupby), aggregator, outputFms);
         for (String pd: parentDims) {
             rollup = rollup.addColumnWithFixedValue(DIM_PREFIX + pd, StatsRollupAggregator.ALL, String.class);
@@ -332,14 +333,14 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         outputFms.add(count.getSchema(ATTR_ID));
         outputFms.add(new FieldMetadata(ATTR_COUNT, Long.class));
         outputFms.add(new FieldMetadata(ATTR_BKTS, String.class));
-        Aggregator aggregator = new StatsRollupAggregator(groupby, null, ATTR_COUNT, ATTR_BKTS, false);
+        StatsRollupAggregator aggregator = new StatsRollupAggregator(groupby, null, ATTR_COUNT, ATTR_BKTS, false);
         return count.groupByAndAggregate(new FieldList(groupby), aggregator, outputFms);
     }
 
     private Node resumeAttrName(Node node) {
         Map<Serializable, Serializable> attrNameMap = new HashMap<>();
         attrIdMap.forEach((s, i) -> attrNameMap.put(i, s));
-        Function function = new MappingFunction(ATTR_ID, ATTR_NAME, attrNameMap);
+        MappingFunction function = new MappingFunction(ATTR_ID, ATTR_NAME, attrNameMap);
         node = node.apply(function, new FieldList(ATTR_ID), new FieldMetadata(ATTR_NAME, String.class));
         node = node.discard(ATTR_ID);
         return node;

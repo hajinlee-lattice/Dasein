@@ -48,7 +48,7 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
         aggregated = aggregated.retain(new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
                 "HGCategory1Parent", "HGCategory2Parent", "DateLastVerified", "MaxIntensity", "LocationCount"));
 
-        aggregated = aggregated.addFunction("LocationCount.intValue()", new FieldList("LocationCount"),
+        aggregated = aggregated.apply("LocationCount.intValue()", new FieldList("LocationCount"),
                 new FieldMetadata("LocationCount", Integer.class));
 
         aggregated = aggregated.addTimestamp("Creation_Date");

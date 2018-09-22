@@ -50,7 +50,6 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>${quartz.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -80,18 +79,15 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-metadata</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>
-            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>
-            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

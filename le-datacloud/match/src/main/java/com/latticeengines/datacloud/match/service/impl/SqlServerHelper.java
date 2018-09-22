@@ -430,7 +430,7 @@ public class SqlServerHelper implements DbHelper {
                 for (int i = 0; i < args.length; i++) {
                     argStrs[i] = "'" + args[i] + "'";
                 }
-                log.info(String.format("SlowSQL=" + sqlStr, argStrs));
+                // log.info(String.format("SlowSQL=" + sqlStr, argStrs));
             } catch (Exception e) {
                 log.info("SlowSQL=" + sqlStr + ", Args=" + String.join(",", args));
             }

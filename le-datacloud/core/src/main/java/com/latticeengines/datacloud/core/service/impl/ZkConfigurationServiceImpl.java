@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     private void bootstrapCamille() throws Exception {
         String json = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("datasource/" + sourceDbsJson));
+                .getResourceAsStream("datasource/" + sourceDbsJson), Charset.defaultCharset());
         Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
         if (!camille.exists(poolPath)) {
             log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");

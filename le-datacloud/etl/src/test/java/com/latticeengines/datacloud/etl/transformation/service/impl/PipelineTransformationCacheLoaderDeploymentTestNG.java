@@ -80,7 +80,8 @@ public class PipelineTransformationCacheLoaderDeploymentTestNG extends
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseLatticeCacheSource, baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(baseLatticeCacheSource.getSourceName(), baseSourceVersion)
+                .toString();
     }
 
     @Override
@@ -165,13 +166,14 @@ public class PipelineTransformationCacheLoaderDeploymentTestNG extends
         targetSourceName = LATTICE_CACHE_SEED_LOADER;
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSource.getSourceName(), targetVersion).toString();
     }
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
+        @SuppressWarnings("unused")
         Map<Long, GenericRecord> recordMap =new HashMap<>();
         while (records.hasNext()) {
             records.next();

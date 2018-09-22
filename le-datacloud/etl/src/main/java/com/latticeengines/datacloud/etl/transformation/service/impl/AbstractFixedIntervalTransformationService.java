@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,9 +67,10 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
         FixedIntervalSource source = (FixedIntervalSource) getSource();
         LOG.info("Source Name: " + source.getSourceName() + " Base Source Name: "
                 + source.getBaseSources()[0].getSourceName() + " RootBaseSourceDirPath: "
-                + hdfsPathBuilder.constructSourceDir(source.getBaseSources()[0]).toString());
+                + hdfsPathBuilder.constructSourceDir(source.getBaseSources()[0].getSourceName()).toString());
         return Collections
-                .singletonList(hdfsPathBuilder.constructSourceDir(source.getBaseSources()[0]).toString());
+                .singletonList(
+                        hdfsPathBuilder.constructSourceDir(source.getBaseSources()[0].getSourceName()).toString());
     }
 
     @Override

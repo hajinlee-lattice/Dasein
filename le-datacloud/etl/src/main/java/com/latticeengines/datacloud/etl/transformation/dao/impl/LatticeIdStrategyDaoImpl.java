@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.etl.transformation.dao.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.transformation.dao.LatticeIdStrategyDao;
@@ -25,7 +25,7 @@ public class LatticeIdStrategyDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         Session session = getSessionFactory().getCurrentSession();
         Class<LatticeIdStrategy> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Strategy = :strategy", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<LatticeIdStrategy> query = session.createQuery(queryStr);
         query.setParameter("strategy", name);
         List<LatticeIdStrategy> resultList = query.list();
         if (CollectionUtils.isEmpty(resultList)) {

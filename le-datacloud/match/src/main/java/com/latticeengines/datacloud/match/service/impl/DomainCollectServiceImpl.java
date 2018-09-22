@@ -152,6 +152,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
         jdbcTemplate.execute(sql);
     }
 
+    @SuppressWarnings("unused")
     private void executeDomainCollectionTransfer(String transferId) {
         StringBuilder sb = new StringBuilder("EXEC [dbo].[MatcherService_HandleDomainCollectionTransfer_3]");
         sb.append(String.format(" '%s',", transferId));

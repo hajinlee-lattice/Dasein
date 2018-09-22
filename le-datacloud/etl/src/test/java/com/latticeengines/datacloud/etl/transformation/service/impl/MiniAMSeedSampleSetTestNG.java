@@ -100,7 +100,6 @@ public class MiniAMSeedSampleSetTestNG
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;

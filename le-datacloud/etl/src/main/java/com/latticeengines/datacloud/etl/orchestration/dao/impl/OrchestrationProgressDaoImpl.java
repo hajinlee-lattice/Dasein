@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,7 +45,7 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
         }
         String queryStr = String.format("from %s where %s %s", entityClz.getSimpleName(),
                 sb.substring(0, sb.length() - 4), orderStr);
-        Query query = session.createQuery(queryStr);
+        Query<OrchestrationProgress> query = session.createQuery(queryStr);
         for (String column : fields.keySet()) {
             if (fields.get(column).getClass().isEnum()) {
                 query.setParameter(column, fields.get(column).toString());
@@ -62,21 +62,20 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
         Class<OrchestrationProgress> entityClz = getEntityClass();
         String queryStr = String.format("from %s p where p.version = :version and p.orchestration.name = :name",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
         query.setParameter("version", version);
         query.setParameter("name", orchName);
         return !CollectionUtils.isEmpty(query.list());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<OrchestrationProgress> findProgressesToCheckStatus() {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
         String queryStr = String.format(
                 "from %s p where p.status = :newStatus or p.status = :processingStatus or (p.status = :failedStatus and p.retries < p.orchestration.maxRetries)",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
         query.setParameter("newStatus", ProgressStatus.NEW);
         query.setParameter("processingStatus", ProgressStatus.PROCESSING);
         query.setParameter("failedStatus", ProgressStatus.FAILED);
