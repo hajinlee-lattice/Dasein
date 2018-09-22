@@ -74,6 +74,7 @@
         <scala.version>2.11.8</scala.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
+        <jackson.dataformat.version>2.9.6</jackson.dataformat.version>
         <jackson.fasterxml.version>2.9.6</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
         <hibnerate.types52.version>2.0.0</hibnerate.types52.version>
@@ -137,7 +138,7 @@
         <libthrift.version>0.11.0</libthrift.version>
         <!-- Spring -->
         <spring.version>5.0.9.RELEASE</spring.version>
-        <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
+        <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
         <spring.batch.version>4.0.0.RELEASE</spring.batch.version>
         <spring.security.version>5.0.8.RELEASE</spring.security.version>
         <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
@@ -1490,6 +1491,17 @@
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-core</artifactId>
+                <version>${aws.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-cbor</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

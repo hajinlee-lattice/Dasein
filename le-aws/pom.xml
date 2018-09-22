@@ -19,6 +19,12 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-cbor</artifactId>
+            <version>${jackson.dataformat.version}</version>
+        </dependency>
+
         <!-- LE dependencies -->
         <dependency>
             <groupId>com.latticeengines</groupId>
