@@ -144,7 +144,7 @@ public class PatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
         Assert.assertTrue(exception);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void patchPublicDomain() {
         String publicDomain = "gmail.com";
 

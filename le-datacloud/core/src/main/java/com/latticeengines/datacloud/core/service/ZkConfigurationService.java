@@ -16,4 +16,6 @@ public interface ZkConfigurationService {
 
     boolean isCDLTenant(CustomerSpace customerSpace);
 
+    boolean isPublicDomainCheckRelaxed();
+
 }

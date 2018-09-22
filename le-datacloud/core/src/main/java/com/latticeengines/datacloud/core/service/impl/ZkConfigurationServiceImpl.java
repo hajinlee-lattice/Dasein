@@ -146,6 +146,19 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         }
     }
 
+    @Override
+    public boolean isPublicDomainCheckRelaxed() {
+        Path publicDomainPath = relaxPublicDomainCheckPath();
+        try {
+            if (!camille.exists(publicDomainPath) || StringUtils.isBlank(camille.get(publicDomainPath).getData())) {
+                camille.upsert(publicDomainPath, new Document("false"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
+            return Boolean.valueOf(camille.get(publicDomainPath).getData());
+        } catch (Exception e) {
+            log.error("Failed to get RELAX_PUBLIC_DOMAIN_CHECK flag", e);
+            return false;
+        }
+    }
 
     private Path matchServicePath() {
         return PathBuilder.buildServicePath(podId, PROPDATA_SERVICE).append(MATCH_SERVICE);

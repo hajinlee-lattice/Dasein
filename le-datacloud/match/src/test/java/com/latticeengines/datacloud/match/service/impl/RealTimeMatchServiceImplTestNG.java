@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,13 +10,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Level;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
@@ -24,7 +31,10 @@ import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputService;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputUtils;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -38,6 +48,13 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RealTimeMatchServiceImplTestNG.class);
+    private Camille camille;
+    private String podId;
+    private static final String PROPDATA_SERVICE = "PropData";
+    private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
+
+    @Value("${common.le.stack}")
+    private String leStack;
 
     @Autowired
     private RealTimeMatchService realTimeMatchService;
@@ -183,10 +200,17 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         log.info(JsonUtils.serialize(output));
     }
 
+    /*
+     * Match against 1.0.0 DataCloud Version , no fuzzy match involved;
+     * Mandatory to add Fake name or fake Duns because need to treat as normal
+     * domain and not public domain. Otherwise, lookup by public domain only
+     * will be treated as normal domain
+     */
     @Test(groups = "functional")
     public void testExcludePublicDomain() {
-        Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
-        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
+        Object[][] data = new Object[][] { { 123, "my@gmail.com", "Fake name", null } };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data,
+                new String[] { "ID", "Domain", "Name", "Duns" });
         input.setExcludePublicDomain(true);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
@@ -195,15 +219,93 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertFalse(output.getResult().get(0).isMatched());
     }
 
+    /*
+     * public domain treated as public domain = when name and DUNS are both null
+     * public domain treated as normal domain = when zookeeper relaxPublic
+     * domain flag is set and either name or DUNS are provided
+     */
+    @Test(groups = "functional", dataProvider = "publicDomain")
+    public void testRelaxPublicDomainCheck(Integer id, String domain, String name, String duns, boolean isPublicDomain,
+            boolean isMatched, String nameKeyword) {
+        Object[][] data = new Object[][] {
+            { id, domain, name, duns }
+        };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data,
+                new String[] { "ID", "Domain", "Name", "Duns" });
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
+        input.setKeyMap(keyMap);
+        ColumnSelection columnSelection = new ColumnSelection();
+        List<Column> columns = Arrays.asList( //
+                new Column(DataCloudConstants.ATTR_LDC_NAME), //
+                new Column("IsPublicDomain") //
+        );
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        try {
+            camille = CamilleEnvironment.getCamille();
+            podId = CamilleEnvironment.getPodId();
+            camille.upsert(
+                    PathBuilder.buildServicePath(podId, PROPDATA_SERVICE, leStack).append(RELAX_PUBLIC_DOMAIN_CHECK),
+                    new Document("true"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertEquals(output.getResult().get(0).isMatched().toString(), String.valueOf(isMatched));
+        if(nameKeyword == null) {
+            Assert.assertNull(output.getResult().get(0).getOutput().get(0));
+        } else {
+            Assert.assertTrue(output.getResult().get(0).getOutput().get(0).toString().contains(nameKeyword));
+        }
+        Assert.assertEquals(output.getResult().get(0).getOutput().get(1).toString(), String.valueOf(isPublicDomain));
+    }
+
+    @DataProvider(name = "publicDomain")
+    private Object[][] provideNameLocation() {
+        // "ID", "Domain", "Name", "Duns", IsPublicDomain, IsMatched,
+        // nameKeyword
+        return new Object[][] { //
+                // public domain with null company name and location : will be treated as normal domain
+                { 1, "my@facebook.com", null, null, true, true, "Facebook" }, //
+                // public domain with DUNS (google duns) : will be treated as public domain when matching and match to google entity(as duns provided)
+                { 2, "my@facebook.com", null, "060902413", true, true, "Google" }, //
+                // public domain with Valid Name : will be treated as public domain when matching and match to google entity(as name provided)
+                { 3, "my@facebook.com", "Google", null, true, true, "Google" }, //
+                // public domain with invalid name : will be treated as public domain and no match
+                { 4, "my@facebook.com", "Fake Name", null, true, false, null}, //
+                // non-public domain with name and duns : will match to domain entity
+                { 5, "netapp.com", "NetApp", "802054742", false, true, "Netapp" }, //
+                // non-public domain with different company name : will match domain entity as valid non-public domain
+                { 6, "netapp.com", "Google", null, false, true, "Netapp" }, //
+                // non-public domain with different company duns : will match domain entity as valid non-public domain
+                { 7, "netapp.com", null, "060902413", false, true, "Netapp" }, //
+                // non-public domain with fake invalid duns : will cleanup duns and match domain entity as valid non-public domain
+                { 8, "netapp.com", null, "Fake Duns", false, true, "Netapp" }
+        };
+    }
+
+    /*
+     * Mandatory to add Fake name or Fake Duns because need to treat as normal
+     * domain and not public domain. Otherwise, lookup by public domain only
+     * will be treated as normal domain
+     */
     @Test(groups = "functional")
     public void testPublicDomainEmail() {
-        Object[][] data = new Object[][] { { "my@gmail.com" } };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "Email" });
+        Object[][] data = new Object[][] { { "my@gmail.com", "Fake Name", null } };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "Email", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Email"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
-        input.setDataCloudVersion("1.0.0");
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         input.setSkipKeyResolution(true);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
@@ -212,13 +314,24 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertFalse(output.getResult().get(0).isMatched());
     }
 
+    /*
+     * Mandatory to add Fake name or Fake Duns because need to treat as normal
+     * domain and not public domain. Otherwise, lookup by public domain only
+     * will be treated as normal domain
+     */
     @Test(groups = "functional")
     public void testTwoStepMatching() {
         Object[][] data = new Object[][] {
-                { 1, "chevron.com" },
-                { 2, "my@gmail.com" }
+                { 1, "chevron.com", null, null },
+                { 2, "my@gmail.com", "Fake Name", null }
         };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[] { "ID", "Domain" });
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data,
+                new String[] { "ID", "Domain", "Name", "Duns" });
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
+        input.setKeyMap(keyMap);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         MatchOutput output = realTimeMatchService.match(input);
@@ -226,16 +339,16 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output.getResult().size(), 2);
         Assert.assertEquals(output.getOutputFields().size(), 1);
         Assert.assertEquals(output.getOutputFields().get(0), MatchConstants.LID_FIELD);
-
         String latticeAccountId = (String) output.getResult().get(0).getOutput().get(0);
         Assert.assertNotNull(latticeAccountId);
         Assert.assertNull(output.getResult().get(1).getOutput().get(0));
 
         data = new Object[][] {
-                { 1, latticeAccountId, "chevron.com" },
-                { 2, null, "my@gmail.com" }
+                { 1, latticeAccountId, "chevron.com", null, null }, //
+                { 2, null, "my@gmail.com", "Fake Name", null }
         };
-        input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[] { "ID", MatchConstants.LID_FIELD, "Domain" });
+        input = TestMatchInputUtils.prepareSimpleMatchInput(data,
+                new String[] { "ID", MatchConstants.LID_FIELD, "Domain", "Name", "Duns" });
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         input.setFetchOnly(true);
         output = realTimeMatchService.match(input);

@@ -221,6 +221,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return statistics;
     }
 
+    public boolean isPublicDomainCheckRelaxed(String name, String duns) {
+        if (zkConfigurationService.isPublicDomainCheckRelaxed() && StringUtils.isBlank(name) && StringUtils.isBlank(duns)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
             int rowNum, List<String> fields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
             Set<NameLocation> nameLocationSet, boolean treatPublicDomainAsNormal) {
@@ -236,9 +244,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
 
-        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
         parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
         parseRecordForDuns(inputRecord, keyPositionMap, record);
+        if (isPublicDomainCheckRelaxed(record.getParsedNameLocation().getName(), record.getParsedDuns())) {
+            treatPublicDomainAsNormal = true;
+        }
+        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
         parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
         parseRecordForLookupId(inputRecord, keyPositionMap, record);
         profilingInputRecord(keyFields, inputRecord, fields, keyPositionMap, record);
