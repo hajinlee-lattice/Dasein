@@ -141,7 +141,7 @@ angular
         return deferred.promise;
     }
 
-    this.getAllJobs = function() {
+    this.getAllJobs = function(statusFilter) {
         var deferred = $q.defer();
         var result;
         var modelId = $stateParams.modelId;
@@ -149,9 +149,13 @@ angular
             ? '/pls/scores/jobs/' + modelId
             : '/pls/jobs';
 
+        var params = modelId || !statusFilter || statusFilter.length == 0
+            ? '' 
+            : '?includeEmptyPA=false&status=pending&status=running'
+
         $http({
             method: 'GET',
-            url: url,
+            url: url + params,
             headers: {
                 'If-Modified-Since': 0,
                 'ErrorDisplayMethod': 'banner'

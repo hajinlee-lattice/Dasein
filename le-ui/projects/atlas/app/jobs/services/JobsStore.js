@@ -13,13 +13,21 @@ angular
         if (!pending) {
             pending = true;
 
-            JobsStore.getJobs(null, modelId).then(function(response) {
-                pending = false;
-            });
+            if (JobsStore.isGetAllJobs()) {
+                console.log('get all jobs');
+                JobsStore.getJobs(null, modelId).then(function(response) {
+                    pending = false;
+                });
+            } else {
+                console.log('get all pending/running jobs');
+                JobsStore.getJobs(null, modelId, ["pending", "running"]).then(function(response) {
+                    pending = false;
+                });
+            }
         }
     }, 120 * 1000);
 })
-.service('JobsStore', function($q, $filter, JobsService) {
+.service('JobsStore', function($q, $state, $filter, JobsService) {
     var JobsStore = this;
     this.importJobsMap = {};
     this.exportJobsMap = {};
@@ -33,10 +41,31 @@ angular
         loadingJobs: false,
         models: {},
         jobsMap: {},
-        isModelState: false
+        isModelState: false,
+        allActiveJobs: []
     };
     this.inProgressModelJobs = {};
     this.cancelledJobs = {};
+
+    this.isGetAllJobs = function() {
+        return ($state.current.name.includes("home.jobs"));
+    }
+
+    function isModelJob(job){
+        // Based on implementation of addJob()
+        switch (job.jobType) {
+            case 'processAnalyzeWorkflow':
+            case 'segmentExportWorkflow':
+            case 'cdlDataFeedImportWorkflow': 
+            case 'cdlOperationWorkflow':
+            case 'metadataChange': {
+                return false;
+            }
+            default: {
+                return true;
+            }
+        }
+    }
 
     function isImportJob(job){
         if (job.jobType === 'processAnalyzeWorkflow') {
@@ -56,6 +85,8 @@ angular
                 return isImportJob(job);
             case 'export':
                 return isExportJob(job);
+            case 'model':
+                return isModelJob(job);
         }
     }
 
@@ -69,6 +100,10 @@ angular
 
     this.isNonWorkflowJobType = function(job) {
         return job.id == null && job.pid == null;
+    }
+
+    this.filterByStatus = function(job) {
+        return job.jobStatus == 'Pending' || job.jobStatus == 'Running';
     }
 
     this.getJob = function(jobId) {
@@ -100,7 +135,7 @@ angular
     }
 
 
-    this.getJobs = function(use_cache, modelId) {
+    this.getJobs = function(use_cache, modelId, statusFilter) {
         JobsStore.loadingJobs = true;
         var deferred = $q.defer(),
             isModelState = modelId ? true : false,
@@ -116,7 +151,7 @@ angular
                 deferred.resolve([]);
             }
         } else {
-            JobsService.getAllJobs().then(function(response) {
+            JobsService.getAllJobs(statusFilter).then(function(response) {
                 var res = response.resultObj;
                 if (modelId) {
                     if (!JobsStore.data.models[modelId]) {
@@ -131,15 +166,26 @@ angular
                         JobsStore.addJobMap(job.id, job);
                         JobsStore.addJob(job, modelId);
                     }
+                } else if (statusFilter) {
+                    JobsStore.inProgressModelJobs = {};
+                    JobsStore.data.allActiveJobs = res;
+
+                    var activeModelJobs = $filter('filter')(res, JobsStore.findModelJobs, true);
+                    activeModelJobs.forEach(function(job) {
+                        JobsStore.processModelJob(job);
+                    });
                 } else {
                     JobsStore.data.jobs.length = 0;
 
                     var nullIdsMap = [];
+                    JobsStore.data.allActiveJobs = [];
                     JobsStore.inProgressModelJobs = {};
                     JobsStore.jobTypes.forEach(function(type) {
                         nullIdsMap[type] = false;
                     })
                     if(res){
+                        JobsStore.data.allActiveJobs = $filter('filter')(res, JobsStore.filterByStatus, true);
+
                         for (var i=0; i<res.length; i++) {
                             var job = res[i];
 
@@ -230,14 +276,17 @@ angular
     };
 
     this.addModelJob = function(job) {
+        JobsStore.processModelJob(job);
+        JobsStore.data.jobs.push(job);
+    }
+
+    this.processModelJob = function(job) {
         var ratingEngineId = job.inputs.RATING_ENGINE_ID;
         if (job.jobStatus != 'Failed' && job.jobStatus != 'Completed' && job.jobStatus != 'Cancelled' && JobsStore.cancelledJobs[ratingEngineId] == undefined) {
-            //console.log('in progress job.id', job.id);
             JobsStore.inProgressModelJobs[ratingEngineId] = job.id;
         } else if (job.jobStatus == 'Cancelled' && JobsStore.cancelledJobs[ratingEngineId] != undefined) {
             delete JobsStore.cancelledJobs[ratingEngineId];
         }
-        JobsStore.data.jobs.push(job);
     }
 
     this.addImportJob = function(job){
