@@ -86,7 +86,7 @@ angular.module('lp.marketo', [
 	};
 	
 }])
-.controller('MarketoCredentialsEditController', ['MarketoCredential', 'MarketoService', '$state', '$stateParams', function(MarketoCredential, MarketoService, $state, $stateParams) {
+.controller('MarketoCredentialsEditController', ['FeatureFlags','MarketoCredential', 'MarketoService', '$state', '$stateParams', function(FeatureFlags, MarketoCredential, MarketoService, $state, $stateParams) {
 
     var vm = this;
     angular.extend(vm, {
@@ -100,11 +100,12 @@ angular.module('lp.marketo', [
 		restIdentityEndpoint: MarketoCredential.rest_identity_endpoint,
 		restClientId: MarketoCredential.rest_client_id,
 		restClientSecret: MarketoCredential.rest_client_secret,
-		latticeSecretKey: MarketoCredential.lattice_secret_key || 'null',
+		latticeSecretKey: MarketoCredential.lattice_secret_key,
 		state: 'edit',
 		saveInProgress: false,
     	addUserErrorMessage: "",
-    	showAddUserError: false
+    	showAddUserError: false,
+    	showSecretKey: FeatureFlags.LatticeMarketoScoring && MarketoCredential.lattice_secret_key
     });
 
 	vm.saveCredentialClicked = function() {

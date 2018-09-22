@@ -849,6 +849,15 @@ angular
                 ResourceString: function() {
                     return 'SUMMARY_MARKETO_APIKEY';
                 },
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
                 MarketoCredential: function($q, $stateParams, MarketoService) {
                     var deferred = $q.defer();
                     var id = $stateParams.id;
