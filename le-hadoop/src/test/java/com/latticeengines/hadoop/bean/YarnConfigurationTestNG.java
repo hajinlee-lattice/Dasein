@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -34,6 +35,9 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     @Inject
     private Configuration yarnConfiguration;
 
+    @Resource(name = "distCpConfiguration")
+    private Configuration distCpConfiguration;
+
     @Inject
     private EMRService emrService;
 
@@ -44,13 +48,16 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     private String s3Bucket;
 
     @Value("${aws.default.access.key}")
-    protected String awsKey;
+    private String awsKey;
 
     @Value("${aws.default.secret.key.encrypted}")
-    protected String awsSecret;
+    private String awsSecret;
 
     @Value("${common.le.stack}")
     private String leStack;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     private String hdfsKmsKey = "yarnconfigtest";
 
@@ -65,7 +72,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private void resetEnvironment() throws IOException {
-        if (HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
+        if (!Boolean.TRUE.equals(useEmr) && HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
             HdfsUtils.deleteKey(yarnConfiguration, hdfsKmsKey);
         }
         if (HdfsUtils.fileExists(yarnConfiguration, "/tmp/HdfsUtilsTest")) {
@@ -93,11 +100,15 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional", enabled = false)
     public void testS3DistCp() throws Exception {
-        testS3DistCp(true);
+        if (!Boolean.TRUE.equals(useEmr)) {
+            testS3DistCp(true);
+        }
         testS3DistCp(false);
     }
 
     private void testS3DistCp(boolean encrypted) throws Exception {
+        String queue = "default";
+
         if (encrypted) {
             if (!HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
                 HdfsUtils.createKey(yarnConfiguration, hdfsKmsKey);
@@ -123,7 +134,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         if (encrypted) {
             // check distcp between hdfs
             String srcDir2 = "/tmp/HdfsUtilsTest/input2";
-            HdfsUtils.distcp(yarnConfiguration, srcDir, srcDir2, "default");
+            HdfsUtils.distcp(distCpConfiguration, srcDir, srcDir2, queue);
         }
 
         // clean up s3 target dir
@@ -133,7 +144,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
         String s3Uri = "s3n://" + s3Bucket + tgtDir;
-        HdfsUtils.distcp(yarnConfiguration, srcDir, s3Uri, "default");
+        HdfsUtils.distcp(distCpConfiguration, srcDir, s3Uri, queue);
 
         // assert HDFS to S3 copy
         Assert.assertTrue(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
@@ -143,7 +154,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         // reverse copy
         HdfsUtils.rmdir(yarnConfiguration, srcDir);
         Assert.assertFalse(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
-        HdfsUtils.distcp(yarnConfiguration, s3Uri, srcDir, "default");
+        HdfsUtils.distcp(distCpConfiguration, s3Uri, srcDir, queue);
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
         AvroUtils.iterator(yarnConfiguration, srcDir + "/*.avro").forEachRemaining(System.out::println);
     }

@@ -48,4 +48,6 @@
 
     <yarn:configuration id="yarnConfiguration" configuration-ref="emrConfiguration"/>
 
+    <bean id="distCpConfiguration" class="com.latticeengines.hadoop.bean.DistCpConfigurationBeanFactory" lazy-init="true"/>
+
 </beans>
