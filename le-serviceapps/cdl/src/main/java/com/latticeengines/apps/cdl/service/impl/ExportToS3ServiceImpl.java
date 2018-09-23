@@ -3,12 +3,12 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.yarn.configuration.ConfigurationUtils;
 
 import com.latticeengines.apps.cdl.service.ExportToS3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -64,8 +63,8 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
 
-    @Value("${hadoop.yarn.application.classpath}")
-    protected String yarnclasspath;
+    @Resource(name = "distCpConfiguration")
+    private Configuration distCpConfiguration;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -230,11 +229,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         }
 
         private Configuration createConfiguration() {
-            Properties properties = new Properties();
-            if (StringUtils.isNotBlank(yarnclasspath)) {
-                properties.setProperty("yarn.application.classpath", yarnclasspath);
-            }
-            Configuration hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
+            Configuration hadoopConfiguration = new Configuration(distCpConfiguration);
             String jobName = StringUtils.isNotBlank(tableName) ? tenantId + "~" + tableName : tenantId;
             hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
             return hadoopConfiguration;
