@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -112,7 +113,9 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
 
-        config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+        if (StringUtils.isNotBlank(condaEnv)) {
+            config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+        }
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {
