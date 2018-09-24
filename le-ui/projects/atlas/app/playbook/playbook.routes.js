@@ -702,7 +702,8 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Campaign Playbook',
-                play_name: ''
+                play_name: '',
+                status: 'Launch'
             },
             onEnter: function($stateParams, PlaybookWizardStore) {
                 var play = PlaybookWizardStore.getCurrentPlay() || {};
@@ -747,7 +748,7 @@ angular
                             },
                             progressDisabled: true
                         },{
-                            label: 'Launch', // *New*
+                            label: 'Launch',
                             state: 'crmselection.targets.launch', 
                             nextLabel: 'Save & Launch later',
                             nextFn: function(nextState) {
@@ -768,8 +769,8 @@ angular
                         nextState: 'home.playbook' 
                     };
                 },
-                WizardHeaderTitle: function() {
-                    return 'Launch Play';
+                WizardHeaderTitle: function($stateParams) { 
+                    return $stateParams.status;
                 },
                 WizardContainerId: function() {
                     return 'playbook';

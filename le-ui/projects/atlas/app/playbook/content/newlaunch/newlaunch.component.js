@@ -11,6 +11,10 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             recommendationCounts: PlaybookWizardStore.getRecommendationCounts()
         });
 
+        angular.extend(vm, {
+            status: $stateParams.status
+        });
+
         vm.$onInit = function() {
         }
 

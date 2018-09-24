@@ -123,7 +123,7 @@
                             type="button"
                             class="button blue-button pull-right"
                             ng-if="play.launchHistory.mostRecentLaunch === null && play.talkingPoints.length"
-                            ui-sref="home.playbook.launch({play_name:play.name})">
+                            ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">
                             Launch
                         </button>
                         <button
@@ -144,7 +144,7 @@
                                 class="button white-button pull-right"
                                 ng-if="(play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'UnLaunched') || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
                                 ng-disabled="play.ratingEngine.status != 'ACTIVE'"
-                                ui-sref="home.playbook.launch({play_name:play.name})">
+                                ui-sref="home.playbook.launch({play_name:play.name, status: 'Relaunch'})">
                                 Relaunch
                             </button>
  -->                        </span>
