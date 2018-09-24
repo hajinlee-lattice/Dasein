@@ -20,13 +20,13 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.setExcludeItems(false);
 
             PlaybookWizardStore.setValidation('crmselection', false);
-
             if(vm.orgs){
                 vm.stored = PlaybookWizardStore.crmselection_form;
                 vm.ratingEngine = PlaybookWizardStore.getSavedRating();
 
                 if($stateParams.play_name) {
                     // PlaybookWizardStore.setValidation('settings', true);
+                    
                     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
                         vm.savedSegment = play.crmselection;
                         vm.stored.crm_selection = play.crmselection;

@@ -321,6 +321,8 @@ angular.module('lp.playbook')
                             launch_id: launch.id,
                             action: 'launch',
                         });
+                    } else {
+                        $state.go('home.playbook')
                     }
                 });
             });

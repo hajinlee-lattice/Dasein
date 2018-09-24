@@ -115,39 +115,18 @@
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch === null"
+                            ng-if="play.launchHistory.mostRecentLaunch.launchState !== 'Launched'"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
-<!--                          <button 
-                            type="button"
-                            class="button blue-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch === null && play.talkingPoints.length"
-                            ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">
-                            Launch
-                        </button>
-                        <button
-                            type="button"
-                            class="button gray-button pull-right"
-                            ng-if="vm.current.tileStates[play.name].launching == true">
-                            <i class="fa fa-spinner fa-pulse fw"></i> 
-                            Launching...</button>
- -->                        <span ng-if="!vm.current.tileStates[play.name].launching">
-                            <span 
-                                class="launch-success pull-left"
-                                ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
-                                <i class="fa fa-check" aria-hidden="true"></i>
-                                Launched {{play.launchHistory.lastCompletedLaunch.updated | date}}
-                            </span>
-<!--                             <button 
-                                type="button"
-                                class="button white-button pull-right"
-                                ng-if="(play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'UnLaunched') || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
-                                ng-disabled="play.ratingEngine.status != 'ACTIVE'"
-                                ui-sref="home.playbook.launch({play_name:play.name, status: 'Relaunch'})">
-                                Relaunch
-                            </button>
- -->                        </span>
+                         <span ng-if="!vm.current.tileStates[play.name].launching">
+                                <span 
+                                    class="launch-success pull-right"
+                                    ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                    Launched {{play.launchHistory.lastCompletedLaunch.updated | date}}
+                                </span>
+                        </span>
 
                     </div><!-- End .tile-footer -->
                     <form

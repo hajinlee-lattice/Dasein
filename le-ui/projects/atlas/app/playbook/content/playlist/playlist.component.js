@@ -27,20 +27,28 @@ angular.module('lp.playbook.plays', [
                 items: [
                     { label: 'Modified Date',   icon: 'numeric',    property: 'updated' },
                     { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
-                    { label: 'Campaign Name',      icon: 'alpha',      property: 'displayName' }
+                    { label: 'Campaign Name',   icon: 'alpha',      property: 'displayName' }
                 ]
             },
             filter: {
                 label: 'Filter By',
                 value: {},
                 items: [
-                    { label: "All", action: { }, total: PlaybookWizardStore.current.plays.length },
+                    { 
+                        label: "All", 
+                        action: {}
+                    },
                     {
-                       label: "Launched", 
+                        label: "Launched", 
                         action: { 
-                            launchHistory: {playLaunch: []}
-                        }, 
-                        total: ''
+                            launchHistory: {mostRecentLaunch: []}
+                        }
+                    },
+                    {
+                        label: "Unlaunched", 
+                        action: { 
+                            launchHistory: {mostRecentLaunch: null}
+                        }
                     }
                 ]
             }
@@ -48,45 +56,6 @@ angular.module('lp.playbook.plays', [
         barChartConfig: PlaybookWizardStore.barChartConfig,
         barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig
     });
-
-    vm.init = function($q) {
-        // console.log(vm.current.plays);
-        PlaybookWizardStore.clear();
-
-        $scope.$watch('vm.current.plays', function() {
-            vm.header.filter.filtered = vm.current.plays;
-            vm.header.filter.unfiltered = vm.current.plays;
-
-            angular.forEach(vm.current.plays, function(play, key) {
-
-                if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
-                    play.ratingEngine.tileClass = play.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy;
-                } else {
-                    play.ratingEngine.tileClass = play.ratingEngine.type;
-                }
-
-                if(play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine.type === 'CUSTOM_EVENT') {
-                    play.ratingEngine.chartConfig = vm.barChartLiftConfig;
-                } else {
-                    play.ratingEngine.chartConfig = vm.barChartConfig;
-                }        
-
-                var newBucketMetadata = [];
-
-                if(play.ratingEngine.bucketMetadata && play.ratingEngine.bucketMetadata.length > 0) {
-                    angular.forEach(play.ratingEngine.bucketMetadata, function(rating, key) {
-                        rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                        newBucketMetadata.push(rating);
-                    });
-                }
-                play.ratingEngine.newBucketMetadata = newBucketMetadata;
-
-            });
-        });
-
-    }
-
-    vm.init();
 
     vm.sumValuesOfObject = function(object) {
         var sum = 0;
@@ -211,6 +180,63 @@ angular.module('lp.playbook.plays', [
         // });
 
     }
+
+    function getLaunchedPlays(plays, unlaunched) {
+        var ret = [];
+
+        ret = plays.filter(function(value) {
+            if(value.launchHistory) {
+                if(unlaunched) {
+                    return value.launchHistory.mostRecentLaunch === null;
+                } else {
+                    return value.launchHistory.mostRecentLaunch !== null;
+                }
+            }
+        });
+        return ret;
+    }
+
+    vm.getLaunchedPlays = getLaunchedPlays;
+
+    vm.init = function($q) {
+        PlaybookWizardStore.clear();
+
+        $scope.$watch('vm.current.plays', function() {
+            vm.header.filter.filtered = vm.current.plays;
+            vm.header.filter.unfiltered = vm.current.plays;
+
+            angular.forEach(vm.current.plays, function(play, key) {
+
+                if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
+                    play.ratingEngine.tileClass = play.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy;
+                } else {
+                    play.ratingEngine.tileClass = play.ratingEngine.type;
+                }
+
+                if(play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine.type === 'CUSTOM_EVENT') {
+                    play.ratingEngine.chartConfig = vm.barChartLiftConfig;
+                } else {
+                    play.ratingEngine.chartConfig = vm.barChartConfig;
+                }        
+
+                var newBucketMetadata = [];
+
+                if(play.ratingEngine.bucketMetadata && play.ratingEngine.bucketMetadata.length > 0) {
+                    angular.forEach(play.ratingEngine.bucketMetadata, function(rating, key) {
+                        rating.lift = (Math.round( rating.lift * 10) / 10).toString();
+                        newBucketMetadata.push(rating);
+                    });
+                }
+                play.ratingEngine.newBucketMetadata = newBucketMetadata;
+
+
+            });
+        });
+
+    }
+
+    vm.init();
+
 
     $scope.$on('$destroy', function() {
         onpage = false;
