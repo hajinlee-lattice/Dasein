@@ -752,7 +752,7 @@ angular
                             state: 'crmselection.targets.launch', 
                             nextLabel: 'Save & Launch later',
                             nextFn: function(nextState) {
-                                PlaybookWizardStore.nextSaveLaunch(nextState, true);
+                                PlaybookWizardStore.nextSaveLaunch(nextState, {saveOnly: true});
                             },
                             progressDisabled: true
                         }

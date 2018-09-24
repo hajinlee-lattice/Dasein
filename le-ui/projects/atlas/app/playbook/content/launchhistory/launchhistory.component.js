@@ -164,10 +164,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     }    
 
     vm.relaunchPlay = function() {
-
         vm.launching = true;
-
-        console.log();
 
         var play = vm.currentPlay,
             opts = {
@@ -179,9 +176,11 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 excludeItems: play.launchHistory.mostRecentLaunch.excludeItems
             };
 
-        PlaybookWizardStore.launchPlay(play, opts).then(function(result){
-            $state.reload();
-        });
+        PlaybookWizardStore.nextSaveLaunch(null, {play: play, launchObj: opts});
+
+        // PlaybookWizardStore.launchPlay(play, opts).then(function(result){
+        //     $state.reload();
+        // });
     };
 
     vm.checkValidDelay = function(form) {

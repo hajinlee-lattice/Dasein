@@ -289,16 +289,18 @@ angular.module('lp.playbook')
         }
     }
 
-    this.nextSaveLaunch = function(nextState, saveOnly) {
-        var play = PlaybookWizardStore.settings,
-            launchObj = {
+    this.nextSaveLaunch = function(nextState, opts) {
+        var opts = opts || {},
+            play = opts.play || PlaybookWizardStore.settings,
+            launchObj = opts.launchObj || {
                 bucketsToLaunch: PlaybookWizardStore.getBucketsToLaunch(),
                 destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
-                //excludeItems: PlaybookWizardStore.getExcludeItems()
-            }
+            },
+            saveOnly = opts.saveOnly || false;
+
         if(play) {
             if(play.ratingEngine){
                 RatingsEngineStore.getRating(play.ratingEngine.id).then(function(result){
