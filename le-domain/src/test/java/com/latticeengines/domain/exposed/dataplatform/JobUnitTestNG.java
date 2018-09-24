@@ -20,19 +20,19 @@ public class JobUnitTestNG {
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
         Field sepalLength = new Field();
         sepalLength.setName("sepal_length");
-        sepalLength.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        sepalLength.setType(Arrays.asList("float", "0.0"));
         Field sepalWidth = new Field();
         sepalWidth.setName("sepal_width");
-        sepalWidth.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        sepalWidth.setType(Arrays.asList("float", "0.0"));
         Field petalLength = new Field();
         petalLength.setName("petal_length");
-        petalLength.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        petalLength.setType(Arrays.asList("float", "0.0"));
         Field petalWidth = new Field();
         petalWidth.setName("petal_width");
-        petalWidth.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        petalWidth.setType(Arrays.asList("float", "0.0"));
         Field category = new Field();
         category.setName("category");
-        category.setType(Arrays.<String> asList(new String[] { "string", "null" }));
+        category.setType(Arrays.asList("string", "null"));
 
         classifier.addFeature(sepalLength.getName());
         classifier.addFeature(sepalWidth.getName());
@@ -49,15 +49,15 @@ public class JobUnitTestNG {
         Job job = new Job();
         job.setId("application_1394728035053_0001");
         assertEquals(job.getId(), job.getAppId().toString());
-        
+
         Properties appMasterProperties = new Properties();
         appMasterProperties.setProperty("QUEUE", "Priority0.0");
         Properties containerProperties = new Properties();
         containerProperties.setProperty("METADATA", metadata);
-        
+
         job.setAppMasterPropertiesObject(appMasterProperties);
         job.setContainerPropertiesObject(containerProperties);
-        
+
         String jsonString = job.toString();
 
         Job deserializedJob = JsonUtils.deserialize(jsonString, Job.class);
