@@ -1,11 +1,13 @@
 <div class="container query-results">
 
-    <h2 ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
+    <h2 ng-if="vm.section === 'dashboard.targets'">
+        Targets
+    </h2>
+    <h2 ng-if="vm.section === 'wizard.targets'">
         Suppressions
     </h2>
-
     <ul class="recommendationCounts" 
-        ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'" 
+        ng-if="vm.recommendationCounts && vm.section === 'wizard.targets'" 
         ng-init="vm.makeRecommendationCounts()">
         <li class="selected">
             <h3>Selected recommendation</h3>

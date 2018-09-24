@@ -494,6 +494,11 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.makeRecommendationCounts = function() {
+        if(!vm.accountsCoverage && !vm.accountsCoverage.bucketCoverageCounts) {
+            vm.recommendationCounts = null;
+            return false;
+        }
+
         var sections = {
                 total: 0,
                 selected: 0,

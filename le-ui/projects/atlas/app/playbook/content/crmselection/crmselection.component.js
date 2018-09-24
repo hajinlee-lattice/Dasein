@@ -25,15 +25,14 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 vm.ratingEngine = PlaybookWizardStore.getSavedRating();
 
                 if($stateParams.play_name) {
-                    // PlaybookWizardStore.setValidation('settings', true);
-                    
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-                        vm.savedSegment = play.crmselection;
-                        vm.stored.crm_selection = play.crmselection;
-                        if(play.crmselection) {
-                            PlaybookWizardStore.setValidation('crmselection', true);
-                        }
-                    });
+                    var play = PlaybookWizardStore.getCurrentPlay(),
+                        crmselection = (play.launchHistory.mostRecentLaunch.destinationOrgId ? vm.orgs.find(function(org) { return org.orgId === play.launchHistory.mostRecentLaunch.destinationOrgId}) : '');
+
+                    vm.savedSegment = crmselection;
+                    vm.stored.crm_selection = crmselection;
+                    if(crmselection) {
+                        PlaybookWizardStore.setValidation('crmselection', true);
+                    }
                 }
             }
 

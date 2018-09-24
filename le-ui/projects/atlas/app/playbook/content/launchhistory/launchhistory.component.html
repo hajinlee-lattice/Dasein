@@ -71,7 +71,7 @@
     		<thead>
     			<tr>
     				<th class="sortable" ng-click="vm.sort('created'); vm.sortDesc = !vm.sortDesc">
-                        Launch Date
+                        Launch Time
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'created',
@@ -90,7 +90,7 @@
                         System Name
                     </th>
     				<th class="sortable" ng-click="vm.sort('accountsSelected'); vm.sortDesc = !vm.sortDesc">
-                        Selected Recommendations
+                        Selected
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'accountsSelected',
@@ -114,11 +114,10 @@
                                 'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
     				<th>
-                        Launched <br/>Recommendations
+                        Launched
                    </th>
     				<th>
-                        Contacts within <br/>Recommendations
-                   </th>
+                        Contacts
                     <th class="sortable" ng-click="vm.sort('launchState'); vm.sortDesc = !vm.sortDesc">
                         Status
                         <i  aria-hidden="true" 
