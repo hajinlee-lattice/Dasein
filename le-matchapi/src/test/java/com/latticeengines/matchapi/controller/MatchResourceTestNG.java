@@ -8,9 +8,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,11 +21,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -42,6 +49,24 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
 
     @Autowired
     private TestMatchInputService testMatchInputService;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+    private static final String PROPDATA_SERVICE = "PropData";
+    private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
+
+    @BeforeClass(groups = { "functional" })
+    public void setup() {
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            camille.upsert(
+                    PathBuilder.buildServicePath(podId, PROPDATA_SERVICE, leStack).append(RELAX_PUBLIC_DOMAIN_CHECK),
+                    new Document("true"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test(groups = { "functional" })
     public void testPredefined() {
@@ -78,12 +103,14 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         Assert.assertFalse(output.getResult().get(0).getInput().isEmpty(), "result record should contain input values");
     }
 
+    // Public domain comes without name or duns is treated as normal domain if
+    // feature flag RelaxPublicDomainCheck in zk is set as true
     @Test(groups = { "functional" })
     public void testPublicDomain() {
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
 
         Object[][] data = new Object[][] {
-                { 123, "gmail.com", null, null, null, null } };
+                { 123, "gmail.com", "Fake Name", null, null, null } };
 
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
