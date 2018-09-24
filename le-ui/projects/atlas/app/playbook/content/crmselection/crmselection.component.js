@@ -26,7 +26,11 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
                 if($stateParams.play_name) {
                     var play = PlaybookWizardStore.getCurrentPlay(),
-                        crmselection = (play.launchHistory.mostRecentLaunch.destinationOrgId ? vm.orgs.find(function(org) { return org.orgId === play.launchHistory.mostRecentLaunch.destinationOrgId}) : '');
+                        crmselection = (play && 
+                                        play.launchHistory && 
+                                        play.launchHistory.mostRecentLaunch && 
+                                        play.launchHistory.mostRecentLaunch.destinationOrgId ? 
+                                        vm.orgs.find(function(org) { return org.orgId === play.launchHistory.mostRecentLaunch.destinationOrgId}) : '');
 
                     vm.savedSegment = crmselection;
                     vm.stored.crm_selection = crmselection;

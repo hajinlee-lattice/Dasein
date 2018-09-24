@@ -320,6 +320,8 @@ angular.module('lp.playbook')
                         PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
                             launch_id: launch.id,
                             action: 'launch',
+                        }).then(function(saved) {
+                            $state.go('home.playbook.dashboard', {play_name: play.name});
                         });
                     } else {
                         $state.go('home.playbook')
