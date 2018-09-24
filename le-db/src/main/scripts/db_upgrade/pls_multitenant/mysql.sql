@@ -94,6 +94,13 @@ CREATE PROCEDURE `UpdatePLSTables`()
     CALL `CreatePlayTypes`();
 
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `FK_PLAY_TYPE` bigint;
+    
+    update PLS_MultiTenant.ACTION as a
+    left join PLS_MultiTenant.WORKFLOW_JOB as w
+    on a.tracking_id = w.workflow_id
+    set a.TRACKING_PID = w.pid
+    where a.TRACKING_PID is null
+    
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CONSTRAINT `FK_PLAY_FKPLAYTYPE_PLAYTYPE` FOREIGN KEY (`FK_PLAY_TYPE`) REFERENCES `PLS_MultiTenant`.`PLAY_TYPE` (`PID`);
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `UPDATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
     UPDATE `PLS_MultiTenant`.`PLAY` SET UPDATED_BY = CREATED_BY WHERE UPDATED_BY = 'placeholderForUpdate';
