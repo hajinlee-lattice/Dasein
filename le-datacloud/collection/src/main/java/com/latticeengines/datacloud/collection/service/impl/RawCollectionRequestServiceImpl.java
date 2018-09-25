@@ -1,15 +1,22 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.PartitionUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.collection.entitymgr.RawCollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
@@ -21,31 +28,49 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     @Inject
     private RawCollectionRequestMgr rawCollectionRequestMgr;
+
     @Inject
     private VendorConfigService vendorConfigService;
 
+    private ExecutorService uploadWorkers;
+
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
-        String vendorUpper = vendor.toUpperCase();
+        final String vendorUpper = vendor.toUpperCase();
         if (!vendorConfigService.getVendors().contains(vendorUpper)) {
             log.warn("invalid vendor name " + vendor + ", ignore it and return...");
             return false;
         }
-
-        vendor = vendorUpper;
-
-        Timestamp ts = new Timestamp(System.currentTimeMillis());
-        for (int i = 0; i < domains.size(); ++i) {
-            RawCollectionRequest req = new RawCollectionRequest();
-
-            req.setVendor(vendor);
-            req.setTransferred(false);
-            req.setRequestedTime(ts);
-            req.setOriginalRequestId(reqId);
-            req.setDomain(domains.get(i));
-
-            rawCollectionRequestMgr.create(req);
+        try (PerformanceTimer timer = new PerformanceTimer("Saved in total " //
+                + CollectionUtils.size(domains) + " raw requests to db.")) {
+            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            int chunkSize = 1000;
+            List<List<String>> domainPartitions = PartitionUtils.partitionCollectionBySize(domains, chunkSize);
+            List<Runnable> uploaders = new ArrayList<>();
+            for (List<String> parition: domainPartitions) {
+                Runnable uploader = () -> {
+                    try (PerformanceTimer timer2 = new PerformanceTimer(
+                            "Saved a chunck of " + parition.size() + " raw requests to db.")) {
+                        List<RawCollectionRequest> reqs = parition.stream().map(domain -> {
+                            RawCollectionRequest req = new RawCollectionRequest();
+                            req.setVendor(vendorUpper);
+                            req.setTransferred(false);
+                            req.setRequestedTime(ts);
+                            req.setOriginalRequestId(reqId);
+                            req.setDomain(domain);
+                            return req;
+                        }).collect(Collectors.toList());
+                        rawCollectionRequestMgr.saveRequests(reqs);
+                    }
+                };
+                uploaders.add(uploader);
+            }
+            if (CollectionUtils.size(uploaders) == 1) {
+                uploaders.get(0).run();
+            } else {
+                ThreadPoolUtils.runRunnablesInParallel(getUploadWorkers(), uploaders, //
+                        60, 5);
+            }
         }
-
         return true;
     }
 
@@ -73,5 +98,16 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
             rawCollectionRequestMgr.delete(added.get(i));
         }
+    }
+
+    private ExecutorService getUploadWorkers() {
+        if (uploadWorkers == null) {
+            synchronized (this) {
+                if (uploadWorkers == null) {
+                    uploadWorkers = ThreadPoolUtils.getFixedSizeThreadPool("raw-req-upload", 4);
+                }
+            }
+        }
+        return uploadWorkers;
     }
 }

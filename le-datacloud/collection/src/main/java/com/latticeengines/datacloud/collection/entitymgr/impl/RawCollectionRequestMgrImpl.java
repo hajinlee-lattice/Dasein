@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.RawCollectionRequestMgr;
@@ -15,13 +13,13 @@ import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 
-@Component
-public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawCollectionRequest, Long> implements RawCollectionRequestMgr {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(RawCollectionRequestMgrImpl.class);
+@Component("rawCollectionRequestMgr")
+public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawCollectionRequest, Long> //
+        implements RawCollectionRequestMgr {
 
     @Inject
     private RawCollectionRequestRepository rawCollectionRequestRepository;
+
     @Inject
     private RawCollectionRequestReaderRepository rawCollectionRequestReaderRepository;
 
@@ -30,9 +28,14 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
         return rawCollectionRequestRepository;
     }
 
+    @Override
     public List<RawCollectionRequest> getNonTransferred() {
-        List<RawCollectionRequest> resultList = rawCollectionRequestReaderRepository.findByTransferred(false);
-
-        return resultList;
+        return rawCollectionRequestReaderRepository.findByTransferred(false);
     }
+
+    @Override
+    public void saveRequests(Iterable<RawCollectionRequest> reqs) {
+        rawCollectionRequestRepository.saveAll(reqs);
+    }
+
 }

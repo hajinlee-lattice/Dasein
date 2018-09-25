@@ -511,7 +511,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             }
 
             //transfer state to finished
-            if (CollectionWorker.STATUS_FINISHED.equals(worker.getStatus())) {
+            if (CollectionWorker.STATUS_RUNNING.equals(worker.getStatus())) {
                 log.info("task " + worker.getWorkerId() + " finished running");
                 worker.setStatus(CollectionWorker.STATUS_FINISHED);
                 collectionWorkerService.getEntityMgr().update(worker);
