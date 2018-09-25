@@ -92,7 +92,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public static final String UPDATE_WARNING_ATTRIBUTE_TITLE = "Attribute In Use";
     public static final String UPDATE_FAIL_TITLE = "Validation Error";
     public static final String UPDATE_FAIL_MSG = "There are validation errors";
-    public static final String UPDATE_ACTIVATION_SUCCESSE_MSG = "<p>The action will be scheduled to process and analyze. You can track the status from the <a ui-sref=\"home.jobs\">Data P&A</a></p>";
+    public static final String UPDATE_ACTIVATION_SUCCESSE_MSG = "<p>The action will be scheduled to process and analyze. You can track the status from the <a ui-sref='home.jobs'>Data P&A</a></p>";
     public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be disabled until the dependency has been removed.";
     public static final String UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be deactivated until it is disabled from the following usecases.";
     public static final String UPDATE_WARNING_CATEGORY_TITLE = "Category In Use";
