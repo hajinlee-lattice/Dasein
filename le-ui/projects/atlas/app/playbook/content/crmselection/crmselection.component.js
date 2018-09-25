@@ -13,6 +13,10 @@ angular.module('lp.playbook.wizard.crmselection', [])
         var vm = this;
         vm.showMAPSystems = vm.featureflags.EnableCdl;
 
+        angular.extend(vm, {
+            status: $stateParams.status
+        });
+
         vm.$onInit = function() {
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
