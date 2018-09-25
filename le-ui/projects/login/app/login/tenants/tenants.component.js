@@ -97,9 +97,9 @@ angular.module('login.tenants', [
                 //Account Fields 
                     "id": tenant.Identifier, //Required 
                     "name": tenant.DisplayName,
-                    "tenant_ui_version": vm.selected.UIVersion,
-                    "tenant_type": vm.selected.TenantType,
-                    "tenant_status": vm.selected.Status
+                    "tenant_ui_version": tenant.UIVersion,
+                    "tenant_type": tenant.TenantType,
+                    "tenant_status": tenant.Status
                 });
             }
         };
