@@ -29,6 +29,8 @@ angular.module('mainApp.login.services.LoginService', [
                 if (result != null && result !== "" && result.Success == true) {
                     BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
                     result.Result.UserName = username;
+                    result.Result.FirstName = result.FirstName;
+                    result.Result.LastName = result.LastName;
                     BrowserStorageUtility.setLoginDocument(result.Result);
                     deferred.resolve(result);
                 } else {

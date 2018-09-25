@@ -76,11 +76,16 @@ angular.module('login')
             if(window.aptrinsic) {
                 window.aptrinsic("identify", { 
                     "id": login.username, // Required for logged in app users 
-                    "email": login.username
+                    "email": login.username,
+                    "firstName": vm.logindocument.FirstName,
+                    "lastName": vm.logindocument.LastName
                 },{ 
                 //Account Fields 
                     "id": tenant.Identifier, //Required 
-                    "name": tenant.DisplayName
+                    "name": tenant.DisplayName,
+                    "tenant_ui_version": vm.selected.UIVersion,
+                    "tenant_type": vm.selected.TenantType,
+                    "tenant_status": vm.selected.Status
                 });
             }
         };
