@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.OnDelete;
@@ -189,6 +190,6 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
     }
 
     public static String getIdForBIS(String type) {
-        return type.equals("List") ? "ADefault" : type;
+        return StringUtils.isNotEmpty(type) && type.equals("List") ? "ADefault" : type;
     }
 }
