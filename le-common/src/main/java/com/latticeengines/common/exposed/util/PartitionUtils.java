@@ -9,19 +9,10 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public final class PartitionUtils {
 
-    public static <T> List<List<T>> partitionBySize(Collection<T> collection, int partitionSize) {
+    public static <T> Iterable<List<T>> partitionBySize(final Iterable<T> collection, int partitionSize) {
         if (partitionSize <= 0) {
             throw new IllegalArgumentException("partitionSize must be positive, but found " + partitionSize);
         }
-        List<List<T>> partitions = Collections.emptyList();
-        if (CollectionUtils.isNotEmpty(collection)) {
-            partitions = partitionNonEmptyCollectionBySize(collection, partitionSize);
-        }
-        return partitions;
-    }
-
-    private static <T> List<List<T>> partitionNonEmptyCollectionBySize(Collection<T> collection,
-            Integer partitionSize) {
         List<List<T>> partitions = new ArrayList<>();
         List<T> thisPartition = new ArrayList<>();
         for (T item: collection) {
