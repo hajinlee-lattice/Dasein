@@ -47,7 +47,7 @@
 			  			<td class="info"> Mapping fields below will result in better scoring. </td>
 			  			<td></td>
 			  		</tr> 
-			  		<tr ng-repeat="scoringField in $ctrl.scoringFields.fields" ng-if="!scoringField.isPrimary">
+			  		<tr ng-repeat="scoringField in $ctrl.scoringFields.fields | orderBy:[$ctrl.orderFieldNames, 'fieldName']" ng-if="!scoringField.isPrimary">
 			  			<td class="right-adjusted">
 			  				{{scoringField.displayName}}
 		  				</td>

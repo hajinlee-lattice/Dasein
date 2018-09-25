@@ -53,16 +53,46 @@ angular.module('lp.marketo.models', [])
             currentScoringRequest: resolve.ExistingScoringRequest,
             marketoDisplayFieldNames: [],
             fieldsMapping: {},
-            requiredMatchFields: ['CompanyName', 'DUNS', 'Email']
+            requiredMatchFields: ['CompanyName', 'DUNS', 'Email'],
+            defaultMapping: {
+                FirstName: "Lead.First Name",
+                LastName: "Lead.Last Name",
+                Industry: "Company.Industry",
+                Title: "Lead.Job Title"
+            }
         });
 
         vm.init = function() {
+            vm.marketoFieldsSet = new Set(vm.marketoFields.map(function(marketoField) {
+                return marketoField.apiName;
+            }))
             vm.checkEnableSave();
             vm.updateMarketoScoringMatchFields();
+            vm.mapDefaultMatchFields();
         }
 
         vm.isRequiredField = function(field) {
             return vm.requiredMatchFields.indexOf(field.fieldName) >= 0;
+        }
+
+        vm.mapDefaultMatchFields = function() {
+            console.log(vm.scoringFields);
+            var defaultFields = $filter('filter')(vm.scoringFields.fields, vm.isDefaultField, true);
+            console.log(vm.fieldsMapping);
+            console.log(defaultFields);
+            defaultFields.forEach(function(defaultField) {
+                if (vm.marketoFieldsSet.has(vm.defaultMapping[defaultField.fieldName]) && vm.fieldsMapping[defaultField.fieldName] == undefined) {
+                    vm.fieldsMapping[defaultField.fieldName] = vm.defaultMapping[defaultField.fieldName];
+                }
+            });
+        }
+
+        vm.isDefaultField = function(field) {
+            return vm.defaultMapping[field.fieldName] != undefined;
+        }
+
+        vm.orderFieldNames = function(field) {
+            return !vm.isDefaultField(field);
         }
 
         vm.updateMarketoScoringMatchFields = function() {
