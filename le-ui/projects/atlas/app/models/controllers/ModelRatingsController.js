@@ -80,7 +80,7 @@ angular.module('lp.models.ratings', [
                     }
                 }
             } else {
-                if (dashboard.summary.publishedIterationId && dashboard.status == 'ACTIVE'){
+                if (dashboard.summary.publishedIterationId && dashboard.summary.status == 'ACTIVE'){
                     for(var i = 0; i < vm.activeIterations.length; i++) {
                         if (vm.activeIterations[i].id === dashboard.summary.publishedIterationId) {
                             vm.activeIteration = vm.activeIterations[i];
@@ -447,7 +447,7 @@ angular.module('lp.models.ratings', [
                 label: 'Filter By',
                 value: {},
                 items: [
-                    { label: "All", action: {}, total: vm.totalLength }
+                    { label: "All Iterations", action: {}, total: vm.totalLength }
                 ]
             }
         }
@@ -464,7 +464,7 @@ angular.module('lp.models.ratings', [
         });
 
         angular.forEach(uniqueIterations, function(iterationOption){
-            var iterationFilter = { label: iterationOption, action: { iteration: iterationOption } }
+            var iterationFilter = { label: 'Iteration ' + iterationOption, action: { iteration: iterationOption } }
             vm.header.filter.items.push(iterationFilter);    
         });
 

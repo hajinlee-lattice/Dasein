@@ -86,7 +86,7 @@ angular.module('lp.ratingsengine.remodel')
         iteration.AI.derived_from_rating_model = iteration.AI.id;
         iteration.AI.createdBy = createdBy;
 
-        console.log(store.configFilters);
+        // console.log(store.configFilters);
 
         if(iteration.AI.advancedModelingConfig.cross_sell){
             iteration.AI.trainingSegment = RatingsEngineStore.getTrainingSegment();
@@ -103,12 +103,9 @@ angular.module('lp.ratingsengine.remodel')
         delete iteration.AI.modelSummaryId;
 
         // console.log(iteration.AI.advancedModelingConfig.cross_sell.filters);
-        
 
         // Save iteration
         AtlasRemodelService.saveIteration(engineId, iteration).then(function(result){
-            
-            // console.log(result);
 
             var modelId = result.AI.id,
                 attributes = store.getRemodelAttributes();

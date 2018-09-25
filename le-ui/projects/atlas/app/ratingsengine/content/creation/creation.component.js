@@ -46,6 +46,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             var model = vm.ratingEngine.latest_iteration.AI;
             vm.type = vm.ratingEngine.type.toLowerCase();
 
+            console.log(model);
+
             vm.predictionType = model.predictionType;  
             vm.trainingSegment = model.trainingSegment;
 

@@ -44,14 +44,13 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
-            // Data variables
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
 
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){
 
-                    vm.filters = vm.iteration.AI.advancedModelingConfig.cross_sell.filters;
+                    vm.filters = vm.ratingModel.advancedModelingConfig.cross_sell.filters;
 
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
                     if(vm.repeatPurchase){
@@ -75,19 +74,14 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : "WITHIN";
                     vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : 2;
 
-
                     vm.validateCrossSellForm();
 
                 } else {
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
 
-                    console.log(vm.iteration);
-
                     vm.configFilters = angular.copy(vm.filters);
                     RatingsEngineStore.setDisplayFileName(vm.configFilters.sourceFileName);
-
-                    console.log(vm.configFilters);
 
                     vm.checkboxModel = {
                         datacloud: (vm.configFilters.dataStores.indexOf('DataCloud') > -1) ? true : false,
@@ -126,6 +120,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
             }
         }
+
 
 
 
@@ -311,10 +306,10 @@ angular.module('lp.ratingsengine.wizard.training', [
                     
                 vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
 
+                // console.log(vm.ratingEngine);
+                console.log(vm.engineId, vm.modelId, vm.ratingModel);
+
                 $timeout(function () {
-
-                    console.log(vm.configFilters);
-
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                     vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);

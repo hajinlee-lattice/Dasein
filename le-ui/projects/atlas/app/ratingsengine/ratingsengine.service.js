@@ -72,10 +72,11 @@ angular.module('lp.ratingsengine')
                     label: 'Segment', 
                     state: 'segment', 
                     progressDisabled: true,
+                    showNextSpinner: true,
                     nextLabel: 'Next, Choose Attributes', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRatingEngine(nextState);
-                    } 
+                    }
                 },{ 
                     label: 'Attributes', 
                     state: 'segment.attributes', 
@@ -163,6 +164,7 @@ angular.module('lp.ratingsengine')
                     label: 'Segment', 
                     state: 'segment',
                     progressDisabled: true,
+                    showNextSpinner: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRatingEngineAI(nextState);
@@ -216,6 +218,7 @@ angular.module('lp.ratingsengine')
                     label:'Segment',
                     state:'segment',
                     progressDisabled: true,
+                    showNextSpinner: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingEngine(nextState);
@@ -234,6 +237,7 @@ angular.module('lp.ratingsengine')
                     label:'Training',
                     state:'segment.attributes.training',
                     progressDisabled: true,
+                    showNextSpinner: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);

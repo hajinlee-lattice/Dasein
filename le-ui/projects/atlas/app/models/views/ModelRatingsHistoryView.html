@@ -39,9 +39,7 @@
                                         modelId: configuration.modelSummaryId,
                                         viewingIteration: true
                                     })">
-                                    Iteration {{ configuration.iteration }}
-                                </a>
-                                <span ng-if="configuration.publishedBy">, published by {{ configuration.publishedBy }}</span>
+                                    Iteration {{ configuration.iteration }}</a><span ng-if="configuration.publishedBy">, published by {{ configuration.publishedBy }}</span>
                             </span>
 
                             <span class="pull-right">{{ configuration.publishedTimestamp | date : 'MMM d, y h:mm:ss a'}} </span>
