@@ -157,6 +157,7 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         ColumnMetadata cm = new ColumnMetadata();
         cm.setAttrName(getAttrName());
         cm.setDisplayName(getProperty(ColumnMetadataKey.DisplayName, String.class));
+        cm.setDescription(getProperty(ColumnMetadataKey.Description, String.class));
         for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
             parseUsageGroup(cm, group);
         }
