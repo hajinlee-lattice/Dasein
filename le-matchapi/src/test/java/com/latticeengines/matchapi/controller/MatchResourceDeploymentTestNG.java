@@ -172,10 +172,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                         JsonUtils.serialize(outputRecord.getResult().get(0))
                                 + " should match as it is not a public domain.");
             } else {
-                Assert.assertFalse(outputRecord.getResult().get(0).isMatched(),
-                        JsonUtils.serialize(outputRecord.getResult().get(0))
-                                + " should not match as it is a public domain.");
+                // Domain-only public domain match without name/duns will be
+                // treated as normal domain
                 Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
+                Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().get(0).contains("public domain"));
             }
         }
     }
@@ -207,9 +207,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 Assert.assertTrue(outputRecord.isMatched(),
                         outputRecord.getPreMatchDomain() + " should match as it is not a public domain.");
             } else {
-                Assert.assertFalse(outputRecord.isMatched(),
-                        outputRecord.getPreMatchDomain() + " should not match as it is a public domain.");
+                // Domain-only public domain match without name/duns will be
+                // treated as normal domain
                 Assert.assertTrue(outputRecord.getErrorMessages().size() > 0);
+                Assert.assertTrue(outputRecord.getErrorMessages().get(0).contains("public domain"));
             }
         }
     }
@@ -288,7 +289,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions")
+    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
     public void testBulkMatchWithSchema(String version) throws Exception {
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
@@ -338,7 +339,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testBulkMatchWithoutSchema() {
         String version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
@@ -366,7 +367,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testMultiBlockBulkMatch() throws InterruptedException {
         String version = "1.0.0";
         HdfsPodContext.changeHdfsPodId(podId);
@@ -403,7 +404,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testGetBulkConfig() {
         String currentVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
         MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);
