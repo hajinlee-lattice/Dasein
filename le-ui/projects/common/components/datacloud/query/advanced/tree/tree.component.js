@@ -366,6 +366,10 @@ angular
                 }
             }
 
+            vm.categoryClass = function(category) {
+                return category.toLowerCase().replace(/\s/g, "_");
+            }
+
             vm.init();
         }
     };

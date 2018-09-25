@@ -550,7 +550,7 @@ div.advanced-query-builder {
                 }
             }
 
-            &.category-product_spend {
+            &.category-product_spend, &.category-product_spend_profile {
                 &,
                 &.editing .query-section-type-dotline,
                 &.editing .query-section-item-label,
@@ -561,6 +561,16 @@ div.advanced-query-builder {
             }
 
             &.category-my_attributes {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-left-color: #457eba;
+                }
+            }
+
+            &.category-curated_account_attributes {
                 &,
                 &.editing .query-section-type-dotline,
                 &.editing .query-section-item-label,
