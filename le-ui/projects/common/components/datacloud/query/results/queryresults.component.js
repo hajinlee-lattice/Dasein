@@ -69,7 +69,10 @@ angular.module('common.datacloud.query.results', [
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
-                    if(bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
+                    if(bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
+                        vm.selectedBuckets.push(bucket.bucket);
+                    }
+                    if(!bucketsToLaunch.length) {
                         vm.selectedBuckets.push(bucket.bucket);
                     }
 
