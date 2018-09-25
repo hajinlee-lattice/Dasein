@@ -51,8 +51,12 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long PROBLEMATIC_ACTION_NO_TRACKING_ID_PID = 6L;
     private static final Long RUNNING_ACTION_1_TRACKING_PID = 101L;
     private static final Long RUNNING_ACTION_2_TRACKING_PID = 102L;
+    private static final Long RUNNING_ACTION_1_TRACKING_ID = 1101L;
+    private static final Long RUNNING_ACTION_2_TRACKING_ID = 1102L;
     private static final Long COMPLETE_ACTION_1_TRACKING_PID = 103L;
     private static final Long COMPLETE_ACTION_2_TRACKING_PID = 104L;
+    private static final Long COMPLETE_ACTION_1_TRACKING_ID = 1103L;
+    private static final Long COMPLETE_ACTION_2_TRACKING_ID = 1104L;
     private static final Long DEFAULT_WORKFLOW_ID = 200L;
     private static final Long DEFAULT_WORKFLOW_PID = 201L;
 
@@ -110,8 +114,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
         Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
         Assert.assertEquals(pair.getRight().size(), 2);
-        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_PID);
-        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_PID);
+        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
+        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetFullActionAndJobIds" })
@@ -132,8 +136,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
         Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
         Assert.assertEquals(pair.getRight().size(), 2);
-        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_PID);
-        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_PID);
+        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
+        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
     }
 
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
@@ -204,16 +208,20 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private List<Job> generateJobs() {
         List<Job> jobs = new ArrayList<>();
         Job runningJob1 = new Job();
-        runningJob1.setId(RUNNING_ACTION_1_TRACKING_PID);
+        runningJob1.setPid(RUNNING_ACTION_1_TRACKING_PID);
+        runningJob1.setId(RUNNING_ACTION_1_TRACKING_ID);
         runningJob1.setJobStatus(JobStatus.RUNNING);
         Job runningJob2 = new Job();
-        runningJob2.setId(RUNNING_ACTION_2_TRACKING_PID);
+        runningJob2.setPid(RUNNING_ACTION_2_TRACKING_PID);
+        runningJob2.setId(RUNNING_ACTION_2_TRACKING_ID);
         runningJob2.setJobStatus(JobStatus.PENDING);
         Job completeJob1 = new Job();
-        completeJob1.setId(COMPLETE_ACTION_1_TRACKING_PID);
+        completeJob1.setPid(COMPLETE_ACTION_1_TRACKING_PID);
+        completeJob1.setId(COMPLETE_ACTION_1_TRACKING_ID);
         completeJob1.setJobStatus(JobStatus.COMPLETED);
         Job completeJob2 = new Job();
-        completeJob2.setId(COMPLETE_ACTION_2_TRACKING_PID);
+        completeJob2.setPid(COMPLETE_ACTION_2_TRACKING_PID);
+        completeJob2.setId(COMPLETE_ACTION_2_TRACKING_ID);
         completeJob2.setJobStatus(JobStatus.FAILED);
         jobs.add(runningJob1);
         jobs.add(runningJob2);

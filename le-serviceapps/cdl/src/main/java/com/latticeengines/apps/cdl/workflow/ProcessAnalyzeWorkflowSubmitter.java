@@ -202,12 +202,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 : importAndDeleteJobs.stream().filter(
                         job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
                         .map(Job::getId).collect(Collectors.toList());
-
-        log.info(String.format("Jobs that associated with the current consolidate job are: %s",
+        log.info(String.format("Job ids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobIds));
 
+        List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
+                ? Collections.emptyList()
+                : importAndDeleteJobs.stream().filter(
+                        job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
+                        .map(Job::getPid).collect(Collectors.toList());
+        log.info(String.format("Job pids that associated with the current consolidate job are: %s",
+                completedImportAndDeleteJobPids));
+
         List<Long> completedActionIds = actions.stream()
-                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobIds))
+                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobPids))
                 .map(Action::getPid).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
@@ -278,12 +285,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
-            List<Long> completedImportAndDeleteJobIds) {
+            List<Long> completedImportAndDeleteJobPids) {
         boolean isComplete = true; // by default every action is valid
         if (selectedTypes.contains(action.getType())) {
             // special check if is selected type
             isComplete = false;
-            if (completedImportAndDeleteJobIds.contains(action.getTrackingPid())) {
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
                 isComplete = true;
             } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
                 ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
