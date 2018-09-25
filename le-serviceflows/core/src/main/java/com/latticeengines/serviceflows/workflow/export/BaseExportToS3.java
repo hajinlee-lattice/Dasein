@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,6 +45,9 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
 
     @Inject
     protected SourceFileProxy sourceFileProxy;
+
+    @Resource(name = "distCpConfiguration")
+    private Configuration distCpConfiguration;
 
     @Value("${aws.region}")
     private String awsRegion;
@@ -135,7 +139,7 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
 
         private Configuration createConfiguration() {
             Properties properties = new Properties();
-            Configuration hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
+            Configuration hadoopConfiguration = ConfigurationUtils.createFrom(distCpConfiguration, properties);
             String jobName = StringUtils.isNotBlank(tableName) ? tenantId + "~" + tableName : tenantId;
             hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
             return hadoopConfiguration;
