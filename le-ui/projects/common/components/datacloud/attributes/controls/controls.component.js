@@ -14,6 +14,7 @@ angular.module('common.attributes.controls', [])
             vm.params = $stateParams;
             vm.section = vm.store.getSection();
             vm.data = vm.store.get('data');
+            vm.filters = vm.store.get('filters');
             vm.category = vm.store.get('category');
 
             if (vm.section == 'enable') {
@@ -43,7 +44,6 @@ angular.module('common.attributes.controls', [])
         };
 
         vm.getTotalAttrs = function() {
-            console.log(vm.store.get('TotalFilteredAttrs'));
             return vm.store.get('TotalFilteredAttrs');
         };
     }

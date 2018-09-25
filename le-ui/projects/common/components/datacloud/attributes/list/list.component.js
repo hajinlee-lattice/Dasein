@@ -306,53 +306,16 @@ angular.module('common.attributes.list', [])
             return a.toLowerCase().localeCompare(b.toLowerCase());
         };
 
-        vm.searchFilter = function(attr) {
-            var text = vm.filters.queryText.toLowerCase(); 
-
-            if (text) {
-                var SubCategory = (attr.SubCategory || '').toLowerCase();
-                var DisplayName = attr.DisplayName.toLowerCase();
-                var Description = (attr.Description || '').toLowerCase();
-                
-                var chkName = DisplayName.indexOf(text) >= 0;
-                var chkSub = SubCategory.indexOf(text) >= 0;
-                var chkDesc = Description.indexOf(text) >= 0;
-                
-                if (chkName || chkSub || chkDesc) {
-                    return true;
-                } else if (attr.Attributes) {
-                    for (var i=0; i<attr.Attributes.length; i++) {
-                        var item = attr.Attributes[i];
-                        var catName = item.DisplayName.toLowerCase();
-                        var catDesc = (item.Description || '').toLowerCase();
-
-                        if (catName.indexOf(text) >= 0 || catDesc.indexOf(text) >= 0) {
-                            return true;
-                        }
-                    }
-                }
-            } else {
-                return true;
-            }
-
-            return false;
-        };
-
         vm.getAttributes = function(filtered) {
-            if (vm.subcategory) {
-                vm.store.set('TotalFilteredAttrs', filtered);
-                return filtered;
-            }
+            var treeroot = [];
 
-            var list = [];
-
-            filtered.forEach(function(item) {
-                list = item.Attributes.concat(list);
+            vm.data.config.Subcategories.forEach(function(item) {
+                treeroot = item.Attributes.concat(treeroot);
             });
 
-            vm.store.set('TotalFilteredAttrs', list);
+            vm.store.set('TotalFilteredAttrs', treeroot);
 
-            return list;
+            return vm.subcategory ? filtered : treeroot;
         };
 
         vm.getPageSize = function() {

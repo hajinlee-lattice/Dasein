@@ -33,13 +33,13 @@
             <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
                 <label for="check_all">
                     Attribute
-                    <span>({{($ctrl.getAttributes(filteredList) | filter: $ctrl.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
+                    <span>({{$ctrl.getAttributes(filteredList).length | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)) | number}})</span>
                 </label>
             </div>
         </li>
 
         <li ng-repeat="item in (filteredList = ($ctrl.getResults()
-                        | filter: $ctrl.filters.queryText
+                        | filter: $ctrl.store.searchFilter
                         | filter: $ctrl.getFiltering()))
                         | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.getPageSize()
@@ -109,7 +109,7 @@
                             {{item.DisplayName}}
                         </span>
 
-                        <span ng-if="item.Attributes">({{(item.Attributes | filter: $ctrl.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
+                        <span ng-if="item.Attributes">({{(item.Attributes | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
                     </label>
                 </div>
 

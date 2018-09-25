@@ -68,7 +68,7 @@
                 <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other
                         | filter: vm.enrichmentsFilter()
                         | filter: vm.filterHideTrue
-                        | orderBy: vm.categoryOrderBy(category)
+                        | orderBy: vm.categoryOrderBy(category, null, TileTableItems.other)
                         | limitTo: 5 - (highlightAttributes.length || 0)))"
                         class="attribute delay top"
                         ng-class="{

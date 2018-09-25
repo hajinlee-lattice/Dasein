@@ -70,6 +70,38 @@ angular.module('common.attributes')
         return this.accesslevel;
     };
 
+    this.searchFilter = function(attr) {
+        var text = store.get('filters').queryText.toLowerCase(); 
+        
+        if (text) {
+            var SubCategory = (attr.SubCategory || '').toLowerCase();
+            var DisplayName = attr.DisplayName.toLowerCase();
+            var Description = (attr.Description || '').toLowerCase();
+            
+            var chkName = DisplayName.indexOf(text) >= 0;
+            var chkSub = SubCategory.indexOf(text) >= 0;
+            var chkDesc = Description.indexOf(text) >= 0;
+            
+            if (chkName || chkSub || chkDesc) {
+                return true;
+            } else if (attr.Attributes) {
+                for (var i=0; i<attr.Attributes.length; i++) {
+                    var item = attr.Attributes[i];
+                    var catName = item.DisplayName.toLowerCase();
+                    var catDesc = (item.Description || '').toLowerCase();
+
+                    if (catName.indexOf(text) >= 0 || catDesc.indexOf(text) >= 0) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            return true;
+        }
+
+        return false;
+    };
+
     this.getFiltering = function() {
         var filters = this.get('filters'),
             obj = {};

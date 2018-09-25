@@ -15,7 +15,7 @@ angular.module('mainApp.core.services.ResourceStringsService', [
         
         $http({
             method: 'GET', 
-            url: "assets/resources/" + locale + "/ResourceStrings.txt"
+            url: "resources/" + locale + "/ResourceStrings.txt"
         })
         .success(function(data, status, headers, config) {
             if (data == null) return;

@@ -75,7 +75,7 @@ angular
                 return vm.category ? vm.categorySize : vm.pagesize;
             }
 
-            vm.categoryOrderBy = function(category, subcategory) {
+            vm.categoryOrderBy = function(category, subcategory, attr) {
                 var YesCategories = [
                         'Technology Profile',
                         'Website Profile',
@@ -104,6 +104,10 @@ angular
                     }
 
                     order = order.concat(['-Count','-Value']);
+                }
+
+                if (category == "My Attributes") {
+                    console.log(category, subcategory, order, attr);
                 }
 
                 return order;

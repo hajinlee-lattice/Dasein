@@ -91,6 +91,7 @@ module.exports = [{
     folders: {
         '/dante': '/assets',
         '/dante/CommonAssets': '/assets/CommonAssets',
+        '/dante/resources': '/assets/resources',
         '/dante/styles': '/assets/styles',
         '/dante/images': '/assets/images'
     }
