@@ -2,14 +2,13 @@ package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
 public final class PartitionUtils {
 
-    public static <T> Iterable<List<T>> partitionBySize(final Iterable<T> collection, int partitionSize) {
+    public static <T> List<List<T>> partitionCollectionBySize(final Collection<T> collection, int partitionSize) {
         if (partitionSize <= 0) {
             throw new IllegalArgumentException("partitionSize must be positive, but found " + partitionSize);
         }
