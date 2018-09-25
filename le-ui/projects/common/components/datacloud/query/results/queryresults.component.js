@@ -55,6 +55,11 @@ angular.module('common.datacloud.query.results', [
 
             vm.selectedBuckets = [];
             if (vm.section === 'wizard.targets') {
+                var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
+                                        PlaybookWizardStore.currentPlay.launchHistory && 
+                                        PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch && 
+                                        PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.bucketsToLaunch ? 
+                                        PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.bucketsToLaunch : []);
                 
                 // Get sum of non-suppressed buckets to calculate percentage for each bucket
                 var numAccounts = 0;
@@ -64,7 +69,9 @@ angular.module('common.datacloud.query.results', [
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
-                    vm.selectedBuckets.push(bucket.bucket);
+                    if(bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
+                        vm.selectedBuckets.push(bucket.bucket);
+                    }
 
                     // Use this if you want to round up to nearest integer percentage
                     // If you do use this, use this in the view HTML ({{ ::bucket.percentage }}%)
@@ -78,7 +85,6 @@ angular.module('common.datacloud.query.results', [
                 });
 
             } else if (vm.section === 'dashboard.targets') {
-
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
                     var buckets = data.ratingEngine.bucketMetadata;
                     buckets.forEach(function(bucket){

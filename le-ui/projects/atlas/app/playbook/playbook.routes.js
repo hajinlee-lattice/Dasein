@@ -537,16 +537,16 @@ angular
             url: '/launch/:applicationId/job',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Launch Play'
+                pageTitle: 'Launch Campaign'
             },
             resolve:  {
                 BuildProgressConfig: function($stateParams) {
                     var play_name = $stateParams.play_name || '';
                     return {
                         text: {
-                            main_title: 'Your play is launching',
-                            main_title_completed: 'Your play is launched',
-                            button_goto: 'Go to Playbook'
+                            main_title: 'Your campaign is launching',
+                            main_title_completed: 'Your campaign is launched',
+                            button_goto: 'Go to Campaigns'
                         },
                         button_goto_sref: 'home.playbook',
                         disable_create_button: true,

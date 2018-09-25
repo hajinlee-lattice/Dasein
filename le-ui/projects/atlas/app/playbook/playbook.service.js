@@ -323,9 +323,11 @@ angular.module('lp.playbook')
                             launch_id: launch.id,
                             action: 'launch',
                         }).then(function(saved) {
-                            $state.go('home.playbook.dashboard', {play_name: play.name});
+                            // after launch
+                            $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
                         });
                     } else {
+                        // saved but not launched
                         $state.go('home.playbook')
                     }
                 });

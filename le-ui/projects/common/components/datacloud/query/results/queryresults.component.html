@@ -65,7 +65,7 @@
             class="bucket-checkboxes"
             ng-if="vm.accountsCoverage.bucketCoverageCounts.length > 1">
             <li 
-                ng-class="!selectedBucket ? '' : 'unselected'"
+                ng-class="vm.selectedBuckets.indexOf(bucket.bucket) !== -1 ? '' : 'unselected'"
                 ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
                 ng-click="vm.bucketClick(bucket); selectedBucket = !selectedBucket">
                 <h3>{{bucket.bucket}}</h3>
