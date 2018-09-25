@@ -42,28 +42,22 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
         }
         try (PerformanceTimer timer = new PerformanceTimer("Saved in total " //
                 + CollectionUtils.size(domains) + " raw requests to db.")) {
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            final Timestamp ts = new Timestamp(System.currentTimeMillis());
             int chunkSize = 1000;
             List<List<String>> domainPartitions = PartitionUtils.partitionCollectionBySize(domains, chunkSize);
             List<Runnable> uploaders = new ArrayList<>();
-            for (List<String> parition: domainPartitions) {
+            domainPartitions.forEach(partition -> {
                 Runnable uploader = () -> {
                     try (PerformanceTimer timer2 = new PerformanceTimer(
-                            "Saved a chunck of " + parition.size() + " raw requests to db.")) {
-                        List<RawCollectionRequest> reqs = parition.stream().map(domain -> {
-                            RawCollectionRequest req = new RawCollectionRequest();
-                            req.setVendor(vendorUpper);
-                            req.setTransferred(false);
-                            req.setRequestedTime(ts);
-                            req.setOriginalRequestId(reqId);
-                            req.setDomain(domain);
-                            return req;
-                        }).collect(Collectors.toList());
+                            "Saved a chunk of " + partition.size() + " raw requests to db.")) {
+                        List<RawCollectionRequest> reqs = partition.stream() //
+                                .map(domain -> toRawRequest(vendorUpper, ts, reqId, domain)) //
+                                .collect(Collectors.toList());
                         rawCollectionRequestMgr.saveRequests(reqs);
                     }
                 };
                 uploaders.add(uploader);
-            }
+            });
             if (CollectionUtils.size(uploaders) == 1) {
                 uploaders.get(0).run();
             } else {
@@ -98,6 +92,16 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
             rawCollectionRequestMgr.delete(added.get(i));
         }
+    }
+
+    private static RawCollectionRequest toRawRequest(String vendor, Timestamp timestamp, String reqId, String domain) {
+        RawCollectionRequest req = new RawCollectionRequest();
+        req.setVendor(vendor);
+        req.setTransferred(false);
+        req.setRequestedTime(timestamp);
+        req.setOriginalRequestId(reqId);
+        req.setDomain(domain);
+        return req;
     }
 
     private ExecutorService getUploadWorkers() {
