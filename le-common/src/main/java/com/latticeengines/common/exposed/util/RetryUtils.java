@@ -31,7 +31,7 @@ public class RetryUtils {
                 retryExceptionMap.put(t, Boolean.TRUE);
             }
         }
-        if (CollectionUtils.isNotEmpty(retryExceptions)) {
+        if (CollectionUtils.isNotEmpty(stopExceptions)) {
             for (Class<? extends Throwable> t : stopExceptions) {
                 retryExceptionMap.put(t, Boolean.FALSE);
             }
