@@ -99,10 +99,13 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
             paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, tupleIdPath, fileFilter));
         }
         if (CollectionUtils.isNotEmpty(paths)) {
-            String applicationIdDirectory = summary.getApplicationId().substring("application_".length());
-            Optional<String> completedModelingPath = paths.stream()
-                    .filter(path -> path.contains(applicationIdDirectory)).findFirst();
-            return completedModelingPath.isPresent() ? completedModelingPath.get() : paths.get(0);
+            if (StringUtils.isNotEmpty(summary.getApplicationId())) {
+                String applicationIdDirectory = summary.getApplicationId().substring("application_".length());
+                Optional<String> completedModelingPath = paths.stream()
+                        .filter(path -> path.contains(applicationIdDirectory)).findFirst();
+                return completedModelingPath.isPresent() ? completedModelingPath.get() : paths.get(0);
+            }
+            return paths.get(0);
         }
 
         String postMatchEventTablePath = modelingServiceHdfsBaseDir + customer + "/data/" + eventTableName
