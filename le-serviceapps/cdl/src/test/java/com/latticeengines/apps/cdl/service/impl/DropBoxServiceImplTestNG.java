@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.ExternalAc
 import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.LatticeUser;
 
 import java.io.InputStream;
+import java.util.Collections;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -11,7 +12,10 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -30,10 +34,13 @@ import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 
 public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DropBoxServiceImplTestNG.class);
 
     @Inject
     private DropBoxService dropboxService;
@@ -113,16 +120,14 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         GrantDropBoxAccessResponse response = dropboxService.grantAccess(request);
         Assert.assertEquals(response.getAccessMode(), LatticeUser);
 
-        waitPolicyTakeEffect();
         BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(response.getAccessKey(), response.getSecretKey());
-        verifyAccess(creds, true);
-        verifyAccess(latticeProvider, false);
+        verifyAccessWithRetries(creds, true);
+        verifyAccessWithRetries(latticeProvider, false);
 
         dropboxService.revokeAccess();
-        waitPolicyTakeEffect();
-        verifyNoAccess(creds, false);
-        verifyAccess(latticeProvider, false);
+        verifyNoAccessWithRetries(creds, false);
+        verifyAccessWithRetries(latticeProvider, false);
     }
 
     private void testGrantAccessToExistingUser() {
@@ -141,13 +146,11 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(accessKey.getAccessKeyId(), accessKey.getSecretAccessKey());
-        waitPolicyTakeEffect();
-        verifyAccess(creds, false);
-        verifyAccess(latticeProvider, false);
+        verifyAccessWithRetries(creds, false);
+        verifyAccessWithRetries(latticeProvider, false);
         dropboxService.revokeAccess();
-        waitPolicyTakeEffect();
-        verifyNoAccess(creds, false);
-        verifyAccess(latticeProvider, false);
+        verifyNoAccessWithRetries(creds, false);
+        verifyAccessWithRetries(latticeProvider, false);
 
         iamService.deleteCustomerUser(userName);
     }
@@ -159,46 +162,58 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         GrantDropBoxAccessResponse response = dropboxService.grantAccess(request);
         Assert.assertEquals(response.getAccessMode(), ExternalAccount);
 
-        waitPolicyTakeEffect();
         BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(customerAccessKey, customerSecret);
-        verifyAccess(creds, true);
-        verifyAccess(latticeProvider, false);
+        verifyAccessWithRetries(creds, true);
+        verifyAccessWithRetries(latticeProvider, false);
 
         dropboxService.revokeAccess();
-        waitPolicyTakeEffect();
-        verifyNoAccess(creds, true);
-        verifyAccess(latticeProvider, false);
+        verifyNoAccessWithRetries(creds, true);
+        verifyAccessWithRetries(latticeProvider, false);
     }
 
-    private void verifyAccess(BasicAWSCredentialsProvider creds, boolean upload) {
+    private void verifyAccessWithRetries(BasicAWSCredentialsProvider creds, boolean upload) {
         String bucket = dropboxService.getDropBoxBucket();
         String prefix = dropboxService.getDropBoxPrefix();
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
                 .withCredentials(creds).withRegion(awsRegion).build();
-        String objectKey = prefix + "/le.html";
-        if (upload) {
-            uploadFile(s3Client, bucket, prefix);
-        }
-        Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
-        ListObjectsV2Result result = s3Client.listObjectsV2(bucket, prefix);
-        Assert.assertTrue(result.getKeyCount() > 0);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AmazonS3Exception.class), null);
+        retry.execute(context -> {
+            int count = context.getRetryCount();
+            if (count > 3) {
+                log.info("Verify access, attempt=" + count);
+            }
+            String objectKey = prefix + "/le.html";
+            if (upload) {
+                uploadFile(s3Client, bucket, prefix);
+            }
+            Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
+            ListObjectsV2Result result = s3Client.listObjectsV2(bucket, prefix);
+            Assert.assertTrue(result.getKeyCount() > 0);
+            return true;
+        });
+
     }
 
-    private void verifyNoAccess(BasicAWSCredentialsProvider creds, boolean skipGet) {
+    private void verifyNoAccessWithRetries(BasicAWSCredentialsProvider creds, boolean skipGet) {
         String bucket = dropboxService.getDropBoxBucket();
         String prefix = dropboxService.getDropBoxPrefix();
         String objectKey = prefix + "/le.html";
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
                 .withCredentials(creds).withRegion(awsRegion).build();
-        try {
-            s3Client.listObjectsV2(bucket, objectKey);
-            Assert.fail("Should throw AmazonS3Exception.");
-        } catch (AmazonS3Exception e) {
-            Assert.assertTrue(e.getMessage().contains("403"));
-        }
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            int count = context.getRetryCount();
+            if (count > 3) {
+                log.info("Verify no access, attempt=" + count);
+            }
+            verifyNoAccess(s3Client, bucket, objectKey);
+            return true;
+        });
         if (!skipGet) {
             try {
                 s3Client.getObject(bucket, objectKey);
@@ -206,6 +221,15 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
             } catch (AmazonS3Exception e) {
                 Assert.assertTrue(e.getMessage().contains("403"));
             }
+        }
+    }
+
+    private void verifyNoAccess(AmazonS3 s3Client, String bucket, String objectKey) {
+        try {
+            s3Client.listObjectsV2(bucket, objectKey);
+            Assert.fail("Should throw AmazonS3Exception.");
+        } catch (AmazonS3Exception e) {
+            Assert.assertTrue(e.getMessage().contains("403"));
         }
     }
 
@@ -218,14 +242,6 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, om)
                 .withCannedAcl(CannedAccessControlList.BucketOwnerRead);
         s3Client.putObject(request);
-    }
-
-    private void waitPolicyTakeEffect() {
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
     }
 
 }
