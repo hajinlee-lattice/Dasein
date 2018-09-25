@@ -77,23 +77,19 @@
 	table {
 		thead th {
 			font-size: 13px;
+			white-space: nowrap;
 		}
 		thead th, tbody td {
 			&:last-of-type {
 				min-width: 100px;
 			}
 			&:nth-child(2) {
-				min-width: 240px;
+				min-width: 140px;
 				max-width: 300px;
 			}
 			&:nth-child(3) {
-				min-width: 133px;
-			}
-			&:nth-child(4) {
-				min-width: 106px;
-			}
-			&:nth-child(5) {
-				min-width: 71px;
+				min-width: 50px;
+				max-width: 100px;
 			}
 		}
 	}

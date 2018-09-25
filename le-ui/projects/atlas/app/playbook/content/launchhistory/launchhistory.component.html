@@ -4,7 +4,7 @@
     <div 
         ng-if="vm.noData"
         class="no-data">
-        <h2>There are no plays launched. The launch history will be available once you launch plays.</h2>
+        <h2>There are no campaigns launched. The launch history will be available once you launch plays.</h2>
         <a 
             class="button white-button"
             ui-sref="home.playbook.create">
@@ -131,8 +131,8 @@
     		<tbody ng-if="!vm.noFilteredData">
     			<tr ng-repeat="launch in vm.launches.launchSummaries">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
-                    <td ng-if="vm.allPlaysHistory" class="text-ellipsis">{{launch.playDisplayName}}</td>
-                    <td>{{vm.systemNameMap[launch.destinationOrgId]}}</td>
+                    <td ng-if="vm.allPlaysHistory" class="text-ellipsis" title="{{launch.playDisplayName}}">{{launch.playDisplayName}}</td>
+                    <td class="text-ellipsis" title="{{vm.systemNameMap[launch.destinationOrgId]}}">{{vm.systemNameMap[launch.destinationOrgId]}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
     				<td class="red-text">{{launch.stats.errors | number}}</td>

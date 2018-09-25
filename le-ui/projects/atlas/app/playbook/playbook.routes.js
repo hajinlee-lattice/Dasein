@@ -623,7 +623,7 @@ angular
                     };
                 },
                 WizardHeaderTitle: function() {
-                    return 'Create Play';
+                    return 'Create Campaign';
                 },
                 WizardContainerId: function() {
                     return 'playbook';
