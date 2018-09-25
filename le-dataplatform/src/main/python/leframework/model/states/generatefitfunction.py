@@ -23,8 +23,11 @@ class FitFunctionGeneratorBase(State):
             rateChartDf = rateChartDf.sort(sortByColumnName, ascending=False)
         else:
             rateChartDf = rateChartDf.sort_values(by=sortByColumnName, ascending=False)
-        maxRateRow = rateChartDf.iloc[0]
-        return maxRateRow[rateColName]
+        topRates = np.zeros(3)
+        topRates[0] = rateChartDf[rateColName].iloc[0]
+        topRates[1] = rateChartDf[rateColName].iloc[range(3)].mean()
+        topRates[2] = rateChartDf[rateColName].iloc[range(10)].mean()
+        return np.max(topRates)
 
     def get_decile_rate(self, p1, scoreColumnName, eventColName, countColName):
         p1['decile'] = p1[scoreColumnName].apply(lambda x: int((x - 1) / 10 + 1))
