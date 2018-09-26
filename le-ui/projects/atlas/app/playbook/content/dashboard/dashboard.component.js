@@ -139,23 +139,23 @@ angular.module('lp.playbook.dashboard', [
     };
 
     var makeLaunchGraph = function(launchHistory) {
-        if(!launchHistory || !launchHistory.playLaunch) {
+        if(!launchHistory || !launchHistory.lastCompletedLaunch) {
             return false;
         }
-        var total_contacts = launchHistory.playLaunch.contactsLaunched + launchHistory.newContactsNum,
-            total_accounts = launchHistory.playLaunch.accountsLaunched + launchHistory.newAccountsNum,
+        var total_contacts = launchHistory.lastCompletedLaunch.contactsLaunched + launchHistory.newContactsNum,
+            total_accounts = launchHistory.lastCompletedLaunch.accountsLaunched + launchHistory.newAccountsNum,
             total = total_contacts + total_accounts;
             
         return {
             buckets: {
                 contacts: {
                     new: launchHistory.newContactsNum,
-                    current: launchHistory.playLaunch.contactsLaunched,
+                    current: launchHistory.lastCompletedLaunch.contactsLaunched,
                     total: total_contacts
                 },
                 accounts: {
                     new: launchHistory.newAccountsNum,
-                    current: launchHistory.playLaunch.accountsLaunched,
+                    current: launchHistory.lastCompletedLaunch.accountsLaunched,
                     total: total_accounts
                 }
             },
