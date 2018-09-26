@@ -19,6 +19,7 @@ angular.module('lp.playbook.wizard.preview', [])
         CgTalkingPointStore.publishTalkingPoints(vm.play.name).then(function(results){
             vm.published = results;
             vm.showPublishingSpinner = false;
+            $state.go('home.playbook.dashboard', {play_name: vm.play.name});
         });
     }
 
