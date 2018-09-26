@@ -15,7 +15,7 @@ angular.module('lp.ratingsengine.wizard.products', [
             selectedAll: false,
             engineType: $stateParams.engineType,
             configFilters: {},
-            purchasedBeforePeriod: '6'
+            purchasedBeforePeriod: getPurchasedBeforePeriod()
         });
 
         $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -43,8 +43,6 @@ angular.module('lp.ratingsengine.wizard.products', [
     vm.getSelectedProducts = function() {
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
-
-                // console.log(rating.activeModel.AI);
 
                 if(rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts !== null){
                     var selectedTargetProducts = rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts;
@@ -137,6 +135,15 @@ angular.module('lp.ratingsengine.wizard.products', [
 
     vm.getSelectedCount = function () {
         return Object.keys(vm.productsSelected).length;
+    }
+
+    function getPurchasedBeforePeriod() {
+        var configFilters = RatingsEngineStore.getConfigFilters() 
+        if (configFilters && configFilters.PURCHASED_BEFORE_PERIOD && configFilters.PURCHASED_BEFORE_PERIOD.value) {
+            return configFilters.PURCHASED_BEFORE_PERIOD.value.toString();
+        } else {
+            return '6';
+        }
     }
 
     vm.init();
