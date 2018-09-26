@@ -21,8 +21,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -109,7 +110,10 @@ public class CustomEventModelingEnd2EndDeploymentTestNG extends SelfServiceModel
                     JsonNode tags = predictor.get("Tags");
                     assertEquals(tags.size(), 1);
                     assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION);
+                    // as per requirement, we moved attributes from
+                    // ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION to
+                    // Category.ACCOUNT_ATTRIBUTES
+                    assertEquals(predictor.get("Category").textValue(), Category.ACCOUNT_ATTRIBUTES.getName());
                 } else if (predictor.get("Name").asText().equals("Industry")) {
                     JsonNode approvedUsages = predictor.get("ApprovedUsage");
                     assertEquals(approvedUsages.size(), 1);

@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -44,16 +43,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -124,11 +120,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         firstTenant = testBed.getMainTestTenant();
 
-//        if (EncryptionGlobalState.isEnabled()) {
-//            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
-//                    .construct(new CustomerSpaceScope(CustomerSpace.parse(firstTenant.getId())));
-//            assertTrue(controller.exists(new Path("/EncryptionKey")));
-//        }
+        // if (EncryptionGlobalState.isEnabled()) {
+        // ConfigurationController<CustomerSpaceScope> controller =
+        // ConfigurationController
+        // .construct(new
+        // CustomerSpaceScope(CustomerSpace.parse(firstTenant.getId())));
+        // assertTrue(controller.exists(new Path("/EncryptionKey")));
+        // }
 
         // Create second tenant for copy model use case
         testBed.bootstrapForProduct(LatticeProduct.LPA3);
@@ -144,7 +142,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public String getScoringApiInternalUrl() {
         return getRestAPIHostPort() + "/pls/scoringapi-internal";
     }
-    
+
     @SuppressWarnings("rawtypes")
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true)
     public void uploadFile() {
@@ -302,7 +300,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), modelId), ModelSummary.class);
         assertEquals(summary.getStatus(), ModelSummaryStatus.ACTIVE);
     }
-    
+
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void testScoringApiInternalModels() {
         log.info("Retrieving Models via ScoringAPI Proxy.");
@@ -319,7 +317,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
         assertEquals(modelList.size(), 1);
         log.info("Retrieving Model Fields via ScoringAPI Proxy.");
-        
+
         log.info("Retrieving Models via ScoringAPI Proxy with Type Filter.");
         url = getScoringApiInternalUrl() + "/models?type=" + ModelType.CONTACT;
         resultList = restTemplate.getForObject(url, List.class);
@@ -334,11 +332,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
         log.info("Retrieving Model Fields via ScoringAPI Proxy with Type Filter.");
     }
-    
+
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "testScoringApiInternalModels")
     public void testScoringApiInternalModelDetails() {
         log.info("Retrieving ModelDetails via ScoringAPI Proxy.");
-        String url = getScoringApiInternalUrl() + "/modeldetails?considerAllStatus=true&offset=0&maximum=10&considerDeleted=false";
+        String url = getScoringApiInternalUrl()
+                + "/modeldetails?considerAllStatus=true&offset=0&maximum=10&considerDeleted=false";
         List<?> resultList = restTemplate.getForObject(url, List.class);
         assertNotNull(resultList);
         List<ModelDetail> paginatedModels = new ArrayList<>();
@@ -353,16 +352,17 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(paginatedModels.get(0).getModel());
         assertEquals(paginatedModels.get(0).getModel().getName(), modelDisplayName);
         log.info("Finished Retrieving ModelDetails via ScoringAPI Proxy.");
-        
+
         log.info("Retrieving Model Fields via ScoringAPI Proxy.");
-        String fieldsUrl = getScoringApiInternalUrl() + "/models/" + paginatedModels.get(0).getModel().getModelId()+ "/fields";
+        String fieldsUrl = getScoringApiInternalUrl() + "/models/" + paginatedModels.get(0).getModel().getModelId()
+                + "/fields";
         Fields fields = restTemplate.getForObject(fieldsUrl, Fields.class);
         assertNotNull(fields);
         assertNotNull(fields.getFields());
         assertEquals(fields.getModelId(), paginatedModels.get(0).getModel().getModelId());
         log.info("Retrieving Model Fields via ScoringAPI Proxy.");
     }
-    
+
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException, InterruptedException {
         log.info("Start compareRtsScoreWithModelingForOriginalModelSummary");
@@ -763,7 +763,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                     JsonNode tags = predictor.get("Tags");
                     assertEquals(tags.size(), 1);
                     assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                    // as per requirement, we moved attributes from
+                    // ModelingMetadata.CATEGORY_LEAD_INFORMATION to
+                    // Category.ACCOUNT_ATTRIBUTES
+                    assertEquals(predictor.get("Category").textValue(), Category.ACCOUNT_ATTRIBUTES.getName());
                 } else if (predictor.get("Name").asText().equals("Industry")) {
                     JsonNode approvedUsages = predictor.get("ApprovedUsage");
                     assertEquals(approvedUsages.size(), 1);
@@ -808,8 +811,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         String urlSuffix = sb.substring(0, sb.length() - 1).toString();
         rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs%s", getRestAPIHostPort(), urlSuffix),
                 List.class);
-        // FIXME: (Yintao - M21) remove this assertion temporarily to unblock M21 release
-        // assertEquals(CollectionUtils.size(rawJobs), CollectionUtils.size(jobs));
+        // FIXME: (Yintao - M21) remove this assertion temporarily to unblock
+        // M21 release
+        // assertEquals(CollectionUtils.size(rawJobs),
+        // CollectionUtils.size(jobs));
         jobs = JsonUtils.convertList(rawJobs, Job.class);
         log.info(String.format("Jobs are %s", jobs));
     }
