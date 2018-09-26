@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 BOOTSTRAP_MODE=$1
-ARTIFACT_DIR=$WSHOME/le-dev/artifacts
+ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.5
+    TOMCAT_VERSION=9.0.12
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
-    sudo chown -R $USER ${CATALINA_HOME} || true
+    sudo chown -R ${USER} ${CATALINA_HOME} || true
 
     TOMCAT_TGZ_URL="http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
 
@@ -32,30 +32,30 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         echo "You installed apr ${APR_VERSION}"
         OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
         echo "You installed openssl ${OPENSSL_VERSION}"
-        pushd $CATALINA_HOME/bin
+        pushd ${CATALINA_HOME}/bin
         tar xzf tomcat-native.tar.gz
         cd tomcat-native-*-src/native
         ./configure \
-            --with-java-home=$JAVA_HOME \
+            --with-java-home=${JAVA_HOME} \
             --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
             --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
-            --prefix=$CATALINA_HOME
+            --prefix=${CATALINA_HOME}
         make && make install
         popd
     else
         echo "You are on ${UNAME}"
-        pushd $CATALINA_HOME/bin
+        pushd ${CATALINA_HOME}/bin
         tar xzf tomcat-native.tar.gz
         cd tomcat-native-*-src/native
         ./configure \
-            --with-java-home=$JAVA_HOME \
-            --prefix=$CATALINA_HOME
+            --with-java-home=${JAVA_HOME} \
+            --prefix=${CATALINA_HOME}
         make && make install
         popd
     fi
 
     sudo mkdir -p /etc/ledp/tls
-    sudo chown -R $USER /etc/ledp/tls
+    sudo chown -R ${USER} /etc/ledp/tls
     rm -rf /etc/ledp/tls/*
     aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt /etc/ledp/tls/server.crt
     aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key /etc/ledp/tls/server.key
