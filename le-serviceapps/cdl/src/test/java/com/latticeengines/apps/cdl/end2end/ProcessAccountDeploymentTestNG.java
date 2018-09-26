@@ -40,11 +40,13 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 1, "Account");
+        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 1, "Contact");
         mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
         mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Account, 2, "Account");
+        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 2, "Contact");
         // TODO: (Yintao) should be changed to mock vdb import
         mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
