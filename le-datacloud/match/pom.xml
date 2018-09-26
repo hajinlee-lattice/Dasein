@@ -78,11 +78,6 @@
             <artifactId>commons-text</artifactId>
             <version>${commons.text.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-ldc-collectiondb</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
 </project>

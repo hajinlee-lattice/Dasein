@@ -2,20 +2,15 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-       xmlns:yarn="http://www.springframework.org/schema/yarn"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:component-scan base-package="com.latticeengines.datacloud.collection" />
-    <context:component-scan base-package="com.latticeengines.ldc_collectiondb"/>
 
     <import resource="classpath:datacloud-core-context.xml" />
-    <import resource="classpath:ldc-collectiondb-persistence-context.xml" />
-
-    <jpa:auditing/>
 
     <import resource="classpath:aws-context.xml"/>
-    <context:component-scan base-package="com.latticeengines.aws" annotation-config="true"/>
 
 </beans>

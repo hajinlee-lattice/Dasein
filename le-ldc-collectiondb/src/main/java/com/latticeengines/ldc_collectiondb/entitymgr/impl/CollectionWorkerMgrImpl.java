@@ -9,11 +9,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
-import com.latticeengines.ldc_collectiondb.repository.CollectionWorkerRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
+import com.latticeengines.ldc_collectiondb.repository.writer.CollectionWorkerRepository;
 
 @Component
 public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<CollectionWorker, Long> implements CollectionWorkerMgr {
@@ -28,7 +28,7 @@ public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<Collecti
     }
 
     @Inject
-    CollectionWorkerRepository collectionWorkerRepository;
+    private CollectionWorkerRepository collectionWorkerRepository;
 
     @Override
     public BaseJpaRepository<CollectionWorker, Long> getRepository() {

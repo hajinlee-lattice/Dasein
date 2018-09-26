@@ -9,30 +9,33 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
-import com.latticeengines.ldc_collectiondb.repository.CollectionRequestRepository;
-import com.latticeengines.ldc_collectiondb.repository.reader.CollectionRequestReaderRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
+import com.latticeengines.ldc_collectiondb.repository.reader.CollectionRequestReaderRepository;
+import com.latticeengines.ldc_collectiondb.repository.writer.CollectionRequestWriterRepository;
 
 @Component
 public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<CollectionRequest, Long> implements CollectionRequestMgr {
-    static final int RAW_REQ_BATCH = 16;
+
+    private static final int RAW_REQ_BATCH = 16;
+
     @Inject
-    CollectionRequestRepository collectionRequestRepository;
+    private CollectionRequestWriterRepository repository;
+
     @Inject
-    CollectionRequestReaderRepository collectionRequestReaderRepository;
+    private CollectionRequestReaderRepository readerRepository;
 
     @Override
     public BaseJpaRepository<CollectionRequest, Long> getRepository() {
-        return collectionRequestRepository;
+        return repository;
     }
 
     @Override
     public List<CollectionRequest> getByVendorAndDomains(String vendor, Collection<String> domains) {
-        return collectionRequestReaderRepository.findByVendorAndDomainIn(vendor, domains);
+        return readerRepository.findByVendorAndDomainIn(vendor, domains);
     }
 
     @Override
@@ -49,10 +52,11 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
         query.select(reqTable).where(builder.and(builder.equal(reqTable.get("vendor"), vendor), builder.equal(reqTable.get("status"), CollectionRequest.STATUS_READY))).orderBy(builder.asc(reqTable.get("requestedTime")));
         TypedQuery<CollectionRequest> typedQuery = entityManager.createQuery(query);
         List<CollectionRequest> resultList = typedQuery.setMaxResults(upperLimit).getResultList();*/
-        List<CollectionRequest> resultList = collectionRequestReaderRepository
+        List<CollectionRequest> resultList = readerRepository
                 .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, CollectionRequest.STATUS_READY);
-        if (resultList.size() > upperLimit)
+        if (resultList.size() > upperLimit) {
             resultList = resultList.subList(0, upperLimit);
+        }
 
         return resultList;
     }
@@ -60,20 +64,21 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     @Override
     public List<CollectionRequest> getPending(String vendor, List<CollectionWorker> finishedWorkers) {
         List<String> finishedWorkerIds = new ArrayList<>(finishedWorkers.size());
-        for (int i = 0; i < finishedWorkers.size(); ++i)
-            finishedWorkerIds.add(finishedWorkers.get(i).getWorkerId());
+        for (CollectionWorker finishedWorker : finishedWorkers) {
+            finishedWorkerIds.add(finishedWorker.getWorkerId());
+        }
 
         List<String> excluedStatus = new ArrayList<>(2);
         excluedStatus.add(CollectionRequest.STATUS_DELIVERED);
         excluedStatus.add(CollectionRequest.STATUS_FAILED);
-        return collectionRequestReaderRepository.findByVendorAndPickupWorkerInAndStatusNotIn(vendor,
+        return readerRepository.findByVendorAndPickupWorkerInAndStatusNotIn(vendor,
                 finishedWorkerIds,
                 excluedStatus);
     }
 
     @Override
     public List<CollectionRequest> getDelivered(String pickupWorker) {
-        return collectionRequestReaderRepository.findByPickupWorker(pickupWorker);
+        return readerRepository.findByPickupWorker(pickupWorker);
     }
 
     @Override
@@ -93,11 +98,12 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
                         builder.equal(reqTable.get("status"), status)));
         Timestamp ts = entityManager.createQuery(query).getSingleResult();*/
 
-        List<CollectionRequest> resultList = collectionRequestReaderRepository
+        List<CollectionRequest> resultList = readerRepository
                 .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, status);
 
-        if (resultList.size() == 0)
+        if (resultList.size() == 0) {
             return new Timestamp(System.currentTimeMillis());
+        }
 
         Timestamp ts = resultList.get(0).getRequestedTime();
         resultList.clear();

@@ -6,36 +6,36 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
-import com.latticeengines.ldc_collectiondb.repository.RawCollectionRequestRepository;
-import com.latticeengines.ldc_collectiondb.repository.reader.RawCollectionRequestReaderRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
+import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
+import com.latticeengines.ldc_collectiondb.repository.reader.RawCollectionRequestReaderRepository;
+import com.latticeengines.ldc_collectiondb.repository.writer.RawCollectionRequestWriterRepository;
 
 @Component("rawCollectionRequestMgr")
 public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawCollectionRequest, Long> //
         implements RawCollectionRequestMgr {
 
     @Inject
-    private RawCollectionRequestRepository rawCollectionRequestRepository;
+    private RawCollectionRequestWriterRepository repository;
 
     @Inject
-    private RawCollectionRequestReaderRepository rawCollectionRequestReaderRepository;
+    private RawCollectionRequestReaderRepository readerRepository;
 
     @Override
     public BaseJpaRepository<RawCollectionRequest, Long> getRepository() {
-        return rawCollectionRequestRepository;
+        return repository;
     }
 
     @Override
     public List<RawCollectionRequest> getNonTransferred() {
-        return rawCollectionRequestReaderRepository.findByTransferred(false);
+        return readerRepository.findByTransferred(false);
     }
 
     @Override
     public void saveRequests(Iterable<RawCollectionRequest> reqs) {
-        rawCollectionRequestRepository.saveAll(reqs);
+        repository.saveAll(reqs);
     }
 
 }

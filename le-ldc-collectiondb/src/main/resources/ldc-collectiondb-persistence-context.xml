@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/data/jpa
+      http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
     <bean id="ldcCollectionDbSource"
           class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
@@ -15,7 +17,7 @@
         <property name="maxPoolSize" value="${ldc_collectiondb.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${ldc_collectiondb.datasource.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${ldc_collectiondb.datasource.poolsize.max.appmaster}"/>
-        <property name="acquireIncrement" value="5" />
+        <property name="acquireIncrement" value="5"/>
     </bean>
 
     <!-- Entity manager factory -->
@@ -92,14 +94,14 @@
     </bean>
 
     <jpa:auditing/>
-    <jpa:repositories base-package="com.latticeengines.ldc_collectiondb.repository"
+    <jpa:repositories base-package="com.latticeengines.ldc_collectiondb.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="ldcCollectionEntityManagerFactory"
-                      transaction-manager-ref="ldcCollectionTransactionManager"  />
+                      transaction-manager-ref="ldcCollectionTransactionManager"/>
 
     <jpa:repositories base-package="com.latticeengines.ldc_collectiondb.repository.reader"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="ldcCollectionEntityManagerFactoryReader"
-                      transaction-manager-ref="ldcCollectionTransactionManagerReader"  />
+                      transaction-manager-ref="ldcCollectionTransactionManagerReader"/>
 
 </beans>

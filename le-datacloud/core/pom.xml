@@ -24,5 +24,10 @@
             <artifactId>le-datafabric</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-ldc-collectiondb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -1,4 +1,4 @@
-package com.latticeengines.ldc_collectiondb.repository;
+package com.latticeengines.ldc_collectiondb.repository.writer;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
