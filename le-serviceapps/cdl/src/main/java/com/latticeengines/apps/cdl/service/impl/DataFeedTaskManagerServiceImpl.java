@@ -63,6 +63,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -71,6 +72,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("dataFeedTaskManagerService")
@@ -102,6 +104,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
+
+    @Value("${common.pls.url}")
+    private String hostPort;
 
     @Inject
     private DropFolderProxy dropFolderProxy;
@@ -238,7 +243,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
-                csvImportFileInfo, new WorkflowPidWrapper(-1L));
+                csvImportFileInfo, false, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
@@ -292,7 +297,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         importConfig.setS3FilePath(newFilePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
         // validate
-        validateS3File(dataFeedTask.getImportTemplate(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
+        validateS3File(dataFeedTask, importConfig, customerSpace.toString());
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
@@ -301,11 +306,38 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
-                JsonUtils.serialize(importConfig), csvImportFileInfo, new WorkflowPidWrapper(-1L));
+                JsonUtils.serialize(importConfig), csvImportFileInfo, true, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
-    private void validateS3File(Table template, String s3Bucket, String s3FilePath) {
+    private void sendS3ImportEmail(String customerSpace, String result, String fileName, String message,
+                                   DataFeedTask dataFeedTask) {
+        try {
+            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
+            if (dataFeedTask != null) {
+                AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
+                Map<String, String> infoMap = new HashMap<>();
+                infoMap.put("TemplateName", dataFeedTask.getFeedType());
+                infoMap.put("Entity", dataFeedTask.getEntity());
+                infoMap.put("FileName", fileName);
+                if (StringUtils.isNotEmpty(message)) {
+                    infoMap.put("FailedMessage", message);
+                }
+                emailInfo.setExtraInfoMap(infoMap);
+                String tenantId = CustomerSpace.parse(customerSpace).toString();
+                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send s3 import email: " + e.getMessage());
+        }
+    }
+
+    private void validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
+                                String customerSpace) {
+        Table template = dataFeedTask.getImportTemplate();
+        String s3Bucket = importConfig.getS3Bucket();
+        String s3FilePath = importConfig.getS3FilePath();
+        List<String> warnings = new ArrayList<>();
         try {
             InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath);
             InputStreamReader reader = new InputStreamReader(
@@ -352,13 +384,17 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 throw new LedpException(LedpCode.LEDP_40043, new String[] { String.join(",", requiredMissing) });
             }
             parser.close();
+            String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
+            sendS3ImportEmail(customerSpace, "In_Progress", importConfig.getS3FileName(), message, dataFeedTask);
         } catch (LedpException e) {
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
+            sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
             throw e;
         } catch (IOException e) {
             log.error(e.getMessage());
         } catch (IllegalArgumentException e) {
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
+            sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
             log.error(e.getMessage());
             throw e;
         }

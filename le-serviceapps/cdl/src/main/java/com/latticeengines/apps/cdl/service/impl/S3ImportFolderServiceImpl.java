@@ -27,7 +27,7 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     @Inject
     private S3Service s3Service;
 
-    @Value("${aws.s3.bucket}")
+    @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
 

@@ -199,6 +199,16 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    public void sendS3ImportEmail(String result, String tenantId, AdditionalEmailInfo emailInfo) {
+        try {
+            String url = constructUrl("pls/internal/emails/s3import/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, emailInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("sendS3ImportEmail: Remote call failure", e);
+        }
+    }
+
     public boolean createTenant(Tenant tenant) {
         try {
             String url = constructUrl("pls/admin/tenants");

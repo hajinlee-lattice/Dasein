@@ -217,6 +217,18 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
+    public void setImportFileName(String importFileName) {
+        setDetailValue("ImportFileName", importFileName);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getImportFileName() {
+        return getDetailValue("ImportFileName") != null ? getDetailValue("ImportFileName").toString() : null;
+    }
+
+    @Transient
+    @JsonIgnore
     public void setDetailValue(String key, Object value) {
         details.put(key, value);
     }

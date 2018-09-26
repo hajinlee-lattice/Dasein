@@ -838,9 +838,9 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending cdl ingestion status to " + user.getEmail() + " on " + tenant.getName() + " started.");
             EmailTemplateBuilder builder;
-            if ("success".equals(status)) {
+            if ("Success".equalsIgnoreCase(status)) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_SUCCESS);
-            } else if ("in progress".equals(status)) {
+            } else if ("In_Progress".equalsIgnoreCase(status)) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_IN_PROCESS);
             } else {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_ERROR);

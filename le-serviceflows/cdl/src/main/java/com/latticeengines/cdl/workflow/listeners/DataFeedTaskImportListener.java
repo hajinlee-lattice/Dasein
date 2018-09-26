@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -20,11 +22,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -33,6 +38,7 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -67,10 +73,14 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
+        String hostPort = jobExecution.getJobParameters().getString("Internal_Resource_Host_Port");
+        log.info("DataFeedTask import hostPort: " + hostPort);
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String applicationId = job.getOutputContextValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
         String importJobIdentifier = job
                 .getInputContextValue(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
+        Boolean sendS3ImportEmail = Boolean.valueOf(
+                job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG));
         String customerSpace = job.getTenant().getId();
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
@@ -87,6 +97,11 @@ public class DataFeedTaskImportListener extends LEJobListener {
         }
 
         if (jobExecution.getStatus().isUnsuccessful()) {
+            if (sendS3ImportEmail) {
+                String message = "Failed to import s3 file, please contact Lattice admin.";
+                sendS3ImportEmail(hostPort, customerSpace, "Failed",
+                        importJobIdentifier, eaiImportJobDetail.getImportFileName(), message);
+            }
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             try {
@@ -150,6 +165,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     vdbLoadTableStatus.setMessage("Load table complete!");
                     dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
                 }
+                if (sendS3ImportEmail) {
+                    sendS3ImportEmail(hostPort, customerSpace, "Success",
+                            importJobIdentifier, eaiImportJobDetail.getImportFileName(), null);
+                }
             } catch (Exception e) {
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
 
@@ -157,6 +176,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     vdbLoadTableStatus.setJobStatus("Failed");
                     vdbLoadTableStatus.setMessage(String.format("Load table failed with exception: %s", e.toString()));
                     dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
+                }
+                if (sendS3ImportEmail) {
+                    sendS3ImportEmail(hostPort, customerSpace, "Failed",
+                            importJobIdentifier, eaiImportJobDetail.getImportFileName(), e.getMessage());
                 }
             }
 
@@ -171,6 +194,29 @@ public class DataFeedTaskImportListener extends LEJobListener {
                         jobExecution.getStatus().name()));
                 dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
             }
+        }
+    }
+
+    private void sendS3ImportEmail(String hostPort, String customerSpace, String result,
+                                   String taskId, String fileName, String message) {
+        try {
+            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
+            if (dataFeedTask != null) {
+                AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
+                Map<String, String> infoMap = new HashMap<>();
+                infoMap.put("TemplateName", dataFeedTask.getFeedType());
+                infoMap.put("Entity", dataFeedTask.getEntity());
+                infoMap.put("FileName", fileName);
+                if (StringUtils.isNotEmpty(message)) {
+                    infoMap.put("FailedMessage", message);
+                }
+                emailInfo.setExtraInfoMap(infoMap);
+                String tenantId = CustomerSpace.parse(customerSpace).toString();
+                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send s3 import email: " + e.getMessage());
         }
     }
 

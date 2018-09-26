@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -355,6 +356,16 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             return JsonUtils.convertList(listObj, Job.class);
         } catch (Exception e) {
             throw new RuntimeException("findJobsBasedOnActionIdsAndType: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public void sendS3ImportEmail(String result, String tenantId, AdditionalEmailInfo emailInfo) {
+        try {
+            String url = constructUrl("pls/internal/emails/s3import/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, emailInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("sendS3ImportEmail: Remote call failure", e);
         }
     }
 

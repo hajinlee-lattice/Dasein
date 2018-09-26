@@ -38,12 +38,12 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
-            CSVImportFileInfo csvImportFileInfo, WorkflowPidWrapper pidWrapper) {
+            CSVImportFileInfo csvImportFileInfo, boolean s3ImportEmail, WorkflowPidWrapper pidWrapper) {
         log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
         Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
-                connectorConfig, csvImportFileInfo, action.getPid());
+                connectorConfig, csvImportFileInfo, action.getPid(), s3ImportEmail);
 
         ApplicationId appId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return appId;
@@ -73,7 +73,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
             DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo,
-            @NonNull Long actionPid) {
+            @NonNull Long actionPid, boolean s3ImportEmail) {
 
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
@@ -88,6 +88,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                                 csvImportFileInfo.getReportFileDisplayName()) //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
+                        .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))
                         .build())
                 .build();
     }

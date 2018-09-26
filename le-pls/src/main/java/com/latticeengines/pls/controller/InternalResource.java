@@ -673,6 +673,33 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/emails/s3import/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after scoring")
+    public void sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
+                                  @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        Tenant tenant = tenantService.findByTenantId(tenantId);
+        String templateName = emailInfo.getExtraInfoMap().get("TemplateName");
+        String fileName = emailInfo.getExtraInfoMap().get("FileName");
+        String entity = emailInfo.getExtraInfoMap().get("Entity");
+        String failedMessage = emailInfo.getExtraInfoMap().get("FailedMessage");
+
+        for (User user : users) {
+            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                    || user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())
+                    || user.getAccessLevel().equals(AccessLevel.SUPER_ADMIN.name())) {
+
+                emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, templateName,
+                        fileName, failedMessage, entity);
+            }
+            if (user.getEmail().equals(emailInfo.getUserId())) {
+
+            }
+        }
+    }
+
     @SuppressWarnings("deprecation")
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody

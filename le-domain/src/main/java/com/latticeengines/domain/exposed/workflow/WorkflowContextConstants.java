@@ -32,6 +32,7 @@ public class WorkflowContextConstants {
         public static final String DATAFEED_STATUS = "DATAFEED_STATUS";
         public static final String INITIAL_DATAFEED_STATUS = "INITIAL_DATAFEED_STATUS";
         public static final String DATAFEEDTASK_IMPORT_IDENTIFIER = "DATAFEEDTASK_IMPORT_IDENTIFIER";
+        public static final String S3_IMPORT_EMAIL_FLAG = "S3_IMPORT_EMAIL_FLAG";
         public static final String CHILDREN_WORKFLOW_JOB_IDS = "CHILDREN_WORKFLOW_JOB_IDS";
         public static final String ACTION_IDS = "ACTION_IDS";
         public static final String ACTION_ID = "ACTION_ID";
