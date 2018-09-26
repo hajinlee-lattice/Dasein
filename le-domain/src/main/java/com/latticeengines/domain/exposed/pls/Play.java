@@ -18,7 +18,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -141,7 +140,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     private String updatedBy;
 
     @JsonProperty("playType")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_PLAY_TYPE", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PlayType playType;
