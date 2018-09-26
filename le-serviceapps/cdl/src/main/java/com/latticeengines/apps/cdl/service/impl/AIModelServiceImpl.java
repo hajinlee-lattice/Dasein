@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import reactor.core.publisher.Flux;
-
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -59,6 +58,8 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
+
+import reactor.core.publisher.Flux;
 
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {
@@ -320,7 +321,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     }).block();
 
             AtomicInteger i = new AtomicInteger(1);
-            return Flux.fromIterable(sortedImportance.entrySet())
+            return Flux.fromIterable(sortedImportance.descendingMap().entrySet())
                     .collect(HashMap<String, Integer>::new, (map, es) -> map.put(es.getValue(), i.getAndIncrement()))
                     .block();
 
