@@ -8,7 +8,6 @@ BEGIN
   DECLARE tenants TEXT;
   DECLARE curs CURSOR FOR  SELECT distinct FK_TENANT_ID FROM PLS_MultiTenant.PLAY;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=1;
-  SET tenants = 'Created Play types for tenantIds: ';
 
   OPEN curs;
   WHILE NOT finished DO
@@ -26,7 +25,7 @@ BEGIN
 		SET tenants = concat(tenants , tenantId, ', ');
     END IF;
   END WHILE;
-  SELECT tenants;
+
   CLOSE curs;
 END
 //
@@ -89,7 +88,7 @@ CREATE PROCEDURE `UpdatePLSTables`()
     PRIMARY KEY (`PID`))
     engine=InnoDB;
 
-    ALTER TABLE `PLS_MultiTenant`.`PLAY_TYPE` ADD CONSTRAINT `FK_PLAYTYPE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_TYPE` ADD CONSTRAINT `FK_PLAYTYPE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) ON DELETE CASCADE;
 
     CALL `CreatePlayTypes`();
 
@@ -100,7 +99,8 @@ CREATE PROCEDURE `UpdatePLSTables`()
     on a.tracking_id = w.workflow_id
     set a.TRACKING_PID = w.pid
     where a.TRACKING_PID is null
-    
+
+    ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CONSTRAINT `FK_PLAY_FKPLAYTYPE_PLAYTYPE` FOREIGN KEY (`FK_PLAY_TYPE`) REFERENCES `PLAY_TYPE` (`PID`) ON DELETE CASCADE;
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CONSTRAINT `FK_PLAY_FKPLAYTYPE_PLAYTYPE` FOREIGN KEY (`FK_PLAY_TYPE`) REFERENCES `PLS_MultiTenant`.`PLAY_TYPE` (`PID`);
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `UPDATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
     UPDATE `PLS_MultiTenant`.`PLAY` SET UPDATED_BY = CREATED_BY WHERE UPDATED_BY = 'placeholderForUpdate';
