@@ -19,9 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -37,9 +35,6 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
 
     @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     private DataCollection.Version dataCollectionVersion;
 
@@ -110,28 +105,11 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
                                 : approvedUsage.toArray(new ApprovedUsage[approvedUsage.size()]));
             } else {
                 log.error(String.format(
-                        "Setting ApprovedUsage for Attribute %s as %s because it is not part of user configured attributes for Modeling",
-                        eventTableAttribute.getName(), ApprovedUsage.NONE));
+                        "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because it is not part of user configured attributes for Modeling",
+                        eventTableAttribute.getName(), eventTableAttribute.getCategory(), ApprovedUsage.NONE));
                 eventTableAttribute.setApprovedUsage( //
                         ApprovedUsage.NONE);
             }
         }
-
-        // TODO - remove following. This was added for extra logging till this feature is stable
-        Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                TableRoleInCollection.ConsolidatedAccount, dataCollectionVersion);
-        if (accountTable != null) {
-            accountTable.getAttributes().stream().forEach(myAtr -> {
-                if (userSelectedAttributesMap.containsKey(myAtr.getName())) {
-                    log.info(String.format("%s My Attribute is part of user configured attributes for Modeling",
-                            myAtr.getName()));
-                } else {
-                    log.info(
-                            String.format("XXXX %s My Attribute is not part of user configured attributes for Modeling",
-                                    myAtr.getName()));
-                }
-            });
-        }
-        // remove till here
     }
 }

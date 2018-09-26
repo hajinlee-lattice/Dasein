@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -17,6 +16,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.common.collect.Sets;
 
 public enum Category {
     FIRMOGRAPHICS("Firmographics"), //
@@ -40,10 +40,12 @@ public enum Category {
     private static Set<String> values;
     private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE, WEBSITE_KEYWORDS,
             ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES);
+    // used in following scenarios
+    // 1. iteration metadata API called via remodeling UI
+    // 2. attribute management UI
     private static Set<Category> hiddenFromUiCategories = new HashSet<>(
             Arrays.asList(LEAD_INFORMATION, DEFAULT, ACCOUNT_INFORMATION));
-    private static Set<Category> ldcReservedCategories = Sets.newHashSet(
-            FIRMOGRAPHICS, //
+    private static Set<Category> ldcReservedCategories = Sets.newHashSet(FIRMOGRAPHICS, //
             GROWTH_TRENDS, //
             INTENT, //
             ONLINE_PRESENCE, //
@@ -117,4 +119,7 @@ public enum Category {
         return premiumCategories.contains(this);
     }
 
+    public boolean isLdcReservedCategory() {
+        return ldcReservedCategories.contains(this);
+    }
 }

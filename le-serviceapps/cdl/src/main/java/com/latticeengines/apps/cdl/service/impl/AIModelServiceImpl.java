@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -284,9 +287,41 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     returnMap.get(cm.getCategory().getName()).add(cm);
                 }).block();
 
-        log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
+        if (MapUtils.isNotEmpty(importanceOrdering)) {
+            log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
+        }
+
+        if (MapUtils.isNotEmpty(toReturn)) {
+            checkAndRemoveHiddenAttributes(toReturn);
+        }
 
         return toReturn;
+    }
+
+    private void checkAndRemoveHiddenAttributes(Map<String, List<ColumnMetadata>> toReturn) {
+        new HashSet<>(toReturn.keySet()).stream() //
+                .map(k -> new MutablePair<>(k, toReturn.get(k))) //
+                .filter(pair -> CollectionUtils.isNotEmpty(pair.getRight())) //
+                .forEach(pair -> {
+                    List<ColumnMetadata> attrs = //
+                            pair.getRight().stream() //
+                                    .filter(atr -> (atr.isHiddenForRemodelingUI() != Boolean.TRUE)) //
+                                    .collect(Collectors.toList());
+                    if (CollectionUtils.isEmpty(attrs)) {
+                        log.info(String.format(
+                                "Removed all '%d' attributes and '%s' category as all attributes under it "
+                                        + "were marked as hidden from remodeling UI",
+                                pair.getRight().size(), pair.getLeft()));
+                        toReturn.remove(pair.getLeft());
+                    } else {
+                        if (pair.getRight().size() != attrs.size()) {
+                            log.info(
+                                    String.format("Removed '%d' attributes from list of attributes under '%s' category",
+                                            (pair.getRight().size() - attrs.size()), pair.getLeft()));
+                            toReturn.put(pair.getLeft(), attrs);
+                        }
+                    }
+                });
     }
 
     private Map<String, Integer> getFeatureImportance(String customerSpace, ModelSummary modelSummary) {

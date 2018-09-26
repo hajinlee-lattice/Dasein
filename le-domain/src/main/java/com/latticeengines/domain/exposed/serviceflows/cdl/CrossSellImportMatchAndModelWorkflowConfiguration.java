@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttr
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AttributeCategoryModifierConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
@@ -65,6 +66,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
         private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
 
         private UseConfiguredModelingAttributesConfiguration.Builder useConfiguredModelingAttributesBuilder = new UseConfiguredModelingAttributesConfiguration.Builder();
+        private AttributeCategoryModifierConfiguration.Builder attributeCategoryModifierConfigurationBuilder = new AttributeCategoryModifierConfiguration.Builder();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             cdlModelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
@@ -99,6 +101,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             addStandardAttributes.setCustomerSpace(customerSpace);
             modelExportToS3.setCustomerSpace(customerSpace);
             useConfiguredModelingAttributesBuilder.customerSpace(customerSpace);
+            attributeCategoryModifierConfigurationBuilder.customerSpace(customerSpace);
             return this;
         }
 
@@ -172,6 +175,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             matchDataCloudWorkflowBuilder.excludeDataCloudAttrs(exclude);
             cdlModelWorkflowBuilder.excludeDataCloudAttrs(exclude);
             useConfiguredModelingAttributesBuilder.excludeDataCloudAttributes(exclude);
+            attributeCategoryModifierConfigurationBuilder.excludeDataCloudAttributes(exclude);
             return this;
         }
 
@@ -418,6 +422,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             configuration.add(mergeUserRefinedAttributes);
             configuration.add(modelExportToS3);
             configuration.add(useConfiguredModelingAttributesBuilder.build());
+            configuration.add(attributeCategoryModifierConfigurationBuilder.build());
             return configuration;
         }
     }

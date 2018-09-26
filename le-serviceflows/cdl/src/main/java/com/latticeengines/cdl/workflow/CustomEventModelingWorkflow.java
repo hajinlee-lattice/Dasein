@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWor
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.modeling.workflow.steps.AttributeCategoryModifier;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import com.latticeengines.modeling.workflow.steps.UseConfiguredModelingAttributes;
@@ -56,6 +57,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private LdcOnlyAttributesStep ldcOnlyAttributesDataFlow;
 
     @Inject
+    private AttributeCategoryModifier attributeCategoryModifier;
+
+    @Inject
     private MergeUserRefinedAttributes mergeUserRefinedAttributes;
 
     @Inject
@@ -90,6 +94,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(addStandardAttributesDataFlow) //
                 .next(useConfiguredModelingAttributes) //
                 .next(ldcOnlyAttributesDataFlow) //
+                .next(attributeCategoryModifier) //
                 .next(mergeUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //

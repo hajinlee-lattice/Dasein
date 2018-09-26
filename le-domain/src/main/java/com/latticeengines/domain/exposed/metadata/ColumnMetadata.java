@@ -91,6 +91,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private Boolean shouldDeprecate;
     @JsonProperty("DataLicense")
     private String dataLicense;
+    @JsonProperty("IsHiddenForRemodelingUI")
+    private Boolean isHiddenForRemodelingUI;
 
     @JsonProperty("IsCoveredByOptionalRule")
     private boolean isCoveredByOptionalRule;
@@ -307,6 +309,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setDataLicense(String dataLicense) {
         this.dataLicense = dataLicense;
+    }
+
+    public Boolean isHiddenForRemodelingUI() {
+        return isHiddenForRemodelingUI;
+    }
+
+    public void setIsHiddenForRemodelingUI(Boolean isHiddenForRemodelingUI) {
+        this.isHiddenForRemodelingUI = isHiddenForRemodelingUI;
     }
 
     @JsonProperty("FundamentalType")

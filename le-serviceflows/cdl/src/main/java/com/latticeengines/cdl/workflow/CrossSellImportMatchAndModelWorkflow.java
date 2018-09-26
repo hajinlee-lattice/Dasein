@@ -11,6 +11,7 @@ import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.modeling.workflow.steps.AttributeCategoryModifier;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import com.latticeengines.modeling.workflow.steps.UseConfiguredModelingAttributes;
@@ -52,6 +53,9 @@ public class CrossSellImportMatchAndModelWorkflow
     private MergeUserRefinedAttributes mergeUserRefinedAttributes;
 
     @Inject
+    private AttributeCategoryModifier attributeCategoryModifier;
+
+    @Inject
     private CdlModelWorkflow modelWorkflow;
 
     @Inject
@@ -82,6 +86,7 @@ public class CrossSellImportMatchAndModelWorkflow
                 .next(addStandardAttributesDataFlow) //
                 .next(useConfiguredModelingAttributes) //
                 .next(mergeUserRefinedAttributes) //
+                .next(attributeCategoryModifier) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(generateRating) //

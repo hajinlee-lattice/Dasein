@@ -550,6 +550,22 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public boolean isHiddenForRemodelingUI() {
+        if (properties.containsKey("IsHiddenForRemodelingUI")) {
+            return (Boolean) properties.get("IsHiddenForRemodelingUI");
+        }
+        return false;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setIsHiddenForRemodelingUI(boolean isHiddenForRemodelingUI) {
+        properties.put("IsHiddenForRemodelingUI", isHiddenForRemodelingUI);
+    }
+
+    @Transient
+    @JsonIgnore
     public boolean getIsCoveredByOptionalRule() {
         if (properties.containsKey("IsCoveredByOptionalRule")) {
             return (Boolean) properties.get("IsCoveredByOptionalRule");
@@ -1121,6 +1137,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setColumnId(getName());
         metadata.setDescription(getDescription());
         metadata.setLogicalDataType(getLogicalDataType());
+        metadata.setIsHiddenForRemodelingUI(isHiddenForRemodelingUI());
         if (StringUtils.isBlank(getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {
