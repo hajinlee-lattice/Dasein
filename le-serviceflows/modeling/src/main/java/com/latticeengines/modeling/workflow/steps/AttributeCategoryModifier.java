@@ -40,10 +40,6 @@ public class AttributeCategoryModifier extends BaseWorkflowStep<AttributeCategor
 
     @Override
     public void onConfigurationInitialized() {
-        if (configuration.getCustomerSpace() == null) {
-            throw new RuntimeException("Customer space is not found in configuration");
-        }
-
         customerSpace = configuration.getCustomerSpace().toString();
         excludeDataCloudAttributes = configuration.isExcludeDataCloudAttributes();
         excludeCDLAttributes = configuration.isExcludeCDLAttributes();
