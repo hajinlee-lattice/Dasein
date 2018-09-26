@@ -561,14 +561,14 @@ angular.module('lp.playbook')
         }
     }
 
-    this.getPlayLaunches = function(params) {
+    this.getPlayLaunches = function(params, where) {
         var deferred = $q.defer();
         if(this.playLaunches) {
             return this.playLaunches;
         } else {
-
             var params = {
                 playName: params.playName,
+                launchStates: (params.launchStates ? params.launchStates : ''),
                 sortby: params.sortby,
                 descending: params.descending,
                 startTimestamp: 0,
@@ -577,7 +577,6 @@ angular.module('lp.playbook')
                 orgId: params.orgId,
                 externalSysType: params.externalSysType
             };
-
             PlaybookWizardService.playLaunches(params).then(function(data){
                 deferred.resolve(data);
             });
@@ -586,16 +585,16 @@ angular.module('lp.playbook')
         
     }
 
-    this.getPlayLaunchCount = function(params) {
+    this.getPlayLaunchCount = function(params, where) {
         var deferred = $q.defer(),
             params = {
                 playName: params.playName,
+                launchStates: (params.launchStates ? params.launchStates : ''),
                 startTimestamp: params.startTimestamp || 0,
                 offset: params.offset || 0,
                 orgId: params.orgId || '',
                 externalSysType: params.externalSysType || ''
             };
-
         PlaybookWizardService.getPlayLaunchCount(params).then(function(data){
             deferred.resolve(data);
         });

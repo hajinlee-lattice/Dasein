@@ -80,6 +80,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: '',
+                            launchStates: 'Launching,Launched,Failed',
                             sortby: 'created',
                             descending: true,
                             offset: 0,
@@ -95,6 +96,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: '',
+                            launchStates: 'Launching,Launched,Failed',
                             startTimestamp: 0
                         };
 
@@ -110,6 +112,7 @@ angular
                         launches = LaunchHistoryData,
                         uniqueLookupIdMapping = launches.uniqueLookupIdMapping,
                         allCountQuery = {
+                            launchStates: 'Launching,Launched,Failed',
                             offset: 0,
                             startTimestamp: 0,
                             orgId: '',
@@ -131,6 +134,7 @@ angular
 
                                 var countParams = {
                                     playName: $stateParams.play_name,
+                                    launchStates: 'Launching,Launched,Failed',
                                     offset: 0,
                                     startTimestamp: 0,
                                     orgId: val.orgId,
@@ -496,12 +500,13 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: $stateParams.play_name,
+                            launchStates: 'Launching,Launched,Failed',
                             sortBy: 'created',
                             descending: true,
                             offset: 0,
                             max: 10
                         };
-                    PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+                    PlaybookWizardStore.getPlayLaunches(params).then(function(result) {
                         deferred.resolve(result);
                     });
                     return deferred.promise;
@@ -510,6 +515,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: $stateParams.play_name,
+                            launchStates: 'Launching,Launched,Failed',
                             startTimestamp: 0
                         };
 

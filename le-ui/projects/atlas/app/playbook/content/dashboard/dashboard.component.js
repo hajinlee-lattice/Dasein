@@ -176,7 +176,7 @@ angular.module('lp.playbook.dashboard', [
     }
 
     vm.edited = function(property) {
-        if(!vm.editing[property]) {
+        if(vm.editing[property] === null) {
             return false;
         }
 
