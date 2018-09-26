@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.PartitionUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.datacloud.collection.entitymgr.RawCollectionRequestMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;

@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -35,7 +33,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 
 @DirtiesContext
 @ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})
@@ -98,7 +95,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
                 domainIdx = (domainIdx + 1) % domainLists.size();
             }
 
-            collectionDBService.service();
+            collectionDBService.collect();
             Thread.sleep(15 * 1000);
         }
     }
@@ -111,7 +108,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
         while (true)
         {
-            collectionDBService.service();
+            collectionDBService.collect();
 
             Thread.sleep(15000);
         }

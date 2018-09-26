@@ -11,6 +11,14 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "VendorConfig")
 public class VendorConfig {
+    public static final String VENDOR_ALEXA = "ALEXA";
+    public static final String VENDOR_BUILTWITH = "BUILTWITH";
+    public static final String VENDOR_COMPETE = "COMPETE";
+    public static final String VENDOR_FEATURE = "FEATURE";
+    public static final String VENDOR_HPA_NEW = "HPA_NEW";
+    public static final String VENDOR_ORBI_V2 = "ORBINTELLIGENCEV2";
+    public static final String VENDOR_SEMRUSH = "SEMRUSH";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic(optional = false)

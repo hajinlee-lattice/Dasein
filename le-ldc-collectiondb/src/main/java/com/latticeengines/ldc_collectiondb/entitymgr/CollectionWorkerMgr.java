@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.collection.entitymgr;
+package com.latticeengines.ldc_collectiondb.entitymgr;
 
 import java.sql.Timestamp;
 import java.util.List;

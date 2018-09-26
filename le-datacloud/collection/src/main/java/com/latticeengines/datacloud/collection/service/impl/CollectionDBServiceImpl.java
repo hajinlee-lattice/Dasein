@@ -558,7 +558,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return CollectionUtils.size(activeWorkers);
     }
 
-    public void service() {
+    public void collect() {
         if (prevMillis == 0)
             log.info("datacloud collection job starts...");
         long currentMillis = System.currentTimeMillis();
@@ -823,8 +823,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         collectionWorkerService.getEntityMgr().update(worker);
     }
 
+    long prevIngestionMillis = 0;
     public void ingest() {
-        long prevIngestionMillis = 0;
         if (prevIngestionMillis == 0) {
             log.info("datacloud ingestion service starts...");
         }

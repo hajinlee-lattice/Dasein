@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.collection.repository.reader;
+package com.latticeengines.ldc_collectiondb.repository.reader;
 
 import java.util.Collection;
 import java.util.List;

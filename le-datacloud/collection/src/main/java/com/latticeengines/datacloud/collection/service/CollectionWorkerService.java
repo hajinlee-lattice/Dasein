@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.collection.service;
 import java.sql.Timestamp;
 import java.util.List;
 
-import com.latticeengines.datacloud.collection.entitymgr.CollectionWorkerMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 public interface CollectionWorkerService {

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.entitymgr.CollectionRequestMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;

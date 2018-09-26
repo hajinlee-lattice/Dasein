@@ -8,20 +8,12 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd">
 
     <context:component-scan base-package="com.latticeengines.datacloud.collection" />
+    <context:component-scan base-package="com.latticeengines.ldc_collectiondb"/>
 
     <import resource="classpath:datacloud-core-context.xml" />
     <import resource="classpath:ldc-collectiondb-persistence-context.xml" />
 
     <jpa:auditing/>
-    <jpa:repositories base-package="com.latticeengines.datacloud.collection.repository"
-                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-                      entity-manager-factory-ref="ldcCollectionEntityManagerFactory"
-                      transaction-manager-ref="ldcCollectionTransactionManager"  />
-
-    <jpa:repositories base-package="com.latticeengines.datacloud.collection.repository.reader"
-                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-                      entity-manager-factory-ref="ldcCollectionEntityManagerFactoryReader"
-                      transaction-manager-ref="ldcCollectionTransactionManagerReader"  />
 
     <import resource="classpath:aws-context.xml"/>
     <context:component-scan base-package="com.latticeengines.aws" annotation-config="true"/>

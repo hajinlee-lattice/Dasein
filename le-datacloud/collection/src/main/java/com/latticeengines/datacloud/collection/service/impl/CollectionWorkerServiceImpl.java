@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.entitymgr.CollectionWorkerMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;

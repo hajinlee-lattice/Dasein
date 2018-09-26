@@ -80,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datacloud-collection</artifactId>
+            <artifactId>le-ldc-collectiondb</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -11,28 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.entitymgr.VendorConfigMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @Component
 public class VendorConfigServiceImpl implements VendorConfigService {
     private static final Logger log = LoggerFactory.getLogger(VendorConfigServiceImpl.class);
-
-    @SuppressWarnings("unused")
-    private static final String VENDOR_ALEXA = "ALEXA";
-    @SuppressWarnings("unused")
-    private static final String VENDOR_BUILTWITH = "BUILTWITH";
-    @SuppressWarnings("unused")
-    private static final String VENDOR_COMPETE = "COMPETE";
-    @SuppressWarnings("unused")
-    private static final String VENDOR_FEATURE = "FEATURE";
-    @SuppressWarnings("unused")
-    private static final String VENDOR_HPA_NEW = "HPA_NEW";
-    @SuppressWarnings("unused")
-    private static final String VENDOR_ORBI_V2 = "ORBINTELLIGENCEV2";
-    @SuppressWarnings("unused")
-    private static final String VENDOR_SEMRUSH = "SEMRUSH";
 
     private static final int DEF_COLLECTION_BATCH = 8192;
     private static final int DEF_MAX_RETRIES = 3;

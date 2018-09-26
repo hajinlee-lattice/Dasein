@@ -92,5 +92,14 @@
     </bean>
 
     <jpa:auditing/>
+    <jpa:repositories base-package="com.latticeengines.ldc_collectiondb.repository"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="ldcCollectionEntityManagerFactory"
+                      transaction-manager-ref="ldcCollectionTransactionManager"  />
+
+    <jpa:repositories base-package="com.latticeengines.ldc_collectiondb.repository.reader"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="ldcCollectionEntityManagerFactoryReader"
+                      transaction-manager-ref="ldcCollectionTransactionManagerReader"  />
 
 </beans>

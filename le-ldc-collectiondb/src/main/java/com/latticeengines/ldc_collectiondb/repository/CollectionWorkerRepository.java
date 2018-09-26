@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.collection.repository;
+package com.latticeengines.ldc_collectiondb.repository;
 
 import java.sql.Timestamp;
 import java.util.Collection;

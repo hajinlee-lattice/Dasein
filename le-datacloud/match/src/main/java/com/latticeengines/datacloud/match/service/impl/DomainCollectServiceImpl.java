@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,9 +27,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.service.CollectionDBService;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 
 @Component("domainCollectService")
 public class DomainCollectServiceImpl implements DomainCollectService {
@@ -50,8 +53,19 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     private static final int MAX_DUMP_SIZE = 40000;
     private static final long MS_IN_MIN = 1000 * 60;
 
+    private static final Set<String> VENDOR_SET = new HashSet<>();
+
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        VENDOR_SET.addAll(Arrays.asList(
+                VendorConfig.VENDOR_ALEXA,
+                VendorConfig.VENDOR_BUILTWITH,
+                VendorConfig.VENDOR_COMPETE,
+                VendorConfig.VENDOR_FEATURE,
+                VendorConfig.VENDOR_HPA_NEW,
+                VendorConfig.VENDOR_ORBI_V2,
+                VendorConfig.VENDOR_SEMRUSH));
     }
 
     @Autowired
@@ -62,10 +76,11 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     @Qualifier("dataCloudCollectorJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private RawCollectionRequestMgr rawCollectionRequestMgr;
+
     @Value("${datacloud.collector.enabled}")
     private boolean domainCollectEnabled;
-
-    private CollectionDBService collectionDBService = null;
 
     private boolean drainMode = false;
 
@@ -74,12 +89,6 @@ public class DomainCollectServiceImpl implements DomainCollectService {
         if (domainCollectEnabled) {
             scheduler.scheduleWithFixedDelay(this::dumpQueue, TimeUnit.MINUTES.toMillis(10));
         }
-    }
-
-    @Override
-    public void setCollectionService(CollectionDBService service)
-    {
-        collectionDBService = service;
     }
 
     @Override
@@ -138,12 +147,28 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     }
 
     private void dumpDomains(String transferId, Collection<String> domains) {
-
         putDomainsInAccountTransferTable(transferId, domains);
 
-        if (collectionDBService != null) {
-            List<String> domain_list = new ArrayList<String>(domains);
-            collectionDBService.addNewDomains(domain_list, transferId);
+        //check vendor
+        String vendor = transferId.toUpperCase();
+        if (!VENDOR_SET.contains(vendor)) {
+            log.warn("invalid vendor " + vendor + " from transferId " + transferId + //
+                    ", will not dump to RawCollectionRequest");
+            return;
+        }
+
+        //add to raw req table
+        String reqId = UUID.randomUUID().toString().toUpperCase();
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        for (String domain: domains) {
+            RawCollectionRequest req = new RawCollectionRequest();
+            req.setDomain(domain);
+            req.setRequestedTime(ts);
+            req.setOriginalRequestId(reqId);
+            req.setTransferred(false);
+            req.setVendor(vendor);
+
+            rawCollectionRequestMgr.create(req);
         }
     }
 

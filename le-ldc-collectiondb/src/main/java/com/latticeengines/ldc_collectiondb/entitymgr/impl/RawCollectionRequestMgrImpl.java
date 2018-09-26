@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.collection.entitymgr.impl;
+package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.util.List;
 
@@ -6,9 +6,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.entitymgr.RawCollectionRequestMgr;
-import com.latticeengines.datacloud.collection.repository.RawCollectionRequestRepository;
-import com.latticeengines.datacloud.collection.repository.reader.RawCollectionRequestReaderRepository;
+import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
+import com.latticeengines.ldc_collectiondb.repository.RawCollectionRequestRepository;
+import com.latticeengines.ldc_collectiondb.repository.reader.RawCollectionRequestReaderRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;

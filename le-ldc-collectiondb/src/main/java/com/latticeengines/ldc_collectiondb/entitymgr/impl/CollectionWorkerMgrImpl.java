@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.collection.entitymgr.impl;
+package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -9,8 +9,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.entitymgr.CollectionWorkerMgr;
-import com.latticeengines.datacloud.collection.repository.CollectionWorkerRepository;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
+import com.latticeengines.ldc_collectiondb.repository.CollectionWorkerRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
