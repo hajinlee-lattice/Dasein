@@ -39,6 +39,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     private Camille camille;
     private String podId;
+    private static Boolean relaxPublicDomain;
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String DATASOURCES = "DataSources";
     private static final String MATCH_SERVICE = "Match";
@@ -148,16 +149,19 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     @Override
     public boolean isPublicDomainCheckRelaxed() {
-        Path publicDomainPath = relaxPublicDomainCheckPath();
-        try {
-            if (!camille.exists(publicDomainPath) || StringUtils.isBlank(camille.get(publicDomainPath).getData())) {
-                camille.upsert(publicDomainPath, new Document("false"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (relaxPublicDomain == null) {
+            Path publicDomainPath = relaxPublicDomainCheckPath();
+            try {
+                if (!camille.exists(publicDomainPath) || StringUtils.isBlank(camille.get(publicDomainPath).getData())) {
+                    camille.upsert(publicDomainPath, new Document("false"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                }
+                relaxPublicDomain = Boolean.valueOf(camille.get(publicDomainPath).getData());
+            } catch (Exception e) {
+                log.error("Failed to get RELAX_PUBLIC_DOMAIN_CHECK flag", e);
+                relaxPublicDomain = false;
             }
-            return Boolean.valueOf(camille.get(publicDomainPath).getData());
-        } catch (Exception e) {
-            log.error("Failed to get RELAX_PUBLIC_DOMAIN_CHECK flag", e);
-            return false;
         }
+        return relaxPublicDomain;
     }
 
     private Path matchServicePath() {
