@@ -1,7 +1,6 @@
 package com.latticeengines.workflowapi.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -29,7 +29,6 @@ import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
 import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.batch.core.repository.dao.MapStepExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -53,10 +52,10 @@ import com.latticeengines.workflowapi.service.WorkflowJobService;
 public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private WorkflowJobService workflowJobService;
 
     private Map<Long, Long> workflowIds = new HashMap<>();
@@ -176,10 +175,12 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         status = workflowJobService.getJobStatusByWorkflowPid(customerSpace3.toString(), workflowPids.get(3L));
         Assert.assertEquals(status, JobStatus.PENDING);
 
+        // although job (workflowId=30001L, workflowPid=31L) has bad heartbeat,
+        // it should not be FAILED because its yarn status is RUNNING
         status = workflowJobService.getJobStatusByWorkflowId(customerSpace3.toString(), workflowIds.get(30001L));
-        Assert.assertEquals(status, JobStatus.FAILED);
+        Assert.assertEquals(status, JobStatus.RUNNING);
         status = workflowJobService.getJobStatusByWorkflowPid(customerSpace3.toString(), workflowPids.get(31L));
-        Assert.assertEquals(status, JobStatus.FAILED);
+        Assert.assertEquals(status, JobStatus.RUNNING);
 
         List<Long> testWorkflowIds1 = new ArrayList<>();
         testWorkflowIds1.add(workflowIds.get(10000L));
@@ -219,9 +220,10 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(statuses.get(0), JobStatus.RUNNING);
         Assert.assertEquals(statuses.get(1), JobStatus.COMPLETED);
 
+        // job (workflowId=30001L, workflowPid=31L) should not be FAILED because its yarn status is RUNNING
         status = workflowJobService.getJobStatusByWorkflowId(customerSpace3.toString(), workflowIds.get(30001L));
         Assert.assertNotNull(status);
-        Assert.assertEquals(status, JobStatus.FAILED);
+        Assert.assertEquals(status, JobStatus.RUNNING);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus", expectedExceptions = {
@@ -246,7 +248,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertTrue(applicationIds.contains("application_30001"));
         // Apply Status Filter
         jobs = workflowJobService.getJobsByWorkflowIds(customerSpace3.toString(), null, null,
-                Arrays.asList(JobStatus.PENDING.toString()), true, false, null);
+                Collections.singletonList(JobStatus.PENDING.toString()), true, false, null);
         Assert.assertEquals(jobs.size(), 1);
 
         MultiTenantContext.setTenant(null);
@@ -282,7 +284,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(4).getSteps().get(1).getJobStepType(), "step2_8");
         // Apply Status Filter
         jobs = workflowJobService.getJobsByWorkflowIds(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds,
-                null, Arrays.asList(JobStatus.FAILED.toString()), true, null, null);
+                null, Collections.singletonList(JobStatus.FAILED.toString()), true, null, null);
         Assert.assertEquals(jobs.size(), 3);
 
         List<Long> pids = new ArrayList<>(workflowPids.values());

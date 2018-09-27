@@ -6,14 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import com.latticeengines.workflow.exposed.service.JobCacheService;
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +35,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
@@ -49,42 +50,32 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowContainerService.class);
 
-    @Autowired
+    @Inject
     private JobEntityMgr jobEntityMgr;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private JobCacheService jobCacheService;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
-    @Autowired
+    @Inject
     private WorkflowTenantService workflowTenantService;
 
-    @Autowired
+    @Inject
     private BatchService batchService;
 
-    @Autowired
+    @Inject
     private JobNameService jobNameService;
 
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
-
-//    @Override
-//    public ApplicationId submitWorkflowExecution(WorkflowConfiguration workflowConfig) {
-//        Job job = createJob(workflowConfig);
-//        ApplicationId appId = jobService.submitJob(job);
-//        job.setId(appId.toString());
-//
-//        createWorkflowJob(workflowConfig, job, appId.toString());
-//        return appId;
-//    }
 
     @Override
     public ApplicationId submitWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid) {
@@ -131,17 +122,6 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
     }
 
-//    @Override
-//    public String submitAwsWorkflow(WorkflowConfiguration workflowConfig) {
-//        Job job = createJob(workflowConfig);
-//        JobRequest jobRequest = createJobRequest(workflowConfig);
-//        String jobId = batchService.submitJob(jobRequest);
-//        job.setId(jobId);
-//
-//        createWorkflowJob(workflowConfig, job, jobId);
-//        return jobId;
-//    }
-
     @Override
     public String submitAwsWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid) {
         WorkflowJob workflowJob = upsertWorkflowJob(workflowConfig, workflowPid);
@@ -174,8 +154,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
             ErrorDetails details;
             if (exc instanceof LedpException) {
-                LedpException casted = (LedpException) exc;
-                details = casted.getErrorDetails();
+                details = ((LedpException) exc).getErrorDetails();
             } else {
                 details = new ErrorDetails(LedpCode.LEDP_00002, exc.getMessage(), ExceptionUtils.getStackTrace(exc));
             }
