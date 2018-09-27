@@ -25,16 +25,15 @@ angular.module('common.banner', [])
             show: opts.show || true,
             type: opts.type || '',
             title: opts.title || '',
-            message: $sce.trustAsHtml(opts.message || '')
+            message: opts.message.replace("home.jobs","home.jobs.data") || ''
         };
 
         var old = opts.name ? this.get(opts.name) : [];
         
         old = old.filter(function(item) {
-            //console.log(item, banner, item.type == banner.type, item.title == banner.title, item.message.toString() == banner.message.toString());
             return (item.type == banner.type && item.title == banner.title && item.message.toString() == banner.message.toString());
         });
-        //console.log('-!- banner', opts.name, old, banner);
+
         if (old.length > 0) {
             old.forEach(function(item) {
                 item.badge++;
@@ -71,6 +70,17 @@ angular.module('common.banner', [])
     };
  
     this.init();
+})
+.directive('ngHtmlCompile', function($compile) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            scope.$watch(attrs.ngHtmlCompile, function(newValue, oldValue) {
+                element.html(newValue);
+                $compile(element.contents())(scope);
+            });
+        }
+    };
 })
 .component('bannerMessage', {
     templateUrl: '/components/banner/banner.component.html',
