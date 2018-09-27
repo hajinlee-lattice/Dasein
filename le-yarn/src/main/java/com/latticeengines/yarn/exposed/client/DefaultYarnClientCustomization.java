@@ -166,7 +166,8 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         // OOM error, then that means the requested memory is really less than
         // what can be handled.
         String xmx = minAllocationInMb > 1536 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
-        return xmx;
+        String xms = minAllocationInMb > 1536 ? String.format("-Xms%dm", minAllocationInMb - 512) : "-Xms1024m";
+        return xms + " " + xmx;
     }
 
     @Override
@@ -192,6 +193,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
                 getXmxSetting(containerProperties), //
+                "-XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
