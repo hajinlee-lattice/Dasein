@@ -6,6 +6,7 @@ angular.module('loginApp')
         event.preventDefault();
         
         if ($state.current.name != toState.name) {
+            console.log("!!!!!!!!!!!!!!!!! here");
             $state.go('login.form');
         }
     });

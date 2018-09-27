@@ -27,10 +27,10 @@ import "./app/login/forgot/forgot.component";
 import "./app/login/tenants/tenants.component";
 
 import "./app/login/saml/saml.component";
-
 import "./app/login/saml/logout/logout.component";
 
 import "./app/login/saml/error/error.component";
+import "./app/login/logout/logout.component";
 
 import '../common/components/banner/banner.component';
 import '../common/components/modal/modal.component';
