@@ -32,6 +32,9 @@ angular.module('login', [
         })
         .state('login.form', {
             url: 'form',
+            params: {
+                obj: {}
+            },
             resolve: {
                 logindocument: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getLoginDocument() || {};
@@ -44,6 +47,9 @@ angular.module('login', [
         })
         .state('login.tenants', {
             url: 'tenants',
+            params: {
+                obj: {}
+            },
             resolve: {
                 logindocument: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getLoginDocument() || {};

@@ -24,18 +24,19 @@ angular.module('login')
                 switch($state.current.name) {
                     case 'login.form': 
                         if (vm.logindocument.UserName) {
-                            $state.go('login.tenants');
+                            var params = $location.$$search;
+                            $state.go('login.tenants', { obj: params });
                         }
                         break;
                     case 'login.tenants':
                         if (!vm.logindocument.UserName) {
                             var params = $location.$$search;
-                            $state.go('login.form', params);
+                            $state.go('login.form', { obj: params });
                         }
                         break;
                     case 'login':
                         var params = $location.$$search;
-                        $state.go('login.form', params);
+                        $state.go('login.form', { obj: params });
                         break;
                 }
             }

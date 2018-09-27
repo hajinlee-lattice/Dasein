@@ -86,7 +86,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.checkboxModel = {
                         datacloud: (vm.configFilters.dataStores.indexOf('DataCloud') > -1) ? true : false,
                         cdl: (vm.configFilters.dataStores.indexOf('CDL') > -1) ? true : false,
-                        deduplicationType: vm.configFilters.deduplicationType ? true : false,
+                        deduplicationType: (vm.configFilters.deduplicationType == 'ONELEADPERDOMAIN') ? true : false,
                         excludePublicDomains: (vm.configFilters.excludePublicDomains == true) ? false : true,
                         transformationGroup: (vm.configFilters.transformationGroup == 'NONE') ? false : true
                     }
@@ -370,7 +370,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                 if(vm.checkboxModel.deduplicationType) {
                     vm.configFilters.deduplicationType = 'ONELEADPERDOMAIN';
                 } else {
-                    delete vm.configFilters.deduplicationType;
+                    vm.configFilters.deduplicationType = 'MULTIPLELEADSPERDOMAIN';
                 }
 
                 vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains ? false : true;
@@ -378,7 +378,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                 if(!vm.checkboxModel.transformationGroup) {
                     vm.configFilters.transformationGroup = 'NONE';
                 } else {
-                    delete vm.configFilters.transformationGroup;
+                    vm.configFilters.transformationGroup = 'ALL';
                 }
 
                 $timeout(function () {

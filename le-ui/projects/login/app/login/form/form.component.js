@@ -21,9 +21,19 @@ angular.module('login.form', [
             vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
             vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
 
+            var urlParams = $location.$$search;
+            vm.params = (Object.keys(urlParams).length != 0 && urlParams.constructor === Object) ? urlParams : $stateParams.obj;
+
             if (vm.logindocument.UserName && !vm.isLoggedInWithTempPassword && !vm.isPasswordOlderThanNinetyDays) {
-                $state.go('login.tenants');
-                return;
+                if (Object.keys(vm.params).length != 0 && vm.params.constructor === Object){
+                    
+                    LoginService.PostToJwt(vm.params).then(function(result){
+                        $window.location.href = result.url;
+                    });
+                    
+                } else {
+                    $state.go('login.tenants', vm.params);
+                }
             }
 
             vm.ResourceUtility = ResourceUtility;
@@ -59,10 +69,9 @@ angular.module('login.form', [
 
                 if (result !== null && result.Success === true) {
 
-                    var params = $location.$$search;
-                    if (Object.keys(params).length != 0 && params.constructor === Object){
+                    if (Object.keys(vm.params).length != 0 && vm.params.constructor === Object){
                         
-                        LoginService.PostToJwt(params).then(function(result){
+                        LoginService.PostToJwt(vm.params).then(function(result){
                             $window.location.href = result.url;
                         });
                         

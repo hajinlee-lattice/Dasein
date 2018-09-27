@@ -455,36 +455,33 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
-        vm.header.filter.unfiltered = vm.scoringHistory;
-        vm.header.filter.filtered = vm.scoringHistory;
+        if(vm.cdlIsEnabled){
+            vm.header.filter.unfiltered = vm.scoringHistory;
+            vm.header.filter.filtered = vm.scoringHistory;
 
-        let uniqueIterations = [...new Set(vm.scoringHistory.map(item => item.iteration).sort())];
-        uniqueIterations.sort(function(a, b) {
-          return b - a;
-        });
+            let uniqueIterations = [...new Set(vm.scoringHistory.map(item => item.iteration).sort())];
+            uniqueIterations.sort(function(a, b) {
+              return b - a;
+            });
 
-        angular.forEach(uniqueIterations, function(iterationOption){
-            var iterationFilter = { label: 'Iteration ' + iterationOption, action: { iteration: iterationOption } }
-            vm.header.filter.items.push(iterationFilter);    
-        });
+            angular.forEach(uniqueIterations, function(iterationOption){
+                var iterationFilter = { label: 'Iteration ' + iterationOption, action: { iteration: iterationOption } }
+                vm.header.filter.items.push(iterationFilter);    
+            });
 
-        if(!vm.cdlIsEnabled) {
+        } else {
 
             if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
                 vm.modelType = "Leads";
             } else {
                 vm.modelType = "Accounts";
             }
+
         }
 
         // vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
 
-        // const ordered = {};
-        // Object.keys(vm.activeIteration.publishedHistory).sort().reverse().forEach(function(key) {
-        //     ordered[key] = vm.publishedHistory[key];
-        // });
-
-        // vm.activeIteration.publishedHistory = ordered;
+        
 
          // Set value for total leads in set
         // This will need to get changed when we're saving configurations

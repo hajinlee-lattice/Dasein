@@ -11,7 +11,7 @@ angular.module('login.tenants', [
         logindocument: '<'
     },
     controller: function (
-        $state, $timeout, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
+        $state, $location, $timeout, $stateParams, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
         LoginService, LoginStore, SessionTimeoutUtility, Banner
     ) {
         var vm = this;
@@ -20,6 +20,18 @@ angular.module('login.tenants', [
         vm.current = 1;
 
         vm.$onInit = function() {
+
+            // var urlParams = $location.$$search;
+            // vm.params = Object.keys(urlParams).length != 0 ? urlParams : $stateParams.obj;
+            // if (Object.keys(vm.params).length != 0){ 
+            //     LoginService.PostToJwt(vm.params).then(function(result){
+
+            //         console.log(result);                    
+
+            //         // $window.location.href = result.url;
+            //     });
+            // }
+
             vm.ResourceUtility = ResourceUtility;
             vm.tenantMap = {};
             vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
