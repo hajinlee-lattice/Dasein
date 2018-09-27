@@ -30,7 +30,8 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void test() {
         List<String> subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
-        Assert.assertEquals(subFolders.size(), 4);
+        int defaultSize = subFolders.size();
+        Assert.assertTrue(defaultSize > 3);
 
         dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
         dropFolderProxy.createTemplateFolder(mainTestTenant.getName(), BusinessEntity.Account.name(), "template2");
@@ -47,7 +48,7 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         dropFolderProxy.createTemplateFolder(mainCustomerSpace, "Account123", "template1");
         subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
-        Assert.assertEquals(subFolders.size(), 5);
+        Assert.assertEquals(subFolders.size(), defaultSize + 1);
 
         subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, "Account123", null);
         Assert.assertEquals(subFolders.size(), 1);

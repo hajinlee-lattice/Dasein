@@ -25,6 +25,8 @@ public class DropFolderServiceImpl implements DropFolderService {
             BusinessEntity.Transaction.name()
     };
 
+    private static final String PS_SHARE = "PS_SHARE";
+
     @Inject
     private DropBoxService dropBoxService;
 
@@ -43,6 +45,8 @@ public class DropFolderServiceImpl implements DropFolderService {
         for (String objectName : objectsName) {
             s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace, objectName, null));
         }
+
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace, PS_SHARE, null));
     }
 
     @Override
