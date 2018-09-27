@@ -8,17 +8,17 @@ angular.module('lp.playbook.wizard.newlaunch', [])
         var vm = this;
 
         angular.extend(vm, {
-            recommendationCounts: PlaybookWizardStore.getRecommendationCounts()
-        });
-
-        angular.extend(vm, {
-            status: $stateParams.status
+            recommendationCounts: PlaybookWizardStore.getRecommendationCounts(),
+            status: $stateParams.status,
+            launching: false
         });
 
         vm.$onInit = function() {
         }
 
         vm.nextSaveLaunch = function() {
+            vm.launching = true;
+            vm.status = "Launching...";
             PlaybookWizardStore.nextSaveLaunch();
         }
 

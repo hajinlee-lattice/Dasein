@@ -107,7 +107,7 @@ angular
                 }
 
                 if (category == "My Attributes") {
-                    console.log(category, subcategory, order, attr);
+                    //console.log(category, subcategory, order, attr);
                 }
 
                 return order;

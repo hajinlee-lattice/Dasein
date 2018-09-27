@@ -6,7 +6,6 @@
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
                         <h2>
-                            <!-- <div ng-keydown="vm.keydown($event)" contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'displayName')">{{ vm.play.displayName||'Play Name' }}</div> -->
                             <div class="contenteditable title" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
                                 <span ng-show="!focus.title">{{ vm.play.displayName||'Campain Name' }}</span>
                                 <div class="editor" ng-show="focus.title">

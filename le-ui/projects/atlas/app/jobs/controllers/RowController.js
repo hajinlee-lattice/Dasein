@@ -65,7 +65,7 @@ angular
                 case "modelandemailworkflow": $scope.job.displayName = "Create Model (Remodel)"; break;
                 case "pmmlmodelworkflow": $scope.job.displayName = "Create Model (PMML File)"; break;
                 case "processanalyzeworkflow": $scope.job.displayName = "Data Processing & Analysis"; break;
-                case "playlaunchworkflow": $scope.job.displayName = "Play Launch"; break;
+                case "playlaunchworkflow": $scope.job.displayName = "Campaign Launch"; break;
                 default: $scope.job.displayName = "Create Model";
             }
 

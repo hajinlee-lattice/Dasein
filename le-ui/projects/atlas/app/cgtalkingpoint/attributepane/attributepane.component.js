@@ -15,7 +15,7 @@ angular.module('lp.cg.talkingpoint.attributepane', [
             });
         },
         controller: function($scope, $element, $filter, $window, CgTalkingPointStore) {
-            console.log($scope.entities);
+            //console.log($scope.entities);
 
             $scope.selected = $scope.entities[0];//Object.keys($scope.opts)[0];
             $scope.categories = new Set($scope.opts['account'].map(function(attr) {

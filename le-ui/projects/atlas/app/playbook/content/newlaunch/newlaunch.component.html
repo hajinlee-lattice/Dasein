@@ -24,5 +24,5 @@
 
     <p>Click {{$ctrl.status}} for recommendation list to be generated and transfered to your Sales or marketing application.</p>
 
-    <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()">{{$ctrl.status}}</button>
+    <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()" ng-disabled="$ctrl.launching">{{$ctrl.status}}</button>
 </div>
