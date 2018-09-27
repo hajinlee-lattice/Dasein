@@ -3,22 +3,24 @@ package com.latticeengines.datacloud.collection.service.impl;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
 
 @Component
 public class CollectionRequestServiceImpl implements CollectionRequestService {
@@ -30,19 +32,27 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     private VendorConfigService vendorConfigService;
 
     class RawRequestCmp implements Comparator<RawCollectionRequest> {
+
         public int compare(RawCollectionRequest lhs, RawCollectionRequest rhs) {
+
             int ret = lhs.getVendor().compareToIgnoreCase(rhs.getVendor());
+
             if (ret == 0) {
+
                 ret = lhs.getDomain().compareTo(rhs.getDomain());
+
                 if (ret == 0)
                     ret = lhs.getRequestedTime().compareTo(rhs.getRequestedTime());
+
             }
 
             return ret;
         }
+
     }
 
     private BitSet prefilterNonTransferred(List<RawCollectionRequest> nonTransferred) {
+
         //sort, first by vendor, then by domain, next by time
         nonTransferred.sort(new RawRequestCmp());
 
@@ -50,72 +60,108 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         BitSet rawReqFilter = new BitSet(nonTransferred.size());
         int nextPos = 0;
         for (int i = 0; i < nonTransferred.size(); i = nextPos) {
+
             nextPos = i + 1;
             String curDomain = nonTransferred.get(i).getDomain();
             String curVendor = nonTransferred.get(i).getVendor();
 
             for (; nextPos < nonTransferred.size(); ++nextPos) {
+
                 RawCollectionRequest nextRawReq = nonTransferred.get(nextPos);
                 int vendorCmpRet = nextRawReq.getVendor().compareTo(curVendor);
-                if (vendorCmpRet > 0 || (vendorCmpRet == 0 && nextRawReq.getDomain().compareTo(curDomain) > 0))
+
+                if (vendorCmpRet > 0 ||
+                        (vendorCmpRet == 0 && nextRawReq.getDomain().compareTo(curDomain) > 0)) {
+
                     break;
+
+                }
+
             }
 
-            for (int k = i + 1; k < nextPos; ++k)
+            for (int k = i + 1; k < nextPos; ++k) {
+
                 rawReqFilter.set(k, true);
+
+            }
+
         }
 
         return rawReqFilter;
+
     }
 
     class ReqCmp implements Comparator<CollectionRequest> {
+
         public int compare(CollectionRequest lhs, CollectionRequest rhs) {
+
             int ret = lhs.getDomain().compareTo(rhs.getDomain());
-            if (ret == 0)
+            if (ret == 0) {
+
                 ret = lhs.getRequestedTime().compareTo(rhs.getRequestedTime());
 
+            }
+
             return ret;
+
         }
+
     }
 
     private static final int RAW_REQ_BATCH = 16;
     private void filterNonTransferredAgainstCurrent(List<RawCollectionRequest> toAdd, BitSet rawReqFilter) {
+
         //select * from CollectionRequest where VENDOR = vendor and DOMAIN = domain
         //select * from CollectionRequest where VENDOR in [vendors] and DOMAIN in [domains]
         //select max(REQUESTED_TIME) from CollectionRequest group by VENDOR, DOMAIN having VENDOR in [vendors] and DOMAIN in [domains]
         int next = 0;
         RawCollectionRequest[] reqBuf = new RawCollectionRequest[RAW_REQ_BATCH];
         int[] posBuf = new int[RAW_REQ_BATCH];
+
         for (int i = 0; i < toAdd.size(); i = next) {
+
             //slide through pre-filtered reqs
             for (; i < toAdd.size() && rawReqFilter.get(i); ++i) ;
-            if (i == toAdd.size())
+            if (i == toAdd.size()) {
+
                 break;
+
+            }
 
             //accumulate micro-batch to process
             int bufLen = 0;
             int j = i;
             for (; j < toAdd.size() && bufLen < RAW_REQ_BATCH; ++j) {
+
                 if (!rawReqFilter.get(j)) {
+
                     posBuf[bufLen] = j;
                     reqBuf[bufLen] = toAdd.get(j);
                     ++bufLen;
+
                 }
+
             }
 
             //adjust next/bufLen, so that there's only one vendor to handle
             String curVendor = reqBuf[0].getVendor();
             j = bufLen - 1;
-            while (reqBuf[j].getVendor().compareTo(curVendor) != 0)
+            while (reqBuf[j].getVendor().compareTo(curVendor) != 0) {
+
                 --j;
+
+            }
             next = posBuf[j] + 1;
             bufLen = j + 1;
 
             //query
             //select * from CollectionRequest where VENDOR = vendor and DOMAIN in [domains];
             List<String> domains = new ArrayList<>();
-            for (j = 0; j < bufLen; ++j)
+            for (j = 0; j < bufLen; ++j) {
+
                 domains.add(reqBuf[j].getDomain());
+
+            }
             List<CollectionRequest> resultList = collectionRequestMgr.getByVendorAndDomains(curVendor, domains);
 
             //sort collection req list
@@ -124,23 +170,31 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             //dedup of same domain
             List<CollectionRequest> reqList = new ArrayList<>();
             for (int k = 0; k < resultList.size(); ) {
+
                 String curDomain = resultList.get(k).getDomain();
                 int l = k + 1;
                 for (; l < resultList.size(); ++l) {
-                    if (resultList.get(l).getDomain().compareTo(curDomain) != 0)
+
+                    if (resultList.get(l).getDomain().compareTo(curDomain) != 0) {
+
                         break;
+
+                    }
+
                 }
 
                 //only retain the one with largest timestamp
                 reqList.add(resultList.get(l - 1));
 
                 k = l;
+
             }
             resultList.clear();
 
             //filtering
             int reqPos = 0;
             for (int k = 0; k < bufLen && reqPos < reqList.size(); ++k) {
+
                 //cur raw req
                 RawCollectionRequest curRawReq = reqBuf[k];
                 String curDomain = curRawReq.getDomain();
@@ -148,40 +202,63 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
                 //slide through collection req list, to find a possible match
                 int l = reqPos;
                 for (; l < reqList.size(); ++l) {
-                    if (curDomain.compareTo(reqList.get(l).getDomain()) <= 0)
+
+                    if (curDomain.compareTo(reqList.get(l).getDomain()) <= 0) {
+
                         break;
+
+                    }
+
                 }
                 reqPos = l;
 
                 //determine whether to filter the raw req
                 if (l < reqList.size()) {
+
                     CollectionRequest curReq = reqList.get(l);
-                    if (curDomain.compareTo(curReq.getDomain()) == 0 &&
-                            (curReq.getStatus().compareTo(CollectionRequest.STATUS_COLLECTING) == 0 ||
-                                    curReq.getStatus().compareTo(CollectionRequest.STATUS_READY) == 0 ||
-                                    ((curReq.getStatus().compareTo(CollectionRequest.STATUS_DELIVERED) == 0 ||
-                                        curReq.getStatus().compareTo(CollectionRequest.STATUS_FAILED) == 0) &&
-                                            curRawReq.getRequestedTime().getTime() - curReq.getRequestedTime().getTime() < 1000L * vendorConfigService.getCollectingFreq(curVendor))))
+                    String curStatus = curReq.getStatus();
+                    if (curDomain.equals(curReq.getDomain()) &&
+                            (curStatus.equals(CollectionRequest.STATUS_COLLECTING) ||
+                                    curStatus.equals(CollectionRequest.STATUS_READY) ||
+                                    ((curStatus.equals(CollectionRequest.STATUS_DELIVERED) ||
+                                            curStatus.equals(CollectionRequest.STATUS_FAILED)) &&
+                                            curRawReq.getRequestedTime().getTime() - curReq.getRequestedTime().getTime() <
+                                                    1000L * vendorConfigService.getCollectingFreq(curVendor)))) {
+
                         rawReqFilter.set(posBuf[k], true);
+
+                    }
+
                 }
+
             }
+
         }
+
     }
 
     @Override
     public BitSet addNonTransferred(List<RawCollectionRequest> toAdd) {
+
         //sort and pre-filter raw req
         BitSet rawReqFilter = prefilterNonTransferred(toAdd);
-        if (rawReqFilter.cardinality() == toAdd.size())
+        if (rawReqFilter.cardinality() == toAdd.size()) {
+
             return rawReqFilter;
+
+        }
 
         //continue to filter raw req against current req
         filterNonTransferredAgainstCurrent(toAdd, rawReqFilter);
 
         //insert collection req
         for (int i = 0; i < toAdd.size(); ++i) {
-            if (rawReqFilter.get(i))
+
+            if (rawReqFilter.get(i)) {
+
                 continue;
+
+            }
 
             RawCollectionRequest rawReq = toAdd.get(i);
 
@@ -197,6 +274,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             colReq.setDeliveryTime(null);
 
             collectionRequestMgr.create(colReq);
+
         }
 
         return rawReqFilter;
@@ -204,111 +282,150 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
     @Override
     public void beginCollecting(List<CollectionRequest> readyReqs, CollectionWorker worker) {
+
         Timestamp pickupTime = new Timestamp(System.currentTimeMillis());
         String workerId = worker.getWorkerId();
         for (CollectionRequest req : readyReqs) {
+
             req.setPickupWorker(workerId);
             req.setPickupTime(pickupTime);
             req.setStatus(CollectionRequest.STATUS_COLLECTING);
 
             collectionRequestMgr.update(req);
+
         }
+
     }
 
     @Override
     public int handlePending(String vendor, int maxRetries, List<CollectionWorker> finishedWorkers) {
-        //check vendor
+
+        //check vendor & list
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor))
+        if (!vendorConfigService.getVendors().contains(vendor) ||
+                CollectionUtils.isEmpty(finishedWorkers)) {
+
             return 0;
 
-        //check worker list
-        if (finishedWorkers == null || finishedWorkers.size() == 0)
-            return 0;
+        }
 
         //normalize max retry count
-        if (maxRetries <= 0)
+        if (maxRetries <= 0) {
+
             maxRetries = vendorConfigService.getDefMaxRetries();
+
+        }
 
         List<CollectionRequest> resultList = collectionRequestMgr.getPending(vendor, finishedWorkers);
 
         //processing
         int resetCount = 0, failCount = 0;
-        for (int i = 0; i < resultList.size(); ++i) {
-            CollectionRequest curReq = resultList.get(i);
+        for (CollectionRequest req: resultList) {
 
-            int reqRetries = curReq.getRetryAttempts();
+            int reqRetries = req.getRetryAttempts();
 
             if (reqRetries < maxRetries) {
-                curReq.setRetryAttempts(reqRetries + 1);
-                curReq.setPickupTime(null);
-                curReq.setPickupWorker(null);
-                curReq.setStatus(CollectionRequest.STATUS_READY);
+
+                req.setRetryAttempts(reqRetries + 1);
+                req.setPickupTime(null);
+                req.setPickupWorker(null);
+                req.setStatus(CollectionRequest.STATUS_READY);
 
                 ++resetCount;
+
             } else {
-                curReq.setStatus(CollectionRequest.STATUS_FAILED);
+
+                req.setStatus(CollectionRequest.STATUS_FAILED);
 
                 ++failCount;
+
             }
 
-            collectionRequestMgr.update(curReq);
+            collectionRequestMgr.update(req);
+
         }
 
-        if (failCount > 0)
+        if (failCount > 0) {
+
             log.info(failCount + " pending requests marked as failed");
+
+        }
         resultList.clear();
 
         return resetCount;
+
     }
 
     @Override
     public int consumeFinished(String workerId, Set<String> domains) {
+
         List<CollectionRequest> reqs = collectionRequestMgr.getDelivered(workerId);
 
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        for (int i = 0; i < reqs.size(); ++i) {
-            CollectionRequest req = reqs.get(i);
+        for (CollectionRequest req: reqs) {
+
             if (domains.contains(req.getDomain())) {
+
                 req.setStatus(CollectionRequest.STATUS_DELIVERED);
                 req.setDeliveryTime(ts);
 
                 collectionRequestMgr.update(req);
+
             }
+
         }
 
         int ret = reqs.size();
         reqs.clear();
+
         return ret;
+
     }
 
     @Override
     public Timestamp getEarliestTime(String vendor, String status) {
+
         //check vendor
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor))
+        if (!vendorConfigService.getVendors().contains(vendor)) {
+
             return new Timestamp(System.currentTimeMillis());
+
+        }
 
         //check status
         status = status.toUpperCase();
         if (!status.equals(CollectionRequest.STATUS_READY) &&
                 !status.equals(CollectionRequest.STATUS_COLLECTING) &&
                 !status.equals(CollectionRequest.STATUS_DELIVERED) &&
-                !status.equals(CollectionRequest.STATUS_FAILED))
+                !status.equals(CollectionRequest.STATUS_FAILED)) {
+
             return new Timestamp(System.currentTimeMillis());
 
+        }
+
         return collectionRequestMgr.getEarliestTime(vendor, status);
+
     }
 
     @Override
     public List<CollectionRequest> getReady(String vendor, int upperLimit) {
-        vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor))
-            return null;
 
-        if (upperLimit < 0)
+        vendor = vendor.toUpperCase();
+        if (!vendorConfigService.getVendors().contains(vendor)) {
+
+            return Collections.emptyList();
+
+        }
+
+        if (upperLimit < 0) {
+
             upperLimit = vendorConfigService.getDefCollectionBatch();
 
+        }
+
         return collectionRequestMgr.getReady(vendor, upperLimit);
+
     }
+
 }

@@ -7,8 +7,13 @@ import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 public interface CollectionWorkerService {
+
     int getActiveWorkerCount(String vendor);
+
     CollectionWorkerMgr getEntityMgr();
+
     List<CollectionWorker> getWorkerByStatus(List<String> status);
+
     List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after);
+
 }

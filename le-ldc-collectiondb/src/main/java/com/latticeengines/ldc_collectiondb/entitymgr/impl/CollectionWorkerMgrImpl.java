@@ -1,7 +1,7 @@
 package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -17,14 +17,17 @@ import com.latticeengines.ldc_collectiondb.repository.writer.CollectionWorkerRep
 
 @Component
 public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<CollectionWorker, Long> implements CollectionWorkerMgr {
-    private static final HashSet<String> workerStatusSet = new HashSet<String>();
+
+    private static final HashSet<String> WORKER_STATUS_SET = new HashSet<String>();
 
     static {
-        workerStatusSet.add(CollectionWorker.STATUS_NEW);
-        workerStatusSet.add(CollectionWorker.STATUS_RUNNING);
-        workerStatusSet.add(CollectionWorker.STATUS_FINISHED);
-        workerStatusSet.add(CollectionWorker.STATUS_CONSUMED);
-        workerStatusSet.add(CollectionWorker.STATUS_FAILED);
+        WORKER_STATUS_SET.addAll(Arrays.asList(
+                CollectionWorker.STATUS_NEW,
+                CollectionWorker.STATUS_RUNNING,
+                CollectionWorker.STATUS_FINISHED,
+                CollectionWorker.STATUS_CONSUMED,
+                CollectionWorker.STATUS_FAILED,
+                CollectionWorker.STATUS_INGESTED));
     }
 
     @Inject
@@ -32,37 +35,48 @@ public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<Collecti
 
     @Override
     public BaseJpaRepository<CollectionWorker, Long> getRepository() {
+
         return collectionWorkerRepository;
+
     }
 
     public List<CollectionWorker> getWorkerByStatus(List<String> statusList) {
         //check
-        for (int i = 0; i < statusList.size(); ++i) {
-            String status = statusList.get(i);
+        for (String status: statusList) {
 
-            if (!workerStatusSet.contains(status))
+            if (!WORKER_STATUS_SET.contains(status)) {
+
                 return null;
+
+            }
+
         }
 
         List<CollectionWorker> resultList = collectionWorkerRepository.findByStatusIn(statusList);
 
         return resultList;
+
     }
 
     public List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after) {
-        List<String> statusList = new ArrayList<>(2);
-        statusList.add(CollectionWorker.STATUS_CONSUMED);
-        statusList.add(CollectionWorker.STATUS_FAILED);
+
+        List<String> statusList = Arrays.asList(
+                CollectionWorker.STATUS_CONSUMED,
+                CollectionWorker.STATUS_FAILED);
+
         List<CollectionWorker> resultList = collectionWorkerRepository.findByStatusInAndVendorAndSpawnTimeIsAfter
                 (statusList, vendor, after);
 
         return resultList;
+
     }
 
     public int getActiveWorkerCount(String vendor) {
-        List<String> statusList = new ArrayList<>(2);
-        statusList.add(CollectionWorker.STATUS_NEW);
-        statusList.add(CollectionWorker.STATUS_RUNNING);
+
+        List<String> statusList = Arrays.asList(
+                CollectionWorker.STATUS_NEW,
+                CollectionWorker.STATUS_RUNNING);
+
         List<CollectionWorker> resultList = collectionWorkerRepository.findByStatusInAndVendor(statusList, vendor);
         return resultList.size();
     }

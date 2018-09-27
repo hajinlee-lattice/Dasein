@@ -7,6 +7,7 @@ import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 public interface CollectionWorkerMgr extends BaseEntityMgrRepository<CollectionWorker, Long> {
+
     //void updateStatus(String taskArn, String status);
     //int cleanOutdated(Timestamp before);
     //int updateNewWorkerStatus(List<String> activeTaskArns);
@@ -16,4 +17,5 @@ public interface CollectionWorkerMgr extends BaseEntityMgrRepository<CollectionW
     List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after);
 
     int getActiveWorkerCount(String vendor);
+
 }

@@ -2,6 +2,7 @@ package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
 
     @Override
     public List<CollectionRequest> getReady(String vendor, int upperLimit) {
+
         //query
         //select * from CollectionRequest where VENDOR = vendor and STATUS = 'READY' order by REQUESTED_TIME asc;
         /*
@@ -55,34 +57,42 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
         List<CollectionRequest> resultList = readerRepository
                 .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, CollectionRequest.STATUS_READY);
         if (resultList.size() > upperLimit) {
+
             resultList = resultList.subList(0, upperLimit);
+
         }
 
         return resultList;
+
     }
 
     @Override
     public List<CollectionRequest> getPending(String vendor, List<CollectionWorker> finishedWorkers) {
+
         List<String> finishedWorkerIds = new ArrayList<>(finishedWorkers.size());
         for (CollectionWorker finishedWorker : finishedWorkers) {
+
             finishedWorkerIds.add(finishedWorker.getWorkerId());
+
         }
 
-        List<String> excluedStatus = new ArrayList<>(2);
-        excluedStatus.add(CollectionRequest.STATUS_DELIVERED);
-        excluedStatus.add(CollectionRequest.STATUS_FAILED);
-        return readerRepository.findByVendorAndPickupWorkerInAndStatusNotIn(vendor,
-                finishedWorkerIds,
-                excluedStatus);
+        List<String> excluedStatus = Arrays.asList(
+                CollectionRequest.STATUS_DELIVERED,
+                CollectionRequest.STATUS_FAILED);
+        return readerRepository.findByVendorAndPickupWorkerInAndStatusNotIn(vendor, finishedWorkerIds, excluedStatus);
+
     }
 
     @Override
     public List<CollectionRequest> getDelivered(String pickupWorker) {
+
         return readerRepository.findByPickupWorker(pickupWorker);
+
     }
 
     @Override
     public Timestamp getEarliestTime(String vendor, String status) {
+
         /*
         //query
         Class<CollectionRequest> reqType = CollectionRequest.class;
@@ -102,12 +112,15 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
                 .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, status);
 
         if (resultList.size() == 0) {
+
             return new Timestamp(System.currentTimeMillis());
+
         }
 
         Timestamp ts = resultList.get(0).getRequestedTime();
         resultList.clear();
 
         return ts;
+
     }
 }

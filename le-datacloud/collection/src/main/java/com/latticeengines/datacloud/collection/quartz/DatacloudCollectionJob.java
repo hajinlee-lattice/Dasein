@@ -11,17 +11,25 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("datacloudCollectionJob")
 public class DatacloudCollectionJob implements QuartzJobBean {
+
     @Inject
     CollectionDBService collectionDBService;
 
     public Callable<Boolean> getCallable(String jobArguments) {
+
         return new Callable<Boolean>() {
+
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
+
                 collectionDBService.collect();
 
                 return true;
+
             }
+
         };
+
     }
+
 }

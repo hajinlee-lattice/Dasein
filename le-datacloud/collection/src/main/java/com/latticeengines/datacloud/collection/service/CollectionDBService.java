@@ -8,6 +8,7 @@ public interface CollectionDBService {
     //int updateCollectingStatus() throws Exception;
 
     boolean addNewDomains(List<String> domains, String vendor, String reqId);
+
     void addNewDomains(List<String> domains, String reqId);
 
     int getActiveTaskCount();
@@ -15,5 +16,6 @@ public interface CollectionDBService {
     void collect();
 
     int getIngestionTaskCount();
+
     void ingest();
 }

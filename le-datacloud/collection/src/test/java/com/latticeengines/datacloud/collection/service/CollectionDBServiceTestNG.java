@@ -37,6 +37,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 @DirtiesContext
 @ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})
 public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests {
+
     private static final Logger log = LoggerFactory.getLogger(CollectionDBServiceTestNG.class);
 
     @Inject
@@ -47,6 +48,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     private List<String> loadDomains(String path) throws Exception
     {
+
         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
                 .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
 
@@ -54,29 +56,38 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         List<String> ret = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(classloader.getResourceAsStream(path)))) {
             try (CSVParser parser = new CSVParser(reader, format)) {
+
                 Map<String, Integer> colMap = parser.getHeaderMap();
                 int domainIdx = colMap.getOrDefault("Domain", -1);
 
                 for (CSVRecord rec : parser) {
+
                     ret.add(rec.get(domainIdx));
+
                 }
+
             }
+
         }
 
         return ret;
+
     }
 
     @Test(groups = "load_test")
     public void testLoad() throws Exception {
-        List<String> pathSet = new ArrayList<>();
-        pathSet.add("50kdomains.0.csv");
-        pathSet.add("50kdomains.1.csv");
-        pathSet.add("50kdomains.2.csv");
-        pathSet.add("50kdomains.3.csv");
+
+        List<String> pathSet = Arrays.asList(
+                "50kdomains.0.csv",
+                "50kdomains.1.csv",
+                "50kdomains.2.csv",
+                "50kdomains.3.csv");
 
         List<List<String>> domainLists = new ArrayList<>();
-        for (String aPathSet : pathSet) {
-            domainLists.add(loadDomains(aPathSet));
+        for (String path : pathSet) {
+
+            domainLists.add(loadDomains(path));
+
         }
 
         long lastTriggered = 0;
@@ -84,43 +95,57 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         long coolDownPeriod = TimeUnit.MINUTES.toMillis(10); // 10 min
         while (true)
         {
+
             long curMillis = System.currentTimeMillis();
-            if (lastTriggered == 0 || curMillis - lastTriggered > coolDownPeriod)
-            {
+            if (lastTriggered == 0 || curMillis - lastTriggered > coolDownPeriod) {
+
                 lastTriggered = curMillis;
                 log.info("uploading " + domainIdx + "-th domain list.");
+
                 collectionDBService.addNewDomains(domainLists.get(domainIdx), "builtwith", UUID.randomUUID()
                         .toString().toUpperCase());
+
                 log.info("uploaded " + domainLists.get(domainIdx).size() + " domains in " + domainIdx + "-th list.");
                 domainIdx = (domainIdx + 1) % domainLists.size();
+
             }
 
             collectionDBService.collect();
+
             Thread.sleep(15 * 1000);
+
         }
+
     }
 
     @Test(groups = "normal_test")
     public void testCollectionDBService() throws Exception {
+
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
         collectionDBService.addNewDomains(domains, "builtwith", UUID.randomUUID().toString().toUpperCase());
 
 
         while (true)
         {
+
             collectionDBService.collect();
 
             Thread.sleep(15000);
+
         }
+
     }
 
     @Test(groups = "ingestion_unit_test")
     public void testIngestionUnit() {
+
         collectionDBService.ingest();
+
     }
 
     @Test(groups = "avro_test")
     public void testAvro() throws Exception {
+
         String schemaStr = AvroUtils.buildSchema("builtwith.avsc");
         Assert.assertNotNull(schemaStr);
         Schema schema = new Schema.Parser().parse(schemaStr);
@@ -142,39 +167,52 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
                 .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(istream))) {
             try (CSVParser parser = new CSVParser(reader, format)) {
+
                 Map<String, Integer> colMap = parser.getHeaderMap();
 
                 int columns = colMap.size();
                 int[] idxMap = new int[columns];
                 Schema.Field[] idx2Fields = new Schema.Field[columns];
                 if (fields.size() != columns) {
+
                     throw new Exception("avro column count != csv column count");
+
                 }
 
-                for (int i = 0; i < columns; ++i)
-                {
-                    Schema.Field field = fields.get(i);
+                for (Schema.Field field: fields) {
+
                     int csvIdx = colMap.get(field.name());
                     idxMap[csvIdx] = field.pos();
                     idx2Fields[csvIdx] = field;
+
                 }
 
-                for (CSVRecord aParser : parser) {
+                for (CSVRecord csvRec : parser) {
+
                     GenericRecord rec = new GenericData.Record(schema);
                     for (int i = 0; i < columns; ++i) {
+
                         rec.put(idxMap[i], AvroUtils.checkTypeAndConvert(idx2Fields[i].name(), //
-                                aParser.get(i), idx2Fields[i].schema().getType()));
+                                csvRec.get(i), idx2Fields[i].schema().getType()));
+
                     }
 
                     try {
+
                         dataFileWriter.append(rec);
+
                     } catch (Exception e) {
-                        log.error("error csv line: " + aParser.get("CollectedAt") + ", " + aParser.get("Spend"));
+                        log.error("error csv line: " + csvRec.get("CollectedAt") + ", " + csvRec.get("Spend"));
                     }
+
                 }
+
             }
+
         }
 
         dataFileWriter.close();
+
     }
+
 }

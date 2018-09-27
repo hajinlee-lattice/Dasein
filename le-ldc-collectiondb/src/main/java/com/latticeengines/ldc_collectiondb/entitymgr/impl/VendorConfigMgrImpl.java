@@ -21,6 +21,9 @@ public class VendorConfigMgrImpl extends JpaEntityMgrRepositoryImpl<VendorConfig
 
     @Override
     public BaseJpaRepository<VendorConfig, Long> getRepository() {
+
         return vendorConfigRepository;
+
     }
+
 }

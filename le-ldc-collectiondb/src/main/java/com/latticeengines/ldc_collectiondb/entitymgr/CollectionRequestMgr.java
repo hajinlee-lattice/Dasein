@@ -9,6 +9,7 @@ import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 public interface CollectionRequestMgr extends BaseEntityMgrRepository<CollectionRequest, Long> {
+
     List<CollectionRequest> getByVendorAndDomains(String vendor, Collection<String> domains);
 
     List<CollectionRequest> getReady(String vendor, int upperLimit);
@@ -18,4 +19,5 @@ public interface CollectionRequestMgr extends BaseEntityMgrRepository<Collection
     Timestamp getEarliestTime(String vendor, String status);
 
     List<CollectionRequest> getDelivered(String pickupWorker);
+
 }

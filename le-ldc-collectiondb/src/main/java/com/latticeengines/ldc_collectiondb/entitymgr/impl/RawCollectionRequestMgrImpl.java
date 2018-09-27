@@ -35,7 +35,9 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
 
     @Override
     public void saveRequests(Iterable<RawCollectionRequest> reqs) {
+
         repository.saveAll(reqs);
+
     }
 
 }

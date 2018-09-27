@@ -14,36 +14,51 @@ import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 @Component
 public class CollectionWorkerServiceImpl implements CollectionWorkerService {
+
     @Inject
     CollectionWorkerMgr collectionWorkerMgr;
+
     @Inject
     VendorConfigService vendorConfigService;
 
     @Override
     public CollectionWorkerMgr getEntityMgr() {
+
         return collectionWorkerMgr;
+
     }
 
     @Override
     public int getActiveWorkerCount(String vendor) {
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor))
+        if (!vendorConfigService.getVendors().contains(vendor)) {
+
             return -1;
 
+        }
+
         return collectionWorkerMgr.getActiveWorkerCount(vendor);
+
     }
 
     @Override
     public List<CollectionWorker> getWorkerByStatus(List<String> status) {
+
         return collectionWorkerMgr.getWorkerByStatus(status);
+
     }
 
     @Override
     public List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after) {
+
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor))
+        if (!vendorConfigService.getVendors().contains(vendor)) {
+
             return null;
 
+        }
+
         return collectionWorkerMgr.getWorkerStopped(vendor, after);
+
     }
 }

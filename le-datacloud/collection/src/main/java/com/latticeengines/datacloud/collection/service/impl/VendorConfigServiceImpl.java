@@ -17,6 +17,7 @@ import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @Component
 public class VendorConfigServiceImpl implements VendorConfigService {
+
     private static final Logger log = LoggerFactory.getLogger(VendorConfigServiceImpl.class);
 
     private static final int DEF_COLLECTION_BATCH = 8192;
@@ -31,9 +32,13 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     private boolean ready = false;
 
     private List<VendorConfig> fetchVendorConfigs() {
+
         List<VendorConfig> all = vendorConfigMgr.findAll();
-        if (all != null && all.size() != 0)
+        if (all != null && all.size() != 0) {
+
             return all;
+
+        }
 
         log.error("no vendor configurations found");
         return null;
@@ -100,60 +105,85 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     }
 
     private void init() {
-        if (ready)
+        if (ready) {
+
             return;
+        }
 
         List<VendorConfig> allConfigs = fetchVendorConfigs();
 
         Map<String, VendorConfig> tempVendorConfigs = new HashMap<>();
         List<String> tempVendors = new ArrayList<>(allConfigs.size());
-        for (int i = 0; i < allConfigs.size(); ++i) {
-            VendorConfig vendorConfig = allConfigs.get(i);
-            tempVendorConfigs.put(vendorConfig.getVendor(), vendorConfig);
-            tempVendors.add(vendorConfig.getVendor());
+        for (VendorConfig config: allConfigs) {
+
+            tempVendorConfigs.put(config.getVendor(), config);
+            tempVendors.add(config.getVendor());
+
         }
+
         vendors = tempVendors;
         vendorConfigs = tempVendorConfigs;
+
         ready = true;
     }
 
     @Override
     public List<String> getVendors() {
+
         init();
+
         return vendors;
+
     }
 
     @Override
     public int getDefCollectionBatch() {
+
         return DEF_COLLECTION_BATCH;
+
     }
 
     @Override
     public int getDefMaxRetries() {
+
         return DEF_MAX_RETRIES;
+
     }
 
     @Override
     public String getDomainField(String vendor) {
+
         init();
+
         return vendorConfigs.get(vendor).getDomainField();
+
     }
 
     @Override
     public String getDomainCheckField(String vendor) {
+
         init();
+
         return vendorConfigs.get(vendor).getDomainCheckField();
+
     }
 
     @Override
     public long getCollectingFreq(String vendor) {
+
         init();
+
         return vendorConfigs.get(vendor).getCollectingFreq();
+
     }
 
     @Override
     public int getMaxActiveTasks(String vendor) {
+
         init();
+
         return vendorConfigs.get(vendor).getMaxActiveTasks();
+
     }
+
 }

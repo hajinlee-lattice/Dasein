@@ -13,6 +13,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "RawCollectionRequest")
 public class RawCollectionRequest {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic(optional = false)
@@ -35,50 +36,74 @@ public class RawCollectionRequest {
     private boolean transferred;
 
     public long getPid() {
+
         return pid;
+
     }
 
     public void setPid(long pid) {
+
         this.pid = pid;
+
     }
 
     public String getVendor() {
+
         return vendor;
+
     }
 
     public void setVendor(String vendor) {
+
         this.vendor = vendor.toUpperCase();
+
     }
 
     public String getDomain() {
+
         return domain;
+
     }
 
     public void setDomain(String domain) {
+
         this.domain = domain;
+
     }
 
     public String getOriginalRequestId() {
+
         return originalRequestId;
+
     }
 
     public void setOriginalRequestId(String originalRequestId) {
+
         this.originalRequestId = originalRequestId;
+
     }
 
     public Timestamp getRequestedTime() {
+
         return requestedTime;
+
     }
 
     public void setRequestedTime(Timestamp requestedTime) {
+
         this.requestedTime = requestedTime;
+
     }
 
     public boolean getTransferred() {
+
         return transferred;
+
     }
 
     public void setTransferred(boolean transferred) {
+
         this.transferred = transferred;
+
     }
 }
