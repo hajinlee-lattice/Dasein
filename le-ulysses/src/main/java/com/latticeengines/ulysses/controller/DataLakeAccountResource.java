@@ -1,6 +1,5 @@
 package com.latticeengines.ulysses.controller;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,7 +68,7 @@ public class DataLakeAccountResource {
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         try {
-            List<String> requiredAttributes = Arrays.asList(InterfaceName.SpendAnalyticsSegment.name(), "SomeRandom");
+            List<String> requiredAttributes = Collections.singletonList(InterfaceName.SpendAnalyticsSegment.name());
             DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup, requiredAttributes);
             if (accountRawData.getData().size() != 1) {
                 throw new LedpException(LedpCode.LEDP_39003,
@@ -97,7 +96,8 @@ public class DataLakeAccountResource {
                 throw new LedpException(LedpCode.LEDP_39003,
                         new String[] { "Account", "" + accountRawData.getData().size() });
             }
-            return new FrontEndResponse<>(Collections.singletonList(accountDanteFormatter.format(accountRawData.getData().get(0))));
+            return new FrontEndResponse<>(
+                    Collections.singletonList(accountDanteFormatter.format(accountRawData.getData().get(0))));
         } catch (LedpException le) {
             log.error("Failed to get account data for account id: " + accountId, le);
             return new FrontEndResponse<>(le.getErrorDetails());
