@@ -9,6 +9,9 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,6 +22,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class NumberOfContactsFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(NumberOfContactsFlowTestNG.class);
 
     protected static final String ACCOUNT = SchemaInterpretation.Account.name();
     protected static final String CONTACT = SchemaInterpretation.Contact.name();
@@ -49,11 +54,13 @@ public class NumberOfContactsFlowTestNG extends DataCloudDataFlowFunctionalTestN
                 Pair.of("Company", String.class),
                 Pair.of("Country", String.class)
         );
-        Object[][] accountData = new Object[][] {
-                { "1", "Google", "USA" },
-                { "2", "Facebook", "USA" },
-                { "3", "Samsung", "South Korea" },
-                { "4", "Toshiba", "Japan" }
+        Object[][] accountData = new Object[][]{
+                { "1", "Google", "USA"},
+                { "2", "Facebook", "USA"},
+                { "3", "Salesforce", "USA" },
+                { "4", "Samsung", "South Korea" },
+                { "5", "Toshiba", "Japan" },
+                { "6", "BlackBerry", "Canada" }
         };
         uploadAvro(accountData, accountFields, ACCOUNT, "/tmp/account");
 
@@ -70,9 +77,9 @@ public class NumberOfContactsFlowTestNG extends DataCloudDataFlowFunctionalTestN
                 { "3", "1", "Sergey", "Brin" },
                 { "4", "2", "Mark", "Zuckerberg" },
                 { "5", "2", "Sheryl", "Sandberg" },
-                { "6", "3", "Jon", "Snow" },
-                { "7", "4", "Daenerys", "Targaryen" },
-                { "7", "4", "Tyrion", "Lanister" }
+                { "6", "4", "Jon", "Snow" },
+                { "7", "5", "Daenerys", "Targaryen" },
+                { "7", "5", "Tyrion", "Lanister" }
         };
         uploadAvro(contactData, contactFields, CONTACT, "/tmp/contact");
 
@@ -94,26 +101,32 @@ public class NumberOfContactsFlowTestNG extends DataCloudDataFlowFunctionalTestN
             // AccountId, NumberOfContacts
             {  "1",       3 },
             {  "2",       2 },
-            {  "3",       1 },
-            {  "4",       2 }
+            {  "3",       0 },
+            {  "4",       1 },
+            {  "5",       2 },
+            {  "6",       0 }
     };
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
-        // TODO: Add more constants.
-        Assert.assertEquals(records.size(), 4);
+
+        // For debugging, output the output table first.
         for (int i = 0; i < records.size(); i++) {
             GenericRecord record = records.get(i);
+            log.info("Output Record " + i + ": " + record);
+        }
 
-            System.out.println("Output Record " + i + ": " + record);
-
+        Assert.assertEquals(records.size(), 6);
+        for (int i = 0; i < records.size(); i++) {
+            GenericRecord record = records.get(i);
             Object[] expectedRecord = expectedOutputTable[i];
 
             String accountId = ((Utf8) record.get(NumberOfContactsFlow.ACCOUNT_ID)).toString();
             Integer numberOfContacts = (Integer) record.get(NumberOfContactsFlow.NUMBER_OF_CONTACTS);
 
             Assert.assertEquals(accountId, expectedRecord[0], "Mismatch for record " + i + ": AccoundId");
-            Assert.assertEquals(numberOfContacts, expectedRecord[1], "Mismatch for record " + i + ": NumberOfContacts");
+            Assert.assertEquals(numberOfContacts, expectedRecord[1],
+                    "Mismatch for record " + i + ": NumberOfContacts");
         }
     }
 }

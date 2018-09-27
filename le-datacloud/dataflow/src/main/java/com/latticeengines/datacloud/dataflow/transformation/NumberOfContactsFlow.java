@@ -4,12 +4,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import cascading.tuple.Fields;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.cdl.NumberOfContactsAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.NumberOfContactsConfig;
@@ -17,21 +20,15 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
-import cascading.operation.aggregator.Count;
-import cascading.tuple.Fields;
-
 // Description:  Transformation class for calculating the number of contacts associated with each account and
 //     generating a table of account ID and count of associated contacts.
 @Component(NumberOfContactsFlow.DATAFLOW_BEAN_NAME)
 public class NumberOfContactsFlow extends ConfigurableFlowBase<NumberOfContactsConfig> {
-    @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory.getLogger(NumberOfContactsFlow.class);
 
     public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
     public static final String DATAFLOW_BEAN_NAME = "NumberOfContactsFlow";
-    private NumberOfContactsConfig config;
-
     public static final String ACCOUNT_ID = InterfaceName.AccountId.name();
+    public static final String CONTACT_ID = InterfaceName.ContactId.name();
     public static final String NUMBER_OF_CONTACTS = InterfaceName.NumberOfContacts.name();
 
     @Override
@@ -51,7 +48,7 @@ public class NumberOfContactsFlow extends ConfigurableFlowBase<NumberOfContactsC
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        config = getTransformerConfig(parameters);
+        NumberOfContactsConfig config = getTransformerConfig(parameters);
 
         // Get the accounts table.
         Node accountsNode = addSource(parameters.getBaseTables().get(0));
@@ -67,13 +64,14 @@ public class NumberOfContactsFlow extends ConfigurableFlowBase<NumberOfContactsC
                 new FieldMetadata(ACCOUNT_ID, String.class),
                 new FieldMetadata(NUMBER_OF_CONTACTS, Long.class));
         Node numberOfContactsNode = joinedNode.groupByAndAggregate(new FieldList(groupby),
-                new Count(new Fields(NUMBER_OF_CONTACTS)), outputFieldMetadataList, Fields.ALL);
+                new NumberOfContactsAggregator(NUMBER_OF_CONTACTS, CONTACT_ID), outputFieldMetadataList, Fields.ALL);
 
         Node integerFormattedNode = numberOfContactsNode.apply(String.format(
                 "%s == null ? null : new Integer(%s.intValue())", NUMBER_OF_CONTACTS, NUMBER_OF_CONTACTS),
                 new FieldList(NUMBER_OF_CONTACTS),
                 new FieldMetadata(NUMBER_OF_CONTACTS, Integer.class));
         return integerFormattedNode;
+
     }
 
 }
