@@ -106,10 +106,6 @@ angular
                     order = order.concat(['-Count','-Value']);
                 }
 
-                if (category == "My Attributes") {
-                    //console.log(category, subcategory, order, attr);
-                }
-
                 return order;
             }
 

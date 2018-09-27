@@ -33,7 +33,7 @@
             <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
                 <label for="check_all">
                     Attribute
-                    <span>({{$ctrl.getAttributes(filteredList).length | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)) | number}})</span>
+                    <span>({{($ctrl.getAttributes(filteredList) | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
                 </label>
             </div>
         </li>
