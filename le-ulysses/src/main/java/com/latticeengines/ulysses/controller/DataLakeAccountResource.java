@@ -1,10 +1,12 @@
 package com.latticeengines.ulysses.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +22,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
@@ -56,8 +59,7 @@ public class DataLakeAccountResource {
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     public DataPage getAccountById(RequestEntity<String> requestEntity, @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
-        return dataLakeService.getAccountById(accountId, attributeGroup,
-                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
+        return getAccountById(requestEntity, accountId, attributeGroup, null);
     }
 
     @RequestMapping(value = "/{accountId}/{attributeGroup}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -67,7 +69,8 @@ public class DataLakeAccountResource {
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         try {
-            DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup);
+            List<String> requiredAttributes = Arrays.asList(InterfaceName.SpendAnalyticsSegment.name(), "SomeRandom");
+            DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup, requiredAttributes);
             if (accountRawData.getData().size() != 1) {
                 throw new LedpException(LedpCode.LEDP_39003,
                         new String[] { "Account", "" + accountRawData.getData().size() });
@@ -94,7 +97,7 @@ public class DataLakeAccountResource {
                 throw new LedpException(LedpCode.LEDP_39003,
                         new String[] { "Account", "" + accountRawData.getData().size() });
             }
-            return new FrontEndResponse<>(Arrays.asList(accountDanteFormatter.format(accountRawData.getData().get(0))));
+            return new FrontEndResponse<>(Collections.singletonList(accountDanteFormatter.format(accountRawData.getData().get(0))));
         } catch (LedpException le) {
             log.error("Failed to get account data for account id: " + accountId, le);
             return new FrontEndResponse<>(le.getErrorDetails());
@@ -119,5 +122,14 @@ public class DataLakeAccountResource {
             log.error("Failed to get spend analytics segments for customerSpace: " + customerSpace, e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
+    }
+
+    private DataPage getAccountById(RequestEntity<String> requestEntity, String accountId, Predefined attributeGroup,
+            List<String> requiredAttributes) {
+        return CollectionUtils.isEmpty(requiredAttributes) //
+                ? dataLakeService.getAccountById(accountId, attributeGroup,
+                        tenantProxy.getOrgInfoFromOAuthRequest(requestEntity))
+                : dataLakeService.getAccountById(accountId, attributeGroup,
+                        tenantProxy.getOrgInfoFromOAuthRequest(requestEntity), requiredAttributes);
     }
 }

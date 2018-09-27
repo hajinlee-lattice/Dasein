@@ -46,6 +46,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -267,7 +268,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         String internalAccountId = getInternalAccountIdViaObjectApi(customerSpace, accountId, lookupIdColumn);
 
-        DataPage dataPage = null;
+        DataPage dataPage;
 
         if (StringUtils.isNotBlank(internalAccountId)) {
             dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId, predefined);
@@ -302,11 +303,72 @@ public class DataLakeServiceImpl implements DataLakeService {
         return dataPage;
     }
 
+    @Override
+    public DataPage getAccountById(String accountID, ColumnSelection.Predefined predefined, Map<String, String> orgInf,
+            List<String> requiredAttributes) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+
+        DataPage page = getAccountById(accountID, predefined, orgInf);
+        if (page == null || CollectionUtils.isEmpty(page.getData())) {
+            return page;
+        }
+        Map<String, Object> accountData = page.getData().get(0);
+
+        List<String> missingReqdAttributes = requiredAttributes.stream().filter(col -> !accountData.containsKey(col))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(missingReqdAttributes)) {
+            return page;
+        }
+
+        Map<String, ColumnMetadata> attributesMap = getServingMetadataForEntity(customerSpace, BusinessEntity.Account)
+                .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
+                .block();
+
+        missingReqdAttributes.stream().filter(col -> !attributesMap.containsKey(col)).collect(Collectors.toList())
+                .forEach(col -> accountData.put(col, null));
+
+        DataPage reqdAttributesPage = getAccountByIdViaMatchApi(customerSpace, accountID,
+                missingReqdAttributes.stream().filter(attributesMap::containsKey)
+                        .map(col -> new Column(col, attributesMap.get(col).getDisplayName()))
+                        .collect(Collectors.toList()));
+
+        if (reqdAttributesPage != null && CollectionUtils.isNotEmpty(reqdAttributesPage.getData())
+                && MapUtils.isNotEmpty(reqdAttributesPage.getData().get(0))) {
+            accountData.putAll(reqdAttributesPage.getData().get(0));
+        } else {
+            missingReqdAttributes.stream().filter(attributesMap::containsKey).collect(Collectors.toList())
+                    .forEach(col -> accountData.put(col, null));
+        }
+
+        return page;
+    }
+
+    private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
+        List<List<Object>> data = new ArrayList<>();
+        List<Object> datum = new ArrayList<>();
+        datum.add(internalAccountId);
+        data.add(datum);
+
+        Tenant tenant = new Tenant(customerSpace);
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(tenant);
+        matchInput.setFields(LOOKUP_FIELDS);
+        matchInput.setData(data);
+        matchInput.setKeyMap(KEY_MAP);
+        ColumnSelection customFieldSelection = new ColumnSelection();
+        customFieldSelection.setColumns(fields);
+        matchInput.setCustomSelection(customFieldSelection);
+        String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        matchInput.setUseRemoteDnB(false);
+        matchInput.setDataCloudVersion(dataCloudVersion);
+
+        log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
+        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+        return convertToDataPage(matchOutput);
+    }
+
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId,
             ColumnSelection.Predefined predefined) {
-
-        MatchInput matchInput = new MatchInput();
-
         List<List<Object>> data = new ArrayList<>();
         List<Object> datum = new ArrayList<>();
 
@@ -314,6 +376,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         data.add(datum);
 
         Tenant tenant = new Tenant(customerSpace);
+        MatchInput matchInput = new MatchInput();
         matchInput.setTenant(tenant);
         matchInput.setFields(LOOKUP_FIELDS);
         matchInput.setData(data);
@@ -348,9 +411,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             List<String> fields = matchOutput.getOutputFields();
             List<Object> values = matchOutput.getResult().get(0).getOutput();
             IntStream.range(0, fields.size()) //
-                    .forEach(i -> {
-                        tempDataRef.put(fields.get(i), values.get(i));
-                    });
+                    .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
             data = tempDataRef;
 
         }
@@ -370,7 +431,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private String getInternalAccountIdViaObjectApi(String customerSpace, String accountId, String lookupIdColumn) {
         List<String> attributes = Collections.singletonList(InterfaceName.AccountId.name());
-        DataPage dataPage = null;
+        DataPage dataPage;
         try {
             dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, true);
         } catch (Exception ex) {
