@@ -20,6 +20,7 @@ public class DataCollectionStatusUtils {
         dateMap.put(Category.WEBSITE_PROFILE.getName(), timestamp);
         dateMap.put(Category.ACCOUNT_ATTRIBUTES.getName(), timestamp);
         dateMap.put(Category.CONTACT_ATTRIBUTES.getName(), timestamp);
+        dateMap.put(Category.CURATED_ACCOUNT_ATTRIBUTES.getName(), timestamp);
         dateMap.put(Category.RATING.getName(), timestamp);
         dateMap.put(Category.PRODUCT_SPEND.getName(), timestamp);
         status.setDateMap(dateMap);
@@ -42,53 +43,15 @@ public class DataCollectionStatusUtils {
         return status;
     }
 
-    public static DataCollectionStatus updateTimeForIntentChange(DataCollectionStatus status, Long timestamp) {
+    public static DataCollectionStatus updateTimeForCategoryChange(DataCollectionStatus status, Long timestamp,
+                                                                   Category category) {
         Map<String, Long> dateMap = status.getDateMap();
         if (MapUtils.isEmpty(dateMap)) {
-            status = initDateMap(status, timestamp);
-            dateMap = status.getDateMap();
+            dateMap = new HashMap<>();
+            status.setDateMap(dateMap);
         }
-        dateMap.put(Category.INTENT.getName(), timestamp);
+        dateMap.put(category.getName(), timestamp);
         return status;
     }
 
-    public static DataCollectionStatus updateTimeForAccountChange(DataCollectionStatus status, Long timestamp) {
-        Map<String, Long> dateMap = status.getDateMap();
-        if (MapUtils.isEmpty(dateMap)) {
-            status = initDateMap(status, timestamp);
-            dateMap = status.getDateMap();
-        }
-        dateMap.put(Category.ACCOUNT_ATTRIBUTES.getName(), timestamp);
-        return status;
-    }
-
-    public static DataCollectionStatus updateTimeForContactChange(DataCollectionStatus status, Long timestamp) {
-        Map<String, Long> dateMap = status.getDateMap();
-        if (MapUtils.isEmpty(dateMap)) {
-            status = initDateMap(status, timestamp);
-            dateMap = status.getDateMap();
-        }
-        dateMap.put(Category.CONTACT_ATTRIBUTES.getName(), timestamp);
-        return status;
-    }
-
-    public static DataCollectionStatus updateTimeForPSChange(DataCollectionStatus status, Long timestamp) {
-        Map<String, Long> dateMap = status.getDateMap();
-        if (MapUtils.isEmpty(dateMap)) {
-            status = initDateMap(status, timestamp);
-            dateMap = status.getDateMap();
-        }
-        dateMap.put(Category.PRODUCT_SPEND.getName(), timestamp);
-        return status;
-    }
-
-    public static DataCollectionStatus updateTimeForRatingChange(DataCollectionStatus status, Long timestamp) {
-        Map<String, Long> dateMap = status.getDateMap();
-        if (MapUtils.isEmpty(dateMap)) {
-            status = initDateMap(status, timestamp);
-            dateMap = status.getDateMap();
-        }
-        dateMap.put(Category.RATING.getName(), timestamp);
-        return status;
-    }
 }

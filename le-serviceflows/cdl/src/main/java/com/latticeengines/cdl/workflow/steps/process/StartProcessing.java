@@ -241,8 +241,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     currentVersion.getRefreshVersionVersion(), statusVersion.getRefreshVersionVersion()) != 0) {
                 createSystemAction(ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-                status = DataCollectionStatusUtils.updateTimeForIntentChange(status,
-                        getLongValueFromContext(PA_TIMESTAMP));
+                status = DataCollectionStatusUtils.updateTimeForCategoryChange(status,
+                        getLongValueFromContext(PA_TIMESTAMP), Category.INTENT);
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             }
         }
@@ -376,14 +376,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         });
         if (entityImportsMap.containsKey(BusinessEntity.Account)) {
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-            status = DataCollectionStatusUtils.updateTimeForAccountChange(status,
-                    getLongValueFromContext(PA_TIMESTAMP));
+            status = DataCollectionStatusUtils.updateTimeForCategoryChange(status,
+                    getLongValueFromContext(PA_TIMESTAMP), Category.ACCOUNT_ATTRIBUTES);
             putObjectInContext(CDL_COLLECTION_STATUS, status);
         }
         if (entityImportsMap.containsKey(BusinessEntity.Contact)) {
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-            status = DataCollectionStatusUtils.updateTimeForContactChange(status,
-                    getLongValueFromContext(PA_TIMESTAMP));
+            status = DataCollectionStatusUtils.updateTimeForCategoryChange(status,
+                    getLongValueFromContext(PA_TIMESTAMP), Category.CONTACT_ATTRIBUTES);
             putObjectInContext(CDL_COLLECTION_STATUS, status);
         }
         putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);

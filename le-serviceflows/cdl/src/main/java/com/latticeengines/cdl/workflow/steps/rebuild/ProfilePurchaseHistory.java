@@ -566,8 +566,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     private void updateDCStatusForProductSpend() {
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        status = DataCollectionStatusUtils.updateTimeForPSChange(status, getLongValueFromContext(PA_TIMESTAMP));
+        status = DataCollectionStatusUtils.updateTimeForCategoryChange(status, getLongValueFromContext(PA_TIMESTAMP),
+                Category.PRODUCT_SPEND);
         putObjectInContext(CDL_COLLECTION_STATUS, status);
-
     }
 }

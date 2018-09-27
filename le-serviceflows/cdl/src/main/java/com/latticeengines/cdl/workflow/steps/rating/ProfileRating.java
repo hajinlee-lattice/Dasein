@@ -290,7 +290,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
     private void updateStatusDateForRating() {
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        status = DataCollectionStatusUtils.updateTimeForRatingChange(status, getLongValueFromContext(PA_TIMESTAMP));
+        status = DataCollectionStatusUtils.updateTimeForCategoryChange(status, getLongValueFromContext(PA_TIMESTAMP),
+                Category.RATING);
         putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 }

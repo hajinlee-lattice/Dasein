@@ -17,6 +17,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
@@ -35,6 +36,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -249,6 +252,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
+        updateDCStatusForCuratedAccountAttributes();
     }
 
     @Override
@@ -259,7 +263,32 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
                 attr.setDisplayName(NUMBER_OF_CONTACTS_DISPLAY_NAME);
             }
         });
-
     }
 
+    protected void updateDCStatusForCuratedAccountAttributes() {
+        // Get the data collection status map and set the last data refresh time for Curated Accounts to the more
+        // recent of the data collection times of Accounts and Contacts.
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, Long> dateMap = status.getDateMap();
+        if (MapUtils.isEmpty(dateMap)) {
+            log.error("No data in DataCollectionStatus Date Map despite running Curated Account Attributes step");
+        } else {
+            Long accountCollectionTime = 0L;
+            if (dateMap.containsKey(Category.ACCOUNT_ATTRIBUTES.getName())) {
+                accountCollectionTime = dateMap.get(Category.ACCOUNT_ATTRIBUTES.getName());
+            }
+            Long contactCollectionTime = 0L;
+            if (dateMap.containsKey(Category.CONTACT_ATTRIBUTES.getName())) {
+                contactCollectionTime = dateMap.get(Category.CONTACT_ATTRIBUTES.getName());
+            }
+            Long curatedAccountcollectionTime = Long.max(accountCollectionTime, contactCollectionTime);
+            if (curatedAccountcollectionTime == 0L) {
+                log.error("No Account or Contact DataCollectionStatus dates despite running Curated Account "
+                        + "Attributes step");
+            } else {
+                dateMap.put(Category.CURATED_ACCOUNT_ATTRIBUTES.getName(), curatedAccountcollectionTime);
+                putObjectInContext(CDL_COLLECTION_STATUS, status);
+            }
+        }
+    }
 }
