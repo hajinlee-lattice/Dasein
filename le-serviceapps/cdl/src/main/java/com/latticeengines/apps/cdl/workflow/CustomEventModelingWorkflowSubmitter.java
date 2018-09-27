@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -84,9 +85,12 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
+    private RatingEngineType ratingEngineType;
+
     @PostConstruct
     public void init() {
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        ratingEngineType = RatingEngineType.CUSTOM_EVENT;
     }
 
     public ApplicationId submit(String customerSpace, ModelingParameters parameters) {
@@ -228,6 +232,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .modelIteration(parameters.getModelIteration()) //
+                .ratingEngineType(ratingEngineType) //
                 .build();
     }
 

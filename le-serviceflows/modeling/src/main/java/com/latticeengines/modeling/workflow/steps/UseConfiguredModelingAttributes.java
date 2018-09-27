@@ -3,22 +3,28 @@ package com.latticeengines.modeling.workflow.steps;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -44,6 +50,14 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
 
     private boolean excludeCDLAttributes;
 
+    private RatingEngineType ratingEngineType;
+
+    @Value("${cdl.modeling.product.spent.special.handling:true}")
+    private Boolean doSpecialHandlingForProductSpent;
+
+    private Set<RatingEngineType> typesNotUsingProductSpent = //
+            Sets.newHashSet(RatingEngineType.CUSTOM_EVENT, RatingEngineType.PROSPECTING, RatingEngineType.RULE_BASED);
+
     @Override
     public void onConfigurationInitialized() {
         dataCollectionVersion = configuration.getDataCollectionVersion();
@@ -61,9 +75,11 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
         customerSpace = configuration.getCustomerSpace().toString();
         excludeDataCloudAttributes = configuration.isExcludeDataCloudAttributes();
         excludeCDLAttributes = configuration.isExcludeCDLAttributes();
+        ratingEngineType = configuration.getRatingEngineType();
 
-        log.info(String.format("excludeDataCloudAttributes = %s, excludeCDLAttributes = %s", excludeDataCloudAttributes,
-                excludeCDLAttributes));
+        log.info(String.format(
+                "excludeDataCloudAttributes = %s, excludeCDLAttributes = %s, doSpecialHandlingForProductSpent=%s",
+                excludeDataCloudAttributes, excludeCDLAttributes, doSpecialHandlingForProductSpent));
     }
 
     @Override
@@ -96,19 +112,46 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
         userSelectedAttributesMap.put(attr.getAttrName(), attr));
 
         for (Attribute eventTableAttribute : eventTable.getAttributes()) {
-            if (userSelectedAttributesMap.containsKey(eventTableAttribute.getName())) {
-                List<ApprovedUsage> approvedUsage = userSelectedAttributesMap.get(eventTableAttribute.getName())
-                        .getApprovedUsageList();
-                eventTableAttribute.setApprovedUsage( //
-                        CollectionUtils.isEmpty(approvedUsage) //
-                                ? new ApprovedUsage[] { ApprovedUsage.NONE } //
-                                : approvedUsage.toArray(new ApprovedUsage[approvedUsage.size()]));
-            } else {
-                log.error(String.format(
-                        "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because it is not part of user configured attributes for Modeling",
-                        eventTableAttribute.getName(), eventTableAttribute.getCategory(), ApprovedUsage.NONE));
+            if (doSpecialHandlingForProductSpent
+                    && Category.PRODUCT_SPEND.getName().equals(eventTableAttribute.getCategory())
+                    && !typesNotUsingProductSpent.contains(ratingEngineType)) {
+                List<String> approvedUsages = eventTableAttribute.getApprovedUsage();
+                ApprovedUsage appUsage = ApprovedUsage.NONE;
+                if (CollectionUtils.isNotEmpty(approvedUsages)) {
+                    if (CollectionUtils.isEmpty( //
+                            approvedUsages.stream() //
+                                    .map(auStr -> ApprovedUsage.fromName(auStr)) //
+                                    .filter(au -> au == ApprovedUsage.NONE) //
+                                    .collect(Collectors.toList()))) {
+                        appUsage = ApprovedUsage.MODEL_ALLINSIGHTS;
+                    }
+                }
+                eventTableAttribute.setApprovedUsage(appUsage);
+            } else if (Category.PRODUCT_SPEND.getName().equals(eventTableAttribute.getCategory())
+                    && typesNotUsingProductSpent.contains(ratingEngineType)) {
+                log.info(String.format(
+                        "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because %s attributes should not be used "
+                                + "for modeling of Rating Engine type '%s'",
+                        eventTableAttribute.getName(), eventTableAttribute.getCategory(), ApprovedUsage.NONE,
+                        eventTableAttribute.getCategory(), ratingEngineType));
                 eventTableAttribute.setApprovedUsage( //
                         ApprovedUsage.NONE);
+            } else {
+                if (userSelectedAttributesMap.containsKey(eventTableAttribute.getName())) {
+                    List<ApprovedUsage> approvedUsage = userSelectedAttributesMap.get(eventTableAttribute.getName())
+                            .getApprovedUsageList();
+                    eventTableAttribute.setApprovedUsage( //
+                            CollectionUtils.isEmpty(approvedUsage) //
+                                    ? new ApprovedUsage[] { ApprovedUsage.NONE } //
+                                    : approvedUsage.toArray(new ApprovedUsage[approvedUsage.size()]));
+                } else {
+                    log.info(String.format(
+                            "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because it is not part of user "
+                                    + "configured attributes for Modeling",
+                            eventTableAttribute.getName(), eventTableAttribute.getCategory(), ApprovedUsage.NONE));
+                    eventTableAttribute.setApprovedUsage( //
+                            ApprovedUsage.NONE);
+                }
             }
         }
     }

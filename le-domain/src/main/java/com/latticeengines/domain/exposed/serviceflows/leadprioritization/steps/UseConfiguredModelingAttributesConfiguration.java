@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class UseConfiguredModelingAttributesConfiguration extends MicroserviceStepConfiguration {
@@ -13,6 +14,8 @@ public class UseConfiguredModelingAttributesConfiguration extends MicroserviceSt
     private boolean excludeCDLAttributes;
 
     private Integer modelIteration;
+
+    private RatingEngineType ratingEngineType;
 
     public DataCollection.Version getDataCollectionVersion() {
         return dataCollectionVersion;
@@ -46,6 +49,14 @@ public class UseConfiguredModelingAttributesConfiguration extends MicroserviceSt
         this.modelIteration = modelIteration;
     }
 
+    public RatingEngineType getRatingEngineType() {
+        return ratingEngineType;
+    }
+
+    public void setRatingEngineType(RatingEngineType ratingEngineType) {
+        this.ratingEngineType = ratingEngineType;
+    }
+
     public static class Builder {
 
         private CustomerSpace customerSpace;
@@ -60,6 +71,8 @@ public class UseConfiguredModelingAttributesConfiguration extends MicroserviceSt
 
         private boolean skipStep = true;
 
+        private RatingEngineType ratingEngineType;
+
         public UseConfiguredModelingAttributesConfiguration build() {
             UseConfiguredModelingAttributesConfiguration configuration = new UseConfiguredModelingAttributesConfiguration();
             configuration.setCustomerSpace(customerSpace);
@@ -68,6 +81,7 @@ public class UseConfiguredModelingAttributesConfiguration extends MicroserviceSt
             configuration.setExcludeCDLAttributes(excludeCDLAttributes);
             configuration.setModelIteration(modelIteration);
             configuration.setSkipStep(skipStep);
+            configuration.setRatingEngineType(ratingEngineType);
             return configuration;
         }
 
@@ -98,6 +112,11 @@ public class UseConfiguredModelingAttributesConfiguration extends MicroserviceSt
 
         public Builder skipStep(boolean skipStep) {
             this.skipStep = skipStep;
+            return this;
+        }
+
+        public Builder ratingEngineType(RatingEngineType ratingEngineType) {
+            this.ratingEngineType = ratingEngineType;
             return this;
         }
     }

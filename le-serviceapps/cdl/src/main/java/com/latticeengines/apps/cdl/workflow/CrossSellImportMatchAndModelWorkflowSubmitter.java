@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -62,6 +63,8 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
 
     @Value("${cdl.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
+
+    private RatingEngineType ratingEngineType = RatingEngineType.CROSS_SELL;
 
     public CrossSellImportMatchAndModelWorkflowConfiguration generateConfiguration(
             RatingEngineModelingParameters parameters) {
@@ -147,7 +150,8 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .modelIteration(parameters.getModelIteration()) //
                 .workflowContainerMem(workflowMemMb) //
-                .notesContent(parameters.getNotesContent());
+                .notesContent(parameters.getNotesContent()) //
+                .ratingEngineType(ratingEngineType);
         return builder.build();
     }
 

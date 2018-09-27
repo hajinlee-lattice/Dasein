@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -397,6 +398,11 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             if (modelIteration != null && modelIteration.intValue() == 1) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
+            return this;
+        }
+
+        public Builder ratingEngineType(RatingEngineType ratingEngineType) {
+            useConfiguredModelingAttributesBuilder.ratingEngineType(ratingEngineType);
             return this;
         }
 

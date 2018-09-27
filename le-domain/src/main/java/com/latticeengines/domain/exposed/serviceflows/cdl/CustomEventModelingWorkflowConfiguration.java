@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -440,6 +441,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             if (modelIteration != null && modelIteration.intValue() == 1) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
+            return this;
+        }
+
+        public Builder ratingEngineType(RatingEngineType ratingEngineType) {
+            useConfiguredModelingAttributesBuilder.ratingEngineType(ratingEngineType);
             return this;
         }
 
