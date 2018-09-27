@@ -124,6 +124,9 @@ angular.module('login', [
         })
         .state('login.logout', {
             url: 'logout',
+            params: {
+                disableUserInfo: true
+            },
             views: {
                 "FrameContent": "logoutView"
             }

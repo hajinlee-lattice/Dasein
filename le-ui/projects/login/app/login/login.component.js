@@ -22,6 +22,11 @@ angular.module('login')
                 return LoginService.Logout();
             } else {
                 switch($state.current.name) {
+                    case 'login.logout':
+                        if (vm.logindocument.UserName) {
+                            LoginService.Logout();
+                        }
+                        break;
                     case 'login.form': 
                         if (vm.logindocument.UserName) {
                             var params = $location.$$search;

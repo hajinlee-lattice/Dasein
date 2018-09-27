@@ -224,7 +224,6 @@ angular.module('mainApp.login.services.LoginService', [
                         if(authenticationRoute === 'SSO') {
                             window.open("/login/saml/' + tenantId + '/logout", "_self");
                         } else {
-                            // window.open("/login/", "_self");
                             window.open("/login/logout", "_self");
                         }
                     }, 300);
