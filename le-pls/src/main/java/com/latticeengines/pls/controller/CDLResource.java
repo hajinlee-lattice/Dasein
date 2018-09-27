@@ -1,15 +1,19 @@
 package com.latticeengines.pls.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
@@ -20,6 +24,8 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
+import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.pls.service.CDLService;
@@ -125,5 +131,13 @@ public class CDLResource {
             log.error(String.format("Failed to submit cleanup all job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[] {"Cleanup", e.getMessage()});
         }
+    }
+
+    @GetMapping(value = "/s3import/template")
+    @ResponseBody
+    @ApiOperation("get template table fields")
+    public List<S3ImportTemplateDisplay> getActivationOverview() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return cdlService.getS3ImportTemplate(customerSpace.toString());
     }
 }

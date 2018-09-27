@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -61,6 +62,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -81,6 +83,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
+    private static final String SLASH = "/";
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -125,6 +128,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private DataFeedTask contactDataFeedTask;
 
     private DataFeedTask transactionDataFeedTask;
+
+    @Inject
+    private DropFolderProxy dropFolderProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -502,4 +508,27 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
         Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
     }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testGetS3ImportPath() {
+        prepareBaseData(ENTITY_ACCOUNT);
+
+        List<S3ImportTemplateDisplay> templates = cdlService.getS3ImportTemplate(customerSpace);
+        Assert.assertNotNull(templates);
+        Assert.assertEquals(templates.size(), 0);
+        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX;
+        // mock up one path to run through the logic
+        dropFolderProxy.createTemplateFolder(customerSpace, ENTITY_ACCOUNT, ENTITY_ACCOUNT);
+        dropFolderProxy.createTemplateFolder(customerSpace, ENTITY_ACCOUNT, ENTITY_ACCOUNT + SLASH + feedType);
+        dropFolderProxy.createTemplateFolder(customerSpace, ENTITY_ACCOUNT,
+                ENTITY_ACCOUNT + SLASH + feedType + SLASH + ACCOUNT_SOURCE_FILE);
+
+        templates = cdlService.getS3ImportTemplate(customerSpace);
+        Assert.assertNotNull(templates);
+        Assert.assertEquals(templates.size(), 1);
+        S3ImportTemplateDisplay display = templates.get(0);
+        Assert.assertEquals(display.getPath(), SLASH + ENTITY_ACCOUNT + SLASH + feedType);
+        Assert.assertEquals(display.getStatus(), JobStatus.COMPLETED);
+    }
+
 }
