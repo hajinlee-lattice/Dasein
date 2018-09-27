@@ -25,7 +25,7 @@ angular.module('common.banner', [])
             show: opts.show || true,
             type: opts.type || '',
             title: opts.title || '',
-            message: opts.message.replace("home.jobs","home.jobs.data") || ''
+            message: opts.message || ''
         };
 
         var old = opts.name ? this.get(opts.name) : [];
