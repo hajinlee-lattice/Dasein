@@ -164,8 +164,6 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
-        Assert.assertThrows(() -> playTypeEntityMgr.delete(types.get(0)));
-
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
