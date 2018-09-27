@@ -8,17 +8,19 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
@@ -43,11 +45,17 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Value("${dataplatform.python.conda.env}")
     private String condaEnv;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Inject
+    private EMRService emrService;
+
     public PythonClientCustomization() {
         super(null, null, null, null, null, null);
     }
 
-    @Autowired
+    @Inject
     public PythonClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
             @Value("${dataplatform.hdfs.stack:}") String stackName, SoftwareLibraryService softwareLibraryService, //
@@ -95,6 +103,11 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
             properties.put(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+            if (Boolean.TRUE.equals(useEmr)) {
+                properties.put(PythonContainerProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
+            } else {
+                properties.put(PythonContainerProperty.SHDP_HD_FSWEB.name(), getWebHdfs());
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

@@ -6,6 +6,9 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 
 public interface SqoopJobService {
+
     ApplicationId exportData(SqoopExporter exporter);
+
     ApplicationId importData(SqoopImporter importer);
+
 }

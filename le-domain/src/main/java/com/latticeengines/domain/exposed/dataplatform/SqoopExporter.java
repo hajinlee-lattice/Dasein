@@ -11,10 +11,16 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SqoopExporter {
 
     private static List<String> defaultHadoopArgs = Arrays.asList(
@@ -25,54 +31,67 @@ public class SqoopExporter {
 
     private static DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
 
+    @JsonProperty("table")
     private String table;
+
+    @JsonProperty("source_dir")
     private String sourceDir;
+
+    @JsonProperty("db_creds")
     private DbCreds dbCreds;
+
+    @JsonProperty("queue")
     private String queue;
+
+    @JsonProperty("customer")
     private String customer;
+
+    @JsonProperty("num_mappers")
     private int numMappers;
+
+    @JsonProperty("java_column_type_mappings")
     private String javaColumnTypeMappings;
+
+    @JsonProperty("export_columns")
     private List<String> exportColumns;
+
+    @JsonProperty("sync")
     private boolean sync;
+
+    @JsonProperty("hadoop_args")
     private List<String> hadoopArgs;
+
+    @JsonProperty("other_opts")
     private List<String> otherOptions;
 
-    @JsonProperty("table")
     public String getTable() {
         return table;
     }
 
-    @JsonProperty("table")
     public void setTable(String table) {
         this.table = table;
     }
 
-    @JsonProperty("source_dir")
     public String getSourceDir() {
         return sourceDir;
     }
 
-    @JsonProperty("source_dir")
     public void setSourceDir(String sourceDir) {
         this.sourceDir = sourceDir;
     }
 
-    @JsonProperty("db_creds")
     public DbCreds getDbCreds() {
         return dbCreds;
     }
 
-    @JsonProperty("db_creds")
     public void setDbCreds(DbCreds dbCreds) {
         this.dbCreds = dbCreds;
     }
 
-    @JsonProperty("queue")
     public String getQueue() {
         return queue;
     }
 
-    @JsonProperty("queue")
     public void setQueue(String queue) {
         this.queue = queue;
         String queueArg = "-Dmapreduce.job.queuename=" + this.queue;
@@ -84,76 +103,62 @@ public class SqoopExporter {
                     args.add(arg);
                 }
             }
-        }        
+        }
         setHadoopArgs(args);
     }
 
-    @JsonProperty("customer")
     public String getCustomer() {
         return customer;
     }
 
-    @JsonProperty("customer")
     public void setCustomer(String customer) {
         this.customer = customer;
     }
 
-    @JsonProperty("num_mappers")
     public int getNumMappers() {
         return numMappers;
     }
 
-    @JsonProperty("num_mappers")
     public void setNumMappers(int numMappers) {
         this.numMappers = numMappers;
     }
 
-    @JsonProperty("java_column_type_mappings")
     public String getJavaColumnTypeMappings() {
         return javaColumnTypeMappings;
     }
 
-    @JsonProperty("java_column_type_mappings")
     public void setJavaColumnTypeMappings(String javaColumnTypeMappings) {
         this.javaColumnTypeMappings = javaColumnTypeMappings;
     }
 
-    @JsonProperty("export_columns")
     public List<String> getExportColumns() {
         return exportColumns;
     }
 
-    @JsonProperty("export_columns")
     public void setExportColumns(List<String> exportColumns) {
         this.exportColumns = exportColumns;
     }
 
-    @JsonProperty("sync")
     public boolean isSync() {
         return sync;
     }
 
-    @JsonProperty("sync")
     public void setSync(boolean sync) {
         this.sync = sync;
     }
 
-    @JsonProperty("hadoop_args")
     public List<String> getHadoopArgs() {
         return hadoopArgs;
     }
 
-    @JsonProperty("hadoop_args")
     public void setHadoopArgs(List<String> hadoopArgs) {
         this.hadoopArgs = hadoopArgs;
     }
 
-    @JsonProperty("other_opts")
     public List<String> getOtherOptions() {
         return otherOptions;
     }
 
-    @JsonProperty("other_opts")
     public void setOtherOptions(List<String> otherOptions) {
         this.otherOptions = otherOptions;
     }

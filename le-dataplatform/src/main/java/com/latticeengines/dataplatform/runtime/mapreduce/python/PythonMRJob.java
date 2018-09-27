@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -11,6 +10,7 @@ import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -26,26 +26,37 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 public class PythonMRJob extends Configured implements MRJobCustomization {
     public static final String PYTHON_MR_JOB = "pythonMRJob";
 
-    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
-
     private VersionManager versionManager;
+
+    private EMRService emrService;
 
     private String stackName;
 
     private String condaEnv;
 
+    private boolean useEmr;
+
     public PythonMRJob(Configuration config) {
         setConf(config);
+        this.condaEnv = "lattice";
+        this.useEmr = false;
     }
 
-    public PythonMRJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry,
-            VersionManager versionManager, String stackName, String condaEnv) {
+    public PythonMRJob(//
+            Configuration config, //
+            MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
+            VersionManager versionManager, //
+                       EMRService emrService, //
+            String stackName, //
+            String condaEnv, //
+            Boolean useEmr) {
         setConf(config);
-        this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
-        this.mapReduceCustomizationRegistry.register(this);
+        mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
+        this.emrService = emrService;
         this.stackName = stackName;
         this.condaEnv = condaEnv;
+        this.useEmr = Boolean.TRUE.equals(useEmr);
     }
 
     @VisibleForTesting
@@ -103,24 +114,28 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         if (mapMemorySize != null) {
             config.set("mapreduce.map.memory.mb", mapMemorySize);
         }
-        String reduceMemorySize = properties.getProperty(MapReduceProperty.REDUCE_MEMORY_SIZE.name());
+        String reduceMemorySize = properties
+                .getProperty(MapReduceProperty.REDUCE_MEMORY_SIZE.name());
         if (reduceMemorySize != null) {
             config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
         }
-        config.set(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
+        config.set(PythonContainerProperty.VERSION.name(),
+                versionManager.getCurrentVersionInStack(stackName));
 
         config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
-
-        if (StringUtils.isNotBlank(condaEnv)) {
-            config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+        config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+        if (useEmr) {
+            config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
         }
+
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {
         try {
-            int linesPerMap = Integer.parseInt(properties.getProperty(PythonMRProperty.LINES_PER_MAP.name()));
+            int linesPerMap = Integer
+                    .parseInt(properties.getProperty(PythonMRProperty.LINES_PER_MAP.name()));
             NLineInputFormat.setNumLinesPerSplit(mrJob, linesPerMap);
 
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());

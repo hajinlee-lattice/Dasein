@@ -7,32 +7,24 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
-import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
@@ -42,23 +34,11 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SqoopJobServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private SqoopJobService sqoopJobService;
-
-    private String targetJdbcHost = "10.51.15.145";
-
-    private String targetJdbcPort = "1433";
-
-    private String targetJdbcDb = "DELL_EBI_STAGE_FINAL_USE_DEV";
-
-    private String targetJdbcType = "SQLServer";
-
-    private String targetJdbcUser = "hadoop";
-
-    private String targetJdbcPassword = CipherUtils.decrypt("8xuq8yYNOoNtHQpFel/J7w==");
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -87,203 +67,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Test(groups = "functional", enabled = false)
-    public void importDataForFile() throws Exception {
-        URL inputUrl = ClassLoader
-                .getSystemResource("com/latticeengines/sqoop/service/impl/files");
-        String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
-        String driver = "org.relique.jdbc.csv.CsvDriver";
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.jdbcUrl(url).driverClass(driver);
-        DbCreds creds = new DbCreds(builder);
-
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Nutanix.csv", "/tmp");
-
-        String[] types = new String[] { "Long", //
-                "String", //
-                "String", //
-                "Long", //
-                "Long", //
-                "Long", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "Long", //
-                "String", //
-                "Float", //
-                "String", //
-                "String", //
-                "String", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "String", //
-                "Float", //
-                "String", //
-                "Float", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "String", //
-                "Float", //
-                "Float", //
-                "String", //
-                "String", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "Float", //
-                "Float", //
-                "String", //
-                "String", //
-                "String", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float" };
-        Properties props = new Properties();
-        props.put("trimHeaders", "true");
-        props.put("columnTypes", StringUtils.join(types, ","));
-        props.put("yarn.mr.hdfs.resources", "/tmp/Nutanix.csv#Nutanix.csv");
-
-        SqoopImporter importer = new SqoopImporter.Builder().setTable("Nutanix").setTargetDir("/tmp/dataFromFile")
-                .setDbCreds(creds).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("Nutanix").setSplitColumn("Nutanix_EventTable_Clean").setNumMappers(1)
-                .setProperties(props).setSync(false).build();
-
-        ApplicationId appId = sqoopJobService.importData(importer);
-
-        log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
-                appId, 600);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile", new HdfsFilenameFilter() {
-
-            @Override
-            public boolean accept(String fileName) {
-                return fileName.endsWith(".avro");
-            }
-
-        });
-
-        assertEquals(files.size(), 1);
-
-        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(files.get(0)));
-
-        int i = 0;
-        for (Field field : schema.getFields()) {
-            Type type = field.schema().getTypes().get(0).getType();
-
-            switch (type) {
-            case DOUBLE:
-                assertEquals(types[i], "Float");
-                break;
-            case LONG:
-                assertEquals(types[i], "Long");
-                break;
-            case STRING:
-                assertEquals(types[i], "String");
-                break;
-            default:
-                break;
-            }
-
-            i++;
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void exportDataToSQLServerWithEnclosure() throws Exception {
         URL inputUrl = ClassLoader
                 .getSystemResource("com/latticeengines/sqoop/service/impl/files");
@@ -299,22 +83,24 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
         String optionalEnclosureValue = "\\\"";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt", "/tmp");
 
-        SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setSourceDir(sourceDir)
-                .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("DellEbi_Warranty").setExportColumns(targetColumns).setNumMappers(1)
-                .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).setSync(false).build();
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setTable(targetTable) //
+                .setSourceDir(sourceDir) //
+                .setDbCreds(getAuroraServerCreds()) //
+                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
+                .setCustomer("DellEbi_Warranty") //
+                .setExportColumns(targetColumns) //
+                .setNumMappers(1) //
+                .addExtraOption(optionalEnclosurePara) //
+                .addExtraOption(optionalEnclosureValue) //
+                .setSync(false) //
+                .build();
 
         ApplicationId appId = sqoopJobService.exportData(exporter);
-
-        log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
-                appId, 600);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
+        waitForJobFinish(yarnConfiguration, appId);
     }
 
-    @SuppressWarnings("deprecation")
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void exportDataToSQLServerWithDelimiter() throws Exception {
         URL inputUrl = ClassLoader
                 .getSystemResource("com/latticeengines/sqoop/service/impl/files");
@@ -324,25 +110,21 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
         List<String> targetColumns = Arrays.asList("MFG_NAME", "SUBCLASS_DESC", "ITM_SHRT_DESC", "MFG_PART_NUM");
         String optionalEnclosurePara = "--fields-terminated-by";
         String optionalEnclosureValue = "|~|";
-
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell_Delimiter.txt", "/tmp");
 
         SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setSourceDir(sourceDir)
-                .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setDbCreds(getAuroraServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
                 .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns)
                 .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).build();
 
         ApplicationId appId = sqoopJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
-                appId, 600);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        waitForJobFinish(yarnConfiguration, appId);
 
     }
 
-    @SuppressWarnings("deprecation")
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void exportDataToSQLServer() throws Exception {
         URL inputUrl = ClassLoader
                 .getSystemResource("com/latticeengines/sqoop/service/impl/files");
@@ -353,24 +135,31 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell.txt", "/tmp");
 
         SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setSourceDir(sourceDir)
-                .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setDbCreds(getAuroraServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
                 .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns).build();
 
         ApplicationId appId = sqoopJobService.exportData(exporter);
+        waitForJobFinish(yarnConfiguration, appId);
+    }
 
+    private void waitForJobFinish(Configuration yarnConfiguration, ApplicationId appId) {
         log.info(String.format("Waiting for appId %s", appId));
+        @SuppressWarnings("deprecation")
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, 600);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
     }
 
-    private DbCreds getSQLServerCreds() {
-
+    private DbCreds getAuroraServerCreds() {
+        // FIXME: (YSong-M24) to be changed to dellebi properties file later
+        String dbUrl = "jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/DellEBI?autoReconnect=true&useSSL=false&user=$$USER$$&password=$$PASSWD$$";
+        String dbUser = "LPI";
+        String dbPassword = CipherUtils.decrypt("bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7");
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
-        DbCreds creds = new DbCreds(builder);
-        return creds;
+        builder.jdbcUrl(dbUrl)
+                .user(dbUser)
+                .clearTextPassword(dbPassword)
+                .dbType("MySQL");
+        return new DbCreds(builder);
     }
 }

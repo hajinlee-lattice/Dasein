@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" 
+<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:yarn="http://www.springframework.org/schema/yarn" 
+    xmlns:yarn="http://www.springframework.org/schema/yarn"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
       http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
@@ -24,6 +24,6 @@
             <ref bean="copyEntriesList" />
         </property>
     </bean>
-    
+
     <import resource="classpath:default/yarn-default-yarn-client-context.xml" />
 </beans>

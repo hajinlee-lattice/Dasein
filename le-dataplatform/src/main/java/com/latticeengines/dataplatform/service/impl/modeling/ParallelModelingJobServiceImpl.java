@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -54,8 +56,14 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
 
-    @Autowired
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Inject
     private VersionManager versionManager;
+
+    @Inject
+    private EMRService emrService;
 
     private void setDefaultValues(Classifier classifier) {
         RandomForestAlgorithm rf = new RandomForestAlgorithm();
@@ -84,9 +92,9 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
                 versionManager.getCurrentVersionInStack(stackName)));
         try {
-            if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
+            if (PythonMRJobType.PROFILING_JOB.jobType().equals(jobType)) {
                 setupProfilingMRConfig(properties, classifier, mapperSize, inputDir);
-            } else if (jobType == PythonMRJobType.MODELING_JOB.jobType()) {
+            } else if (PythonMRJobType.MODELING_JOB.jobType().equals(jobType)) {
                 setupModelingMRConfig(properties, classifier, mapperSize, inputDir);
             }
         } catch (Exception e) {
@@ -105,7 +113,11 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         String pipelineLibFile = StringUtils.substringAfterLast(classifier.getPythonPipelineLibHdfsPath(), "/");
         properties.put(PythonMRProperty.PYTHONPATH.name(), ".:leframework.tar.gz:" + pipelineLibFile);
         properties.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
-        properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
+        if (Boolean.TRUE.equals(useEmr)) {
+            properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
+        } else {
+            properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
+        }
         properties.put(PythonMRProperty.DEBUG.name(), debug);
         properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
         properties.put(PythonContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);

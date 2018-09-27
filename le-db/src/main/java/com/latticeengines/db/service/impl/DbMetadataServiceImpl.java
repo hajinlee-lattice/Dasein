@@ -7,12 +7,12 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.db.service.impl.metadata.MetadataProvider;
@@ -39,7 +39,7 @@ public class DbMetadataServiceImpl implements DbMetadataService {
         if (StringUtils.isEmpty(driverClass)) {
             driverClass = provider.getDriverClass();
         }
-        if (!StringUtils.isEmpty(url)) {
+        if (StringUtils.isNotEmpty(url)) {
             return provider.replaceUrlWithParamsAndTestConnection(url, driverClass, creds);
         }
         return provider.getConnectionString(creds);
@@ -174,7 +174,7 @@ public class DbMetadataServiceImpl implements DbMetadataService {
         MetadataProvider provider = getProvider(jdbcTemplate);
         return provider.getDistinctColumnValues(jdbcTemplate, tableName, column);
     }
-    
+
     @Override
     public String getConnectionString(DbCreds creds) {
         String dbType = creds.getDbType();

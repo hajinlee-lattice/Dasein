@@ -6,4 +6,6 @@ public interface EMRService {
 
     String getMasterIp(String clusterName);
 
+    String getWebHdfsUrl();
+
 }

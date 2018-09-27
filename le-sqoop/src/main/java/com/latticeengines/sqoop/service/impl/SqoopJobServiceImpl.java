@@ -9,18 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.MRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +33,10 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.hadoop.bean.EMRConfigurationFactory;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
-@SuppressWarnings("deprecation")
 @Component("sqoopJobService")
 public class SqoopJobServiceImpl implements SqoopJobService {
 
@@ -43,23 +44,27 @@ public class SqoopJobServiceImpl implements SqoopJobService {
 
     private static final int MAX_SQOOP_RETRY = 3;
 
+    @Inject
+    protected VersionManager versionManager;
+
+    @Inject
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private DbMetadataService dbMetadataService;
+
+    @Inject
+    private EMRConfigurationFactory emrConfigurationFactory;
+
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Autowired
-    protected VersionManager versionManager;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private DbMetadataService dbMetadataService;
-
     public ApplicationId exportData(SqoopExporter exporter) {
         Configuration yarnConfiguration = new Configuration(this.yarnConfiguration);
+
         int numMappers = exporter.getNumMappers();
         if (numMappers < 1) {
             numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
@@ -100,9 +105,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
             cmds.add(StringUtils.join(exporter.getExportColumns(), ","));
         }
         if (exporter.getOtherOptions() != null) {
-            for (String option : exporter.getOtherOptions()) {
-                cmds.add(option);
-            }
+            cmds.addAll(exporter.getOtherOptions());
         }
         addShadedJarToDistributedCache(yarnConfiguration);
         yarnConfiguration.set("yarn.mr.am.class.name", MRAppMaster.class.getName());
@@ -186,9 +189,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         cmds.add(getGenerateOutputDir(uuid));
 
         if (importer.getOtherOptions() != null) {
-            for (String option : importer.getOtherOptions()) {
-                cmds.add(option);
-            }
+            cmds.addAll(importer.getOtherOptions());
         }
 
         String propsFileName = null;
@@ -240,7 +241,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         String jobId = null;
         File appIdFile = new File(appIdFilePath);
         try {
-            jobId = FileUtils.readFileToString(appIdFile);
+            jobId = FileUtils.readFileToString(appIdFile, "UTF-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -266,9 +267,6 @@ public class SqoopJobServiceImpl implements SqoopJobService {
                 return getApplicationId(appIdFilePath);
             } catch (Exception e) {
                 log.error("Sqoop Job Failed! Retry " + retryCount + "\n", e);
-                if (retryCount == MAX_SQOOP_RETRY) {
-                    throw new LedpException(LedpCode.LEDP_12010, e, new String[] { "finish" });
-                }
                 try {
                     Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
                 } catch (InterruptedException e1) {
@@ -308,7 +306,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         }
     }
 
-    protected String overwriteQueue(String queue) {
+    private String overwriteQueue(String queue) {
         if (StringUtils.isEmpty(queue)) {
             queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         }

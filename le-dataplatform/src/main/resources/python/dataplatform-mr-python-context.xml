@@ -17,8 +17,10 @@
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
         <constructor-arg ref="versionManager" />
+        <constructor-arg ref="emrService" />
         <constructor-arg value="${dataplatform.hdfs.stack}" />
         <constructor-arg value="${dataplatform.python.conda.env}" />
+        <constructor-arg value="${hadoop.use.emr}" />
     </bean>
 
 </beans>

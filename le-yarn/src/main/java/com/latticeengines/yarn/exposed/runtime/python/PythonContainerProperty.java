@@ -18,6 +18,6 @@ public enum PythonContainerProperty {
     VERSION, //
     SWLIBARTIFACT, //
     RUNTIME_CONFIG, //
-    CONDA_ENV,
-
+    CONDA_ENV, //
+    SHDP_HD_FSWEB
 }

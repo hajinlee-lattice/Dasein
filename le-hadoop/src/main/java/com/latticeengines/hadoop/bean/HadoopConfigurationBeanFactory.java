@@ -25,7 +25,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     private EMRService emrService;
 
     @Value("${hadoop.use.emr}")
-    private String useEmr;
+    private Boolean useEmr;
 
     @Value("${aws.default.access.key}")
     protected String awsKey;
@@ -62,6 +62,6 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     }
 
     private boolean shouldUseEmr() {
-        return "true".equalsIgnoreCase(useEmr);
+        return Boolean.TRUE.equals(useEmr);
     }
 }

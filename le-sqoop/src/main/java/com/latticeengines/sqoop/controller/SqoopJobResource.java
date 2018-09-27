@@ -2,8 +2,9 @@ package com.latticeengines.sqoop.controller;
 
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,7 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/jobs")
 public class SqoopJobResource {
 
-    @Autowired
+    @Inject
     private SqoopJobService sqoopJobService;
 
     @RequestMapping(value = "/import", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -64,4 +64,9 @@ public class EMRServiceImpl implements EMRService {
         return masterIp;
     }
 
+    @Override
+    public String getWebHdfsUrl() {
+        return "http://" + getMasterIp() + ":50070/webhdfs/v1";
+    }
+
 }

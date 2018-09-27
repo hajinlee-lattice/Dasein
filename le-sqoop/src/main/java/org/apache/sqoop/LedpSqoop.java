@@ -83,7 +83,6 @@ public class LedpSqoop extends Sqoop {
             try {
                 parser = new GenericOptionsParser(conf, toolArgs);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 LOG.debug(e.getMessage(), e);
             }
 

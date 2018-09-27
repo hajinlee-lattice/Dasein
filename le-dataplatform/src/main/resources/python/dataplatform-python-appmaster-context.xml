@@ -35,7 +35,7 @@
 
     <yarn:environment>
         <yarn:classpath />
-        SHDP_HD_FSWEB=${hadoop.fs.web.defaultFS}
+        SHDP_HD_FSWEB=$$SHDP_HD_FSWEB$$
         PYTHONIOENCODING=UTF-8
         PYTHONPATH=.:leframework.tar.gz:$$PYTHONPIPELINELIB$$
         DEBUG=${dataplatform.debug:false}
@@ -49,7 +49,7 @@
         <yarn:container-command>
                         <![CDATA[
                         ./pythonlauncher.sh
-                        ${dataplatform.python.conda.env} launcher.py metadata.json ${dataplatform.yarn.job.runtime.config}
+                        $$CONDA_ENV$$ launcher.py metadata.json ${dataplatform.yarn.job.runtime.config}
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

@@ -50,4 +50,6 @@
 
     <bean id="distCpConfiguration" class="com.latticeengines.hadoop.bean.DistCpConfigurationBeanFactory" lazy-init="true"/>
 
+    <bean id="emrConfigurationFactory" class="com.latticeengines.hadoop.bean.EMRConfigurationFactory" lazy-init="true" />
+
 </beans>
