@@ -37,6 +37,7 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntity
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
+import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 
@@ -528,6 +529,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @VisibleForTesting
     void setLeJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {
         this.leJobExecutionRetriever = leJobExecutionRetriever;
+        ((WorkflowServiceImpl) workflowService).setLeJobExecutionRetriever(this.leJobExecutionRetriever);
     }
 
 }

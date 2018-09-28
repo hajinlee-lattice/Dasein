@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -492,5 +493,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         public void callDone() {
             isDone = true;
         }
+    }
+
+    @VisibleForTesting
+    public void setLeJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {
+        this.leJobExecutionRetriever = leJobExecutionRetriever;
     }
 }

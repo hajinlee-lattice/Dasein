@@ -45,7 +45,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
-import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 
@@ -143,6 +143,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional")
     public void testGetJobStatus() {
         createWorkflowJobs();
+        setupLEJobExecutionRetriever();
 
         JobStatus status = workflowJobService.getJobStatusByWorkflowId(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10000L));
         Assert.assertEquals(status, JobStatus.RUNNING);
@@ -150,9 +151,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(status, JobStatus.RUNNING);
 
         status = workflowJobService.getJobStatusByWorkflowId(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10001L));
-        Assert.assertEquals(status, JobStatus.FAILED);
+        Assert.assertEquals(status, JobStatus.PENDING);
         status = workflowJobService.getJobStatusByWorkflowPid(WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(11L));
-        Assert.assertEquals(status, JobStatus.FAILED);
+        Assert.assertEquals(status, JobStatus.PENDING);
 
 
         status = workflowJobService.getJobStatusByWorkflowId(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10002L));
@@ -397,6 +398,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     public void testGetStepNames() {
         mockWorkflowService();
         setupLEJobExecutionRetriever();
+
         Long workflowPid = workflowPids.get(1L);
         List<String> stepNames = workflowJobService.getStepNames(WFAPITEST_CUSTOMERSPACE.toString(), workflowPid);
         Assert.assertNotNull(stepNames);
@@ -721,7 +723,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     }
 
     private void mockWorkflowService() {
-        WorkflowService workflowService = Mockito.mock(WorkflowService.class);
+        WorkflowServiceImpl workflowService = Mockito.mock(WorkflowServiceImpl.class);
         Mockito.when(workflowService.getStepNames(Mockito.any(WorkflowExecutionId.class))).thenAnswer(invocation -> {
             Long workflowId = ((WorkflowExecutionId) invocation.getArguments()[0]).getId();
             Job job = workflowJobToJobMapper.apply(workflowJobEntityMgr.findByWorkflowId(workflowId));
