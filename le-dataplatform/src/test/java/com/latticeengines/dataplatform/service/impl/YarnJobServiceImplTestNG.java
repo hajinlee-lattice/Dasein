@@ -6,6 +6,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -55,9 +56,8 @@ public class YarnJobServiceImplTestNG extends DataplatformMiniClusterFunctionalT
     public void test() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
-        classifier.setFeatures(
-                Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length", "petal_width" }));
-        classifier.setTargets(Arrays.<String> asList(new String[] { "category" }));
+        classifier.setFeatures(Arrays.asList("sepal_length", "sepal_width", "petal_length", "petal_width"));
+        classifier.setTargets(Collections.singletonList("category"));
         classifier.setSchemaHdfsPath(baseDir + "/datascientist1/iris.json");
         classifier.setModelHdfsDir(baseDir + "/datascientist1/result");
         classifier.setPythonScriptHdfsPath(baseDir + "/datascientist1/nn_train.py");

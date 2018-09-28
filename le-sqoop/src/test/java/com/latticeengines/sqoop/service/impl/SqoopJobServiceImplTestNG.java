@@ -96,7 +96,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
                 .setSync(false) //
                 .build();
 
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter, yarnConfiguration);
         waitForJobFinish(yarnConfiguration, appId);
     }
 
@@ -117,7 +117,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
                 .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns)
                 .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).build();
 
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter, yarnConfiguration);
 
         log.info(String.format("Waiting for appId %s", appId));
         waitForJobFinish(yarnConfiguration, appId);
@@ -138,7 +138,7 @@ public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
                 .setDbCreds(getAuroraServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
                 .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns).build();
 
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter, yarnConfiguration);
         waitForJobFinish(yarnConfiguration, appId);
     }
 
