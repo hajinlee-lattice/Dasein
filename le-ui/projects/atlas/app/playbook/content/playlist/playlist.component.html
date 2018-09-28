@@ -115,7 +115,7 @@
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length"
+                            ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
@@ -123,7 +123,7 @@
                             type="button"
                             class="button blue-button pull-right"
                             ng-disabled="vm.current.tileStates[play.name].launching == true"
-                            ng-if="play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && play.talkingPoints.length"
+                            ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
                             {{vm.current.tileStates[play.name].launching == true ? 'Launching...' : 'Launch'}}
                         </button>

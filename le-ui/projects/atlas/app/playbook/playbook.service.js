@@ -299,7 +299,8 @@ angular.module('lp.playbook')
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
             },
-            saveOnly = opts.saveOnly || false;
+            saveOnly = opts.saveOnly || false,
+            lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
 
         if(play) {
             if(play.ratingEngine){
@@ -310,28 +311,38 @@ angular.module('lp.playbook')
                 var ratingEngine = PlaybookWizardStore.getSavedRating();
                 play.ratingEngine = ratingEngine;
             }
-            // save play
-            PlaybookWizardStore.savePlay(play).then(function(play) {
-                // get launchid
-                PlaybookWizardService.saveLaunch(play.name, {
-                    launchObj: launchObj
-                }).then(function(launch) {
-                    var launch = launch || {};
-                    // save launch
-                    if(launch && !saveOnly) {
-                        PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
-                            launch_id: launch.id,
-                            action: 'launch',
-                        }).then(function(saved) {
-                            // after launch
-                            $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
-                        });
-                    } else {
-                        // saved but not launched
-                        $state.go('home.playbook')
-                    }
+            // launch saved play
+            if(lastIncompleteLaunch) {
+                PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                    launch_id: lastIncompleteLaunch.launchId,
+                    action: 'launch',
+                }).then(function(saved) {
+                    $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
                 });
-            });
+            } else {
+                // save play
+                PlaybookWizardStore.savePlay(play).then(function(play) {
+                    // get launchid
+                    PlaybookWizardService.saveLaunch(play.name, {
+                        launchObj: launchObj
+                    }).then(function(launch) {
+                        var launch = launch || {};
+                        // save launch
+                        if(launch && !saveOnly) {
+                            PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                                launch_id: launch.id,
+                                action: 'launch',
+                            }).then(function(saved) {
+                                // after launch
+                                $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                            });
+                        } else {
+                            // saved but not launched
+                            $state.go('home.playbook')
+                        }
+                    });
+                });
+            }
         }
     }
 

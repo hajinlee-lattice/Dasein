@@ -19,7 +19,7 @@ angular.module('lp.playbook.wizard.newlaunch', [])
         vm.nextSaveLaunch = function() {
             vm.launching = true;
             vm.status = "Launching...";
-            PlaybookWizardStore.nextSaveLaunch();
+            PlaybookWizardStore.nextSaveLaunch(null, {lastIncompleteLaunch: PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch});
         }
 
     }});
