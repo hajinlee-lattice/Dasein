@@ -9,7 +9,7 @@ angular
 ])
 .controller('csvImportController', function(
     $scope, $state, $q, ResourceUtility, StringUtility, ImportService, FieldMappingSettingsModal,
-    ImportStore, FeatureFlagService, CancelJobModal, ServiceErrorUtility
+    ImportStore, FeatureFlagService, CancelJobModal, ServiceErrorUtility, Banner
 ) {
     var vm = this;
 
@@ -65,7 +65,7 @@ angular
     };
 
     vm.fileLoad = function(headers) {
-        var columns = headers.split(','),
+        var columns = headers.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/),
             columnLimit = 200,
             nonDuplicatedColumns = [],
             duplicatedColumns = [],
@@ -80,7 +80,7 @@ angular
                 var columnErrorMsg = 'We are unable to build your model because your file is too large.  Your file has ' + columns.length + ' columns.  Please reduce the numer of columns to below ' + columnLimit + '.';
                 vm.showImportError = false;
                 vm.params.importError = true;
-                ServiceErrorUtility.showBanner({data: {errorMsg: columnErrorMsg}});
+                Banner.error({message: columnErrorMsg});
             }
 
             for (var i = 0; i < columns.length; i++) {
@@ -94,7 +94,7 @@ angular
                 vm.showImportError = false;
                 vm.importErrorMsg = "Duplicate column(s) detected: '[" + duplicatedColumns + "]'";
                 vm.params.importError = true;
-                ServiceErrorUtility.showBanner({data: {errorMsg: vm.importErrorMsg}});
+                Banner.error({message: vm.importErrorMsg});
             }
 
             var hasWebsite = columns.indexOf('Website') != -1 || columns.indexOf('"Website"') != -1,

@@ -83,11 +83,11 @@ angular
                 }
 
                 if(!vm.params.noSizeLimit && vm.selectedFile.size > (GB * GBLimit)) {
-                    ServiceErrorUtility.showBanner({data: {errorMsg: 'Your file is too large.  Please try again with a file that is smaller then ' + GBLimit + 'GB.'}});
+                    Banner.error({title: 'Error', message: 'Your file is too large.  Please try again with a file that is smaller then ' + GBLimit + 'GB.'});
                     return;
                 } else if (!vm.matchesFileExtension(vm.selectedFileName)) {
                     var fileExt = vm.fileAccept ? vm.fileAccept.split(',')[0].split('.').pop().toUpperCase() : 'CSV'; //get first file extension in file-accept or use CSV as default;
-                    ServiceErrorUtility.showBanner({data: {errorMsg: 'Invalid file format. Please try uploading the file in ' + fileExt + ' format.'}});
+                    Banner.error({title: 'Error', message: 'Invalid file format. Please try uploading the file in ' + fileExt + ' format.'});
                     return;
                 }
 

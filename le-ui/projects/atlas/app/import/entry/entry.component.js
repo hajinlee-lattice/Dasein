@@ -6,7 +6,7 @@ angular.module('lp.import.entry', [
     'lp.import.entry.producthierarchy'
 ])
 .controller('ImportEntry', function(
-    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore, AuthorizationUtility
+    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore, AuthorizationUtility, Banner
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -77,13 +77,12 @@ angular.module('lp.import.entry', [
     vm.fileLoad = function(headers) {
         vm.next = false;
         vm.invalidcolumns = [];
-        var columns = headers.split(','),
+        var columns = headers.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/),
             nonDuplicatedColumns = [],
             duplicatedColumns = [],
             schemaSuggestion;
 
         vm.params.importError = false;
-        vm.showImportError = false;
     
         vm.params.infoTemplate = "<p>Please prepare a CSV file with the data you wish to import, using the sample CSV file above as a guide.</p><p>You will be asked to map your fields to the Lattice system, so you may want to keep the uploaded file handy for the next few steps.</p>";
         vm.invalidcolumns = getInvalidColumns(columns);
@@ -96,9 +95,8 @@ angular.module('lp.import.entry', [
                 }
             }
             if (duplicatedColumns.length != 0) {
-                vm.showImportError = true;
-                vm.importErrorMsg = "Duplicate column(s) detected: '[" + duplicatedColumns + "]'";
                 vm.params.importError = true;
+                Banner.error({message: "Duplicate column(s) detected: '[" + duplicatedColumns + "]'"});
             }
 
             var hasWebsite = columns.indexOf('Website') != -1 || columns.indexOf('"Website"') != -1,
