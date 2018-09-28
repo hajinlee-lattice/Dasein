@@ -48,8 +48,11 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         }
 
         boolean isSegment = isSpendAnalyticsSegmentEntity(entity);
+        String spendAnalyticsSegmentName = entity.containsKey(InterfaceName.SpendAnalyticsSegment.name())
+                ? entity.get(InterfaceName.SpendAnalyticsSegment.name()).toString() : null;
 
-        String accountId = (String) (isSegment ? entity.get(accountIdColumnName.toLowerCase()) : entity.get(accountIdColumnName));
+        String accountId = (String) (isSegment ? entity.get(accountIdColumnName.toLowerCase())
+                : entity.get(accountIdColumnName));
         entity.put(RequiredDanteAccountProperty.BaseExternalID, accountId);
         entity.put(RequiredDanteAccountProperty.LEAccount_External_ID, accountId);
         entity.put(RequiredDanteAccountProperty.Dante_Accounts, accountId);
@@ -57,7 +60,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
                 entity.containsKey(lookupIdColumnName) ? entity.get(lookupIdColumnName) : accountId);
         entity.put(RequiredDanteAccountProperty.NotionName, notionName);
         entity.put(DanteAccountSegmentProperty.IsSegment, isSegment);
-        entity.put(DanteAccountSegmentProperty.Segment1Name, isSegment ? accountId : "");
+        entity.put(DanteAccountSegmentProperty.Segment1Name, isSegment ? accountId : spendAnalyticsSegmentName);
         entity.put(DanteAccountSegmentProperty.Segment2Name, "");
         entity.put(DanteAccountSegmentProperty.Segment3Name, "");
         if (entity.containsKey(InterfaceName.RepresentativeAccounts.toString().toLowerCase())) {
@@ -66,7 +69,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         }
         if (isSegment) {
             entity.remove(accountIdColumnName.toLowerCase());
-            entity.remove("spendanalyticssegment");
+            entity.remove(InterfaceName.SpendAnalyticsSegment.name().toLowerCase());
             entity.remove(InterfaceName.RepresentativeAccounts.toString().toLowerCase());
             entity.remove(DanteAccountSegmentProperty.IsSegment.toLowerCase());
         }
@@ -79,8 +82,8 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
                 && entity.get(isSegmentColumnName) != null //
                 && (boolean) entity.get(isSegmentColumnName)) //
                 || (entity.containsKey(isSegmentColumnName.toLowerCase()) //
-                && entity.get(isSegmentColumnName.toLowerCase()) != null //
-                && (boolean) entity.get(isSegmentColumnName.toLowerCase()));
+                        && entity.get(isSegmentColumnName.toLowerCase()) != null //
+                        && (boolean) entity.get(isSegmentColumnName.toLowerCase()));
     }
 
     @Override
