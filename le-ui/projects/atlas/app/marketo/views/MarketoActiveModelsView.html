@@ -24,7 +24,7 @@
 				    	{{model.name}}
 				    </td>
 				    <td>
-				    	<a ui-sref="home.marketosettings.setup({credentialId: $ctrl.credentialId, modelId: model.modelId})"> 
+				    	<a ui-sref="home.marketosettings.setup({credentialId: $ctrl.credentialId, modelUuid: model.modelId})"> 
 				    		<button class="button blue-button"> Setup Model </button>
 				    	</a>
 				    	<a ui-sref="home.marketosettings.webhook({credentialId: $ctrl.credentialId, configId: $ctrl.getConfigId(model.modelId)})" ng-if="$ctrl.scoringRequestSummaryIds.has(model.modelId)">

@@ -1059,7 +1059,7 @@ angular
             }
         })
         .state('home.marketosettings.setup', {
-            url: '/{credentialId}/setup/{modelId}',
+            url: '/{credentialId}/setup/{modelUuid}',
             params: {
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
@@ -1110,21 +1110,21 @@ angular
                 ScoringFields: function($q, $stateParams, MarketoService) {
                     var deferred = $q.defer();
 
-                    MarketoService.GetScoringFields($stateParams.modelId).then(function(result) {
+                    MarketoService.GetScoringFields($stateParams.modelUuid).then(function(result) {
                         deferred.resolve(result);
                     })
 
                     return deferred.promise;
                 },
-                ExistingScoringRequest: function($q, $stateParams, MarketoService, ScoringRequestSummaries) {
+                ExistingScoringRequest: function($q, $stateParams, MarketoStore, ScoringRequestSummaries) {
                     var deferred = $q.defer();
 
                     var existingScoringRequest = ScoringRequestSummaries ? ScoringRequestSummaries.find(function(x) {
-                            return x.modelUuid === $stateParams.modelId;
+                            return x.modelUuid === $stateParams.modelUuid;
                         }) : null;
 
                     if (existingScoringRequest) {
-                        MarketoService.GetScoringRequest($stateParams.credentialId, existingScoringRequest.configId).then(function(result) {
+                        MarketoStore.getScoringRequest(false, $stateParams.credentialId, existingScoringRequest.configId).then(function(result) {
                             deferred.resolve(result);
                         });
                     } else {
@@ -1163,10 +1163,15 @@ angular
 
                     return deferred.promise;
                 },
-                ScoringRequest: function($q, $stateParams, MarketoService) {
-                    var deferred = $q.defer();
+                ScoringRequest: function($q, $stateParams, MarketoStore, StateHistory) {
+                    var deferred = $q.defer(),
+                        useCache = false;
 
-                    MarketoService.GetScoringRequest($stateParams.credentialId, $stateParams.configId).then(function(result) {
+                    if (StateHistory.isFrom('home.marketosettings.setup')) {
+                        useCache = true;
+                    }
+
+                    MarketoStore.getScoringRequest(useCache, $stateParams.credentialId, $stateParams.configId).then(function(result) {
                         deferred.resolve(result);
                     })
 

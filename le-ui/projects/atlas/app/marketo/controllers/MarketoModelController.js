@@ -2,7 +2,7 @@ angular.module('lp.marketo.models', [])
 .component('marketoActiveModels', {
     templateUrl: 'app/marketo/views/MarketoActiveModelsView.html',
     controller: function( 
-        $q, $state, $stateParams, $scope, $location, $timeout, $filter, BrowserStorageUtility, MarketoStore) 
+        $q, $state, $stateParams, $scope, $timeout, $filter, BrowserStorageUtility, MarketoStore) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
@@ -39,13 +39,13 @@ angular.module('lp.marketo.models', [])
 .component('marketoSetupModel', {
     templateUrl: 'app/marketo/views/MarketoModelSetupView.html',
     controller: function( 
-        $q, $state, $stateParams, $scope, $location, $timeout, $filter, BrowserStorageUtility, MarketoService) 
+        $q, $state, $stateParams, $scope, $timeout, $filter, BrowserStorageUtility, MarketoStore, MarketoService) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve;
 
         angular.extend(vm, {
-            modelId: $stateParams.modelId,
+            modelId: $stateParams.modelUuid,
             credentialId: $stateParams.credentialId,
             marketoFields: resolve.MarketoFields.data,
             primaryFields: resolve.PrimaryAttributeFields,
@@ -76,10 +76,8 @@ angular.module('lp.marketo.models', [])
         }
 
         vm.mapDefaultMatchFields = function() {
-            console.log(vm.scoringFields);
             var defaultFields = $filter('filter')(vm.scoringFields.fields, vm.isDefaultField, true);
-            console.log(vm.fieldsMapping);
-            console.log(defaultFields);
+
             defaultFields.forEach(function(defaultField) {
                 if (vm.marketoFieldsSet.has(vm.defaultMapping[defaultField.fieldName]) && vm.fieldsMapping[defaultField.fieldName] == undefined) {
                     vm.fieldsMapping[defaultField.fieldName] = vm.defaultMapping[defaultField.fieldName];
@@ -132,6 +130,7 @@ angular.module('lp.marketo.models', [])
 
                 MarketoService.CreateScoringRequest(vm.credentialId, scoringRequest).then(function(result){
                     console.log(result);
+                    MarketoStore.setScoringRequest(result);
                     $state.go('home.marketosettings.webhook', {"credentialId": $stateParams.credentialId, "configId": result.configId});
                 });
             } else { // UPDATE
@@ -142,6 +141,7 @@ angular.module('lp.marketo.models', [])
                 };
                 MarketoService.UpdateScoringRequest(vm.credentialId, scoringRequest).then(function(result) {
                     console.log(result);
+                    MarketoStore.updateScoringRequestMatchFields(scoringRequest);
                     $state.go('home.marketosettings.webhook', {"credentialId": $stateParams.credentialId, "configId": vm.currentScoringRequest.configId});
                 });
             }
@@ -153,8 +153,8 @@ angular.module('lp.marketo.models', [])
 .component('marketoWebhookSummary', {
     templateUrl: 'app/marketo/views/MarketoWebhookSummaryView.html',
     controller: function( 
-        $q, $state, $stateParams, $scope, $location, $timeout, BrowserStorageUtility) 
-    { 
+        $q, $state, $stateParams, $scope, $timeout, BrowserStorageUtility) 
+    {
         var vm = this,
             resolve = $scope.$parent.$resolve,
             model = resolve.Model,

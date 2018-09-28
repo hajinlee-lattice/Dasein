@@ -10,6 +10,8 @@ angular
         this.useMarketoLatticeIntegration = null;
         this.primaryAttributeFields = null;
         this.scoringRequestList = null;
+        this.scoringRequest = null;
+        this.configId = null;
 
     }
 
@@ -73,6 +75,34 @@ angular
 
             return deferred.promise;
         }
+    }
+
+    this.setScoringRequest = function(scoringRequest) {
+        this.scoringRequest = scoringRequest;
+        this.configId = scoringRequest.configId ? scoringRequest.configId : null;
+    }
+
+    this.updateScoringRequestMatchFields = function(scoringRequest) {
+        if (this.scoringRequest) {
+            this.scoringRequest.marketoScoringMatchFields = scoringRequest.marketoScoringMatchFields;
+        }
+    }
+
+    this.getScoringRequest = function(cacheOnly, credentialId, configId) {
+        var deferred = $q.defer();
+
+        if (credentialId == this.marketoCredentialId && configId == this.configId && this.scoringRequest && cacheOnly) {
+            deferred.resolve(this.scoringRequest);
+        } else {
+            MarketoService.GetScoringRequest(credentialId, configId).then(function(result) {
+                console.log(result);
+                MarketoStore.setScoringRequest(result);
+                deferred.resolve(result);
+            });
+
+        }
+
+        return deferred.promise;
     }
 
     this.setPrimaryAttributeFields = function(fields) {
@@ -502,12 +532,12 @@ angular
         return deferred.promise;
     }
 
-    this.GetScoringRequest = function(credentialId, modelId) {
+    this.GetScoringRequest = function(credentialId, configId) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
-            url: '/pls/marketo/credentials/' + credentialId + '/scoring-requests/' + modelId
+            url: '/pls/marketo/credentials/' + credentialId + '/scoring-requests/' + configId
         }).then(
             function onSuccess(response) {
                 deferred.resolve(response.data);
