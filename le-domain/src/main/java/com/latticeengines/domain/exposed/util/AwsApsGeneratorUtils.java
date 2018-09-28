@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -19,6 +21,8 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class AwsApsGeneratorUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(AwsApsGeneratorUtils.class);
+
     public static void setupMetaData(Table apsTable, Map<String, List<Product>> productMap) {
         List<Attribute> attributes = apsTable.getAttributes();
         for (Attribute attribute : attributes) {
@@ -27,10 +31,11 @@ public class AwsApsGeneratorUtils {
                     || InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
                 attribute.setApprovedUsage(ApprovedUsage.NONE);
                 attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
-                attribute.setCategory(Category.ACCOUNT_INFORMATION);
+                attribute.setCategory(Category.DEFAULT);
                 if (InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
                     attribute.setLogicalDataType(LogicalDataType.InternalId);
                 }
+                log.info(String.format("Setting category for %s attribute as %s", name, Category.DEFAULT.getName()));
             } else {
                 attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
                 attribute.setCategory(Category.PRODUCT_SPEND);
