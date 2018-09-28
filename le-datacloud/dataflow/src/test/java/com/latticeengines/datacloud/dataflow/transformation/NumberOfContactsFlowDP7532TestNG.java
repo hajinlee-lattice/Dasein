@@ -73,7 +73,6 @@ public class NumberOfContactsFlowDP7532TestNG extends DataCloudDataFlowFunctiona
             String accountId = ((Utf8) record.get(NumberOfContactsFlow.ACCOUNT_ID)).toString();
             Integer numberOfContacts = (Integer) record.get(NumberOfContactsFlow.NUMBER_OF_CONTACTS);
 
-            //Assert.assertEquals(accountId, expectedRecord[0], "Mismatch for record " + i + ": AccoundId");
             if (accountId.equals("0012400001DNwcNAAT")) {
                 Assert.assertEquals(numberOfContacts.intValue(), 1,
                         "Mismatch for record " + i + " with AccountID " + accountId + ": NumberOfContacts");
