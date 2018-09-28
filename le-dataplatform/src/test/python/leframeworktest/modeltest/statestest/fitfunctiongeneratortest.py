@@ -38,7 +38,7 @@ class FitFunctionGeneratorTest(TestBase):
         self.assertAlmostEquals(fit_function_parameters['alpha'], 0.0, delta=1e-6)
         self.assertAlmostEquals(fit_function_parameters['beta'], -1.7346010553881064, delta=1e-6)
         self.assertAlmostEquals(fit_function_parameters['gamma'], 0.0, delta=1e-6)
-        self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.0, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.1, delta=1e-6)
 
     def testExecute2(self):
         mediator = Mediator()
