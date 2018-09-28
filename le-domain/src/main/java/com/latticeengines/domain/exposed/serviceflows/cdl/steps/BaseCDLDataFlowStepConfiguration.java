@@ -15,7 +15,9 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
         @Type(value = MatchCdlMergeConfiguration.class, name = "MatchCdlMergeConfiguration"),
         @Type(value = MatchCdlSplitConfiguration.class, name = "MatchCdlSplitConfiguration"),
         @Type(value = RedshiftPublishStepConfiguration.class, name = "RedshiftPublishStepConfiguration"),
-        @Type(value = ScoreAggregateFlowConfiguration.class, name = "ScoreAggregateFlowConfiguration"), })
+        @Type(value = ScoreAggregateFlowConfiguration.class, name = "ScoreAggregateFlowConfiguration"),
+        @Type(value = OrphanRecordExportConfiguration.class, name = "OrphanRecordExportConfiguration"),
+})
 public class BaseCDLDataFlowStepConfiguration extends DataFlowStepConfiguration {
 
     @Override

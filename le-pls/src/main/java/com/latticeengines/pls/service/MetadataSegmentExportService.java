@@ -21,4 +21,6 @@ public interface MetadataSegmentExportService {
     void downloadSegmentExportResult(String exportId, HttpServletRequest request, HttpServletResponse response);
 
     String getExportedFilePath(MetadataSegmentExport metadataSegmentExport);
+
+    MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport);
 }

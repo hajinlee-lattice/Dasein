@@ -302,6 +302,12 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         return url;
     }
 
+    //fix it: only for OrphanRecordExportDeploymentTestNG, after segmentExport migration, remove it.
+    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport, CustomerSpace customerSpace){
+        String url = constructUrl("pls/internal/segment/orphan/customerspace/" + customerSpace.toString());
+        return restTemplate.postForObject(url, metadataSegmentExport, MetadataSegmentExport.class);
+    }
+
     public MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, //
             String exportId) {
         try {

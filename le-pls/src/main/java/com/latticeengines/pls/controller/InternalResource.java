@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,6 +80,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
@@ -640,16 +642,23 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody MetadataSegmentExport export, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
-        String exportType = export.getType().toString();
+        MetadataSegmentExportType exportType = export.getType();
+        String exportTypeStr = "";
         switch (exportType) {
-        case "ACCOUNT":
-            exportType = "Account";
+        case ACCOUNT:
+            exportTypeStr = "Account";
             break;
-        case "CONTACT":
-            exportType = "Contact";
+        case CONTACT:
+            exportTypeStr = "Contact";
             break;
-        case "ACCOUNT_AND_CONTACT":
-            exportType = "Account and Contact";
+        case ACCOUNT_AND_CONTACT:
+            exportTypeStr = "Account and Contact";
+            break;
+        case ORPHAN_TXN:
+            exportTypeStr = "Orphan Transaction";
+            break;
+        case ORPHAN_CONTACT:
+            exportTypeStr = "Orphan Contacts";
             break;
         }
         if (exportID != null && !exportID.isEmpty()) {
@@ -659,13 +668,17 @@ public class InternalResource extends InternalResourceBase {
                     String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
                     case "COMPLETED":
-                        emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
+                        emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr);
                         break;
                     case "FAILED":
-                        emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportType);
+                        emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
                         break;
                     case "STARTED":
-                        emailService.sendPlsExportSegmentRunningEmail(user, exportID);
+                        if (exportTypeStr.contains("Orphan")){
+                            emailService.sendPlsExportOrphanRecordRunningEmail(user,exportID,exportTypeStr);
+                        }else {
+                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
+                        }
                         break;
                     }
                 }
@@ -952,6 +965,18 @@ public class InternalResource extends InternalResourceBase {
         metadataSegmentExport.setStatus(state);
         return metadataSegmentExportService.updateSegmentExportJob(metadataSegmentExport);
     }
+
+
+    @PostMapping(value = "/segment/orphan/customerspace/" + TENANT_ID_PATH)
+    @ResponseBody
+    @ApiOperation(value = "create orphan record through MetadataSegmentExportEntityMgr")
+    public MetadataSegmentExport createOrphanRecordThruMgr(@PathVariable("tenantId") String tenantId, HttpServletRequest request,
+            @RequestBody MetadataSegmentExport metadataSegmentExport){
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        return metadataSegmentExportService.createOrphanRecordThruMgr(metadataSegmentExport);
+    }
+
 
     public List<String> getTestTenantIds() {
         String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";

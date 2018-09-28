@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccou
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlMergeParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlSplitParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTxnExportParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMa
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
+
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
@@ -63,6 +65,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
         @JsonSubTypes.Type(value = MatchCdlSplitParameters.class, name = "MatchCdlSplitParameters"), //
         @JsonSubTypes.Type(value = MatchCdlMergeParameters.class, name = "MatchCdlMergeParameters"), //
         @JsonSubTypes.Type(value = PrepareMatchDataParameters.class, name = "PrepareMatchDataParameters"), //
+        @JsonSubTypes.Type(value = OrphanTxnExportParameters.class, name = "OrphanTxnExportParameters"), //
 })
 public class DataFlowParameters {
 

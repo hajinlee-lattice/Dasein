@@ -22,6 +22,10 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean shouldUseDisplayName = Boolean.TRUE;
 
+    private boolean exportMergedFile = Boolean.FALSE;
+
+    private String mergedFileName;
+
     private Map<String, String> properties = new HashMap<>();
 
     public ExportFormat getExportFormat() {
@@ -87,4 +91,21 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     public void setUsingDisplayName(boolean shouldUseDisplayName) {
         this.shouldUseDisplayName = shouldUseDisplayName;
     }
+
+    public boolean isExportMergedFile() {
+        return exportMergedFile;
+    }
+
+    public void setExportMergedFile(boolean exportMergedFile) {
+        this.exportMergedFile = exportMergedFile;
+    }
+
+    public String getMergedFileName() {
+        return mergedFileName;
+    }
+
+    public void setMergedFileName(String mergedFileName) {
+        this.mergedFileName = mergedFileName;
+    }
+
 }

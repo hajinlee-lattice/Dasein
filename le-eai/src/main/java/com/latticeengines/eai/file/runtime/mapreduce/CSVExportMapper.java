@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData.Record;
@@ -112,7 +113,10 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             if (fieldValue.equals("null")) {
                 fieldValue = "";
             } else if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
-                fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
+                Class<?> javaType = AvroUtils.getJavaType(AvroUtils.getType(field));
+                if (Long.class.equals(javaType) || Integer.class.equals(javaType)){
+                    fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
+                }
             }
             csvFilePrinter.print(fieldValue);
         } else if (field.name() != null) {

@@ -176,4 +176,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         metadataSegmentExportJob.setApplicationId(applicationId.toString());
         return updateSegmentExportJob(metadataSegmentExportJob);
     }
+
+    @Override
+    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport){
+        metadataSegmentExportEntityMgr.create(metadataSegmentExport);
+        return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExport.getExportId());
+    }
 }

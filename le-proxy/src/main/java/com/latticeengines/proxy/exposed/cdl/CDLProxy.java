@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -149,6 +150,23 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
         return responseDoc.isSuccess();
     }
+
+    public ApplicationId OrphanRecordExport(String customerSpace, MetadataSegmentExport metadataSegmentExport){
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/exportorphanrecord", customerSpace);
+        ResponseDocument responseDoc = post("orphanRecordExport", url, metadataSegmentExport, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult().toString();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start OrphanRecordExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity, String initiator) {
