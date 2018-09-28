@@ -6,8 +6,8 @@ angular.module('login')
         clientsession: '<'
     },
     controller: function(
-        $state, $location, $timeout, ResourceUtility, LoginService, Banner,
-        SessionTimeoutUtility, BrowserStorageUtility, LoginStore
+        $state, $location, $timeout, $window, ResourceUtility, LoginService, Banner,
+        SessionTimeoutUtility, TimestampIntervalUtility, BrowserStorageUtility, LoginStore
     ) {
         var vm = this;
 
@@ -17,7 +17,10 @@ angular.module('login')
             vm.state = $state;
             vm.history = [];
             vm.loginInProgress = {};
-            
+            vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
+            vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
+            vm.params = $location.$$search;
+
             if (SessionTimeoutUtility.hasSessionTimedOut() && vm.logindocument.UserName) {
                 return LoginService.Logout();
             } else {
@@ -29,19 +32,24 @@ angular.module('login')
                         break;
                     case 'login.form': 
                         if (vm.logindocument.UserName) {
-                            var params = $location.$$search;
-                            $state.go('login.tenants', { obj: params });
+                            $state.go('login.tenants', { obj: vm.params });
                         }
                         break;
                     case 'login.tenants':
                         if (!vm.logindocument.UserName) {
-                            var params = $location.$$search;
-                            $state.go('login.form', { obj: params });
+                            $state.go('login.form');
                         }
                         break;
                     case 'login':
-                        var params = $location.$$search;
-                        $state.go('login.form', { obj: params });
+                        if ((Object.keys(vm.params).length != 0) && vm.logindocument.UserName) {
+                    
+                            LoginService.PostToJwt(vm.params).then(function(result){
+                                $window.location.href = result.url;
+                            });
+
+                        } else {
+                            $state.go('login.form', { obj: vm.params });
+                        }
                         break;
                 }
             }

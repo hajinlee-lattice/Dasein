@@ -21,17 +21,6 @@ angular.module('login.tenants', [
 
         vm.$onInit = function() {
 
-            // var urlParams = $location.$$search;
-            // vm.params = Object.keys(urlParams).length != 0 ? urlParams : $stateParams.obj;
-            // if (Object.keys(vm.params).length != 0){ 
-            //     LoginService.PostToJwt(vm.params).then(function(result){
-
-            //         console.log(result);                    
-
-            //         // $window.location.href = result.url;
-            //     });
-            // }
-
             vm.ResourceUtility = ResourceUtility;
             vm.tenantMap = {};
             vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
@@ -62,7 +51,8 @@ angular.module('login.tenants', [
                 if (vm.logindocument && !LoginStore.login.username) {
                     showError(ResourceUtility.getString("LOGIN_EXPIRED_AUTHENTICATION_CREDENTIALS"));
                 } else {
-                    showError(ResourceUtility.getString("NO_TENANT_MESSAGE"));
+                    // showError(ResourceUtility.getString("NO_TENANT_MESSAGE"));
+                    $window.location.href = 'https://help.lattice-engines.com';
                 }
                 return;
             }

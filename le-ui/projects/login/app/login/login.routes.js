@@ -11,6 +11,10 @@ angular.module('login', [
     $stateProvider
         .state('login', {
             url: '/',
+            params: {
+                disableUserInfo: true,
+                disableLogoArea: false
+            },
             resolve: {
                 strings: function(ResourceStringsService) {
                     return ResourceStringsService.GetExternalResourceStringsForLocale();
@@ -48,7 +52,8 @@ angular.module('login', [
         .state('login.tenants', {
             url: 'tenants',
             params: {
-                obj: {}
+                obj: {},
+                disableUserInfo: false
             },
             resolve: {
                 logindocument: function(BrowserStorageUtility) {
