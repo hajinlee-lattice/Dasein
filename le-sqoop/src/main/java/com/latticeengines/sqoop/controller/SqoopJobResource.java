@@ -5,6 +5,7 @@ import java.util.Collections;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,7 +35,7 @@ public class SqoopJobResource {
     @ApiOperation(value = "Import data from SQL to HDFS")
     public AppSubmission importTable(@RequestBody SqoopImporter importer) {
         importer.setSync(false);
-        ApplicationId applicationId = sqoopJobService.importData(importer);
+        ApplicationId applicationId = sqoopJobService.importData(importer, new YarnConfiguration());
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
@@ -44,7 +45,7 @@ public class SqoopJobResource {
     @ApiOperation(value = "Export data from HDFS to SQL")
     public AppSubmission exportTable(@RequestBody SqoopExporter exporter) {
         exporter.setSync(false);
-        ApplicationId applicationId = sqoopJobService.exportData(exporter);
+        ApplicationId applicationId = sqoopJobService.exportData(exporter, new YarnConfiguration());
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 

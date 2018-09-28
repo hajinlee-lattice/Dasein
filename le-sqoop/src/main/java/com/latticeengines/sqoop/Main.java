@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,8 +31,7 @@ public class Main {
         ClassPathXmlApplicationContext appContext = //
                 new ClassPathXmlApplicationContext("sqoop-cli-context.xml");
         sqoopJobService = appContext.getBean("sqoopJobService", SqoopJobService.class);
-        Configuration yarnConfiguration = appContext.getBean("yarnConfiguration", Configuration.class);
-        exportToAurora(yarnConfiguration);
+        exportToAurora(new YarnConfiguration());
     }
 
     private static void exportToAurora(Configuration yarnConfiguration) throws IOException {
@@ -52,7 +52,7 @@ public class Main {
                 .setExportColumns(targetColumns) //
                 .build();
 
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter, yarnConfiguration);
         log.info(String.format("Waiting for appId %s", appId));
         @SuppressWarnings("deprecation")
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,

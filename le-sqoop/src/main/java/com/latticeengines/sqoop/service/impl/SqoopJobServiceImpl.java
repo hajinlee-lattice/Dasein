@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,6 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.hadoop.bean.EMRConfigurationFactory;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
@@ -45,7 +45,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     private static final int MAX_SQOOP_RETRY = 3;
 
     @Inject
-    protected VersionManager versionManager;
+    private VersionManager versionManager;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -53,17 +53,19 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     @Inject
     private DbMetadataService dbMetadataService;
 
-    @Inject
-    private EMRConfigurationFactory emrConfigurationFactory;
-
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
 
-    @Value("${dataplatform.hdfs.stack:}")
+    @Value("${dataplatform.hdfs.stack}")
     private String stackName;
 
-    public ApplicationId exportData(SqoopExporter exporter) {
-        Configuration yarnConfiguration = new Configuration(this.yarnConfiguration);
+    @Override
+    public ApplicationId exportData(SqoopExporter exporter, Configuration yarnConfiguration) {
+        if (yarnConfiguration == null) {
+            yarnConfiguration = new Configuration(this.yarnConfiguration);
+            log.info("Use autowired yarnConfiguration");
+        }
+        log.info("Use yarnConfiguration with default Fs: " + yarnConfiguration.get("fs.defaultFS"));
 
         int numMappers = exporter.getNumMappers();
         if (numMappers < 1) {
@@ -117,8 +119,13 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         }
     }
 
-    public ApplicationId importData(SqoopImporter importer) {
-        Configuration yarnConfiguration = new Configuration(this.yarnConfiguration);
+    @Override
+    public ApplicationId importData(SqoopImporter importer, Configuration yarnConfiguration) {
+        if (yarnConfiguration == null) {
+            yarnConfiguration = new Configuration(this.yarnConfiguration);
+            log.info("Use autowired yarnConfiguration");
+        }
+        log.info("Use yarnConfiguration with default Fs: " + yarnConfiguration.get("fs.defaultFS"));
 
         boolean targeDirExists = false;
         try {
@@ -300,7 +307,15 @@ public class SqoopJobServiceImpl implements SqoopJobService {
 
     private static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration, String version) {
         try {
-            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/sqoop/lib", version), ".*.jar$");
+            String sqoopJar = "/apps/sqoop/sqoop.jar";
+            List<String> files;
+            if (!HdfsUtils.fileExists(yarnConfiguration, sqoopJar)) {
+                files = new ArrayList<>(Collections.singleton(sqoopJar));
+            } else {
+                files = HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/sqoop/lib", version), //
+                        ".*.jar$");
+            }
+            return files;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }

@@ -69,12 +69,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 ruleEngineIds = new HashSet<>(idAttrsMap.values());
             }
             Node ruleRating = addSource(parameters.getBaseTables().get(ruleSrcIdx));
-            ruleRating = ruleRating.filter(idCol + " != null", new FieldList(idCol));
-            ruleRating = ruleRating.discard(InterfaceName.__Composite_Key__.name(),
-                    InterfaceName.CDLUpdatedTime.name());
-            ruleRating = renameIds(ruleRating);
-            pivoted = pivotField(ruleRating, ruleEngineIds, InterfaceName.Rating.name(), String.class, null)
-                    .renamePipe("rule_rating");
+            pivoted = pivotRuleBased(ruleEngineIds, ruleRating);
         }
 
         if (aiSrcIdx != null) {
@@ -90,7 +85,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 List<String> fields = new ArrayList<>(pivoted.getFieldNames());
                 fields.addAll(aiPivoted.getFieldNames());
                 pivoted = mergeJoinedCol(pivoted, idCol, aiIdCol, String.class);
-                pivoted = pivoted.discard(findFieldsToDiscard(pivoted));
+                pivoted = removeExtraId(pivoted);
                 fields = pivoted.getFieldNames();
                 Collections.sort(fields);
                 pivoted = pivoted.retain(new FieldList(fields));
@@ -105,38 +100,23 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         if (inactiveSrcIdx != null) {
             Node inactive = addSource(parameters.getBaseTables().get(inactiveSrcIdx));
             List<String> inactiveEngines = config.getInactiveEngines();
-            List<String> inactiveToRetain = new ArrayList<>();
-            Set<String> existing = new HashSet<>(inactive.getFieldNames());
-            for (String inactiveEngine: inactiveEngines) {
-                for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
-                    String scoreAttr = RatingEngine.toRatingAttrName(inactiveEngine, scoreType);
-                    inactiveToRetain.add(scoreAttr);
-                }
-            }
-            inactiveToRetain.retainAll(existing);
-
-            FieldList filterFields = new FieldList(new ArrayList<>(inactiveToRetain));
-            List<String> expressionTokens = new ArrayList<>();
-            inactiveToRetain.forEach(attr -> expressionTokens.add(attr + " != null"));
-            String expression = StringUtils.join(expressionTokens, " || ");
-            // 255 is maximum number of method parameters allowed by java
-            if (filterFields.getFields() != null && filterFields.getFields().length <= 255) {
-                inactive = inactive.filter(expression, filterFields);
-            }
-
-            inactiveToRetain.add(InterfaceName.AccountId.name());
-            inactive = inactive.retain(new FieldList(inactiveToRetain));
-            String idCol2 = idCol + "_2";
-            inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
-            pivoted = pivoted.outerJoin(idCol, inactive, idCol2);
-            pivoted = mergeJoinedCol(pivoted, idCol, idCol2, String.class);
-            pivoted = pivoted.discard(findFieldsToDiscard(pivoted));
+            pivoted = joinInactiveEngines(pivoted, inactive, inactiveEngines);
         }
 
+        pivoted = removeExtraId(pivoted);
         pivoted = pivoted.addTimestamp(InterfaceName.CDLCreatedTime.name());
         pivoted = pivoted.addTimestamp(InterfaceName.CDLUpdatedTime.name());
 
         return pivoted;
+    }
+
+    private Node pivotRuleBased(Set<String> ruleEngineIds, Node ruleRating) {
+        ruleRating = ruleRating.filter(idCol + " != null", new FieldList(idCol));
+        ruleRating = ruleRating.discard(InterfaceName.__Composite_Key__.name(),
+                InterfaceName.CDLUpdatedTime.name());
+        ruleRating = renameIds(ruleRating);
+        return pivotField(ruleRating, ruleEngineIds, InterfaceName.Rating.name(), String.class, null)
+                .renamePipe("rule_rating");
     }
 
     private Node pivotAIBased(Node rawRatings) {
@@ -153,7 +133,37 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         FieldList joinKey = new FieldList(idCol);
         List<FieldList> joinKeys = rhs.stream().map(n -> joinKey).collect(Collectors.toList());
         Node joined = rating.coGroup(joinKey, rhs, joinKeys, JoinType.OUTER);
-        return joined.discard(findFieldsToDiscard(joined));
+        return removeExtraId(joined);
+    }
+
+    private Node joinInactiveEngines(Node pivoted, Node inactive, List<String> inactiveEngines) {
+        List<String> inactiveToRetain = new ArrayList<>();
+        Set<String> existing = new HashSet<>(inactive.getFieldNames());
+        for (String inactiveEngine: inactiveEngines) {
+            for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
+                String scoreAttr = RatingEngine.toRatingAttrName(inactiveEngine, scoreType);
+                inactiveToRetain.add(scoreAttr);
+            }
+        }
+        inactiveToRetain.retainAll(existing);
+
+        FieldList filterFields = new FieldList(new ArrayList<>(inactiveToRetain));
+        List<String> expressionTokens = new ArrayList<>();
+        inactiveToRetain.forEach(attr -> expressionTokens.add(attr + " != null"));
+        String expression = StringUtils.join(expressionTokens, " || ");
+        // 255 is maximum number of method parameters allowed by java
+        if (filterFields.getFields() != null && filterFields.getFields().length <= 255) {
+            inactive = inactive.filter(expression, filterFields);
+        }
+
+        inactiveToRetain.add(InterfaceName.AccountId.name());
+        inactive = inactive.retain(new FieldList(inactiveToRetain));
+        String idCol2 = idCol + "_2";
+        inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
+        pivoted = pivoted.outerJoin(idCol, inactive, idCol2);
+        pivoted = mergeJoinedCol(pivoted, idCol, idCol2, String.class);
+        pivoted = removeExtraId(pivoted);
+        return pivoted;
     }
 
     private Node pivotScoreField(Node rawRatings, Set<String> engineIds, RatingEngine.ScoreType scoreType) {
@@ -190,12 +200,15 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 new FieldMetadata(keyCol, String.class));
     }
 
-    private FieldList findFieldsToDiscard(Node joined) {
+    private Node removeExtraId(Node joined) {
         List<String> toDiscard = joined.getFieldNames().stream() //
                 .filter(f -> (f.contains(idCol) && !f.equals(idCol)) || (f.contains(RatingEngine.RATING_ENGINE_PREFIX)
                         && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX))) //
                 .collect(Collectors.toList());
-        return new FieldList(toDiscard);
+        if (CollectionUtils.isNotEmpty(toDiscard)) {
+            joined = joined.discard(new FieldList(toDiscard));
+        }
+        return joined;
     }
 
     private Node mergeJoinedCol(Node node, String tgtCol, String tgtCol2, Class<?> clz) {
