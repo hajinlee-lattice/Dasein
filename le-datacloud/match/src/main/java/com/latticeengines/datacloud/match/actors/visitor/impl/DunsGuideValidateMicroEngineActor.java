@@ -21,10 +21,10 @@ import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component("dunsValidatorMicroEngineActor")
+@Component("dunsGuideValidateMicroEngineActor")
 @Scope("prototype")
-public class DunsValidatorMicroEngineActor extends MicroEngineActorTemplate<DunsGuideBookLookupActor> {
-    private static final Logger log = LoggerFactory.getLogger(DunsValidatorMicroEngineActor.class);
+public class DunsGuideValidateMicroEngineActor extends MicroEngineActorTemplate<DunsGuideBookLookupActor> {
+    private static final Logger log = LoggerFactory.getLogger(DunsGuideValidateMicroEngineActor.class);
 
     @PostConstruct
     public void postConstruct() {
