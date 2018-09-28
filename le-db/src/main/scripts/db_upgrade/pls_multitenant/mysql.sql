@@ -109,6 +109,10 @@ CREATE PROCEDURE `UpdatePLSTables`()
     UPDATE `PLS_MultiTenant`.`PLAY_LAUNCH` pl, `PLS_MultiTenant`.`PLAY` p
     SET pl.UPDATED_BY = p.UPDATED_BY, pl.CREATED_BY = p.CREATED_BY
     WHERE pl.FK_PLAY_ID = p.PID;
+    
+    update PLS_MultiTenant.WORKFLOW_JOB w 
+    set w.input_context = REPLACE(input_context, 'RatingEngineImportMatchAndModelWorkflow', 'CrossSellImportMatchAndModelWorkflow'), w.type = 'crossSellImportMatchAndModelWorkflow' 
+    where w.type like '%ratingEngineImportMatchAndModelWorkflow%';
 
     CALL `AttachPlayTypes`();
 
