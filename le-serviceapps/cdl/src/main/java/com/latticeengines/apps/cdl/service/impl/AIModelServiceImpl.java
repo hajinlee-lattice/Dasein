@@ -178,6 +178,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
             SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
             modelingConfig.setSourceFileName(clonedSourceFile.getName());
+            modelingConfig.setSourceFileDisplayName(clonedSourceFile.getDisplayName());
             log.info("Completed cloning the Sourcefile and Training table for the new iteration");
         }
 

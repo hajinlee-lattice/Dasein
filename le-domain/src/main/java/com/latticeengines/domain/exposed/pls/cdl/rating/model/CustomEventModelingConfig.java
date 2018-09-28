@@ -18,6 +18,8 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
 
     private String sourceFileName;
 
+    private String sourceFileDisplayName;
+
     private List<DataStore> dataStores;
 
     private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
@@ -40,6 +42,14 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
 
     public void setSourceFileName(String sourceFileName) {
         this.sourceFileName = sourceFileName;
+    }
+
+    public String getSourceFileDisplayName() {
+        return sourceFileDisplayName;
+    }
+
+    public void setSourceFileDisplayName(String sourceFileDisplayName) {
+        this.sourceFileDisplayName = sourceFileDisplayName;
     }
 
     public List<DataStore> getDataStores() {
@@ -95,6 +105,7 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         CustomEventModelingConfig advancedConfInAIModel = (CustomEventModelingConfig) config;
         advancedConfInRetrievedAIModel.setCustomEventModelingType(advancedConfInAIModel.getCustomEventModelingType());
         advancedConfInRetrievedAIModel.setSourceFileName(advancedConfInAIModel.getSourceFileName());
+        advancedConfInRetrievedAIModel.setSourceFileDisplayName(advancedConfInAIModel.getSourceFileDisplayName());
         advancedConfInRetrievedAIModel.setDataStores(advancedConfInAIModel.getDataStores());
         advancedConfInRetrievedAIModel.setDeduplicationType(advancedConfInAIModel.getDeduplicationType());
         advancedConfInRetrievedAIModel.setExcludePublicDomains(advancedConfInAIModel.isExcludePublicDomains());

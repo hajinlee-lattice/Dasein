@@ -996,6 +996,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         advancedConf.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
         advancedConf.setExcludePublicDomains(false);
         advancedConf.setSourceFileName(sourceFileName);
+        advancedConf.setSourceFileDisplayName(sourceFileName);
         advancedConf.setTransformationGroup(null); // TransformationGroup.ALL
     }
 
@@ -1050,15 +1051,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void verifyBatchStore(Map<BusinessEntity, Long> expectedEntityCount) {
-        expectedEntityCount.forEach((key, value) -> {
-            Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value);
-        });
+        expectedEntityCount
+                .forEach((key, value) -> Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value));
     }
 
     void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
-        expectedEntityCount.forEach((key, value) -> {
-            Assert.assertEquals(Long.valueOf(countInRedshift(key)), value);
-        });
+        expectedEntityCount.forEach((key, value) -> Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
