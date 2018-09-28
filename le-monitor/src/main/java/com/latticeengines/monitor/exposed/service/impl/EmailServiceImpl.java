@@ -34,6 +34,7 @@ public class EmailServiceImpl implements EmailService {
     public static Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     private static final String COMMA = ", ";
+    private static final String ORPHAN_FILTER = "Orphan";
 
     @Autowired
     private EmailSettings emailsettings;
@@ -633,17 +634,24 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending segment export complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_SUCCESS);
+            String successSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT;
+            String requestType = "a segment";
+            if (type.contains(ORPHAN_FILTER)){
+                successSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT;
+                requestType = "orphan records";
+            }
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{downloadLink}}", hostport);
             builder.replaceToken("{{exportID}}", exportID);
             builder.replaceToken("{{exportType}}", type);
             builder.replaceToken("{{url}}", hostport);
-
+            builder.replaceToken("{{requestType}}",requestType);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png", "image/png",
                     "instruction");
-            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID), mp,
+
+            sendMultiPartEmail(String.format(successSubject, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
@@ -658,12 +666,16 @@ public class EmailServiceImpl implements EmailService {
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_ERROR);
 
+            String errorSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT;
+            if (type.contains(ORPHAN_FILTER)){
+                errorSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_ERROR_SUBJECT;
+            }
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{exportID}}", exportID);
             builder.replaceToken("{{exportType}}", type);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT, exportID), mp,
+            sendMultiPartEmail(String.format(errorSubject, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
@@ -673,15 +685,31 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsExportSegmentRunningEmail(User user, String exportID) {
+        sendPlsExportRunningEmail(user,exportID,"segment");
+    }
+
+    @Override
+    public void sendPlsExportOrphanRecordRunningEmail(User user, String exportID, String type){
+        sendPlsExportRunningEmail(user,exportID,type);
+    }
+
+    private void sendPlsExportRunningEmail(User user, String exportID, String type){
         try {
             log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_RUNNING);
+            String inProgressSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT;
+            String requestType = "a segment";
+            if (type.contains(ORPHAN_FILTER)){
+                inProgressSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT;
+                requestType = "orphan records";
+            }
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{requestType}}", requestType);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT, exportID),
+            sendMultiPartEmail(String.format(inProgressSubject, exportID),
                     mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
@@ -689,6 +717,7 @@ public class EmailServiceImpl implements EmailService {
                     "Failed to send PLS export segment in-progress email to " + user.getEmail() + " " + e.getMessage());
         }
     }
+
 
     private void sendEmailForEnrichInternalAttribute(User user, String hostport, String tenantName, String modelName,
             boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,

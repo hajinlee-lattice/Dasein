@@ -23,11 +23,16 @@ public enum MetadataSegmentExportType {
     CONTACT("Contacts", BusinessEntity.Contact), //
     ACCOUNT_AND_CONTACT("Accounts and Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
     ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"), // ;
-    ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact, BusinessEntity.Account);
+    ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact, BusinessEntity.Account),
+    ORPHAN_TXN("Orphan Transaction");
 
     String displayName;
 
     List<Triple<BusinessEntity, String, String>> defaultAttributeTuples;
+
+    MetadataSegmentExportType(String displayName){
+        this.displayName = displayName;
+    }
 
     MetadataSegmentExportType(String displayName, InterfaceName field, String fieldDisplayName) {
         this.displayName = displayName;

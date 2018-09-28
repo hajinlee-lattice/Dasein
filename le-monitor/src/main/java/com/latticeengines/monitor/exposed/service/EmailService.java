@@ -75,6 +75,8 @@ public interface EmailService {
 
     void sendPlsExportSegmentRunningEmail(User user, String exportID);
 
+    void sendPlsExportOrphanRecordRunningEmail(User user, String exportID, String type);
+
     void sendCDLProcessAnalyzeCompletionEmail(User user, Tenant tenant, String appPublicUrl);
 
     void sendCDLProcessAnalyzeErrorEmail(User user, Tenant tenant, String appPublicUrl);
