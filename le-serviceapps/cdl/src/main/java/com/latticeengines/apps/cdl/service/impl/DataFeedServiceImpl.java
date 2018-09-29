@@ -1,7 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -163,7 +163,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         });
         log.info("imports for processanalyze are: " + imports);
 
-        Collections.sort(imports, (a, b) -> Long.compare(a.getDataTable().getPid(), b.getDataTable().getPid()));
+        imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getPid()));
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.addImports(imports);
         execution.setWorkflowId(jobId);

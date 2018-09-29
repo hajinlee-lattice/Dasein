@@ -149,7 +149,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         List<Action> dataCloudChangeActions = getDataCloudChangeActions();
         dataCloudChangeActions.forEach(action -> {
             ObjectNode actionNode = JsonUtils.createObjectNode();
-            actionNode.put(ReportConstants.TIME, sdf.format(action.getCreated()));
+            // discussed with Afroz that displaying action time here is confusing and should be removed.
+//            actionNode.put(ReportConstants.TIME, sdf.format(action.getCreated()));
             actionNode.put(ReportConstants.USER, action.getActionInitiator());
             actionNode.put(ReportConstants.ACTION, action.getType().getDisplayName());
             systemActionNode.add(actionNode);
@@ -354,10 +355,25 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private List<Action> getDataCloudChangeActions() {
+        long lastPATimestamp;
+        List<String> jobTypes = Collections.singletonList("processAnalyzeWorkflow");
+        List<Job> jobs = workflowProxy.getJobs(null, jobTypes, Boolean.FALSE, customerSpace.toString());
+        Optional<Job> latestSuccessJob = jobs.stream()
+                .filter(job -> job.getJobStatus() == JobStatus.COMPLETED)
+                .max(Comparator.comparing(Job::getEndTimestamp));
+        if (latestSuccessJob.isPresent()) {
+            lastPATimestamp = latestSuccessJob.get().getEndTimestamp().getTime();
+        } else {
+            log.info("Cannot find the latest success job. ");
+            lastPATimestamp = -1L;
+        }
+        Long currentPATimestamp = getLongValueFromContext(PA_TIMESTAMP);
         List<Long> systemActionIds = getListObjectFromContext(SYSTEM_ACTION_IDS, Long.class);
         List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), systemActionIds);
         return actions.stream()
                 .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
+                .filter(action -> action.getCreated().getTime() > lastPATimestamp
+                        && action.getCreated().getTime() < currentPATimestamp)
                 .collect(Collectors.toList());
     }
 
