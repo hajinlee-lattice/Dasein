@@ -775,6 +775,7 @@ public enum LedpCode {
     LEDP_40041("Cannot perform action as potential circular dependencies found: {0}"), //
     LEDP_40042("Cannot perform deletion as there are direct dependencies: {0}"), //
     LEDP_40043("S3 File missing the following required fields: {0}"),
+    LEDP_40044("Please add Attributes to your model. You can also change usage settings in Attribute Management"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

@@ -91,7 +91,7 @@ public class AttrConfigServiceImplUnitTestNG {
                         AttrConfigServiceImplTestUtils.generatePremiumCategoryAttrConfigActivationOverview());
         AttrConfigStateOverview overview = attrConfigService.getOverallAttrConfigActivationOverview();
         List<AttrConfigSelection> result = overview.getSelections();
-        Assert.assertEquals(result.size(), Category.getPremiunCategories().size());
+        Assert.assertEquals(result.size(), Category.getPremiumCategories().size());
 
         AttrConfigSelection categoryOverview = result.get(0);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalIntentAttrs);

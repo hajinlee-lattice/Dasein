@@ -107,8 +107,12 @@ public enum Category {
         }
     }
 
-    public static List<Category> getPremiunCategories() {
+    public static List<Category> getPremiumCategories() {
         return premiumCategories;
+    }
+
+    public static Set<Category> getLdcReservedCategories() {
+        return ldcReservedCategories;
     }
 
     public boolean isHiddenFromUi() {

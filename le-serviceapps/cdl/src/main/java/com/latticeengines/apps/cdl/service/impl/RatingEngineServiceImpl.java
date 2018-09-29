@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -80,6 +81,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -141,6 +143,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @Inject
     private DependencyChecker dependencyChecker;
@@ -581,14 +586,26 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             }
             break;
         case CUSTOM_EVENT:
-            if (CollectionUtils.isEmpty(CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getDataStores())) {
-                errors.add("No datastore selected, atleast one attribute set needed for modeling");
-            }
+            List<CustomEventModelingConfig.DataStore> dataStores = CustomEventModelingConfig
+                    .getAdvancedModelingConfig(aiModel).getDataStores();
             if (CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getCustomEventModelingType() == null) {
                 errors.add("No CustomEventModelingType selected");
             }
-            if (StringUtils.isEmpty(CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getSourceFileName())) {
-                errors.add("SourceFileName cannot be empty for custom event model's iteration");
+            if (CollectionUtils.isEmpty(dataStores)) {
+                errors.add("No datastore selected, atleast one attribute set needed for modeling");
+            }
+            Set<Category> selectedCategories = new HashSet<>();
+            if (dataStores.contains(CustomEventModelingConfig.DataStore.DataCloud)) {
+                selectedCategories.addAll(Category.getLdcReservedCategories());
+            }
+            if (dataStores.contains(CustomEventModelingConfig.DataStore.CDL)) {
+                selectedCategories.add(Category.ACCOUNT_ATTRIBUTES);
+            }
+            List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
+                    .getNewModelingAttrs(customerSpace, dataCollectionService.getActiveVersion(customerSpace))
+                    .filter(cm -> selectedCategories.contains(cm.getCategory())).collectList().block();
+            if (CollectionUtils.isEmpty(userSelectedAttributesForModeling)) {
+                errors.add(LedpCode.LEDP_40044.getMessage());
             }
             break;
         case PROSPECTING:
