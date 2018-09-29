@@ -100,7 +100,7 @@
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Score External File:</dt>
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Training File:</dt>
-                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.sourceFileName}}</dd>
+                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.sourceFileDisplayName ? vm.model.advancedModelingConfig.custom_event.sourceFileDisplayName : vm.model.advancedModelingConfig.custom_event.sourceFileName}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">One record per account:</dt>
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>

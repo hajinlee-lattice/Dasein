@@ -828,6 +828,7 @@ angular.module('lp.ratingsengine')
                 customEventModelingType = RatingsEngineStore.getCustomEventModelingType();
                 var modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
                 var fileName = RatingsEngineStore.getCSVFileName();
+                var displayFileName = RatingsEngineStore.getDisplayFileName();
                 var obj = {};
 
             obj = {
@@ -839,6 +840,7 @@ angular.module('lp.ratingsengine')
                             customEventModelingType: customEventModelingType,
                             dataStores: dataStores,
                             sourceFileName: fileName,
+                            sourceFileDisplayName: displayFileName,
                             deduplicationType: modelTrainingOptions['deduplicationType'],
                             excludePublicDomains: modelTrainingOptions['excludePublicDomains'],
                             transformationGroup: modelTrainingOptions['transformationGroup']
