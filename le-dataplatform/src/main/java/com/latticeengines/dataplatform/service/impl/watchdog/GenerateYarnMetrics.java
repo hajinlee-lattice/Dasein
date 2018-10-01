@@ -189,7 +189,8 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             jobMetric.setFinalAppStatus(FinalApplicationStatus.UNDEFINED.name());
 
             String split = splits.get(0);
-            if (splits.size() > 1) {
+            if (!split.contains("[") && !split.contains("]")
+                    && (splits.size() > 1 || split.toLowerCase().endsWith("playmaker"))) {
                 jobMetric.setTenantId(split);
             } else {
                 log.debug("Job does not contain proper tenant name:" + split + " split from: "
