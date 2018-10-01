@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -30,7 +31,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -89,7 +89,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     private static final String DIAGNOSTIC_FILE = "diagnostics.json";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Resource(name = "modelingJobService")
@@ -98,16 +98,16 @@ public class ModelingServiceImpl implements ModelingService {
     @Resource(name = "modelEntityMgr")
     private ModelEntityMgr modelEntityMgr;
 
-    @Autowired
+    @Inject
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    @Autowired
+    @Inject
     private SqoopMetadataService sqoopMetadataService;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
     @Resource(name = "parallelDispatchService")

@@ -35,7 +35,7 @@
 
     <yarn:environment>
         <yarn:classpath />
-        SHDP_HD_FSWEB=$$SHDP_HD_FSWEB$$
+        SHDP_HD_FSWEB=$$WEBHDFS_URL$$
         PYTHONIOENCODING=UTF-8
         PYTHONPATH=.:leframework.tar.gz:$$PYTHONPIPELINELIB$$
         DEBUG=${dataplatform.debug:false}

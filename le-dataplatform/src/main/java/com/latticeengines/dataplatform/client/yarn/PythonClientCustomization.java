@@ -104,9 +104,9 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
             properties.put(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
             if (Boolean.TRUE.equals(useEmr)) {
-                properties.put(PythonContainerProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
+                properties.put(PythonContainerProperty.WEBHDFS_URL.name(), emrService.getWebHdfsUrl());
             } else {
-                properties.put(PythonContainerProperty.SHDP_HD_FSWEB.name(), getWebHdfs());
+                properties.put(PythonContainerProperty.WEBHDFS_URL.name(), getWebHdfs());
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);
