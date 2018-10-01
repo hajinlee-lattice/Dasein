@@ -115,10 +115,17 @@ public class LoginResource {
             List<Tenant> tenants = tenantService.getAllTenants();
             tenants = tenants.stream().filter(tenant -> TenantStatus.ACTIVE.equals(tenant.getStatus()))
                     .collect(Collectors.toList());
-            List<Tenant> gaTenants = new ArrayList<>(ticket.getTenants());
-            tenants.retainAll(gaTenants);
-            tenants.sort(new TenantNameSorter());
-            result.setTenants(tenants);
+            List<Tenant> gaTenants = null;
+            if (ticket.getTenants()!= null) {
+                gaTenants = new ArrayList<>(ticket.getTenants());
+            }
+            if (gaTenants != null) {
+                if (!gaTenants.isEmpty()) {
+                    tenants.retainAll(gaTenants);
+                    tenants.sort(new TenantNameSorter());
+                    result.setTenants(tenants);
+                }
+            }
             doc.setResult(result);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
