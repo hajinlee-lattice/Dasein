@@ -7,7 +7,8 @@ public class EmailSettings {
 
     public static final String PLS_NEW_INTERNAL_USER_EMAIL_MSG = "You have been added to the <strong>%s</strong> Lead Prioritization Tenant.";
     public static final String PLS_NEW_USER_SUBJECT = "Welcome to Lattice Predictive Insights";
-    public static final String PLS_NEW_EXTERNAL_USER_EMAIL_MSG = "Congratulations! You've been invited to use Lattice Predictive Insights. You can sign in for the first time using the temporary credentials listed below.\n";
+    public static final String PLS_NEW_EXTERNAL_USER_EMAIL_MSG = "Congratulations! You've been invited to use Lattice Engines. You can sign in for the first time using the temporary credentials listed below.\n";
+    public static final String PLS_NEW_PROSPECTING_USER_EMAIL_MSG = "Congratulations! You've been invited to access Lattice Help Center. You can sign in for the first time using the temporary credentials listed below.\n";
     public static final String PLS_EXISTING_USER_SUBJECT = "Invitation to Access %s (Lattice Predictive Insights)";
     public static final String PLS_FORGET_PASSWORD_EMAIL_SUBJECT = "Password Reset for Lattice Predictive Insights";
     public static final String PD_NEW_USER_EMAIL_MSG = "You have been granted access to the Lattice Prospect Discovery.";
@@ -59,6 +60,7 @@ public class EmailSettings {
     public static final String POC_STATE_NOTICE_EMAIL_SUBJECT = "POC Tenant State Change";
     public static final String S3_CREDENTIALS_EMAIL_SUBJECT = "S3 Credential";
     public static final String CDL_INGESTION_STATUS_SUBJECT = " %s - %s File Transfer";
+    public static final String LATTICE_HELP_CENTER_URL = "http://help.lattice-engines.com";
     private String from;
     private String password;
     private int port;

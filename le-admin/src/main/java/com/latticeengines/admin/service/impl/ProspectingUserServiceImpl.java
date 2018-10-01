@@ -33,7 +33,7 @@ public class ProspectingUserServiceImpl implements ProspectingUserService {
         RegistrationResult result = userService.registerUserWithNoTenant(userReg);
         if (result.isValid()) {
             String tempPass = result.getPassword();
-            emailService.sendPlsNewProspectingUserEmail(userReg.getUser(), tempPass, apiPublicUrl);
+            emailService.sendPlsNewProspectingUserEmail(userReg.getUser(), tempPass, null);
             LOGGER.info(String.format("%s registered as a new prevision user", userReg.getUser().getEmail()));
         } else {
             LOGGER.info(String.format("Failure of prevision user %s registration, user maybe exist",

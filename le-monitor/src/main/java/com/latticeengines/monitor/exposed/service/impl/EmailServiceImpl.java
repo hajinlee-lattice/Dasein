@@ -80,13 +80,14 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending new PLS internal user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_NEW_PREVISION_USER);
+                    EmailTemplateBuilder.Template.PLS_NEW_PROSPECTING_USER);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
-            builder.replaceToken("{{url}}", hostport);
-            builder.replaceToken("{{apppublicurl}}", hostport);
+            builder.replaceToken("{{helpcenterurl}}", EmailSettings.LATTICE_HELP_CENTER_URL);
+            builder.replaceToken("{{url}}", EmailSettings.LATTICE_HELP_CENTER_URL);
+            builder.replaceToken("{{msg}}", EmailSettings.PLS_NEW_PROSPECTING_USER_EMAIL_MSG);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
@@ -110,6 +111,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
+            builder.replaceToken("{{helpcenterurl}}", EmailSettings.LATTICE_HELP_CENTER_URL);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
@@ -125,13 +127,13 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending new PLS external user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_NEW_EXTERNAL_USER);
-
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantmsg}}", EmailSettings.PLS_NEW_EXTERNAL_USER_EMAIL_MSG);
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
+            builder.replaceToken("{{helpcenterurl}}", EmailSettings.LATTICE_HELP_CENTER_URL);
 
             Multipart mp = builder.buildMultipart();
             log.info("Sending email to " + user.getUsername());

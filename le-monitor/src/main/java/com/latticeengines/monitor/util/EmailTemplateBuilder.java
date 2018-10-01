@@ -83,7 +83,7 @@ public class EmailTemplateBuilder {
     public enum Template {
         PLS_NEW_EXTERNAL_USER("new_user.html"), //
         PLS_NEW_INTERNAL_USER("new_user.html"), //
-        PLS_NEW_PREVISION_USER("new_user.html"), //
+        PLS_NEW_PROSPECTING_USER("new_prospecting_user.html"), //
         PLS_EXISTING_EXTERNAL_USER("old_user.html"), //
         PLS_EXISTING_INTERNAL_USER("old_user.html"), //
         PLS_FORGET_PASSWORD("forget_password.html"), //
