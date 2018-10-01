@@ -1,5 +1,6 @@
 import React, { Component } from '../../../common/react-vendor';
 import LeButton from '../../../common/widgets/buttons/le-button';
+import LeButtonActions from '../../../common/widgets/buttons/le-button-actions';
 
 export default class ButtonsPage extends Component {
 
@@ -49,6 +50,7 @@ export default class ButtonsPage extends Component {
                     <LeButton callback={this.callbackHandler} disabled={this.state.disabled} config={config} />
                     <LeButton lable="Click" config={iconConfig} callback={() => { alert('Test'); }} />
                     <LeButton lable="Click" config={iconTitleConfig} callback={() => { alert('Test'); }} />
+                    <LeButtonActions />
                 </div>
             </div>
 
