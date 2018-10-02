@@ -3,7 +3,7 @@ angular.module('lp.playbook.plays', [
     'mainApp.appCommon.services.FilterService'
 ])
 .controller('PlayListController', function ($scope, $timeout, $element, $state, $stateParams, $interval, 
-    PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore) {
+    PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore, FilterService) {
 
     var vm = this,
         onpage = true,
@@ -202,7 +202,9 @@ angular.module('lp.playbook.plays', [
         PlaybookWizardStore.clear();
 
         $scope.$watch('vm.current.plays', function() {
-            vm.header.filter.filtered = vm.current.plays;
+            var filterStore = FilterService.getFilters('playlist.filter');
+
+            vm.header.filter.filtered = filterStore ? filterStore.filtered : vm.current.plays;
             vm.header.filter.unfiltered = vm.current.plays;
 
             angular.forEach(vm.current.plays, function(play, key) {
@@ -228,8 +230,6 @@ angular.module('lp.playbook.plays', [
                     });
                 }
                 play.ratingEngine.newBucketMetadata = newBucketMetadata;
-
-
             });
         });
 

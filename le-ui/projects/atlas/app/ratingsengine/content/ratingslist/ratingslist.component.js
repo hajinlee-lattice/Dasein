@@ -7,7 +7,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
     RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore, JobsService, ModelRatingsService,
-    ConfigureAttributesStore
+    ConfigureAttributesStore, FilterService
 ) {
     var vm = this;
 
@@ -144,8 +144,11 @@ angular.module('lp.ratingsengine.ratingslist', [
             if(lastRouteContainsSegmentOrAttributes){
                 vm.isRatingsSet = RatingsEngineStore.ratingsSet;
             };
+
+            var filterStore = FilterService.getFilters('ratings.filter');
+
+            vm.header.filter.filtered  = filterStore ? filterStore.filtered : vm.current.ratings;
             vm.header.filter.unfiltered = vm.current.ratings;
-            vm.header.filter.filtered = vm.current.ratings;
 
             angular.forEach(vm.current.ratings, function(rating, key, array) {
                 if(rating.displayName === 'DS_Test_1stPur_0002_EV'){
