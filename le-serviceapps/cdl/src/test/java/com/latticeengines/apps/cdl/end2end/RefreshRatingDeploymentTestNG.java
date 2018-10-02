@@ -130,14 +130,14 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
                 ai1 = createCrossSellEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
-                        ai1.getId(), ai1.getActiveModel().getId(), ModelingQueryType.TARGET);
+                        ai1.getId(), ai1.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
                 activateRatingEngine(ai1.getId());
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
                 ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
-                        ai2.getActiveModel().getId(), ModelingQueryType.TARGET);
+                        ai2.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
                 activateRatingEngine(ai2.getId());
 
@@ -229,10 +229,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         verifyRuleBasedEngines();
         verifyDecoratedMetadata();
         if (ENABLE_AI_RATINGS) {
-            verifyBucketMetadata(ai1.getId());
-            verifyBucketMetadata(ai2.getId());
             verifyPublishedIterations(ai1);
             verifyPublishedIterations(ai2);
+            verifyBucketMetadata(((AIModel) ai1.getPublishedIteration()).getModelSummaryId());
+            verifyBucketMetadata(((AIModel) ai2.getPublishedIteration()).getModelSummaryId());
         }
 
     }
@@ -265,8 +265,6 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         List<ColumnMetadata> ratingMetadata = getFullyDecoratedMetadata(BusinessEntity.Rating);
         log.info("Rating attrs: "
                 + ratingMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList()));
-        // Assert.assertEquals(ratingMetadata.size(), 12,
-        // JsonUtils.serialize(ratingMetadata));
     }
 
     private ProcessAnalyzeRequest constructRequest() {
@@ -295,7 +293,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Assert.assertEquals(bucketMetadataHistory.size(), 2);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
         List<BucketMetadata> latestBucketedMetadata = bucketedScoreProxy
-                .getLatestABCDBucketsByEngineId(mainTestTenant.getId(), engineId);
+                .getPublishedBucketMetadataByModelGuid(mainTestTenant.getId(), engineId);
         latestBucketedMetadata.forEach(bucket -> Assert.assertEquals(bucket.getPublishedVersion().intValue(), 0));
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
     }
