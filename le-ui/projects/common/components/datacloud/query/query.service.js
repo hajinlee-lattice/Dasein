@@ -174,6 +174,7 @@ angular.module('common.datacloud.query')
                     return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
                 }));
             });
+            
             if (entity) {
                 var counts = {
                             'account': filteredAccounts.length, 

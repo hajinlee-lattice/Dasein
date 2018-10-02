@@ -1,3 +1,4 @@
+import './import.utils';
 angular
 .module('lp.import', [
     'common.wizard',
