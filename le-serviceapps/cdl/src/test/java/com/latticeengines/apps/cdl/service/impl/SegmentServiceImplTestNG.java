@@ -10,8 +10,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.log4testng.Logger;
 
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -28,6 +30,8 @@ import com.latticeengines.domain.exposed.query.Restriction;
 
 public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
 
+    private Logger log = Logger.getLogger(getClass());
+    
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
@@ -75,7 +79,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(segments.get(0).getDisplayName(), SEGMENT_NAME);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindDependingSegments", enabled = false)
+    @Test(groups = "functional", dependsOnMethods = "testFindDependingSegments", enabled = true)
     public void testCyclicDependency() {
         MetadataSegment segment1 = createSegment(SEGMENT_NAME + "1");
         MetadataSegment segment2 = createSegment(SEGMENT_NAME + "2");
@@ -101,6 +105,20 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40041);
         }
         assertTrue(exception);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = "testCyclicDependency", enabled = true)
+    public void testDeleteSegmentByName() {
+        String segmentName = testSegment.getName();
+        boolean exception = false;
+        try {
+            log.info("Retrieving segmentName: " + segmentName);
+            boolean res = segmentService.deleteSegmentByName(segmentName, true);
+            log.info("Retrieving segment: " + res);
+            assertTrue(res);
+        } catch (Exception e) {
+            Assert.fail("Exception: " + e.getMessage());
+        }
     }
 
     private MetadataSegment createSegment(String segmentName) {
