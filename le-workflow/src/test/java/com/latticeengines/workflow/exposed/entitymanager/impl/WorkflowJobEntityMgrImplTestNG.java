@@ -80,6 +80,46 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
+
+        workflowJobEntityMgr.deleteAll();
+    }
+
+    @Test(groups = "functional")
+    public void testDeleteWorkflowJobByApplicationId() {
+        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
+
+        WorkflowJob workflowJob1 = new WorkflowJob();
+        workflowJob1.setApplicationId("application_91000");
+        workflowJob1.setTenant(tenant1);
+        workflowJob1.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJob1.setWorkflowId(91L);
+        workflowJob1.setType("type1");
+        workflowJob1.setParentJobId(null);
+        workflowJob1.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob1);
+
+        WorkflowJob workflowJob2 = new WorkflowJob();
+        workflowJob2.setApplicationId("application_92000");
+        workflowJob2.setTenant(tenant2);
+        workflowJob2.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJob2.setWorkflowId(92L);
+        workflowJob2.setType("type1");
+        workflowJob2.setParentJobId(null);
+        workflowJob2.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob2);
+
+        WorkflowJob result = workflowJobEntityMgr.deleteByApplicationId("application_99000");
+        assertNull(result);
+
+        WorkflowJob result1 = workflowJobEntityMgr.deleteByApplicationId("application_91000");
+        assertEquals(result1.getPid(), workflowJob1.getPid());
+        assertEquals(result1.getStatus(), workflowJob1.getStatus());
+
+        MultiTenantContext.setTenant(tenant2);
+        WorkflowJob result2 = workflowJobEntityMgr.deleteByApplicationId("application_92000");
+        assertEquals(result2.getPid(), workflowJob2.getPid());
+        assertEquals(result2.getStatus(), workflowJob2.getStatus());
     }
 
     @Test(groups = "functional")

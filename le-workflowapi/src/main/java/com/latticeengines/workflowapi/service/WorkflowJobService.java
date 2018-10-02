@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public interface WorkflowJobService {
     WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId);
@@ -58,4 +59,8 @@ public interface WorkflowJobService {
     void stopWorkflow(String customerSpace, Long workflowId);
 
     void stopWorkflowJob(String customerSpace, Long workflowPid);
+
+    WorkflowJob deleteWorkflowJobByApplicationId(String customerSpace, String applicationId);
+
+    List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime);
 }

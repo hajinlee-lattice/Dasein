@@ -141,6 +141,123 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     }
 
     @Test(groups = "functional")
+    public void testDeleteWorkflowJobByApplicationId() {
+        WorkflowJob workflowJob1 = new WorkflowJob();
+        workflowJob1.setApplicationId("application_91000");
+        workflowJob1.setWorkflowId(91L);
+        workflowJob1.setTenant(tenant);
+        workflowJob1.setType("type1");
+        workflowJob1.setParentJobId(null);
+        workflowJob1.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob1);
+        WorkflowJobUpdate jobUpdate1 = new WorkflowJobUpdate();
+        jobUpdate1.setWorkflowPid(workflowJob1.getPid());
+        jobUpdate1.setCreateTime(System.currentTimeMillis());
+        jobUpdate1.setLastUpdateTime(System.currentTimeMillis());
+        workflowJobUpdateEntityMgr.create(jobUpdate1);
+
+        WorkflowJob workflowJob2 = new WorkflowJob();
+        workflowJob2.setApplicationId("application_92000");
+        workflowJob2.setWorkflowId(92L);
+        workflowJob2.setTenant(tenant);
+        workflowJob2.setType("type1");
+        workflowJob2.setParentJobId(null);
+        workflowJob2.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob2);
+
+        WorkflowJob result = workflowJobService.deleteWorkflowJobByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "987654");
+        Assert.assertNull(result);
+
+        result = workflowJobService.deleteWorkflowJobByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "application_91000");
+        Assert.assertEquals(result.getPid(), workflowJob1.getPid());
+
+        result = workflowJobService.deleteWorkflowJobByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "application_92000");
+        Assert.assertEquals(result.getPid(), workflowJob2.getPid());
+
+        Assert.assertNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob1.getPid(), Boolean.FALSE));
+        Assert.assertNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob2.getPid(), Boolean.FALSE));
+    }
+
+    @Test(groups = "functional")
+    public void testDeleteWorkflowJobs() {
+        Long currentTime = System.currentTimeMillis();
+        WorkflowJob workflowJob1 = new WorkflowJob();
+        workflowJob1.setApplicationId("application_91000");
+        workflowJob1.setWorkflowId(91L);
+        workflowJob1.setTenant(tenant);
+        workflowJob1.setType("type1");
+        workflowJob1.setParentJobId(null);
+        workflowJob1.setStartTimeInMillis(currentTime);
+        workflowJob1.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob1);
+        WorkflowJobUpdate jobUpdate1 = new WorkflowJobUpdate();
+        jobUpdate1.setWorkflowPid(workflowJob1.getPid());
+        jobUpdate1.setCreateTime(currentTime);
+        jobUpdate1.setLastUpdateTime(currentTime);
+        workflowJobUpdateEntityMgr.create(jobUpdate1);
+
+        WorkflowJob workflowJob2 = new WorkflowJob();
+        workflowJob2.setApplicationId("application_92000");
+        workflowJob2.setWorkflowId(92L);
+        workflowJob2.setTenant(tenant);
+        workflowJob2.setType("type2");
+        workflowJob2.setParentJobId(null);
+        workflowJob2.setStartTimeInMillis(currentTime);
+        workflowJob2.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob2);
+
+        WorkflowJob workflowJob3  = new WorkflowJob();
+        workflowJob3.setApplicationId(null);
+        workflowJob3.setWorkflowId(null);
+        workflowJob3.setTenant(tenant);
+        workflowJob3.setType("type2");
+        workflowJob3.setParentJobId(null);
+        workflowJob3.setStartTimeInMillis(currentTime);
+        workflowJob3.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
+        workflowJobEntityMgr.create(workflowJob3);
+
+        List<WorkflowJob> result = workflowJobService.deleteWorkflowJobs(
+                WFAPITEST_CUSTOMERSPACE.toString(), "type1",
+                currentTime - TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES),
+                currentTime - TimeUnit.MILLISECONDS.convert(5L, TimeUnit.MINUTES));
+        Assert.assertTrue(result.isEmpty());
+
+        result = workflowJobService.deleteWorkflowJobs(
+                WFAPITEST_CUSTOMERSPACE.toString(), "type1",
+                currentTime - TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES),
+                currentTime + TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 1);
+        Assert.assertEquals(result.get(0).getApplicationId(), workflowJob1.getApplicationId());
+
+        Assert.assertNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob1.getPid(), Boolean.FALSE));
+        Assert.assertNotNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob2.getPid(), Boolean.FALSE));
+        Assert.assertNotNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob3.getPid(), Boolean.FALSE));
+
+        result = workflowJobService.deleteWorkflowJobs(
+                WFAPITEST_CUSTOMERSPACE.toString(), "type2",
+                currentTime - TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES),
+                currentTime + TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 2);
+        Assert.assertEquals(result.get(0).getApplicationId(), workflowJob2.getApplicationId());
+        Assert.assertNull(result.get(1).getApplicationId());
+
+        Assert.assertNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob2.getPid(), Boolean.FALSE));
+        Assert.assertNull(workflowJobService.getJobByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowJob3.getPid(), Boolean.FALSE));
+    }
+
+    @Test(groups = "functional")
     public void testGetJobStatus() {
         createWorkflowJobs();
         setupLEJobExecutionRetriever();

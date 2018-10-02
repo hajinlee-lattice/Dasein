@@ -51,4 +51,6 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
     void updateErrorDetails(WorkflowJob workflowJob);
 
     void updateApplicationId(WorkflowJob workflowJob);
+
+    WorkflowJob deleteByApplicationId(String applicationId);
 }

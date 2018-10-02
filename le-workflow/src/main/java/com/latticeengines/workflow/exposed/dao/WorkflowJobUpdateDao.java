@@ -13,4 +13,6 @@ public interface WorkflowJobUpdateDao extends BaseDao<WorkflowJobUpdate> {
     List<WorkflowJobUpdate> findByLastUpdateTime(Long lastUpdateTime);
 
     void updateLastUpdateTime(WorkflowJobUpdate workflowJobUpdate);
+
+    WorkflowJobUpdate deleteByWorkflowPid(Long workflowJobPid);
 }

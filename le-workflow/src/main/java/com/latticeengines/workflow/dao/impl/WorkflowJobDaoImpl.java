@@ -34,6 +34,15 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
     }
 
     @Override
+    public WorkflowJob deleteByApplicationId(String applicationId) {
+        WorkflowJob workflowJob = findByApplicationId(applicationId);
+        if (workflowJob != null) {
+            deleteByPid(workflowJob.getPid(), true);
+        }
+        return workflowJob;
+    }
+
+    @Override
     public WorkflowJob findByWorkflowId(long workflowId) {
         return findByField("workflowId", workflowId);
     }

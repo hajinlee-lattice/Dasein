@@ -48,4 +48,10 @@ public class WorkflowJobUpdateEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJo
     public void updateLastUpdateTime(WorkflowJobUpdate workflowJobUpdate) {
         workflowJobUpdateDao.updateLastUpdateTime(workflowJobUpdate);
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public WorkflowJobUpdate deleteByWorkflowPid(Long workflowPid) {
+        return workflowJobUpdateDao.deleteByWorkflowPid(workflowPid);
+    }
 }

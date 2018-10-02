@@ -11,4 +11,6 @@ public interface WorkflowJobUpdateEntityMgr extends BaseEntityMgr<WorkflowJobUpd
     List<WorkflowJobUpdate> findByLastUpdateTime(Long lastUpdateTime);
 
     void updateLastUpdateTime(WorkflowJobUpdate workflowJobUpdate);
+
+    WorkflowJobUpdate deleteByWorkflowPid(Long workflowPid);
 }

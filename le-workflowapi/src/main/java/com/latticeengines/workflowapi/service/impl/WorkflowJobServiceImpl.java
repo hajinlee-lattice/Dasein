@@ -382,6 +382,49 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowService.stop(new WorkflowExecutionId(workflowId));
     }
 
+    @Override
+    @WithCustomerSpace
+    public WorkflowJob deleteWorkflowJobByApplicationId(String customerSpace, String applicationId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.deleteByApplicationId(applicationId);
+        if (workflowJob != null) {
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.deleteByWorkflowPid(workflowJob.getPid());
+            if (jobUpdate == null) {
+                log.warn("WorkflowJobUpdate is missing for workflowJob pid=" + workflowJob.getPid());
+            }
+
+            jobCacheService.evict(MultiTenantContext.getTenant());
+            jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+        }
+
+        return workflowJob;
+    }
+
+    @Override
+    @WithCustomerSpace
+    public List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime) {
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
+        workflowJobs.removeIf(Objects::isNull);
+        workflowJobs = workflowJobs.stream()
+                .filter(workflowJob -> {
+                    return workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
+                        && workflowJob.getStartTimeInMillis() >= startTime
+                        && workflowJob.getStartTimeInMillis() <= endTime;
+                }).collect(Collectors.toList());
+        List<Long> workflowIds = workflowJobs.stream().map(WorkflowJob::getWorkflowId).collect(Collectors.toList());
+        workflowJobs.forEach(workflowJob -> {
+            if (workflowJob.getApplicationId() != null) {
+                workflowJobEntityMgr.deleteByApplicationId(workflowJob.getApplicationId());
+            } else {
+                workflowJobEntityMgr.delete(workflowJob);
+            }
+        });
+
+        jobCacheService.evict(MultiTenantContext.getTenant());
+        jobCacheService.evictByWorkflowIds(workflowIds);
+
+        return workflowJobs;
+    }
+
     private List<WorkflowJob> checkExecutionId(List<WorkflowJob> workflowJobs) {
         if (workflowJobs == null) {
             return null;

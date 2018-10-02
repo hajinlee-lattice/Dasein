@@ -18,6 +18,7 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     private WorkflowJobUpdate jobUpdate1;
     private WorkflowJobUpdate jobUpdate2;
+    private Long workflowPidNotExist = 1234L;
     private Long workflowPid1 = 9901L;
     private Long workflowPid2 = 9902L;
     private Long lastUpdateTime1 = 1516231234L;
@@ -77,5 +78,15 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
         Assert.assertEquals(jobUpdates.get(1).getWorkflowPid(), workflowPid2);
         Assert.assertEquals(jobUpdates.get(1).getLastUpdateTime(), lastUpdateTime2);
         Assert.assertEquals(jobUpdates.get(1).getCreateTime(), currentTime);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testFindByLastUpdateTime")
+    public void deleteByWorkflowPid() {
+        WorkflowJobUpdate result = workflowJobUpdateEntityMgr.deleteByWorkflowPid(workflowPidNotExist);
+        Assert.assertNull(result);
+
+        WorkflowJobUpdate result1 = workflowJobUpdateEntityMgr.deleteByWorkflowPid(workflowPid1);
+        Assert.assertEquals(result1.getPid(), jobUpdate1.getPid());
+        Assert.assertEquals(result1.getWorkflowPid(), jobUpdate1.getWorkflowPid());
     }
 }

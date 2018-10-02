@@ -6,14 +6,21 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,13 +31,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
@@ -46,14 +50,14 @@ public class WorkflowResource {
     @Inject
     private WorkflowJobService workflowJobService;
 
-    @RequestMapping(value = "/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/job/{workflowId}/stop", headers = "Accept=application/json")
     @ApiOperation(value = "Stop an executing workflow")
     public void stopWorkflowExecution(@PathVariable String workflowId,
             @RequestParam(required = false) String customerSpace) {
         workflowJobService.stopWorkflow(customerSpace, Long.valueOf(workflowId));
     }
 
-    @RequestMapping(value = "/job/{workflowId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/job/{workflowId}/restart", headers = "Accept=application/json")
     @ApiOperation(value = "Restart a previous workflow execution")
     public AppSubmission restartWorkflowExecution(@PathVariable String workflowId, @RequestParam String customerSpace,
             @ApiParam(value = "Memory in MB", required = false) @RequestParam(value = "memory", required = false) Integer memory) {
@@ -94,7 +98,7 @@ public class WorkflowResource {
         }
     }
 
-    @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/job/{workflowId}", headers = "Accept=application/json")
     @ApiOperation(value = "Get a workflow execution")
     public Job getWorkflowExecution(@PathVariable String workflowId,
             @RequestParam(required = false) String customerSpace,
@@ -106,7 +110,7 @@ public class WorkflowResource {
         }
     }
 
-    @RequestMapping(value = "/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/jobs", headers = "Accept=application/json")
     @ApiOperation(value = "Get list of workflow jobs by given list of job Ids or job types.")
     public List<Job> getJobs(@RequestParam(value = "jobId", required = false) List<String> jobIds,
             @RequestParam(value = "type", required = false) List<String> types,
@@ -133,7 +137,7 @@ public class WorkflowResource {
         }
     }
 
-    @RequestMapping(value = "/jobsByPid", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/jobsByPid", headers = "Accept=application/json")
     @ApiOperation(value = "Get list of workflow jobs by given list of workflowPid or job types.")
     public List<Job> getJobsByPid(@RequestParam(value = "jobId", required = false) List<String> jobIds,
                                   @RequestParam(value = "type", required = false) List<String> types,
@@ -155,7 +159,7 @@ public class WorkflowResource {
         }
     }
 
-    @RequestMapping(value = "/jobs", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/jobs", headers = "Accept=application/json")
     @ApiOperation(value = "Update workflow jobs' parent job Id")
     public void updateParentJobId(@RequestParam(value = "jobId", required = true) List<String> jobIds,
             @RequestParam(value = "parentId", required = true) String parentJobId,
@@ -164,44 +168,59 @@ public class WorkflowResource {
                 jobIds.stream().map(Long::valueOf).collect(Collectors.toList()), Long.valueOf(parentJobId));
     }
 
-    @RequestMapping(value = "/jobs/submit", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/jobs/submit", headers = "Accept=application/json")
     @ApiOperation(value = "Create a workflow execution in a Yarn container")
     public AppSubmission submitWorkflowExecution(@RequestBody WorkflowConfiguration config,
             @RequestParam(required = false) String customerSpace) {
         return new AppSubmission(workflowJobService.submitWorkflow(customerSpace, config, null));
     }
 
-    @RequestMapping(value = "/jobs/submitwithpid", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/jobs/submitwithpid", headers = "Accept=application/json")
     @ApiOperation(value = "Create a workflow execution in a Yarn container")
     public AppSubmission submitWorkflow(@RequestBody WorkflowConfiguration config,
             @RequestParam(required = true) Long workflowPid, @RequestParam(required = false) String customerSpace) {
         return new AppSubmission(workflowJobService.submitWorkflow(customerSpace, config, workflowPid));
     }
 
-    @RequestMapping(value = "/awsJobs/submit", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/awsJobs/submit", headers = "Accept=application/json")
     @ApiOperation(value = "Create a workflow execution in a AWS container")
     public String submitAWSWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig,
             @RequestParam(required = false) String customerSpace) {
         return workflowJobService.submitAwsWorkflow(customerSpace, workflowConfig);
     }
 
-    @RequestMapping(value = "/jobs/create", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/jobs/create", headers = "Accept=application/json")
     @ApiOperation(value = "Create a workflow job")
     public Long createWorkflowJob(@RequestParam(required = true) String customerSpace) {
         return workflowJobService.createWorkflowJob(customerSpace);
     }
 
-    @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+
+    @GetMapping(value = "/yarnapps/id/{applicationId}", headers = "Accept=application/json")
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
         return workflowJobService.getWorkflowExecutionIdByApplicationId(customerSpace, applicationId);
     }
 
-    @RequestMapping(value = "/yarnapps/job/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
+    @GetMapping(value = "/yarnapps/job/{applicationId}", headers = "Accept=application/json")
+    @ApiOperation(value = "Get status about a submitted workflow from YARN applicationId")
     public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
         return workflowJobService.getJobByApplicationId(customerSpace, applicationId, true);
+    }
+
+    @DeleteMapping(value = "/yarnapps/job/{applicationId}", headers = "Accept=application/json")
+    @ApiOperation(value = "Delete a workflow from YARN applicationId")
+    public WorkflowJob deleteWorkflowJobFromApplicationId(@PathVariable String applicationId,
+                                                          @RequestParam(required = false) String customerSpace) {
+        return workflowJobService.deleteWorkflowJobByApplicationId(customerSpace, applicationId);
+    }
+
+    @DeleteMapping(value = "/yarnapps/jobs", headers = "Accept=application/json")
+    @ApiOperation(value = "Delete a workflow by tenant, job type and timestamps range")
+    public List<WorkflowJob> deleteWorkflowJobs(@RequestParam String customerSpace, @RequestParam String type,
+                                                @RequestParam Long startTime, @RequestParam Long endTime) {
+        return workflowJobService.deleteWorkflowJobs(customerSpace, type, startTime, endTime);
     }
 }

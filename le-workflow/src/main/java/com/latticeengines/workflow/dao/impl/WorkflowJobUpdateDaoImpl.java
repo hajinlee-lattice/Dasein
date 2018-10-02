@@ -52,4 +52,13 @@ public class WorkflowJobUpdateDaoImpl extends BaseDaoImpl<WorkflowJobUpdate> imp
         query.setParameter("pid", workflowJobUpdate.getPid());
         query.executeUpdate();
     }
+
+    @Override
+    public WorkflowJobUpdate deleteByWorkflowPid(Long workflowJobPid) {
+        WorkflowJobUpdate jobUpdate = findByWorkflowPid(workflowJobPid);
+        if (jobUpdate != null) {
+            deleteByPid(jobUpdate.getPid(), true);
+        }
+        return jobUpdate;
+    }
 }

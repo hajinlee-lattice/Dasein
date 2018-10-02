@@ -12,6 +12,8 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     WorkflowJob findByApplicationId(String applicationId);
 
+    WorkflowJob deleteByApplicationId(String applicationId);
+
     WorkflowJob findByWorkflowId(long workflowId);
 
     List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds);
