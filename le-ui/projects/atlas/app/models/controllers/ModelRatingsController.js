@@ -62,8 +62,8 @@ angular.module('lp.models.ratings', [
 
         } else if (vm.section === 'dashboard.ratings') {
             // Get dahsboard data for list of iterations
-            var dashboard = ModelStore.getDashboardData(),
-                dashboardIterations = dashboard.iterations;
+            vm.dashboard = ModelStore.getDashboardData();
+            var dashboardIterations = vm.dashboard.iterations;
 
             // use only iterations that have active modelSummaryId by creating new array
             vm.activeIterations = [];
@@ -73,24 +73,22 @@ angular.module('lp.models.ratings', [
                 }
             });
 
+            // Set active iteration (default value for iteration select menu) 
+            // and working buckets (vm.workingBuckets is what drives the chart data)
             if ($stateParams.toggleRatings){
-                for(var i = 0; i < vm.activeIterations.length; i++) {
-                    if (vm.activeIterations[i].modelSummaryId === $stateParams.modelId) {
-                        vm.activeIteration = vm.activeIterations[i];
-                    }
-                }
+                vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
+                vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
             } else {
-                if (dashboard.summary.publishedIterationId && dashboard.summary.status == 'ACTIVE'){
-                    for(var i = 0; i < vm.activeIterations.length; i++) {
-                        if (vm.activeIterations[i].id === dashboard.summary.publishedIterationId) {
-                            vm.activeIteration = vm.activeIterations[i];
-                        }
-                    }
+                if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
+                    vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
                 } else {
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
                 }
             }
 
+            console.log(vm.section);
+            console.log(vm.dashboard.summary.bucketMetadata);
             vm.ratingModelId = vm.activeIteration.id;
         }
         
@@ -103,13 +101,15 @@ angular.module('lp.models.ratings', [
         renderChart();
     }
 
+    vm.init();
+
     vm.changeIterationData = function(){
         $state.go('home.model.ratings', {
             modelId: vm.activeIteration.modelSummaryId,
             rating_id: $stateParams.rating_id,
             viewingIteration: false,
             toggleRatings: true
-        }, { reload: true });
+        }, {reload: true});
     }
 
     function renderChart(){
@@ -149,6 +149,7 @@ angular.module('lp.models.ratings', [
     }
 
     function refreshChartData(){
+
         vm.buckets = vm.workingBuckets;
         vm.bucketsLength = vm.buckets.length;
         vm.updateContent = false;
@@ -409,10 +410,6 @@ angular.module('lp.models.ratings', [
             });
         }
     }
-
-
-
-    vm.init();
 
 })
 .controller('ModelRatingsHistoryController', function (

@@ -169,7 +169,7 @@
             	</li>
             </ul><!-- End .bucket-tiles -->
 
-            <div ng-if="vm.section !== 'dashboard.scoring'">
+            <div ng-if="vm.section !== 'dashboard.scoring' && vm.dashboard.summary.bucketMetadata">
                 <hr/>
                 <h3>Currently published configuration</h3>
                 <refresher condition="vm.updateContent">

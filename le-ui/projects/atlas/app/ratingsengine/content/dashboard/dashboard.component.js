@@ -4,7 +4,7 @@ angular.module('lp.ratingsengine.dashboard', [
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce,
     RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
-    Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
+    Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -19,6 +19,8 @@ angular.module('lp.ratingsengine.dashboard', [
         ratingEngine: RatingEngine,
         modelSummary: Model,
         products: Products,
+        targetProducts: TargetProducts,
+        trainingProducts: TrainingProducts,
         barChartConfig: {
             'data': {
                 'tosort': true,
@@ -215,6 +217,8 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.initDataModel = function(){
         
+        console.log(vm.ratingEngine);
+
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
             if (vm.dashboard.dependencies[type]) {
@@ -234,8 +238,6 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.isPublishedOrScored = (vm.ratingEngine.published_iteration || vm.ratingEngine.scoring_iteration) ? true : false;
         
         RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-
-        // console.log(vm.ratingEngine);
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
@@ -274,10 +276,8 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.hasSettingsInfo = true;
                 }
 
-                vm.targetProducts = vm.model.advancedModelingConfig[type].targetProducts;
                 vm.modelingStrategy = vm.model.advancedModelingConfig[type].modelingStrategy;
                 vm.configFilters = vm.model.advancedModelingConfig[type].filters;
-                vm.trainingProducts = vm.model.advancedModelingConfig[type].trainingProducts;
 
                 if (vm.configFilters && vm.configFilters['SPEND_IN_PERIOD']) {
                     if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
@@ -295,29 +295,15 @@ angular.module('lp.ratingsengine.dashboard', [
                     }
                 }
 
-                if (vm.targetProducts && vm.targetProducts.length != 0) {
-                    vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
-                }
-                if (vm.trainingProducts && vm.trainingProducts.length != 0) {
-                    vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
-                }
-
                 if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
                     vm.ratingEngineType = 'First Purchase Cross-Sell'
                 } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
                     vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
                 }
             } else {
-
-                // console.log(vm.model);
-
                 vm.modelingStrategy = 'CUSTOM_EVENT';
                 vm.ratingEngineType = 'Custom Event';
             }
-
-            // console.log(vm.ratingEngine);
-            // console.log(vm.dashboard);
-            // console.log(vm.model);
 
             vm.predictionType = vm.model.predictionType;
             vm.trainingSegment = vm.model.trainingSegment;
@@ -345,13 +331,6 @@ angular.module('lp.ratingsengine.dashboard', [
             return false;
         }
     }
-
-    vm.returnProductNameFromId = function(productId) {
-        var products = vm.products,
-            product = products.find(function(obj) { return obj.ProductId === productId.toString() });
-
-        return product.ProductName;
-    };
 
     vm.getCustomEventAvailableAttributes = function(model) {
         var dataStore = model.advancedModelingConfig.custom_event.dataStores;

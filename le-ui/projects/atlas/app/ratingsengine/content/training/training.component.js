@@ -304,10 +304,10 @@ angular.module('lp.ratingsengine.wizard.training', [
                     delete vm.configFilters.TRAINING_SET_PERIOD;
                 }
                     
-                vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
+                vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.filters = vm.configFilters;
 
                 // console.log(vm.ratingEngine);
-                console.log(vm.engineId, vm.modelId, vm.ratingModel);
+                // console.log(vm.engineId, vm.modelId, vm.ratingModel);
 
                 $timeout(function () {
                     RatingsEngineStore.setConfigFilters(vm.configFilters);

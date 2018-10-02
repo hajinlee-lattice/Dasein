@@ -87,7 +87,18 @@
                         <dd ng-if="vm.ratingEngine.segment" class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
                         
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Products:</dt>
-                        <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.targetProducts.length == 1 ? vm.targetProductName : vm.targetProducts.length + ' selected'}}</dd>
+                        <dd 
+                            ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'"
+                            ng-class="{'show-tooltip left delay': vm.targetProducts.length > 1}">
+                            {{ vm.targetProducts.length == 1 ? vm.targetProductName : vm.targetProducts.length + ' selected'}}
+                            <div class="tooltip_ small">
+                                <div class="cover">
+                                    <ul>
+                                        <li ng-repeat="product in vm.targetProducts">{{ product.ProductName }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </dd>
 
                         <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
                         <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
@@ -131,7 +142,18 @@
                                     ng-if="vm.trainingProducts !== undefined">
                                     Model with similar product(s): 
                                     <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
-                                    <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
+                                    <span 
+                                        ng-if="vm.trainingProducts.length > 1"
+                                        class="show-tooltip left delay">
+                                        {{ vm.trainingProducts.length }} selected
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <ul>
+                                                    <li ng-repeat="product in vm.trainingProducts">{{ product.ProductName }}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </span>
                                 </li>
                             </ul>
                         </dd>
