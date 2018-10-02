@@ -83,7 +83,7 @@ angular
                     ];
 
                 if (vm.section == 'segment.analysis') {
-                    var order = ['!TopBkt','!ImportanceOrdering','-ImportanceOrdering'];
+                    var order = [];
 
                     if (category && YesCategories.indexOf(category) >= 0) {
                         order.push(function(attribute) {
@@ -91,13 +91,13 @@ angular
                         });
                     }
 
-                    order = order.concat(['-TopBkt.Cnt','-Value']);
+                    order = order.concat(['!TopBkt','!ImportanceOrdering','-ImportanceOrdering','-TopBkt.Cnt','-Value']);
                 } else {
                     var order = !vm.showHighlighting()
                         ? ['-ImportanceOrdering']
                         : ['-HighlightHighlighted','!ImportanceOrdering','-ImportanceOrdering'];
 
-                    if (vm.lookupMode ) {
+                    if (vm.lookupMode) {
                         order.push(function(attribute) {
                             return attribute.Value == 'Yes' ? -1 : 1;
                         });
@@ -105,6 +105,10 @@ angular
 
                     order = order.concat(['-Count','-Value']);
                 }
+
+                // if (category == 'Product Spend Profile') {
+                //     console.log(category, order, subcategory, attr);
+                // }
 
                 return order;
             }
@@ -140,7 +144,7 @@ angular
 
             vm.getAttributeStat = function(attribute) {
                 var enrichmentKey = attribute.Attribute || attribute.ColumnId,
-                    index = vm.enrichmentsMap[enrichmentKey],
+                    index = vm.enrichmentsMap[attribute.Entity + '.' + enrichmentKey],
                     enrichment = vm.enrichments[index],
                     attributeEntity = attribute.Entity,
                     stats = (vm.cube.data[attributeEntity].Stats[enrichmentKey] && vm.cube.data[attributeEntity].Stats[enrichmentKey] && vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts && vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts.List ? vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts.List : null),

@@ -78,7 +78,7 @@ angular.module('common.datacloud.query.builder', [
                     continue;
                 }
 
-                vm.enrichmentsMap[enrichment.ColumnId] = i;
+                vm.enrichmentsMap[enrichment.Entity + '.' + enrichment.ColumnId] = i;
             }
 
             vm.enrichments = enrichments;

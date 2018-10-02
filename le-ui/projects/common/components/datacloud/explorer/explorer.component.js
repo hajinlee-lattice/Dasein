@@ -186,7 +186,6 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.relanding = function() {
-
         vm.TileTableItems = {};
 
         if (vm.metadataSegments || QueryRestriction) {
@@ -317,7 +316,7 @@ angular.module('common.datacloud.explorer', [
                 enrichment.IsInternal = false;
             }
 
-            vm.enrichmentsMap[enrichment.ColumnId] = vm.enrichments.length;
+            vm.enrichmentsMap[enrichment.Entity + '.' + enrichment.ColumnId] = vm.enrichments.length;
             vm.enrichmentsObj[enrichment.Category].push(enrichment);
             vm.enrichments.push(enrichment);
         }
@@ -501,7 +500,6 @@ angular.module('common.datacloud.explorer', [
                     disabled = breakOnFirstEncounter(items, 'HighlightHidden', true),
                     enabled = breakOnFirstEncounter(items, 'HighlightHidden', false),
                     dirty = breakOnFirstEncounter(items, 'AttributeFlagsMap', {});
-
                 
                 vm.highlightMetadata.categories[category].enabled = enabled ? 1 : 0;
                 vm.highlightMetadata.categories[category].disabled = disabled ? 1 : 0;
@@ -858,7 +856,7 @@ angular.module('common.datacloud.explorer', [
 
                     items.forEach(function(item) {
 
-                        var enrichment = vm.enrichments[vm.enrichmentsMap[item.Attribute]];
+                        var enrichment = vm.enrichments[vm.enrichmentsMap[item.Entity + '.' + item.Attribute]];
 
                         if (enrichment && enrichment.DisplayName) {
                             var displayName = enrichment.DisplayName;
@@ -964,7 +962,7 @@ angular.module('common.datacloud.explorer', [
 
             if (items) {
                 items.forEach(function(item, itemKey) {
-                    var index = vm.enrichmentsMap[item.Attribute],
+                    var index = vm.enrichmentsMap[item.Entity + '.' + item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
                             //'Value',
@@ -1067,6 +1065,7 @@ angular.module('common.datacloud.explorer', [
         //         'vm.metadata.toggle': vm.metadata.toggle
         //     }
         // );
+        
         return items;
     }
 
@@ -1274,7 +1273,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.isYesNoCategory = function(category, includeKeywords) {
-        var list = ['Website Profile','Technology Profile'];
+        var list = ['Website Profile','Technology Profile', 'Product Spend Profile'];
 
         if (includeKeywords) {
             list.push('Website Keywords');
@@ -1395,7 +1394,7 @@ angular.module('common.datacloud.explorer', [
                 label = restriction.bkt.Lbl,
                 key = restriction.attr.split(".")[1],
                 enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
-                index = vm.enrichmentsMap[key];
+                index = vm.enrichmentsMap[restriction.attr];
             
             if (index || index === 0) {
                 vm.enrichments[index].SegmentChecked = true;
@@ -1563,7 +1562,7 @@ angular.module('common.datacloud.explorer', [
             stat = vm.getAttributeStat(attribute) || {},
             attributeRangeKey = (stat.Lbl ? vm.makeSegmentsRangeKey(attribute, stat.Rng, stat.Lbl) : ''),
             
-            index = vm.enrichmentsMap[attributeKey],
+            index = vm.enrichmentsMap[attribute.Entity + '.' + attributeKey],
             enrichment = vm.enrichments[index],
             
             entity = attribute.Entity,

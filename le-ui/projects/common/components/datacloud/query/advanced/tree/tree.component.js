@@ -78,8 +78,7 @@ angular
                                 vm.type = 'String';
                             }
                         }
-                        // var tmp = vm.enrichmentsMap;
-                        // console.log(tmp);
+                        
                         vm.label = vm.tree.bucketRestriction.bkt ? vm.tree.bucketRestriction.bkt.Lbl : '';
                         vm.range = QueryTreeService.getBktVals(vm.tree.bucketRestriction, vm.type)//vm.tree.bucketRestriction.bkt.Vals;
                     }

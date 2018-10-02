@@ -53,8 +53,8 @@ angular
     vm.init();
 })
 .service('SidebarStore', function(
-    $state, $stateParams, StateHistory, ResourceUtility, $q,
-    FeatureFlagService, DataCloudStore, QueryStore, QueryService
+    $state, $stateParams, StateHistory, ResourceUtility, $q, SegmentStore,
+    FeatureFlagService, DataCloudStore, QueryStore, QueryService, $transitions
 ) {
     var store = this;
 
@@ -66,6 +66,9 @@ angular
 
     this.MyDataStates = [
         'home.nodata',
+        'home.attributes.activate',
+        'home.attributes.enable',
+        'home.attributes.edit',
         'home.segment.explorer.attributes',
         'home.segment.explorer.enumpicker',
         'home.segment.explorer.builder',
@@ -80,7 +83,18 @@ angular
         var deferred = $q.defer();
 
         FeatureFlagService.GetAllFlags().then(function(result) {
+            var segment = (StateHistory.lastToParams() || {}).segment;
             var flags = FeatureFlagService.Flags();
+            var MyDataState = store.getMyDataState();
+            var MyDataParams = '';
+            
+            if (MyDataState != 'home.nodata') {
+                if (store.checkMyDataActiveState && segment && segment != 'segment.name') {
+                    MyDataParams = "({ segment: '" + segment + "', category: '', subcategory: '' })";
+                } else {
+                    MyDataParams = "({ segment: 'Create', category: '', subcategory: '' })";
+                }
+            }
             
             store.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
             store.showModelCreationHistory = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
@@ -103,7 +117,8 @@ angular
             store.root = [{
                     if: store.showAnalysisPage,
                     active: store.checkMyDataActiveState,
-                    sref: store.getMyDataState() + "({ segment: 'Create' })",
+                    srefactive: MyDataState + "({ segment: 'Create', category: '', subcategory: '' })",
+                    sref: MyDataState + MyDataParams,
                     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MYDATA"),
                     icon: "ico-analysis ico-light-gray"
                 },{
@@ -276,7 +291,8 @@ angular
     };
 
     store.checkMyDataActiveState = function() {
-        return store.isStateName(store.MyDataStates) && (!store.stateParams.segment || store.stateParams.segment == 'Create')
+        var segment = (StateHistory.lastToParams() || {}).segment;
+        return store.isStateName(store.MyDataStates) && (!segment || segment == 'Create')
     };
 
     store.checkSegmentationActiveState = function() {
@@ -288,7 +304,7 @@ angular
     };
 
     store.isStateName = function(state_names) {
-        return (state_names || []).indexOf($state.current.name) !== -1; 
+        return (state_names || []).indexOf($state.current.name,) !== -1; 
     };
 
     store.isTransitingFrom = function(state_names) {

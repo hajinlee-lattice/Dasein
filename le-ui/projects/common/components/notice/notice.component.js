@@ -60,7 +60,7 @@ angular.module('common.notice', [])
 })
 .component('noticeMessage', {
     templateUrl: '/components/notice/notice.component.html',
-    controller: function(Notice) {
+    controller: function(Notice, $scope, $compile, $sce) {
         this.notice = Notice.get();
     }
 });

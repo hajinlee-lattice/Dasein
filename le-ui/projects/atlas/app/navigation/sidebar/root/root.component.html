@@ -16,7 +16,7 @@
         </a>
     </li>
     <li     role="presentation"
-            ui-sref-active="active"
+            ui-sref-active="{'active': item.srefactive || item.sref)}"
             ng-repeat="item in vm.items"
             ng-if="item.if"
             ng-disabled="item.disabled"

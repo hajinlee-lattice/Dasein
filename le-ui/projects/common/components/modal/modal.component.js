@@ -48,7 +48,7 @@ angular.module('common.modal', [])
         };
     };
 
-    this.get = function (name) {
+    this.get = function(name) {
         return this.modals[name] ? this.modals[name].modal : false;
     };
 
@@ -70,7 +70,7 @@ angular.module('common.modal', [])
         }
     };
 
-    this.set = function (name, modal) {
+    this.set = function(name, modal) {
         var mod = this.modals[name];
 
         if (!mod) {
@@ -168,8 +168,8 @@ angular.module('common.modal', [])
 
     this.init();
 })
-.filter('cut', function () {
-    return function (value, wordwise, max, tail) {
+.filter('cut', function() {
+    return function(value, wordwise, max, tail) {
         if (!value) {
             return '';
         }
@@ -197,14 +197,14 @@ angular.module('common.modal', [])
 
     };
 })
-.directive('leModalWindow', ['Modal', function (Modal) {
+.directive('leModalWindow', ['Modal', function(Modal) {
     return {
         restrict: 'E',
         scope: { config: '=', callback: '&callbackFunction' },
         replace: true,
         transclude: true,
         templateUrl: "/components/modal/modal.component.html",
-        link: function (scope, element, attrs, ctrl, transclude) {
+        link: function(scope, element, attrs, ctrl, transclude) {
             transclude(scope, function(content) {
                 scope.transclude = content.length > 0 ? content[0].innerHTML : '';
             });
@@ -227,7 +227,6 @@ angular.module('common.modal', [])
             var name = scope.config['name'] || Date.now();
 
             Modal.set(name, scope);
-            // console.log('Color', scope.config.headerconfig )
 
             scope.modalConfig = {
                 "type": scope.config.type || "md",
@@ -247,13 +246,13 @@ angular.module('common.modal', [])
                 "headerconfig": scope.config.headerconfig || {}
             };
 
-            scope.toggle = function (data) {
+            scope.toggle = function(data) {
                 scope.opened = !scope.opened;
                 Modal.setData(name, data);
                 resetWindow();
             };
 
-            scope.showMessage = function (msg, type) {
+            scope.showMessage = function(msg, type) {
                 scope.showModalMsg = true;
                 scope.modalMsg = msg;
                 scope.modalMsgType = type;
@@ -267,11 +266,11 @@ angular.module('common.modal', [])
                 }
             };
 
-            scope.disableConfirmButton = function (disable) {
+            scope.disableConfirmButton = function(disable) {
                 this.confirmDisabled = disable;
             };
 
-            scope.disableDischargeButton = function (disable) {
+            scope.disableDischargeButton = function(disable) {
                 scope.dischargeDisabled = disable;
             };
 
@@ -281,15 +280,15 @@ angular.module('common.modal', [])
                 scope.callCallback('closedForced');
             };
 
-            scope.discharge = function () {
+            scope.discharge = function() {
                 scope.callCallback(scope.modalConfig.dischargeaction);
             };
 
-            scope.confirm = function () {
+            scope.confirm = function() {
                 scope.callCallback(scope.modalConfig.confirmaction);
             };
 
-            scope.callCallback = function (value) {
+            scope.callCallback = function(value) {
                 if (typeof (scope.callback) !== undefined) {
                     var data = Modal.getData(name);
                     scope.callback({ 
