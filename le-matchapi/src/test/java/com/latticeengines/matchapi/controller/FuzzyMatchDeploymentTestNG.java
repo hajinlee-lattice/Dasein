@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -50,6 +51,11 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String invalidDomain = "abcdefghijklmn.com";
     private static final String podId = "FuzzyMatchDeploymentTestNG";
     private static final String avroDir = "/tmp/FuzzyMatchDeploymentTestNG";
+    private static final String DUNS_GUIDE_BOOK_DATACLOUD_VERSION = "2.0.14";
+    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Pokemon";
+    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Pokemon2";
+    private static final String DUNS_GUIDE_BOOK_DIR = "DunsGuideBook";
+    private static final String DUNS_GUIDE_BOOK_TEST_FILE = "dunsguidebookdata.avro";
 
     // For realtime match: the first element is expected matched company name
     private static final Object[][] nameLocation = {
@@ -71,8 +77,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", null },
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", " +     * = # " } };
 
-    private static final String[] selectedColumns = { "LatticeAccountId", "LDC_Name", "LDC_Domain", "LDC_Country",
-            "LDC_State", "LDC_City", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "YEAR_STARTED" };
+    private static final String[] selectedColumns = { "LatticeAccountId", "LDC_Name", DataCloudConstants.ATTR_LDC_DUNS,
+            "LDC_Domain", "LDC_Country", "LDC_State", "LDC_City", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "YEAR_STARTED" };
 
     private static final String SCENARIO_VALIDLOCATION = "ValidLocation";
     private static final String SCENARIO_VALIDLOCATION_INVALIDDOMAIN = "ValidLocationInvalidDomain";
@@ -136,21 +142,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Test(groups = "deployment", dataProvider = "bulkCatchScenarios", enabled = false)
     public void testBulkMatchWithCache(String scenario) {
         MatchInput input = prepareBulkMatchInput(scenario, true);
-        MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
-        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-
-        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
-        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
-        Assert.assertEquals(finalStatus.getProgress(), 1f);
-        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
-        Assert.assertEquals(finalStatus.getResultLocation(),
-                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        MatchCommand finalStatus = runAndVerifyBulkMatch(input);
 
         validateBulkMatchResult(scenario, finalStatus.getResultLocation());
     }
@@ -188,6 +181,33 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             Assert.assertEquals(finalStatus.getResultLocation(),
                     hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
         }
+    }
+
+    /*
+     * Test the DUNS redirect functionality. Without redirect, we should match to given src DUNS.
+     * With redirect, we should get the target DUNS instead.
+     */
+    @Test(groups = "deployment")
+    public void testDunsGuideBookBulkMatch() throws Exception {
+        Object[][] expectedResult = TestDunsGuideBookUtils.getDunsGuideBookTestData();
+        String fullAvroDir = new Path(avroDir, DUNS_GUIDE_BOOK_DIR).toString();
+        prepareDunsGuideBookData(fullAvroDir);
+        AvroInputBuffer buf = new AvroInputBuffer();
+        buf.setAvroDir(fullAvroDir);
+        MatchInput input = TestDunsGuideBookUtils.newBulkMatchInput(DUNS_GUIDE_BOOK_DATACLOUD_VERSION,
+                DECISION_GRAPH_WITHOUT_GUIDE_BOOK, true, true, buf, prepareColumnSelection());
+        MatchCommand command = runAndVerifyBulkMatch(input);
+        Iterator<GenericRecord> records =
+                AvroUtils.iterator(yarnConfiguration, command.getResultLocation() + "/*.avro");
+        // should get srcDuns using the old decision graph
+        validateMatchedDuns(records, expectedResult, 1); // expected source DUNS
+
+        input = TestDunsGuideBookUtils.newBulkMatchInput(DUNS_GUIDE_BOOK_DATACLOUD_VERSION,
+                DECISION_GRAPH_WITH_GUIDE_BOOK, true, true, buf, prepareColumnSelection());
+        command = runAndVerifyBulkMatch(input);
+        records = AvroUtils.iterator(yarnConfiguration, command.getResultLocation() + "/*.avro");
+        // redirect to the target DUNS
+        validateMatchedDuns(records, expectedResult, 2); // expected target DUNS
     }
 
     private MatchInput prepareRealtimeMatchInput(String scenario, boolean useDnBCache) {
@@ -436,6 +456,64 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
         }
+    }
+
+    /*
+     * clear hdfs directory for testing and upload test data as avro file
+     */
+    private void prepareDunsGuideBookData(String fullAvroDir) throws Exception {
+        HdfsPodContext.changeHdfsPodId(podId);
+        cleanupAvroDir(hdfsPathBuilder.podDir().toString());
+        cleanupAvroDir(fullAvroDir);
+        AvroUtils.createAvroFileByData(yarnConfiguration, TestDunsGuideBookUtils.getBulkMatchAvroColumns(),
+                TestDunsGuideBookUtils.getBulkMatchAvroData(), fullAvroDir, DUNS_GUIDE_BOOK_TEST_FILE);
+    }
+
+    /*
+     * run bulk match job and verify the job finished correctly
+     */
+    private MatchCommand runAndVerifyBulkMatch(MatchInput input) {
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+
+        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getProgress(), 1f);
+        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
+        Assert.assertEquals(finalStatus.getResultLocation(),
+                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        return finalStatus;
+    }
+
+    /*
+     * verify that matched DUNS in bulk match output matches the expected DUNS, dunsFieldIdx is used to specify
+     * which index in the expected row is the DUNS.
+     */
+    private void validateMatchedDuns(Iterator<GenericRecord> records, Object[][] expectedData, int dunsFieldIdx) {
+        Assert.assertNotNull(records);
+        int count = 0;
+        for (; records.hasNext(); count++) {
+            GenericRecord record = records.next();
+            Assert.assertNotNull(record);
+            Integer testId = (Integer) record.get(TestDunsGuideBookUtils.TEST_CASE_ID_FIELD);
+            Assert.assertNotNull(testId);
+            Object matchedDuns = record.get(DataCloudConstants.ATTR_LDC_DUNS);
+            // use testId to retrieve the expected entry as the result can be out of order
+            Object expectedDuns = expectedData[testId][dunsFieldIdx];
+            if (expectedDuns == null) {
+                Assert.assertNull(matchedDuns);
+            } else {
+                // matchedDuns can be Utf8 and not string
+                Assert.assertEquals(matchedDuns.toString(), expectedDuns);
+            }
+        }
+        Assert.assertEquals(count, expectedData.length);
     }
 
     private void validateBulkMatchResult(String scenario, String path) {

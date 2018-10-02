@@ -65,6 +65,14 @@
             <version>${snappy.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-core</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

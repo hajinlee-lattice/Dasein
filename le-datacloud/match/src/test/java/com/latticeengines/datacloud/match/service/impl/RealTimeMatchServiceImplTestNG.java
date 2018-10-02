@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -52,6 +57,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     private String podId;
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
+    private static final String DUNS_GUIDE_BOOK_DATACLOUD_VERSION = "2.0.14";
+    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Pokemon";
+    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Pokemon2";
 
     @Value("${common.le.stack}")
     private String leStack;
@@ -450,6 +458,30 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
+    /*
+     * Test the DUNS redirect functionality. Without redirect, we should match to given src DUNS.
+     * With redirect, we should get the target DUNS instead.
+     */
+    @Test(groups = "functional", dataProvider = "provideDunsGuideBookTestData")
+    public void testDunsGuideBook(
+            MatchKeyTuple tuple, String expectedSrcDuns, String expectedTargetDuns, String expectedBookSource) {
+        MatchInput input = TestDunsGuideBookUtils.newRealtimeMatchInput(
+                DUNS_GUIDE_BOOK_DATACLOUD_VERSION, DECISION_GRAPH_WITHOUT_GUIDE_BOOK, tuple);
+        MatchOutput output = realTimeMatchService.match(input);
+        // should get srcDuns using the old decision graph
+        verifyMatchedDuns(output, expectedSrcDuns);
+
+        input = TestDunsGuideBookUtils.newRealtimeMatchInput(
+                DUNS_GUIDE_BOOK_DATACLOUD_VERSION, DECISION_GRAPH_WITH_GUIDE_BOOK, tuple);
+        output = realTimeMatchService.match(input);
+        // redirect to the target DUNS
+        verifyMatchedDuns(output, expectedTargetDuns);
+        if (expectedBookSource != null) {
+            // should be redirected with the correct keyPartition & bookSource
+            Assert.assertTrue(containsRedirectLog(output, tuple, expectedBookSource));
+        }
+    }
+
     /**
      * All cases covered: Key_Loc_Data_Loc_CacheAccept
      * Key_Loc_Data_Loc_CacheDiscard Key_Loc_Data_Loc_CacheMiss
@@ -568,6 +600,11 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         return map;
     }
 
+    @DataProvider(name = "provideDunsGuideBookTestData")
+    private Object[][] provideDunsGuideBookTestData() {
+        return TestDunsGuideBookUtils.getDunsGuideBookTestData();
+    }
+
     private Object[] testDunsExpectedResuls(String[] matchKeys, Object[] data, int matchedRows, String[] expectedLogs,
             String[] unexpectedLogs) {
         return new Object[] { matchKeys, data, matchedRows, expectedLogs, unexpectedLogs };
@@ -578,5 +615,32 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         nl.setName((String) data[0]);
         nl.setCountryCode(countryCodeService.getCountryCode((String) data[1]));
         dnbCacheService.removeCache(new DnBCache(nl));
+    }
+
+    private void verifyMatchedDuns(MatchOutput output, String matchedDuns) {
+        Assert.assertNotNull(output);
+        Assert.assertNotNull(output.getResult());
+        Assert.assertEquals(output.getResult().size(), 1);
+        OutputRecord record = output.getResult().get(0);
+        Assert.assertNotNull(record);
+        Assert.assertEquals(record.getMatchedDuns(), matchedDuns);
+    }
+
+    /*
+     * Use match logs to determine whether redirection happens with the correct key partition and book source
+     */
+    private boolean containsRedirectLog(
+            @NotNull MatchOutput output, @NotNull MatchKeyTuple tuple, @NotNull String bookSource) {
+        tuple.setCountryCode(tuple.getCountry());
+        String keyPartitionLog = String.format("KeyPartition=%s", MatchKeyUtils.evalKeyPartition(tuple));
+        String bookSourceLog = String.format("BookSource=%s", bookSource);
+        OutputRecord record = output.getResult().get(0);
+        Assert.assertNotNull(record.getMatchLogs());
+        for (String log : record.getMatchLogs()) {
+            if (log != null && log.contains(keyPartitionLog) && log.contains(bookSourceLog)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
