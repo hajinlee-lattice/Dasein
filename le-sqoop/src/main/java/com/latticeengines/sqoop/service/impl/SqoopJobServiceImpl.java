@@ -309,7 +309,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         try {
             String sqoopJar = "/apps/sqoop/sqoop.jar";
             List<String> files;
-            if (!HdfsUtils.fileExists(yarnConfiguration, sqoopJar)) {
+            if (HdfsUtils.fileExists(yarnConfiguration, sqoopJar)) {
                 files = new ArrayList<>(Collections.singleton(sqoopJar));
             } else {
                 files = HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/sqoop/lib", version), //
