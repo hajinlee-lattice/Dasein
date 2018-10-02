@@ -24,8 +24,6 @@ public interface BucketedScoreService {
 
     List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId);
 
-    List<BucketMetadata> getUpToDateABCDBucketsBasedOnRatingEngineId(String ratingEngineId);
-
     List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId);
 
 }

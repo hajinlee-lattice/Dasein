@@ -64,12 +64,16 @@ public class BucketedScoreResource {
         return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
     }
 
-    @GetMapping(value = "/abcdbuckets/uptodate/ratingengine/{ratingId}")
-    @ResponseBody
-    @ApiOperation(value = "Get up-to-date ABCD Buckets info given Rating Engine Id")
-    public List<BucketMetadata> getUpToDateABCDBucketsBasedOnRatingEngineId(@PathVariable String ratingId) {
-        return bucketedScoreService.getUpToDateABCDBucketsBasedOnRatingEngineId(ratingId);
-    }
+    // @GetMapping(value = "/abcdbuckets/uptodate/ratingengine/{ratingId}")
+    // @ResponseBody
+    // @ApiOperation(value = "Get up-to-date ABCD Buckets info given Rating
+    // Engine Id")
+    // public List<BucketMetadata>
+    // getUpToDateABCDBucketsBasedOnRatingEngineId(@PathVariable String
+    // ratingId) {
+    // return
+    // bucketedScoreService.getUpToDateABCDBucketsBasedOnRatingEngineId(ratingId);
+    // }
 
     @PostMapping(value = "/abcdbuckets/{modelGuid}")
     @ApiOperation(value = "Create a group of ABCD buckets")

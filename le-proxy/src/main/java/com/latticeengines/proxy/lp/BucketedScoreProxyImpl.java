@@ -75,13 +75,6 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
-    public List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/uptodateabcdbuckets/engine/{engineId}",
-                shortenCustomerSpace(customerSpace), engineId);
-        return getList("get up-to-date bucket metadata for engine", url, BucketMetadata.class);
-    }
-
-    @Override
     public List<BucketMetadata> getAllBucketsByEngineId(String customerSpace, String engineId) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/ratingengines/{ratingEngineId}",
@@ -115,7 +108,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     @SuppressWarnings("rawtypes")
     private Map<Long, List<BucketMetadata>> parseABCDBucketsHistory(Map<?, ?> map) {
         if (MapUtils.isNotEmpty(map)) {
-			Map<Long, List> listMap = JsonUtils.convertMap(map, Long.class, List.class);
+            Map<Long, List> listMap = JsonUtils.convertMap(map, Long.class, List.class);
             Map<Long, List<BucketMetadata>> result = new HashMap<>();
             listMap.forEach((k, v) -> result.put(k, JsonUtils.convertList(v, BucketMetadata.class)));
             return result;

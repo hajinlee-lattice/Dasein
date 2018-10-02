@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LaunchHistory;
@@ -178,8 +180,9 @@ public class PlayServiceImpl implements PlayService {
             } else {
                 String reId = play.getRatingEngine().getId();
                 try {
-                    List<BucketMetadata> latestABCDBuckets = bucketedScoreProxy
-                            .getLatestABCDBucketsByEngineId(tenant.getId(), reId);
+                    List<BucketMetadata> latestABCDBuckets = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(
+                            tenant.getId(),
+                            ((AIModel) play.getRatingEngine().getPublishedIteration()).getModelSummaryId());
                     play.getRatingEngine().setBucketMetadata(latestABCDBuckets);
                 } catch (Exception ex) {
                     log.error("Ignoring exception while loading latest ABCD" + " bucket of rating engine " + reId
@@ -258,10 +261,11 @@ public class PlayServiceImpl implements PlayService {
                                         String reId = pair.getLeft();
                                         List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
                                         try {
-                                            List<BucketMetadata> latestABCDBuckets = bucketedScoreProxy
-                                                    .getLatestABCDBucketsByEngineId(tenant.getId(), reId);
                                             ratingEngines.stream() //
-                                                    .forEach(r -> r.setBucketMetadata(latestABCDBuckets));
+                                                    .forEach(r -> r.setBucketMetadata(bucketedScoreProxy
+                                                            .getPublishedBucketMetadataByModelGuid(tenant.getId(),
+                                                                    ((AIModel) r.getPublishedIteration())
+                                                                            .getModelSummaryId())));
                                         } catch (Exception ex) {
                                             log.info("Ignoring exception while loading latest ABCD"
                                                     + " bucket of rating engine " + reId
@@ -346,9 +350,9 @@ public class PlayServiceImpl implements PlayService {
 
     private LaunchHistory getLaunchHistoryForPlay(Play play) {
         PlayLaunch lastIncompleteLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
-                Arrays.asList(LaunchState.UnLaunched));
+                Collections.singletonList(LaunchState.UnLaunched));
         PlayLaunch lastCompletedLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
-                Arrays.asList(LaunchState.Launched));
+                Collections.singletonList(LaunchState.Launched));
         PlayLaunch mostRecentLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
         launchHistory.setLastIncompleteLaunch(lastIncompleteLaunch);
