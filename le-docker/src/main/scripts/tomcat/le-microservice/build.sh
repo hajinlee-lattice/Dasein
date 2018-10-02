@@ -19,16 +19,6 @@ function build_docker() {
 
     UNAME=`uname`
 
-    if [[ "${UNAME}" == 'Darwin' ]]; then
-        echo "You are on Mac"
-        # Remove alter table drop foreign key statements from the script
-        sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-datadb/ddl_data_multitenant_mysql5innodb.sql
-    else
-        echo "You are on ${UNAME}"
-        # Remove alter table drop foreign key statements from the script
-        sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-datadb/ddl_data_multitenant_mysql5innodb.sql
-    fi
-
     DIR="${PWD}"
 	rm -rf ${WORKSPACE}
 	mkdir -p ${WORKSPACE}/webapps/${TGT_WAR}
