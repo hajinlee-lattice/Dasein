@@ -87,8 +87,6 @@ angular.module('lp.models.ratings', [
                 }
             }
 
-            console.log(vm.section);
-            console.log(vm.dashboard.summary.bucketMetadata);
             vm.ratingModelId = vm.activeIteration.id;
         }
         
