@@ -186,58 +186,69 @@ angular
                     },
                     TargetProducts: function(RatingEngine, Products) {
                         var ratingEngine = RatingEngine,
-                            type = ratingEngine.type.toLowerCase(),
-                            isPublishedOrScored = (ratingEngine.published_iteration || ratingEngine.scoring_iteration) ? true : false,
-                            products = Products,
-                            model = {},
-                            targetProducts = [];
+                            type = ratingEngine.type.toLowerCase();
 
-                        if (isPublishedOrScored){
-                            var model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
-                        } else {
-                            var model = ratingEngine.latest_iteration.AI;
-                        }
+                        if (type != 'rule_based') {
+                            var isPublishedOrScored = (ratingEngine.published_iteration || ratingEngine.scoring_iteration) ? true : false,
+                                products = Products,
+                                model = {},
+                                targetProducts = [];
 
-                        var targetProducts = model.advancedModelingConfig[type].targetProducts;
-
-                        if (targetProducts && targetProducts.length != 0) {
-                            if(targetProducts.length == 1){
-                                return products.find(function(obj) { return obj.ProductId === targetProducts[0].toString() });
+                            if (isPublishedOrScored){
+                                var model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
                             } else {
-                                var targetProductNames = [];
-                                angular.forEach(targetProducts, function(product){
-                                    targetProductNames.push(products.find(function(obj) { return obj.ProductId === product.toString() }));
-                                });
-                                return targetProductNames;
+                                var model = ratingEngine.latest_iteration.AI;
                             }
+
+                            var targetProducts = model.advancedModelingConfig[type].targetProducts;
+
+                            if (targetProducts && targetProducts.length != 0) {
+                                if(targetProducts.length == 1){
+                                    return products.find(function(obj) { return obj.ProductId === targetProducts[0].toString() });
+                                } else {
+                                    var targetProductNames = [];
+                                    angular.forEach(targetProducts, function(product){
+                                        targetProductNames.push(products.find(function(obj) { return obj.ProductId === product.toString() }));
+                                    });
+                                    return targetProductNames;
+                                }
+                            }
+                        } else {
+                            return null;
                         }
                     },
                     TrainingProducts: function(RatingEngine, Products) {
                         var ratingEngine = RatingEngine,
-                            type = ratingEngine.type.toLowerCase(),
-                            isPublishedOrScored = (ratingEngine.published_iteration || ratingEngine.scoring_iteration) ? true : false,
-                            products = Products,
-                            model = {},
-                            trainingProducts = [];
+                            type = ratingEngine.type.toLowerCase();
 
-                        if (isPublishedOrScored){
-                            var model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
-                        } else {
-                            var model = ratingEngine.latest_iteration.AI;
-                        }
+                        if (type != 'rule_based') {
 
-                        var trainingProducts = model.advancedModelingConfig[type].trainingProducts;
+                            var isPublishedOrScored = (ratingEngine.published_iteration || ratingEngine.scoring_iteration) ? true : false,
+                                products = Products,
+                                model = {},
+                                trainingProducts = [];
 
-                        if (trainingProducts && trainingProducts.length != 0) {
-                            if(trainingProducts.length == 1){
-                                return products.find(function(obj) { return obj.ProductId === trainingProducts[0].toString() });
+                            if (isPublishedOrScored){
+                                var model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
                             } else {
-                                var trainingProductNames = [];
-                                angular.forEach(trainingProducts, function(product){
-                                    trainingProductNames.push(products.find(function(obj) { return obj.ProductId === product.toString() }));
-                                });
-                                return trainingProductNames;
+                                var model = ratingEngine.latest_iteration.AI;
                             }
+
+                            var trainingProducts = model.advancedModelingConfig[type].trainingProducts;
+
+                            if (trainingProducts && trainingProducts.length != 0) {
+                                if(trainingProducts.length == 1){
+                                    return products.find(function(obj) { return obj.ProductId === trainingProducts[0].toString() });
+                                } else {
+                                    var trainingProductNames = [];
+                                    angular.forEach(trainingProducts, function(product){
+                                        trainingProductNames.push(products.find(function(obj) { return obj.ProductId === product.toString() }));
+                                    });
+                                    return trainingProductNames;
+                                }
+                            }
+                        } else {
+                            return null;
                         }
                     }
                 },
