@@ -90,8 +90,9 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Query Builder'
             },
-            onEnter: ['$stateParams', 'SegmentService', 'SegmentStore', 'BackStore', function($stateParams, SegmentService, SegmentStore, BackStore) {
-                var name = $stateParams.segment;
+            onEnter: ['$stateParams', 'SegmentService', 'SegmentStore', 'BackStore', 'StateHistory', function($stateParams, SegmentService, SegmentStore, BackStore, StateHistory) {
+                var name = $stateParams.segment,
+                    lastFrom = (StateHistory && StateHistory.lastTo() ? StateHistory.lastFrom().name : '');
 
                 BackStore.setBackState('home.segments');
                 if('Create' === name){
@@ -104,7 +105,10 @@ angular.module('common.datacloud.query')
                     });
                     
                 }
-                SegmentService.GetSegmentDependenciesModelView(name);
+                
+                if(lastFrom !== 'home.segment.explorer.attributes') {
+                    SegmentService.GetSegmentDependenciesModelView(name);
+                }
             }],
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
