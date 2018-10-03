@@ -25,9 +25,6 @@ public class ProspectingUserServiceImpl implements ProspectingUserService {
     @Inject
     private UserService userService;
 
-    @Value("${security.app.public.url}")
-    private String apiPublicUrl;
-
     @Override
     public RegistrationResult createUser(UserRegistration userReg) {
         RegistrationResult result = userService.registerUserWithNoTenant(userReg);

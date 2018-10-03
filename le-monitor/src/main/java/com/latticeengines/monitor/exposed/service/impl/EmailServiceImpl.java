@@ -47,6 +47,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${monitor.email.pm:dev@lattice-engines.com}")
     private String pmEmail;
+    
+    @Value("${monitor.url.helpcenter}")
+    private String helpCenterUrl;
 
     @VisibleForTesting
     public void enableEmail() {
@@ -82,11 +85,19 @@ public class EmailServiceImpl implements EmailService {
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_NEW_PROSPECTING_USER);
 
+            String appUrl = null;
+            if (hostport == null) {
+                appUrl = helpCenterUrl;
+            }
+            else {
+                appUrl = hostport;
+            }
+
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
-            builder.replaceToken("{{helpcenterurl}}", EmailSettings.LATTICE_HELP_CENTER_URL);
-            builder.replaceToken("{{url}}", EmailSettings.LATTICE_HELP_CENTER_URL);
+            builder.replaceToken("{{helpcenterurl}}", appUrl);
+            builder.replaceToken("{{url}}", appUrl);
             builder.replaceToken("{{msg}}", EmailSettings.PLS_NEW_PROSPECTING_USER_EMAIL_MSG);
 
             Multipart mp = builder.buildMultipart();
@@ -111,7 +122,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
-            builder.replaceToken("{{helpcenterurl}}", EmailSettings.LATTICE_HELP_CENTER_URL);
+            builder.replaceToken("{{helpcenterurl}}", helpCenterUrl);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
@@ -133,7 +144,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
-            builder.replaceToken("{{helpcenterurl}}", EmailSettings.LATTICE_HELP_CENTER_URL);
+            builder.replaceToken("{{helpcenterurl}}", helpCenterUrl);
 
             Multipart mp = builder.buildMultipart();
             log.info("Sending email to " + user.getUsername());
