@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.sqoop.util.YarnConfigurationUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,7 +35,7 @@ public class HealthResource {
     @ApiOperation(value = "Check Yarn Configuration")
     @NoMetricsLog
     public String checkYarnConfiguration() {
-        YarnConfiguration yarnConfiguration = new YarnConfiguration();
+        YarnConfiguration yarnConfiguration = YarnConfigurationUtils.getYarnConfiguration();
         String defaultFs = yarnConfiguration.get("fs.defaultFS");
         log.info("Use yarnConfiguration with default Fs: " + defaultFs);
         return defaultFs;

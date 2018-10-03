@@ -37,6 +37,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -105,6 +106,9 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         String prefix = dropboxService.getDropBoxPrefix();
         Assert.assertTrue(StringUtils.isNotBlank(prefix));
         Assert.assertTrue(s3Service.objectExist(dropboxService.getDropBoxBucket(), prefix + "/"));
+        Tenant owner = dropboxService.getDropBoxOwner(dropboxService.getDropBoxSummary().getDropBox());
+        Assert.assertNotNull(owner);
+        Assert.assertEquals(owner.getPid(), mainTestTenant.getPid());
         return prefix;
     }
 

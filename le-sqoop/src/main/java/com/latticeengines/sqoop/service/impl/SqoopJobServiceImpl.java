@@ -20,6 +20,7 @@ import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.MRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.sqoop.LedpSqoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

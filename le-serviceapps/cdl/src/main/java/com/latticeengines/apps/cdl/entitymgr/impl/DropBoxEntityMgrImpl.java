@@ -88,9 +88,30 @@ public class DropBoxEntityMgrImpl //
         }
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Tenant getDropBoxOwner(String dropBox) {
+        DropBox entity;
+        if (isReaderConnection()) {
+            entity = getDropBoxOwnerFromReader(dropBox);
+        } else {
+            entity = writerRepository.findByDropBox(dropBox);
+        }
+        Tenant tenant = null;
+        if (entity != null) {
+            tenant = entity.getTenant();
+        }
+        return tenant;
+    }
+
     @Transactional(transactionManager = "transactionManagerReader", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DropBox getDropBoxFromReader(Tenant tenant) {
         return readerRepository.findByTenant(tenant);
+    }
+
+    @Transactional(transactionManager = "transactionManagerReader", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DropBox getDropBoxOwnerFromReader(String dropBox) {
+        return readerRepository.findByDropBox(dropBox);
     }
 
     private String findAvailableRandomStr() {

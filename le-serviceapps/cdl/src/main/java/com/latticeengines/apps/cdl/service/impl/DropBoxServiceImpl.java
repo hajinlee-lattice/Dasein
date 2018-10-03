@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Service("dropBoxService")
 public class DropBoxServiceImpl implements DropBoxService {
@@ -119,6 +120,11 @@ public class DropBoxServiceImpl implements DropBoxService {
             }
             return summary;
         }
+    }
+
+    @Override
+    public Tenant getDropBoxOwner(String dropBox) {
+        return entityMgr.getDropBoxOwner(dropBox);
     }
 
     @Override

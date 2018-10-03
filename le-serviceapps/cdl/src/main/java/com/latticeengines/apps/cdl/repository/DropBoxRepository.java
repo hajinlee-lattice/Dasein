@@ -12,4 +12,6 @@ public interface DropBoxRepository extends BaseJpaRepository<DropBox, Long> {
 
     boolean existsByDropBox(String dropBox);
 
+    DropBox findByDropBox(String dropBox);
+
 }
