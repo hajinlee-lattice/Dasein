@@ -44,6 +44,12 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
+            // console.log(vm.iteration);
+
+            AtlasRemodelStore.setRemodelIteration(vm.iteration);
+
+            // console.log(vm.ratingEngine);
+
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
 
@@ -80,16 +86,20 @@ angular.module('lp.ratingsengine.wizard.training', [
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
 
-                    vm.configFilters = angular.copy(vm.filters);
-                    RatingsEngineStore.setDisplayFileName(vm.configFilters.sourceFileName);
+                    // console.log(vm.configFilters);
+
+                    
+                    RatingsEngineStore.setDisplayFileName(vm.filters.sourceFileName);
 
                     vm.checkboxModel = {
-                        datacloud: (vm.configFilters.dataStores.indexOf('DataCloud') > -1) ? true : false,
-                        cdl: (vm.configFilters.dataStores.indexOf('CDL') > -1) ? true : false,
-                        deduplicationType: (vm.configFilters.deduplicationType == 'ONELEADPERDOMAIN') ? true : false,
-                        excludePublicDomains: (vm.configFilters.excludePublicDomains == true) ? false : true,
-                        transformationGroup: (vm.configFilters.transformationGroup == 'NONE') ? false : true
+                        datacloud: (vm.filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
+                        cdl: (vm.filters.dataStores.indexOf('CDL') > -1) ? true : false,
+                        deduplicationType: (vm.filters.deduplicationType == 'ONELEADPERDOMAIN') ? true : false,
+                        excludePublicDomains: (vm.filters.excludePublicDomains == true) ? false : true,
+                        transformationGroup: (vm.filters.transformationGroup == 'NONE') ? false : true
                     }
+
+                    vm.configFilters = angular.copy(vm.filters);
 
                     vm.configFilters.dataStores = [];
                     if(vm.checkboxModel.datacloud) {

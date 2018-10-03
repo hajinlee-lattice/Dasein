@@ -27,6 +27,8 @@ angular.module('lp.ratingsengine.remodel.training', [])
                         engineId = $stateParams.engineId,
                         modelId = $stateParams.modelId;
 
+                    console.log($stateParams);
+
                     RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
                         AtlasRemodelStore.setRemodelIteration(result);
                         RatingsEngineStore.setRatingEngine(ratingEngine);

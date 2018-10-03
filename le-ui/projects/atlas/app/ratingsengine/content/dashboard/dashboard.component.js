@@ -216,9 +216,6 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.initDataModel = function(){
-        
-        console.log(vm.ratingEngine);
-
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
             if (vm.dashboard.dependencies[type]) {
