@@ -4,7 +4,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;

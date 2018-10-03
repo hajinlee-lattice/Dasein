@@ -44,27 +44,27 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     boolean hasChange = false;
 
     @Override
-    protected AbstractStep mergeStep() {
+    protected AbstractStep<?> mergeStep() {
         return mergeProduct;
     }
 
     @Override
-    protected AbstractStep cloneStep() {
+    protected AbstractStep<?> cloneStep() {
         return cloneProduct;
     }
 
     @Override
-    protected AbstractStep resetStep() {
+    protected AbstractStep<?> resetStep() {
         return resetProduct;
     }
 
     @Override
-    protected AbstractWorkflow updateWorkflow() {
+    protected AbstractWorkflow<?> updateWorkflow() {
         return updateProductWorkflow;
     }
 
     @Override
-    protected AbstractWorkflow rebuildWorkflow() {
+    protected AbstractWorkflow<?> rebuildWorkflow() {
         return rebuildProductWorkflow;
     }
 

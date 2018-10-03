@@ -53,12 +53,14 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
         List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
         List<String> inactiveEngines = getListObjectFromContext(INACTIVE_ENGINES, String.class);
 
+        @SuppressWarnings("rawtypes")
         List<List> generations = getListObjectFromContext(RATING_MODELS_BY_ITERATION, List.class);
         if (iteration > CollectionUtils.size(generations)) {
             log.info("Current iteration " + iteration + " is larger than max dependency depth "
                     + CollectionUtils.size(generations) + ", skip iteration.");
         } else {
             String customerSpace = configuration.getCustomerSpace().toString();
+            @SuppressWarnings("rawtypes")
             List list = generations.get(iteration - 1);
             List<RatingModelContainer> containersInIteration = JsonUtils.convertList(list, RatingModelContainer.class);
             log.info("Found " + containersInIteration.size() + " active models to process in this iteration.");
@@ -75,8 +77,7 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                 }
             }
 
-            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
-                    DataCollection.Version.class);
+            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
             if (CollectionUtils.isNotEmpty(inactiveEnginesInIteration)) {
                 Set<String> existingEngineIds = new HashSet<>();
                 Table table = dataCollectionProxy.getTable(customerSpace, //

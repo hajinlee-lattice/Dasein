@@ -50,27 +50,27 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected AbstractStep mergeStep() {
+    protected AbstractStep<?> mergeStep() {
         return mergeAccount;
     }
 
     @Override
-    protected AbstractStep cloneStep() {
+    protected AbstractStep<?> cloneStep() {
         return cloneAccount;
     }
 
     @Override
-    protected AbstractStep resetStep() {
+    protected AbstractStep<?> resetStep() {
         return resetAccount;
     }
 
     @Override
-    protected AbstractWorkflow updateWorkflow() {
+    protected AbstractWorkflow<?> updateWorkflow() {
         return updateAccountWorkflow;
     }
 
     @Override
-    protected AbstractWorkflow rebuildWorkflow() {
+    protected AbstractWorkflow<?> rebuildWorkflow() {
         return rebuildAccountWorkflow;
     }
 

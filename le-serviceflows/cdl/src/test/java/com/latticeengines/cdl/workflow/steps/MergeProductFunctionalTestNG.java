@@ -1,14 +1,12 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -20,7 +18,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
 public class MergeProductFunctionalTestNG {
-    private static final Logger logger = LoggerFactory.getLogger(MergeProductFunctionalTestNG.class);
 
     private MergeProduct step;
     private List<Product> currentProductList;

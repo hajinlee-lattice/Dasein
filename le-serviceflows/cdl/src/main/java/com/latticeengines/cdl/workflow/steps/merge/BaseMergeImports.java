@@ -44,7 +44,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfiguration>
@@ -70,9 +69,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String diffReportTablePrefix;
     protected String batchStorePrimaryKey;
     protected List<String> batchStoreSortKeys;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
 
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;

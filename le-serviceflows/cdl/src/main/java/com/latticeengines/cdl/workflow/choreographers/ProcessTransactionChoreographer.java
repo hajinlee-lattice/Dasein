@@ -178,27 +178,27 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
-    protected AbstractStep mergeStep() {
+    protected AbstractStep<?> mergeStep() {
         return mergeTransaction;
     }
 
     @Override
-    protected AbstractStep cloneStep() {
+    protected AbstractStep<?> cloneStep() {
         return cloneTransaction;
     }
 
     @Override
-    protected AbstractStep resetStep() {
+    protected AbstractStep<?> resetStep() {
         return resetTransaction;
     }
 
     @Override
-    protected AbstractWorkflow updateWorkflow() {
+    protected AbstractWorkflow<?> updateWorkflow() {
         return updateTransactionWorkflow;
     }
 
     @Override
-    protected AbstractWorkflow rebuildWorkflow() {
+    protected AbstractWorkflow<?> rebuildWorkflow() {
         return rebuildTransactionWorkflow;
     }
 

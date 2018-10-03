@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -15,8 +13,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlSplit
 
 @Component("matchCdlSplitFlow")
 public class MatchCdlSplitFlow extends TypesafeDataFlowBuilder<MatchCdlSplitParameters> {
-
-    private static final Logger log = LoggerFactory.getLogger(MatchCdlSplitFlow.class);
 
     @Override
     public Node construct(MatchCdlSplitParameters parameters) {

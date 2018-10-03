@@ -46,7 +46,6 @@ public class ComputeLiftZeroAvgTestNG extends ServiceFlowsDataFlowFunctionalTest
         return parameters;
     }
 
-    @SuppressWarnings("unused")
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         int numRows = 0;

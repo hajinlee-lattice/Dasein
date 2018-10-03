@@ -155,6 +155,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     private void checkImports(AbstractStep<? extends BaseStepConfiguration> step) {
+        @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = step.getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
         hasImports = MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(mainEntity());
@@ -285,15 +286,15 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return rebuild || update;
     }
 
-    protected abstract AbstractStep mergeStep();
+    protected abstract AbstractStep<?> mergeStep();
 
-    protected abstract AbstractStep cloneStep();
+    protected abstract AbstractStep<?> cloneStep();
 
-    protected abstract AbstractStep resetStep();
+    protected abstract AbstractStep<?> resetStep();
 
-    protected abstract AbstractWorkflow updateWorkflow();
+    protected abstract AbstractWorkflow<?> updateWorkflow();
 
-    protected abstract AbstractWorkflow rebuildWorkflow();
+    protected abstract AbstractWorkflow<?> rebuildWorkflow();
 
     protected abstract BusinessEntity mainEntity();
 

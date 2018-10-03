@@ -3,8 +3,6 @@ package com.latticeengines.cdl.workflow.steps.update;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -17,8 +15,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessC
 @Component(ProcessContactDiff.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessContactDiff extends BaseProcessSingleEntityDiffStep<ProcessContactStepConfiguration> {
-
-    private static final Logger log = LoggerFactory.getLogger(ProcessContactDiff.class);
 
     static final String BEAN_NAME = "processContactDiff";
 

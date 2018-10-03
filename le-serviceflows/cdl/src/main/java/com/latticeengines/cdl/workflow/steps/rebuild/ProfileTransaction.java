@@ -65,7 +65,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private DataCollection.Version inactive;
     private DataCollection.Version active;
-    private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep, mergePeriodStep;
+    private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep;
     private Table rawTable, dailyTable;
     private List<Table> periodTables;
     private Map<String, List<Product>> productMap;
@@ -229,11 +229,11 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
         TransformationStepConfig dayPeriods = collectDays(); // dayPeriodStep
         TransformationStepConfig updateDaily = updateDailyStore();
-        steps.add(productAgr);  // step 0
-        steps.add(perioded);  // step 1
-        steps.add(dailyAgr);  // step 2
-        steps.add(dayPeriods);  // step 3
-        steps.add(updateDaily);  // step 4
+        steps.add(productAgr); // step 0
+        steps.add(perioded); // step 1
+        steps.add(dailyAgr); // step 2
+        steps.add(dayPeriods); // step 3
+        steps.add(updateDaily); // step 4
 
         periodedStep = 5;
         periodAgrStep = 6;
@@ -244,12 +244,12 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         TransformationStepConfig updatePeriod = updatePeriodStore(periodTables);
         TransformationStepConfig sortDaily = sort(dailyTable.getName(), null, sortedDailyTablePrefix);
         TransformationStepConfig sortPeriod = sort(null, periodAgrStep, sortedPeriodTablePrefix);
-        steps.add(perioded);  // step 5
-        steps.add(periodAgr);  // step 6
-        steps.add(periods);  // step 7
-        steps.add(updatePeriod);  // step 8
-        steps.add(sortDaily);  // step 9
-        steps.add(sortPeriod);  // step 10
+        steps.add(perioded); // step 5
+        steps.add(periodAgr); // step 6
+        steps.add(periods); // step 7
+        steps.add(updatePeriod); // step 8
+        steps.add(sortDaily); // step 9
+        steps.add(sortPeriod); // step 10
 
         request.setSteps(steps);
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
@@ -305,29 +305,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setPeriodStrategies(periodStrategies);
         config.setPeriodField(InterfaceName.PeriodId.name());
         step.setConfiguration(JsonUtils.serialize(config));
-        return step;
-    }
-
-    private TransformationStepConfig addPeriodToSourceTable(List<PeriodStrategy> periodStrategies,
-                                                            String sourceTableName) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.PERIOD_CONVERTOR);
-
-        String sourceName = "CustomerUniverse";
-        List<String> baseSources = Collections.singletonList(sourceName);
-        step.setBaseSources(baseSources);
-
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(sourceName, sourceTable);
-        step.setBaseTables(baseTables);
-
-        PeriodConvertorConfig config = new PeriodConvertorConfig();
-        config.setTrxDateField(InterfaceName.TransactionDate.name());
-        config.setPeriodStrategies(periodStrategies);
-        config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
-
         return step;
     }
 
@@ -447,26 +424,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
         step.setConfiguration(JsonUtils.serialize(config));
-        return step;
-    }
-
-    private TransformationStepConfig mergePeriodStore() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.TRANSFORMER_MERGE);
-
-        List<String> baseSources = new ArrayList<>();
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        for (Table periodTable : periodTables) {
-            String tableSourceName = periodTable.getName();
-            String sourceTableName = periodTable.getName();
-            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-            baseSources.add(tableSourceName);
-            baseTables.put(tableSourceName, sourceTable);
-        }
-        step.setBaseSources(baseSources);
-        step.setBaseTables(baseTables);
-
-        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
 

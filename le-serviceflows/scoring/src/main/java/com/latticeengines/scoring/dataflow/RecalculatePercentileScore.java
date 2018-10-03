@@ -5,12 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import cascading.operation.aggregator.Count;
-import cascading.tuple.Fields;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -19,9 +15,11 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 
+import cascading.operation.aggregator.Count;
+import cascading.tuple.Fields;
+
 @Component("recalculatePercentileScore")
 public class RecalculatePercentileScore extends TypesafeDataFlowBuilder<RecalculatePercentileScoreParameters> {
-    private static final Logger log = LoggerFactory.getLogger(RecalculatePercentileScore.class);
 
     public static final String SCORE_COUNT_FIELD_NAME = ScoreResultField.RawScore.displayName + "_count";
 

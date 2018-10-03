@@ -1,5 +1,11 @@
 package com.latticeengines.scoring.workflow.util;
 
+import static com.latticeengines.domain.exposed.scoringapi.Model.FIT_FUNCTION_PARAMETERS_FILENAME;
+import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_ENHANCEMENTS_DIR;
+import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_APPID_DIR;
+import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_BASE_DIR;
+import static com.latticeengines.domain.exposed.scoringapi.Model.SCORE_DERIVATION_FILENAME;
+
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
@@ -17,14 +23,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
-import static com.latticeengines.domain.exposed.scoringapi.Model.EV_FIT_FUNCTION_PARAMETERS_FILENAME;
-import static com.latticeengines.domain.exposed.scoringapi.Model.EV_SCORE_DERIVATION_FILENAME;
-import static com.latticeengines.domain.exposed.scoringapi.Model.FIT_FUNCTION_PARAMETERS_FILENAME;
-import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_ENHANCEMENTS_DIR;
-import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_APPID_DIR;
-import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_BASE_DIR;
-import static com.latticeengines.domain.exposed.scoringapi.Model.SCORE_DERIVATION_FILENAME;
-
 public class ScoreArtifactRetriever {
     private static final Logger log = LoggerFactory.getLogger(ScoreArtifactRetriever.class);
 
@@ -36,11 +34,12 @@ public class ScoreArtifactRetriever {
         this.yarnConfiguration = yarnConfiguration;
     }
 
-    private ModelSummary getModelSummary(CustomerSpace customerSpace, ModelSummaryProxy modelSummaryProxy, String modelId) {
+    private ModelSummary getModelSummary(CustomerSpace customerSpace, ModelSummaryProxy modelSummaryProxy,
+            String modelId) {
         ModelSummary modelSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelId);
 
         if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_31027, new String[]{modelId});
+            throw new LedpException(LedpCode.LEDP_31027, new String[] { modelId });
         }
         return modelSummary;
     }
@@ -65,18 +64,18 @@ public class ScoreArtifactRetriever {
 
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
         String hdfsScoreArtifactAppIdDir = String.format(HDFS_SCORE_ARTIFACT_APPID_DIR, customerSpace.toString(),
-                                                         modelNameAndVersion.getKey(), modelNameAndVersion.getValue());
+                modelNameAndVersion.getKey(), modelNameAndVersion.getValue());
         try {
             List<String> folders = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactAppIdDir);
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
             } else {
                 throw new LedpException(LedpCode.LEDP_31007,
-                                        new String[]{modelSummary.getId(), JsonUtils.serialize(folders)});
+                        new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new LedpException(LedpCode.LEDP_31000, new String[]{hdfsScoreArtifactAppIdDir});
+            throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
         }
 
         log.info("Found appId folder name by discovery:" + appId);
@@ -84,14 +83,12 @@ public class ScoreArtifactRetriever {
         return appId;
     }
 
-    private String getScoreArtifactBaseDir(
-        CustomerSpace customerSpace, ModelSummary modelSummary) {
+    private String getScoreArtifactBaseDir(CustomerSpace customerSpace, ModelSummary modelSummary) {
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
         String appId = getModelAppIdSubfolder(customerSpace, modelSummary);
 
         String hdfsScoreArtifactBaseDir = String.format(HDFS_SCORE_ARTIFACT_BASE_DIR, customerSpace.toString(),
-                                                        modelNameAndVersion.getKey(), modelNameAndVersion.getValue(),
-                                                        appId);
+                modelNameAndVersion.getKey(), modelNameAndVersion.getValue(), appId);
 
         return hdfsScoreArtifactBaseDir;
     }
@@ -101,33 +98,11 @@ public class ScoreArtifactRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            //ScoreDerivation scoreDerivation = JsonUtils.deserialize(content, ScoreDerivation.class);
+            // ScoreDerivation scoreDerivation = JsonUtils.deserialize(content,
+            // ScoreDerivation.class);
             return content;
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31000, new String[]{path});
-        }
-    }
-
-    private String retrieveEVScoreDerivationFromHdfs(String hdfsScoreArtifactBaseDir) {
-        String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + EV_SCORE_DERIVATION_FILENAME;
-        String content = null;
-        try {
-            content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            return content;
-        } catch (IOException e) {
-            log.warn("Cannot find ev score derivation file at " + path + ", model may be old");
-            return null;
-        }
-    }
-
-    private String retrieveEVFitFunctionParametersFromHdfs(String hdfsScoreArtifactBaseDir) {
-        String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + EV_FIT_FUNCTION_PARAMETERS_FILENAME;
-        try {
-            String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            return content;
-        } catch (IOException e) {
-            log.warn("Cannot find ev fit function parameters file at " + path + ", model may be old");
-            return null;
+            throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
     }
 
@@ -143,10 +118,9 @@ public class ScoreArtifactRetriever {
     }
 
     public String getScoreDerivation(CustomerSpace customerSpace, //
-                                     String modelId) {
+            String modelId) {
         log.info(String.format("Retrieving score derivation from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
-
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
 
@@ -154,10 +128,9 @@ public class ScoreArtifactRetriever {
     }
 
     public String getFitFunctionParameters(CustomerSpace customerSpace, //
-                                           String modelId) {
+            String modelId) {
         log.info(String.format("Retrieving fit function parameters from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
-
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
 
@@ -165,7 +138,7 @@ public class ScoreArtifactRetriever {
     }
 
     public String getEVScoreDerivation(CustomerSpace customerSpace, //
-                                       String modelId) {
+            String modelId) {
         log.info(String.format("Retrieving ev model score derivation from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
 
@@ -175,10 +148,9 @@ public class ScoreArtifactRetriever {
     }
 
     public String getEVFitFunctionParameters(CustomerSpace customerSpace, //
-                                             String modelId) {
+            String modelId) {
         log.info(String.format("Retrieving ev model fit function parameters from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
-
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
 

@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -18,8 +16,6 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-dataflow-context.xml" })
 public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(MatchCdlAccountFlowTestNG.class);
 
     private MatchCdlAccountParameters getMatchAccountIdParameters() {
         MatchCdlAccountParameters params = new MatchCdlAccountParameters("inputTable", "accountTable");

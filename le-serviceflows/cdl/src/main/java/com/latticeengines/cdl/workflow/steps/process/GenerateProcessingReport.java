@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
@@ -111,20 +109,20 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
         BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
-                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+        role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
                 .findFirst().orElse(null);
         if (owner == null) {
             switch (role) {
-                case Profile:
-                    return BusinessEntity.Account;
-                case ContactProfile:
-                    return BusinessEntity.Contact;
-                case PurchaseHistoryProfile:
-                    return BusinessEntity.PurchaseHistory;
-                case ConsolidatedRawTransaction:
-                    return BusinessEntity.Transaction;
-                default:
-                    return null;
+            case Profile:
+                return BusinessEntity.Account;
+            case ContactProfile:
+                return BusinessEntity.Contact;
+            case PurchaseHistoryProfile:
+                return BusinessEntity.PurchaseHistory;
+            case ConsolidatedRawTransaction:
+                return BusinessEntity.Transaction;
+            default:
+                return null;
             }
         }
         return owner;
@@ -145,12 +143,13 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         ArrayNode systemActionNode = report.get(ReportPurpose.SYSTEM_ACTIONS.getKey()) != null
                 ? (ArrayNode) report.get(ReportPurpose.SYSTEM_ACTIONS.getKey())
                 : report.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
         List<Action> dataCloudChangeActions = getDataCloudChangeActions();
         dataCloudChangeActions.forEach(action -> {
             ObjectNode actionNode = JsonUtils.createObjectNode();
-            // discussed with Afroz that displaying action time here is confusing and should be removed.
-//            actionNode.put(ReportConstants.TIME, sdf.format(action.getCreated()));
+            // discussed with Afroz that displaying action time here is
+            // confusing and should be removed.
+            // actionNode.put(ReportConstants.TIME,
+            // sdf.format(action.getCreated()));
             actionNode.put(ReportConstants.USER, action.getActionInitiator());
             actionNode.put(ReportConstants.ACTION, action.getType().getDisplayName());
             systemActionNode.add(actionNode);
@@ -171,12 +170,12 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 BusinessEntity.Transaction, BusinessEntity.PurchaseHistory };
         for (BusinessEntity entity : entities) {
             ObjectNode entityNode = entitiesSummaryNode.get(entity.name()) != null
-                    ? (ObjectNode) entitiesSummaryNode.get(entity.name())
-                    : PAReportUtils.initEntityReport(entity);
+                    ? (ObjectNode) entitiesSummaryNode.get(entity.name()) : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             // Product report is generated in MergeProduct step
-            // PurchaseHistory report is generated in ProfilePurchaseHistory step
+            // PurchaseHistory report is generated in ProfilePurchaseHistory
+            // step
             if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
                 long newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
                 long deleteCnt = deleteCnts.get(entity) == null ? 0L : deleteCnts.get(entity);
@@ -204,45 +203,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
 
-    }
-
-    @Deprecated
-    private Map<BusinessEntity, Long> retrievePreviousEntityCnts() {
-        Map<BusinessEntity, Long> previousCnts = new HashMap<>();
-        List<String> types = Collections.singletonList("processAnalyzeWorkflow");
-        List<Job> jobs = workflowProxy.getJobs(null, types, Boolean.TRUE, customerSpace.toString());
-        Optional<Job> latestSuccessJob = jobs.stream().filter(job -> job.getJobStatus() == JobStatus.COMPLETED)
-                .max(Comparator.comparing(Job::getEndTimestamp));
-        BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
-                BusinessEntity.Transaction };
-        try {
-            if (latestSuccessJob.isPresent()) {
-                Report report = latestSuccessJob.get().getReports().stream()
-                        .filter(r -> r.getPurpose() == ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY)
-                        .collect(Collectors.toList()).get(0);
-                ObjectMapper om = JsonUtils.getObjectMapper();
-                ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
-                ObjectNode entitiesSummaryNode = (ObjectNode) jsonReport.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
-                Arrays.stream(entities)
-                        .filter(entity -> entitiesSummaryNode.get(entity.name()) != null && entitiesSummaryNode
-                                .get(entity.name()).get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()) != null)
-                        .forEach(entity -> previousCnts.put(entity, entitiesSummaryNode.get(entity.name())
-                                .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()).get(ReportConstants.TOTAL).asLong()));
-            } else {
-                log.info("Cannot find previous successful processAnalyzeWorkflow job");
-            }
-        } catch (Exception e) {
-            log.error("Fail to parse report from job: " + JsonUtils.serialize(latestSuccessJob.get()));
-        } finally {
-            for (BusinessEntity entity : entities) {
-                if (!previousCnts.containsKey(entity)) {
-                    log.info(String.format("Cannot find previous count for entity %s in previous job report. Set as 0.",
-                            entity.name()));
-                    previousCnts.put(entity, 0L);
-                }
-            }
-        }
-        return previousCnts;
     }
 
     private Map<BusinessEntity, Long> retrieveCurrentEntityCnts() {
@@ -349,8 +309,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         if (actions == null) {
             actions = getActions();
         }
-        return actions.stream()
-                .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
+        return actions.stream().filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
     }
 
@@ -358,8 +317,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         long lastPATimestamp;
         List<String> jobTypes = Collections.singletonList("processAnalyzeWorkflow");
         List<Job> jobs = workflowProxy.getJobs(null, jobTypes, Boolean.FALSE, customerSpace.toString());
-        Optional<Job> latestSuccessJob = jobs.stream()
-                .filter(job -> job.getJobStatus() == JobStatus.COMPLETED)
+        Optional<Job> latestSuccessJob = jobs.stream().filter(job -> job.getJobStatus() == JobStatus.COMPLETED)
                 .max(Comparator.comparing(Job::getEndTimestamp));
         if (latestSuccessJob.isPresent()) {
             lastPATimestamp = latestSuccessJob.get().getEndTimestamp().getTime();
@@ -370,8 +328,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         Long currentPATimestamp = getLongValueFromContext(PA_TIMESTAMP);
         List<Long> systemActionIds = getListObjectFromContext(SYSTEM_ACTION_IDS, Long.class);
         List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), systemActionIds);
-        return actions.stream()
-                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
+        return actions.stream().filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
                 .filter(action -> action.getCreated().getTime() > lastPATimestamp
                         && action.getCreated().getTime() < currentPATimestamp)
                 .collect(Collectors.toList());

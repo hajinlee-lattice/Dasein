@@ -45,7 +45,7 @@ public class ComputeLift extends TypesafeDataFlowBuilder<ComputeLiftParameters> 
 
         Map<Serializable, Serializable> valueMap = new HashMap<>();
         scoreFieldMap.forEach(valueMap::put);
-        Function scoreFieldMapping = new MappingFunction(modelGuidField, SCORE_FIELD, valueMap);
+        Function<?> scoreFieldMapping = new MappingFunction(modelGuidField, SCORE_FIELD, valueMap);
         inputTable = inputTable.apply(scoreFieldMapping, new FieldList(modelGuidField), new FieldMetadata(SCORE_FIELD, String.class));
 
         Map<String, Node> nodes = splitNodes(inputTable, new HashSet<>(scoreFieldMap.values()));

@@ -1,8 +1,6 @@
 package com.latticeengines.serviceflows.dataflow;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -12,8 +10,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.dataflow.PrepareMatch
 
 @Component("prepareMatchDataflow")
 public class PrepareMatchDataflow extends TypesafeDataFlowBuilder<PrepareMatchDataParameters> {
-
-    private static final Logger log = LoggerFactory.getLogger(PrepareMatchDataflow.class);
 
     @Override
     public Node construct(PrepareMatchDataParameters parameters) {

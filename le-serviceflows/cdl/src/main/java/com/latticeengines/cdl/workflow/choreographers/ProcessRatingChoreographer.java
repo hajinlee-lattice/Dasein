@@ -149,7 +149,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     RatingModelContainer.class);
             List<String> inactiveEngines = step.getListObjectFromContext(INACTIVE_ENGINES,
                     String.class);
-            List generations = step.getObjectFromContext(RATING_MODELS_BY_ITERATION, List.class);
+            List<?> generations = step.getObjectFromContext(RATING_MODELS_BY_ITERATION, List.class);
             effectiveIterations = Math.max(1, CollectionUtils.size(generations));
             boolean hasEngines = CollectionUtils.isNotEmpty(containers) || CollectionUtils.isNotEmpty(inactiveEngines);
             hasDataChange = hasDataChange();

@@ -51,7 +51,6 @@ import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -89,13 +88,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private CustomerSpace customerSpace;
     private DataCollection.Version activeVersion;
     private DataCollection.Version inactiveVersion;
-    private InternalResourceRestApiProxy internalResourceProxy;
     private ObjectNode reportJson;
     private ChoreographerContext grapherContext = new ChoreographerContext();;
 
     @PostConstruct
     public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     // for Spring
@@ -106,7 +103,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     StartProcessing(DataCollectionProxy dataCollectionProxy, InternalResourceRestApiProxy internalResourceProxy,
             ActionProxy actionProxy, CustomerSpace customerSpace) {
         this.dataCollectionProxy = dataCollectionProxy;
-        this.internalResourceProxy = internalResourceProxy;
         this.actionProxy = actionProxy;
         this.customerSpace = customerSpace;
         this.reportJson = JsonUtils.createObjectNode();
@@ -234,11 +230,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     || DataCloudVersion.versionComparator.compare(currentVersion, statusVersion) != 0) {
                 createSystemAction(ActionType.DATA_CLOUD_CHANGE, ActionType.DATA_CLOUD_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-                status = DataCollectionStatusUtils.updateTimeForDCChange(status,
-                        getLongValueFromContext(PA_TIMESTAMP));
+                status = DataCollectionStatusUtils.updateTimeForDCChange(status, getLongValueFromContext(PA_TIMESTAMP));
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
-            } else if (StringUtils.compare(
-                    currentVersion.getRefreshVersionVersion(), statusVersion.getRefreshVersionVersion()) != 0) {
+            } else if (StringUtils.compare(currentVersion.getRefreshVersionVersion(),
+                    statusVersion.getRefreshVersionVersion()) != 0) {
                 createSystemAction(ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
                 status = DataCollectionStatusUtils.updateTimeForCategoryChange(status,
@@ -350,11 +345,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> actionList = getActions();
         return actionList.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
-    }
-
-    private List<Job> getDeleteJobs() {
-        return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
-                configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
     }
 
     private void determineVersions() {

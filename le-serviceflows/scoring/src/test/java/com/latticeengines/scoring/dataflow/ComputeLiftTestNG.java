@@ -46,7 +46,6 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         return parameters;
     }
 
-    @SuppressWarnings("unused")
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         int numRows = 0;

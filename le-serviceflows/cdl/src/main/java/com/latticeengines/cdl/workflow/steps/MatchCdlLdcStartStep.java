@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +10,6 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("matchCdlLdcStartStep")
 public class MatchCdlLdcStartStep extends BaseWorkflowStep<MatchCdlStepConfiguration> {
-
-    private static final Logger log = LoggerFactory.getLogger(MatchCdlLdcStartStep.class);
 
     @Autowired
     protected MetadataProxy metadataProxy;

@@ -48,27 +48,27 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected AbstractStep mergeStep() {
+    protected AbstractStep<?> mergeStep() {
         return mergeContact;
     }
 
     @Override
-    protected AbstractStep cloneStep() {
+    protected AbstractStep<?> cloneStep() {
         return cloneContact;
     }
 
     @Override
-    protected AbstractStep resetStep() {
+    protected AbstractStep<?> resetStep() {
         return resetContact;
     }
 
     @Override
-    protected AbstractWorkflow updateWorkflow() {
+    protected AbstractWorkflow<?> updateWorkflow() {
         return updateContactWorkflow;
     }
 
     @Override
-    protected AbstractWorkflow rebuildWorkflow() {
+    protected AbstractWorkflow<?> rebuildWorkflow() {
         return rebuildContactWorkflow;
     }
 

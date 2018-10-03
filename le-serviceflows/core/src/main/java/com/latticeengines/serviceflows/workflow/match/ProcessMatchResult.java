@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
@@ -101,28 +99,4 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         log.info("Found source columns: " + StringUtils.join(cols, ", "));
         return cols;
     }
-
-    private String getIdColumn(Table table) {
-        String idAttr = getStringValueFromContext(MATCH_INPUT_ID_COLUMN);
-        if (StringUtils.isBlank(idAttr)) {
-            List<Attribute> idColumns = table.getAttributes(LogicalDataType.InternalId);
-            if (idColumns.isEmpty()) {
-                if (table.getAttribute("Id") == null) {
-                    throw new RuntimeException("No Id columns found in prematch table");
-                } else {
-                    log.warn(
-                            "No column with LogicalDataType InternalId in prematch table.  Choosing column called \"Id\"");
-                    idColumns.add(table.getAttribute("Id"));
-                }
-            }
-            if (idColumns.size() != 1) {
-                log.warn(String.format("Multiple id columns in prematch table.  Choosing %s",
-                        idColumns.get(0).getName()));
-            }
-            return idColumns.get(0).getName();
-        } else {
-            return idAttr;
-        }
-    }
-
 }

@@ -29,7 +29,6 @@ import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("finishProcessing")
@@ -44,9 +43,6 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
-
-    @Inject
-    private EntityProxy entityProxy;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -160,6 +156,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                         bucketedScoreSummary);
             });
         }
+        @SuppressWarnings("rawtypes")
         Map<String, List> listMap = getMapObjectFromContext(BUCKET_METADATA_MAP, String.class, List.class);
         Map<String, String> modelGuidToEngineIdMap = getMapObjectFromContext(MODEL_GUID_ENGINE_ID_MAP, String.class,
                 String.class);

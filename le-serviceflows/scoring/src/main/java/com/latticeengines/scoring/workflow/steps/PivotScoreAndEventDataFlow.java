@@ -264,6 +264,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     private void upsertRatingLifts() {
         Map<String, Map<String, Double>> liftMap = new HashMap<>();
+        @SuppressWarnings("rawtypes")
         Map<String, Map> mapInContext = getMapObjectFromContext(RATING_LIFTS, String.class, Map.class);
         if (MapUtils.isNotEmpty(mapInContext)) {
             mapInContext.forEach((k, v) -> liftMap.put(k, JsonUtils.convertMap(v, String.class, Double.class)));
