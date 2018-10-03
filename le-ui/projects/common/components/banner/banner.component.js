@@ -36,15 +36,32 @@ angular.module('common.banner', [])
 
         if (old.length > 0) {
             old.forEach(function(item) {
+                item.timestamp.push(new Date().getTime());
                 item.badge++;
             });
         } else {
+            banner.timestamp = [ new Date().getTime() ];
             this.banners.push(banner);
         }
     };
 
-    this.reset = function() {
+    this.reset = function(lifetime) {
+        var now = Date.now();
+
+        lifetime = lifetime || 0;
+
+        var banners = this.banners.filter(function(banner) {
+            var ts = banner.timestamp[banner.timestamp.length - 1];
+            var age = now - ts;
+            
+            return age < lifetime;
+        });
+
         this.banners.length = 0;
+
+        banners.forEach(function(banner) {
+            Banner.banners.push(banner);
+        });
     };
 
     this.generate = function(type, opts) {
@@ -101,6 +118,34 @@ angular.module('common.banner', [])
             });
 
             return visible;
+        };
+
+        vm.showTimeStamps = function(banner) {
+            var now = Date.now();
+            var times = [];
+
+            banner.timestamp.forEach(function(ts, index) {
+                var elapsed = new Date(now - ts),
+                    index = index + 1,
+                    secs = elapsed.getSeconds(),
+                    mins = elapsed.getMinutes(),
+                    time = '    Iteration ' + index + ':    now',
+                    fn = function(num, text) {
+                        return (num == 1 ? text : text + 's') + ' ';
+                    };
+
+                if (mins > 0) {
+                    time = '    Iteration ' + index + ':    ' + mins + fn(mins,' minute') + secs + fn(secs,' second') + 'ago';
+                } else if (secs > 0) {
+                    time = '    Iteration ' + index + ':    ' + secs + fn(secs,' second') + 'ago';
+                }
+
+                times.push(time);
+            });
+
+            var preface = 'This banner' + (banner.name ? ' "' + banner.name + '" ' : ' ') + 'has been triggered ' + banner.badge + ' times.\n\n'
+
+            return preface + times.join('\n');
         };
     }
 });

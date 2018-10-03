@@ -15,7 +15,7 @@
 
         <div class="le-modal-body" ng-if="showModalMsg || showWaiting || transclude">
             <div ng-transclude ng-show="!showModalMsg && !showWaiting"></div>
-            <div class="le-modal-message" ng-if="showModalMsg">{{modalMsg}}</div>
+            <div class="le-modal-message" ng-if="showModalMsg && modalMsg" ng-html-compile="modalMsg"></div>
             <div class="le-modal-spinner" ng-if="showWaiting">
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
             </div>

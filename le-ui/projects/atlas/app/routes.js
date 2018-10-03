@@ -54,8 +54,8 @@ angular
         StateHistory.setFrom(from, trans.params('from'));
         StateHistory.setTo(to, trans.params('to'));
 
-        // maybe we shouldn't be clearing banners anymore on state change?
-        //Banner.reset();
+        // clears all banners that are older than N milliseconds
+        Banner.reset(7500);
     });
 
     // when user hits browser Back button after app instantiate, send back to login

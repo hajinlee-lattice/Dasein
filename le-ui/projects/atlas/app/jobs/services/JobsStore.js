@@ -14,12 +14,12 @@ angular
             pending = true;
 
             if (JobsStore.isGetAllJobs()) {
-                console.log('get all jobs');
+                // console.log('get all jobs');
                 JobsStore.getJobs(null, modelId).then(function(response) {
                     pending = false;
                 });
             } else {
-                console.log('get all pending/running jobs');
+                // console.log('get all pending/running jobs');
                 JobsStore.getJobs(null, modelId, ["pending", "running"]).then(function(response) {
                     pending = false;
                 });

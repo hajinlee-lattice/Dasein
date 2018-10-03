@@ -12,7 +12,7 @@
                             'fa-info-circle': banner.type == 'info'
                         }">
                 </ico>
-                <i class="badge blue-badge" ng-if="banner.badge > 1">{{banner.badge}}</i>
+                <i class="badge blue-badge" ng-if="banner.badge > 1" title="{{$ctrl.showTimeStamps(banner)}}" ng-mouseover="$ctrl.showTimeStamps(banner)">{{banner.badge}}</i>
             </div>
 
             <div class="messaging-content">

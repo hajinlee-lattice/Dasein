@@ -53,11 +53,25 @@ angular.module('common.attributes.activate', [])
         overview: '<',
         config: '<'
     },
-    controller: function ($q, AttrConfigStore) {
+    controller: function ($q, $timeout, AttrConfigStore, Banner) {
         var vm = this;
 
         vm.store = AttrConfigStore;
         vm.filters = vm.store.get('filters');
         vm.uiCanExit = vm.store.uiCanExit;
+
+        // Banner.error({name: 'Test_Error', message: 'This is a test'});
+        // $timeout(function() {
+        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
+        // }, 1349);
+        // $timeout(function() {
+        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
+        // }, 14333);
+        // $timeout(function() {
+        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
+        // }, 57500);
+        // $timeout(function() {
+        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
+        // }, 117777);
     }
 });
