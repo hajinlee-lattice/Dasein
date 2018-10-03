@@ -136,7 +136,7 @@ PRGDIR=`dirname "$PRG"`
 
 # Ensure that any user defined CLASSPATH variables are not used on startup,
 # but allow them to be specified in setenv.sh, in rare case when it is needed.
-CLASSPATH=$CATALINA_CLASSPATH
+CLASSPATH=
 
 if [ -r "$CATALINA_BASE/bin/setenv.sh" ]; then
   . "$CATALINA_BASE/bin/setenv.sh"
@@ -218,6 +218,8 @@ if [ -r "$CATALINA_BASE/bin/tomcat-juli.jar" ] ; then
 else
   CLASSPATH=$CLASSPATH:$CATALINA_HOME/bin/tomcat-juli.jar
 fi
+
+CLASSPATH=${CATALINA_CLASSPATH}:${CLASSPATH}
 
 # Bugzilla 37848: When no TTY is available, don't output to console
 have_tty=0
@@ -347,7 +349,7 @@ if [ "$1" = "debug" ] ; then
   fi
 
 elif [ "$1" = "run" ]; then
-
+  echo "CLASSPATH for run is ${CLASSPATH}"
   shift
   if [ "$1" = "-security" ] ; then
     if [ $have_tty -eq 1 ]; then

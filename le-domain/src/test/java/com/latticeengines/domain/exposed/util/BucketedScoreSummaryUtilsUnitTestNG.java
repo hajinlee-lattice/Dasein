@@ -8,24 +8,27 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.BucketedScore;
 import org.apache.avro.generic.GenericRecord;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 
 public class BucketedScoreSummaryUtilsUnitTestNG {
 
+    private static final String RESOURCE_ROOT = "com/latticeengines/domain/exposed" //
+            + "/util/BucketedScoreSummaryUtilsUnitTestNG/";
+
     @Test(groups = "unit")
     public void testParseBucketedScore() throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classLoader.getResourceAsStream("com/latticeengines/domain/exposed/util/BucketedScoreSummaryUtilsUnitTestNG/part-00000.avro");
+        InputStream is = classLoader.getResourceAsStream(RESOURCE_ROOT + "part-00000.avro");
         List<GenericRecord> recordList = AvroUtils.readFromInputStream(is);
         BucketedScoreSummary summary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(recordList);
         Assert.assertEquals(summary.getBarLifts().length, 32);
@@ -37,7 +40,7 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
     @Test(groups = "unit")
     public void testComputeLift() throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classLoader.getResourceAsStream("com/latticeengines/domain/exposed/util/BucketedScoreSummaryUtilsUnitTestNG/bucketed_score_summary.json");
+        InputStream is = classLoader.getResourceAsStream(RESOURCE_ROOT + "bucketed_score_summary.json");
         ObjectMapper om = new ObjectMapper();
         BucketedScoreSummary summary = om.readValue(is, BucketedScoreSummary.class);
         List<BucketMetadata> bucketMetadataList = getBucketMetadata();
