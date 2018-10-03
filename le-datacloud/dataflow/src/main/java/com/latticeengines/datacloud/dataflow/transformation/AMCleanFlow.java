@@ -60,20 +60,20 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
     public Node construct(AMCleanerParameters parameters) {
         Node accountMaster = addSource(parameters.getBaseTables().get(0));
         // Map for storing attribute and argument (data type expected)
-        Map<String, TypeConvertStrategy> attrsAndExpectedType = new HashMap<String, TypeConvertStrategy>();
+        Map<String, TypeConvertStrategy> attrsAndExpectedType = new HashMap<>();
         List<String> dropAttributes = new ArrayList<>();
         Map<String, CleanOpt> attrArgs = parameters.getAttrOpts();
-        List<String> accMasterFields = accountMaster.getFieldNames();
+        List<String> expectedAMFields = accountMaster.getFieldNames();
         List<String> addAttributes = new ArrayList<>();
         List<FieldMetadata> fieldMetaData = new ArrayList<>();
-        Set<String> amFields = new HashSet<String>(accountMaster.getFieldNames());
+        Set<String> existedAMFields = new HashSet<String>(accountMaster.getFieldNames());
         for (Map.Entry<String, CleanOpt> entry : attrArgs.entrySet()) {
             String attribute = entry.getKey();
             CleanOpt argument = entry.getValue();
             // checking if attribute not exists in am schema
-            if (!attribute.equals(LATTICE_ACCOUNT_ID) && !amFields.contains(attribute)) {
+            if (!attribute.equals(LATTICE_ACCOUNT_ID) && !existedAMFields.contains(attribute)) {
                 addAttributes.add(attribute);
-                accMasterFields.add(attribute);
+                expectedAMFields.add(attribute);
                 if (typeStrategies.containsKey(argument)) {
                     fieldMetaData.add(new FieldMetadata(attribute, typeStrategies.get(argument).getValue()));
                 }
@@ -89,7 +89,7 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
                     LatticeIdFunction idFunc = new LatticeIdFunction(new Fields(attribute), LATTIC_ID);
                     accountMaster = accountMaster //
                             .apply(idFunc, new FieldList(LATTIC_ID), new FieldMetadata(attribute, String.class));
-                    accMasterFields.add(attribute);
+                    expectedAMFields.add(attribute);
                     break;
                 case STRING:
                 case DOUBLE:
@@ -122,19 +122,19 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
         Fields fieldDeclaration = new Fields(
                 accountMaster.getFieldNames().toArray(new String[accountMaster.getFieldNames().size()]));
         TypeBatchConvertFunction convertFunc = new TypeBatchConvertFunction(fieldDeclaration,
-                attrsAndExpectedType, accMasterFields);
+                attrsAndExpectedType, expectedAMFields);
         accountMaster = accountMaster.apply(convertFunc, new FieldList(accountMaster.getFieldNames()), fms,
-                new FieldList(accMasterFields), Fields.REPLACE);
+                new FieldList(expectedAMFields), Fields.REPLACE);
 
         // adding columns from sourceAttribute that don't exist in AM
         AddNullColumns addNullCol = new AddNullColumns(
                 new Fields(addAttributes.toArray(new String[addAttributes.size()])));
         accountMaster = accountMaster //
                 .apply(addNullCol, new FieldList(accountMaster.getFieldNames()), fieldMetaData,
-                        new FieldList(accMasterFields));
+                        new FieldList(expectedAMFields));
 
         // checking if amColumn not exists in attrArgs
-        for (String amCol : accMasterFields) {
+        for (String amCol : expectedAMFields) {
             if (!attrArgs.containsKey(amCol)) {
                 dropAttributes.add(amCol);
             }
