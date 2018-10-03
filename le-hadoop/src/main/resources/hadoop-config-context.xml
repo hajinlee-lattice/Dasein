@@ -44,7 +44,7 @@
         fs.s3n.impl=org.apache.hadoop.fs.s3native.NativeS3FileSystem
     </yarn:configuration>
 
-    <bean id="emrConfiguration" class="com.latticeengines.hadoop.bean.YarnConfigurationBeanFactory" depends-on="placeholderConfigurer" />
+    <bean id="emrConfiguration" class="com.latticeengines.hadoop.bean.YarnConfigurationBeanFactory" />
 
     <yarn:configuration id="yarnConfiguration" configuration-ref="emrConfiguration"/>
 
