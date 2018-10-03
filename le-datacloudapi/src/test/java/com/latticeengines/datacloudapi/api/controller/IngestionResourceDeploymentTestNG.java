@@ -39,9 +39,11 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 
+/**
+ * workflowapi,datacloudapi,modeling,eai,sqoop
+ */
 @Component
 public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
-    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(IngestionResourceDeploymentTestNG.class);
 
     private static final String POD_ID = IngestionResourceDeploymentTestNG.class.getSimpleName();

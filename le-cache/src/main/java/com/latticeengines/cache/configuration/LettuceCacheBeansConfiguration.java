@@ -76,7 +76,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
     }
 
     public CacheManager redisCacheManager() {
-        long ttl = 2;
+        long ttl = 10;
         RedisCacheConfiguration sessionCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofMinutes(20)) //
                 .disableCachingNullValues() //
@@ -113,25 +113,25 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         // BEGIN: objectapi proxy
         // =========================
         RedisCacheConfiguration entityCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(ttl)) //
+                .entryTtl(Duration.ofDays(1)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityCountCacheName));
         RedisCacheConfiguration entityDataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(ttl)) //
+                .entryTtl(Duration.ofDays(1)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityDataCacheName));
         RedisCacheConfiguration entityRatingCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(ttl)) //
+                .entryTtl(Duration.ofDays(1)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityRatingCountCacheName));
         RedisCacheConfiguration ratingCoverageCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(ttl)) //
+                .entryTtl(Duration.ofDays(1)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //

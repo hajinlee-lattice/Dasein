@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -558,7 +557,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             Runnable columnNamesRunnable = //
                     () -> {
                         log.info("Getting serving store attrs for " + tenantId + " : " + entity);
-                        Set<String> attrs = _dataLakeService.getServingTableColumns(customerSpace, entity);
+                        Set<String> attrs = servingStoreProxy.getServingStoreColumnsFromCache(customerSpace, entity);
                         if (CollectionUtils.isNotEmpty(attrs)) {
                             concurrentColumnNamesMap.put(entity, attrs);
                         }
@@ -617,36 +616,15 @@ public class DataLakeServiceImpl implements DataLakeService {
                         .doOnNext(cm -> counter.getAndIncrement()).doOnComplete(() -> {
                             long duration = System.currentTimeMillis() - timer.get();
                             long count = counter.get();
-                            String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity
-                                    + " in " + customerSpace + " TimeElapsed=" + duration + " msec.";
-                            log.info(msg);
+                            if (duration > 500) {
+                                String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity
+                                        + " in " + customerSpace + " TimeElapsed=" + duration + " msec.";
+                                log.info(msg);
+                            }
                         });
             }
         }
         return cms;
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|servingtable\", #customerSpace, #entity)", unless = "#result == null")
-    public Set<String> getServingTableColumns(String customerSpace, BusinessEntity entity) {
-        Set<String> result = null;
-        if (entity != null) {
-            String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getServingStore());
-            if (StringUtils.isBlank(tableName)) {
-                log.info("Cannot find serving table for " + entity + " in " + customerSpace);
-            } else {
-                try (PerformanceTimer timer = new PerformanceTimer()) {
-                    Set<String> attrSet = new HashSet<>();
-                    List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
-                    cms.forEach(cm -> attrSet.add(cm.getAttrName()));
-                    timer.setTimerMessage(
-                            "Fetched " + attrSet.size() + " attr names for " + entity + " in " + customerSpace);
-                    if (CollectionUtils.isNotEmpty(attrSet)) {
-                        result = attrSet;
-                    }
-                }
-            }
-        }
-        return result;
     }
 
     @VisibleForTesting

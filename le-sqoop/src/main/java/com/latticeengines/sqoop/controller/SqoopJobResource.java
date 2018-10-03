@@ -6,9 +6,9 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +29,7 @@ public class SqoopJobResource {
     @Inject
     private SqoopJobService sqoopJobService;
 
-    @RequestMapping(value = "/import", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/import")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Import data from SQL to HDFS")
@@ -39,7 +39,7 @@ public class SqoopJobResource {
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
-    @RequestMapping(value = "/export", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/export")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Export data from HDFS to SQL")

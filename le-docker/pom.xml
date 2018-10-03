@@ -14,7 +14,7 @@
         <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
         <saml.docker.context>src/main/scripts/tomcat/le-saml</saml.docker.context>
         <oauth2.docker.context>src/main/scripts/tomcat/le-oauth2</oauth2.docker.context>
-        <playmaker.docker.context>src/main/scripts/tomcat/le-playmaker</playmaker.docker.context>
+        <sqoop.docker.context>src/main/scripts/tomcat/le-sqoop</sqoop.docker.context>
         <scoringapi.docker.context>src/main/scripts/tomcat/le-scoringapi</scoringapi.docker.context>
         <express.docker.context>src/main/scripts/nodejs/le-express</express.docker.context>
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
@@ -69,8 +69,8 @@
                                 <copy file="${project.basedir}/../le-oauth2/target/le-oauth2-${project.version}.war"
                                       tofile="${project.basedir}/${oauth2.docker.context}/webapps/ROOT.war"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-playmaker/target/le-playmaker-${project.version}.war"
-                                      tofile="${project.basedir}/${playmaker.docker.context}/webapps/ROOT.war"
+                                <copy file="${project.basedir}/../le-microservice/sqoop/target/le-sqoop-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${sqoop.docker.context}/webapps/sqoop.war"
                                       overwrite="true" />
 
                                 <!-- microservices -->
@@ -147,14 +147,14 @@
                                       overwrite="true" />
 
                                 <!-- python app -->
-                                <copy file="${project.basedir}/../le-dataplatform/target/leframework.tar.gz" 
+                                <copy file="${project.basedir}/../le-dataplatform/target/leframework.tar.gz"
                                       tofile="${project.basedir}/${pythonapp.docker.context}/leframework.tar.gz"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsdataloader.py" 
-                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsdataloader.py" 
+                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsdataloader.py"
+                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsdataloader.py"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsgenerator.py" 
-                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py" 
+                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsgenerator.py"
+                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py"
                                       overwrite="true"/>
 
                                 <!-- workflow app -->
@@ -163,7 +163,7 @@
                                       overwrite="true" />
 
                                 <!-- datascience app -->
-                                <copy file="${project.basedir}/../le-dataplatform/target/ledatascience.tar.gz" 
+                                <copy file="${project.basedir}/../le-dataplatform/target/ledatascience.tar.gz"
                                       tofile="${project.basedir}/${datascienceapp.docker.context}/ledatascience.tar.gz"
                                       overwrite="true" />
                             </tasks>

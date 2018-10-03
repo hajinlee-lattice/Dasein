@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 import argparse
 import base64
 import boto3
@@ -16,7 +17,10 @@ class AwsEnvironment:
         self.env = env
 
     def aws_account_id(self):
-        return "028036828464"
+        if self.env == "qa":
+            return "028036828464"
+        elif self.env == "prod":
+            return "158854640770"
 
     def ecr_registry(self):
         return "%s.dkr.ecr.us-east-1.amazonaws.com" % self.aws_account_id()
@@ -36,11 +40,8 @@ def push(args):
 
     if args.environment != "dev":
         create_ecr_if_not_exists(args.environment, args.image)
-
-    if args.skiplogin:
-        login_cmd = "echo skipping docker login ..."
-    else:
-        login_cmd = login_internal(args.environment)
+    print("login")
+    login_cmd = login_internal(args.environment)
 
     if args.environment == 'dev':
         reg_url = NEXUS_DOCKER_REGISTRY
@@ -194,22 +195,21 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     subparser = commands.add_parser("login")
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     subparser.set_defaults(func=login)
 
     subparser = commands.add_parser("push")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
-    subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
     subparser.add_argument('-f', dest='withf', action="store_true", help='with -f option when tagging')
     subparser.add_argument('--dryrun', dest='dryrun', action="store_true", help='Perform a dry run')
     subparser.set_defaults(func=push)
 
     subparser = commands.add_parser("pull")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
@@ -219,7 +219,7 @@ def parse_args():
 
     subparser = commands.add_parser("purge")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     subparser.add_argument('--dryrun', dest='dryrun', action="store_true", help='Perform dry run')
     subparser.set_defaults(func=purge)
 

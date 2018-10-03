@@ -34,6 +34,9 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.PublicationProxy;
 import com.latticeengines.yarn.exposed.service.JobService;
 
+/**
+ * workflowapi,datacloudapi,modeling,eai,sqoop
+ */
 @Component
 public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
 
@@ -70,7 +73,7 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
     private ThreadLocal<String> publicationName = new ThreadLocal<>();
 
     @AfterMethod(groups = "deployment")
-    public void teardown() throws Exception {
+    public void teardown() {
         publicationEntityMgr.removePublication(publicationName.get());
         String tableName = DynamoPublishService.convertToFabricStoreName(DYNAMO_RECORD_TYPE + "_" + leStack);
         dynamoService.deleteTable(tableName);

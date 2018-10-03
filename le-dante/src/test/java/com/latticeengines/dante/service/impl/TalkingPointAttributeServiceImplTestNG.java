@@ -6,6 +6,7 @@ import static org.mockito.Mockito.spy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -79,6 +80,11 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
 
             @Override
             public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Version version) {
+                return null;
+            }
+
+            @Override
+            public Set<String> getServingStoreColumnsFromCache(String customerSpace, BusinessEntity entity) {
                 return null;
             }
         });

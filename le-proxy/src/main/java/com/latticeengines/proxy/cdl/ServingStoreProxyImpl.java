@@ -3,6 +3,7 @@ package com.latticeengines.proxy.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -34,6 +35,11 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     @Override
     public List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity) {
         return cacheService.getDecoratedMetadata(customerSpace, entity);
+    }
+
+    @Override
+    public Set<String> getServingStoreColumnsFromCache(String customerSpace, BusinessEntity entity) {
+        return cacheService.getServingTableColumns(customerSpace, entity);
     }
 
     @Override

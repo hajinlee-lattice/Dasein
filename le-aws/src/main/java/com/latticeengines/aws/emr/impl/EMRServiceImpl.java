@@ -2,7 +2,6 @@ package com.latticeengines.aws.emr.impl;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,6 +79,11 @@ public class EMRServiceImpl implements EMRService {
         return "http://" + getMasterIp() + ":50070/webhdfs/v1";
     }
 
+    @Override
+    public String getSqoopHostPort() {
+        return "http://" + getMasterIp() + ":8081";
+    }
+
     private AmazonElasticMapReduce getEmr() {
         if (emrClient == null) {
             synchronized (this) {
@@ -88,13 +92,6 @@ public class EMRServiceImpl implements EMRService {
                             .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
                             .withRegion(Regions.fromName(region)) //
                             .build();
-
-                    ListClustersRequest request = new ListClustersRequest().withClusterStates(ClusterState.RUNNING,
-                            ClusterState.WAITING);
-                    ListClustersResult result = emrClient.listClusters(request);
-                    log.info("There are " + CollectionUtils.size(result.getClusters()) + " clusters.");
-
-                    log.info("Generating an emr client using creds: " + awsCredentials.getAWSAccessKeyId());
                 }
             }
         }

@@ -4,18 +4,8 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-    <display-name>PROPDATA SERVICE API</display-name>
-    <description>Lattice Engines PropData Service REST API</description>
-
-    <filter>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    <display-name>SQOOP SERVICE API</display-name>
+    <description>Lattice Engines Sqoop REST API</description>
 
     <servlet>
         <servlet-name>sqoop</servlet-name>

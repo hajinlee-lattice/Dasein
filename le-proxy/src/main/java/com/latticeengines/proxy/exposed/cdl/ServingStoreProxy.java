@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed.cdl;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -27,5 +28,7 @@ public interface ServingStoreProxy {
     // only use cache when you have performance needs.
     // otherwise using above non-cached apis gives more up-to-date info.
     List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity);
+
+    Set<String> getServingStoreColumnsFromCache(String customerSpace, BusinessEntity entity);
 
 }
