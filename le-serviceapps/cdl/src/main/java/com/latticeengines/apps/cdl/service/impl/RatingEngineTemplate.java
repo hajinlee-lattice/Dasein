@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -27,7 +29,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 public abstract class RatingEngineTemplate {
@@ -38,7 +39,7 @@ public abstract class RatingEngineTemplate {
     private BucketedScoreProxy bucketedScoreProxy;
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
 
     @VisibleForTesting
     RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId) {
@@ -83,10 +84,11 @@ public abstract class RatingEngineTemplate {
         try {
             if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
                 Map<String, Long> counts = ratingEngine.getCountsAsMap();
-                if (counts != null)
+                if (counts != null) {
                     ratingEngineSummary.setBucketMetadata(counts.keySet().stream()
                             .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
                             .collect(Collectors.toList()));
+                }
             } else {
                 if (ratingEngine.getPublishedIteration() != null
                         && StringUtils.isNotEmpty(((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
@@ -140,7 +142,7 @@ public abstract class RatingEngineTemplate {
     }
 
     Date findLastRefreshedDate(String tenantId) {
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
+        DataFeed dataFeed = dataFeedService.getDefaultDataFeed(CustomerSpace.parse(tenantId).toString());
         return dataFeed.getLastPublished();
     }
 }
