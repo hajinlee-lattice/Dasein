@@ -44,7 +44,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
                 $scope.internalCategories[i].name = 'My Attributes';
                 $scope.internalCategories[i].color = '#457DB9';
+                
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
+                
+                // myAttributesCategory.categoryName = 'My Attributes';
+                // myAttributesCategory.name = 'My Attributes';
+
                 if (myAttributesCategory) {
                     setAttributeColor(myAttributesCategory, '#457DB9');
                 }
@@ -241,6 +246,16 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
 
     $scope.backToSummaryClicked = function () {
+
+        console.log(chartData);
+
+        for (var attribute of chartData.children) {
+            if(attribute.categoryName === 'My Attributes'){
+                attribute.name = 'ACCOUNT_ATTRIBUTES';
+                attribute.categoryName = 'ACCOUNT_ATTRIBUTES';
+            }
+        }
+
         clearSelectedCategory();
         $scope.backToSummaryView = false;
         $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
@@ -278,6 +293,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
         var prefix = categoryList.length >= 50 ? ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER_PREFIX") : "";
+
+        if(category.name === 'ACCOUNT_ATTRIBUTES'){
+            category.name = 'My Attributes';
+            category.categoryName = 'My Attributes';
+        }
+
         $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER", [category.name, prefix, categoryList.length]);
         var root = {
             name: "root",
