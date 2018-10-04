@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
@@ -98,11 +99,15 @@ public class EMRServiceImpl implements EMRService {
 
     private synchronized void getEmrWithRetry() {
         if (emrClient == null) {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                     Collections.singleton(AmazonElasticMapReduceException.class), null);
+            ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+            backOffPolicy.setInitialInterval(5000L);
+            backOffPolicy.setMultiplier(2.0D);
+            retry.setBackOffPolicy(backOffPolicy);
             emrClient = retry.execute(context -> {
-                if (context.getRetryCount() > 1) {
-                    log.info("(Attempt=%d) Retry creating emr client.");
+                if (context.getRetryCount() > 0) {
+                    log.info(String.format("(Attempt=%d) Retry creating emr client.", context.getRetryCount() + 1));
                 }
                 AmazonElasticMapReduce emr = AmazonElasticMapReduceClientBuilder.standard() //
                         .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
