@@ -19,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 public class RatingEngineServiceImplUnitTestNG {
 
@@ -42,7 +42,7 @@ public class RatingEngineServiceImplUnitTestNG {
     private static final String id2 = "id2";
 
     @Mock
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
 
     @Mock
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -97,7 +97,7 @@ public class RatingEngineServiceImplUnitTestNG {
     private void mockDataFeedProxy() {
         DataFeed dataFeed = new DataFeed();
         dataFeed.setLastPublished(DATE);
-        when(dataFeedProxy.getDataFeed(anyString())).thenReturn(dataFeed);
+        when(dataFeedService.getDefaultDataFeed(anyString())).thenReturn(dataFeed);
     }
 
     private void mockRatingEngineEntityMgr() {
