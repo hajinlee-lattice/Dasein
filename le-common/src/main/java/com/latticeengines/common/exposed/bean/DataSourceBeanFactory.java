@@ -95,7 +95,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         }
         //If MaxPoolSize is not configured at environment level, then use default MaxPoolSize
         maxPoolSize = maxPoolSize > 0 ? maxPoolSize : this.maxPoolSize;
-        int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : (Math.max(1, maxPoolSize/32));
+        int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : 0;
         maxPoolSize = maxPoolSize > minPoolSize ? maxPoolSize : Math.max(minPoolSize, 8);
         
         if (log.isInfoEnabled()) {
