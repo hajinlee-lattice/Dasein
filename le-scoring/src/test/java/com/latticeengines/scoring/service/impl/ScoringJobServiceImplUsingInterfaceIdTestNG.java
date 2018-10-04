@@ -6,7 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +86,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         scoringConfig.setCustomer(tenant);
         scoringConfig.setSourceDataDir(dataPath);
         scoringConfig.setTargetResultDir(scorePath);
-        scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
+        scoringConfig.setModelGuids(Collections.singletonList("ms__" + uuid + "-PLS_model"));
         scoringConfig.setUniqueKeyColumn(InterfaceName.Id.name());
         scoringConfig.setModelIdFromRecord(false);
         ApplicationId appId = scoringJobService.score(scoringConfig);
@@ -111,7 +111,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         }
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @AfterMethod(lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         try {
             HdfsUtils.rmdir(yarnConfiguration, path);

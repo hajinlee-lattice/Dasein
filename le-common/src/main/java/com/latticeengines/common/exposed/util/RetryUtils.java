@@ -36,7 +36,7 @@ public class RetryUtils {
                 retryExceptionMap.put(t, Boolean.FALSE);
             }
         }
-        return getExponentialBackoffRetryTemplate(maxAttempts, 2000L, 2.0D, retryExceptionMap);
+        return getExponentialBackoffRetryTemplate(maxAttempts, 1000L, 2.0D, retryExceptionMap);
     }
 
     public static RetryTemplate getExponentialBackoffRetryTemplate(int maxAttempts,
