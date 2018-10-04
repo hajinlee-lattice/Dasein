@@ -165,68 +165,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         return stream.collectList().block();
     }
 
-    private Flux<ColumnMetadata> getAllSegmentAttributes() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        Map<BusinessEntity, List<ColumnMetadata>> metadataInMds = new HashMap<>();
-        Map<BusinessEntity, Set<String>> colsInServingStore = new HashMap<>();
-        Map<String, StatsCube> cubeMap = new HashMap<>();
-        collectMetadataInParallel(tenantId, BusinessEntity.SEGMENT_ENTITIES, metadataInMds, colsInServingStore,
-                cubeMap);
-        return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES) //
-                .flatMap(entity -> {
-                    List<ColumnMetadata> cms = metadataInMds.getOrDefault(entity, Collections.emptyList());
-                    StatsCube statsCube = cubeMap.get(entity.name());
-                    if (CollectionUtils.isEmpty(cms) || statsCube == null) {
-                        return Flux.empty();
-                    } else {
-                        Flux<ColumnMetadata> flux = Flux.fromIterable(cms);
-                        Set<String> availableAttrs = colsInServingStore.getOrDefault(entity, Collections.emptySet());
-                        Map<String, AttributeStats> statsMap = statsCube.getStatistics();
-                        if (MapUtils.isEmpty(statsMap)) {
-                            statsMap = Collections.emptyMap();
-                        }
-                        Set<String> attrsInStats = statsMap.keySet();
-                        flux = flux //
-                                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
-                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm)) //
-                                .filter(cm -> {
-                                    boolean avail = availableAttrs.contains(cm.getAttrName());
-                                    if (!avail) {
-                                        log.info("Filtering out  " + cm.getAttrName() + " in " + entity
-                                                + " because it is not in serving store.");
-                                    }
-                                    return avail;
-                                }) //
-                                .filter(cm -> {
-                                    boolean avail = attrsInStats.contains(cm.getAttrName());
-                                    if (!avail) {
-                                        log.info("Filtering out  " + cm.getAttrName() + " in " + entity
-                                                + " because it is not in stats cube.");
-                                    }
-                                    return avail;
-                                });
-                        return StatsCubeUtils.sortByCategory(flux, statsCube);
-                    }
-                });
-    }
-
-    @Deprecated
-    private List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
-        // Only return attributes for account now
-        String tenantId = MultiTenantContext.getShortTenantId();
-        List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId,
-                BusinessEntity.Account);
-        accountAttrs = accountAttrs.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
-        // Hack to limit attributes for talking points temporarily PLS-7065
-                && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
-                        || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
-                .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(accountAttrs)) {
-            accountAttrs = new ArrayList<>();
-        }
-        return accountAttrs;
-    }
-
     @Override
     public Map<String, StatsCube> getStatsCubes() {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -326,21 +264,65 @@ public class DataLakeServiceImpl implements DataLakeService {
         missingReqdAttributes.stream().filter(col -> !attributesMap.containsKey(col)).collect(Collectors.toList())
                 .forEach(col -> accountData.put(col, null));
 
-        DataPage reqdAttributesPage = getAccountByIdViaMatchApi(customerSpace, accountID,
-                missingReqdAttributes.stream().filter(attributesMap::containsKey)
-                        .map(col -> new Column(col, attributesMap.get(col).getDisplayName()))
-                        .collect(Collectors.toList()));
+        List<Column> missingAttributesNotInPredefinedSelections = missingReqdAttributes.stream()
+                .filter(attributesMap::containsKey).map(col -> new Column(col, attributesMap.get(col).getDisplayName()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(missingAttributesNotInPredefinedSelections)) {
+            DataPage reqdAttributesPage = getAccountByIdViaMatchApi(customerSpace, accountID,
+                    missingAttributesNotInPredefinedSelections);
 
-        if (reqdAttributesPage != null && CollectionUtils.isNotEmpty(reqdAttributesPage.getData())
-                && MapUtils.isNotEmpty(reqdAttributesPage.getData().get(0))) {
-            accountData.putAll(reqdAttributesPage.getData().get(0));
-        } else {
-            missingReqdAttributes.stream().filter(attributesMap::containsKey).collect(Collectors.toList())
-                    .forEach(col -> accountData.put(col, null));
+            if (reqdAttributesPage != null && CollectionUtils.isNotEmpty(reqdAttributesPage.getData())
+                    && MapUtils.isNotEmpty(reqdAttributesPage.getData().get(0))) {
+                accountData.putAll(reqdAttributesPage.getData().get(0));
+            } else {
+                missingReqdAttributes.stream().filter(attributesMap::containsKey).collect(Collectors.toList())
+                        .forEach(col -> accountData.put(col, null));
+            }
         }
 
         return page;
     }
+
+    @Override
+    public synchronized TopNTree getTopNTree(String customerSpace) {
+        return _dataLakeService.getTopNTreeFromCache(customerSpace);
+    }
+
+    @Override
+    public synchronized Map<String, StatsCube> getStatsCubes(String customerSpace) {
+        return _dataLakeService.getStatsCubesFromCache(customerSpace);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless = "#result == null")
+    public TopNTree getTopNTreeFromCache(String customerSpace) {
+        Map<String, StatsCube> cubes = new HashMap<>();
+        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
+        populateColumnMetadataMap(customerSpace, cmMap, cubes);
+        if (MapUtils.isEmpty(cubes) || MapUtils.isEmpty(cmMap)) {
+            return null;
+        }
+        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
+        try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
+            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
+        }
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", unless = "#result == null")
+    public Map<String, StatsCube> getStatsCubesFromCache(String customerSpace) {
+        StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
+        if (container != null) {
+            Map<String, StatsCube> cubeMap = container.getStatsCubes();
+            if (MapUtils.isNotEmpty(cubeMap)) {
+                cubeMap.forEach((entityName, cube) -> {
+                    BusinessEntity entity = BusinessEntity.valueOf(entityName);
+                    StatsCubeUtils.sortBkts(cube, entity);
+                });
+            }
+            return cubeMap;
+        }
+        return null;
+    }
+
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
         List<List<Object>> data = new ArrayList<>();
@@ -475,44 +457,66 @@ public class DataLakeServiceImpl implements DataLakeService {
         return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
-    @Override
-    public synchronized TopNTree getTopNTree(String customerSpace) {
-        return _dataLakeService.getTopNTreeFromCache(customerSpace);
-    }
-
-    @Override
-    public synchronized Map<String, StatsCube> getStatsCubes(String customerSpace) {
-        return _dataLakeService.getStatsCubesFromCache(customerSpace);
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless = "#result == null")
-    public TopNTree getTopNTreeFromCache(String customerSpace) {
-        Map<String, StatsCube> cubes = new HashMap<>();
-        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
-        populateColumnMetadataMap(customerSpace, cmMap, cubes);
-        if (MapUtils.isEmpty(cubes) || MapUtils.isEmpty(cmMap)) {
-            return null;
-        }
-        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
-        try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
-            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
-        }
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", unless = "#result == null")
-    public Map<String, StatsCube> getStatsCubesFromCache(String customerSpace) {
-        StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
-        if (container != null) {
-            Map<String, StatsCube> cubeMap = container.getStatsCubes();
-            if (MapUtils.isNotEmpty(cubeMap)) {
-                cubeMap.forEach((entityName, cube) -> {
-                    BusinessEntity entity = BusinessEntity.valueOf(entityName);
-                    StatsCubeUtils.sortBkts(cube, entity);
+    private Flux<ColumnMetadata> getAllSegmentAttributes() {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        Map<BusinessEntity, List<ColumnMetadata>> metadataInMds = new HashMap<>();
+        Map<BusinessEntity, Set<String>> colsInServingStore = new HashMap<>();
+        Map<String, StatsCube> cubeMap = new HashMap<>();
+        collectMetadataInParallel(tenantId, BusinessEntity.SEGMENT_ENTITIES, metadataInMds, colsInServingStore,
+                cubeMap);
+        return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES) //
+                .flatMap(entity -> {
+                    List<ColumnMetadata> cms = metadataInMds.getOrDefault(entity, Collections.emptyList());
+                    StatsCube statsCube = cubeMap.get(entity.name());
+                    if (CollectionUtils.isEmpty(cms) || statsCube == null) {
+                        return Flux.empty();
+                    } else {
+                        Flux<ColumnMetadata> flux = Flux.fromIterable(cms);
+                        Set<String> availableAttrs = colsInServingStore.getOrDefault(entity, Collections.emptySet());
+                        Map<String, AttributeStats> statsMap = statsCube.getStatistics();
+                        if (MapUtils.isEmpty(statsMap)) {
+                            statsMap = Collections.emptyMap();
+                        }
+                        Set<String> attrsInStats = statsMap.keySet();
+                        flux = flux //
+                                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
+                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm)) //
+                                .filter(cm -> {
+                                    boolean avail = availableAttrs.contains(cm.getAttrName());
+                                    if (!avail) {
+                                        log.info("Filtering out  " + cm.getAttrName() + " in " + entity
+                                                + " because it is not in serving store.");
+                                    }
+                                    return avail;
+                                }) //
+                                .filter(cm -> {
+                                    boolean avail = attrsInStats.contains(cm.getAttrName());
+                                    if (!avail) {
+                                        log.info("Filtering out  " + cm.getAttrName() + " in " + entity
+                                                + " because it is not in stats cube.");
+                                    }
+                                    return avail;
+                                });
+                        return StatsCubeUtils.sortByCategory(flux, statsCube);
+                    }
                 });
-            }
-            return cubeMap;
+    }
+
+    @Deprecated
+    private List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
+        // Only return attributes for account now
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId,
+                BusinessEntity.Account);
+        accountAttrs = accountAttrs.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
+                // Hack to limit attributes for talking points temporarily PLS-7065
+                && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
+                || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(accountAttrs)) {
+            accountAttrs = new ArrayList<>();
         }
-        return null;
+        return accountAttrs;
     }
 
     private void populateColumnMetadataMap(String customerSpace, Map<String, List<ColumnMetadata>> cmMap,

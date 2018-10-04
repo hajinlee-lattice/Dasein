@@ -49,7 +49,8 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
 
         boolean isSegment = isSpendAnalyticsSegmentEntity(entity);
         String spendAnalyticsSegmentName = entity.containsKey(InterfaceName.SpendAnalyticsSegment.name())
-                ? entity.get(InterfaceName.SpendAnalyticsSegment.name()).toString() : null;
+                && entity.get(InterfaceName.SpendAnalyticsSegment.name()) != null
+                        ? entity.get(InterfaceName.SpendAnalyticsSegment.name()).toString() : null;
 
         String accountId = (String) (isSegment ? entity.get(accountIdColumnName.toLowerCase())
                 : entity.get(accountIdColumnName));
