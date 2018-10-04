@@ -69,31 +69,29 @@ pip install \
     pexpect==4.0.1 \
     ptyprocess==0.5.1
 
-pip install --no-deps \
-    kazoo==2.2.1 \
-    patsy==0.3.0 \
-    python-dateutil==2.4.1
+pip install --no-deps kazoo==2.2.1 patsy==0.3.0 python-dateutil==2.4.1
 
-${ANACONDA_HOME}/bin/conda install -y \
-    pandas=0.14.1=np19py27_0 \
+$ANACONDA_HOME/bin/conda install -y pandas=0.13.1=np18py27_0
+
+$ANACONDA_HOME/bin/conda install -y \
     libiconv=1.14=0 \
     libxml2=2.9.4=0 \
     libxslt=1.1.28=3 \
     lxml=3.4.0=py27_0 \
-    numpy=1.9.3=py27_3 \
+    numpy=1.8.2=py27_0 \
     openssl=1.0.2j=0 \
     py=1.4.31=py27_0 \
     pytest=2.9.2=py27_0 \
     pytz=2016.10=py27_0 \
     readline=6.2=2 \
-    scikit-learn=0.16.0=np19py27_0 \
+    scikit-learn=0.14.1=np18py27_1 \
+    statsmodels=0.5.0=np18py27_0 \
     setuptools=27.2.0=py27_0 \
     sqlite=3.13.0=0 \
     tk=8.5.18=0 \
     wheel=0.29.0=py27_0 \
     zlib=1.2.8=3 \
-    python-snappy=0.5.1 \
-    statsmodels==0.5.0
+    python-snappy=0.5.1
 
 source ${ANACONDA_HOME}/bin/deactivate
 
