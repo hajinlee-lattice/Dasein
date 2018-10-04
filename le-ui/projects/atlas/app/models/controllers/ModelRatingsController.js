@@ -53,9 +53,6 @@ angular.module('lp.models.ratings', [
         // console.log(vm.currentConfiguration);
         // console.log(vm.workingBuckets);
 
-        vm.Math = window.Math;
-        vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
-
         if(vm.section === 'dashboard.scoring') {
 
             vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
@@ -76,12 +73,24 @@ angular.module('lp.models.ratings', [
             // Set active iteration (default value for iteration select menu) 
             // and working buckets (vm.workingBuckets is what drives the chart data)
             if ($stateParams.toggleRatings){
-                vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
+                vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
+
+                var id = vm.activeIteration.modelSummaryId;
+                ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                    vm.ratingsSummary = result;
+                });
+
             } else {
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
+                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
+
+                    var id = vm.activeIteration.modelSummaryId;
+                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                        vm.ratingsSummary = result;
+                    });
+
                 } else {
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
                 }
@@ -96,7 +105,12 @@ angular.module('lp.models.ratings', [
             vm.modelType = "Accounts";
         };
 
-        renderChart();
+        vm.Math = window.Math;
+        vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
+
+        $timeout(function() {
+            renderChart();
+        }, 500);
     }
 
     vm.init();
