@@ -3,6 +3,7 @@ package com.latticeengines.proxy.exposed.sqoop;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.emr.EMRService;
@@ -19,7 +20,7 @@ public class SqoopProxy extends BaseRestApiProxy {
     private Boolean useEmr;
 
     @Inject
-    private EMRService emrService;
+    private ApplicationContext appCtx;
 
     private boolean hostPortSwitched;
 
@@ -43,6 +44,7 @@ public class SqoopProxy extends BaseRestApiProxy {
         if (!hostPortSwitched && Boolean.TRUE.equals(useEmr)) {
             synchronized (this) {
                 if (!hostPortSwitched && Boolean.TRUE.equals(useEmr)) {
+                    EMRService emrService = appCtx.getBean("emrService", EMRService.class);
                     setHostport(emrService.getSqoopHostPort());
                     hostPortSwitched = true;
                 }
