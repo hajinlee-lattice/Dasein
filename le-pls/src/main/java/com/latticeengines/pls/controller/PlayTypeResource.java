@@ -42,7 +42,7 @@ public class PlayTypeResource {
     @PostMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create new Play type")
-    public PlayType createPlayType(@PathVariable String customerSpace, @RequestBody PlayType playType) {
+    public PlayType createPlayType(@RequestBody PlayType playType) {
         Tenant tenant = MultiTenantContext.getTenant();
         String userId = MultiTenantContext.getEmailAddress();
         playType.setCreatedBy(userId);
