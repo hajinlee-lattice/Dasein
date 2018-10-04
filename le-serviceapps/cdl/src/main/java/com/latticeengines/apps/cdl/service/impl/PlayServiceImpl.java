@@ -35,6 +35,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -48,7 +49,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
@@ -361,11 +361,29 @@ public class PlayServiceImpl implements PlayService {
         return launchHistory;
     }
 
+    private CoverageInfo getCoverageInfo(RatingEngine ratingEngine) {
+        CoverageInfo coverageInfo = new CoverageInfo();
+        MetadataSegment segment = ratingEngine.getSegment();
+        if (segment != null) {
+            coverageInfo.setAccountCount(segment.getAccounts());
+            coverageInfo.setContactCount(segment.getContacts());
+        }
+        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
+            coverageInfo.setBucketCoverageCounts(CoverageInfo.fromCounts(ratingEngine.getCountsAsMap()));
+        } else {
+            Tenant tenant = MultiTenantContext.getTenant();
+            List<BucketMetadata> buckets = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenant.getId(),
+                    ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
+            coverageInfo.setBucketCoverageCounts(CoverageInfo.fromBuckets(buckets));
+        }
+        return coverageInfo;
+    }
+
     private void populateCoverageInfo(Play play, LaunchHistory launchHistory, RatingEngine ratingEngine) {
         try {
             PlayLaunch mostRecentSuccessfulPlayLaunch = launchHistory.getLastIncompleteLaunch();
 
-            CoverageInfo coverageInfo = RatingEngineUtils.getCoverageInfo(ratingEngine);
+            CoverageInfo coverageInfo = getCoverageInfo(ratingEngine);
             Long accountCount = coverageInfo.getAccountCount();
             if (accountCount == null) {
                 throw new IllegalStateException(
@@ -381,13 +399,13 @@ public class PlayServiceImpl implements PlayService {
             log.info(String.format("For play %s, account number and contact number are %d and %d, respectively",
                     play.getName(), accountCount, contactCount));
 
-            Long mostRecentSucessfulLaunchAccountNum = mostRecentSuccessfulPlayLaunch == null ? 0L
+            Long mostRecentSuccessfulLaunchAccountNum = mostRecentSuccessfulPlayLaunch == null ? 0L
                     : mostRecentSuccessfulPlayLaunch.getAccountsLaunched();
-            Long mostRecentSucessfulLaunchContactNum = mostRecentSuccessfulPlayLaunch == null ? 0L
+            Long mostRecentSuccessfulLaunchContactNum = mostRecentSuccessfulPlayLaunch == null ? 0L
                     : mostRecentSuccessfulPlayLaunch.getContactsLaunched();
 
-            Long newAccountsNum = accountCount - mostRecentSucessfulLaunchAccountNum;
-            Long newContactsNum = contactCount - mostRecentSucessfulLaunchContactNum;
+            Long newAccountsNum = accountCount - mostRecentSuccessfulLaunchAccountNum;
+            Long newContactsNum = contactCount - mostRecentSuccessfulLaunchContactNum;
 
             launchHistory.setNewAccountsNum(newAccountsNum);
             launchHistory.setNewContactsNum(newContactsNum);

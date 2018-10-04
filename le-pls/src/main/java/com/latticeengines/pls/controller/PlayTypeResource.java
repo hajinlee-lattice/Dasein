@@ -47,7 +47,7 @@ public class PlayTypeResource {
         String userId = MultiTenantContext.getEmailAddress();
         playType.setCreatedBy(userId);
         playType.setUpdatedBy(userId);
-        return playProxy.createPlayType(tenant.getId(), playType);
+        return  playProxy.createPlayType(tenant.getId(), playType);
     }
 
     @GetMapping(value = "/{playTypeId}", headers = "Accept=application/json")

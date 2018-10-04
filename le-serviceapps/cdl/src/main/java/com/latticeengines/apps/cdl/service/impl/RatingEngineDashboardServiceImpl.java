@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelDTO;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
-import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("ratingEngineDashboardService")
@@ -51,7 +50,8 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         log.info(String.format("Step 1 - Loading rating engine summary completed for : %s", ratingEngineId));
 
         // get coverage info
-        CoverageInfo coverageInfo = RatingEngineUtils.getCoverageInfo(ratingEngine);
+        CoverageInfo coverageInfo = new CoverageInfo(ratingEngine.getSegment().getAccounts(),
+                ratingEngine.getSegment().getContacts(), ratingEngineSummary.getBucketMetadata());
         log.info(String.format("Step 2 - Loading ratings coverage completed for : %s", ratingEngineId));
 
         // get segment info
