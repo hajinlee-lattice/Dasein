@@ -1,14 +1,10 @@
 package com.latticeengines.aws.emr.impl;
 
-import java.util.Collections;
-
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -16,7 +12,6 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuilder;
-import com.amazonaws.services.elasticmapreduce.model.AmazonElasticMapReduceException;
 import com.amazonaws.services.elasticmapreduce.model.ClusterState;
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
@@ -27,7 +22,6 @@ import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
 import com.amazonaws.services.elasticmapreduce.model.ListInstancesRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
 import com.latticeengines.aws.emr.EMRService;
-import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Service("emrService")
 public class EMRServiceImpl implements EMRService {
@@ -92,34 +86,16 @@ public class EMRServiceImpl implements EMRService {
 
     private AmazonElasticMapReduce getEmr() {
         if (emrClient == null) {
-            getEmrWithRetry();
+            synchronized (this) {
+                if (emrClient == null) {
+                    emrClient = AmazonElasticMapReduceClientBuilder.standard() //
+                            .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
+                            .withRegion(Regions.fromName(region)) //
+                            .build();
+                }
+            }
         }
         return emrClient;
-    }
-
-    private synchronized void getEmrWithRetry() {
-        if (emrClient == null) {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                    Collections.singleton(AmazonElasticMapReduceException.class), null);
-            ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-            backOffPolicy.setInitialInterval(5000L);
-            backOffPolicy.setMultiplier(2.0D);
-            retry.setBackOffPolicy(backOffPolicy);
-            emrClient = retry.execute(context -> {
-                if (context.getRetryCount() > 0) {
-                    log.info(String.format("(Attempt=%d) Retry creating emr client.", context.getRetryCount() + 1));
-                }
-                AmazonElasticMapReduce emr = AmazonElasticMapReduceClientBuilder.standard() //
-                        .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
-                        .withRegion(Regions.fromName(region)) //
-                        .build();
-                ListClustersRequest request = new ListClustersRequest().withClusterStates(ClusterState.RUNNING,
-                        ClusterState.WAITING);
-                ListClustersResult clustersResult = emr.listClusters(request);
-                clustersResult.getClusters();
-                return emr;
-            });
-        }
     }
 
 }
