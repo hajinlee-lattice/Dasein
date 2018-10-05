@@ -249,7 +249,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         // Apply the status filter again on results, Because "checkLastUpdateTime" can
         // update the status
         if (CollectionUtils.isNotEmpty(jobStatuses) && CollectionUtils.isNotEmpty(workflowJobs)) {
-            Set<String> jobStatusSet = jobStatuses.stream().map(st -> st.toUpperCase()).collect(Collectors.toSet());
+            Set<String> jobStatusSet = jobStatuses.stream().map(String::toUpperCase).collect(Collectors.toSet());
             workflowJobs = workflowJobs.stream().filter(workflowJob -> {
                 return workflowJob.getStatus() == null || jobStatusSet.contains(workflowJob.getStatus().toUpperCase());
             }).collect(Collectors.toList());

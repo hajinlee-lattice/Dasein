@@ -163,7 +163,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
             }
             Map<String, String> flatteredConfig = WorkflowUtils.getFlattenedConfig(workflowConfiguration);
-            flatteredConfig.entrySet().forEach(e -> parmsBuilder.addString(e.getKey(), e.getValue()));
+            flatteredConfig.forEach(parmsBuilder::addString);
         }
 
         return parmsBuilder.toJobParameters();
@@ -216,6 +216,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         jobCacheService.evict(workflowJob.getTenant());
 
+        log.info(String.format("Start workflow with jobExecutionId=%d", jobExecutionId));
         return new WorkflowExecutionId(jobExecutionId);
     }
 
@@ -262,7 +263,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
             jobExecutionId = jobOperator.restart(workflowExecutionId.getId());
             workflowJob.setWorkflowId(jobExecutionId);
+            workflowJob.setStatus(JobStatus.RUNNING.name());
             workflowJobEntityMgr.registerWorkflowId(workflowJob);
+            workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
 
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
             if (jobUpdate == null) {
@@ -279,7 +282,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
             jobCacheService.evict(workflowJob.getTenant());
 
-            log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
+            log.info(String.format("Restart workflow from jobExecutionId=%d. Created new jobExecutionId=%d",
                     workflowExecutionId.getId(), jobExecutionId));
         } catch (JobInstanceAlreadyCompleteException | NoSuchJobExecutionException | NoSuchJobException
                 | JobRestartException | JobParametersInvalidException e) {

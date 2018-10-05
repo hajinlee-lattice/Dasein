@@ -3,15 +3,15 @@ package com.latticeengines.workflowapi.yarn.runtime;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -35,30 +35,27 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowProcessor.class);
 
-    @Autowired
+    @Inject
     private ApplicationContext appContext;
 
-    @Autowired
+    @Inject
     private SoftwareLibraryService softwareLibraryService;
 
-    @Autowired
+    @Inject
     private WorkflowService workflowService;
 
-    @Autowired
-    private VersionManager versionManager;
-
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
-    @Autowired
+    @Inject
     private JobCacheService jobCacheService;
 
     public WorkflowProcessor() {
         super();
-        log.info("Construct WorkflowProcessor");
+        log.info("Constructed WorkflowProcessor.");
     }
 
     @Override

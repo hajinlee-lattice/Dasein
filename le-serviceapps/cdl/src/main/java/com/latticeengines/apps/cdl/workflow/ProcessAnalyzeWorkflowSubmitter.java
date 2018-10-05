@@ -357,7 +357,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
         checkWorkflowId(customerSpace, datafeed, workflowId);
         try {
-            log.info(String.format("restarted execution with pid: %s", workflowId));
+            log.info(String.format("restarted execution with workflowId=%s", workflowId));
             return workflowJobService.restart(workflowId, customerSpace, memory);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
