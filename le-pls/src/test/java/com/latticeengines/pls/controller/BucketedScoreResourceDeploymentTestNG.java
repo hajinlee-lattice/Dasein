@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
@@ -93,22 +94,15 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         Assert.assertNotNull(history);
         Assert.assertEquals(history.size(), 1);
 
-        List<BucketMetadata> bucketList = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/bucketedscore/abcdbuckets/uptodate/ratingengine/" + re1.getId(),
-                List.class);
-        Assert.assertNotNull(bucketList);
-        Assert.assertEquals(bucketList.size(), list.size());
-
         // create another bucketlist and store it
         list = BucketedMetadataTestUtils.generateDefaultBucketMetadataList().subList(0, list.size() - 1);
         restTemplate.postForObject(getRestAPIHostPort() + "/pls/bucketedscore/abcdbuckets/ratingengine/" + re1.getId()
                 + "/model/" + modelGuid, list, Void.class);
         Thread.sleep(500);
-        bucketList = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/bucketedscore/abcdbuckets/uptodate/ratingengine/" + re1.getId(),
-                List.class);
-        Assert.assertNotNull(bucketList);
-        Assert.assertEquals(bucketList.size(), list.size());
+        history = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/bucketedscore/abcdbuckets/ratingengine/" + re1.getId(), Map.class);
+        Assert.assertNotNull(history);
+        Assert.assertEquals(history.size(), 2);
     }
 
     private RatingEngine createAIRatingEngine(MetadataSegment retrievedSegment, RatingEngineType type) {
