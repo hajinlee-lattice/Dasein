@@ -31,7 +31,8 @@ import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.service.YarnService;
 
-public class CommandLineAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
+public class CommandLineAppMaster extends StaticEventingAppmaster
+        implements ContainerLauncherInterceptor {
 
     private final static Logger log = LoggerFactory.getLogger(CommandLineAppMaster.class);
 
@@ -64,7 +65,8 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             return;
         }
         for (Map.Entry<Object, Object> parameter : parameters.entrySet()) {
-            log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
+            log.info("Key = " + parameter.getKey().toString() + " Value = "
+                    + parameter.getValue().toString());
         }
         super.setParameters(parameters);
 
@@ -114,19 +116,19 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
         String containerId = status.getContainerId().toString();
         super.onContainerCompleted(status);
         switch (status.getExitStatus()) {
-        case ContainerExitStatus.SUCCESS:
-            log.info("Container id = " + status.getContainerId().toString() + " completed.");
-            break;
-        case ContainerExitStatus.PREEMPTED:
-            log.info("Printing out the status to find the reason: " + status.getExitStatus());
-            break;
-        case ContainerExitStatus.ABORTED:
-            log.info("Releasing container " + containerId + ". Ignoring abort error.");
-            setFinalApplicationStatus(FinalApplicationStatus.FAILED);
-            notifyCompleted();
-            break;
-        default:
-            break;
+            case ContainerExitStatus.SUCCESS:
+                log.info("Container id = " + status.getContainerId().toString() + " completed.");
+                break;
+            case ContainerExitStatus.PREEMPTED:
+                log.info("Printing out the status to find the reason: " + status.getExitStatus());
+                break;
+            case ContainerExitStatus.ABORTED:
+                log.info("Releasing container " + containerId + ". Ignoring abort error.");
+                setFinalApplicationStatus(FinalApplicationStatus.FAILED);
+                notifyCompleted();
+                break;
+            default:
+                break;
         }
 
     }
@@ -161,7 +163,8 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     private void setRuntimeConfig(Properties parameters) {
         // Sets runtime host and port needed by container
-        String configPath = hdfsJobBaseDir + "/" + parameters.getProperty(ContainerProperty.JOBDIR.name()) + "/"
+        String configPath = hdfsJobBaseDir + "/"
+                + parameters.getProperty(ContainerProperty.JOBDIR.name()) + "/"
                 + parameters.getProperty(ContainerProperty.RUNTIME_CONFIG.name());
         RuntimeConfig runtimeConfig = new RuntimeConfig(configPath, yarnConfiguration);
         runtimeConfig.addProperties("host", monitor.getHost());
@@ -171,7 +174,8 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     }
 
     private void cleanupJobDir() {
-        String dir = hdfsJobBaseDir + "/" + getParameters().getProperty(ContainerProperty.JOBDIR.name());
+        String dir = hdfsJobBaseDir + "/"
+                + getParameters().getProperty(ContainerProperty.JOBDIR.name());
         try {
             HdfsUtils.rmdir(yarnConfiguration, dir);
         } catch (Exception e) {

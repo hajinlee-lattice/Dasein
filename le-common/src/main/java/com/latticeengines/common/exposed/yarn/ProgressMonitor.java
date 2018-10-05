@@ -11,9 +11,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.hadoop.util.Progressable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.util.Progressable;
 import org.springframework.yarn.am.allocate.ContainerAllocator;
 
 public class ProgressMonitor {
@@ -132,7 +132,12 @@ public class ProgressMonitor {
 
     public String getHost() {
         try {
-            return InetAddress.getLocalHost().getHostName();
+            String host = InetAddress.getLocalHost().getHostName();
+            if (host.startsWith("ip-")) {
+                // use ip instead of hostname
+                host = InetAddress.getLocalHost().getHostAddress();
+            }
+            return host;
         } catch (UnknownHostException e) {
             log.error(ExceptionUtils.getStackTrace(e));
         }
