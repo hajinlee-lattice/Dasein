@@ -1,19 +1,23 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.app.exposed.download;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.latticeengines.app.exposed.download.AbstractHttpFileDownLoader;
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -21,9 +25,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
+
+    private static final Logger log = LoggerFactory.getLogger(HdfsFileHttpDownloader.class);
 
     private String modelId;
     private Configuration yarnConfiguration;
@@ -32,10 +39,11 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String filter;
     private String modelingServiceHdfsBaseDir;
 
+    private String customer;
     private String filePath;
 
     public HdfsFileHttpDownloader(DownloadRequestBuilder requestBuilder) {
-        super(requestBuilder.mimeType);
+        super(requestBuilder.mimeType, requestBuilder.importFromS3Service);
         this.filter = requestBuilder.filter;
         this.modelId = requestBuilder.modelId;
         this.yarnConfiguration = requestBuilder.yarnConfiguration;
@@ -51,7 +59,8 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
     @Override
     protected InputStream getFileInputStream() throws Exception {
-        FileSystem fs = FileSystem.get(yarnConfiguration);
+        Path path = new Path(filePath);
+        FileSystem fs = path.getFileSystem(yarnConfiguration);
         return fs.open(new Path(filePath));
     }
 
@@ -62,7 +71,18 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
     private String getFilePath() throws Exception {
         ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
-        String customer = summary.getTenant().getId();
+        String s3FilePath = searchS3FilePath(summary);
+        if (StringUtils.isNotBlank(s3FilePath)) {
+            log.info("Download from S3 path=" + s3FilePath);
+            return s3FilePath;
+        }
+        String hdfsPath = searchHdfsFilePath(summary);
+        log.info("Download from HDFS path=" + hdfsPath);
+        return hdfsPath;
+    }
+
+    private String searchHdfsFilePath(ModelSummary summary) throws IOException {
+        customer = summary.getTenant().getId();
         final String uuid = UuidUtils.extractUuid(modelId);
 
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
@@ -128,6 +148,64 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         return paths.get(0);
     }
 
+    private String searchS3FilePath(ModelSummary summary) {
+        customer = summary.getTenant().getId();
+        final String uuid = UuidUtils.extractUuid(modelId);
+
+        // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
+        HdfsUtils.HdfsFilenameFilter fileFilter = new HdfsUtils.HdfsFilenameFilter() {
+            @Override
+            public boolean accept(String filePath) {
+                if (filePath == null) {
+                    return false;
+                }
+                String name = FilenameUtils.getName(filePath);
+                String path = FilenameUtils.getFullPath(filePath);
+                return name.matches(filter) && path.contains(uuid);
+            }
+        };
+
+        String eventTableName = "";
+        if (StringUtils.isNotEmpty(summary.getEventTableName())) {
+            eventTableName = summary.getEventTableName();
+        }
+
+        CustomerSpace space = CustomerSpace.parse(customer);
+        customer = space.toString();
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String tupleIdPath = pathBuilder.getS3AnalyticsModelTableDir(importFromS3Service.getS3Bucket(),
+                space.getTenantId(), eventTableName);
+
+        List<String> paths = importFromS3Service.getFilesForDir(tupleIdPath, fileFilter);
+        if (CollectionUtils.isNotEmpty(paths)) {
+            if (StringUtils.isNotEmpty(summary.getApplicationId())) {
+                String applicationIdDirectory = summary.getApplicationId().substring("application_".length());
+                Optional<String> completedModelingPath = paths.stream()
+                        .filter(path -> path.contains(applicationIdDirectory)).findFirst();
+                return completedModelingPath.isPresent() ? completedModelingPath.get() : paths.get(0);
+            }
+            return paths.get(0);
+        }
+
+        String postMatchEventTablePath = pathBuilder.getS3AnalyticsDataTableDir(importFromS3Service.getS3Bucket(),
+                space.getTenantId(), eventTableName) + "/csv_files/";
+        fileFilter = new HdfsUtils.HdfsFilenameFilter() {
+            @Override
+            public boolean accept(String filePath) {
+                if (filePath == null) {
+                    return false;
+                }
+                String name = FilenameUtils.getName(filePath);
+                return name.matches(filter);
+            }
+        };
+        paths = importFromS3Service.getFilesForDir(postMatchEventTablePath, fileFilter);
+        if (CollectionUtils.isNotEmpty(paths)) {
+            return paths.get(0);
+        }
+        return null;
+    }
+
     public static class DownloadRequestBuilder {
 
         private String mimeType;
@@ -136,6 +214,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         private String filter;
         private String modelingServiceHdfsBaseDir;
         private ModelSummaryProxy modelSummaryProxy;
+        protected ImportFromS3Service importFromS3Service;
 
         public DownloadRequestBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -164,6 +243,11 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
         public DownloadRequestBuilder setModelSummaryProxy(ModelSummaryProxy modelSummaryProxy) {
             this.modelSummaryProxy = modelSummaryProxy;
+            return this;
+        }
+
+        public DownloadRequestBuilder setImportFromS3Service(ImportFromS3Service importFromS3Service) {
+            this.importFromS3Service = importFromS3Service;
             return this;
         }
     }

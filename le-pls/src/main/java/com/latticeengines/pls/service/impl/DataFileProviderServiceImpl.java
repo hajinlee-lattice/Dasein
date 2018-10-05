@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,12 +14,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
+import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader;
+import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader.DownloadRequestBuilder;
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.DataFileProviderService;
-import com.latticeengines.pls.service.impl.HdfsFileHttpDownloader.DownloadRequestBuilder;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
@@ -40,6 +43,9 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private ImportFromS3Service importFromS3Service;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
@@ -81,7 +87,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     public void downloadFileByApplicationId(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String applicationId, String fileDisplayName) throws IOException {
         log.info(String.format("Download file with applicationId=%s", applicationId));
-        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(), applicationId);
+        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(),
+                applicationId);
         validateSourceFile(sourceFile);
         downloadSourceFileCsv(request, response, mimeType, fileDisplayName, sourceFile);
     }
@@ -133,7 +140,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
             String fileName) {
         CustomerSpaceHdfsFileDownloader.FileDownloadBuilder builder = new CustomerSpaceHdfsFileDownloader.FileDownloadBuilder();
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName);
+                .setFileName(fileName).setCustomer(MultiTenantContext.getTenant().getId())
+                .setImportFromS3Service(importFromS3Service);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 
@@ -148,7 +156,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         DownloadRequestBuilder requestBuilder = new DownloadRequestBuilder();
         requestBuilder.setMimeType(mimeType).setFilter(filter).setModelId(modelId)
                 .setYarnConfiguration(yarnConfiguration).setModelSummaryProxy(modelSummaryProxy);
-        requestBuilder.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+        requestBuilder.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
+                .setImportFromS3Service(importFromS3Service);
         return new HdfsFileHttpDownloader(requestBuilder);
     }
 
@@ -171,5 +180,10 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @VisibleForTesting
     void setModelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
         this.modelingServiceHdfsBaseDir = modelingServiceHdfsBaseDir;
+    }
+
+    @VisibleForTesting
+    void setImportFromS3Service(ImportFromS3Service importFromS3Service) {
+        this.importFromS3Service = importFromS3Service;
     }
 }

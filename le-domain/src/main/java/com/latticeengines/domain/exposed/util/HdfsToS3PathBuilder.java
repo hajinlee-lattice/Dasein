@@ -20,6 +20,7 @@ public class HdfsToS3PathBuilder {
     private String s3EventTableModelDir = s3AnalyticsDir + "/models";
     private String s3EventTableDataDir = s3AnalyticsDir + "/data";
 
+    private String s3BucketDir = "s3n://%s";
     private String s3AtlasDir = "s3n://%s/%s/atlas";
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
@@ -79,6 +80,10 @@ public class HdfsToS3PathBuilder {
     }
 
     // S3 Atlas
+    public String getS3BucketDir(String s3Bucket) {
+        return String.format(s3BucketDir, s3Bucket);
+    }
+
     public String getS3AtlasDir(String s3Bucket, String tenantId) {
         return String.format(s3AtlasDir, s3Bucket, tenantId);
     }
@@ -178,6 +183,23 @@ public class HdfsToS3PathBuilder {
         String fileName = FilenameUtils.getName(inputFileDir);
         return builder.append(getS3AtlasMetadataDir(s3Bucket, tenantId)).append(PATH_SEPARATOR).append(fileName)
                 .toString();
+    }
+
+    public String exploreS3FilePath(String inputFileDir, String pod, String customer, String tenantId,
+            String s3Bucket) {
+        StringBuilder builder = new StringBuilder();
+        String hdfsFilesDir = getHdfsAnalyticsDir(customer);
+        if (inputFileDir.startsWith(hdfsFilesDir)) {
+            return builder.append(getS3AnalyticsDir(s3Bucket, tenantId))
+                    .append(inputFileDir.substring(hdfsFilesDir.length())).toString();
+        }
+
+        hdfsFilesDir = getHdfsAtlasDir(pod, tenantId);
+        if (inputFileDir.startsWith(hdfsFilesDir)) {
+            return builder.append(getS3AtlasDir(s3Bucket, tenantId))
+                    .append(inputFileDir.substring(hdfsFilesDir.length())).toString();
+        }
+        return inputFileDir;
     }
 
     public String toParentDir(String dir) {

@@ -7,6 +7,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
+
 public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader {
 
     private Configuration yarnConfiguration;
@@ -14,12 +16,14 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
     private String filePath;
 
     private String fileName;
+    private String customer;
 
     public CustomerSpaceHdfsFileDownloader(FileDownloadBuilder builder) {
-        super(builder.mimeType);
+        super(builder.mimeType, builder.importFromS3Service);
         this.yarnConfiguration = builder.yarnConfiguration;
         this.filePath = builder.filePath;
         this.fileName = builder.fileName;
+        this.customer = builder.customer;
     }
 
     @Override
@@ -32,8 +36,11 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
 
     @Override
     protected InputStream getFileInputStream() throws Exception {
-        FileSystem fs = FileSystem.get(yarnConfiguration);
-        return fs.open(new Path(filePath));
+
+        String newFilePath = importFromS3Service.exploreS3FilePath(filePath, customer);
+        Path path = new Path(newFilePath);
+        FileSystem fs = path.getFileSystem(yarnConfiguration);
+        return fs.open(path);
     }
 
     public static class FileDownloadBuilder {
@@ -42,6 +49,8 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
         private Configuration yarnConfiguration;
         private String filePath;
         private String fileName;
+        private String customer;
+        private ImportFromS3Service importFromS3Service;
 
         public FileDownloadBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -60,6 +69,16 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
 
         public FileDownloadBuilder setYarnConfiguration(Configuration yarnConfiguration) {
             this.yarnConfiguration = yarnConfiguration;
+            return this;
+        }
+
+        public FileDownloadBuilder setCustomer(String customer) {
+            this.customer = customer;
+            return this;
+        }
+
+        public FileDownloadBuilder setImportFromS3Service(ImportFromS3Service importFromS3Service) {
+            this.importFromS3Service = importFromS3Service;
             return this;
         }
 

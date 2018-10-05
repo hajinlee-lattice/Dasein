@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.FileCopyUtils;
 
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -19,14 +20,16 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     private String mimeType;
+    protected ImportFromS3Service importFromS3Service;
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpFileDownLoader.class);
 
     protected abstract String getFileName() throws Exception;
 
     protected abstract InputStream getFileInputStream() throws Exception;
 
-    protected AbstractHttpFileDownLoader(String mimeType) {
+    protected AbstractHttpFileDownLoader(String mimeType, ImportFromS3Service importFromS3Service) {
         this.mimeType = mimeType;
+        this.importFromS3Service = importFromS3Service;
     }
 
     @Override

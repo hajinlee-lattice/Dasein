@@ -40,6 +40,12 @@ public class HdfsToS3PathBuilderUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void getS3BucketDir() {
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        Assert.assertEquals(builder.getS3BucketDir("bucket2"), "s3n://bucket2");
+    }
+
+    @Test(groups = "unit")
     public void getS3AtlasDir() {
         HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
         Assert.assertEquals(builder.getS3AtlasDir("bucket2", "tenantId2"), "s3n://bucket2/tenantId2/atlas");
@@ -150,6 +156,21 @@ public class HdfsToS3PathBuilderUnitTestNG {
         Assert.assertEquals(builder.convertAtlasMetadata(
                 "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export/file2.csv", "pod2",
                 "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Metadata/Export/file2.csv");
+    }
+
+    @Test(groups = "unit")
+    public void exploreS3FilePath() {
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        Assert.assertEquals(
+                builder.exploreS3FilePath(
+                        "/user/s-analytics/customers/tenantId2.tenantId2.Production/data/table2/samples/file2.csv",
+                        "pod2", "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
+                "s3n://bucket2/tenantId2/analytics/data/table2/samples/file2.csv");
+        Assert.assertEquals(
+                builder.exploreS3FilePath(
+                        "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export/file2.csv",
+                        "pod2", "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
+                "s3n://bucket2/tenantId2/atlas/Metadata/Export/file2.csv");
     }
 
 }

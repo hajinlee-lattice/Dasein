@@ -31,11 +31,9 @@ public interface S3Service {
 
     boolean objectExist(String bucket, String object);
 
-    void copyObject(String sourceBucketName, String sourceKey,
-                    String destinationBucketName, String destinationKey);
+    void copyObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey);
 
-    void moveObject(String sourceBucketName, String sourceKey,
-                    String destinationBucketName, String destinationKey);
+    void moveObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey);
 
     boolean isNonEmptyDirectory(String bucket, String prefix);
 
@@ -46,4 +44,6 @@ public interface S3Service {
     void setBucketPolicy(String bucket, String policyDoc);
 
     void deleteBucketPolicy(String bucket);
+
+    List<String> getFilesForDir(String s3Bucket, String prefix);
 }

@@ -1,7 +1,18 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
 import java.net.URL;
 import java.util.List;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -33,17 +45,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
-import com.latticeengines.security.exposed.service.TenantService;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -69,7 +70,7 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
     private DataFileProviderServiceImpl dataFileProviderService = new DataFileProviderServiceImpl();
 
     @Autowired
-    private TenantService tenantService;
+    private ImportFromS3Service importFromS3Service;
 
     @Autowired
     private ModelSummaryProxy modelSummaryProxy;
@@ -90,6 +91,7 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
         dataFileProviderService.setConfiguration(yarnConfiguration);
         dataFileProviderService.setModelSummaryProxy(modelSummaryProxy);
         dataFileProviderService.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+        dataFileProviderService.setImportFromS3Service(importFromS3Service);
 
         testBed.bootstrap(1);
         Tenant tenant1 = testBed.getMainTestTenant();
