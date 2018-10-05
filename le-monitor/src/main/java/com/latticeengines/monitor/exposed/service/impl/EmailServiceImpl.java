@@ -48,7 +48,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${monitor.email.pm:dev@lattice-engines.com}")
     private String pmEmail;
     
-    @Value("${monitor.url.helpcenter}")
+    @Value("${monitor.urls.helpcenter}")
     private String helpCenterUrl;
 
     @VisibleForTesting
