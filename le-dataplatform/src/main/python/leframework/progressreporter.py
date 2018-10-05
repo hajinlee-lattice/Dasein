@@ -23,7 +23,7 @@ class ProgressReporter(object):
     # this is a temp workaround for emr
     # better approach to set it correctly in AM
     def parseHost(self, host):
-        if host[:3] == "ip-":
+        if host is not None and len(host) > 3 and host[:3] == "ip-":
             ip = host[3:]
             ip = ip.replace("-", ".")
             self.logger.error("Change AM host from %s to %s" % (host, ip))
