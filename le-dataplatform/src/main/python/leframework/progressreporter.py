@@ -1,5 +1,7 @@
 import logging
+import re
 import socket
+
 
 class ProgressReporter(object):
     '''
