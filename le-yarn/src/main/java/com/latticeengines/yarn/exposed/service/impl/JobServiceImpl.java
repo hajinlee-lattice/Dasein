@@ -2,10 +2,10 @@ package com.latticeengines.yarn.exposed.service.impl;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -32,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.mapreduce.counters.JobCounters;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.MapReduceCustomizationService;
 import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
@@ -50,8 +52,6 @@ import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     protected static final Logger log = LoggerFactory.getLogger(JobServiceImpl.class);
-    protected static final int MAX_TRIES = 60;
-    protected static final long APP_WAIT_TIME = 1000L;
 
     private static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
             FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
@@ -76,6 +76,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Value("${dataplatform.queue.scheme:legacy}")
     private String queueScheme;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Inject
+    private EMRService emrService;
 
     @Override
     public List<ApplicationReport> getJobReportsAll() {
@@ -179,7 +185,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         overwriteMRQueueAssignment(properties);
         Job job = getJob(mrJobName);
         mapReduceCustomizationService.addCustomizations(job, mrJobName, properties);
-        if (properties != null) {
+        if (job != null) {
             Configuration config = job.getConfiguration();
             config.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
             for (Object key : properties.keySet()) {
@@ -188,11 +194,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         }
 
         Configuration config = job.getConfiguration();
-        Iterator<Map.Entry<String, String>> iter = config.iterator();
         log.info(String.format("Job %s Properties:", mrJobName));
-        while (iter.hasNext()) {
-            Map.Entry<String, String> next = iter.next();
-            log.info(String.format("%s: %s", next.getKey(), next.getValue()));
+        config.forEach(entry -> log.info(String.format("%s: %s", entry.getKey(), entry.getValue())));
+        if (useEmr) {
+            config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
         }
         try {
             JobID jobId = JobService.runMRJob(job, mrJobName, false);
