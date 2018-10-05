@@ -247,8 +247,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
     $scope.backToSummaryClicked = function () {
 
-        console.log(chartData);
-
         for (var attribute of chartData.children) {
             if(attribute.categoryName === 'My Attributes'){
                 attribute.name = 'ACCOUNT_ATTRIBUTES';
@@ -286,6 +284,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     }
 
     $scope.categoryClicked = function (category) {
+
+        if(category.name === 'My Attributes'){
+            category.name = 'ACCOUNT_ATTRIBUTES';
+            category.categoryName = 'ACCOUNT_ATTRIBUTES';
+        }
+
         clearTimeout(showAttributeTimeout);
         var categoryList = TopPredictorService.GetAttributesByCategory(data, category.name, category.color, 50);
         highlightSelectedCategory(category);
