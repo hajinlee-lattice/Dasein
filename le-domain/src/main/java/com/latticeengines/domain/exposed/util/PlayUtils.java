@@ -41,6 +41,11 @@ public class PlayUtils {
                     new TreeSet<>(Arrays.asList(RatingBucketName.values()));
             playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
         }
+
+        if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No destination system selected for the launch for play: " + play.getName() });
+        }
     }
 
 }

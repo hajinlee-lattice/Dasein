@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,11 +192,17 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
 
-        playLaunch.setLaunchState(LaunchState.UnLaunched);
-        playLaunch.setPlay(play);
-        playLaunchService.create(playLaunch);
-        return playLaunch;
+        List<PlayLaunch> playLaunches = playLaunchService.findByPlayId(play.getPid(),
+                Collections.singletonList(LaunchState.UnLaunched));
 
+        if (CollectionUtils.isEmpty(playLaunches)) {
+            playLaunch.setLaunchState(LaunchState.UnLaunched);
+            playLaunch.setPlay(play);
+            playLaunchService.create(playLaunch);
+            return playLaunch;
+        } else {
+            return playLaunches.get(0);
+        }
     }
 
     @GetMapping(value = "/{playName}/launches/{launchId}")
