@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -29,8 +31,10 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
     private static final String HOSTPORT = "hostport";
     private static final String TENANT_NAME = "tenantName";
     private static final String MODEL_NAME = "modelName";
-
+    
+    @Inject
     private EmailService emailService;
+    
     private Tenant tenant;
     private User user;
     private Logger origLog;
@@ -41,7 +45,7 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
     public void setup() {
         origLog = EmailServiceImpl.log;
 
-        emailService = new EmailServiceImpl();
+        //emailService = new EmailServiceImpl();
 
         tenant = new Tenant();
         tenant.setName(TENANT_NAME);
@@ -94,6 +98,13 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("new PLS external user"));
+    }
+    
+    @Test(groups = "functional")
+    public void sendPlsNewProspectingUserEmail() {
+        emailService.sendPlsNewProspectingUserEmail(user, PASSWORD, null);
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("new PLS prospecting user"));
     }
 
     @Test(groups = "functional")

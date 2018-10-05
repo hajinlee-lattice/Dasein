@@ -81,7 +81,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsNewProspectingUserEmail(User user, String password, String hostport) {
         try {
-            log.info("Sending new PLS internal user email to " + user.getEmail() + " started.");
+            log.info("Sending new PLS prospecting user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_NEW_PROSPECTING_USER);
 
@@ -102,9 +102,9 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
-            log.info("Sending new PLS internal user email to " + user.getEmail() + " succeeded.");
+            log.info("Sending new PLS prospecting user email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send new PLS internal user email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send new PLS prospecting user email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
@@ -127,7 +127,7 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
             log.info("Sending new PLS internal user email to " + user.getEmail() + " succeeded.");
-        } catch (Exception e) {
+        } catch (Exception e) {   
             log.error("Failed to send new PLS internal user email to " + user.getEmail() + " " + e.getMessage());
         }
     }
