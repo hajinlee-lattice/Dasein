@@ -24,8 +24,10 @@ class ProgressReporter(object):
     # better approach to set it correctly in AM
     def parseHost(self, host):
         if host[:3] == "ip-":
-            host = host[3:]
-            host = host.replace("-", ".")
+            ip = host[3:]
+            ip = ip.replace("-", ".")
+            self.logger.error("Change AM host from %s to %s" % (host, ip))
+            host = ip
         return host
 
     def setTotalState(self, size):
