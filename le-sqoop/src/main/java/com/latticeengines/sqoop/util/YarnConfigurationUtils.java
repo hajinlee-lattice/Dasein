@@ -12,8 +12,8 @@ public class YarnConfigurationUtils {
         YarnConfiguration configuration = new YarnConfiguration();
         String defaultFs = configuration.get("fs.defaultFS");
         if (defaultFs.startsWith("hdfs://ip-")) {
-            final String address = defaultFs.substring("hdfs://".length(), defaultFs.indexOf(":"));
-            final String ip = address.substring("ip-".length(), address.indexOf(".")).replace("-", ".");
+            final String address = parseAddress(defaultFs);
+            final String ip = parseMasterIp(address);
             log.info("Change address from " + address + " to " + ip);
             configuration.forEach(entry -> {
                 String key = entry.getKey();
@@ -26,6 +26,15 @@ public class YarnConfigurationUtils {
             });
         }
         return configuration;
+    }
+
+    static String parseAddress(String defaultFs) {
+        String address = defaultFs.substring("hdfs://".length());
+        return address.substring(0, address.indexOf(":"));
+    }
+
+    static String parseMasterIp(String address) {
+        return address.substring("ip-".length(), address.indexOf(".")).replace("-", ".");
     }
 
 }
