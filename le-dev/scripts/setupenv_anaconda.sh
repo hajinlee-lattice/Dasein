@@ -93,6 +93,8 @@ $ANACONDA_HOME/bin/conda install -y \
     zlib=1.2.8=3 \
     python-snappy=0.5.1
 
+$ANACONDA_HOME/bin/conda install -y libgfortran=1
+
 source ${ANACONDA_HOME}/bin/deactivate
 
 source ${ANACONDA_HOME}/bin/activate v01
