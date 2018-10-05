@@ -89,7 +89,7 @@ angular
             var MyDataParams = '';
             
             if (MyDataState != 'home.nodata') {
-                if (store.checkMyDataActiveState && segment && segment != 'segment.name') {
+                if (segment && segment != 'segment.name') {
                     MyDataParams = "({ segment: '" + segment + "', category: '', subcategory: '' })";
                 } else {
                     MyDataParams = "({ segment: 'Create', category: '', subcategory: '' })";

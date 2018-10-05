@@ -1,8 +1,6 @@
 <ul >
         <li class="header-back-name-container" title="{{$ctrl.getBackLabel()}}" ng-if="!$ctrl.isHidden()">
-                <a  ui-sref="
-                		{{$ctrl.getBackState()}}
-                		({{$ctrl.getBackParams()}})"
+                <a  ui-sref="{{$ctrl.getBackState()}}" ui-sref-opts="{{$ctrl.getBackParams() || '{reload: true}'}}"
                 	class="header-back-name">{{ $ctrl.getBackLabel() }}</a>
         </li>
 </ul>
