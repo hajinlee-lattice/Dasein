@@ -125,7 +125,7 @@
                             ng-disabled="vm.current.tileStates[play.name].launching == true || play.ratingEngine.status != 'ACTIVE'"
                             ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
-                            {{vm.current.tileStates[play.name].launching == true ? 'Launching...' : 'Launch'}}
+                            {{vm.launchButtonLabel(play)}}
                         </button>
                          <span ng-if="!vm.current.tileStates[play.name].launching">
                                 <span 

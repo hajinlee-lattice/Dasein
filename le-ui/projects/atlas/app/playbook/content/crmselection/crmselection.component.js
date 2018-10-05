@@ -7,7 +7,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
         orgs: '<'
     },
     controller: function(
-        $scope, $state, $timeout, $stateParams,
+        $scope, $state, $timeout, $stateParams, 
         ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService, QueryStore
     ) {
         var vm = this;
@@ -50,7 +50,15 @@ angular.module('lp.playbook.wizard.crmselection', [])
             PlaybookWizardStore.setExcludeItems(excludeItemsWithoutSalesforceId);
         }
 
-        vm.checkValid = function(form, accountId, isRegistered) {
+        vm.checkValidDelay = function(form, accountId, orgId, isRegistered) {
+            $timeout(function() {
+                if(vm.stored.crm_selection.orgId === orgId) {
+                    vm.checkValid(form, accountId, orgId, isRegistered);
+                }
+            }, 1);
+        }
+
+        vm.checkValid = function(form, accountId, orgId, isRegistered) {
             vm.orgIsRegistered = isRegistered;
 
             $scope.excludeItemsWithoutSalesforceId = false;

@@ -198,6 +198,17 @@ angular.module('lp.playbook.plays', [
 
     vm.getLaunchedPlays = getLaunchedPlays;
 
+    vm.launchButtonLabel = function(play) {
+        var label = 'Launch';
+        if(vm.current.tileStates[play.name].launching === true) {
+            label = 'Launching...'; 
+        }
+        if(play.lastTalkingPointPublishTime) {
+            label = 'ReLaunch';
+        }
+        return label;
+    }
+
     vm.init = function($q) {
         PlaybookWizardStore.clear();
 
@@ -208,6 +219,9 @@ angular.module('lp.playbook.plays', [
             vm.header.filter.unfiltered = vm.current.plays;
 
             angular.forEach(vm.current.plays, function(play, key) {
+                if(!play.ratingEngine) {
+                    return false; // there was a terrible failure, do not proceed
+                }
 
                 if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
                     play.ratingEngine.tileClass = play.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy;

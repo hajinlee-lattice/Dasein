@@ -185,7 +185,7 @@ angular
                     $scope.tosort = $scope.config.data.tosort == undefined ? false : $scope.config.data.tosort;
                     $scope.sortBy = $scope.config.data.sortBy !== undefined ? $scope.config.data.sortBy : '-Cnt';
                     $scope.trimData = $scope.config.data.trim !== undefined ? $scope.config.data.trim : false;
-                    $scope.top = $scope.config.data.top !== undefined ? $scope.config.data.top : 5;
+                    $scope.top = $scope.config.data.top !== undefined ? $scope.config.data.top : 6;
                     $scope.decimal = $scope.config.data.decimal !== undefined ? $scope.config.data.decimal : 1;
                     /***********************************************************/
 

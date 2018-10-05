@@ -67,7 +67,7 @@ angular.module('lp.playbook')
                 'tosort': true,
                 'sortBy': 'bucket_name',
                 'trim': true,
-                'top': 5,
+                'top': 6,
             },
             'chart': {
                 'header':'Value',
@@ -96,7 +96,7 @@ angular.module('lp.playbook')
                 'tosort': true,
                 'sortBy': 'bucket_name',
                 'trim': true,
-                'top': 5,
+                'top': 6,
             },
             'chart': {
                 'header':'Value',
@@ -161,7 +161,7 @@ angular.module('lp.playbook')
                 saveEnabled: false
             };
 
-            if(play.launchHistory.mostRecentLaunch != null && play.launchHistory.mostRecentLaunch.launchState === 'Launching'){
+            if(play.launchHistory && play.launchHistory.mostRecentLaunch != null && play.launchHistory.mostRecentLaunch.launchState === 'Launching'){
                 PlaybookWizardStore.current.tileStates[play.name].launching = true;
                 PlaybookWizardStore.checkLaunchStateInterval(play);
             }

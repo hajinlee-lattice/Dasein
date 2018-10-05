@@ -18,14 +18,15 @@
                     <tbody>
                         <tr 
                             ng-repeat="org in $ctrl.orgs"
-                            ng-if="$ctrl.orgs.length > 0">
+                            ng-if="$ctrl.orgs.length > 0"
+                            ng-init="$ctrl.checkValidDelay(crmselection_form, org.accountId, org.orgId, org.isRegistered)">
                             <td>
                                 <input  
                                     type="radio" 
                                     id="{{org.orgId}}" 
                                     name="{{org.orgId}}" 
                                     ng-value="org"
-                                    ng-change="$ctrl.checkValid(crmselection_form, org.accountId, org.isRegistered)" 
+                                    ng-change="$ctrl.checkValid(crmselection_form, org.accountId, org.orgId, org.isRegistered)" 
                                     ng-model="$ctrl.stored.crm_selection" />
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
@@ -61,7 +62,7 @@
                         <span class="fa fa-spinner fa-pulse fa-fw"></span> Looking for blank account IDs for the selected System Org.
                     </div>
 
-                    <div ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount === 0">
+                    <div ng-if="!$ctrl.loadingCoverageCounts && (!$ctrl.nullCount || $ctrl.nullCount === 0 || $ctrl.nullCount === null)">
                         No blank account IDs found for this System Org.
                     </div>
 
