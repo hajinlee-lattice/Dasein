@@ -13,8 +13,8 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 public class PythonInvoker {
+    private static final Logger log = LoggerFactory.getLogger(PythonInvoker.class);
 
-    private static final Logger log = LoggerFactory.getLogger(PythonMRUtils.class);
     private Classifier classifier;
     private String runtimeConfigFile;
 

@@ -27,7 +27,7 @@ class Launcher(object):
 
     def __validateEnvVariable(self, variable):
         try:
-            os.environ[variable]
+            logger.info("Validated env var %s=%s" % (variable, os.environ[variable]))
         except KeyError:
             raise Exception("%s environment variable not set." % (variable))
 
@@ -97,6 +97,8 @@ class Launcher(object):
         runtimeProperties = parser.getRuntimeProperties()
         if runtimeProperties is not None:
             progressReporter = ProgressReporter(runtimeProperties["host"], int(runtimeProperties["port"]))
+            if "webhdfs" in runtimeProperties:
+                os.environ["SHDP_HD_FSWEB"] = runtimeProperties["webhdfs"]
         else:
             progressReporter = ProgressReporter(None, 0)
         progressReporter.setTotalState(2)
@@ -169,10 +171,10 @@ class Launcher(object):
         if len(newFeatures) > 0:
             params["schema"]["features"] = params["schema"]["features"] + newFeatures
             parser.fields = self.updatedFields(parser.fields, newFeatures, self.training, self.test)
-            
+
         if len(removedFeatures) > 0:
             params["schema"]["features"] = [ x for x in params["schema"]["features"] if x not in removedFeatures ]
-            
+
 
         if self.training is not None:
             dataFrameColumns = set(self.training.columns.values.tolist())

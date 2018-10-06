@@ -46,7 +46,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             Configuration config, //
             MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
             VersionManager versionManager, //
-                       EMRService emrService, //
+            EMRService emrService, //
             String stackName, //
             String condaEnv, //
             Boolean useEmr) {
@@ -129,7 +129,6 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         if (useEmr) {
             config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
         }
-
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {
