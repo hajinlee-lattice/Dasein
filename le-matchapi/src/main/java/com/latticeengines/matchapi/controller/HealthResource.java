@@ -97,7 +97,7 @@ public class HealthResource {
         if (Boolean.TRUE.equals(matchOutput.getResult().get(0).isMatched())) {
             log.info("Matched lattice-engines.com to " + JsonUtils.serialize(matchOutput.getResult().get(0).getOutput().get(0)));
         } else {
-            log.warn("google.com is not matched!");
+            log.warn("lattice-engines.com is not matched!");
         }
     }
 

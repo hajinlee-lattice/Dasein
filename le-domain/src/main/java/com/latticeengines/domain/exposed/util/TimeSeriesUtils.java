@@ -233,7 +233,7 @@ public class TimeSeriesUtils {
         Map<Integer, String> periodFileMap = new HashMap<>();
         for (Integer period : periods) {
             periodFileMap.put(period, targetDir + "/" + getFileNameFromPeriod(period));
-            log.info("Add period " + period + " File" + targetDir + "/" + getFileNameFromPeriod(period));
+            log.info("Add period " + period + " File " + targetDir + "/" + getFileNameFromPeriod(period));
         }
         try {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, inputDir);
@@ -452,16 +452,21 @@ public class TimeSeriesUtils {
         return periodBuilder;
     }
 
+    private static final String TIMESERIES_FILENAME_PREFIX = "Period-";
+    private static final String TIMESERIES_FILENAME_SUFFIX = "-data.avro";
+
     private static Integer getPeriodFromFileName(String fileName) {
         try {
-            return Integer.valueOf(fileName.split("-")[1]);
+            int beginIndex = TIMESERIES_FILENAME_PREFIX.length();
+            int endIndex = fileName.indexOf(TIMESERIES_FILENAME_SUFFIX);
+            return Integer.valueOf(fileName.substring(beginIndex, endIndex));
         } catch (Exception e) {
             return null;
         }
     }
 
     private static String getFileNameFromPeriod(Integer period) {
-        return "Period-" + period + "-data.avro";
+        return TIMESERIES_FILENAME_PREFIX + period + TIMESERIES_FILENAME_SUFFIX;
     }
 
     private static void verifySchemaCompatibility(Configuration yarnConfiguration, String sourceDir,

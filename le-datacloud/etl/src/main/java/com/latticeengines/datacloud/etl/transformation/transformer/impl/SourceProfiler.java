@@ -256,7 +256,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     private Map<String, ProfileArgument> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
         List<SourceAttribute> srcAttrs;
-        if (config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT) {
+        if ("Segment".equals(config.getStage())) {
             srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
                     config.getTransformer(), dataCloudVersion, true);
         } else {
