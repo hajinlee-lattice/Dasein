@@ -167,6 +167,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
     }
 
+    @Override
+    public com.latticeengines.domain.exposed.dataplatform.JobStatus getJobStatus(String applicationId) {
+        return jobService.getJobStatus(applicationId);
+    }
+
     private JobRequest createJobRequest(WorkflowConfiguration workflowConfig) {
         String customer = workflowConfig.getCustomerSpace().toString();
         JobRequest jobRequest = new JobRequest();

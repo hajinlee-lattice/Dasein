@@ -8,13 +8,14 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,29 +52,30 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Value("${workflow.jobs.disableCache:false}")
     private Boolean disableCache;
 
-    @Autowired
+    @Inject
     private JobCacheService jobCacheService;
 
-    @Autowired
+    @Inject
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
-    @Autowired
+    @Inject
     private WorkflowService workflowService;
 
-    @Autowired
+    @Inject
     private WorkflowContainerService workflowContainerService;
 
     private static final long HEARTBEAT_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES);
-
+    private static final long ALLOWED_PENDING_THRESHOLD = TimeUnit.MILLISECONDS.convert(30L, TimeUnit.MINUTES);
+    private static final long NOTIFICATION_THRESHOLD = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
     private static final long SPRING_BATCH_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
 
     @Override
@@ -478,39 +480,115 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
             long currentTimeMillis = System.currentTimeMillis();
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
-            /*
-             * Fail the job because the last heartbeat is received over HEARTBEAT_FAILURE_THRESHOLD ago.
-             *
-             * NOTE:
-             * 1. Initially, createTime == lastUpdateTime
-             * 2. lastUpdateTime != createTime is used to make sure we only fail jobs that have sent at least one
-             * heartbeat. DO NOT CHANGE THIS because if there are a lot of jobs in queue, currentTime - lastUpdateTime
-             * can be greater than the threshold but the job is not actually failed (hasn't even started yet).
-             *
-             * TODO have a better way to determine whether the first heartbeat has been sent
-             */
-            if (jobUpdate != null && jobUpdate.getLastUpdateTime() != null
-                    && !jobUpdate.getLastUpdateTime().equals(jobUpdate.getCreateTime())
-                    && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
-                // Before failing the job, check spring batch status first. If there is no spring-batch associated, or
-                // spring-batch gives unsuccessful status, we fail the job.
-                WorkflowStatus status = workflowService.getStatus(new WorkflowExecutionId(workflowJob.getWorkflowId()));
-                if (status == null || status.getStatus().isUnsuccessful()) {
+
+            if (jobUpdate != null) {
+                /*
+                 * Fail the job because the heartbeat value is missing.
+                 */
+                if (jobUpdate.getLastUpdateTime() == null) {
                     workflowJob.setStatus(JobStatus.FAILED.name());
                     workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
                     log.warn(String.format(
-                            "Heartbeat failure threshold exceeded, failing the job. "
-                                    + "WorkflowId=%s. Heartbeat created time=%s. "
-                                    + "Heartbeat update time=%s. Heartbeat failure threshold=%s. Current time=%s. "
-                                    + "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
-                            workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
-                            HEARTBEAT_FAILURE_THRESHOLD, currentTimeMillis,
-                            jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime(),
-                            currentTimeMillis - jobUpdate.getLastUpdateTime()));
+                            "Heartbeat update value is null, failing the job. WorkflowId=%s. Heartbeat create time=%s.",
+                            workflowJob.getWorkflowId(), jobUpdate.getCreateTime()));
                     if (workflowJob.getWorkflowId() != null) {
                         // invalidate cache entry
                         jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
                     }
+
+                    continue;
+                }
+
+                /*
+                 * Fail the job because the last heartbeat is received over HEARTBEAT_FAILURE_THRESHOLD ago.
+                 *
+                 * NOTE:
+                 * 1. Initially, createTime == lastUpdateTime
+                 * 2. lastUpdateTime != createTime is used to make sure we only fail jobs that have sent at least one
+                 * heartbeat. DO NOT CHANGE THIS because if there are a lot of jobs in queue, currentTime - lastUpdateTime
+                 * can be greater than the threshold but the job is not actually failed (hasn't even started yet).
+                 *
+                 * TODO have a better way to determine whether the first heartbeat has been sent
+                 */
+                if (!jobUpdate.getLastUpdateTime().equals(jobUpdate.getCreateTime())
+                        && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
+                    // Before failing the job, check spring batch status first. If there is no spring-batch associated, or
+                    // spring-batch gives unsuccessful status, we fail the job.
+                    WorkflowStatus status = workflowService.getStatus(new WorkflowExecutionId(workflowJob.getWorkflowId()));
+                    if (status == null || status.getStatus().isUnsuccessful()) {
+                        workflowJob.setStatus(JobStatus.FAILED.name());
+                        workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                        log.warn(String.format("Heartbeat failure threshold exceeded, failing the job. "
+                                        + "WorkflowId=%s. Heartbeat created time=%s. Heartbeat update time=%s. "
+                                        + "Heartbeat failure threshold=%s. Current time=%s. "
+                                        + "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
+                                workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
+                                HEARTBEAT_FAILURE_THRESHOLD, currentTimeMillis,
+                                jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime(),
+                                currentTimeMillis - jobUpdate.getLastUpdateTime()));
+                        if (workflowJob.getWorkflowId() != null) {
+                            // invalidate cache entry
+                            jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                        }
+                    }
+
+                    continue;
+                }
+
+                /*
+                 * Fail the job if there is no heartbeat sent for over ALLOWED_PENDING_THRESHOLD time.
+                 */
+                if (jobUpdate.getLastUpdateTime().equals(jobUpdate.getCreateTime())
+                        && currentTimeMillis - jobUpdate.getCreateTime() > ALLOWED_PENDING_THRESHOLD) {
+                    String applicationId = workflowJob.getApplicationId();
+
+                    // check status from YARN if applicationId != null
+                    if (applicationId != null) {
+                        com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
+                                workflowContainerService.getJobStatus(applicationId);
+                        JobStatus status = JobStatus.fromString(yarnStatus.getStatus().name(), yarnStatus.getState());
+                        if (status != null) {
+                            workflowJob.setStatus(status.name());
+                        } else {
+                            workflowJob.setStatus(JobStatus.FAILED.name());
+                            log.warn("Cannot understand status return from YARN, failing the job. WorkflowId=%s. "
+                                            + "Heartbeat created time=%s. Heartbeat last update time=%s. "
+                                            + "Allowed pending threshold=%s. Current time=%s. "
+                                            + "DiffBetweenCurrentAndCreate=%s.",
+                                    workflowJob.getWorkflowId(), jobUpdate.getCreateTime(),
+                                    jobUpdate.getLastUpdateTime(), ALLOWED_PENDING_THRESHOLD, currentTimeMillis,
+                                    currentTimeMillis - jobUpdate.getCreateTime());
+                        }
+
+                        workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                        if (workflowJob.getWorkflowId() != null) {
+                            // invalidate cache entry
+                            jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                        }
+                    }
+                    // applicationId is null, sending alert if NOTIFICATION_THRESHOLD is met.
+                    else {
+                        if (currentTimeMillis - jobUpdate.getCreateTime() > NOTIFICATION_THRESHOLD) {
+                            // log an error for now. In future, an notification will be sent to SQS.
+                            log.error("Log an error for now. In future, an notification will be sent to SQS. "
+                                            + "WorkflowId=%s. Current time=%s. Heartbeat create time=%s. "
+                                            + "Notification threshold=%s",
+                                    workflowJob.getWorkflowId(), currentTimeMillis, jobUpdate.getCreateTime(),
+                                    NOTIFICATION_THRESHOLD);
+                        }
+                    }
+                }
+            } else {
+                /*
+                 * Fail the job because the heartbeat is missing.
+                 */
+                workflowJob.setStatus(JobStatus.FAILED.name());
+                workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                log.warn(String.format("Heartbeat is null, failing the job. WowkflowPid=%s. WorkflowId=%s.",
+                        workflowJob.getPid(), workflowJob.getWorkflowId()));
+                if (workflowJob.getWorkflowId() != null) {
+                    // invalidate cache entry
+                    jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
                 }
             }
         }
