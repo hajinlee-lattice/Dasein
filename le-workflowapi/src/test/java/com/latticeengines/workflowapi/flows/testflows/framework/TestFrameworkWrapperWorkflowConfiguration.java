@@ -123,21 +123,6 @@ public class TestFrameworkWrapperWorkflowConfiguration extends WorkflowConfigura
             return this;
         }
 
-        // TODO: Do I need this function?
-        public Builder microServiceHostPort(String microServiceHostPort) {
-            //preStepConfig.setMicroServiceHostPort(microServiceHostPort);
-            //postStepConfig.setMicroServiceHostPort(microServiceHostPort);
-            return this;
-        }
-
-
-        // TODO: Do I need this function?
-        public Builder internalResourceHostPort(String internalResourceHostPort) {
-            preStepConfig.setInternalResourceHostPort(internalResourceHostPort);
-            postStepConfig.setInternalResourceHostPort(internalResourceHostPort);
-            return this;
-        }
-
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             return this;

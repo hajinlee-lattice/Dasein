@@ -71,8 +71,6 @@ public class ExportToDynamoDeploymentTestNG extends
 
         ExportToDynamoStepConfiguration exportToDynamoStepConfig = new ExportToDynamoStepConfiguration();
         exportToDynamoStepConfig.setCustomerSpace(mainTestCustomerSpace);
-        exportToDynamoStepConfig.setInternalResourceHostPort(internalResourceHostPort);
-        exportToDynamoStepConfig.setMicroServiceHostPort(microServiceHostPort);
         exportToDynamoStepConfig.setDynamoSignature(signature);
 
         return generateStepTestConfiguration(prepareTestDynamoConfig, "exportToDynamo",

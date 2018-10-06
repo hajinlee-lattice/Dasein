@@ -41,8 +41,6 @@ public class ExportToRedshiftDeploymentTestNG extends
 
         ExportToRedshiftStepConfiguration exportToRedshiftStepConfig = new ExportToRedshiftStepConfiguration();
         exportToRedshiftStepConfig.setCustomerSpace(mainTestCustomerSpace);
-        exportToRedshiftStepConfig.setInternalResourceHostPort(internalResourceHostPort);
-        exportToRedshiftStepConfig.setMicroServiceHostPort(microServiceHostPort);
 
         return generateStepTestConfiguration(prepareTestRedshiftConfig, "exportToRedshift",
                 exportToRedshiftStepConfig, postStepConfig);
