@@ -27,6 +27,8 @@ public class DropFolderServiceImpl implements DropFolderService {
 
     private static final String PS_SHARE = "PS_SHARE";
 
+    private static final String TEMPLATES = "Templates";
+
     @Inject
     private DropBoxService dropBoxService;
 
@@ -40,13 +42,13 @@ public class DropFolderServiceImpl implements DropFolderService {
         String dropBoxBucket = dropBoxService.getDropBoxBucket();
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace, null, null));
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, null, null));
 
         for (String objectName : objectsName) {
-            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace, objectName, null));
+            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, objectName, null));
         }
 
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace, PS_SHARE, null));
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, PS_SHARE, null));
     }
 
     @Override
@@ -56,13 +58,13 @@ public class DropFolderServiceImpl implements DropFolderService {
         String dropBoxBucket = dropBoxService.getDropBoxBucket();
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace, formatPath(objectName), null));
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, formatPath(objectName), null));
         String[] folderList = path.split("/");
         String needCreateFolder = "";
         for (String folder : folderList) {
             if (StringUtils.isNotEmpty(folder)) {
                 needCreateFolder += "/" + folder;
-                s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, customerSpace,
+                s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES,
                         formatPath(objectName), formatPath(needCreateFolder)));
             }
         }
@@ -76,7 +78,7 @@ public class DropFolderServiceImpl implements DropFolderService {
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 
         return s3Service.listSubFolders(dropBoxBucket,
-                getFullPath(dropBoxPrefix, customerSpace, formatPath(objectName), formatPath(path)));
+                getFullPath(dropBoxPrefix, TEMPLATES, formatPath(objectName), formatPath(path)));
     }
 
     private String getFullPath(String dropBoxPrefix, String customerSpace, String objectName, String path) {

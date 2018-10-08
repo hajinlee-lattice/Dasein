@@ -12,9 +12,12 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 @Component("s3ImportJmsConsumer")
@@ -31,6 +34,9 @@ public class S3ImportJmsConsumer {
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private DropBoxService dropBoxService;
 
 
     @JmsListener(destination = "${cdl.s3.file.import.sqs.name:}")
@@ -61,14 +67,21 @@ public class S3ImportJmsConsumer {
                 String bucket = s3Node.get(BUCKET).get(NAME).asText();
                 String key = s3Node.get(OBJECT).get(KEY).asText();
                 String[] parts = key.split("/");
-                if (parts.length < 4) {
+                if (parts.length < 5) {
                     log.error("S3 import path is not correct!");
                     return;
                 }
                 String fileName = parts[parts.length - 1];
                 String feedType = parts[parts.length - 2];
                 String entity = parts[parts.length - 3];
-                String tenantId = parts[parts.length - 4];
+                String dropBoxPrefix = parts[parts.length - 5];
+                Tenant tenant = dropBoxService.getDropBoxOwner(dropBoxPrefix);
+                if (tenant == null) {
+                    log.error("Cannot find DropBox Owner: " + dropBoxPrefix);
+                    return;
+                }
+                String tenantId = tenant.getId();
+                tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
                 log.info(String.format("S3 import for %s / %s / %s / %s / %s", bucket, tenantId, entity, feedType,
                         fileName));
                 submitApplication(tenantId, bucket, entity, feedType, key);
