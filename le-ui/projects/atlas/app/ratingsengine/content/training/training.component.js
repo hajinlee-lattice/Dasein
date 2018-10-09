@@ -48,8 +48,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
             AtlasRemodelStore.setRemodelIteration(vm.iteration);
 
-            // console.log(vm.ratingEngine);
-
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
 
@@ -80,14 +78,25 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : "WITHIN";
                     vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : 2;
 
+                    // if(vm.ratingModel.trainingSegment){
+                    //     vm.trainingSegment = vm.ratingModel.trainingSegment;
+                    //     vm.updateSegmentSelected(vm.trainingSegment);
+                    //     vm.autcompleteChange();
+                    // }
+
+                    // if(vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts){
+                    //     vm.trainingProducts = vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts;
+                    //     vm.updateProductsSelected(vm.trainingProducts);
+                    //     RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
+                    //     vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
+                    //     vm.autcompleteChange();
+                    // }
+
                     vm.validateCrossSellForm();
 
                 } else {
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
-
-                    // console.log(vm.configFilters);
-
                     
                     RatingsEngineStore.setDisplayFileName(vm.filters.sourceFileName);
 

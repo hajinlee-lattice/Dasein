@@ -41,15 +41,29 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
         console.log($scope.internalCategories);
         for (var i = 0; i < $scope.internalCategories.length; i++) {
+            if ($scope.internalCategories[i].name == 'My Attributes') {
+                console.log("My Attributes");
+
+                $scope.hasAccountAttributes = false;
+                $scope.internalCategories[i].color = '#457DB9';
+                
+                var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'My Attributes' });
+
+                console.log(myAttributesCategory);
+                if (myAttributesCategory) {
+                    setAttributeColor(myAttributesCategory, '#457DB9');
+                }
+            }
             if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
+                console.log("Account Attributes");
+
+                $scope.hasAccountAttributes = true;
+                
                 $scope.internalCategories[i].name = 'My Attributes';
                 $scope.internalCategories[i].color = '#457DB9';
                 
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
-                
-                // myAttributesCategory.categoryName = 'My Attributes';
-                // myAttributesCategory.name = 'My Attributes';
-
+                console.log(myAttributesCategory);
                 if (myAttributesCategory) {
                     setAttributeColor(myAttributesCategory, '#457DB9');
                 }
@@ -247,10 +261,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
     $scope.backToSummaryClicked = function () {
 
-        for (var attribute of chartData.children) {
-            if(attribute.categoryName === 'My Attributes'){
-                attribute.name = 'ACCOUNT_ATTRIBUTES';
-                attribute.categoryName = 'ACCOUNT_ATTRIBUTES';
+        if($scope.hasAccountAttributes){
+            for (var attribute of chartData.children) {
+                if(attribute.categoryName === 'My Attributes'){
+                    attribute.name = 'ACCOUNT_ATTRIBUTES';
+                    attribute.categoryName = 'ACCOUNT_ATTRIBUTES';
+                }
             }
         }
 
@@ -285,7 +301,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
     $scope.categoryClicked = function (category) {
 
-        if(category.name === 'My Attributes'){
+        if($scope.hasAccountAttributes && category.name === 'My Attributes'){
             category.name = 'ACCOUNT_ATTRIBUTES';
             category.categoryName = 'ACCOUNT_ATTRIBUTES';
         }
@@ -298,7 +314,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.backToSummaryView = true;
         var prefix = categoryList.length >= 50 ? ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER_PREFIX") : "";
 
-        if(category.name === 'ACCOUNT_ATTRIBUTES'){
+        if($scope.hasAccountAttributes && category.name === 'ACCOUNT_ATTRIBUTES'){
             category.name = 'My Attributes';
             category.categoryName = 'My Attributes';
         }
