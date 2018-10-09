@@ -89,11 +89,11 @@ angular
             var MyDataParams = '';
             
             if (MyDataState != 'home.nodata') {
-                if (segment && segment != 'segment.name') {
-                    MyDataParams = "({ segment: '" + segment + "', category: '', subcategory: '' })";
-                } else {
+                //if (segment && segment != 'segment.name') {
+                //    MyDataParams = "({ segment: '" + segment + "', category: '', subcategory: '' })";
+                //} else {
                     MyDataParams = "({ segment: 'Create', category: '', subcategory: '' })";
-                }
+                //}
             }
             
             store.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
