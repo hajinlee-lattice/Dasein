@@ -26,6 +26,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.callable.RedshiftIngestCallable;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -220,6 +221,10 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                         version);
             } else {
                 dataPage = ratingProxy.getData(customerSpace.getTenantId(), frontEndQuery, version);
+            }
+            if (dataPage != null && CollectionUtils.isEmpty(dataPage.getData())) {
+                log.warn("Got 0 data from api at version " + version + " for the query: " //
+                        + JsonUtils.pprint(frontEndQuery));
             }
             return dataPage;
         }
