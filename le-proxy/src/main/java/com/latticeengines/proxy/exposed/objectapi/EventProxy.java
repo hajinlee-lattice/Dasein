@@ -35,9 +35,11 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         return getEventCount(customerSpace, frontEndQuery, null).block(Duration.ofHours(1));
     }
 
-    public DataPage getScoringTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public DataPage getScoringTuples(String customerSpace, EventFrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getScoringTuplesNonBlocking(customerSpace, frontEndQuery, version).block(Duration.ofHours(1));
+            DataPage dataPage = getScoringTuplesNonBlocking(customerSpace, frontEndQuery, version)
+                    .block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " scoring tuples.";
             timer.setTimerMessage(msg);
@@ -45,9 +47,11 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         }
     }
 
-    public DataPage getTrainingTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public DataPage getTrainingTuples(String customerSpace, EventFrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getTrainingTuplesNonBlocking(customerSpace, frontEndQuery, version).block(Duration.ofHours(1));
+            DataPage dataPage = getTrainingTuplesNonBlocking(customerSpace, frontEndQuery, version)
+                    .block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " training tuples.";
             timer.setTimerMessage(msg);
@@ -55,9 +59,11 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         }
     }
 
-    public DataPage getEventTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public DataPage getEventTuples(String customerSpace, EventFrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getEventTuplesNonBlocking(customerSpace, frontEndQuery, version).block(Duration.ofHours(1));
+            DataPage dataPage = getEventTuplesNonBlocking(customerSpace, frontEndQuery, version)
+                    .block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " event tuples.";
             timer.setTimerMessage(msg);
@@ -65,43 +71,55 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         }
     }
 
-    private Mono<Long> getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/count/scoring", shortenCustomerSpace(customerSpace));
+    private Mono<Long> getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/count/scoring",
+                shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
         return postMono("getScoringCount", url, frontEndQuery, Long.class);
     }
 
-    private Mono<Long> getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/count/training", shortenCustomerSpace(customerSpace));
+    private Mono<Long> getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/count/training",
+                shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
         return postMono("getTrainingCount", url, frontEndQuery, Long.class);
     }
 
-    private Mono<Long> getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/count/event", shortenCustomerSpace(customerSpace));
+    private Mono<Long> getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/count/event",
+                shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
         return postMono("getEventCount", url, frontEndQuery, Long.class);
     }
 
-    private Mono<DataPage> getScoringTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/data/scoring", shortenCustomerSpace(customerSpace));
+    private Mono<DataPage> getScoringTuplesNonBlocking(String customerSpace,
+            EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/data/scoring",
+                shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
         return postMonoKryo("getScoringTuples", url, frontEndQuery, DataPage.class);
     }
 
-    private Mono<DataPage> getTrainingTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/data/training", shortenCustomerSpace(customerSpace));
+    private Mono<DataPage> getTrainingTuplesNonBlocking(String customerSpace,
+            EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/data/training",
+                shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
         return postMonoKryo("getTrainingTuples", url, frontEndQuery, DataPage.class);
     }
 
-    private Mono<DataPage> getEventTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/data/event", shortenCustomerSpace(customerSpace));
+    private Mono<DataPage> getEventTuplesNonBlocking(String customerSpace,
+            EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/data/event",
+                shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
         return postMonoKryo("getEventTuples", url, frontEndQuery, DataPage.class);
