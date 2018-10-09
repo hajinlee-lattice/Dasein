@@ -89,7 +89,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         String queue = customization.getQueue(appMasterProperties);
 
         customization.afterCreateLocalLauncherContextFile(containerProperties);
-        List<String> commands = customization.getCommands(containerProperties);
+        List<String> commands = customization.getCommands(containerProperties, appMasterProperties);
         Map<String, String> environment = customization.setEnvironment(client.getEnvironment(), containerProperties);
         client.setAppName(appName(appMasterProperties, clientName));
         if (resourceLocalizer != null) {

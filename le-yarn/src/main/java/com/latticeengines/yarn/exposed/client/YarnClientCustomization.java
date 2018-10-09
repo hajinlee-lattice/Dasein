@@ -45,7 +45,7 @@ public abstract class YarnClientCustomization {
 
     public abstract String getContainerLauncherContextFile(Properties properties);
 
-    public abstract List<String> getCommands(Properties properties);
+    public abstract List<String> getCommands(Properties properties, Properties appMasterProperties);
 
     public abstract void validate(Properties appMasterProperties, Properties containerProperties);
 

@@ -145,11 +145,11 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     }
 
     @VisibleForTesting
-    String getXmxSetting(Properties containerProperties) {
+    String getXmxSetting(Properties appMasterProperties) {
         int minAllocationInMb = yarnConfiguration.getInt("yarn.scheduler.minimum-allocation-mb", -1);
 
-        if (containerProperties != null) {
-            String requestedMemoryStr = containerProperties.getProperty(ContainerProperty.MEMORY.name());
+        if (appMasterProperties != null) {
+            String requestedMemoryStr = appMasterProperties.getProperty(AppMasterProperty.MEMORY.name());
 
             if (requestedMemoryStr != null) {
                 int requestedMemory = Integer.parseInt(requestedMemoryStr);
@@ -171,7 +171,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     }
 
     @Override
-    public List<String> getCommands(Properties containerProperties) {
+    public List<String> getCommands(Properties containerProperties, Properties appMasterProperties) {
         String containerLaunchContextFile = containerProperties
                 .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
         if (containerLaunchContextFile == null) {
@@ -192,7 +192,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "-Dlog4j.configuration=file:log4j.properties", //
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
-                getXmxSetting(containerProperties), //
+                getXmxSetting(appMasterProperties), //
                 "-XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
