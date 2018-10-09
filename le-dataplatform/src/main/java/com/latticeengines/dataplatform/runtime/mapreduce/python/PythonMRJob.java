@@ -126,7 +126,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
         config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
-        if (useEmr) {
+        if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
             config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
         }
     }

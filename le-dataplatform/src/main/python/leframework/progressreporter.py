@@ -76,7 +76,7 @@ class ProgressReporter(object):
                 skt.close()
                 break
             except socket.error:
-                self.logger.error("Failed to send progress to: " + self.host + "at port: " + str(self.port))
+                self.logger.error("Failed to send progress to: " + self.host + " at port: " + str(self.port))
 
 
 

@@ -195,7 +195,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
         Configuration config = job.getConfiguration();
         log.info(String.format("Job %s Properties:", mrJobName));
-        if (useEmr) {
+        if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
             config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
         }
         config.forEach(entry -> log.info(String.format("%s: %s", entry.getKey(), entry.getValue())));
