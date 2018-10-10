@@ -114,7 +114,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         testRatingEngineNoteCreation(re3, false);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
+    @Test(groups = "deployment", dependsOnMethods = "testCreate")
     public void testGet() {
         // test get all rating engine summary list
         List<?> ratingEngineSummarieObjects = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines",

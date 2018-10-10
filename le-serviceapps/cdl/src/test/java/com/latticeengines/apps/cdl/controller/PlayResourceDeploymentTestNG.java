@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -61,6 +62,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
 
         playCreationHelper.setTenant(mainTestTenant);
+        playCreationHelper.setDestinationOrgId("O" + System.currentTimeMillis());
+        playCreationHelper.setDestinationOrgType(CDLExternalSystemType.CRM);
         MetadataSegment retrievedSegment = createSegment();
         ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
     }

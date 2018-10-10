@@ -187,6 +187,11 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch object is null" });
         }
 
+        if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot create a Play launch without Destination Org  or Destination System" });
+        }
+
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
@@ -232,6 +237,10 @@ public class PlayResource {
         if (!playLaunch.getId().equals(launchId)) {
             throw new LedpException(LedpCode.LEDP_18205,
                     new String[] { "LaunchId is not the same for the Play launch being updated" });
+        }
+        if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot update a Play launch without Destination Org  or Destination System" });
         }
 
         Play play = playService.getPlayByName(playName, false);

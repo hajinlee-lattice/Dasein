@@ -159,8 +159,16 @@ public class TestPlayCreationHelper {
         return destinationOrgId;
     }
 
+    public void setDestinationOrgId(String destinationOrgId) {
+        this.destinationOrgId = destinationOrgId;
+    }
+
     public CDLExternalSystemType getDestinationOrgType() {
         return destinationOrgType;
+    }
+
+    public void setDestinationOrgType(CDLExternalSystemType type) {
+        this.destinationOrgType = type;
     }
 
     public Tenant getTenant() {
