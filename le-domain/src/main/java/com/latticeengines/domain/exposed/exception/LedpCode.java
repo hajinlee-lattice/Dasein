@@ -340,6 +340,8 @@ public enum LedpCode {
             "URL encode fail."), LEDP_19009(
                     "No User Name key/value"), LEDP_19010("No User Email key/value"), LEDP_19011(
                             "No return_to key/value"), LEDP_19012("No source_ref key/value "),
+    LEDP_19013("Service not found."), //
+    LEDP_19014("Unsupport error."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //

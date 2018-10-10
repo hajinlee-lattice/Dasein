@@ -20,8 +20,11 @@ public class ErrorController {
         switch (httpErrorCode) {
             case 404:
                 return get404ModelAndView();
+            case 500:
+                return get500ModelAndView();
             default:
-                throw new UnsupportedOperationException("Cannot handle http error " + httpErrorCode);
+                return getUnsupportedModelAndView();
+                //throw new UnsupportedOperationException("Cannot handle http error " + httpErrorCode);
         }
     }
 
@@ -34,6 +37,18 @@ public class ErrorController {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_19003.name(), //
                 "errorMsg", LedpCode.LEDP_19003.getMessage()));
+    }
+    
+    private ModelAndView get500ModelAndView() {
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_19013.name(), //
+                "errorMsg", LedpCode.LEDP_19013.getMessage()));
+    }
+    
+    private ModelAndView getUnsupportedModelAndView() {
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_19014.name(), //
+                "errorMsg", LedpCode.LEDP_19014.getMessage()));
     }
 
 }
