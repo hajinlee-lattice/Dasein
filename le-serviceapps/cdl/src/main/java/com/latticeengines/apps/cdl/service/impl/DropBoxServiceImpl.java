@@ -21,6 +21,7 @@ import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.auth.policy.actions.S3Actions;
 import com.amazonaws.auth.policy.conditions.StringCondition;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
+import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.aws.iam.IAMService;
@@ -40,6 +41,8 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     private static final String DROPBOX = "dropbox";
     private static final String POLICY_NAME = "dropbox";
+    private static final String SLASH = "/";
+    private static final String STAR = "*";
     private static final String WILD_CARD = "/*";
     private static final String ARN_PREFIX = "arn:aws:s3:::";
     // naming convention for S3 bucket policy statement
@@ -105,6 +108,12 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     @Override
+    public Tenant getDropBoxOwner(String dropBox) {
+        return entityMgr.getDropBoxOwner(dropBox);
+    }
+
+
+    @Override
     public DropBoxSummary getDropBoxSummary() {
         DropBox dropbox = entityMgr.getDropBox();
         if (dropbox == null) {
@@ -115,16 +124,19 @@ public class DropBoxServiceImpl implements DropBoxService {
             summary.setDropBox(dropbox.getDropBox());
             if (dropbox.getAccessMode() != null) {
                 summary.setAccessMode(dropbox.getAccessMode());
-                summary.setExternalAccount(dropbox.getExternalAccount());
-                summary.setLatticeUser(dropbox.getLatticeUser());
+                if (DropBoxAccessMode.LatticeUser.equals(dropbox.getAccessMode())) {
+                    summary.setLatticeUser(dropbox.getLatticeUser());
+                    String userName = dropbox.getLatticeUser();
+                    AccessKeyMetadata md = iamService.getCustomerKeyIfExists(userName);
+                    if (md != null) {
+                        summary.setAccessKeyId(md.getAccessKeyId());
+                    }
+                } else {
+                    summary.setExternalAccount(dropbox.getExternalAccount());
+                }
             }
             return summary;
         }
-    }
-
-    @Override
-    public Tenant getDropBoxOwner(String dropBox) {
-        return entityMgr.getDropBoxOwner(dropBox);
     }
 
     @Override
@@ -155,6 +167,26 @@ public class DropBoxServiceImpl implements DropBoxService {
         return response;
     }
 
+    public GrantDropBoxAccessResponse refreshAccessKey() {
+        DropBox dropbox = entityMgr.getDropBox();
+        if (dropbox == null) {
+            throw new RuntimeException("Tenant " + MultiTenantContext.getShortTenantId() //
+                    + " does not have a dropbox.");
+        }
+        String userName = dropbox.getLatticeUser();
+        if (!DropBoxAccessMode.LatticeUser.equals(dropbox.getAccessMode()) || StringUtils.isBlank(userName)) {
+            throw new RuntimeException("The access to the dropbox for " + MultiTenantContext.getShortTenantId() //
+                    + " has not been granted to a lattice IAM user. Cannot refresh the access key.");
+        }
+        GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
+        response.setAccessMode(DropBoxAccessMode.LatticeUser);
+        response.setLatticeUser(userName);
+        AccessKey newKey = iamService.refreshCustomerKey(userName);
+        response.setAccessKey(newKey.getAccessKeyId());
+        response.setSecretKey(newKey.getSecretAccessKey());
+        return response;
+    }
+
     @Override
     public void revokeAccess() {
         DropBox dropbox = entityMgr.getDropBox();
@@ -175,13 +207,13 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     private String getDropBoxId() {
         String prefix = getDropBoxPrefix();
-        return prefix.substring(prefix.indexOf("/") + 1);
+        return prefix.substring(prefix.indexOf(SLASH) + 1);
     }
 
     private GrantDropBoxAccessResponse grantAccessToLatticeUser(String existingUser) {
         String bucket = getDropBoxBucket();
         String prefix = getDropBoxPrefix();
-        String dropBoxId = prefix.substring(prefix.indexOf("/") + 1);
+        String dropBoxId = prefix.substring(prefix.indexOf(SLASH) + 1);
         String userName = existingUser;
         if (StringUtils.isBlank(userName)) {
             userName = "c-" + dropBoxId;
@@ -215,7 +247,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private Policy newDropBoxPolicy(String bucket, String dropBoxId) {
-        String arnPrefix = ARN_PREFIX + bucket + "/" + DROPBOX + "/" + dropBoxId;
+        String arnPrefix = ARN_PREFIX + bucket + SLASH + DROPBOX + SLASH + dropBoxId;
         return new Policy().withStatements(//
                 listDropBoxStatement(bucket, dropBoxId), //
                 new Statement(Statement.Effect.Allow) //
@@ -245,7 +277,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 List<Resource> resourceList = stmt.getResources();
                 Set<String> resources = resourceList.stream().map(Resource::getId)
                         .collect(Collectors.toSet());
-                String rsc = ARN_PREFIX + bucket + "/" + DROPBOX + "/" + dropBoxId + WILD_CARD;
+                String rsc = ARN_PREFIX + bucket + SLASH + DROPBOX + SLASH + dropBoxId + WILD_CARD;
                 if (!resources.contains(rsc)) {
                     resourceList.add(new Resource(rsc));
                     resources.add(rsc);
@@ -265,7 +297,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
-                        DROPBOX + "/" + dropBoxId + "*" //
+                        DROPBOX + SLASH + dropBoxId + STAR //
         ));
     }
 
@@ -275,7 +307,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     private void revokeAccessToLatticeUser(String userName) {
         String prefix = getDropBoxPrefix();
-        String dropBoxId = prefix.substring(prefix.indexOf("/") + 1);
+        String dropBoxId = prefix.substring(prefix.indexOf(SLASH) + 1);
         String policyDoc = iamService.getUserPolicy(userName, POLICY_NAME);
         if (StringUtils.isNotBlank(policyDoc)) {
             Policy policy = Policy.fromJson(policyDoc);
@@ -363,7 +395,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         S3Actions.DeleteObject, //
                         S3Actions.SetObjectAcl //
                 ) //
-                .withResources(new Resource(arn + "*"));
+                .withResources(new Resource(arn + STAR));
     }
 
     private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId,
@@ -376,7 +408,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
-                        DROPBOX + "/" + dropBoxId + "*" //
+                        DROPBOX + SLASH + dropBoxId + STAR //
         ));
     }
 
@@ -451,7 +483,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         String arn = ARN_PREFIX + bucketName + "/dropbox/" + dropBoxId;
         List<Resource> rscs = new ArrayList<>(statement.getResources());
         rscs.add(new Resource(arn));
-        rscs.add(new Resource(arn + "*"));
+        rscs.add(new Resource(arn + STAR));
         statement.setResources(rscs);
     }
 
@@ -474,7 +506,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private String toPrefix(DropBox dropbox) {
-        return DROPBOX + "/" + dropbox.getDropBox();
+        return DROPBOX + SLASH + dropbox.getDropBox();
     }
 
     // for tests

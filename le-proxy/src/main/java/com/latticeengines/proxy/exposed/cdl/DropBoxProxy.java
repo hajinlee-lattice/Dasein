@@ -10,4 +10,6 @@ public interface DropBoxProxy {
 
     GrantDropBoxAccessResponse grantAccess(String customerSpace, GrantDropBoxAccessRequest request);
 
+    GrantDropBoxAccessResponse refreshAccessKey(String customerSpace);
+
 }

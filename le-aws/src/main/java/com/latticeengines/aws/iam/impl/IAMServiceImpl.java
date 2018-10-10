@@ -2,6 +2,7 @@ package com.latticeengines.aws.iam.impl;
 
 import java.net.URLDecoder;
 import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -19,6 +20,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
+import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.amazonaws.services.identitymanagement.model.AddUserToGroupRequest;
 import com.amazonaws.services.identitymanagement.model.CreateAccessKeyRequest;
 import com.amazonaws.services.identitymanagement.model.CreateAccessKeyResult;
@@ -39,6 +41,7 @@ import com.amazonaws.services.identitymanagement.model.ListGroupsForUserResult;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
 import com.amazonaws.services.identitymanagement.model.PutUserPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.RemoveUserFromGroupRequest;
+import com.amazonaws.services.identitymanagement.model.StatusType;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 
@@ -90,14 +93,38 @@ public class IAMServiceImpl implements IAMService {
 
     @Override
     public boolean hasCustomerKey(String userName) {
-        boolean hasKey = false;
+        return getCustomerKeyIfExists(userName) != null;
+    }
+
+    @Override
+    public AccessKeyMetadata getCustomerKeyIfExists(String userName) {
+        AccessKeyMetadata key = null;
         if (hasCustomerUser(userName)) {
             AmazonIdentityManagement iam = iamClient();
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, //
+                    Collections.singleton(NoSuchEntityException.class));
             ListAccessKeysRequest request = new ListAccessKeysRequest().withUserName(userName);
-            ListAccessKeysResult result = iam.listAccessKeys(request);
-            hasKey = CollectionUtils.isNotEmpty(result.getAccessKeyMetadata());
+            ListAccessKeysResult result = retry.execute(context -> iam.listAccessKeys(request));
+            List<AccessKeyMetadata> mds = result.getAccessKeyMetadata();
+            if (CollectionUtils.isNotEmpty(mds)) {
+                for (AccessKeyMetadata md : mds) {
+                    String status = md.getStatus();
+                    if (StatusType.Active.name().equals(status)) {
+                        key = md;
+                        break; // return the first active key
+                    }
+                }
+            }
         }
-        return hasKey;
+        return key;
+    }
+
+    @Override
+    public AccessKey refreshCustomerKey(String userName) {
+        if (hasCustomerUser(userName)) {
+            removeAccessKeys(userName);
+        }
+        return createCustomerKey(userName);
     }
 
     @Override

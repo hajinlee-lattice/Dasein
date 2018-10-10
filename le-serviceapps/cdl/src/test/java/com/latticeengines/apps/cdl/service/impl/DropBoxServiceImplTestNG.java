@@ -35,6 +35,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -129,6 +130,14 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         verifyAccessWithRetries(creds, true);
         verifyAccessWithRetries(latticeProvider, false);
 
+        DropBoxSummary summary = dropboxService.getDropBoxSummary();
+        Assert.assertEquals(summary.getAccessKeyId(), response.getAccessKey());
+
+        GrantDropBoxAccessResponse newResponse = dropboxService.refreshAccessKey();
+        BasicAWSCredentialsProvider newCreds = //
+                new BasicAWSCredentialsProvider(newResponse.getAccessKey(), newResponse.getSecretKey());
+        verifyAccessWithRetries(newCreds, false);
+
         dropboxService.revokeAccess();
         verifyNoAccessWithRetries(creds, false);
         verifyAccessWithRetries(latticeProvider, false);
@@ -152,6 +161,10 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
                 new BasicAWSCredentialsProvider(accessKey.getAccessKeyId(), accessKey.getSecretAccessKey());
         verifyAccessWithRetries(creds, false);
         verifyAccessWithRetries(latticeProvider, false);
+
+        DropBoxSummary summary = dropboxService.getDropBoxSummary();
+        Assert.assertEquals(summary.getAccessKeyId(), accessKey.getAccessKeyId());
+
         dropboxService.revokeAccess();
         verifyNoAccessWithRetries(creds, false);
         verifyAccessWithRetries(latticeProvider, false);

@@ -18,6 +18,8 @@ public interface DropBoxService {
 
     GrantDropBoxAccessResponse grantAccess(GrantDropBoxAccessRequest request);
 
+    GrantDropBoxAccessResponse refreshAccessKey();
+
     void revokeAccess();
 
     DropBoxSummary getDropBoxSummary();

@@ -26,9 +26,16 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
 
     @Override
     public GrantDropBoxAccessResponse grantAccess(String customerSpace, GrantDropBoxAccessRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/dropbox/", //
+        String url = constructUrl("/customerspaces/{customerSpace}/dropbox/access", //
                 shortenCustomerSpace(customerSpace));
         return put("grant drop box access", url, request, GrantDropBoxAccessResponse.class);
+    }
+
+    @Override
+    public GrantDropBoxAccessResponse refreshAccessKey(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dropbox/key", //
+                shortenCustomerSpace(customerSpace));
+        return put("refresh dropbox access key", url, null, GrantDropBoxAccessResponse.class);
     }
 
 }

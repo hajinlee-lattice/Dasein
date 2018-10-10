@@ -1,6 +1,7 @@
 package com.latticeengines.aws.iam;
 
 import com.amazonaws.services.identitymanagement.model.AccessKey;
+import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 
 public interface IAMService {
 
@@ -11,7 +12,11 @@ public interface IAMService {
 
     AccessKey createCustomerKey(String userName);
 
+    AccessKey refreshCustomerKey(String userName);
+
     boolean hasCustomerKey(String userName);
+
+    AccessKeyMetadata getCustomerKeyIfExists(String userName);
 
     String getUserPolicy(String userName, String policyName);
 

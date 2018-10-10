@@ -54,6 +54,12 @@ public class DropBoxResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @PutMapping("/key")
+    @ApiOperation(value = "Refresh AWS access key to drop box, if the access was granted to a Lattice user")
+    public GrantDropBoxAccessResponse refreshAccessKey(@PathVariable String customerSpace) {
+        return dropBoxService.refreshAccessKey();
+    }
+
     @PostMapping("")
     @ApiOperation(value = "Create drop box. (only for fixing old tenants)")
     public DropBoxSummary createDropBox(@PathVariable String customerSpace) {

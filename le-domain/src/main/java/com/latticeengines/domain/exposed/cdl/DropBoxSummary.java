@@ -25,6 +25,9 @@ public class DropBoxSummary {
     @JsonProperty("LatticeUser")
     private String latticeUser;
 
+    @JsonProperty("AccessKeyId")
+    private String accessKeyId;
+
     public String getBucket() {
         return bucket;
     }
@@ -63,5 +66,13 @@ public class DropBoxSummary {
 
     public void setLatticeUser(String latticeUser) {
         this.latticeUser = latticeUser;
+    }
+
+    public String getAccessKeyId() {
+        return accessKeyId;
+    }
+
+    public void setAccessKeyId(String accessKeyId) {
+        this.accessKeyId = accessKeyId;
     }
 }
