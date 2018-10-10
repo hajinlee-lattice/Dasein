@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match.patch;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 
 import java.util.List;
 

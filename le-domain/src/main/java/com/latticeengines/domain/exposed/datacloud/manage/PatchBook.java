@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.match.patch;
+package com.latticeengines.domain.exposed.datacloud.manage;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,6 +27,12 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PatchBook implements HasPid, Serializable {
 
+    public static final String COLUMN_PID = "PID";
+    public static final String COLUMN_HOTFIX = "HotFix";
+    public static final String COLUMN_EOL = "EOL";
+    public static final String COLUMN_EFFECTIVE_SINCE_VERSION = "EffectiveSinceVersion";
+    public static final String COLUMN_EXPIRE_AFTER_VERSION = "ExpireAfterVersion";
+
     private static final long serialVersionUID = 5460817063985318621L;
 
     public enum Type {
@@ -39,7 +45,7 @@ public class PatchBook implements HasPid, Serializable {
     @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PID", unique = true, nullable = false)
+    @Column(name = COLUMN_PID, unique = true, nullable = false)
     private Long pid;
 
     @JsonProperty("Type")
@@ -79,24 +85,24 @@ public class PatchBook implements HasPid, Serializable {
     @Column(name = "Cleanup", nullable = false)
     private boolean cleanup;
 
-    @JsonProperty("HotFix")
-    @Column(name = "HotFix", nullable = false)
+    @JsonProperty(COLUMN_HOTFIX)
+    @Column(name = COLUMN_HOTFIX, nullable = false)
     private boolean hotFix;
 
-    @JsonProperty("EOL")
-    @Column(name = "EOL", nullable = false)
+    @JsonProperty(COLUMN_EOL)
+    @Column(name = COLUMN_EOL, nullable = false)
     private boolean endOfLife;
 
     @JsonProperty("EffectiveSince")
-    @Column(name = "EffectiveSince", nullable = false)
+    @Column(name = "EffectiveSince")
     private Date effectiveSince;
 
     @JsonProperty("ExpireAfter")
-    @Column(name = "ExpireAfter", nullable = false)
+    @Column(name = "ExpireAfter")
     private Date expireAfter;
 
     @JsonProperty("CreatedDate")
-    @Column(name = "CreatedDate", nullable = false)
+    @Column(name = "CreatedDate")
     private Date createdDate;
 
     @JsonProperty("CreatedBy")
@@ -104,7 +110,7 @@ public class PatchBook implements HasPid, Serializable {
     private String createdBy;
 
     @JsonProperty("LastModifiedDate")
-    @Column(name = "LastModifiedDate", nullable = false)
+    @Column(name = "LastModifiedDate")
     private Date lastModifiedDate;
 
     @JsonProperty("LastModifiedBy")
@@ -115,12 +121,12 @@ public class PatchBook implements HasPid, Serializable {
     @Column(name = "Logs")
     private String logs;
 
-    @JsonProperty("EffectiveSinceVersion")
-    @Column(name = "EffectiveSinceVersion")
+    @JsonProperty(COLUMN_EFFECTIVE_SINCE_VERSION)
+    @Column(name = COLUMN_EFFECTIVE_SINCE_VERSION)
     private String effectiveSinceVersion;
 
-    @JsonProperty("ExpireAfterVersion")
-    @Column(name = "ExpireAfterVersion")
+    @JsonProperty(COLUMN_EXPIRE_AFTER_VERSION)
+    @Column(name = COLUMN_EXPIRE_AFTER_VERSION)
     private String expireAfterVersion;
 
     @Override
