@@ -689,8 +689,10 @@ angular.module('lp.playbook')
 
     this.getLaunchedStatus = function(play) {
         var launchedState = (play.launchHistory && play.launchHistory.playLaunch && play.launchHistory.playLaunch.launchState ? play.launchHistory.playLaunch.launchState : null),
-            hasLaunched = (launchedState === 'Launched' ? true : false);
+            hasLaunched = (launchedState === 'Launched' ? true : false),
+            hasLaunchHistory = (play.launchHistory.mostRecentLaunch ||  play.launchHistory.lastCompletedLaunch || play.launchHistory.lastIncompleteLaunch ? true : false);
         return {
+            hasLaunchHistory: hasLaunchHistory,
             launchedState: launchedState,
             hasLaunched: hasLaunched
         };

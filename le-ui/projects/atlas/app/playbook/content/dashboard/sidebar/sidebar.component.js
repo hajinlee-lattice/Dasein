@@ -20,6 +20,8 @@ angular
 
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(vm.play);
 
+        vm.launchHistoryDisabled = !launchedStatus.hasLaunchHistory;
+
         vm.segment = vm.play.segment;
         vm.targetsDisabled = (vm.play.ratingEngine ? false : true);
 
