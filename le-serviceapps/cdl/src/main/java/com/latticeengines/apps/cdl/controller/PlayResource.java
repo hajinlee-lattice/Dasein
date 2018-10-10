@@ -248,6 +248,7 @@ public class PlayResource {
             log.error("Invalid playName: " + playName);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+        playLaunch.setPlay(play);
         return playLaunchService.update(playLaunch);
     }
 
