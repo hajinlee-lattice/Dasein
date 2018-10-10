@@ -249,6 +249,8 @@ public class PlayResource {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         playLaunch.setPlay(play);
+        playLaunch.setTenant(MultiTenantContext.getTenant());
+        playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
         return playLaunchService.update(playLaunch);
     }
 
