@@ -33,7 +33,7 @@ public class PlayTypeResource {
 
     @GetMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Get all playtypes for a tenant")
     public List<PlayType> getPlayTypes() {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayTypes(tenant.getId());
@@ -41,18 +41,18 @@ public class PlayTypeResource {
 
     @PostMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create new Play type")
+    @ApiOperation(value = "Create new Playtype")
     public PlayType createPlayType(@RequestBody PlayType playType) {
         Tenant tenant = MultiTenantContext.getTenant();
         String userId = MultiTenantContext.getEmailAddress();
         playType.setCreatedBy(userId);
         playType.setUpdatedBy(userId);
-        return  playProxy.createPlayType(tenant.getId(), playType);
+        return playProxy.createPlayType(tenant.getId(), playType);
     }
 
     @GetMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Get a playtype for a tenant given its ID")
     public PlayType getPlayTypeById(@PathVariable String playTypeId) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayTypeById(tenant.getId(), playTypeId);
@@ -60,7 +60,7 @@ public class PlayTypeResource {
 
     @PostMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Update a playtype given its ID")
     public PlayType updatePlayType(@PathVariable String playTypeId, @RequestBody PlayType playType) {
         Tenant tenant = MultiTenantContext.getTenant();
         String userId = MultiTenantContext.getEmailAddress();
@@ -70,7 +70,7 @@ public class PlayTypeResource {
 
     @DeleteMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Delete a playtype given its ID")
     public void deletePlayType(@PathVariable String playTypeId) {
         Tenant tenant = MultiTenantContext.getTenant();
         playProxy.deletePlayTypeById(tenant.getId(), playTypeId);
