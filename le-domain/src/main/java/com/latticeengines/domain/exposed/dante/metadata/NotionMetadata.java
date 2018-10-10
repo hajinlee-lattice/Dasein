@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.dante.metadata;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /// <summary>

@@ -1,19 +1,22 @@
 package com.latticeengines.domain.exposed.workflow;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.hibernate.annotations.Filter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "WORKFLOW_JOB_UPDATE",
+@Table(name = "WORKFLOW_JOB_UPDATE", //
        indexes = @Index(name = "IX_WORKFLOW_PID", columnList = "WORKFLOW_PID"))
 public class WorkflowJobUpdate implements HasPid {
-    private static final Logger log = LoggerFactory.getLogger(WorkflowJobUpdate.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

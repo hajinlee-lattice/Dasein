@@ -3,12 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.core.steps;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
-import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
-
-import java.util.List;
 
 public class ImportVdbTableStepConfiguration extends BaseStepConfiguration {
 

@@ -5,6 +5,8 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EVScoreDerivation implements Serializable {
+    private static final long serialVersionUID = 7497135843862227141L;
+
     @JsonProperty("ev")
     private ScoreDerivation ev;
 

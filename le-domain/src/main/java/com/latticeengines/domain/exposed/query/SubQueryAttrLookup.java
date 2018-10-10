@@ -17,7 +17,9 @@ public class SubQueryAttrLookup extends Lookup {
     @JsonProperty("attribute")
     private String attribute;
 
-    private SubQueryAttrLookup() {}
+    // for jackson
+    @SuppressWarnings("unused")
+	private SubQueryAttrLookup() {}
 
     public SubQueryAttrLookup(SubQuery subQuery) {
         this.subQuery = subQuery;

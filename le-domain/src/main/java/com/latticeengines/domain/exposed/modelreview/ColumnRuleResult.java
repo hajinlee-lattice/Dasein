@@ -5,12 +5,14 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@javax.persistence.Table(name = "MODELREVIEW_COLUMNRESULT")
+@Table(name = "MODELREVIEW_COLUMNRESULT", indexes = {@Index(name = "IX_MODEL_ID", columnList = "MODEL_ID")})
 public class ColumnRuleResult extends BaseRuleResult {
 
     @JsonProperty

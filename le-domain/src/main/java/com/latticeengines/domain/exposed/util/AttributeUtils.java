@@ -33,7 +33,6 @@ public class AttributeUtils {
         for (PropertyDescriptor descriptor : descriptors) {
             if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
                 Object sourceValue = getValue(source, descriptor);
-                Object destValue = getValue(dest, descriptor);
                 if (!isPropertyBag(descriptor)) {
                     boolean sourceEmpty = sourceValue == null
                             || (sourceValue instanceof List && ((List<?>) sourceValue).size() == 0)

@@ -270,7 +270,8 @@ public class Bucket implements Serializable {
         private AggregationFilter unitFilter;
 
         // for jackson
-        private Transaction() {}
+        @SuppressWarnings("unused")
+		private Transaction() {}
 
         public Transaction(String productId, TimeFilter timeFilter, AggregationFilter spentFilter,
                 AggregationFilter unitFilter, Boolean negate) {

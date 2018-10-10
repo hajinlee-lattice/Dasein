@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Lob;
@@ -20,7 +21,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 @Entity
-@Table(name = "JOB")
+@Table(name = "JOB", indexes = { @Index(name = "IX_JOB_ID", columnList = "JOB_ID") })
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Job implements HasPid, HasId<String> {
 
@@ -58,7 +58,6 @@ public class Job implements HasPid, HasId<String> {
 
     @Override
     @Column(name = "JOB_ID", nullable = false)
-    @Index(name = "IX_JOB_ID")
     public String getId() {
         return id;
     }
@@ -85,7 +84,10 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    /** string representation is ignored; json uses getAppMasterPropertiesObject() **/
+    /**
+     * string representation is ignored; json uses
+     * getAppMasterPropertiesObject()
+     **/
     @Column(name = "APPMASTER_PROPERTIES")
     @Lob
     public String getAppMasterProperties() {
@@ -104,7 +106,10 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    /** string representation is ignored; json uses setAppMasterPropertiesObject() **/
+    /**
+     * string representation is ignored; json uses
+     * setAppMasterPropertiesObject()
+     **/
     /** data store has string / varchar as persistence type **/
     public void setAppMasterProperties(String appMasterPropertiesStr) throws IOException {
         this.appMasterProperties = new Properties();
@@ -126,7 +131,10 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    /** string representation is ignored; json uses getContainerPropertiesObject() **/
+    /**
+     * string representation is ignored; json uses
+     * getContainerPropertiesObject()
+     **/
     @Column(name = "CONTAINER_PROPERTIES")
     @Lob
     public String getContainerProperties() {
@@ -145,7 +153,10 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    /** string representation is ignored; json uses setContainerPropertiesObject() **/
+    /**
+     * string representation is ignored; json uses
+     * setContainerPropertiesObject()
+     **/
     public void setContainerProperties(String containerPropertiesStr) throws IOException {
         this.containerProperties = new Properties();
         if (containerPropertiesStr != null && !containerPropertiesStr.equalsIgnoreCase("")) {
@@ -217,7 +228,8 @@ public class Job implements HasPid, HasId<String> {
 
         Job job = (Job) obj;
 
-        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient()) //
+        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId())
+                .append(client, job.getClient()) //
                 .append(appMasterProperties, job.getAppMasterPropertiesObject()) //
                 .append(containerProperties, job.getContainerPropertiesObject()).isEquals();
 

@@ -360,7 +360,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         }
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public ColumnMetadata toColumnMetadata() {
         List<ApprovedUsage> approvedUsages = getApprovedUsageList();
 

@@ -19,7 +19,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
@@ -45,6 +44,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
+@SuppressWarnings("deprecation")
 @Entity
 @javax.persistence.Table(name = "METADATA_STATISTICS", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })

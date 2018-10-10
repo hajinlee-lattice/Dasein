@@ -17,7 +17,9 @@ public class BusinessCalendarValidation {
         this.note = note;
     }
 
-    private BusinessCalendarValidation(){}
+    // for jackson
+    @SuppressWarnings("unused")
+	private BusinessCalendarValidation(){}
 
     public String getNote() {
         return note;

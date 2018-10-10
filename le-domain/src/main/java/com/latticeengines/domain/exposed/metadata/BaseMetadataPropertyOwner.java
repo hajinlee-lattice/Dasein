@@ -3,13 +3,13 @@ package com.latticeengines.domain.exposed.metadata;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseMetadataPropertyOwner<P extends MetadataProperty> implements HasProperties<P> {
+public abstract class BaseMetadataPropertyOwner<P extends MetadataProperty<?>> implements HasProperties<P> {
 
     public abstract List<P> getProperties();
 
     protected abstract void setProperties(List<P> properties);
 
-    protected abstract Class<P> getPropertyClz();
+    abstract Class<P> getPropertyClz();
 
     @Override
     public void putProperty(String key, String value) {

@@ -17,6 +17,8 @@ public class TimeRestriction extends Restriction {
         this.filter = filter;
     }
 
+    // for jackson
+    @SuppressWarnings("unused")
     private TimeRestriction() {}
 
     public TimeFilter getFilter() {

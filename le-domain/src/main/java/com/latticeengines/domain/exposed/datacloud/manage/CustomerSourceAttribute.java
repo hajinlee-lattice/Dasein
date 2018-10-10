@@ -9,17 +9,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.Index;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "CustomerSourceAttribute", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "Source", "Stage", "Transformer", "Attribute", "DataCloudVersion" }) })
+@Table(name = "CustomerSourceAttribute", indexes = { //
+        @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER", columnList = "Source,Stage,Transformer") }, //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "Source", "Stage", "Transformer",
+                "Attribute", "DataCloudVersion" }) })
 public class CustomerSourceAttribute implements HasPid, Serializable {
 
     private static final long serialVersionUID = 5143418326245069059L;
@@ -28,15 +29,12 @@ public class CustomerSourceAttribute implements HasPid, Serializable {
     @Column(name = "SourceAttributeID", unique = true, nullable = false)
     private Long sourceAttributeId;
 
-    @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER")
     @Column(name = "Source", nullable = false, length = 128)
     private String source;
 
-    @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER")
     @Column(name = "Stage", nullable = false, length = 32)
     private String stage;
 
-    @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER")
     @Column(name = "Transformer", nullable = false, length = 32)
     private String transformer;
 

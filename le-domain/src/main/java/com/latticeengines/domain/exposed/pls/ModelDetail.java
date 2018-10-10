@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-
 
 public class ModelDetail {
 

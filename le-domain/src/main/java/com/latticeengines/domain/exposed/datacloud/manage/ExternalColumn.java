@@ -338,7 +338,8 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         this.tags = StringUtils.join(tokens, ",");
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setColumnId(getExternalColumnID());

@@ -15,7 +15,7 @@ public class PipelineUnitTestNG {
     @Test(groups = "unit")
     public void addStepsFromPipelineJson() throws Exception {
         URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/domain/exposed/modelquality/pipeline.json");
-        String contents = FileUtils.readFileToString(new File(jsonUrl.getFile()));
+        String contents = FileUtils.readFileToString(new File(jsonUrl.getFile()), "UTF-8");
         
         Pipeline pipeline = new Pipeline();
         pipeline.addStepsFromPipelineJson(contents);

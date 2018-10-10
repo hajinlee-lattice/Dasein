@@ -13,16 +13,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.Index;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "DecisionGraph")
+@Table(name = "DecisionGraph", indexes = {@Index(name = "IX_NAME", columnList = "GraphName")})
 public class DecisionGraph implements HasPid, Serializable {
     private static final long serialVersionUID = -803250604271710254L;
 
@@ -31,7 +30,6 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Index(name = "IX_NAME")
     @Column(name = "GraphName", unique = true, nullable = false, length = 100)
     private String graphName;
 

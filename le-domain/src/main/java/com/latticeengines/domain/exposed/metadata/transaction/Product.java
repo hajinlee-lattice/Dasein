@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.HashUtils;
 
 public class Product implements Serializable {
-    private static final String UNKNOWN_PRODUCT_INTERNAL_ID = "c4ca1e5e-1018-4619-9f6b-bb23b7578b6a";
+	private static final long serialVersionUID = 3364226218384157226L;
+	
+	private static final String UNKNOWN_PRODUCT_INTERNAL_ID = "c4ca1e5e-1018-4619-9f6b-bb23b7578b6a";
     private static final String PRODUCT_ID = "Id";
     private static final String PRODUCT_NAME = "ProductName";
     private static final String PRODUCT_DESCRIPTION = "Description";

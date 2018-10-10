@@ -3,11 +3,7 @@ package com.latticeengines.domain.exposed.pls.frontend;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class JobStepDisplayInfoMapping {
-    private static final Logger log = LoggerFactory.getLogger(JobStepDisplayInfoMapping.class);
 
     private static final String[] FIT_MODEL_STEPS = { //
             "load_data", //

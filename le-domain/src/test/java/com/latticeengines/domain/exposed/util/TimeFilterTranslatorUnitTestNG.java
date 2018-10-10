@@ -11,7 +11,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 
 public class TimeFilterTranslatorUnitTestNG {
 
@@ -30,26 +29,35 @@ public class TimeFilterTranslatorUnitTestNG {
 
     @DataProvider(name = "timeFilterProvider")
     public Object[][] provideTimeFilters() {
-        TimeFilter currentMonth = new TimeFilter( //
-                ComparisonType.IN_CURRENT_PERIOD, TimeFilter.Period.Month.name(), Collections.emptyList());
-        TimeFilter within1Month = new TimeFilter( //
-                ComparisonType.WITHIN, TimeFilter.Period.Month.name(), Collections.singletonList(1));
-        TimeFilter within3Month = new TimeFilter( //
-                ComparisonType.WITHIN, TimeFilter.Period.Month.name(), Collections.singletonList(3));
-        TimeFilter within2Quarter = new TimeFilter( //
-                ComparisonType.WITHIN, TimeFilter.Period.Quarter.name(), Collections.singletonList(2));
-        TimeFilter prior1Month = new TimeFilter( //
-                ComparisonType.PRIOR, TimeFilter.Period.Month.name(), Collections.singletonList(1));
-        TimeFilter prior3Month = new TimeFilter( //
-                ComparisonType.PRIOR, TimeFilter.Period.Month.name(), Collections.singletonList(3));
-        TimeFilter between1And3Month = new TimeFilter( //
-                ComparisonType.BETWEEN, TimeFilter.Period.Month.name(), Arrays.asList(1, 3));
-        TimeFilter betweenDates = new TimeFilter( //
-                ComparisonType.BETWEEN_DATE, TimeFilter.Period.Date.name(), Arrays.asList("2018-02-01", "2019-01-01"));
-        TimeFilter beforeDate = new TimeFilter( //
-                ComparisonType.BEFORE, TimeFilter.Period.Date.name(), Collections.singletonList("2018-02-01"));
-        TimeFilter afterDate = new TimeFilter( //
-                ComparisonType.AFTER, TimeFilter.Period.Date.name(), Collections.singletonList("2018-02-01"));
+        TimeFilter currentMonth = new TimeFilter(//
+                ComparisonType.IN_CURRENT_PERIOD, PeriodStrategy.Template.Month.name(),
+                Collections.emptyList());
+        TimeFilter within1Month = new TimeFilter(//
+                ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(),
+                Collections.singletonList(1));
+        TimeFilter within3Month = new TimeFilter(//
+                ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(),
+                Collections.singletonList(3));
+        TimeFilter within2Quarter = new TimeFilter(//
+                ComparisonType.WITHIN, PeriodStrategy.Template.Quarter.name(),
+                Collections.singletonList(2));
+        TimeFilter prior1Month = new TimeFilter(//
+                ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(),
+                Collections.singletonList(1));
+        TimeFilter prior3Month = new TimeFilter(//
+                ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(),
+                Collections.singletonList(3));
+        TimeFilter between1And3Month = new TimeFilter(//
+                ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(), Arrays.asList(1, 3));
+        TimeFilter betweenDates = new TimeFilter(//
+                ComparisonType.BETWEEN_DATE, PeriodStrategy.Template.Date.name(),
+                Arrays.asList("2018-02-01", "2019-01-01"));
+        TimeFilter beforeDate = new TimeFilter(//
+                ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(),
+                Collections.singletonList("2018-02-01"));
+        TimeFilter afterDate = new TimeFilter(//
+                ComparisonType.AFTER, PeriodStrategy.Template.Date.name(),
+                Collections.singletonList("2018-02-01"));
         return new Object[][] { //
                 { TimeFilter.ever(), null }, //
                 { currentMonth, Pair.of("2018-02-01", "2018-02-28") }, //

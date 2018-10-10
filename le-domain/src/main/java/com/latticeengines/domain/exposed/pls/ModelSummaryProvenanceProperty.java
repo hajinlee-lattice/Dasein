@@ -6,11 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,7 +17,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 
 @Entity
-@Table(name = "MODEL_SUMMARY_PROVENANCE_PROPERTY")
+@Table(name = "MODEL_SUMMARY_PROVENANCE_PROPERTY", //
+        indexes = { @Index(name = "PROSPECT_DISCOVERY_OPTION_OPTION_IDX", columnList = "OPTION") })
 public class ModelSummaryProvenanceProperty implements HasOptionAndValue, HasPid {
 
     private Long pid;
@@ -56,7 +56,6 @@ public class ModelSummaryProvenanceProperty implements HasOptionAndValue, HasPid
 
     @Column(name = "OPTION", nullable = false)
     @JsonProperty("option")
-    @Index(name = "PROSPECT_DISCOVERY_OPTION_OPTION_IDX")
     public String getOption() {
         return option;
     }

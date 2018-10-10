@@ -9,19 +9,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "TalkingPointCache")
+@Table(name = "TalkingPointCache", indexes = {@Index(name = "IX_EXTERNALID", columnList = "External_ID")})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DanteTalkingPoint implements Serializable, HasDanteAuditingFields {
+
+    private static final long serialVersionUID = -416386386502430635L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,6 @@ public class DanteTalkingPoint implements Serializable, HasDanteAuditingFields {
     @Column(name = "TalkingPointCache_ID", unique = true, nullable = false)
     private int talkingPointCacheID;
 
-    @Index(name = "IX_EXTERNALID")
     @Column(name = "External_ID", unique = true, nullable = false, length = 50)
     private String externalID;
 

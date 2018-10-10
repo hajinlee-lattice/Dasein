@@ -6,13 +6,15 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@javax.persistence.Table(name = "MODELREVIEW_ROWRESULT")
+@Table(name = "MODELREVIEW_ROWRESULT", indexes = {@Index(name = "IX_MODEL_ID", columnList = "MODEL_ID")})
 public class RowRuleResult extends BaseRuleResult {
 
     @JsonProperty

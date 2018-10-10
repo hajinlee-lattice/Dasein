@@ -47,13 +47,13 @@ public class TimeFilterTranslator {
             return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
         } else {
             vals = Arrays.asList(range.getLeft(), range.getRight());
-            return new TimeFilter(ComparisonType.BETWEEN, TimeFilter.Period.Date.name(), vals);
+            return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(), vals);
         }
     }
 
     public Pair<String, String> translateRange(TimeFilter timeFilter) {
         String period = timeFilter.getPeriod();
-        if (TimeFilter.Period.Date.name().equals(period)) {
+        if (PeriodStrategy.Template.Date.name().equals(period)) {
             return translateDateFilter(timeFilter);
         }
         ComparisonType operator = timeFilter.getRelation();

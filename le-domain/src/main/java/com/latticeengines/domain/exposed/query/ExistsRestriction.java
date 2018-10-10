@@ -25,10 +25,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ExistsRestriction extends Restriction {
 
-    @Deprecated
-    @JsonProperty("object_type")
-    private SchemaInterpretation objectType;
-
     @JsonProperty("entity")
     private BusinessEntity entity;
 
@@ -40,7 +36,6 @@ public class ExistsRestriction extends Restriction {
 
     @Deprecated
     public ExistsRestriction(SchemaInterpretation objectType, boolean negate) {
-        this.objectType = objectType;
         this.negate = negate;
     }
 
@@ -58,7 +53,9 @@ public class ExistsRestriction extends Restriction {
         this.restriction = restriction;
     }
 
-    public ExistsRestriction() {
+    // for jackson
+    @SuppressWarnings("unused")
+    private ExistsRestriction() {
     }
 
     public BusinessEntity getEntity() {
@@ -75,16 +72,6 @@ public class ExistsRestriction extends Restriction {
 
     public void setNegate(boolean negate) {
         this.negate = negate;
-    }
-
-    @Deprecated
-    private SchemaInterpretation getObjectType() {
-        return objectType;
-    }
-
-    @Deprecated
-    private void setObjectType(SchemaInterpretation objectName) {
-        this.objectType = objectName;
     }
 
     public Restriction getRestriction() {
@@ -116,7 +103,6 @@ public class ExistsRestriction extends Restriction {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         return Collections.emptyMap();
     }

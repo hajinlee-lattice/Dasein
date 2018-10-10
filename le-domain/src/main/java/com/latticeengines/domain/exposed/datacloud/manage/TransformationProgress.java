@@ -12,18 +12,21 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "TransformationProgress")
+@Table(name = "TransformationProgress", indexes = {
+        @Index(name = "IX_SOURCE", columnList = "SourceName"), //
+        @Index(name = "IX_PIPELINE_VERSION", columnList = "SourceName,PipelineName,Version") //
+})
 @FilterDef(name = "hdfsPodFilter", parameters = { @ParamDef(name = "hdfsPod", type = "string") })
 @Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 public class TransformationProgress implements Progress {
@@ -33,11 +36,9 @@ public class TransformationProgress implements Progress {
     protected Long pid;
 
     @Column(name = "SourceName", nullable = false)
-    @Index(name = "IX_NAME_VERSION")
     protected String sourceName;
 
     @Column(name = "PipelineName")
-    @Index(name = "IX_NAME_VERSION")
     protected String pipelineName;
 
     @Column(name = "StartDate")
@@ -75,7 +76,6 @@ public class TransformationProgress implements Progress {
     private String baseSourceVersions;
 
     @Column(name = "Version")
-    @Index(name = "IX_NAME_VERSION")
     protected String version;
 
     @Column(name = "YarnAppId")
@@ -204,8 +204,8 @@ public class TransformationProgress implements Progress {
         return yarnAppId;
     }
 
-    public static TransformationProgress constructByDates(String sourceName, Date startDate, Date endDate)
-            throws InstantiationException, IllegalAccessException {
+    public static TransformationProgress constructByDates(String sourceName, Date startDate,
+            Date endDate) throws InstantiationException, IllegalAccessException {
         TransformationProgress progress = new TransformationProgress();
         progress.setSourceName(sourceName);
         progress.setStartDate(startDate);

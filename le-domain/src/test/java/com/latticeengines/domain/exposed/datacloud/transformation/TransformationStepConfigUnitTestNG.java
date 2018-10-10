@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.transformation;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,18 +14,18 @@ public class TransformationStepConfigUnitTestNG {
 
     @Test(groups = "unit")
     public void testDeSer() {
-        ObjectMapper OM = new ObjectMapper();
+        ObjectMapper om = new ObjectMapper();
         TransformationStepConfig config = new TransformationStepConfig();
-        ObjectNode objectNode = OM.createObjectNode();
+        ObjectNode objectNode = om.createObjectNode();
         objectNode.put("StringField", "StringValue");
         TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
         engineConfiguration.setEngine("flink");
-        objectNode.put("EngineConfig", OM.valueToTree(engineConfiguration));
+        objectNode.set("EngineConfig", om.valueToTree(engineConfiguration));
         config.setConfiguration(JsonUtils.serialize(objectNode));
 
         String serialized = JsonUtils.serialize(config);
         TransformationStepConfig deser = JsonUtils.deserialize(serialized, TransformationStepConfig.class);
-
+        Assert.assertNotNull(deser);
     }
 
 

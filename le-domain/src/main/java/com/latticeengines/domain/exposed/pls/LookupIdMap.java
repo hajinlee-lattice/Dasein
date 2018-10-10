@@ -12,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -20,7 +21,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -37,8 +37,10 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "LOOKUP_ID_MAP", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "ORG_ID", "EXT_SYS_TYPE", "FK_TENANT_ID" }) })
+@Table(name = "LOOKUP_ID_MAP", //
+        indexes = { @Index(name = "LOOKUP_ID_MAP_CONFIG_ID", columnList = "ID") }, //
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "ORG_ID", "EXT_SYS_TYPE", "FK_TENANT_ID" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OnDelete(action = OnDeleteAction.CASCADE)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
@@ -52,7 +54,6 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     private Long pid;
 
     @JsonProperty("configId")
-    @Index(name = "LOOKUP_ID_MAP_CONFIG_ID")
     @Column(name = "ID", unique = true, nullable = false)
     private String id;
 

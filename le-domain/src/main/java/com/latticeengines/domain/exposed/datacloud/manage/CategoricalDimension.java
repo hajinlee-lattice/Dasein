@@ -7,18 +7,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "CategoricalDimension", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "Source", "Dimension" }) })
+@Table(name = "CategoricalDimension", //
+        indexes = { @Index(name = "IX_SOURCE_DIMENSION", columnList = "Source,Dimension")}, //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "Source", "Dimension" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CategoricalDimension implements HasPid {
 
@@ -27,11 +27,9 @@ public class CategoricalDimension implements HasPid {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Index(name = "IX_SOURCE_DIMENSION")
     @Column(name = "Source", nullable = false, length = 100)
     private String source;
 
-    @Index(name = "IX_SOURCE_DIMENSION")
     @Column(name = "Dimension", nullable = false, length = 100)
     private String dimension;
 

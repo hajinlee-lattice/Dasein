@@ -146,7 +146,6 @@ public class PipelineStep implements HasName, HasPid, Serializable {
         this.mainClassName = mainClassName;
     }
 
-    @SuppressWarnings("unchecked")
     @JsonProperty("OperatesOnColumns")
     public List<String> getOperatesOnColumns() {
         if (operatesOnColumns == null) {

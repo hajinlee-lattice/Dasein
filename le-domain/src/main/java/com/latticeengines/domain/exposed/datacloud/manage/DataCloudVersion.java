@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
-
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
@@ -16,10 +15,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,25 +27,27 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "DataCloudVersion")
+@Table(name = "DataCloudVersion", //
+        indexes = { //
+                @Index(name = "IX_VERSION", columnList = "Version"),
+                @Index(name = "IX_MAJOR", columnList = "MajorVersion"), //
+        })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataCloudVersion implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6472245305360293747L;
 
-	@Id
+    @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
     @JsonProperty("Version")
-    @Index(name = "IX_VERSION")
     @Column(name = "Version", nullable = false, unique = true, length = 10)
     private String version;
 
     @JsonProperty("MajorVersion")
-    @Index(name = "IX_MAJOR")
     @Column(name = "MajorVersion", nullable = false, length = 10)
     private String majorVersion;
 

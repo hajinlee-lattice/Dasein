@@ -12,14 +12,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -38,8 +39,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT_EXPORT", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "EXPORT_ID" }) })
+@Table(name = "METADATA_SEGMENT_EXPORT", //
+        indexes = { //
+                @Index(name = "METADATA_SEGMENT_EXPORT_ID", columnList = "EXPORT_ID"), //
+                @Index(name = "METADATA_SEGMENT_EXPORT_TTL", columnList = "CLEANUP_BY"), //
+        }, uniqueConstraints = { @UniqueConstraint(columnNames = { "EXPORT_ID" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFields {
@@ -52,7 +56,6 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     private Long pid;
 
     @JsonProperty("exportId")
-    @Index(name = "METADATA_SEGMENT_EXPORT_ID")
     @Column(name = "EXPORT_ID", nullable = false)
     private String exportId;
 
@@ -114,7 +117,6 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     private Date updated;
 
     @JsonProperty("cleanup_by")
-    @Index(name = "METADATA_SEGMENT_EXPORT_TTL")
     @Column(name = "CLEANUP_BY", nullable = false)
     private Date cleanupBy;
 
@@ -180,7 +182,8 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public FrontEndRestriction getAccountFrontEndRestriction() {
         return StringUtils.isNoneBlank(restrictionString)
-                ? JsonUtils.deserialize(restrictionString, FrontEndRestriction.class) : new FrontEndRestriction();
+                ? JsonUtils.deserialize(restrictionString, FrontEndRestriction.class)
+                : new FrontEndRestriction();
     }
 
     public void setAccountFrontEndRestriction(FrontEndRestriction accountFrontEndRestriction) {

@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -23,7 +24,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -48,11 +48,14 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "MODEL_SUMMARY", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
-        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+@Table(name = "MODEL_SUMMARY", //
+        indexes = { @Index(name = "MODEL_SUMMARY_NAME_IDX", columnList = "NAME"),
+                @Index(name = "MODEL_SUMMARY_ID_IDX", columnList = "ID"), }, //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
+                @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummary
-        implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact, Dimension {
+public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId,
+        HasApplicationId, Fact, Dimension {
 
     public static final String STATUS = "Status";
     public static final String DISPLAY_NAME = "DisplayName";
@@ -120,7 +123,6 @@ public class ModelSummary
     @Override
     @JsonProperty("Name")
     @Column(name = "NAME", nullable = false)
-    @Index(name = "MODEL_SUMMARY_NAME_IDX")
     public String getName() {
         return name;
     }
@@ -145,7 +147,6 @@ public class ModelSummary
     @Override
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
-    @Index(name = "MODEL_SUMMARY_ID_IDX")
     public String getId() {
         return id;
     }
@@ -167,7 +168,7 @@ public class ModelSummary
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
         if (tenant != null) {
-        		setTenantId(tenant.getPid());
+            setTenantId(tenant.getPid());
         }
     }
 
@@ -547,7 +548,8 @@ public class ModelSummary
         this.modelSummaryProvenanceProperties = modelSummaryProvenanceProperties;
     }
 
-    public void addModelSummaryProvenanceProperty(ModelSummaryProvenanceProperty modelSummaryProvenanceProperty) {
+    public void addModelSummaryProvenanceProperty(
+            ModelSummaryProvenanceProperty modelSummaryProvenanceProperty) {
         this.modelSummaryProvenanceProperties.add(modelSummaryProvenanceProperty);
     }
 

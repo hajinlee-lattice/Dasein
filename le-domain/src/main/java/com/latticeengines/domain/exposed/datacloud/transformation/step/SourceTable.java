@@ -22,7 +22,8 @@ public class SourceTable {
     }
 
     // for jackson
-    private SourceTable() {}
+    @SuppressWarnings("unused")
+	private SourceTable() {}
 
     public String getTableName() {
         return tableName;

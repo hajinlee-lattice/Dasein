@@ -6,11 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,8 +21,10 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "MODELQUALITY_SUMMARY_METRICS", uniqueConstraints = { @UniqueConstraint(columnNames = { "PID" }),
-        @UniqueConstraint(columnNames = { "TENANT_NAME", "NAME" }) })
+@Table(name = "MODELQUALITY_SUMMARY_METRICS", //
+        indexes = { @Index(name = "MODELQUALITY_SUMMARY_NAME_IDX", columnList = "TENANT_NAME") }, //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "PID" }),
+                @UniqueConstraint(columnNames = { "TENANT_NAME", "NAME" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_NAME = :tenantFilterName")
 public class ModelSummaryMetrics implements HasPid, HasName {
     private String tenantName;
@@ -52,7 +54,6 @@ public class ModelSummaryMetrics implements HasPid, HasName {
 
     @JsonProperty("TenantName")
     @Column(name = "TENANT_NAME", nullable = false)
-    @Index(name = "MODELQUALITY_SUMMARY_NAME_IDX")
     public String getTenantName() {
         return tenantName;
     }

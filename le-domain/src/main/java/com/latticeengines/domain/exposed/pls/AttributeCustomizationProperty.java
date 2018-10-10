@@ -11,14 +11,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -37,11 +36,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "ATTRIBUTE_CUSTOMIZATION_PROPERTY", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE", "CATEGORY_NAME",
-        "PROPERTY_NAME" }) })
+        indexes = { @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE", //
+                columnList = "FK_TENANT_ID,ATTRIBUTE_NAME,USE_CASE")}, //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME",
+                "USE_CASE", "CATEGORY_NAME", "PROPERTY_NAME" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class AttributeCustomizationProperty extends CustomizationProperty implements HasPid, HasName, HasTenant,
-        HasTenantId {
+public class AttributeCustomizationProperty extends CustomizationProperty
+        implements HasPid, HasName, HasTenant, HasTenantId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -52,18 +53,15 @@ public class AttributeCustomizationProperty extends CustomizationProperty implem
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
     private Tenant tenant;
 
     @JsonProperty("attribute_name")
     @Column(name = "ATTRIBUTE_NAME", nullable = false, length = 100)
-    @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
     private String attributeName;
 
     @JsonProperty("use_case")
     @Enumerated(EnumType.STRING)
     @Column(name = "USE_CASE", nullable = false, length = 50)
-    @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
     private AttributeUseCase useCase;
 
     @JsonIgnore

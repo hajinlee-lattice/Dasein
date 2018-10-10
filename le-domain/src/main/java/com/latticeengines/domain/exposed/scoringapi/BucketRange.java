@@ -7,6 +7,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class BucketRange implements Serializable {
+    private static final long serialVersionUID = 2656192079200240174L;
+
     // The user facing display name of this bucket.
     public String name;
 

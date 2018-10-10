@@ -10,7 +10,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 // Contains all the information necessary to construct score elements that
 // are derived from the probability.
 public class ScoreDerivation implements Serializable {
-    public ScoreDerivation(String target, double averageProbability, List<BucketRange> percentiles,
+	private static final long serialVersionUID = 1315253030388148287L;
+
+	public ScoreDerivation(String target, double averageProbability, List<BucketRange> percentiles,
             List<BucketRange> buckets) {
         this.target = target;
         this.averageProbability = averageProbability;

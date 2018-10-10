@@ -12,13 +12,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,7 +29,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "IngestionProgress")
+@Table(name = "IngestionProgress", indexes = { //
+        @Index(name = "IX_INGESTION_ID", columnList = "IngestionId"), //
+        @Index(name = "IX_VERSION", columnList = "Version") //
+})
 @FilterDef(name = "hdfsPodFilter", parameters = { @ParamDef(name = "hdfsPod", type = "string") })
 @Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -45,7 +48,6 @@ public class IngestionProgress implements Progress, Serializable {
 
     @ManyToOne
     @JoinColumn(name = "IngestionId", nullable = false)
-    @Index(name = "IX_INGESTION_ID")
     private Ingestion ingestion;
 
     @Column(name = "Source", nullable = false, length = 1000)
@@ -58,7 +60,6 @@ public class IngestionProgress implements Progress, Serializable {
     private String hdfsPod;
 
     @Column(name = "Version", length = 50)
-    @Index(name = "IX_VERSION")
     private String version;
 
     @Enumerated(EnumType.STRING)

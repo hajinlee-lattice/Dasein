@@ -21,7 +21,9 @@ public class RatingModelContainer {
     @JsonProperty("scoringBucketMetadata")
     private List<BucketMetadata> scoringBucketMetadata;
 
-    private RatingModelContainer() {
+    // for jackson
+    @SuppressWarnings("unused")
+	private RatingModelContainer() {
     }
 
     public RatingModelContainer(RatingModel ratingModel) {

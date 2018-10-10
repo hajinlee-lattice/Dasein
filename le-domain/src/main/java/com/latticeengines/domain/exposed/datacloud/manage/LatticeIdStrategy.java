@@ -68,7 +68,6 @@ public class LatticeIdStrategy implements HasPid, Serializable {
     @Transient
     private Map<String, List<String>> keyMap;
 
-    @SuppressWarnings("unchecked")
     public void addKeyMap(String keySet, String attrs) {
         if (keyMap == null) {
             keyMap = new HashMap<>();

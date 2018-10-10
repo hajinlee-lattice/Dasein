@@ -12,12 +12,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
-@Table(name = "SECURITY_IDENTITY_PROVIDER")
+@Table(name = "SECURITY_IDENTITY_PROVIDER", indexes = {@Index(name = "IX_ENTITY_ID", columnList = "ENTITY_ID")})
 public class IdentityProvider implements HasPid, HasAuditingFields {
 
     @Id
@@ -49,7 +49,6 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     private GlobalAuthTenant globalAuthTenant;
 
     @JsonProperty("entity_id")
-    @Index(name = "IX_ENTITY_ID")
     @Column(name = "ENTITY_ID", nullable = false, unique = true)
     private String entityId;
 

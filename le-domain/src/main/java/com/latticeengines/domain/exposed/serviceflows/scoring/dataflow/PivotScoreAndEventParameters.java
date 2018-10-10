@@ -9,8 +9,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
-import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class PivotScoreAndEventParameters extends DataFlowParameters {
 

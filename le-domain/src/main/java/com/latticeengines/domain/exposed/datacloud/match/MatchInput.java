@@ -283,14 +283,6 @@ public class MatchInput implements Fact, Dimension {
         }
     }
 
-    private String getLogLevel() {
-        return logLevel;
-    }
-
-    private void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
-    }
-
     public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
     }

@@ -7,6 +7,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 
@@ -157,7 +158,7 @@ public class BucketRestrictionUnitTestNG {
     @Test(groups = "unit")
     public void testGenericPurchaseHistory() {
         // last quarter
-        TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, TimeFilter.Period.Quarter.name(),
+        TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, PeriodStrategy.Template.Quarter.name(),
                 Collections.singletonList(1));
         // amount > 1000
         AggregationFilter amtFilter = new AggregationFilter(ComparisonType.GREATER_THAN,

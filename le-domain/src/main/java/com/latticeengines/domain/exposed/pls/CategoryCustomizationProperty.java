@@ -11,13 +11,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -36,9 +36,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "CATEGORY_CUSTOMIZATION_PROPERTY", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "USE_CASE", "CATEGORY_NAME", "PROPERTY_NAME" }) })
+        indexes = {
+                @Index(name = "IX_TENANT_ATTRIBUTECATEGORY_USECASE", columnList = "FK_TENANT_ID,USE_CASE") }, //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "USE_CASE",
+                "CATEGORY_NAME", "PROPERTY_NAME" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class CategoryCustomizationProperty extends CustomizationProperty implements HasPid, HasTenant, HasTenantId {
+public class CategoryCustomizationProperty extends CustomizationProperty
+        implements HasPid, HasTenant, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,13 +54,11 @@ public class CategoryCustomizationProperty extends CustomizationProperty impleme
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    @Index(name = "IX_TENANT_ATTRIBUTECATEGORY_USECASE")
     private Tenant tenant;
 
     @JsonProperty("use_case")
     @Enumerated(EnumType.STRING)
     @Column(name = "USE_CASE", nullable = false)
-    @Index(name = "IX_TENANT_ATTRIBUTECATEGORY_USECASE")
     private AttributeUseCase useCase;
 
     @JsonIgnore

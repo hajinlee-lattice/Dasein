@@ -41,7 +41,7 @@ public class Namespace2<T1 extends Serializable, T2 extends Serializable> extend
         if (obj.getClass() != getClass()) {
             return false;
         }
-        Namespace2 rhs = (Namespace2) obj;
+        Namespace2<?, ?> rhs = (Namespace2<?, ?>) obj;
         return new EqualsBuilder() //
                 .appendSuper(super.equals(obj)) //
                 .append(coord1, rhs.coord1) //

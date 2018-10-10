@@ -14,7 +14,7 @@ public class MetadataUnitTestNG {
     @Test(groups = "unit")
     public void testSerializationAndDeseralization() throws Exception {
         URL metadataUrl = ClassLoader.getSystemResource("com/latticeengines/domain/exposed/modeling/metadata.avsc");
-        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()), "UTF-8");
 
         ObjectMapper objectMapper = new ObjectMapper();
         Metadata metadata = objectMapper.readValue(metadataContents, Metadata.class);

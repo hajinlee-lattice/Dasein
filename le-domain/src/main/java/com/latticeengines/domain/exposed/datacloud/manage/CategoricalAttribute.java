@@ -7,16 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "CategoricalAttribute")
+@Table(name = "CategoricalAttribute", indexes = { @Index(name = "IX_PARENT_ID", columnList = "ParentID")})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CategoricalAttribute implements HasPid {
 
@@ -35,7 +34,6 @@ public class CategoricalAttribute implements HasPid {
     @Column(name = "AttrValue", nullable = false, length = 500)
     private String attrValue;
 
-    @Index(name = "IX_PARENT_ID")
     @Column(name = "ParentID")
     private Long parentId;
 

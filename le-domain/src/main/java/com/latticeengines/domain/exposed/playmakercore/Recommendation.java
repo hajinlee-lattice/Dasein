@@ -14,7 +14,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -23,7 +25,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.FilterDefs;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,7 +39,17 @@ import com.latticeengines.domain.exposed.pls.SoftDeletable;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
-@javax.persistence.Table(name = "Recommendation")
+@Table(name = "Recommendation", indexes = { //
+        @Index(name = "REC_EXTERNAL_ID", columnList = "EXTERNAL_ID"), //
+        @Index(name = "REC_PLAY_ID", columnList = "PLAY_ID"), //
+        @Index(name = "REC_LAUNCH_ID", columnList = "LAUNCH_ID"), //
+        @Index(name = "REC_LAUNCH_DATE", columnList = "LAUNCH_DATE"), //
+        @Index(name = "REC_LAUNCH_LAST_UPD_TIME", columnList = "LAST_UPDATED_TIMESTAMP"), //
+        @Index(name = "REC_DELETED", columnList = "DELETED"), //
+        @Index(name = "REC_TENANT_ID", columnList = "TENANT_ID"), //
+        @Index(name = "DESTINATION_SYS_TYPE", columnList = "DESTINATION_SYS_TYPE"), //
+        @Index(name = "DESTINATION_ORG_ID", columnList = "DESTINATION_ORG_ID"), //
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FilterDefs({
         @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
@@ -54,7 +65,6 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Index(name = "REC_EXTERNAL_ID")
     @Column(name = "EXTERNAL_ID", nullable = false)
     @JsonProperty("external_id")
     private String recommendationId;
@@ -67,12 +77,10 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @JsonProperty("leAccountExternalID")
     private String leAccountExternalID;
 
-    @Index(name = "REC_PLAY_ID")
     @Column(name = "PLAY_ID", nullable = false)
     @JsonProperty("play_id")
     private String playId;
 
-    @Index(name = "REC_LAUNCH_ID")
     @Column(name = "LAUNCH_ID", nullable = false)
     @JsonProperty("launch_id")
     private String launchId;
@@ -81,13 +89,11 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @JsonProperty("description")
     private String description;
 
-    @Index(name = "REC_LAUNCH_DATE")
     @Column(name = "LAUNCH_DATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("launchDate")
     private Date launchDate;
 
-    @Index(name = "REC_LAUNCH_LAST_UPD_TIME")
     @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("lastUpdatedTimestamp")
@@ -143,22 +149,18 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @JsonProperty("modelSummaryId")
     private String modelSummaryId;
 
-    @Index(name = "DESTINATION_ORG_ID")
-    @Column(name = "DESTINATION_ORG_ID", nullable = true)
+    @Column(name = "DESTINATION_ORG_ID")
     @JsonProperty("destinationOrgId")
     private String destinationOrgId;
 
-    @Index(name = "DESTINATION_SYS_TYPE")
-    @Column(name = "DESTINATION_SYS_TYPE", nullable = true)
+    @Column(name = "DESTINATION_SYS_TYPE")
     @JsonProperty("destinationSysType")
     private String destinationSysType;
 
-    @Index(name = "REC_TENANT_ID")
     @Column(name = "TENANT_ID", nullable = false)
     @JsonProperty("tenant_id")
     private Long tenantId;
 
-    @Index(name = "REC_DELETED")
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
@@ -457,7 +459,8 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
         return recMap;
     }
 
-    private static void setAttribute(List<Attribute> schema, int index, String attrName, Schema.Type physicalType) {
+    private static void setAttribute(List<Attribute> schema, int index, String attrName,
+            Schema.Type physicalType) {
         Attribute attr = new Attribute(attrName);
         attr.setDisplayName(attrName);
         attr.setPhysicalDataType(physicalType.name());

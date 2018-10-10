@@ -59,7 +59,6 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
                 .endRecord();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public DunsGuideBook fromFabricAvroRecord(GenericRecord record) {
         Preconditions.checkNotNull(record);

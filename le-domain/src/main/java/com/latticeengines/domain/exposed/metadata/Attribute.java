@@ -61,12 +61,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
      * from both Active and InActive stacks, we need to consider addition of new
      * column with backward compatibility support. As it is unnecessary at this
      * point, going back to Identity generator.
-     * 
+     *
      * @TableGenerator(name = "MDAttribute_SEQ_GEN", table =
      * "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName
      * = "SEQUENCE_VAL", pkColumnValue = "MDAttribute_SEQUENCE", initialValue =
      * MDATTRIBUTE_INIT_VALUE, allocationSize = 50)
-     * 
+     *
      * @GeneratedValue(strategy = GenerationType.TABLE, generator =
      * "MDAttribute_SEQ_GEN")
      */
@@ -550,7 +550,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    @SuppressWarnings("unchecked")
     public boolean isHiddenForRemodelingUI() {
         if (properties.containsKey("IsHiddenForRemodelingUI")) {
             return (Boolean) properties.get("IsHiddenForRemodelingUI");
@@ -1134,7 +1133,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setDisplayName(getDisplayName());
         metadata.setSecondaryDisplayName(getSecondaryDisplayName());
-        metadata.setColumnId(getName());
+        metadata.setAttrName(getName());
         metadata.setDescription(getDescription());
         metadata.setLogicalDataType(getLogicalDataType());
         metadata.setIsHiddenForRemodelingUI(isHiddenForRemodelingUI());

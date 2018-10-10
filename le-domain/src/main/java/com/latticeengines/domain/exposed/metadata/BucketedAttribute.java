@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BucketedAttribute implements Serializable {
 
+    private static final long serialVersionUID = -1967674185815017667L;
+
     @JsonProperty("nominal_attr")
     private String nominalAttr;
 
@@ -37,10 +39,6 @@ public class BucketedAttribute implements Serializable {
         return nominalAttr;
     }
 
-    private void setNominalAttr(String nominalAttr) {
-        this.nominalAttr = nominalAttr;
-    }
-
     public List<String> getBuckets() {
         return buckets;
     }
@@ -53,15 +51,7 @@ public class BucketedAttribute implements Serializable {
         return lowestBit;
     }
 
-    private void setLowestBit(int lowestBit) {
-        this.lowestBit = lowestBit;
-    }
-
     public int getNumBits() {
         return numBits;
-    }
-
-    private void setNumBits(int numBits) {
-        this.numBits = numBits;
     }
 }

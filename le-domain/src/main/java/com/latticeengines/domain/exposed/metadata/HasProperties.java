@@ -1,8 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
-public interface HasProperties<T extends MetadataProperty> {
+public interface HasProperties<T extends MetadataProperty<?>> {
 
-    MetadataProperty getProperty(String key);
+    T getProperty(String key);
 
     void putProperty(String key, String value);
 

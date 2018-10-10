@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 public class BucketedScoreSummaryUtilsUnitTestNG {
 
     private static final String RESOURCE_ROOT = "com/latticeengines/domain/exposed" //
-            + "/util/BucketedScoreSummaryUtilsUnitTestNG/";
+            + "/util/BucketedScoreSummaryUtilsTest/";
 
     @Test(groups = "unit")
     public void testParseBucketedScore() throws IOException {
@@ -76,7 +76,8 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
         return buckets;
     }
 
-    private static BucketMetadata bucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+    @SuppressWarnings("deprecation")
+	private static BucketMetadata bucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
         BucketMetadata bucket = new BucketMetadata();
         bucket.setLeftBoundScore(leftBoundScore);
         bucket.setRightBoundScore(rightBoundScore);

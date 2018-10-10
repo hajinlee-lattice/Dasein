@@ -43,7 +43,7 @@ public class Namespace3<T1 extends Serializable, T2 extends Serializable, T3 ext
         if (obj.getClass() != getClass()) {
             return false;
         }
-        Namespace3 rhs = (Namespace3) obj;
+        Namespace3<?, ?, ?> rhs = (Namespace3<?, ?, ?>) obj;
         return new EqualsBuilder() //
                 .appendSuper(super.equals(obj)) //
                 .append(coord1, rhs.coord1) //

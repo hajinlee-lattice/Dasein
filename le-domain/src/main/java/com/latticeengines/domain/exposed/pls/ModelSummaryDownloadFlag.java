@@ -8,16 +8,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODEL_SUMMARY_DOWNLOAD_FLAGS")
+@Table(name = "MODEL_SUMMARY_DOWNLOAD_FLAGS", indexes = { //
+        @Index(name = "IX_TENANT_ID", columnList = "Tenant_ID"), //
+        @Index(name = "IX_MARK_TIME", columnList = "MARK_TIME") //
+})
 public class ModelSummaryDownloadFlag implements HasPid {
 
     @Id
@@ -28,12 +30,10 @@ public class ModelSummaryDownloadFlag implements HasPid {
     private Long pid;
 
     @JsonProperty("tenant_id")
-    @Index(name = "IX_TENANT_ID")
     @Column(name = "Tenant_ID")
     private String tenantId;
 
     @JsonProperty("mark_time")
-    @Index(name = "IX_MARK_TIME")
     @Column(name = "MARK_TIME")
     private Date markTime;
 

@@ -12,12 +12,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "MatchBlock")
+@Table(name = "MatchBlock", indexes = { @Index(name = "IX_UID", columnList = "BlockOperationUID")})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchBlock implements HasPid {
 
@@ -35,7 +35,6 @@ public class MatchBlock implements HasPid {
     @Column(name = "PID", nullable = false)
     private Long pid;
 
-    @Index(name = "IX_UID")
     @Column(name = "BlockOperationUID", nullable = false, length = 100)
     private String blockOperationUid;
 
@@ -201,19 +200,23 @@ public class MatchBlock implements HasPid {
         this.progress = progress;
     }
 
-    private String getCreateTimeAsString() {
+    @SuppressWarnings("unused")
+	private String getCreateTimeAsString() {
         return DateTimeUtils.format(createTime);
     }
 
-    private void setCreateTimeByString(String createTimeString) {
+    @SuppressWarnings("unused")
+	private void setCreateTimeByString(String createTimeString) {
         this.createTime = DateTimeUtils.parse(createTimeString);
     }
 
-    private String getLatestStatusUpdateAsString() {
+    @SuppressWarnings("unused")
+	private String getLatestStatusUpdateAsString() {
         return DateTimeUtils.format(latestStatusUpdate);
     }
 
-    private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
+    @SuppressWarnings("unused")
+	private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
         this.latestStatusUpdate = DateTimeUtils.parse(latestStatusUpdateString);
     }
 }

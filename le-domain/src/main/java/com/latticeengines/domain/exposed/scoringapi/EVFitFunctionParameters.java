@@ -5,6 +5,8 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EVFitFunctionParameters implements Serializable {
+    private static final long serialVersionUID = 7439595521700906270L;
+
     @JsonProperty("ev")
     private FitFunctionParameters ev;
 

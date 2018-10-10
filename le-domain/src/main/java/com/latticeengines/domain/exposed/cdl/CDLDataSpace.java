@@ -17,7 +17,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CDLDataSpace implements Serializable {
 
-    @JsonProperty("ActiveVersion")
+    private static final long serialVersionUID = -2292678716486572472L;
+
+	@JsonProperty("ActiveVersion")
     private DataCollection.Version activeVersion;
 
     @JsonProperty("Entities")

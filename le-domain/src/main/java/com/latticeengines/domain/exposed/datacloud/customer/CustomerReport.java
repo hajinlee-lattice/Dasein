@@ -11,10 +11,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -26,7 +26,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-@Table(name = "CustomerReport")
+@Table(name = "CustomerReport", indexes = {@Index(name = "Report_ID_IDX", columnList = "ID")})
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -83,7 +83,6 @@ public class CustomerReport implements HasId<String>, HasPid{
     }
 
     @Column(name = "ID", unique = true, nullable = false)
-    @Index(name = "Report_ID_IDX")
     @Override
     public String getId() {
         return id;

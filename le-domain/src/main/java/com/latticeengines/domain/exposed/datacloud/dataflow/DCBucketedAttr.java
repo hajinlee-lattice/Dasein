@@ -18,7 +18,8 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
     private static final long serialVersionUID = -1L;
 
     // for jackson
-    private DCBucketedAttr() {
+    @SuppressWarnings("unused")
+	private DCBucketedAttr() {
     }
 
     public DCBucketedAttr(String nominalAttr, String sourceAttr, int lowestBit, int numBits) {
@@ -53,7 +54,7 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
         this.bucketAlgo = bucketAlgo;
     }
 
-    private String getSourceAttr() {
+    public String getSourceAttr() {
         return sourceAttr;
     }
 

@@ -4,9 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,8 +24,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AttributeRepository {
-
-    private static final Logger log = LoggerFactory.getLogger(AttributeRepository.class);
 
     @JsonProperty("Customer")
     private CustomerSpace customerSpace;

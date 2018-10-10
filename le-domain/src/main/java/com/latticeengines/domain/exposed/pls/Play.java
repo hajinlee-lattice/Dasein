@@ -15,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -27,7 +28,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.FilterDefs;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.ParamDef;
@@ -48,7 +48,10 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "PLAY")
+@Table(name = "PLAY", indexes = { //
+        @Index(name = "PLAY_DELETED", columnList = "DELETED"), //
+        @Index(name = "PLAY_CLEANUP_DONE", columnList = "CLEANUP_DONE") //
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FilterDefs({
         @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
@@ -103,7 +106,8 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     private LaunchHistory launchHistory;
 
     @JsonProperty("talkingPoints")
-    @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
+    @OneToMany(cascade = {
+            CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TalkingPoint> talkingPoints;
 
@@ -150,12 +154,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastTalkingPointPublishTime;
 
-    @Index(name = "PLAY_DELETED")
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
 
-    @Index(name = "PLAY_CLEANUP_DONE")
     @JsonProperty("isCleanupDone")
     @Column(name = "CLEANUP_DONE", nullable = false)
     private Boolean isCleanupDone = Boolean.FALSE;

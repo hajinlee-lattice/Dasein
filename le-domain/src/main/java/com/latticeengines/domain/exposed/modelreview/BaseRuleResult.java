@@ -13,7 +13,6 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -50,7 +49,6 @@ public abstract class BaseRuleResult implements HasPid, HasTenant {
 
     @JsonProperty
     @Column(name = "MODEL_ID", nullable = false)
-    @Index(name = "IX_MODEL_ID")
     private String modelId;
 
     @Override

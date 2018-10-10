@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.query.BusinessEntity;

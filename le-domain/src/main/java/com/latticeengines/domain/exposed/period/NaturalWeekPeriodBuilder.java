@@ -49,8 +49,4 @@ public class NaturalWeekPeriodBuilder extends StartTimeBasedPeriodBuilder implem
         startDayOfWeek = startDate.get(ChronoField.DAY_OF_WEEK) % 7;
     }
 
-    private int getPeriodYear(int period) {
-        return startDate.get(ChronoField.YEAR) + period;
-    }
-
 }

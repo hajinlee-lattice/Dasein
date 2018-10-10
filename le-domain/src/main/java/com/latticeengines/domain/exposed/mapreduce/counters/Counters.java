@@ -75,7 +75,7 @@ public class Counters implements org.apache.hadoop.mapreduce.v2.api.records.Coun
     @Override
     @JsonIgnore
     public void removeCounterGroup(String key) {
-        counterGroups.remove(key);
+        counterGroups.removeIf(grp -> grp.getName().equals(key));
     }
 
     @Override

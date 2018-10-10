@@ -15,8 +15,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -26,7 +28,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.FilterDefs;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.ParamDef;
@@ -44,7 +45,13 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "PLAY_LAUNCH")
+@Table(name = "PLAY_LAUNCH", indexes = { //
+        @Index(name = "PLAY_LAUNCH_ID", columnList = "LAUNCH_ID"), //
+        @Index(name = "PLAY_LAUNCH_CREATED", columnList = "CREATED"), //
+        @Index(name = "PLAY_LAUNCH_LAST_UPDATED", columnList = "UPDATED"), //
+        @Index(name = "PLAY_LAUNCH_STATE", columnList = "STATE"), //
+        @Index(name = "PLAY_LAUNCH_DELETED", columnList = "DELETED") //
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FilterDefs({
         @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
@@ -67,18 +74,15 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private Long pid;
 
     @JsonProperty("launchId")
-    @Index(name = "PLAY_LAUNCH_ID")
     @Column(name = "LAUNCH_ID", unique = true, nullable = false)
     private String launchId;
 
     @JsonProperty("created")
-    @Index(name = "PLAY_LAUNCH_CREATED")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     @JsonProperty("updated")
-    @Index(name = "PLAY_LAUNCH_LAST_UPDATED")
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
@@ -92,7 +96,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private String updatedBy;
 
     @JsonProperty("launchState")
-    @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
     @Enumerated(EnumType.STRING)
     private LaunchState launchState;
@@ -170,7 +173,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ACC_ID", nullable = true)
     private String destinationAccountId;
 
-    @Index(name = "PLAY_LAUNCH_DELETED")
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;

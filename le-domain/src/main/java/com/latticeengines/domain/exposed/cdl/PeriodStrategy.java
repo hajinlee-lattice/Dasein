@@ -29,7 +29,9 @@ public class PeriodStrategy implements Serializable {
         CalendarYear = new PeriodStrategy(Template.Year);
     }
 
-    private PeriodStrategy() {
+    // for jackson
+    @SuppressWarnings("unused")
+	private PeriodStrategy() {
     }
 
     public PeriodStrategy(Template template) {

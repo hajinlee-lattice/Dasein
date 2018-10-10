@@ -67,6 +67,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+@SuppressWarnings("deprecation")
 public class StatsCubeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);
@@ -817,28 +818,6 @@ public class StatsCubeUtils {
                 return 1;
             }
         };
-    }
-
-    private static Comparator<TopAttribute> productTopAttrComparator() {
-        return (o1, o2) -> {
-            String attr1 = o1.getAttribute();
-            String attr2 = o2.getAttribute();
-            int rank1 = productAttrSuffixRank(attr1);
-            int rank2 = productAttrSuffixRank(attr2);
-            if (rank1 == rank2) {
-                return attr1.compareTo(attr2);
-            } else {
-                return rank1 - rank2;
-            }
-        };
-    }
-
-    private static int productAttrSuffixRank(String attr) {
-        if (attr.endsWith(HASEVER_PURCHASED_SUFFIX)) {
-            return 0;
-        } else {
-            return Integer.MAX_VALUE;
-        }
     }
 
     public static Map<String, StatsCube> toStatsCubes(Statistics statistics) {

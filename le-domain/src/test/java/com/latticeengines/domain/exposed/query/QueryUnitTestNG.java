@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class QueryUnitTestNG {
 

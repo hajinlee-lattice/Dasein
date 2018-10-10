@@ -14,31 +14,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class MatchKeyUtils {
 
     private static final Logger log = LoggerFactory.getLogger(MatchKeyUtils.class);
 
-    private static final List<String> domainFields = new ArrayList<>(Arrays.asList("domain", "website", "email", "url"));
+    private static final List<String> domainFields = new ArrayList<>(
+            Arrays.asList("domain", "website", "email", "url"));
     private static final String latticeAccountId = "latticeaccountid";
 
     /**
      * Match key level -> accuracy level Lower accuracy level, less information
      * in match input
      */
-    private static final Map<MatchKey, Integer> KEY_LEVEL = new HashMap<MatchKey, Integer>() {
-        {
-            put(MatchKey.Name, 0);
-            put(MatchKey.Country, 1);
-            put(MatchKey.State, 2);
-            put(MatchKey.City, 3);
-        }
-    };
+    private static final Map<MatchKey, Integer> KEY_LEVEL = ImmutableMap.of( //
+            MatchKey.Name, 0, //
+            MatchKey.Country, 1, //
+            MatchKey.State, 2, //
+            MatchKey.City, 3 //
+    );
 
     public static Map<MatchKey, List<String>> resolveKeyMap(Schema schema) {
         List<String> fieldNames = new ArrayList<>();
-        for (Schema.Field field: schema.getFields()) {
+        for (Schema.Field field : schema.getFields()) {
             fieldNames.add(field.name());
         }
         return resolveKeyMap(fieldNames);
@@ -48,15 +48,16 @@ public class MatchKeyUtils {
      * This method tries to automatically resolve match keys from a list of
      * field names. It could generate incorrect result. Use with caution. It is
      * safer to directly specify key field mapping.
+     *
      * @param fields
      * @return
      */
     public static Map<MatchKey, List<String>> resolveKeyMap(List<String> fields) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
 
-        keyMap.put(MatchKey.Domain, new ArrayList<String>());
+        keyMap.put(MatchKey.Domain, new ArrayList<>());
 
-        for (String domainField: domainFields) {
+        for (String domainField : domainFields) {
             for (String field : fields) {
                 String lowerField = field.toLowerCase();
                 if (domainField.equals(lowerField)) {
@@ -106,6 +107,7 @@ public class MatchKeyUtils {
                 case "latticeid":
                     keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(field));
                     break;
+                default:
             }
         }
 
@@ -148,8 +150,8 @@ public class MatchKeyUtils {
      */
     public static int compareKeyLevel(MatchKey compared, MatchKey compareTo) {
         if (!KEY_LEVEL.containsKey(compared) || !KEY_LEVEL.containsKey(compareTo)) {
-            throw new UnsupportedOperationException(
-                    String.format("Not able to compare match key level between %s and %s", compared, compareTo));
+            throw new UnsupportedOperationException(String.format(
+                    "Not able to compare match key level between %s and %s", compared, compareTo));
         }
         if (KEY_LEVEL.get(compared) > KEY_LEVEL.get(compareTo)) {
             return 1;
@@ -163,7 +165,7 @@ public class MatchKeyUtils {
     /**
      * Evaluate key partition based on the input {@link MatchKeyTuple}.
      * Currently, only name/location based match key partition is used.
-     * 
+     *
      * @param tuple
      *            input match keys
      * @return {@literal null} if no name/location fields present. otherwise, a
@@ -194,7 +196,7 @@ public class MatchKeyUtils {
 
     /**
      * Sort and return comma separated key names
-     * 
+     *
      * @param keys
      * @return
      */

@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class DeleteFileUploadStepConfiguration extends BaseReportStepConfiguration {
 

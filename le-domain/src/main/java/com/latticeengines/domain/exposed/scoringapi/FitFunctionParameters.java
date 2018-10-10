@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FitFunctionParameters implements Serializable {
 
+    private static final long serialVersionUID = -1117763326097592033L;
+
     @JsonProperty("alpha")
     private double alpha;
 

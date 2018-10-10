@@ -9,26 +9,26 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "AccountCache")
+@Table(name = "AccountCache", indexes = { @Index(name = "IX_EXTERNALID", columnList = "External_ID")})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DanteAccount implements Serializable, HasDanteAuditingFields {
+    private static final long serialVersionUID = 6514634375315908857L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "AccountCache_ID", unique = true, nullable = false)
     private int accountCacheID;
 
-    @Index(name = "IX_EXTERNALID")
     @Column(name = "External_ID", unique = true, nullable = false, length = 50)
     private String externalID;
 

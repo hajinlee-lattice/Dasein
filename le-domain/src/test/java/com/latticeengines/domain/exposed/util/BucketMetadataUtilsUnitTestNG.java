@@ -48,7 +48,8 @@ public class BucketMetadataUtilsUnitTestNG {
                 .collect(Collectors.toList());
     }
 
-    private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+    @SuppressWarnings("deprecation")
+	private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
         BucketMetadata bucket = new BucketMetadata();
         bucket.setLeftBoundScore(leftBoundScore);
         bucket.setRightBoundScore(rightBoundScore);

@@ -25,7 +25,9 @@ public class FrontEndSort {
         setDescending(descending);
     }
 
-    private FrontEndSort(){}
+    // for jackson
+    @SuppressWarnings("unused")
+	private FrontEndSort(){}
 
     public List<AttributeLookup> getAttributes() {
         return attributes;

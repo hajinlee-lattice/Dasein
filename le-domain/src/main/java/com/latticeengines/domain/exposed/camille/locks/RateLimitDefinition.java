@@ -37,7 +37,7 @@ public class RateLimitDefinition {
         return quotas;
     }
 
-    private void setQuotas(Map<String, List<Quota>> quotas) {
+    public void setQuotas(Map<String, List<Quota>> quotas) {
         this.quotas = new HashMap<>();
         if (quotas != null) {
             quotas.entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {

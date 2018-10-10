@@ -5,9 +5,9 @@ public enum CustomizationPropertyName {
     highlighted("highlighted", Boolean.class);
 
     private final String name;
-    private final Class type;
+    private final Class<?> type;
 
-    CustomizationPropertyName(String name, Class type) {
+    CustomizationPropertyName(String name, Class<?> type) {
         this.name = name;
         this.type = type;
     }
@@ -16,7 +16,7 @@ public enum CustomizationPropertyName {
         return name;
     }
 
-    public Class getType() {
+    public Class<?> getType() {
         return type;
     }
 

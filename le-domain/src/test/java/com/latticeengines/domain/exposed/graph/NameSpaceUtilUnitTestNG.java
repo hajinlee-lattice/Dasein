@@ -8,10 +8,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class NameSpaceUtilUnitTestNG {
-    private String ID = UUID.randomUUID().toString();
-    private String A = UUID.randomUUID().toString() + ".user";
-    private String B = UUID.randomUUID().toString() + ".3.63.076";
-    private String C = UUID.randomUUID().toString();
+    private static final String ID = UUID.randomUUID().toString();
+    private static final String A = UUID.randomUUID().toString() + ".user";
+    private static final String B = UUID.randomUUID().toString() + ".3.63.076";
+    private static final String C = UUID.randomUUID().toString();
 
     private NameSpaceUtil nameSpaceUtil = //
             new NameSpaceUtil(UUID.randomUUID().toString(), UUID.randomUUID().toString());
@@ -21,9 +21,9 @@ public class NameSpaceUtilUnitTestNG {
         Map<String, String> nsMap = new HashMap<>();
         String ignoredKey = "RANDOME_KEY_" + UUID.randomUUID().toString();
         nsMap.put(ignoredKey, UUID.randomUUID().toString());
-        nsMap.put(nameSpaceUtil.ENV_KEY, A);
-        nsMap.put(nameSpaceUtil.VERSION_KEY, B);
-        nsMap.put(nameSpaceUtil.TYPE_KEY, C);
+        nsMap.put(NameSpaceUtil.ENV_KEY, A);
+        nsMap.put(NameSpaceUtil.VERSION_KEY, B);
+        nsMap.put(NameSpaceUtil.TYPE_KEY, C);
         String vertexId = nameSpaceUtil.generateNSId(ID, nsMap, false);
         Assert.assertEquals(nameSpaceUtil.extractObjectIdFromGraphVertexId(vertexId, false), ID);
 
@@ -38,9 +38,9 @@ public class NameSpaceUtilUnitTestNG {
         Map<String, String> nsMap = new HashMap<>();
         String ignoredKey = "RANDOME_KEY_" + UUID.randomUUID().toString();
         nsMap.put(ignoredKey, UUID.randomUUID().toString());
-        nsMap.put(nameSpaceUtil.ENV_KEY, A);
-        nsMap.put(nameSpaceUtil.VERSION_KEY, B);
-        nsMap.put(nameSpaceUtil.TYPE_KEY, C);
+        nsMap.put(NameSpaceUtil.ENV_KEY, A);
+        nsMap.put(NameSpaceUtil.VERSION_KEY, B);
+        nsMap.put(NameSpaceUtil.TYPE_KEY, C);
         Map<String, String> expectedNsMap = new HashMap<>(nsMap);
         expectedNsMap.remove(ignoredKey);
 

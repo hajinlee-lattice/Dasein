@@ -6,10 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,7 +18,10 @@ import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
-@Table(name = "PROSPECT_DISCOVERY_OPTION")
+@Table(name = "PROSPECT_DISCOVERY_OPTION", indexes = { //
+        @Index(name = "PROSPECT_DISCOVERY_OPTION_TENANT_ID_IDX", columnList = "TENANT_ID"), //
+        @Index(name = "PROSPECT_DISCOVERY_OPTION_OPTION_IDX", columnList = "OPTION") //
+})
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class ProspectDiscoveryOption implements HasTenantId, HasOptionAndValue, HasPid {
 
@@ -46,7 +49,6 @@ public class ProspectDiscoveryOption implements HasTenantId, HasOptionAndValue, 
     @Override
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
-    @Index(name = "PROSPECT_DISCOVERY_OPTION_TENANT_ID_IDX")
     public Long getTenantId() {
         return tenantId;
     }
@@ -58,7 +60,6 @@ public class ProspectDiscoveryOption implements HasTenantId, HasOptionAndValue, 
 
     @Column(name = "OPTION", nullable = false)
     @JsonProperty("option")
-    @Index(name = "PROSPECT_DISCOVERY_OPTION_OPTION_IDX")
     public String getOption() {
         return option;
     }
@@ -67,7 +68,7 @@ public class ProspectDiscoveryOption implements HasTenantId, HasOptionAndValue, 
         this.option = option;
     }
 
-    @Column(name = "VALUE", nullable = true)
+    @Column(name = "VALUE")
     @JsonProperty("value")
     public String getValue() {
         return value;

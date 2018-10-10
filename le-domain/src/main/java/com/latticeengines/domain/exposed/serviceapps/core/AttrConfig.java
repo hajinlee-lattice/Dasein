@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceapps.core;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,14 +91,14 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         this.attrProps = attrProps;
     }
 
-    public void putProperty(String key, AttrConfigProp attrProp) {
+    public void putProperty(String key, AttrConfigProp<?> attrProp) {
         if (attrProps == null) {
             attrProps = new HashMap<>();
         }
         attrProps.put(key, attrProp);
     }
 
-    public AttrConfigProp getProperty(String key) {
+    public AttrConfigProp<?> getProperty(String key) {
         if (MapUtils.isNotEmpty(attrProps) && attrProps.containsKey(key)) {
             return attrProps.get(key);
         }
@@ -105,8 +106,15 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     }
 
     @SuppressWarnings("unchecked")
+    public <T extends Serializable> AttrConfigProp<T> getStrongTypedProperty(String key, Class<T> valClz) {
+        if (MapUtils.isNotEmpty(attrProps) && attrProps.containsKey(key)) {
+            return (AttrConfigProp<T>) attrProps.get(key);
+        }
+        return null;
+    }
+
     public <T> T getPropertyFinalValue(String key, Class<T> valueClz) {
-        AttrConfigProp prop = getProperty(key);
+        AttrConfigProp<?> prop = getProperty(key);
         if (prop != null) {
             if (Boolean.TRUE.equals(prop.isAllowCustomization()) && prop.getCustomValue() != null) {
                 return valueClz.cast(prop.getCustomValue());
@@ -117,8 +125,8 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         return null;
     }
 
-    private <T> T getProperty(String key, Class<T> valueClz) {
-        AttrConfigProp prop = getProperty(key);
+    private  <T> T getProperty(String key, Class<T> valueClz) {
+        AttrConfigProp<?> prop = getProperty(key);
         if (prop != null && prop.getCustomValue() != null) {
             return valueClz.cast(prop.getCustomValue());
         }
@@ -176,27 +184,43 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void fixJsonDeserialization() {
         if (attrProps.containsKey(ColumnMetadataKey.State)) {
-            AttrConfigProp prop = attrProps.get(ColumnMetadataKey.State);
-            if (prop.getCustomValue() != null && prop.getCustomValue() instanceof String) {
-                prop.setCustomValue(AttrState.valueOf((String) prop.getCustomValue()));
+            AttrConfigProp<?> prop = attrProps.get(ColumnMetadataKey.State);
+            AttrConfigProp<AttrState> typeSafeProp = new AttrConfigProp<>();
+            typeSafeProp.setAllowCustomization(prop.isAllowCustomization());
+            if (prop.getCustomValue() != null) {
+                Object val = prop.getCustomValue();
+                AttrState state = (val instanceof String) ? AttrState.valueOf((String) val) : (AttrState) val;
+                typeSafeProp.setCustomValue(state);
             }
-            if (prop.getSystemValue() != null && prop.getSystemValue() instanceof String) {
-                prop.setSystemValue(AttrState.valueOf((String) prop.getSystemValue()));
+            if (prop.getSystemValue() != null) {
+                Object val = prop.getSystemValue();
+                AttrState state = (val instanceof String) ? AttrState.valueOf((String) val) : (AttrState) val;
+                typeSafeProp.setSystemValue(state);
             }
+
+            attrProps.put(ColumnMetadataKey.State, typeSafeProp);
         }
 
         if (attrProps.containsKey(ColumnMetadataKey.Category)) {
-            AttrConfigProp prop = attrProps.get(ColumnMetadataKey.Category);
-            if (prop.getCustomValue() != null && prop.getCustomValue() instanceof String) {
-                prop.setCustomValue(Category.valueOf((String) prop.getCustomValue()));
+            AttrConfigProp<?> prop = attrProps.get(ColumnMetadataKey.Category);
+            AttrConfigProp<Category> typeSafeProp = new AttrConfigProp<>();
+            typeSafeProp.setAllowCustomization(prop.isAllowCustomization());
+            if (prop.getCustomValue() != null) {
+                Object val = prop.getCustomValue();
+                Category category = (val instanceof String) ? Category.valueOf((String) val) : (Category) val;
+                typeSafeProp.setCustomValue(category);
             }
-            if (prop.getSystemValue() != null && prop.getSystemValue() instanceof String) {
-                prop.setSystemValue(Category.valueOf((String) prop.getSystemValue()));
+            if (prop.getSystemValue() != null) {
+                Object val = prop.getSystemValue();
+                Category category = (val instanceof String) ? Category.valueOf((String) val) : (Category) val;
+                typeSafeProp.setSystemValue(category);
             }
+
+            attrProps.put(ColumnMetadataKey.Category, typeSafeProp);
         }
+
     }
 
     @Override

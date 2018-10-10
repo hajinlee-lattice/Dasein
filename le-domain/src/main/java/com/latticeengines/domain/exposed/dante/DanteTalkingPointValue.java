@@ -32,6 +32,7 @@ public class DanteTalkingPointValue {
     private String title;
 
     // for jackson
+    @SuppressWarnings("unused")
     private DanteTalkingPointValue() {
     }
 

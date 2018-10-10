@@ -14,13 +14,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "MatchCommand")
+@Table(name = "MatchCommand", indexes = {@Index(name = "IX_UID", columnList = "RootOperationUID")})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchCommand implements HasPid {
 
@@ -42,7 +42,6 @@ public class MatchCommand implements HasPid {
     @Column(name = "PID", nullable = false)
     private Long pid;
 
-    @Index(name = "IX_UID")
     @Column(name = "RootOperationUID", unique = true, nullable = false, length = 100)
     private String rootOperationUid;
 

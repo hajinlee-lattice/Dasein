@@ -12,8 +12,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.JdbcStorage;
-import com.latticeengines.domain.exposed.metadata.JdbcStorage.DatabaseName;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MetadataConverterUnitTestNG {

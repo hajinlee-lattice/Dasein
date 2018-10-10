@@ -70,19 +70,23 @@ public class FrontEndResponse<T> {
             this.value = value;
         }
 
-        public String getKey() {
+        @SuppressWarnings("unused")
+		public String getKey() {
             return key;
         }
 
-        public void setKey(String key) {
+        @SuppressWarnings("unused")
+		public void setKey(String key) {
             this.key = key;
         }
 
-        public String getValue() {
+        @SuppressWarnings("unused")
+		public String getValue() {
             return value;
         }
 
-        public void setValue(String value) {
+        @SuppressWarnings("unused")
+		public void setValue(String value) {
             this.value = value;
         }
 

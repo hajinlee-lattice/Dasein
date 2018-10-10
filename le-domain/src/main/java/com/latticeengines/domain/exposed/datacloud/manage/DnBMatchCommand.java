@@ -12,9 +12,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +24,10 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "DnBMatchCommand")
+@Table(name = "DnBMatchCommand", indexes = { //
+        @Index(name = "IX_RID", columnList = "RootOperationUID"), //
+        @Index(name = "IX_BID", columnList = "BatchID")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DnBMatchCommand implements HasPid, Serializable {
 
@@ -38,12 +40,10 @@ public class DnBMatchCommand implements HasPid, Serializable {
     private Long pid;
 
     @JsonProperty("RootOperationUID")
-    @Index(name = "IX_RID")
     @Column(name = "RootOperationUID", nullable = false, length = 100)
     private String rootOperationUid;
 
     @JsonProperty("BatchID")
-    @Index(name = "IX_BID")
     @Column(name = "BatchID", unique = true, nullable = false, length = 20)
     private String batchId;
 

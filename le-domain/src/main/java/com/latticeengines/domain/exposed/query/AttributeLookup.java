@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -109,10 +110,12 @@ public class AttributeLookup extends Lookup implements Comparable<AttributeLooku
         @Override
         public void serializeWithType(AttributeLookup value, JsonGenerator gen, SerializerProvider provider,
                 TypeSerializer typeSer) throws IOException {
-            typeSer.writeTypePrefixForObject(value, gen);
-            serialize(value, gen, provider); // call your customized serialize
-                                             // method
-            typeSer.writeTypeSuffixForObject(value, gen);
+            // typeSer.writeTypePrefixForObject(value, gen);
+            typeSer.writeTypePrefix(gen, typeSer.typeId(value, JsonToken.START_OBJECT));
+            // call your customized serialize method
+            serialize(value, gen, provider);
+            typeSer.writeTypeSuffix(gen, typeSer.typeId(value, JsonToken.START_OBJECT));
+            // typeSer.writeTypeSuffixForObject(value, gen);
         }
     }
 

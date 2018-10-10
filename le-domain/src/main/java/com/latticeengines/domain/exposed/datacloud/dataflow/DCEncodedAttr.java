@@ -21,7 +21,8 @@ public class DCEncodedAttr implements Serializable {
     private List<DCBucketedAttr> bktAttrs = new ArrayList<>();
 
     // for jackson
-    private DCEncodedAttr() {}
+    @SuppressWarnings("unused")
+	private DCEncodedAttr() {}
 
     public DCEncodedAttr(String encAttr) {
         this.encAttr = encAttr;
@@ -31,16 +32,8 @@ public class DCEncodedAttr implements Serializable {
         return encAttr;
     }
 
-    private void setEncAttr(String encAttr) {
-        this.encAttr = encAttr;
-    }
-
     public List<DCBucketedAttr> getBktAttrs() {
         return bktAttrs;
-    }
-
-    private void setBktAttrs(List<DCBucketedAttr> bktAttrs) {
-        this.bktAttrs = bktAttrs;
     }
 
     public void addBktAttr(DCBucketedAttr bktAttr) {

@@ -43,7 +43,8 @@ public class BucketMetadataUtils {
         return buckets;
     }
 
-    public static BucketMetadata bucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+    @SuppressWarnings("deprecation")
+	public static BucketMetadata bucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
         BucketMetadata bucket = new BucketMetadata();
         bucket.setLeftBoundScore(leftBoundScore);
         bucket.setRightBoundScore(rightBoundScore);

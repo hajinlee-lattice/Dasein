@@ -254,7 +254,6 @@ public class RestrictionBuilder {
         return this;
     }
 
-    @Deprecated
     public RestrictionBuilder in(Object min, Object max) {
         if (min == null && max == null) {
             throw new RuntimeException("min and max cannot both be null.");

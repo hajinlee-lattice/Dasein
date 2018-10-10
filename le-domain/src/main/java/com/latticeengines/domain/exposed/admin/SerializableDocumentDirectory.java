@@ -11,8 +11,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,8 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SerializableDocumentDirectory implements Iterable<SerializableDocumentDirectory.Node> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerializableDocumentDirectory.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SerializableDocumentDirectory.class);
 
     private String rootPath;
     private Collection<Node> nodes;
@@ -50,7 +52,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 Path nodePath = new Path(entry.getKey());
                 docDir.add(nodePath, new Document(entry.getValue()), true);
             } catch (IllegalArgumentException e) {
-                //ignore
+                // ignore
             }
         }
         constructByDocumentDirectory(docDir);
@@ -83,7 +85,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         this.rootPath = "/";
-        if (nodes != null && !nodes.isEmpty()) this.nodes = nodes;
+        if (CollectionUtils.isNotEmpty(nodes)) {
+            this.nodes = nodes;
+        }
         this.documentDirectory = SerializableDocumentDirectory.deserialize(this);
     }
 
@@ -94,7 +98,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         for (DocumentDirectory.Node node : documentDirectory.getChildren()) {
             nodes.add(new Node(node));
         }
-        if (!nodes.isEmpty()) this.nodes = nodes;
+        if (!nodes.isEmpty()) {
+            this.nodes = nodes;
+        }
     }
 
     public Map<String, String> flatten() {
@@ -118,15 +124,15 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         return result;
     }
 
-    public void applyMetadata (DocumentDirectory metadataDirectory) {
+    public void applyMetadata(DocumentDirectory metadataDirectory) {
         applyMetadataTemplate(metadataDirectory, false);
     }
 
-    public void applyMetadataIgnoreOptionsValidation (DocumentDirectory metadataDirectory) {
+    public void applyMetadataIgnoreOptionsValidation(DocumentDirectory metadataDirectory) {
         applyMetadataTemplate(metadataDirectory, true);
     }
 
-    public void applyMetadataTemplate (DocumentDirectory metadataDirectory, boolean ignoreOptions) {
+    public void applyMetadataTemplate(DocumentDirectory metadataDirectory, boolean ignoreOptions) {
         if (metadataDirectory != null && this.getNodes() != null) {
             // apply metadata to nodes
             for (Node node : this.getNodes()) {
@@ -140,7 +146,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
     @JsonIgnore
     public DocumentDirectory getMetadataAsDirectory() {
         Path rootPath = new Path("/");
-        DocumentDirectory dir =  new DocumentDirectory(rootPath);
+        DocumentDirectory dir = new DocumentDirectory(rootPath);
         if (this.getNodes() != null) {
             for (Node node : this.getNodes()) {
                 node.writeMetadataToDir(dir, "");
@@ -159,7 +165,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         return dir;
     }
 
-    private static void deserializeNodes(DocumentDirectory dir, Collection<Node> nodes, String rootPath) {
+    private static void deserializeNodes(DocumentDirectory dir, Collection<Node> nodes,
+            String rootPath) {
         for (Node node : nodes) {
             Document doc = new Document("");
             if (node.getData() != null) {
@@ -182,7 +189,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         List<SelectableConfigurationField> optFields = new ArrayList<>();
         if (this.getNodes() != null && !this.getNodes().isEmpty()) {
             String parent = "";
-            for(Node node : this.getNodes()) {
+            for (Node node : this.getNodes()) {
                 optFields.addAll(node.findSelectableFields(parent, includeDynamicOptions));
             }
         }
@@ -213,16 +220,24 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
     }
 
     @JsonProperty("RootPath")
-    public String getRootPath() { return rootPath; }
+    public String getRootPath() {
+        return rootPath;
+    }
 
     @JsonProperty("RootPath")
-    public void setRootPath(String rootPath) { this.rootPath = rootPath; }
+    public void setRootPath(String rootPath) {
+        this.rootPath = rootPath;
+    }
 
     @JsonProperty("Nodes")
-    public Collection<Node> getNodes() { return nodes; }
+    public Collection<Node> getNodes() {
+        return nodes;
+    }
 
     @JsonProperty("Nodes")
-    public void setNodes(Collection<Node> nodes) { this.nodes = nodes; }
+    public void setNodes(Collection<Node> nodes) {
+        this.nodes = nodes;
+    }
 
     @JsonIgnore
     public Iterator<Node> getBreathFirstIterator() {
@@ -234,7 +249,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         return new DepthFirstIterator(this.getNodes());
     }
 
-    public Iterator<Node> iterator() { return new DepthFirstIterator(this.getNodes()); }
+    public Iterator<Node> iterator() {
+        return new DepthFirstIterator(this.getNodes());
+    }
 
     public static class BreathFirstIterator implements Iterator<Node> {
 
@@ -242,7 +259,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         public BreathFirstIterator(Collection<Node> roots) {
             if (roots != null) {
-                for (Node root: roots) {
+                for (Node root : roots) {
                     root.path = new Path("/" + root.getNode());
                     queue.add(root);
                 }
@@ -250,14 +267,16 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         @Override
-        public void remove() { throw new UnsupportedOperationException(); }
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
 
         @Override
         public Node next() {
             Node front = queue.poll();
             Path rootPath = front.path;
             if (front.getChildren() != null) {
-                for (Node child: front.getChildren()) {
+                for (Node child : front.getChildren()) {
                     child.path = rootPath.append(child.getNode());
                     queue.add(child);
                 }
@@ -266,7 +285,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         @Override
-        public boolean hasNext() { return !queue.isEmpty(); }
+        public boolean hasNext() {
+            return !queue.isEmpty();
+        }
     }
 
     public static class DepthFirstIterator implements Iterator<Node> {
@@ -275,7 +296,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         public DepthFirstIterator(Collection<Node> roots) {
             if (roots != null) {
-                for (Node root: roots) {
+                for (Node root : roots) {
                     root.path = new Path("/" + root.getNode());
                     stack.push(root);
                 }
@@ -283,14 +304,16 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         @Override
-        public void remove() { throw new UnsupportedOperationException(); }
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
 
         @Override
         public Node next() {
             Node front = stack.pop();
             Path rootPath = front.path;
             if (front.getChildren() != null) {
-                for (Node child: front.getChildren()) {
+                for (Node child : front.getChildren()) {
                     child.path = rootPath.append(child.getNode());
                     stack.push(child);
                 }
@@ -299,11 +322,13 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         @Override
-        public boolean hasNext() { return !stack.isEmpty(); }
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
     }
 
     public Node getNodeAtPath(Path path) {
-        for (Node node: this) {
+        for (Node node : this) {
             if (node.path.equals(path)) {
                 return node;
             }
@@ -311,7 +336,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         return null;
     }
 
-    public Node getNodeAtPath(String path) { return getNodeAtPath(new Path(path)); }
+    public Node getNodeAtPath(String path) {
+        return getNodeAtPath(new Path(path));
+    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Node {
@@ -327,12 +354,14 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         @JsonIgnore
         public boolean ignoreOptionsValidateion;
 
-        public Node() { }
+        public Node() {
+        }
 
         public Node(DocumentDirectory.Node documentNode) {
             this.node = documentNode.getPath().getSuffix();
             this.data = documentNode.getDocument().getData();
-            if (this.data.equals("") && documentNode.getChildren() != null && !documentNode.getChildren().isEmpty()) {
+            if (this.data.equals("") && documentNode.getChildren() != null
+                    && !documentNode.getChildren().isEmpty()) {
                 this.data = null;
             }
             this.version = documentNode.getDocument().getVersion();
@@ -341,50 +370,73 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             for (DocumentDirectory.Node child : documentNode.getChildren()) {
                 children.add(new Node(child));
             }
-            if (!children.isEmpty()) this.children = children;
+            if (!children.isEmpty())
+                this.children = children;
         }
 
         @JsonProperty("Node")
-        public String getNode() { return node; }
+        public String getNode() {
+            return node;
+        }
 
         @JsonProperty("Node")
-        public void setNode(String node) { this.node = node; }
+        public void setNode(String node) {
+            this.node = node;
+        }
 
         @JsonProperty("Data")
-        public String getData() { return data; }
+        public String getData() {
+            return data;
+        }
 
         @JsonProperty("Data")
-        public void setData(String data) { this.data = data; }
+        public void setData(String data) {
+            this.data = data;
+        }
 
         @JsonProperty("Metadata")
-        public Metadata getMetadata() { return metadata; }
+        public Metadata getMetadata() {
+            return metadata;
+        }
 
         @JsonProperty("Metadata")
-        public void setMetadata(Metadata metadata) { this.metadata = metadata; }
+        public void setMetadata(Metadata metadata) {
+            this.metadata = metadata;
+        }
 
         @JsonProperty("Version")
-        public int getVersion() { return version; }
+        public int getVersion() {
+            return version;
+        }
 
         @JsonProperty("Version")
-        public void setVersion(int version) { this.version = version; }
+        public void setVersion(int version) {
+            this.version = version;
+        }
 
         @JsonProperty("Children")
-        public Collection<Node> getChildren() { return children; }
+        public Collection<Node> getChildren() {
+            return children;
+        }
 
         @JsonProperty("Children")
-        public void setChildren(Collection<Node> children) { this.children = children; }
+        public void setChildren(Collection<Node> children) {
+            this.children = children;
+        }
 
         public void applyMetadata(DocumentDirectory.Node metaNode) {
-            if (metaNode == null) return;
+            if (metaNode == null)
+                return;
 
             if (this.getData() != null) {
                 Metadata metadataProvided = null;
                 ObjectMapper mapper = new ObjectMapper();
 
                 try {
-                    metadataProvided = mapper.readValue(metaNode.getDocument().getData(), Metadata.class);
+                    metadataProvided = mapper.readValue(metaNode.getDocument().getData(),
+                            Metadata.class);
                 } catch (NullPointerException | IOException e) {
-                    //ignore
+                    // ignore
                 }
 
                 if (metadataProvided != null) {
@@ -403,7 +455,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         public void applySingleMetadata(Metadata metadata) {
-            if (this.getData() == null) return;
+            if (this.getData() == null)
+                return;
 
             if (metadata != null && metadata.getType() != null && !metadata.getType().equals("")) {
                 if (metadata.validateDataTemplate(this.getData(), ignoreOptionsValidateion)) {
@@ -415,7 +468,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 }
             } else {
                 String type = interpretDataType();
-                if (!type.equals("string")) {
+                if (!"string".equals(type)) {
                     Metadata interpretedMetadata = new Metadata();
                     interpretedMetadata.setType(type);
                     this.setMetadata(interpretedMetadata);
@@ -454,12 +507,12 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             return "string";
         }
 
-
-        public List<SelectableConfigurationField> findSelectableFields(String parent, boolean includeDynamicOptions) {
+        public List<SelectableConfigurationField> findSelectableFields(String parent,
+                boolean includeDynamicOptions) {
             List<SelectableConfigurationField> optFields = new ArrayList<>();
             Metadata metadata = this.getMetadata();
-            if (metadata != null && metadata.getType().equals("options") &&
-                    (includeDynamicOptions || metadata.isDynamicOptions() == null || !metadata.isDynamicOptions())) {
+            if (metadata != null && metadata.getType().equals("options") && (includeDynamicOptions
+                    || metadata.isDynamicOptions() == null || !metadata.isDynamicOptions())) {
                 if (this.getMetadata().validateDataIgnoreOptions(this.getData())) {
                     SelectableConfigurationField field = new SelectableConfigurationField();
                     field.setNode(parent + "/" + this.getNode());
@@ -467,12 +520,14 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                     field.setOptions(new ArrayList<>(this.getMetadata().getOptions()));
                     optFields.add(field);
                 } else {
-                    LOGGER.warn("Found an invalid optional configuration field at " + this.getNode());
+                    LOGGER.warn(
+                            "Found an invalid optional configuration field at " + this.getNode());
                 }
             }
             if (this.getChildren() != null && !this.getChildren().isEmpty()) {
                 for (Node child : this.getChildren()) {
-                    optFields.addAll(child.findSelectableFields(parent + "/" + this.getNode(), includeDynamicOptions));
+                    optFields.addAll(child.findSelectableFields(parent + "/" + this.getNode(),
+                            includeDynamicOptions));
                 }
             }
             return optFields;
@@ -493,71 +548,108 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         private Boolean readonly = null;
 
         private ObjectMapper mapper = new ObjectMapper();
-        public Metadata() { }
+
+        public Metadata() {
+        }
 
         @JsonProperty("Type")
-        public String getType() { return type; }
+        public String getType() {
+            return type;
+        }
 
         @JsonProperty("Type")
-        public void setType(String type) { this.type = type; }
+        public void setType(String type) {
+            this.type = type;
+        }
 
         @JsonProperty("Options")
-        public Collection<String> getOptions() { return options; }
+        public Collection<String> getOptions() {
+            return options;
+        }
 
         @JsonProperty("Options")
-        public void setOptions(Collection<String> options) { this.options = options; }
+        public void setOptions(Collection<String> options) {
+            this.options = options;
+        }
 
         @JsonProperty("DynamicOptions")
-        public Boolean isDynamicOptions() { return dynamicOptions; }
+        public Boolean isDynamicOptions() {
+            return dynamicOptions;
+        }
 
         @JsonProperty("DynamicOptions")
-        public void setDynamicOptions(Boolean dynamicOptions) { this.dynamicOptions = dynamicOptions; }
+        public void setDynamicOptions(Boolean dynamicOptions) {
+            this.dynamicOptions = dynamicOptions;
+        }
 
         @JsonProperty("Required")
-        public Boolean isRequired() { return required; }
+        public Boolean isRequired() {
+            return required;
+        }
 
         @JsonProperty("Required")
-        public void setRequired(Boolean required) { this.required = required; }
+        public void setRequired(Boolean required) {
+            this.required = required;
+        }
 
         @JsonProperty("Readonly")
-        public Boolean isReadonly() { return readonly; }
+        public Boolean isReadonly() {
+            return readonly;
+        }
 
         @JsonProperty("Readonly")
-        public void setReadonly(Boolean readonly) { this.readonly = readonly; }
+        public void setReadonly(Boolean readonly) {
+            this.readonly = readonly;
+        }
 
         @JsonProperty("Helper")
-        public String getHelper() { return helper; }
+        public String getHelper() {
+            return helper;
+        }
 
         @JsonProperty("Helper")
-        public void setHelper(String helper) { this.helper = helper; }
+        public void setHelper(String helper) {
+            this.helper = helper;
+        }
 
         @JsonProperty("Derived")
-        public DerivedField getDerived() { return derived; }
+        public DerivedField getDerived() {
+            return derived;
+        }
 
         @JsonProperty("Derived")
-        public void setDerived(DerivedField derived) { this.derived = derived; }
+        public void setDerived(DerivedField derived) {
+            this.derived = derived;
+        }
 
         private boolean validateDataIgnoreOptions(String data) {
             return validateDataTemplate(data, true);
         }
 
         private boolean validateDataTemplate(String data, boolean ignoreOptions) {
-            if (this.getType() == null) { return true; }
+            if (this.getType() == null) {
+                return true;
+            }
             switch (this.getType()) {
                 case "number":
                     return isNumber(data);
                 case "boolean":
                     return isBoolean(data);
                 case "object":
-                    return true; //isObject(data);
+                    return true; // isObject(data);
                 case "array":
                     return true; // isArray(data);
                 case "options":
-                    if (ignoreOptions) return true;
-                    if (this.dynamicOptions != null) {
-                        return this.isDynamicOptions() || this.getOptions().contains(data);
+                    if (ignoreOptions) {
+                        return true;
                     } else {
-                        return this.getOptions().contains(data);
+                        String unescaped = StringEscapeUtils.unescapeJava(data);
+                        unescaped = data;
+                        if (this.dynamicOptions != null) {
+                            return this.isDynamicOptions() || this.getOptions().contains(unescaped);
+                        } else {
+                            return this.getOptions().contains(unescaped);
+                        }
                     }
                 case "email":
                     return emailValidator.isValid(data);
@@ -571,29 +663,23 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
         }
 
-        private static boolean isNumber(String str)
-        {
+        private static boolean isNumber(String str) {
             if (StringUtils.isBlank(str)) {
                 return false;
             }
-            try
-            {
+            try {
                 Double.parseDouble(str);
-            }
-            catch(NumberFormatException nfe)
-            {
+            } catch (NumberFormatException nfe) {
                 return false;
             }
             return true;
         }
 
-        private static boolean isBoolean(String str)
-        {
+        private static boolean isBoolean(String str) {
             return str.toLowerCase().equals("true") || str.toLowerCase().equals("false");
         }
 
-        private static boolean isPath(String str)
-        {
+        private static boolean isPath(String str) {
             if (StringUtils.isBlank(str)) {
                 return false;
             }
@@ -605,8 +691,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
         }
 
-        private static boolean isObject(String str)
-        {
+        private static boolean isObject(String str) {
             if (StringUtils.isBlank(str)) {
                 return false;
             }
@@ -619,8 +704,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
         }
 
-        private static boolean isArray(String str)
-        {
+        private static boolean isArray(String str) {
             if (StringUtils.isBlank(str)) {
                 return false;
             }
@@ -633,9 +717,11 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
         }
 
-        public static Collection<Node> applyMetadataOnJsonArrays(JsonNode configNodes, JsonNode metaNodes)
-                throws JsonProcessingException {
-            if (configNodes == null || !configNodes.isArray()) return null;
+        static Collection<Node> applyMetadataOnJsonArrays(JsonNode configNodes,
+                JsonNode metaNodes) throws JsonProcessingException {
+            if (configNodes == null || !configNodes.isArray()) {
+                return null;
+            }
 
             ObjectMapper mapper = new ObjectMapper();
 
@@ -650,10 +736,13 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 boolean mustBeString = false;
                 if (dataNode != null) {
                     String data;
-                    if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
+                    if (Metadata.isObject(dataNode.toString())
+                            || Metadata.isArray(dataNode.toString())) {
                         data = dataNode.toString();
-                    } else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
-                        data = unescapeDataText(dataNode.toString().substring(1, dataNode.toString().length() - 1));
+                    } else if (dataNode.toString().startsWith("\"")
+                            && dataNode.toString().endsWith("\"")) {
+                        data = unescapeDataText(
+                                dataNode.toString().substring(1, dataNode.toString().length() - 1));
                         mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
                     } else {
                         data = unescapeDataText(dataNode.asText());
@@ -666,10 +755,11 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 JsonNode metaNode = null;
                 if (metaNodes != null && metaNodes.isArray()) {
                     for (JsonNode thisMetaNode : metaNodes) {
-                        if (thisMetaNode.isObject() && thisMetaNode.has("Node") &&
-                                thisMetaNode.get("Node").asText().equals(docNode.getNode())){
+                        if (thisMetaNode.isObject() && thisMetaNode.has("Node")
+                                && thisMetaNode.get("Node").asText().equals(docNode.getNode())) {
                             if (thisMetaNode.has("Data")) {
-                                metadata = mapper.treeToValue(thisMetaNode.get("Data"), Metadata.class);
+                                metadata = mapper.treeToValue(thisMetaNode.get("Data"),
+                                        Metadata.class);
                             }
                             metaNode = thisMetaNode;
                             break;
@@ -686,7 +776,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 // process children
                 if (jNode.has("Children")) {
                     JsonNode metaChildren = metaNode != null ? metaNode.get("Children") : null;
-                    docNode.setChildren(applyMetadataOnJsonArrays(jNode.get("Children"), metaChildren));
+                    docNode.setChildren(
+                            applyMetadataOnJsonArrays(jNode.get("Children"), metaChildren));
                 }
 
                 // add to the collection
@@ -694,6 +785,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
             return docNodes;
         }
+
         @Override
         public String toString() {
             try {
@@ -704,7 +796,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
 
         private static String unescapeDataText(String data) {
-            return StringEscapeUtils.unescapeJson(data);
+            return StringEscapeUtils.unescapeJava(data);
         }
     }
 }

@@ -8,8 +8,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
 
-import org.hibernate.annotations.Index;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -33,7 +31,6 @@ public abstract class MetadataProperty<T> implements HasOptionAndValue, HasPid {
     private Long pid;
 
     @Column(name = "PROPERTY", nullable = false)
-    @Index(name = "IX_PROPERTY")
     @JsonProperty("property")
     private String property;
 

@@ -11,15 +11,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -34,7 +34,10 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "WORKFLOW_JOB")
+@Table(name = "WORKFLOW_JOB", indexes = { //
+        @Index(name = "IX_APPLICATION_ID", columnList = "APPLICATION_ID"), //
+        @Index(name = "IX_WORKFLOW_ID", columnList = "WORKFLOW_ID") //
+})
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
@@ -54,11 +57,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @Index(name = "IX_APPLICATION_ID")
     @Column(name = "APPLICATION_ID")
     private String applicationId;
 
-    @Index(name = "IX_WORKFLOW_ID")
     @Column(name = "WORKFLOW_ID")
     private Long workflowId;
 

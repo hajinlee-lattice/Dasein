@@ -104,7 +104,6 @@ public class ConcreteRestriction extends Restriction {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
         map.put("lhs", Collections.singletonList(lhs));

@@ -11,14 +11,13 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Index;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "AccountMasterFact", uniqueConstraints = { @UniqueConstraint(columnNames = { "Location", //
+@Table(name = "AccountMasterFact", //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "Location", //
         "Industry", //
         "NumEmpRange", //
         "RevRange", //
@@ -39,27 +38,21 @@ public class AccountMasterFact implements HasPid {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Index(name = "IX_DIMENSIONS")
     @Column(name = DIM_LOCATION, nullable = false)
     private Long location;
 
-    @Index(name = "IX_DIMENSIONS")
     @Column(name = DIM_INDUSTRY, nullable = false)
     private Long industry;
 
-    @Index(name = "IX_DIMENSIONS")
     @Column(name = DIM_NUM_EMP_RANGE, nullable = false)
     private Long numEmpRange;
 
-    @Index(name = "IX_DIMENSIONS")
     @Column(name = DIM_REV_RANGE, nullable = false)
     private Long revRange;
 
-    @Index(name = "IX_DIMENSIONS")
     @Column(name = DIM_NUM_LOC_RANGE, nullable = false)
     private Long numLocRange;
 
-    @Index(name = "IX_DIMENSIONS")
     @Column(name = DIM_CATEGORY, nullable = false)
     private Long category;
 
