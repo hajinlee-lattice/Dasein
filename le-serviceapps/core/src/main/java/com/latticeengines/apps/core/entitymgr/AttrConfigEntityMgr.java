@@ -24,4 +24,6 @@ public interface AttrConfigEntityMgr {
 
     List<AttrConfig> findAllByTenantId(String tenantId);
 
+    void deleteByAttrNameStartingWith(String attrName);
+
 }

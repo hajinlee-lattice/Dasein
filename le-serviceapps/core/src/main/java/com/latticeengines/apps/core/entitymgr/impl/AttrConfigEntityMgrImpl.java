@@ -119,4 +119,11 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
         return repository.findByTenantIdAndEntity(tenantId, entity);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteByAttrNameStartingWith(String attrName) {
+        List<AttrConfigEntity> entities = repository.removeByAttrNameStartingWith(attrName);
+        log.info("Deleted " + entities.size() + " documents whose name like " + attrName);
+    }
+
 }
