@@ -307,6 +307,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         if (retainAttrNames == null) {
             retainAttrNames = new ArrayList<>();
         }
+        log.info(String.format("retainAttrNames from servingStore: %d", retainAttrNames.size()));
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }

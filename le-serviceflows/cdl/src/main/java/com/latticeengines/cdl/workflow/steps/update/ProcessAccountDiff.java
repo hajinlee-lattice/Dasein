@@ -213,6 +213,7 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         if (retainAttrNames == null) {
             retainAttrNames = new ArrayList<>();
         }
+        log.info(String.format("retainAttrNames from servingStore: %d", retainAttrNames.size()));
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
