@@ -1,4 +1,4 @@
-var product_code = "AP-PDCNS0SWT1ZP-2",
+var product_code = "AP-PUJQ09NPTAAO-2",
     disable_zendesk = false,
     disable_aptrinsic = false;
 
