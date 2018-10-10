@@ -70,6 +70,8 @@ angular.module('lp.models.ratings', [
                 }
             });
 
+            vm.currentConfiguration = angular.copy(vm.dashboard.summary.bucketMetadata);
+
             // Set active iteration (default value for iteration select menu) 
             // and working buckets (vm.workingBuckets is what drives the chart data)
             if ($stateParams.toggleRatings){
@@ -372,6 +374,8 @@ angular.module('lp.models.ratings', [
             
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
+
+                    console.log(vm.dashboard.summary.bucketMetadata);
 
                     RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
                         vm.chartNotUpdated = true;
