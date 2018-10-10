@@ -300,6 +300,7 @@ angular.module('lp.playbook')
                 topNCount: PlaybookWizardStore.getTopNCount(),
             },
             saveOnly = opts.saveOnly || false,
+            lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
 
         if(play) {
@@ -315,9 +316,33 @@ angular.module('lp.playbook')
             if(lastIncompleteLaunch) {
                 PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
                     launch_id: lastIncompleteLaunch.launchId,
-                    action: 'launch',
+                    action: 'launch'
                 }).then(function(saved) {
                     $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                });
+            } else if(lastIncompleteLaunchId) {
+                // save play
+                PlaybookWizardStore.savePlay(play).then(function(play) {
+                    // save launch
+                    var _launchObj = angular.merge({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj);
+                    PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                        launch_id: lastIncompleteLaunchId,
+                        launchObj: _launchObj
+                    }).then(function(saved) {
+                        if(!saveOnly) {
+                            // launch
+                            PlaybookWizardService.saveLaunch(play.name, {
+                                launch_id: lastIncompleteLaunchId,
+                                action: 'launch'
+                            }).then(function(launch) {
+                                // after launch
+                                $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                            });
+                        } else {
+                            // saved but not launched
+                            $state.go('home.playbook');
+                        }
+                    });
                 });
             } else {
                 // save play
@@ -338,7 +363,7 @@ angular.module('lp.playbook')
                             });
                         } else {
                             // saved but not launched
-                            $state.go('home.playbook')
+                            $state.go('home.playbook');
                         }
                     });
                 });
