@@ -27,7 +27,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
             if(vm.orgs){
                 vm.stored = PlaybookWizardStore.crmselection_form;
                 vm.ratingEngine = PlaybookWizardStore.getSavedRating();
-
                 if($stateParams.play_name) {
                     var play = PlaybookWizardStore.getCurrentPlay(),
                         crmselection = (play && 
@@ -85,7 +84,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     engineId = vm.ratingEngine.id;
 
 
-                PlaybookWizardService.getTargetCount(engineId, allCountsQuery).then(function(result){
+                PlaybookWizardService.getTargetCount(engineId, allCountsQuery).then(function(result) {
                     vm.totalCount = result;
 
                     var accountIdCountQuery = { 

@@ -57,9 +57,9 @@ angular.module('common.datacloud.query.results', [
             if (vm.section === 'wizard.targets') {
                 var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
                                         PlaybookWizardStore.currentPlay.launchHistory && 
-                                        PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch && 
-                                        PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.bucketsToLaunch ? 
-                                        PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.bucketsToLaunch : []);
+                                        PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch && 
+                                        PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch ? 
+                                        PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : []);
                 
                 // Get sum of non-suppressed buckets to calculate percentage for each bucket
                 var numAccounts = 0;
@@ -304,8 +304,7 @@ angular.module('common.datacloud.query.results', [
                             selectedBuckets: vm.selectedBuckets
                         };
 
-                    PlaybookWizardService.getTargetCount(engineId, countsQuery).then(function(data){
-
+                    PlaybookWizardService.getTargetCount(engineId, countsQuery).then(function(data) {
                         vm.counts.accounts.value = data;
                         
                         vm.showAccountPagination = vm.counts.accounts.value > 10;

@@ -456,7 +456,7 @@ angular
                                 sortBy: 'ContactName',
                                 descending: false
                             };
-
+                            
                         PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
                             PlaybookWizardStore.setTargetData(data.data);
                             deferred.resolve(PlaybookWizardStore.getTargetData());
