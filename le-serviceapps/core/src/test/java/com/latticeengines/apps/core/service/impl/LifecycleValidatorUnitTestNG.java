@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class LifecycleValidatorUnitTestNG {
     @Test(groups = "unit")
     private void testLifeCycle() {
         AttrConfig lDCPremium = AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true);
-        lDCPremium.getProperty(ColumnMetadataKey.State).setSystemValue(AttrState.Deprecated);
+        ((AttrConfigProp<AttrState>) lDCPremium.getProperty(ColumnMetadataKey.State)).setSystemValue(AttrState.Deprecated);
         List<AttrConfig> attrList = Arrays.asList(lDCPremium);
 
         lifecycleValidator.validate(new ArrayList<>(), attrList);

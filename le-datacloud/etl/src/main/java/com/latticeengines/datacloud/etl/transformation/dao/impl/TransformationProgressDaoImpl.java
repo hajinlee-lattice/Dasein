@@ -12,7 +12,8 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryI
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 
 @Component("transformationProgressDao")
-public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<TransformationProgress>
+public class TransformationProgressDaoImpl
+        extends BaseDaoWithAssignedSessionFactoryImpl<TransformationProgress>
         implements TransformationProgressDao {
 
     @Override
@@ -24,7 +25,8 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     @Override
     public TransformationProgress findByRootOperationUid(String uid) {
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where RootOperationUID = :rootUid", getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where RootOperationUID = :rootUid",
+                getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("rootUid", uid.toUpperCase());
         List<TransformationProgress> list = query.list();
@@ -44,7 +46,7 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
                 getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("sourceName", sourceName);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -53,11 +55,11 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName "
-                        + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
+                + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
                 getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("sourceName", sourceName);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -65,21 +67,25 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     public List<TransformationProgress> findAllOfSource(Source source) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where SourceName = :sourceName", getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where SourceName = :sourceName",
+                getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("sourceName", sourceName);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<TransformationProgress> findAllForBaseSourceVersions(String sourceName, String baseVersions) {
+    public List<TransformationProgress> findAllForBaseSourceVersions(String sourceName,
+            String baseVersions) {
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where SourceName = :sourceName and BaseSourceVersions = :baseVersions", getEntityClass().getSimpleName());
+        String queryStr = String.format(
+                "from %s where SourceName = :sourceName and BaseSourceVersions = :baseVersions",
+                getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("sourceName", sourceName);
         query.setParameter("baseVersions", baseVersions);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -108,7 +114,7 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
                 getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("pipelineName", pipelineName);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -116,21 +122,22 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     public List<TransformationProgress> findUnfinishedPipelines(String pipelineName) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where PipelineName = :pipelineName "
-                        + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
+                + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
                 getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("pipelineName", pipelineName);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<TransformationProgress> findAllforPipeline(String pipelineName) {
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where PipelineName = :pipelineName", getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where PipelineName = :pipelineName",
+                getEntityClass().getSimpleName());
         Query<TransformationProgress> query = session.createQuery(queryStr);
         query.setParameter("pipelineName", pipelineName);
-        return (List<TransformationProgress>) query.list();
+        return query.list();
     }
 
 }

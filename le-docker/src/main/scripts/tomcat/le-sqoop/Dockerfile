@@ -23,8 +23,11 @@ COPY webapps/sqoop.war $CATALINA_HOME/webapps/sqoop.war
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
+COPY server.xml $CATALINA_HOME/conf/server.xml
 COPY catalina.sh $CATALINA_HOME/bin/catalina.sh
 COPY setenv.sh $CATALINA_HOME/bin/setenv.sh
 
 COPY webapps/latticeengines.properties /etc/ledp/latticeengines.properties
 COPY start.sh /start.sh
+
+EXPOSE 8081

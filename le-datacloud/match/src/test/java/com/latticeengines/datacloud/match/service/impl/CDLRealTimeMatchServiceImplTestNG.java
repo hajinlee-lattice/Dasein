@@ -90,20 +90,20 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         MockitoAnnotations.initMocks(this);
         when(zkConfigurationService.isCDLTenant(any())).thenReturn(true);
         when(servingStoreProxy.getDecoratedMetadataFromCache(anyString(), eq(BusinessEntity.Account))) //
-                .thenReturn(Stream.of( //
+                .thenReturn(Stream.of(//
                         accountSchema.get(accountAttrs[0]), //
                         accountSchema.get(accountAttrs[1]), //
                         accountSchema.get(accountAttrs[2])
                 ).peek(cm -> cm.setAttrState(AttrState.Active)).collect(Collectors.toList()));
         when(servingStoreProxy.getDecoratedMetadataFromCache(anyString(), eq(BusinessEntity.Rating))) //
-                .thenReturn(Stream.of( //
+                .thenReturn(Stream.of(//
                         ratingSchema.get(ratingAttrs[0]), //
                         ratingSchema.get(ratingAttrs[1]), //
                         ratingSchema.get(ratingAttrs[2]), //
                         ratingSchema.get(ratingAttrs[3])) //
                         .peek(cm -> cm.setAttrState(AttrState.Active)).collect(Collectors.toList()));
         when(servingStoreProxy.getDecoratedMetadataFromCache(anyString(), eq(BusinessEntity.PurchaseHistory))) //
-                .thenReturn(Stream.of( //
+                .thenReturn(Stream.of(//
                         purchaseHistorySchema.get(phAttrs[0]), //
                         purchaseHistorySchema.get(phAttrs[1]), //
                         purchaseHistorySchema.get(phAttrs[2])) //

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -188,6 +189,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         // bucket
         RestrictionBuilder builder = Restriction.builder();
         String value = vals == null ? null : vals[0];
+        List<Object> objs;
         switch (operator) {
             case EQUAL:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(value);
@@ -215,11 +217,13 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 break;
             case IN_COLLECTION:
                 Assert.assertNotNull(vals);
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
+                objs = Arrays.stream(vals).collect(Collectors.toList());
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(objs);
                 break;
             case NOT_IN_COLLECTION:
                 Assert.assertNotNull(vals);
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notInCollection(Arrays.asList(vals));
+                objs = Arrays.stream(vals).collect(Collectors.toList());
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notInCollection(objs);
                 break;
             default:
                 throw new UnsupportedOperationException("Does not support " + operator);

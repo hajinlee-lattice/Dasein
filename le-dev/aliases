@@ -99,3 +99,5 @@ alias kfk-deploy='bash $WSHOME/le-dev/scripts/setupkafka.sh'
 alias kfk-start='bash $WSHOME/le-dev/scripts/start-kafka.sh'
 alias kfk-stop='bash $WSHOME/le-dev/scripts/stop-kafka.sh'
 alias kfk-connect='bash $WSHOME/le-dev/scripts/start-kafka-connect.sh'
+
+alias emr-ip='bash $WSHOME/le-dev/scripts/emr_ip.sh'

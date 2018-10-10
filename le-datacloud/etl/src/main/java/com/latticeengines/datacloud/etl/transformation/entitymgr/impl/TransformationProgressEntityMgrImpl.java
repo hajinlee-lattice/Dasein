@@ -28,13 +28,13 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     @Override
     @Transactional(value = "propDataManage")
-    public TransformationProgress insertNewProgress(String pipelineName, Source source, String version,
-            String creator) {
+    public TransformationProgress insertNewProgress(String pipelineName, Source source,
+            String version, String creator) {
         try {
             Date currentDate = new Date();
             Date endDate = new Date(currentDate.getTime() + TIME_24_HOUR_IN_MILLISECONDS);
-            TransformationProgress newProgress = TransformationProgress.constructByDates(source.getSourceName(),
-                    currentDate, endDate);
+            TransformationProgress newProgress = TransformationProgress
+                    .constructByDates(source.getSourceName(), currentDate, endDate);
             newProgress.setCreatedBy(creator);
             newProgress.setVersion(version);
             newProgress.setHdfsPod(HdfsPodContext.getHdfsPodId());
@@ -57,7 +57,8 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     @Override
     @Transactional(value = "propDataManage")
-    public TransformationProgress updateStatus(TransformationProgress progress, ProgressStatus status) {
+    public TransformationProgress updateStatus(TransformationProgress progress,
+            ProgressStatus status) {
         progress.setStatus(status);
         return updateProgress(progress);
     }
@@ -130,19 +131,21 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
     public boolean hasActiveForBaseSourceVersions(Source source, String baseSourceVersions) {
-        List<TransformationProgress> progresses = progressDao.findAllForBaseSourceVersions(source.getSourceName(),
-                baseSourceVersions);
+        List<TransformationProgress> progresses = progressDao
+                .findAllForBaseSourceVersions(source.getSourceName(), baseSourceVersions);
 
         if (progresses == null || progresses.isEmpty()) {
             return false;
         }
 
         // active means either finished, running or failed but under max retries
-        for (TransformationProgress progress: progresses) {
-            if (ProgressStatus.FINISHED.equals(progress.getStatus()) || ProgressStatus.PROCESSING.equals(progress.getStatus())) {
+        for (TransformationProgress progress : progresses) {
+            if (ProgressStatus.FINISHED.equals(progress.getStatus())
+                    || ProgressStatus.PROCESSING.equals(progress.getStatus())) {
                 return true;
             }
-            if (ProgressStatus.FAILED.equals(progress.getStatus()) && progress.getNumRetries() <= MAX_RETRIES) {
+            if (ProgressStatus.FAILED.equals(progress.getStatus())
+                    && progress.getNumRetries() <= MAX_RETRIES) {
                 return true;
             }
         }
@@ -152,7 +155,8 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public TransformationProgress findPipelineProgressAtVersion(String pipelineName, String version) {
+    public TransformationProgress findPipelineProgressAtVersion(String pipelineName,
+            String version) {
         return progressDao.findPipelineAtVersion(pipelineName, version);
     }
 

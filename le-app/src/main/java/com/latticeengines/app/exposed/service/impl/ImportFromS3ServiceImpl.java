@@ -38,7 +38,7 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
     @Inject
     private S3Service s3Service;
 
-    protected HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+    private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
 
     @Override
     public String exploreS3FilePath(String inputFile, String customer) {

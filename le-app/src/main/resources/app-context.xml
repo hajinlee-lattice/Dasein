@@ -13,6 +13,7 @@
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:app-aspects-context.xml"/>
     <import resource="classpath:db-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml" />
 
     <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
 

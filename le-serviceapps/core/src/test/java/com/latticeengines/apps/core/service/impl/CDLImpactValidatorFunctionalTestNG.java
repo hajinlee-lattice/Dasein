@@ -1,5 +1,7 @@
 package com.latticeengines.apps.core.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -12,8 +14,7 @@ import org.junit.Assert;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyList;
+
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -47,7 +48,7 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
         when(cdlDependenciesProxy.getDependingSegments(anyString(), anyList())).thenReturn(segList);
         ReflectionTestUtils.setField(cdlImpactValidator, "cdlDependenciesProxy", cdlDependenciesProxy);
         AttrConfig lDCNonPremium = AttrConfigTestUtils.getLDCNonPremiumAttr(Category.INTENT, true);
-        lDCNonPremium.getProperty(ColumnSelection.Predefined.TalkingPoint.name()).setCustomValue(false);
+        lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.TalkingPoint.name(), Boolean.class).setCustomValue(false);
         cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCNonPremium));
 
         Assert.assertNotNull(lDCNonPremium.getImpactWarnings());
@@ -55,7 +56,7 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
                 lDCNonPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.IMPACTED_PLAYS), true);
 
         AttrConfig lDCPremium = AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true);
-        lDCNonPremium.getProperty(ColumnSelection.Predefined.Segment.name()).setCustomValue(false);
+        lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(), Boolean.class).setCustomValue(false);
         cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCPremium));
 
         Assert.assertNotNull(lDCPremium.getImpactWarnings());
