@@ -170,6 +170,9 @@
                     <li class="form-group auto-select-group">
                         <div>
                             <p>Let me model on a similar segment, not exactly the one I want to sell into</p>
+                            
+                            <!-- {{$ctrl.trainingSegment}} -->
+
                             <chips
                                 placeholder="Search for a similar segment"
                                 datasource="$ctrl.segments" 
@@ -179,12 +182,16 @@
                                 displayname="display_name"
                                 queryscope="display_name"
                                 ng-model="$ctrl.trainingSegment"
+                                initialvalue="$ctrl.trainingSegment"
                                 showicon="true"></chips>
                         </div>
                     </li>
                     <li class="form-group auto-select-group">
                         <div>
                             <p>Let me model on similar products, not exactly the ones I want to sell</p>
+                            
+                            <!-- {{$ctrl.trainingProducts}} -->
+
                             <chips
                                 placeholder="Search for similar products" 
                                 datasource="$ctrl.products"
@@ -194,6 +201,7 @@
                                 displayname="ProductName"
                                 queryscope="ProductName"
                                 ng-model="$ctrl.trainingProducts"
+                                initialvalue="$ctrl.trainingProducts"
                                 showicon="true"></chips>
                         </div>
                     </li>

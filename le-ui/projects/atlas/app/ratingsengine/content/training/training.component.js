@@ -44,8 +44,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
-            // console.log(vm.iteration);
-
             AtlasRemodelStore.setRemodelIteration(vm.iteration);
 
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
@@ -78,19 +76,13 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : "WITHIN";
                     vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : 2;
 
-                    // if(vm.ratingModel.trainingSegment){
-                    //     vm.trainingSegment = vm.ratingModel.trainingSegment;
-                    //     vm.updateSegmentSelected(vm.trainingSegment);
-                    //     vm.autcompleteChange();
-                    // }
+                    if(vm.ratingModel.trainingSegment){
+                        vm.trainingSegment = vm.ratingModel.trainingSegment;
+                    }
 
-                    // if(vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts){
-                    //     vm.trainingProducts = vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts;
-                    //     vm.updateProductsSelected(vm.trainingProducts);
-                    //     RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
-                    //     vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
-                    //     vm.autcompleteChange();
-                    // }
+                    if(vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts){
+                        vm.trainingProducts = vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts;
+                    }
 
                     vm.validateCrossSellForm();
 
@@ -266,7 +258,7 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.getPurchasedBeforeValue = function(value) {
             // vm.purchasedBeforePeriod = value;
-            console.log('Value ',vm.purchasedBeforePeriod);
+            // console.log('Value ',vm.purchasedBeforePeriod);
         }
 
         vm.validateCrossSellForm = function(){

@@ -12,7 +12,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             displayname: '@' ,
             model: '@',
             queryscope: '@',
-            showicon: '@'
+            showicon: '@',
+            initialvalue: '='
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -105,6 +106,17 @@ angular.module('mainApp.appCommon.directives.chips', [])
 
                 }
             }
+
+            scope.callCallback = function () {
+                if (typeof (scope.callback) != undefined) {
+                    scope.callback({args:Object.values(scope.chips)});
+                }
+            }
+
+            scope.setListVisibility = function (visible) {
+                scope.showQueryList = visible;
+            }
+
             scope.chooseItem = function (item) {
                 if (item) {
                     if(scope.singleSelection) {
@@ -123,15 +135,33 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     }
                 }
             }
+
+            if (scope.initialvalue === undefined) {
+                scope.initialvalue = !!scope.initialvalue;
+            } else {
+
+                if(Array.isArray(scope.initialvalue)){
+                    
+                    let array1 = scope.datasource;
+                    let array2 = scope.initialvalue;
+
+                    var array = array2.map(function(e) {
+                      var f = array1.find(a => a.ProductId == e);
+                      return f;
+                    });
+
+                    scope.chips = array;
+                    scope.callCallback();
+                } else {
+                    scope.chooseItem(scope.initialvalue);
+                }
+
+                scope.initialvalue = true;
+            }
+
             scope.removeItem = function (val) {
                 delete scope.chips[val[scope.id]];
                 scope.callCallback();
-            }
-
-            scope.callCallback = function () {
-                if (typeof (scope.callback) != undefined) {
-                    scope.callback({args:Object.values(scope.chips)});
-                }
             }
 
             scope.hoverIn = function () {
@@ -154,9 +184,6 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 scope.query = '';
             }
 
-            scope.setListVisibility = function (visible) {
-                scope.showQueryList = visible;
-            }
         }
     }
 });
