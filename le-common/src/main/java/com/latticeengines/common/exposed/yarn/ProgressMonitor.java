@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.util.Progressable;
@@ -30,6 +31,7 @@ public class ProgressMonitor {
     private Progressable progressable;
 
     private ExecutorService executor;
+    private final AtomicBoolean started = new AtomicBoolean(false);
 
 
     public ProgressMonitor(ContainerAllocator allocator) {
@@ -61,14 +63,13 @@ public class ProgressMonitor {
         executor = Executors.newSingleThreadScheduledExecutor();
     }
 
-    public void start() {
+    public synchronized void start() {
         if (listener == null) {
             return;
         }
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
+        if (!started.get()) {
+            executor.execute(() -> {
                 log.info("Listening application progress at : " + listener.getInetAddress().getHostAddress() + " "
                         + listener.getLocalPort());
                 // executor.shutdownNow() will interrupt this thread
@@ -92,8 +93,10 @@ public class ProgressMonitor {
                     }
                 }
                 log.info("Listening thread terminated");
-            }
-        });
+            });
+            started.set(true);
+        }
+
     }
 
     public void stop() {

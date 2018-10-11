@@ -57,7 +57,7 @@ class ProgressReporter(object):
         self.__reportProgress()
 
     def nextStateForPreStateMachine(self, previousWeight, currentWeight, curState):
-        self.curState = curState;
+        self.curState = curState
         self.progress = previousWeight + currentWeight * self.curState / float(self.stateCount)
         self.__reportProgress()
 

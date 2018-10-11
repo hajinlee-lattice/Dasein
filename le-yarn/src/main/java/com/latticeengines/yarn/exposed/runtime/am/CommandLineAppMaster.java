@@ -7,8 +7,6 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.Container;
@@ -16,6 +14,8 @@ import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
@@ -50,6 +50,9 @@ public class CommandLineAppMaster extends StaticEventingAppmaster
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Override
     protected void onInit() throws Exception {
         log.info("Initializing application.");
@@ -57,6 +60,11 @@ public class CommandLineAppMaster extends StaticEventingAppmaster
         setTemplate(((DefaultContainerAllocator) getAllocator()).getRmTemplate());
         monitor = new ProgressMonitor(getAllocator());
         yarnConfiguration = super.getConfiguration();
+        // TODO: YSong-M24 condition to be removed after cutting over to EMR
+        if (Boolean.TRUE.equals(useEmr)) {
+            log.info("Starting progress monitor ...");
+            monitor.start();
+        }
     }
 
     @Override
