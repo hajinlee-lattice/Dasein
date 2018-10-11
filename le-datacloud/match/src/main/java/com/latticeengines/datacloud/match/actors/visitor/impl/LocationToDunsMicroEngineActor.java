@@ -84,14 +84,14 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
         DnBMatchContext res = (DnBMatchContext) response.getResult();
         traveler.debug(REMOTE_API);
         String logMessage = String.format(
-                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s, IsDunsInAM = %s.",
+                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
                 res.getDuns(), getClass().getSimpleName(),
                 (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
                 (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
                 res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
                 res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
                 res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
-                res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusinessString(), res.isDunsInAMString());
+                res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusinessString());
         if (Boolean.TRUE.equals(res.getPatched())) {
             logMessage += " This cache entry has been manually patched.";
         }
@@ -106,12 +106,8 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
         } else {
             matchKeyTuple.setDuns(res.getDuns());
         }
-        Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
-        if (dunsOriginMap == null) {
-            dunsOriginMap = new HashMap<String, String>();
-            ((MatchTraveler) traveler).setDunsOriginMap(dunsOriginMap);
-        }
-        dunsOriginMap.put(this.getClass().getName(), res.getDuns());
+        traveler.setDunsOriginMapIfAbsent(new HashMap<>());
+        traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
         traveler.getDnBMatchContexts().add(res);
         response.setResult(null);
     }

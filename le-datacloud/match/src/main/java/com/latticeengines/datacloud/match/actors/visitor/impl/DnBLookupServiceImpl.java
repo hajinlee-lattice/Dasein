@@ -38,7 +38,6 @@ import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DnBLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
@@ -51,7 +50,6 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -119,9 +117,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     @Autowired
     private DnBCacheService dnbCacheService;
-
-    @Autowired
-    private AccountLookupService accountLookupService;
 
     @Autowired
     private DnBMatchResultValidator dnbMatchResultValidator;
@@ -590,18 +585,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             context.setDunsInAM(Boolean.FALSE);
             return;
         }
-        if (isDunsInAM(context.getDuns(), context.getDataCloudVersion())) {
-            context.setDunsInAM(Boolean.TRUE);
-        } else {
-            context.setDunsInAM(Boolean.FALSE);
-        }
-    }
 
-    private boolean isDunsInAM(String duns, String dataCloudVersion) {
-        AccountLookupRequest lookupRequest = new AccountLookupRequest(dataCloudVersion);
-        lookupRequest.addLookupPair(null, duns);
-        List<String> ids = accountLookupService.batchLookupIds(lookupRequest);
-        return (ids != null && ids.size() == 1 && StringUtils.isNotEmpty(ids.get(0)));
+        context.setDunsInAM(true);
     }
 
     private void writeDnBMatchHistory(List<DnBMatchHistory> metrics) {

@@ -11,8 +11,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
+import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +222,10 @@ public class MatchActorSystem {
         initNamedActor(DunsBasedMicroEngineActor.class);
         initNamedActor(LocationToDunsMicroEngineActor.class);
         initNamedActor(LocationToCachedDunsMicroEngineActor.class);
+        initNamedActor(DunsValidateMicroEngineActor.class);
+        initNamedActor(CachedDunsValidateMicroEngineActor.class);
         initNamedActor(DunsGuideValidateMicroEngineActor.class);
+        initNamedActor(CachedDunsGuideValidateMicroEngineActor.class);
         initNamedActor(DomainCountryZipCodeBasedMicroEngineActor.class);
         initNamedActor(DomainCountryStateBasedMicroEngineActor.class);
         initNamedActor(DomainCountryBasedMicroEngineActor.class);

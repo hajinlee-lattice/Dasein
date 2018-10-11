@@ -157,6 +157,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         this.dunsOriginMap = dunsOriginMap;
     }
 
+    public void setDunsOriginMapIfAbsent(Map<String, String> dunsOriginMap) {
+        if (this.dunsOriginMap == null) {
+            this.dunsOriginMap = dunsOriginMap;
+        }
+    }
+
     public Timeout getTravelTimeout() {
         return travelTimeout;
     }

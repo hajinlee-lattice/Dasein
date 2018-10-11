@@ -113,12 +113,8 @@ public class LocationToCachedDunsMicroEngineActor extends MicroEngineActorTempla
         } else {
             matchKeyTuple.setDuns(res.getDuns());
         }
-        Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
-        if (dunsOriginMap == null) {
-            dunsOriginMap = new HashMap<String, String>();
-            ((MatchTraveler) traveler).setDunsOriginMap(dunsOriginMap);
-        }
-        dunsOriginMap.put(this.getClass().getName(), res.getDuns());
+        traveler.setDunsOriginMapIfAbsent(new HashMap<>());
+        traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
         traveler.getDnBMatchContexts().add(res);
         response.setResult(null);
     }

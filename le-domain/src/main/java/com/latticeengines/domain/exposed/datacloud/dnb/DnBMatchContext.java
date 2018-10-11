@@ -122,6 +122,28 @@ public class DnBMatchContext implements Fact, Dimension {
         }
     }
 
+    /**
+     * Reset all the result copied from {@link DnBMatchContext#copyResultFromCache(DnBCache)} for white cache.
+     * Noop if the result is copied from black cache
+     */
+    public void clearWhiteCacheResult() {
+        if (!hitWhiteCache) {
+            return;
+        }
+
+        duns = null;
+        origDuns = null;
+        dnbCode = null;
+        confidenceCode = null;
+        matchGrade = null;
+        cacheId = null;
+        matchedNameLocation = null;
+        outOfBusiness = null;
+        dunsInAM = null;
+        hitWhiteCache = false;
+        patched = null;
+    }
+
     @MetricFieldGroup
     public NameLocation getInputNameLocation() {
         return inputNameLocation;
