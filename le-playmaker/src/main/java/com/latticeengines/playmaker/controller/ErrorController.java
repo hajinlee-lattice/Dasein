@@ -23,8 +23,8 @@ public class ErrorController {
             case 500:
                 return get500ModelAndView();
             default:
-                return getUnsupportedModelAndView();
-                //throw new UnsupportedOperationException("Cannot handle http error " + httpErrorCode);
+                //return getUnsupportedModelAndView();
+                throw new UnsupportedOperationException("Cannot handle http error " + httpErrorCode);
         }
     }
 

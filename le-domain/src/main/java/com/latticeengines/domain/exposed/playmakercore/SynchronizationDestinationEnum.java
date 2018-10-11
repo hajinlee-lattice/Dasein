@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.playmakercore;
 
+import org.apache.commons.lang.StringUtils;
+
 public enum SynchronizationDestinationEnum {
     SFDC(0), MAP(1), SFDC_AND_MAP(2);
 
@@ -10,10 +12,12 @@ public enum SynchronizationDestinationEnum {
     }
 
     public static int mapToIntType(String strType) {
-        strType = strType.toUpperCase();
-        for (SynchronizationDestinationEnum type : values()) {
-            if (type.name().equals(strType)) {
-                return type.type;
+        if (StringUtils.isNotBlank(strType)) {
+            strType = strType.toUpperCase();
+            for (SynchronizationDestinationEnum type : values()) {
+                if (type.name().equals(strType)) {
+                    return type.type;
+                }
             }
         }
         return SFDC.type;
