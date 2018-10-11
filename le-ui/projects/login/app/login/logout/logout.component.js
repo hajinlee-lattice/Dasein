@@ -2,10 +2,12 @@ angular.module('login')
 .component('logoutView', {
     templateUrl: 'app/login/logout/logout.component.html',
     controller: function(
-        $state, $location, $timeout, $interval, 
+        $scope, $state, $location, $timeout, $interval, 
         ResourceUtility, LoginService, Banner, SessionTimeoutUtility, BrowserStorageUtility, LoginStore
     ) {
-        var vm = this;
+        var vm = this,
+            redirectDelayInterval,
+            redirectDelayTimeout;
 
         angular.extend(vm, {
             redirectDelay: 10 // change to 0 to disable
@@ -19,13 +21,19 @@ angular.module('login')
                 redirectDelayMs = redirectDelaySeconds * 1000,
                 countDown = redirectDelaySeconds;
 
-            $timeout(function() {
+            redirectDelayTimeout = $timeout(function() {
                 $state.go("login.form");
             }, redirectDelayMs + 1000);
 
-            $interval(function(){
+            redirectDelayInterval = $interval(function(){
                 vm.delay = countDown--
+                console.log(vm.delay);
             }, 1000, redirectDelaySeconds);
+
+            $scope.$on('$destroy', function() {
+                $interval.cancel(redirectDelayInterval);
+                $timeout.cancel(redirectDelayTimeout);
+            });
         }
 
         vm.$onInit = function() {
