@@ -882,10 +882,10 @@ public class EmailServiceImpl implements EmailService {
             EmailTemplateBuilder builder;
             if ("Success".equalsIgnoreCase(status)) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_SUCCESS);
-            } else if ("In_Progress".equalsIgnoreCase(status)) {
-                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_IN_PROCESS);
-            } else {
+            } else if ("Failed".equalsIgnoreCase(status)) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_ERROR);
+            } else {
+                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_IN_PROCESS);
             }
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{templatename}}", templateName);
@@ -899,7 +899,8 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{apppublicurl}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(
-                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), templateName), mp,
+                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), templateName),
+                    mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");

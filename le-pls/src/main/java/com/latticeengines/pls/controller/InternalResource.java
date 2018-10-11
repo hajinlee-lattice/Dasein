@@ -700,15 +700,13 @@ public class InternalResource extends InternalResourceBase {
         String failedMessage = emailInfo.getExtraInfoMap().get("FailedMessage");
 
         for (User user : users) {
-            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                    || user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())
-                    || user.getAccessLevel().equals(AccessLevel.SUPER_ADMIN.name())) {
-
+            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())
+                    || user.getAccessLevel().equals(AccessLevel.EXTERNAL_USER.name())) {
                 emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, templateName,
                         fileName, failedMessage, entity);
-            }
-            if (user.getEmail().equals(emailInfo.getUserId())) {
-
+            } else if (user.getEmail().equals(emailInfo.getUserId())) {
+                emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, templateName, fileName,
+                        failedMessage, entity);
             }
         }
     }
