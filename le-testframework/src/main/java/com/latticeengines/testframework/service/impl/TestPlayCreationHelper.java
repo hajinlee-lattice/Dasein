@@ -225,6 +225,7 @@ public class TestPlayCreationHelper {
         segment = createSegment(SEGMENT_NAME, accountRestriction, contactRestriction);
         log.info("Tenant = " + tenant.getId());
         ruleBasedRatingEngine = createRatingEngine(segment, ratingRule);
+        playTargetSegment = createPlayTargetSegment();
         // crossSellRatingEngine =
         // createCrossSellRatingEngineWithPublishedRating(segment);
     }
