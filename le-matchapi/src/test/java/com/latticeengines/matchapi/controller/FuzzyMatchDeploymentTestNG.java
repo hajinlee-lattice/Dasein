@@ -52,8 +52,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String podId = "FuzzyMatchDeploymentTestNG";
     private static final String avroDir = "/tmp/FuzzyMatchDeploymentTestNG";
     private static final String DUNS_GUIDE_BOOK_DATACLOUD_VERSION = "2.0.14";
-    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Pokemon";
-    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Pokemon2";
+    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Gingerbread";
+    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Honeycomb";
     private static final String DUNS_GUIDE_BOOK_DIR = "DunsGuideBook";
     private static final String DUNS_GUIDE_BOOK_TEST_FILE = "dunsguidebookdata.avro";
 

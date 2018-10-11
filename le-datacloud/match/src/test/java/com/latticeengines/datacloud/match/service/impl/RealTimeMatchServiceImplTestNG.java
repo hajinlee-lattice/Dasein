@@ -58,8 +58,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
     private static final String DUNS_GUIDE_BOOK_DATACLOUD_VERSION = "2.0.14";
-    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Pokemon";
-    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Pokemon2";
+    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Gingerbread";
+    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Honeycomb";
 
     @Value("${common.le.stack}")
     private String leStack;

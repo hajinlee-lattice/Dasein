@@ -15,14 +15,14 @@ import javax.annotation.PostConstruct;
 import java.util.HashMap;
 
 /*
- * validate remote DnB match result and perform post processing on the result (including checking if matched DUNS
- * exists in AM and refresh the cache if necessary).
+ * validate cached DnB match result and perform post processing on the result (including checking if matched DUNS
+ * exists in AM and whether a DnB remote API lookup is required to refresh the cache).
  *
  * after the validation, DUNS redirection is performed.
  */
-@Component("dunsGuideValidateMicroEngineActor")
+@Component("cachedDunsGuideValidateMicroEngineActor")
 @Scope("prototype")
-public class DunsGuideValidateMicroEngineActor extends BaseDunsGuideValidateMicroEngineActor {
+public class CachedDunsGuideValidateMicroEngineActor extends BaseDunsGuideValidateMicroEngineActor {
     private static final Logger log = LoggerFactory.getLogger(CachedDunsGuideValidateMicroEngineActor.class);
 
     @PostConstruct
@@ -35,16 +35,16 @@ public class DunsGuideValidateMicroEngineActor extends BaseDunsGuideValidateMicr
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
         MatchInput input = traveler.getMatchInput();
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
-        DnBMatchContext remoteContext = DnBMatchUtils.getRemoteResult(traveler);
+        DnBMatchContext cacheContext = DnBMatchUtils.getCacheResult(traveler);
         boolean isResultValid = true;
-        if (dnBMatchPostProcessor.shouldPostProcessRemoteResult(remoteContext, input, tuple)) {
-            isResultValid = dnBMatchPostProcessor.postProcessRemoteResult(
-                    traveler, remoteContext, traveler.getDunsOriginMap(), isDunsInAM);
+        if (dnBMatchPostProcessor.shouldPostProcessCacheResult(cacheContext, input, tuple)) {
+            isResultValid = dnBMatchPostProcessor.postProcessCacheResult(
+                    traveler, cacheContext, traveler.getDunsOriginMap(), isDunsInAM);
             if (!isResultValid) {
-                String dnbCodeStr = remoteContext == null ? null : remoteContext.getDnbCodeAsString();
+                String cacheId = cacheContext == null ? null : cacheContext.getCacheId();
                 traveler.debug(String.format(
-                        "Invalid remote DnBMatchContext, DUNS=%s DnBCode=%s CurrentIsDunsInAM=%s",
-                        tuple.getDuns(), dnbCodeStr, isDunsInAM));
+                        "Invalid cached DnBMatchContext, CacheId=%s DUNS=%s DnBCode=%s CurrentIsDunsInAM=%s",
+                        cacheId, tuple.getDuns(), cacheContext.getDnbCodeAsString(), isDunsInAM));
             }
         }
         return isResultValid;
