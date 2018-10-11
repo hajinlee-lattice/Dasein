@@ -316,18 +316,22 @@ angular.module('lp.playbook')
             if(lastIncompleteLaunch) {
                 PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
                     launch_id: lastIncompleteLaunch.launchId,
-                    action: 'launch'
-                }).then(function(saved) {
-                    $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                    launchObj: Object.assign({},lastIncompleteLaunch, launchObj)
+                }).then(function(launch) {
+                    PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                        launch_id: lastIncompleteLaunch.launchId,
+                        action: 'launch'
+                    }).then(function(saved) {
+                        $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                    });
                 });
             } else if(lastIncompleteLaunchId) {
                 // save play
                 PlaybookWizardStore.savePlay(play).then(function(play) {
                     // save launch
-                    var _launchObj = angular.merge({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj);
                     PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
                         launch_id: lastIncompleteLaunchId,
-                        launchObj: _launchObj
+                        launchObj: Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj)
                     }).then(function(saved) {
                         if(!saveOnly) {
                             // launch

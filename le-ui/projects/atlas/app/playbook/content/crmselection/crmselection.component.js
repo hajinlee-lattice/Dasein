@@ -37,6 +37,11 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
                     vm.savedSegment = crmselection;
                     vm.stored.crm_selection = crmselection;
+
+                    PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
+                    PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
+                    PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+
                     if(crmselection) {
                         PlaybookWizardStore.setValidation('crmselection', true);
                     }

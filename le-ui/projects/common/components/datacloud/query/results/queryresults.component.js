@@ -84,9 +84,9 @@ angular.module('common.datacloud.query.results', [
                     // Use this if you want more precise percentage in the display
                     // If you do use this, use this in the view HTML ({{ ::bucket.percentage | percentage: 1 }})
                     // result is (0.3%) for 0.3%
-                    bucket.percentage = bucket.count / numAccounts;
+                    bucket.percentage = bucket.count / numAccounts;               
                 });
-
+                PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
             } else if (vm.section === 'dashboard.targets') {
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
                     var buckets = data.ratingEngine.bucketMetadata;
