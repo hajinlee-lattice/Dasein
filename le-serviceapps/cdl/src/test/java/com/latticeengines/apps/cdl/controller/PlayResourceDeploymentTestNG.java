@@ -65,6 +65,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         playCreationHelper.setDestinationOrgId("O" + System.currentTimeMillis());
         playCreationHelper.setDestinationOrgType(CDLExternalSystemType.CRM);
         MetadataSegment retrievedSegment = createSegment();
+        playCreationHelper.createPlayTargetSegment();
         ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
     }
 

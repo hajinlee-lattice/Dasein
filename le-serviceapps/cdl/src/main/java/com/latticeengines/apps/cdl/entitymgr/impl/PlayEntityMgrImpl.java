@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +22,17 @@ import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayRepository;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -47,6 +52,9 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
+
+    @Inject
+    private SegmentEntityMgr segmentEntityMgr;
 
     @Resource(name = "playWriterRepository")
     private PlayRepository playWriterRepository;
@@ -100,6 +108,16 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     private void createNewPlay(Play play) {
         if (play.getRatingEngine() != null) {
             play.setRatingEngine(findRatingEngine(play));
+        }
+        if (play.getTargetSegment() == null) {
+            throw new LedpException(LedpCode.LEDP_18206);
+        } else {
+            String segmentName = play.getTargetSegment().getName();
+            if( StringUtils.isBlank(segmentName)) {
+                throw new LedpException(LedpCode.LEDP_18207);
+            }
+            MetadataSegment selSegment = segmentEntityMgr.findByName(segmentName.trim());
+            play.setTargetSegment(selSegment);
         }
         // TODO: Remove in M24
         if (play.getDisplayName() == null) {

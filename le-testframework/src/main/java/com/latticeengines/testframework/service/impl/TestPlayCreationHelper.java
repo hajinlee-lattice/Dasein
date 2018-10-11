@@ -122,6 +122,7 @@ public class TestPlayCreationHelper {
     private String tenantIdentifier;
     private Tenant tenant;
     private MetadataSegment segment;
+    private MetadataSegment playTargetSegment;
     private ModelSummary modelSummary;
     private RatingEngine ruleBasedRatingEngine;
     private RatingEngine crossSellRatingEngine;
@@ -259,6 +260,11 @@ public class TestPlayCreationHelper {
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setId(ratingEngine.getId());
         play.setRatingEngine(ratingEngine1);
+
+        MetadataSegment playSegment = new MetadataSegment();
+        playSegment.setName(playTargetSegment.getName());
+        play.setTargetSegment(playSegment);
+
         return play;
     }
 
@@ -366,6 +372,7 @@ public class TestPlayCreationHelper {
 
         Play retrievedPlay = playProxy.getPlay(tenant.getId(), playName);
         Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);
+        assertPlay(retrievedPlay);
 
         String jsonValue = JsonUtils.serialize(retrievedPlay);
         Assert.assertNotNull(jsonValue);
@@ -414,6 +421,8 @@ public class TestPlayCreationHelper {
         Assert.assertNotNull(play.getRatingEngine());
         Assert.assertEquals(play.getRatingEngine().getId(), ratingEngine.getId());
         Assert.assertNotNull(play.getRatingEngine().getBucketMetadata());
+        Assert.assertNotNull(play.getTargetSegment());
+        Assert.assertEquals(play.getTargetSegment().getName(), playTargetSegment.getName());
         Assert.assertTrue(CollectionUtils.isNotEmpty(play.getRatingEngine().getBucketMetadata()));
     }
 
@@ -735,6 +744,11 @@ public class TestPlayCreationHelper {
 
     public MetadataSegment getSegment() {
         return segment;
+    }
+
+    public MetadataSegment createPlayTargetSegment() {
+        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlaySegmentResourceTest"), null, null);
+        return playTargetSegment;
     }
 
 }

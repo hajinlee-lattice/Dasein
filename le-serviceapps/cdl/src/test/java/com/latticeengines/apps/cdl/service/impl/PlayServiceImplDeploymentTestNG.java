@@ -33,6 +33,7 @@ import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final String SEGMENT_NAME = "segment";
+    private static final String PLAY_SEGMENT_NAME = "Play Segment for Service DeployTests";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final String TALKINGPOINT_CONTENT = "<p>Space={!Space}</p> <p>Hello&nbsp;{!PlaySolutionName}, I am&nbsp;{!ExpectedValue}</p> <p>Let's checkout&nbsp;{!Account.Website}, and DUNS={!Account.DUNS},</p> <p>in&nbsp;{!Account.LDC_City},&nbsp;{!Account.LDC_State}, {!Account.LDC_Country}</p>";
 
@@ -57,6 +58,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     private PlayTypeService playTypeService;
 
     private RatingEngine ratingEngine1;
+    private MetadataSegment playSegment;
     private Play play;
     private String playName;
     private List<PlayType> playTypes;
@@ -71,6 +73,11 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
                 createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         log.info(String.format("Segment is %s", retrievedSegment));
+
+        playSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace, constructSegment(PLAY_SEGMENT_NAME));
+        playSegment = segmentProxy.getMetadataSegmentByName(mainCustomerSpace, playSegment.getName());
+        Assert.assertNotNull(playSegment);
+        log.info(String.format("Play Segment is %s", playSegment));
 
         ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
@@ -269,6 +276,8 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getCreatedBy(), CREATED_BY);
         Assert.assertNotNull(play.getRatingEngine());
+        Assert.assertNotNull(play.getTargetSegment());
+        Assert.assertEquals(play.getTargetSegment().getDisplayName(), PLAY_SEGMENT_NAME);
         Assert.assertNotNull(play.getName());
         Assert.assertNotNull(play.getPid());
         log.info(String.format("play is %s", play.toString()));
@@ -281,6 +290,9 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);
+        MetadataSegment targetSegment = new MetadataSegment();
+        targetSegment.setName(playSegment.getName());
+        play.setTargetSegment(targetSegment);
         play.setTenant(mainTestTenant);
         play.setPlayType(playTypes.get(0));
         // cannot use other servers in a functional test

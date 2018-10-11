@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,6 +29,7 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -65,22 +69,27 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
+    private String PLAY_TARGET_SEGMENT_NAME = "Play Target Segment - 2";
     private String CREATED_BY = "lattice@lattice-engines.com";
     private Map<String, PlayLaunch> playLaunchMap;
     private List<PlayType> playTypes;
     private Set<RatingBucketName> bucketsToLaunch1;
     private Set<RatingBucketName> bucketsToLaunch2;
+    private MetadataSegment playTargetSegment;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
 
         setupTestEnvironmentWithDummySegment();
 
-        cleanupPlayLunches();
+        cleanupPlayLaunches();
 
         Date timestamp = new Date(System.currentTimeMillis());
 
         playTypes = playTypeService.getAllPlayTypes(mainCustomerSpace);
+        playTargetSegment = createMetadataSegment(PLAY_TARGET_SEGMENT_NAME);
+        assertNotNull(playTargetSegment);
+        assertEquals(playTargetSegment.getDisplayName(), PLAY_TARGET_SEGMENT_NAME);
 
         play = new Play();
         play.setName(NAME);
@@ -90,10 +99,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
+        play.setTargetSegment(playTargetSegment);
         play.setPlayType(playTypes.get(0));
 
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
+        assertPlayTargetSegment(play);
 
         bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
@@ -125,7 +136,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     }
 
-    private void cleanupPlayLunches() {
+    private void assertPlayTargetSegment(Play testPlay) {
+        assertNotNull(testPlay.getTargetSegment());
+        assertEquals(testPlay.getTargetSegment().getDisplayName(), PLAY_TARGET_SEGMENT_NAME);
+    }
+
+    private void cleanupPlayLaunches() {
         for (PlayLaunch launch : playLaunchService.findByState(LaunchState.Launching)) {
             playLaunchService.deleteByLaunchId(launch.getLaunchId(), false);
         }

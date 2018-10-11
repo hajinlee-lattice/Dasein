@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +20,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.PlayType;
@@ -31,6 +35,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private final static String NEW_DISPLAY_NAME = "playHarder!";
     private final static String DESCRIPTION = "playHardest";
     private final static String CREATED_BY = "lattice@lattice-engines.com";
+    private final static String PLAY_SEGMENT_NAME = "PlayTargetSegment";
 
     @Autowired
     private PlayEntityMgr playEntityMgr;
@@ -50,6 +55,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private Play play;
     private RatingEngine ratingEngine1;
     private RatingEngine ratingEngine2;
+    private MetadataSegment playTargetSegment;
 
     private Play retrievedPlay;
     private String playName;
@@ -80,6 +86,10 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine2.setId(createdRatingEngine.getId());
         ratingEngine2.setPid(createdRatingEngine.getPid());
 
+        playTargetSegment = createMetadataSegment(PLAY_SEGMENT_NAME);
+        Assert.assertNotNull(playTargetSegment);
+        Assert.assertNotNull(playTargetSegment.getPid());
+
         types = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = new Play();
         play.setDescription(DESCRIPTION);
@@ -92,6 +102,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setPlayStatus(PlayStatus.INACTIVE);
         play.setTenant(mainTestTenant);
         play.setName(UUID.randomUUID().toString());
+        play.setTargetSegment(playTargetSegment);
     }
 
     @Test(groups = "functional")
@@ -103,7 +114,17 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Play play1 = playList.get(0);
         playName = play1.getName();
         log.info(String.format("play1 has name %s", playName));
+
+        assertPlayTargetSegment(play1);
         retrievedPlay = playEntityMgr.getPlayByName(playName, true);
+        assertPlayTargetSegment(retrievedPlay);
+    }
+
+    private void assertPlayTargetSegment(Play testPlay) {
+        assertNotNull(testPlay.getTargetSegment());
+        assertNotNull(testPlay.getTargetSegment().getPid());
+        assertNotNull(testPlay.getTargetSegment().getDisplayName());
+        assertEquals(testPlay.getTargetSegment().getDisplayName(), PLAY_SEGMENT_NAME);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreate" })
@@ -111,6 +132,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         List<Play> plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine1.getPid());
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 1);
+        assertPlayTargetSegment(plays.get(0));
         plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine2.getPid());
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 0);
@@ -146,6 +168,8 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
+
+        assertPlayTargetSegment(retrievedPlay);
 
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);

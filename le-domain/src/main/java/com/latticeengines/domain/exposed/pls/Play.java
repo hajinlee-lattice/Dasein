@@ -42,6 +42,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPoint;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -94,6 +95,12 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @JsonProperty("ratings")
     @Transient
     private List<RatingBucketCoverage> ratings;
+
+    @JsonProperty("targetSegment")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MetadataSegment targetSegment;
 
     @JsonProperty("ratingEngine")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -198,6 +205,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public MetadataSegment getTargetSegment() {
+        return targetSegment;
+    }
+
+    public void setTargetSegment(MetadataSegment targetSegment) {
+        this.targetSegment = targetSegment;
     }
 
     public RatingEngine getRatingEngine() {
