@@ -231,8 +231,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         if (ENABLE_AI_RATINGS) {
             verifyPublishedIterations(ai1);
             verifyPublishedIterations(ai2);
-            verifyBucketMetadata(((AIModel) ai1.getPublishedIteration()).getModelSummaryId());
-            verifyBucketMetadata(((AIModel) ai2.getPublishedIteration()).getModelSummaryId());
+            verifyBucketMetadataByEngineId(ai1.getId());
+            verifyBucketMetadataByEngineId(ai2.getId());
+            verifyBucketMetadataByModelGuid(((AIModel) ai1.getPublishedIteration()).getModelSummaryId());
+            verifyBucketMetadataByModelGuid(((AIModel) ai2.getPublishedIteration()).getModelSummaryId());
         }
 
     }
@@ -285,15 +287,24 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return buckets;
     }
 
-    private void verifyBucketMetadata(String engineId) {
+    private void verifyBucketMetadataByEngineId(String engineId) {
         log.info("Verifying bucket metadata for engine " + engineId);
         Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
                 .getABCDBucketsByEngineId(mainTestTenant.getId(), engineId);
         Assert.assertNotNull(bucketMetadataHistory);
         Assert.assertEquals(bucketMetadataHistory.size(), 2);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
+    }
+
+    private void verifyBucketMetadataByModelGuid(String modelGuid) {
+        log.info("Verifying bucket metadata for engine " + modelGuid);
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
+                .getABCDBucketsByModelGuid(mainTestTenant.getId(), modelGuid);
+        Assert.assertNotNull(bucketMetadataHistory);
+        Assert.assertEquals(bucketMetadataHistory.size(), 2);
+        log.info("time is " + bucketMetadataHistory.keySet().toString());
         List<BucketMetadata> latestBucketedMetadata = bucketedScoreProxy
-                .getPublishedBucketMetadataByModelGuid(mainTestTenant.getId(), engineId);
+                .getPublishedBucketMetadataByModelGuid(mainTestTenant.getId(), modelGuid);
         latestBucketedMetadata.forEach(bucket -> Assert.assertEquals(bucket.getPublishedVersion().intValue(), 0));
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
     }

@@ -29,9 +29,7 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
         PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
         String modelguid = "ms__f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06-PLS_model";
         params.setAvgScores(ImmutableMap.of(modelguid, 0.05));
-        params.setScoreFieldMap(ImmutableMap.of( //
-                modelguid, InterfaceName.Event.name()//
-        ));
+        params.setScoreFieldMap(ImmutableMap.of(modelguid, InterfaceName.Event.name()));
         return params;
     }
 

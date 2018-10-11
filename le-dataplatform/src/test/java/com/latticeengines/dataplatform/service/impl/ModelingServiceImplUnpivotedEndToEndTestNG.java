@@ -3,7 +3,7 @@ package com.latticeengines.dataplatform.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -104,7 +103,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+        modelDef.addAlgorithms(Collections.singletonList(randomForestAlgorithm));
 
         model = createModel(modelDef);
     }
@@ -120,8 +119,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setName("Model Submission1");
         m.setTable("Q_EventTable_Nutanix");
         m.setMetadataTable("EventMetadata");
-        m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event" }));
-        m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
+        m.setTargetsList(Collections.singletonList("P1_Event"));
+        m.setKeyCols(Collections.singletonList("Nutanix_EventTable_Clean"));
         m.setCustomer(getCustomer());
         m.setDataFormat("avro");
         m.setProvenanceProperties(StringUtils.join(new String[] { "swlib.module=dataflowapi", //
@@ -159,7 +158,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         config.setCustomer(getCustomer());
         config.setTable("Q_EventTable_Nutanix");
         config.setMetadataTable("EventMetadata");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
+        config.setKeyCols(Collections.singletonList("Nutanix_EventTable_Clean"));
         return config;
     }
 

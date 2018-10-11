@@ -70,7 +70,6 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
                     .next(combineStatistics) //
                     .next(exportToRedshift) //
                     .next(exportToDynamo);
-            ;
         }
         return builder.build();
     }

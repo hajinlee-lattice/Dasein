@@ -127,6 +127,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
     protected static final String BUCKET_METADATA_MAP = "BUCKET_METADATA_MAP";
     protected static final String MODEL_GUID_ENGINE_ID_MAP = "MODEL_GUID_ENGINE_ID_MAP";
+    protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
+    protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";
+    protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
     public static final String EXISTING_RECORDS = "EXISTING_RECORDS";
     public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
     public static final String NEW_RECORDS = "NEW_RECORDS";

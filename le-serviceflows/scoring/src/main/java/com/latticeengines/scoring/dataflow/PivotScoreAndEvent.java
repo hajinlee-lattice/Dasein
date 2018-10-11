@@ -51,19 +51,18 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
             String modelGuid = entry.getKey();
-            Node node = entry.getValue();
-
-            Double avgScore = avgScoresMap.get(modelGuid);
             String scoreField = scoreFieldMap.getOrDefault(modelGuid, InterfaceName.RawScore.name());
             useEvent = InterfaceName.Event.name().equals(scoreField);
             isEV = InterfaceName.ExpectedRevenue.name().equals(scoreField);
             log.info("useEvent=" + useEvent + " isEV=" + isEV + " ModeId=" + modelGuid);
 
+            Node node = entry.getValue();
             total = getTotal(node, modelGuid, scoreField);
             Node aggregatedNode = aggregate(node, scoreField);
             String scoreDerivation = parameters.getScoreDerivationMap().get(modelGuid);
             String fitFunctionParams = parameters.getFitFunctionParametersMap().get(modelGuid);
 
+            Double avgScore = avgScoresMap.get(modelGuid);
             Node output = createLift(aggregatedNode, avgScore, scoreDerivation, fitFunctionParams);
             if (merged == null) {
                 merged = output;
@@ -115,10 +114,9 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             aggregations.add(new Aggregation(scoreField, BUCKET_AVG_SCORE, AggregationType.AVG));
             aggregations.add(new Aggregation(scoreField, BUCKET_SUM, AggregationType.SUM));
         }
-        Node aggregatedNode = inputTable.groupBy(
+        return inputTable.groupBy(
                 new FieldList(ScoreResultField.Percentile.displayName, ScoreResultField.ModelId.displayName),
                 aggregations);
-        return aggregatedNode;
     }
 
     private Node createLift(Node aggregatedNode, Double avgScore,

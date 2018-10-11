@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
@@ -179,6 +180,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             putObjectInContext(BUCKETED_SCORE_SUMMARIES, bucketedScoreSummaryMap);
             putObjectInContext(BUCKET_METADATA_MAP, modelGuidToBucketMetadataMap);
             putObjectInContext(MODEL_GUID_ENGINE_ID_MAP, modelGuidToEngineIdMap);
+            mergeAggregatedMaps();
         }
     }
 
@@ -297,5 +299,41 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
                     return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
                             || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
                 }).collect(Collectors.toList());
+    }
+
+    private void mergeAggregatedMaps() {
+        Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = //
+                getMapObjectFromContext(BUCKETED_SCORE_SUMMARIES, String.class, BucketedScoreSummary.class);
+
+        if (MapUtils.isNotEmpty(bucketedScoreSummaryMap)) {
+            Map<String, BucketedScoreSummary> bucketedScoreSummaryMapAgg = getMapObjectFromContext(//
+                    BUCKETED_SCORE_SUMMARIES_AGG, String.class, BucketedScoreSummary.class);
+            if (MapUtils.isEmpty(bucketedScoreSummaryMapAgg)) {
+                bucketedScoreSummaryMapAgg = new HashMap<>();
+            }
+            bucketedScoreSummaryMapAgg.putAll(bucketedScoreSummaryMap);
+            putObjectInContext(BUCKETED_SCORE_SUMMARIES_AGG, bucketedScoreSummaryMapAgg);
+        }
+
+        if (MapUtils.isNotEmpty(modelGuidToEngineIdMap)) {
+            Map<String, String> modelGuidToEngineIdMapAgg = getMapObjectFromContext(//
+                    MODEL_GUID_ENGINE_ID_MAP_AGG, String.class, String.class);
+            if (MapUtils.isEmpty(modelGuidToEngineIdMapAgg)) {
+                modelGuidToEngineIdMapAgg = new HashMap<>();
+            }
+            modelGuidToEngineIdMapAgg.putAll(modelGuidToEngineIdMap);
+            putObjectInContext(MODEL_GUID_ENGINE_ID_MAP_AGG, modelGuidToEngineIdMapAgg);
+        }
+
+        if (MapUtils.isNotEmpty(modelGuidToBucketMetadataMap)) {
+            Map<String, List> map = getMapObjectFromContext(BUCKET_METADATA_MAP_AGG, String.class, List.class);
+            Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMapAgg = new HashMap<>();
+            if (MapUtils.isNotEmpty(map)) {
+                map.forEach((key, val) -> //
+                        modelGuidToBucketMetadataMapAgg.put(key, JsonUtils.convertList(val, BucketMetadata.class)));
+            }
+            modelGuidToBucketMetadataMapAgg.putAll(modelGuidToBucketMetadataMap);
+            putObjectInContext(BUCKET_METADATA_MAP_AGG, modelGuidToBucketMetadataMapAgg);
+        }
     }
 }
