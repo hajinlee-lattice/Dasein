@@ -26,7 +26,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 
 @Component("createScoringTargetTable")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRatingStepConfiguration> {
+public class CreateScoringTargetTable
+        extends BaseRedshiftIngestStep<GenerateRatingStepConfiguration> {
 
     private ThreadLocal<Long> ingestTimestamp = new ThreadLocal<>();
     private AtomicLong evaluationPeriod = new AtomicLong(0L);
@@ -71,7 +72,8 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
     }
 
     @Override
-    protected GenericRecord parseDataForModel(String modelId, String modelGuid, Map<String, Object> data) {
+    protected GenericRecord parseDataForModel(String modelId, String modelGuid,
+            Map<String, Object> data) {
         if (ingestTimestamp.get() == null || ingestTimestamp.get() == 0L) {
             ingestTimestamp.set(System.currentTimeMillis());
         }
@@ -87,7 +89,8 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
                 accountId = (String) data.get(accountIdAttr);
             }
             if (StringUtils.isBlank(accountId)) {
-                throw new IllegalArgumentException("Found null account id: " + JsonUtils.serialize(data));
+                throw new IllegalArgumentException(
+                        "Found null account id: " + JsonUtils.serialize(data));
             }
             String compositeKey = String.format("%s_%s", accountId, modelId);
             builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
@@ -99,8 +102,9 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
             String periodIdAttr = InterfaceName.PeriodId.name();
             if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
                 if (evaluationPeriod.get() == 0L) {
-                    Long periodId = Long
-                            .valueOf(String.valueOf(data.get(InterfaceName.PeriodId.name().toLowerCase())));
+                    long periodId = Long.valueOf(String.valueOf(//
+                            data.get(InterfaceName.PeriodId.name().toLowerCase()) //
+                    ));
                     evaluationPeriod.set(periodId);
                 }
                 builder.set(periodIdAttr, evaluationPeriod.get());

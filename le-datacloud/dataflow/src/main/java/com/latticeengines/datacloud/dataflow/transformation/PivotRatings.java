@@ -80,12 +80,12 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 pivoted = aiPivoted;
             } else {
                 String aiIdCol = "AI_" + idCol;
-                aiPivoted = aiPivoted.apply(idCol, new FieldList(idCol), new FieldMetadata(aiIdCol, String.class));
+                aiPivoted = aiPivoted.apply(idCol, new FieldList(idCol),
+                        new FieldMetadata(aiIdCol, String.class));
                 pivoted = pivoted.join(idCol, aiPivoted, aiIdCol, JoinType.OUTER);
                 List<String> fields = new ArrayList<>(pivoted.getFieldNames());
                 fields.addAll(aiPivoted.getFieldNames());
-                pivoted = mergeJoinedCol(pivoted, idCol, aiIdCol, String.class);
-                pivoted = removeExtraId(pivoted);
+                pivoted = mergeIdCols(pivoted, aiIdCol);
                 fields = pivoted.getFieldNames();
                 Collections.sort(fields);
                 pivoted = pivoted.retain(new FieldList(fields));
@@ -104,6 +104,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         }
 
         pivoted = removeExtraId(pivoted);
+        pivoted = pivoted.filter(String.format("%s != null && %s != \"\"", idCol, idCol),
+                new FieldList(idCol));
         pivoted = pivoted.addTimestamp(InterfaceName.CDLCreatedTime.name());
         pivoted = pivoted.addTimestamp(InterfaceName.CDLUpdatedTime.name());
 
@@ -115,20 +117,21 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         ruleRating = ruleRating.discard(InterfaceName.__Composite_Key__.name(),
                 InterfaceName.CDLUpdatedTime.name());
         ruleRating = renameIds(ruleRating);
-        return pivotField(ruleRating, ruleEngineIds, InterfaceName.Rating.name(), String.class, null)
-                .renamePipe("rule_rating");
+        return pivotField(ruleRating, ruleEngineIds, InterfaceName.Rating.name(), String.class,
+                null).renamePipe("rule_rating");
     }
 
     private Node pivotAIBased(Node rawRatings) {
         rawRatings = renameIds(rawRatings);
         rawRatings = rawRatings.discard(InterfaceName.CDLUpdatedTime.name(), "Model_GUID",
                 InterfaceName.__Composite_Key__.name());
-        Node rating = pivotField(rawRatings, aiEngineIds, InterfaceName.Rating.name(), String.class, null)
-                .renamePipe("ai_rating");
+        Node rating = pivotField(rawRatings, aiEngineIds, InterfaceName.Rating.name(), String.class,
+                null).renamePipe("ai_rating");
         List<Node> rhs = new ArrayList<>();
         rhs.add(pivotScoreField(rawRatings, aiEngineIds, RatingEngine.ScoreType.Score));
         if (CollectionUtils.isNotEmpty(evEngineIds)) {
-            rhs.add(pivotScoreField(rawRatings, evEngineIds, RatingEngine.ScoreType.ExpectedRevenue));
+            rhs.add(pivotScoreField(rawRatings, evEngineIds,
+                    RatingEngine.ScoreType.ExpectedRevenue));
         }
         FieldList joinKey = new FieldList(idCol);
         List<FieldList> joinKeys = rhs.stream().map(n -> joinKey).collect(Collectors.toList());
@@ -139,8 +142,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
     private Node joinInactiveEngines(Node pivoted, Node inactive, List<String> inactiveEngines) {
         List<String> inactiveToRetain = new ArrayList<>();
         Set<String> existing = new HashSet<>(inactive.getFieldNames());
-        for (String inactiveEngine: inactiveEngines) {
-            for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
+        for (String inactiveEngine : inactiveEngines) {
+            for (RatingEngine.ScoreType scoreType : RatingEngine.ScoreType.values()) {
                 String scoreAttr = RatingEngine.toRatingAttrName(inactiveEngine, scoreType);
                 inactiveToRetain.add(scoreAttr);
             }
@@ -161,21 +164,23 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         String idCol2 = idCol + "_2";
         inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
         pivoted = pivoted.outerJoin(idCol, inactive, idCol2);
-        pivoted = mergeJoinedCol(pivoted, idCol, idCol2, String.class);
-        pivoted = removeExtraId(pivoted);
+        pivoted = mergeIdCols(pivoted, idCol2);
         return pivoted;
     }
 
-    private Node pivotScoreField(Node rawRatings, Set<String> engineIds, RatingEngine.ScoreType scoreType) {
+    private Node pivotScoreField(Node rawRatings, Set<String> engineIds,
+            RatingEngine.ScoreType scoreType) {
         String suffix = RatingEngine.SCORE_ATTR_SUFFIX.get(scoreType);
         String interfaceName = scoreType.name();
         Class<? extends Serializable> scoreClz = RatingEngine.SCORE_ATTR_CLZ.get(scoreType);
-        return pivotField(rawRatings, engineIds, interfaceName, scoreClz, suffix).renamePipe("ai_" + suffix);
+        return pivotField(rawRatings, engineIds, interfaceName, scoreClz, suffix)
+                .renamePipe("ai_" + suffix);
     }
 
-    private <T extends Serializable> Node pivotField(Node rawRatings, Set<String> pivotedKeys, String valCol,
-                                                     Class<T> resultClz, String suffix) {
-        PivotStrategyImpl pivotStrategy = PivotStrategyImpl.any(keyCol, valCol, pivotedKeys, resultClz, null);
+    private <T extends Serializable> Node pivotField(Node rawRatings, Set<String> pivotedKeys,
+            String valCol, Class<T> resultClz, String suffix) {
+        PivotStrategyImpl pivotStrategy = PivotStrategyImpl.any(keyCol, valCol, pivotedKeys,
+                resultClz, null);
         Node pivoted = rawRatings.pivot(new String[] { idCol }, pivotStrategy, false);
 
         List<String> retainFields = new ArrayList<>();
@@ -183,7 +188,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
         if (StringUtils.isNotBlank(suffix)) {
             List<String> oldFields = new ArrayList<>(pivotedKeys);
-            List<String> newFields = oldFields.stream().map(f -> f + "_" + suffix).collect(Collectors.toList());
+            List<String> newFields = oldFields.stream().map(f -> f + "_" + suffix)
+                    .collect(Collectors.toList());
             pivoted = pivoted.rename(new FieldList(oldFields), new FieldList(newFields));
             retainFields.addAll(newFields);
         } else {
@@ -202,8 +208,9 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
     private Node removeExtraId(Node joined) {
         List<String> toDiscard = joined.getFieldNames().stream() //
-                .filter(f -> (f.contains(idCol) && !f.equals(idCol)) || (f.contains(RatingEngine.RATING_ENGINE_PREFIX)
-                        && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX))) //
+                .filter(f -> (f.contains(idCol) && !f.equals(idCol)) || //
+                        (f.contains(RatingEngine.RATING_ENGINE_PREFIX) //
+                                && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX))) //
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(toDiscard)) {
             joined = joined.discard(new FieldList(toDiscard));
@@ -211,13 +218,15 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         return joined;
     }
 
-    private Node mergeJoinedCol(Node node, String tgtCol, String tgtCol2, Class<?> clz) {
-        String mergedCol = NamingUtils.uuid(tgtCol);
-        node = node.apply(String.format("%s == null ? %s : %s", tgtCol, tgtCol2, tgtCol),
-                new FieldList(tgtCol, tgtCol2), new FieldMetadata(mergedCol, clz));
-        node = node.discard(tgtCol2, tgtCol);
-        node = node.rename(new FieldList(mergedCol), new FieldList(tgtCol));
-        return node;
+    private Node mergeIdCols(Node joined, String idCol2) {
+        String mergedCol = NamingUtils.uuid(idCol);
+        joined = joined.apply(
+                String.format("(%s == null || %s.length() == 0) ? %s : %s", //
+                        idCol, idCol, idCol2, idCol),
+                new FieldList(idCol, idCol2), new FieldMetadata(mergedCol, String.class));
+        joined = joined.discard(idCol, idCol2);
+        joined = joined.rename(new FieldList(mergedCol), new FieldList(idCol));
+        return removeExtraId(joined);
     }
 
     @Override
@@ -233,7 +242,6 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
     @Override
     public String getTransformerName() {
         return TRANSFORMER_NAME;
-
     }
 
 }

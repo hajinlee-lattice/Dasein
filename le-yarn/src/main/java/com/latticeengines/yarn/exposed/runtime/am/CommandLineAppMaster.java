@@ -62,6 +62,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster
         yarnConfiguration = super.getConfiguration();
         // TODO: YSong-M24 condition to be removed after cutting over to EMR
         if (Boolean.TRUE.equals(useEmr)) {
+            logFilesInLocalFilesystem();
             log.info("Starting progress monitor ...");
             monitor.start();
         }

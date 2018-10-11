@@ -25,7 +25,8 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("generateAIRatingWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
+public class GenerateAIRatingWorkflow
+        extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
 
     @Inject
     private CreateScoringTargetTable createScoringTargetTable;
@@ -64,10 +65,10 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         }
         builder.next(matchDataCloud) //
                 .next(addStandardAttributes) //
-            .next(scoreEventTable); //
+                .next(scoreEventTable);
         if (!isLPI) {
             builder.next(recalculatePercentileScore) //
-            .next(scoreAggregate); //
+                    .next(scoreAggregate);
         }
         return builder.next(combineInputTableWithScore) //
                 .next(pivotScoreAndEvent) //
