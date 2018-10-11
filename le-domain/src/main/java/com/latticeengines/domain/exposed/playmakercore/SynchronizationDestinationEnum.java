@@ -1,13 +1,13 @@
 package com.latticeengines.domain.exposed.playmakercore;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public enum SynchronizationDestinationEnum {
     SFDC(0), MAP(1), SFDC_AND_MAP(2);
 
     private int type;
 
-    private SynchronizationDestinationEnum(int intType) {
+    SynchronizationDestinationEnum(int intType) {
         this.type = intType;
     }
 
