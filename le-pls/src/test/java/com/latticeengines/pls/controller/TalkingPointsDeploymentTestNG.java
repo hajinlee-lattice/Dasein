@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
@@ -194,6 +195,8 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setTenantId(mainTestTenant.getPid());
         playLaunch.setTenant(mainTestTenant);
         playLaunch.setLaunchState(LaunchState.Launched);
+        playLaunch.setDestinationOrgId("SomeOrgId");
+        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),
                 LaunchState.Launching);
@@ -274,7 +277,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
                 null, String.class);
 
-        String url = previewResources.getServerUrl() + "/playmaker/tenants/oauthtotenant";
+        String url = previewResources.getServerUrl() + "/ulysses/generic/oauthtotenant";
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + previewResources.getoAuthToken());
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);

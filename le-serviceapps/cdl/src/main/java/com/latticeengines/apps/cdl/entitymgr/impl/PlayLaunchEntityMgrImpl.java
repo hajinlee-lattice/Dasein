@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,19 +18,14 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("playLaunchEntityMgr")
 public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> implements PlayLaunchEntityMgr {
-
-    private static final String PLAY_LAUNCH_NAME_PREFIX = "launch";
-    private static final String PLAY_LAUNCH_NAME_FORMAT = "%s__%s";
 
     @Autowired
     private PlayLaunchDao playLaunchDao;
@@ -47,9 +41,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(PlayLaunch entity) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
-        entity.setTenant(tenant);
-        entity.setLaunchId(generateLaunchId());
         playLaunchDao.create(entity);
     }
 
@@ -144,10 +135,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             Long endTimestamp, String orgId, String externalSysType) {
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
-    }
-
-    private String generateLaunchId() {
-        return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
 
     private List<LaunchSummary> convertToSummaries(List<PlayLaunch> playLaunches) {

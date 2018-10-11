@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -62,6 +63,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields, SoftDeletable {
 
     public static final int PID_INIT_VALUE = 1_000_000; // 1M
+    private static final String PLAY_LAUNCH_NAME_PREFIX = "launch";
+    private static final String PLAY_LAUNCH_NAME_FORMAT = "%s__%s";
 
     public PlayLaunch() {
     }
@@ -201,11 +204,17 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     }
 
     @Override
-    public void setId(String launchId) { this.launchId = launchId; }
+    public void setId(String launchId) {
+        this.launchId = launchId;
+    }
 
-    public Date getCreated() { return created; }
+    public Date getCreated() {
+        return created;
+    }
 
-    public void setCreated(Date created) { this.created = created; }
+    public void setCreated(Date created) {
+        this.created = created;
+    }
 
     public Date getUpdated() {
         return updated;
@@ -215,13 +224,21 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.updated = updated;
     }
 
-    public String getCreatedBy() { return createdBy; }
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
-    public String getUpdatedBy() { return updatedBy; }
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
 
-    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
     public LaunchState getLaunchState() {
         return launchState;
@@ -394,5 +411,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public static String generateLaunchId() {
+        return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
 }

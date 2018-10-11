@@ -201,6 +201,8 @@ public class PlayResource {
                 Collections.singletonList(LaunchState.UnLaunched));
 
         if (CollectionUtils.isEmpty(playLaunches)) {
+            playLaunch.setTenant(MultiTenantContext.getTenant());
+            playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
             playLaunch.setLaunchState(LaunchState.UnLaunched);
             playLaunch.setPlay(play);
             playLaunchService.create(playLaunch);
