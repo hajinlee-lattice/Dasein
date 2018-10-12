@@ -913,10 +913,11 @@ angular.module('common.datacloud.explorer', [
                 'Curated Account Attributes',
                 'Product Spend Profile',
                 'Intent',
+                'Website Profile',
                 'Technology Profile',
                 'Online Presence',
                 'Growth Trends',
-                'Website Profile'
+                'Website Keywords'
             ];
 
             topCategories.forEach(function(category, index) {
