@@ -6,7 +6,7 @@ angular.module('login')
         clientsession: '<'
     },
     controller: function(
-        $state, $location, $timeout, $window, ResourceUtility, LoginService, Banner,
+        $state, $location, $window, ResourceUtility, LoginService, Banner,
         SessionTimeoutUtility, TimestampIntervalUtility, BrowserStorageUtility, LoginStore
     ) {
         var vm = this;
@@ -22,12 +22,12 @@ angular.module('login')
             vm.params = $location.$$search;
 
             if (SessionTimeoutUtility.hasSessionTimedOut() && vm.logindocument.UserName) {
-                return LoginService.Logout();
+                return LoginService.Logout(vm.params);
             } else {
                 switch($state.current.name) {
                     case 'login.logout':
                         if (vm.logindocument.UserName) {
-                            LoginService.Logout();
+                            LoginService.Logout(vm.params);
                         }
                         break;
                     case 'login.form': 

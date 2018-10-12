@@ -5,7 +5,7 @@ angular.module('mainApp.login.services.LoginService', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.SessionService'
 ])
-.service('LoginService', function ($http, $q, $window, $location, BrowserStorageUtility, ResourceUtility, StringUtility, SessionService) {
+.service('LoginService', function ($http, $q, $location, $window, BrowserStorageUtility, ResourceUtility, StringUtility, SessionService) {
 
     this.Login = function (username, password) {
         var deferred = $q.defer();
@@ -200,15 +200,15 @@ angular.module('mainApp.login.services.LoginService', [
         return deferred.promise;
     };
 
-    this.Logout = function () {
+    this.Logout = function (params) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
             data: '',
-            url: "/pls/logout",
+            url: '/pls/logout',
             headers: {
-               "Content-Type": "application/json"
+               'Content-Type': 'application/json'
             }
         }).then(
             function onSuccess(data, status, headers, config){
@@ -220,11 +220,15 @@ angular.module('mainApp.login.services.LoginService', [
                         authenticationRoute = (loginDocument && loginDocument.AuthenticationRoute ? loginDocument.AuthenticationRoute : null),
                         tenantId = (BrowserStorageUtility.getClientSession() && BrowserStorageUtility.getClientSession().Tenant  && BrowserStorageUtility.getClientSession().Tenant.Identifier ? BrowserStorageUtility.getClientSession().Tenant.Identifier : null);
     
+                    var paramString = Object.keys(params).map(function(k) {
+                        return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+                    }).join('&');
+
                     setTimeout(function() {
                         if(authenticationRoute === 'SSO') {
-                            window.open("/login/saml/' + tenantId + '/logout", "_self");
+                            $window.open('/login/saml/' + tenantId + '/logout?' + paramString, '_self');
                         } else {
-                            window.open("/login/logout", "_self");
+                            $window.open('/login/logout?' + paramString, '_self');
                         }
                     }, 300);
                 } else {

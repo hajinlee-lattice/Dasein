@@ -22,7 +22,7 @@ angular.module('login')
                 countDown = redirectDelaySeconds;
 
             redirectDelayTimeout = $timeout(function() {
-                $state.go("login.form");
+                $state.go('login.form', { obj: $location.$$search });
             }, redirectDelayMs + 1000);
 
             redirectDelayInterval = $interval(function(){
@@ -41,7 +41,7 @@ angular.module('login')
         };
 
         vm.loginClick = function() {
-            $state.go("login.form");
+            $state.go('login.form', { obj: $location.$$search });
         }
     }
 });
