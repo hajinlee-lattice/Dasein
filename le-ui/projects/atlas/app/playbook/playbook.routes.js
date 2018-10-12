@@ -325,29 +325,31 @@ angular
             resolve: {
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
                     var deferred = $q.defer();
-
-                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
-
-                        var engineId = data.ratingEngine.id,
-                            query = { 
-                                free_form_text_search: '',
-                                restrictNotNullSalesforceId: false,
-                                entityType: 'Account',
-                                bucketFieldName: 'ScoreBucket',
-                                maximum: 10,
-                                offset: 0,
-                                sortBy: 'CompanyName',
-                                descending: false
-                            };
-
-                        PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
-                            PlaybookWizardStore.setTargetData(data.data);
-                            deferred.resolve(PlaybookWizardStore.getTargetData());
-                        });
-
-                    });
-
+                    deferred.resolve([]);
                     return deferred.promise;
+
+                    // PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
+
+                    //     var engineId = data.ratingEngine.id,
+                    //         query = { 
+                    //             free_form_text_search: '',
+                    //             restrictNotNullSalesforceId: false,
+                    //             entityType: 'Account',
+                    //             bucketFieldName: 'ScoreBucket',
+                    //             maximum: 10,
+                    //             offset: 0,
+                    //             sortBy: 'CompanyName',
+                    //             descending: false
+                    //         };
+
+                    //     PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
+                    //         PlaybookWizardStore.setTargetData(data.data);
+                    //         deferred.resolve(PlaybookWizardStore.getTargetData());
+                    //     });
+
+                    // });
+
+                    // return deferred.promise;
 
                 }],
                 NoSFIdsCount: [function(){

@@ -501,7 +501,9 @@ angular.module('common.datacloud.query.results', [
         };
     };
 
-    vm.makeRecommendationCounts = function() {
+    vm.makeRecommendationCounts = function(opts) {
+        var opts = opts || {};
+
         if(!vm.accountsCoverage && !vm.accountsCoverage.bucketCoverageCounts) {
             vm.recommendationCounts = null;
             return false;
@@ -510,7 +512,7 @@ angular.module('common.datacloud.query.results', [
         var sections = {
                 total: 0,
                 selected: 0,
-                supressed: 0,
+                suppressed: 0,
                 launched: 0,
                 contacts: 0
             },
@@ -527,7 +529,11 @@ angular.module('common.datacloud.query.results', [
             });
             sections.selected += parseInt(count.count);
         }
-        sections.supressed = parseInt(sections.total - sections.selected);
+        sections.suppressed = parseInt(sections.total - sections.selected);
+
+        sections.launched = (vm.topNCount && opts.suppressed ? vm.topNCount : (sections.selected > sections.suppressed ? sections.selected - sections.suppressed : sections.selected));
+
+        sections.contacts = vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 
         vm.recommendationCounts = sections;
         PlaybookWizardStore.setRecommendationCounts(sections);

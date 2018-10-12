@@ -13,9 +13,9 @@
             <h3>Selected recommendation</h3>
             <strong>{{vm.recommendationCounts.selected}}</strong>
         </li>
-        <li class="supressed">
+        <li class="suppressed">
             <h3>Suppressed</h3>
-            <strong>{{vm.recommendationCounts.supressed}}</strong>
+            <strong>{{vm.recommendationCounts.suppressed}}</strong>
         </li>
         <li class="launching">
             <h3>Recommendations to be launched</h3>
@@ -46,7 +46,8 @@
                 type="checkbox"
                 ng-model="topNCount"
                 id="topNCount"
-                ng-change="topNCount && vm.updateTopNCount()" />
+                ng-change="topNCount && vm.updateTopNCount()" 
+                ng-click="vm.makeRecommendationCounts({suppressed: topNCount})" />
             <label for="topNCount">Limit to only </label>
             <input 
                 type="number" 
@@ -55,7 +56,7 @@
                 ng-focus="vm.topNInputClick($event)"
                 min="1"
                 ng-max="::vm.topNCount"
-                ng-change="topNCount && vm.updateTopNCount()"
+                ng-change="topNCount && vm.updateTopNCount(); vm.makeRecommendationCounts({suppressed: topNCount})"
                 class="form-control" />
             <span> highest rated {{vm.section === 'wizard.targets' ? 'recommendations' : 'targets'}}</span>
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
@@ -194,9 +195,9 @@
         <tbody ng-if="!vm.loading && vm.selectedBuckets.length != 0">
             <tr 
                 ng-repeat="account in (vm.tmpAccounts = vm.accounts)">
-                <td>{{account.CompanyName}}</td>
+                <td ng-class="{'gray-text': account.CompanyName === null}">{{account.CompanyName || 'None'}}</td>
                 <td>
-                    <span ng-if="account.Website">{{account.Website}}</span>
+                    <span ng-class="{'gray-text': account.Website === null}" ng-if="account.Website">{{account.Website || 'None'}}</span>
                     <span ng-if="!account.Website" class="gray-text">N/A</span>
                 </td>
                 <td>{{account.ScoreBucket}}</td>
