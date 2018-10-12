@@ -232,7 +232,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
                 status = DataCollectionStatusUtils.updateTimeForDCChange(status, getLongValueFromContext(PA_TIMESTAMP));
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
-            } else if (StringUtils.compare(currentVersion.getRefreshVersionVersion(),
+            } else if (StringUtils.compare(
+                    currentVersion == null ? null : currentVersion.getRefreshVersionVersion(),
                     statusVersion.getRefreshVersionVersion()) != 0) {
                 createSystemAction(ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);

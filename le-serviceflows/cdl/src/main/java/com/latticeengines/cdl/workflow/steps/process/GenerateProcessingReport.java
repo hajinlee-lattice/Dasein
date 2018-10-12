@@ -2,11 +2,9 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,15 +37,12 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("generateProcessingReport")
@@ -64,9 +59,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     @Inject
     private RatingProxy ratingProxy;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
 
     @Inject
     private CloneTableService cloneTableService;
@@ -249,7 +241,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private long countInRedshift(BusinessEntity entity) {
-        String servingStore = null;
+        String servingStore;
         try {
             servingStore = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(),
                     inactive);
@@ -314,23 +306,11 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private List<Action> getDataCloudChangeActions() {
-        long lastPATimestamp;
-        List<String> jobTypes = Collections.singletonList("processAnalyzeWorkflow");
-        List<Job> jobs = workflowProxy.getJobs(null, jobTypes, Boolean.FALSE, customerSpace.toString());
-        Optional<Job> latestSuccessJob = jobs.stream().filter(job -> job.getJobStatus() == JobStatus.COMPLETED)
-                .max(Comparator.comparing(Job::getEndTimestamp));
-        if (latestSuccessJob.isPresent()) {
-            lastPATimestamp = latestSuccessJob.get().getEndTimestamp().getTime();
-        } else {
-            log.info("Cannot find the latest success job. ");
-            lastPATimestamp = -1L;
-        }
-        Long currentPATimestamp = getLongValueFromContext(PA_TIMESTAMP);
         List<Long> systemActionIds = getListObjectFromContext(SYSTEM_ACTION_IDS, Long.class);
         List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), systemActionIds);
-        return actions.stream().filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
-                .filter(action -> action.getCreated().getTime() > lastPATimestamp
-                        && action.getCreated().getTime() < currentPATimestamp)
+        return actions.stream()
+                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
+                .filter(action -> action.getOwnerId().equals(configuration.getOwnerId()))
                 .collect(Collectors.toList());
     }
 
