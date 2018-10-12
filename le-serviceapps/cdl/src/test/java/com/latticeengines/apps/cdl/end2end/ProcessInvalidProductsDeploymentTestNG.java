@@ -18,28 +18,28 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
     private static long FAILED_PRODUCT_IMPORT_COUNT = 0L;
     private static long INITIAL_ACCOUNT_COUNT = 0L;
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", priority = 0)
     public void testBundleProductMissingProductBundle() throws Exception {
         importData(4, "ProductBundle_MissingProductBundle");
         processAnalyze();
         verifyProcess(DataCollection.Version.Green);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", priority = 1)
     public void testHierarchyProductMissingCategory() throws Exception {
         importData(5, "ProductHierarchies_MissingCategory");
         processAnalyze();
         verifyProcess(DataCollection.Version.Blue);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", priority = 2)
     public void testHierarchyProductMissingFamily() throws Exception {
         importData(6, "ProductHierarchies_MissingFamily");
         processAnalyze();
         verifyProcess(DataCollection.Version.Green);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", priority = 3)
     public void testVDBProductMissingProductName() throws Exception {
         importData(7, "ProductVDB_MissingProductName");
         processAnalyze();
