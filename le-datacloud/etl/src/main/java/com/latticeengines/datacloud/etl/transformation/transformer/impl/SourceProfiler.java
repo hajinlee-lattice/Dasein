@@ -121,7 +121,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Override
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
             ProfileConfig config) {
-        if (config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH) {
+        if (DataCloudConstants.PROFILE_STAGE_ENRICH.equals(config.getStage())) {
             postProcessProfiledAttrs(workflowDir, config, paras);
         }
         List<Object[]> result = new ArrayList<>();
@@ -256,7 +256,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     private Map<String, ProfileArgument> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
         List<SourceAttribute> srcAttrs;
-        if ("Segment".equals(config.getStage())) {
+        if (DataCloudConstants.PROFILE_STAGE_SEGMENT.equals(config.getStage())) {
             srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
                     config.getTransformer(), dataCloudVersion, true);
         } else {
