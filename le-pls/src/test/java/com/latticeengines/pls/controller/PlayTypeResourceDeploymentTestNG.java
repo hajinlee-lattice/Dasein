@@ -85,7 +85,6 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(updatedPlayType.getDisplayName(), updatedPlayTypeName);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "deployment", dependsOnMethods = "testUpdate")
     public void testDelete() {
         // Test deleting playType
