@@ -4,6 +4,8 @@ SET SQL_SAFE_UPDATES = 0;
 
 DROP PROCEDURE IF EXISTS `UpdateDataCloudVersionTable`;
 
+DROP PROCEDURE IF EXISTS `UpdateDecisionGraphTable`;
+
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 
 DELIMITER //
@@ -28,9 +30,31 @@ CREATE PROCEDURE `UpdateDataCloudVersionTable`()
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE `UpdateDecisionGraphTable`()
+  BEGIN
+
+    # add column if not exists
+    IF NOT EXISTS(SELECT *
+                  FROM information_schema.COLUMNS
+                  WHERE
+                    TABLE_SCHEMA = 'LDC_ManageDB'
+                    AND TABLE_NAME = 'DecisionGraph'
+                    AND COLUMN_NAME = 'Description')
+    THEN
+      ALTER TABLE `DecisionGraph`
+        ADD COLUMN `Description` VARCHAR(1000)
+        NULL DEFAULT NULL AFTER `GraphName`;
+
+    END IF;
+
+  END //
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
     CALL `UpdateDataCloudVersionTable`();
+    CALL `UpdateDecisionGraphTable`();
 
     START TRANSACTION;
 

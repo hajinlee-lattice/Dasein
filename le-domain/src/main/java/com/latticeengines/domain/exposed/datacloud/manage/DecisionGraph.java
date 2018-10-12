@@ -39,6 +39,9 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "StartingVertices", length = 1000)
     private String startingVertices;
 
+    @Column(name = "Description", length = 1000)
+    private String description;
+
     @Column(name = "Edges", length = 1000)
     private String edges;
 
@@ -68,6 +71,10 @@ public class DecisionGraph implements HasPid, Serializable {
 
     private String getStartingVertices() {
         return startingVertices;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     private String getEdges() {
