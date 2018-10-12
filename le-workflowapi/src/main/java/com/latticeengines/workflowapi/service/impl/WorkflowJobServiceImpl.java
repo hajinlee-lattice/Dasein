@@ -151,7 +151,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return getJobByWorkflowId(customerSpace, workflowId, includeDetails);
         }
         Job job = jobCacheService.getByWorkflowId(workflowId, includeDetails);
-        checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
+        if (job != null) {
+            checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
+        }
         if (!currentTenantHasAccess(job)) {
             return null;
         }
