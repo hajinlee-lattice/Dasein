@@ -14,4 +14,8 @@
         class="com.latticeengines.apps.cdl.controller.PlayResourceDeploymentTestNG">
     </bean>
 
+    <bean id="checkpointService"
+          class="com.latticeengines.apps.cdl.service.impl.CheckpointService">
+    </bean>
+
 </beans>

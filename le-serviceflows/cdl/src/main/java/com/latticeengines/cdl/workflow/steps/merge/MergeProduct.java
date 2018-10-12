@@ -84,7 +84,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             nInvalids = mergeProducts(inputProducts, currentProducts, productList, mergeReport);
         } catch (Exception exc) {
             productList = currentProducts;
-            String errMsg = "Found inconsistency during imports. Current product map will be used.";
+            String errMsg = "Found inconsistency during imports. Current product map will be used. ";
             log.error(errMsg + exc.getMessage(), exc);
             mergeReport.put("Merged_NumProductBundles", 0);
             mergeReport.put("Merged_NumProductHierarchies", 0);

@@ -143,7 +143,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected static final String S3_CSV_VERSION = "2";
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
-    private static final String S3_AVRO_VERSION = "1";
+    private static final String S3_AVRO_VERSION = "2";
 
     static final Long ACCOUNT_1 = 500L;
     static final Long ACCOUNT_2 = 600L;
@@ -1051,8 +1051,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void verifyBatchStore(Map<BusinessEntity, Long> expectedEntityCount) {
-        expectedEntityCount
-                .forEach((key, value) -> Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value));
+        expectedEntityCount.forEach(
+                (key, value) -> Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value));
     }
 
     void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
