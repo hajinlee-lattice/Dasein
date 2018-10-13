@@ -37,6 +37,7 @@ cp ../le-config/conf/env/${LE_ENVIRONMENT}/latticeengines.properties ${dist}/con
 if [ ! -z "${STACK_PROFILE}" ]; then
     if [ "${IS_MINISTACK}" == "true" ]; then
         CONSUL_SERVER="internal-consul-1214146536.us-east-1.elb.amazonaws.com:8500"
+        LE_STACK=${STACK}
         cp ../le-config/src/main/python/update_ministack.py .
         python2.7 update_ministack.py -e ${LE_ENVIRONMENT} -s ${LE_STACK} -c ${CONSUL_SERVER} -p ${STACK_PROFILE}
     fi
