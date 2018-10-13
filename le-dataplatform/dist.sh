@@ -27,6 +27,7 @@ echo "getting environment information"
 echo ${LE_ENVIRONMENT}
 echo ${LE_STACK}
 echo ${STACK_PROFILE}
+echo ${IS_MINISTACK}
 
 mkdir -p ${dist}/lib
 cp jacocoagent.jar ${dist}/lib
@@ -34,6 +35,11 @@ cp jacocoagent.jar ${dist}/lib
 mkdir -p ${dist}/conf
 cp ../le-config/conf/env/${LE_ENVIRONMENT}/latticeengines.properties ${dist}/conf
 if [ ! -z "${STACK_PROFILE}" ]; then
+    if [ "${IS_MINISTACK}" == "true" ]; then
+        CONSUL_SERVER="internal-consul-1214146536.us-east-1.elb.amazonaws.com:8500"
+        cp ../le-config/src/main/python/update_ministack.py .
+        python2.7 update_ministack.py -e ${LE_ENVIRONMENT} -s ${LE_STACK} -c ${CONSUL_SERVER} -p ${STACK_PROFILE}
+    fi
     cp ../le-config/src/main/python/replace_token.py .
     python2.7 replace_token.py ${dist}/conf ${STACK_PROFILE}
 fi
