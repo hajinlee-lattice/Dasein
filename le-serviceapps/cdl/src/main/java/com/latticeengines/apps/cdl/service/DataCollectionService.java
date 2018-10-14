@@ -3,8 +3,6 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
-
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
