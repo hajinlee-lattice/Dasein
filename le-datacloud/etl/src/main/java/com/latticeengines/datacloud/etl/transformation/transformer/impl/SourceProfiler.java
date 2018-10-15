@@ -55,6 +55,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 
+/**
+ * Basic knowledge:
+ * config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH: 
+ *      serve AccountMasterStatistics job
+ * config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT: 
+ *      serve ProfileAccount in PA job
+ */
 @Component(TRANSFORMER_NAME)
 public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
     private static final Logger log = LoggerFactory.getLogger(SourceProfiler.class);
@@ -111,6 +118,17 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return ProfileParameters.class;
     }
 
+    /*
+     * 1. Before dataflow executed, classify attributes in base source and
+     * populate idAttr, numericAttrs, catAttrs, amAttrsToEnc, exAttrsToEnc,
+     * attrsToRetain in the ProfileParameters
+     */
+    /*
+     * 2. For attributes which do not need dataflow to profile, eg. we already
+     * know what could be the bucket, put them in corresponding attribute
+     * list/map in ProfileParameters and bucket algo could be finalized in
+     * postDataFlowProcessing
+     */
     @Override
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
             ProfileConfig config) {
@@ -118,9 +136,17 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, paras);
     }
 
+    /*
+     * After dataflow executed, profile result from dataflow and pre-known
+     * prefile result need to combine together
+     */
     @Override
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
             ProfileConfig config) {
+        // config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH: serve
+        // AccountMasterStatistics job
+        // config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT: serve
+        // ProfileAccount in PA job
         if (DataCloudConstants.PROFILE_STAGE_ENRICH.equals(config.getStage())) {
             postProcessProfiledAttrs(workflowDir, config, paras);
         }
@@ -188,6 +214,22 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setMaxDiscrete(config.getMaxDiscrete());
     }
 
+    
+    /* Classify an attribute belongs to which scenario: */
+    /*- DataCloud ID attr: AccountMasterId */
+    /*- Discard attr: attr will not show up in bucketed source */
+    /*- No bucket attr: attr will show up in bucketed source and stats, but no bucket created. They are DataCloud attrs which are predefined by PM */
+    /*- Pre-known bucket attr: DataCloud attrs whose enum values are pre-known, eg. Intent attributes) */
+    /*- Numerical attr */
+    /*- Boolean attr */
+    /*- Categorical attr */
+    /*- Other attr: don't know how to profile it for now, don't create bucket for it */
+    /*
+     * For AccountMasterStatistics job, we will encode numerical attr and
+     * categorical attr, but NO for ProfileAccount job in PA. Because
+     * BucketedAccount needs to support decode in Redshift query, but NO for
+     * bucketed AccountMaster
+     */
     private void classifyAttrs(Source baseSrc, String baseVer, ProfileConfig config, ProfileParameters paras) {
         String dataCloudVersion = findDCVersionToProfile(config);
         Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(config, dataCloudVersion);
@@ -235,6 +277,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
     }
 
+    /**
+     * For ProfileAccount job in QA, look for metadata of latest approved datacloud version
+     * For AccountMasterStatistics job, look for metadata of the datacloud version which is current in build (next datacloud version)
+     */
     private String findDCVersionToProfile(ProfileConfig config) {
         String dataCloudVersion = config.getDataCloudVersion();
         if (dataCloudVersion == null) {
@@ -254,6 +300,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return dataCloudVersion;
     }
 
+    /**
+     * Get profile/decode strategy for DataCloud attrs
+     */
     private Map<String, ProfileArgument> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
         List<SourceAttribute> srcAttrs;
         if (DataCloudConstants.PROFILE_STAGE_SEGMENT.equals(config.getStage())) {
@@ -272,6 +321,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return amAttrsConfig;
     }
 
+    /**
+     * Get schema for base source to be profiled. Schema file has metadata for
+     * customer attrs (non-DataCloud attrs)
+     */
     private Schema findSchema(Source baseSrc, String baseVer) {
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseSrc, baseVer);
         if (schema == null) {
@@ -282,6 +335,14 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     /**
+     * Some DataCloud attrs are encoded already. We need to put DecodeStrategy
+     * in profile result so that bucket job will know how to decode them. For
+     * those encoded DataCloud attrs, to decode them first and encode them again
+     * in bucket job, we could keep same encode strategy (bucket value, number
+     * of bits, etc), but assigned bit position will change because DataCloud
+     * encodes thousands of attrs into single encoded attrs, while here, every
+     * encoded attr only has 64 bits
+     * 
      * @param amAttrsConfig:
      *            attr name -> profile argument
      * @param encAttrsMap:
@@ -372,6 +433,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         throw new RuntimeException(String.format("Fail to cast %s to BucketAlgorithm", algo));
     }
 
+    /**
+     * To encode numeric attrs and categorical attrs. Only serve for
+     * AccountMasterStatistic job
+     */
     private void postProcessProfiledAttrs(String avroDir, ProfileConfig config, ProfileParameters paras) {
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
         Map<String, Attribute> numericAttrsMap = new HashMap<>(); // attr name -> attr
@@ -461,6 +526,15 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
     }
 
+    /**
+     * AttrName: attr name in target source after bucketing
+     * SrcAttr: original attr name in base source to profile/bucket, to serve some rename purpose
+     * DecodeStrategy: original attr is encoded, to serve AccountMasterStatistics job. No need for ProfileAccount job in PA
+     * EncAttr: if the attr needs to encode in bucket job, it's the encode attr name
+     * LowestBit: if the attr needs to encode in bucket job, it's the lowest bit position of this attr in encode attr
+     * NumBits: if the attr needs to encode in bucket job, how many bits it needs 
+     * BktAlgo: serialized BucketAlgorithm
+     */
     private List<Pair<String, Class<?>>> prepareColumns() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(DataCloudConstants.PROFILE_ATTR_ATTRNAME, String.class));
@@ -481,6 +555,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
     }
 
+    // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,
+    // BktAlgo
+    // For ProfileAccount job in PA, idAttr is always LatticeAccountId
+    // For AccountMasterStatistics job, rename idAttr from LatticeID in original AccountMaster to LatticeAccountId in AccountMasterStatistics
     private Object[] profileIdAttr(String idAttr) {
         Object[] data = new Object[7];
         data[0] = DataCloudConstants.LATTICE_ACCOUNT_ID;
@@ -493,6 +571,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
+    // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,
+    // BktAlgo
     private Object[] profileAttrToRetain(ProfileParameters.Attribute attr) {
         Object[] data = new Object[7];
         data[0] = attr.getAttr();
@@ -505,6 +585,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
+    // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,
+    // BktAlgo
     private Object[] profileAttrToEnc(ProfileParameters.Attribute attr, String encodedAttr, int lowestBit) {
         Object[] data = new Object[7];
         data[0] = attr.getAttr();
@@ -517,6 +599,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
+    /**
+     * Group attrs to encode. Different attrs require different number of bits.
+     * Each encoded attr has 64 bits
+     */
     private Map<String, List<ProfileParameters.Attribute>> groupAttrsToEnc(List<ProfileParameters.Attribute> attrs,
             String encAttrPrefix) {
         Map<String, List<ProfileParameters.Attribute>> encodedAttrs = new HashMap<>();
