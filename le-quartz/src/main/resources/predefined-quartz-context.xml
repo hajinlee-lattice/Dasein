@@ -29,7 +29,7 @@
     </bean>
 
     <bean name="lpEmrScaling" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="lpEmrScaling" />
+        <property name="jobName" value="emrScaling" />
         <property name="cronTrigger" value="${quartz.lp.emrscaling.job.cron}" />
         <property name="destUrl" value="${quartz.lp.predefined.job.primary.url}" />
         <property name="secondaryDestUrl" value="${quartz.lp.predefined.job.secondary.url}" />
