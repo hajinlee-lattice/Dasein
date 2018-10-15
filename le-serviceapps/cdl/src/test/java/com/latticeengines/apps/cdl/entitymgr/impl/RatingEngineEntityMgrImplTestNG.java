@@ -490,6 +490,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setTenant(mainTestTenant);
         play.setPlayType(types.get(0));
         play.setName(UUID.randomUUID().toString());
+        play.setTargetSegment(testSegment);
         return play;
     }
 }

@@ -20,6 +20,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -86,7 +87,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
-
+        play.setTargetSegment(testSegment);
+        
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
@@ -483,6 +485,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         launch.setDestinationAccountId(destinationAccountIdColumn);
         launch.setCreatedBy(CREATED_BY);
         launch.setUpdatedBy(CREATED_BY);
+        launch.setLaunchId(NamingUtils.randomSuffix("pl", 16));
         return launch;
     }
 

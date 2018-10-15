@@ -86,14 +86,13 @@ public class PlayTypeResource {
     @PostMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all play types for a tenant")
-    public PlayType updatePlayType(@PathVariable String customerSpace, @PathVariable String playTypeId,
+    public void updatePlayType(@PathVariable String customerSpace, @PathVariable String playTypeId,
             @RequestBody PlayType playType) {
         List<String> validationErrors = validatePlayTypeForUpdate(playType);
         if (CollectionUtils.isEmpty(validationErrors)) {
             Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
             playType.setTenant(tenant);
             playTypeEntityMgr.update(playType);
-            return playTypeEntityMgr.findById(playType.getId());
         } else {
             AtomicInteger i = new AtomicInteger(1);
             throw new LedpException(LedpCode.LEDP_32000,

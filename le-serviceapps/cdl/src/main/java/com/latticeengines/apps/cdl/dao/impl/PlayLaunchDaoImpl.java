@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.PlayLaunchDao;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -345,5 +346,13 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         return new Date(timestamp);
+    }
+
+    @Override
+    public void create(PlayLaunch entity) {
+        if (entity.getLaunchId() == null) {
+            entity.setLaunchId(NamingUtils.uuid("pl"));
+        }
+        super.create(entity);
     }
 }

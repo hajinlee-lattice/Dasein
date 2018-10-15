@@ -28,6 +28,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -101,7 +102,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setUpdatedBy(CREATED_BY);
         play.setTargetSegment(playTargetSegment);
         play.setPlayType(playTypes.get(0));
-
+        
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
         assertPlayTargetSegment(play);
@@ -109,6 +110,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
         playLaunch1 = new PlayLaunch();
+        playLaunch1.setLaunchId(NamingUtils.randomSuffix("pl", 16));
         playLaunch1.setTenant(mainTestTenant);
         playLaunch1.setLaunchState(LaunchState.Launching);
         playLaunch1.setPlay(play);
@@ -124,6 +126,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         bucketsToLaunch2.add(RatingBucketName.B);
 
         playLaunch2 = new PlayLaunch();
+        playLaunch2.setLaunchId(NamingUtils.randomSuffix("pl", 16));
         playLaunch2.setTenant(mainTestTenant);
         playLaunch2.setLaunchState(LaunchState.Launching);
         playLaunch2.setPlay(play);

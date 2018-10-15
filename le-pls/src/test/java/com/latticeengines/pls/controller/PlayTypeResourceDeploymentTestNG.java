@@ -80,7 +80,13 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         // Test updating the newly made playType
         String updatedPlayTypeName = "playTypeTestPostUpdate";
         playType.setDisplayName(updatedPlayTypeName);
-        PlayType updatedPlayType = playProxy.updatePlayType(tenant.getId(), playType.getId(), playType);
+        playProxy.updatePlayType(tenant.getId(), playType.getId(), playType);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            //Ignore
+        }
+        PlayType updatedPlayType = playProxy.getPlayTypeById(tenant.getId(), playType.getId());
         Assert.assertNotNull(updatedPlayType);
         Assert.assertEquals(updatedPlayType.getDisplayName(), updatedPlayTypeName);
     }

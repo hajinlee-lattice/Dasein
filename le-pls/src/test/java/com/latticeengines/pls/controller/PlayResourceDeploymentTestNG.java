@@ -96,8 +96,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTenantAndData();
-        MetadataSegment retrievedSegment = createSegment();
-        createRatingEngine(retrievedSegment, new RatingRule());
+        MetadataSegment mdSegment = createSegment();
+        createRatingEngine(mdSegment, new RatingRule());
     }
 
     public void setupTenantAndData() throws Exception {
@@ -288,6 +288,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         MetadataSegment retrievedSegment = segmentProxy
                 .getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
+        segment = retrievedSegment;
         return retrievedSegment;
     }
 
@@ -582,6 +583,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
         play.setPlayType(playTypes.get(0));
         play.setRatingEngine(ratingEngine);
+        play.setTargetSegment(segment);
         return play;
     }
 

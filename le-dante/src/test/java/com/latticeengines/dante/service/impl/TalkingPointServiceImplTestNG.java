@@ -1,5 +1,6 @@
 package com.latticeengines.dante.service.impl;
 
+import static com.latticeengines.domain.exposed.metadata.DataCollection.Version.Blue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -17,11 +19,16 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.dante.testframework.DanteTestNGBase;
+import com.latticeengines.dante.testframework.testdao.TestDataCollectionDao;
+import com.latticeengines.dante.testframework.testdao.TestMetadataSegmentDao;
 import com.latticeengines.dante.testframework.testdao.TestPlayDao;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -35,7 +42,13 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
     @Autowired
     private TestPlayDao testPlayDao;
+    
+    @Autowired
+    private TestMetadataSegmentDao testMetadataSegmentDao;
 
+    @Autowired
+    private TestDataCollectionDao testDataCollectionDao;
+    
     private PlayProxy playProxy;
 
     private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
@@ -228,8 +241,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
     private Play createTestPlay() {
         Play play = new Play();
-        MetadataSegment segment = new MetadataSegment();
-        segment.setDisplayName(SEGMENT_NAME);
+        MetadataSegment targetSegment = createMetadataSegment(SEGMENT_NAME);
         play.setDisplayName(PLAY_DISPLAY_NAME);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
@@ -239,7 +251,8 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         play.setCreated(new Date());
         play.setName(play.generateNameStr());
         play.setPlayType(testPlayType);
-
+        play.setTargetSegment(targetSegment);
+        
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
@@ -250,6 +263,44 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         });
         return play;
     }
+
+    private MetadataSegment createMetadataSegment(String segmentName) {
+        MetadataSegment segment = new MetadataSegment();
+        segment.setDisplayName(segmentName);
+        segment.setName(NamingUtils.timestamp("testseg"));
+        segment.setTenant(MultiTenantContext.getTenant());
+        segment.setDataCollection(createDataCollection());
+        
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
+        TransactionTemplate tx = new TransactionTemplate(ptm);
+        tx.execute(new TransactionCallbackWithoutResult() {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
+                testMetadataSegmentDao.create(segment);
+            }
+        });
+        
+        return segment;
+    }
+    
+    private DataCollection createDataCollection() {
+        DataCollection dc = new DataCollection();
+        dc.setName(NamingUtils.timestamp("DC"));
+        dc.setVersion(Blue);
+        
+        dc.setTenant(MultiTenantContext.getTenant());
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
+        TransactionTemplate tx = new TransactionTemplate(ptm);
+        tx.execute(new TransactionCallbackWithoutResult() {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
+                testDataCollectionDao.create(dc);
+            }
+        });
+        
+        return dc;
+    }
+    
 
     private PlayType createTestPlayType() {
         PlayType playType = new PlayType();

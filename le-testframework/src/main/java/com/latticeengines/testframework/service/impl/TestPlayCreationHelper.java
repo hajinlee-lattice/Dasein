@@ -528,6 +528,13 @@ public class TestPlayCreationHelper {
         }
 
         try {
+            log.info("Cleaning up segment: " + segment.getName());
+            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName());
+        } catch (Exception ex) {
+            ignoreException(ex);
+        }
+
+        try {
             log.info("Cleaning up rating engine: " + play.getRatingEngine().getId());
             ratingEngineProxy.deleteRatingEngine(CustomerSpace.parse(tenantIdentifier).toString(),
                     play.getRatingEngine().getId());
@@ -535,12 +542,6 @@ public class TestPlayCreationHelper {
             ignoreException(ex);
         }
 
-        try {
-            log.info("Cleaning up segment: " + segment.getName());
-            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName());
-        } catch (Exception ex) {
-            ignoreException(ex);
-        }
     }
 
     public void deletePlay(String playName) {

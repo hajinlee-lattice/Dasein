@@ -61,11 +61,11 @@ public class PlayTypeResource {
     @PostMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a playtype given its ID")
-    public PlayType updatePlayType(@PathVariable String playTypeId, @RequestBody PlayType playType) {
+    public void updatePlayType(@PathVariable String playTypeId, @RequestBody PlayType playType) {
         Tenant tenant = MultiTenantContext.getTenant();
         String userId = MultiTenantContext.getEmailAddress();
         playType.setUpdatedBy(userId);
-        return playProxy.updatePlayType(tenant.getId(), playTypeId, playType);
+        playProxy.updatePlayType(tenant.getId(), playTypeId, playType);
     }
 
     @DeleteMapping(value = "/{playTypeId}", headers = "Accept=application/json")

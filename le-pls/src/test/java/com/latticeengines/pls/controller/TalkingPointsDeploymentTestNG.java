@@ -299,6 +299,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         if (CollectionUtils.isEmpty(playTypes)) {
             playTypes = playProxy.getPlayTypes(mainTestTenant.getId());
         }
+        play.setTargetSegment(ratingEngine1.getSegment());
         play.setPlayType(playTypes.get(0));
         return play;
     }
