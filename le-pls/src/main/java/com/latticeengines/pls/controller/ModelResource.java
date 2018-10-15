@@ -1,13 +1,12 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
@@ -46,7 +48,12 @@ import com.latticeengines.proxy.exposed.cdl.CDLModelProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelOperationProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
@@ -78,6 +85,15 @@ public class ModelResource {
 
     @Inject
     private ModelOperationProxy modelOperationProxy;
+
+    @Inject
+    private ImportFromS3Service importFromS3Service;
+
+    @Value("${dataplatform.queue.scheme}")
+    private String queueScheme;
+
+    @Inject
+    protected SourceFileProxy sourceFileProxy;
 
     @Inject
     private CDLModelProxy cdlModelProxy;
@@ -137,16 +153,23 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
+
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryEnrichedByDetails(
+                MultiTenantContext.getTenant().getId(), parameters.getSourceModelSummaryId());
+        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(),
+                modelSummary.getTrainingTableName());
+
+        importFromS3IfNeeded(trainingTable, modelSummary);
+
         log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
                 parameters.getDeduplicationType()));
-        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getShortTenantId(), parameters.getSourceModelSummaryId());
-
-        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryEnrichedByDetails(MultiTenantContext.getTenant().getId(),
+        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getShortTenantId(),
                 parameters.getSourceModelSummaryId());
 
         SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
-            sourceFileService.copySourceFile(sourceFile.getName(), clone.getName(), MultiTenantContext.getShortTenantId());
+            sourceFileService.copySourceFile(sourceFile.getName(), clone.getName(),
+                    MultiTenantContext.getShortTenantId());
         } else {
             log.warn("Unable to find source file for model summary:" + modelSummary.getName());
         }
@@ -160,6 +183,27 @@ public class ModelResource {
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
+    }
+
+    private void importFromS3IfNeeded(Table trainigTable, ModelSummary modelSummary) {
+        String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        String queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        String tenantId = MultiTenantContext.getTenant().getId();
+        tenantId = CustomerSpace.parse(tenantId).getTenantId();
+        importFromS3Service.importTable(tenantId, trainigTable, queueName);
+        String pivotFilePath = modelSummary.getPivotArtifactPath();
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        if (StringUtils.isNotBlank(pivotFilePath)) {
+            String s3Path = builder.convertAtlasMetadata(pivotFilePath, importFromS3Service.getPodId(), tenantId,
+                    importFromS3Service.getS3Bucket());
+            importFromS3Service.importFile(tenantId, s3Path, pivotFilePath, queueName);
+        }
+        SourceFile sourceFile = sourceFileProxy.findByTableName(tenantId, modelSummary.getTrainingTableName());
+        if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getPath())) {
+            String s3Path = builder.convertAtlasFile(sourceFile.getPath(), importFromS3Service.getPodId(), tenantId,
+                    importFromS3Service.getS3Bucket());
+            importFromS3Service.importFile(tenantId, s3Path, sourceFile.getPath(), queueName);
+        }
     }
 
     @RequestMapping(value = "/pmml/{modelName}", method = RequestMethod.POST)
@@ -202,7 +246,8 @@ public class ModelResource {
             @RequestParam(value = "targetModelId") String targetModelId) {
         modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
         return ResponseDocument.successResponse( //
-                modelOperationProxy.replaceModel(MultiTenantContext.getShortTenantId(), sourceModelId, targetTenantId, targetModelId));
+                modelOperationProxy.replaceModel(MultiTenantContext.getShortTenantId(), sourceModelId, targetTenantId,
+                        targetModelId));
     }
 
     @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")

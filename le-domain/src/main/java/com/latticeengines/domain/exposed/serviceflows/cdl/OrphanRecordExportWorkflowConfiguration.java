@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.OrphanRecordExportConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class OrphanRecordExportWorkflowConfiguration extends BaseCDLWorkflowConf
         private OrphanRecordExportWorkflowConfiguration configuration = new OrphanRecordExportWorkflowConfiguration();
         private OrphanRecordExportConfiguration stepConf = new OrphanRecordExportConfiguration();
         private ExportStepConfiguration avroToCsvExportStepConf = new ExportStepConfiguration();
-        private ExportToS3StepConfiguration exportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration(WORK_FLOW_NAME, customerSpace,

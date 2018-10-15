@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -41,7 +41,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
 
         private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowConfigurationBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
-        private ExportToS3StepConfiguration exportScoreToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration exportScoreToS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);

@@ -20,6 +20,7 @@ import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportModelToS3;
+import com.latticeengines.serviceflows.workflow.export.ImportModelFromS3;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
@@ -78,6 +79,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private ExportBucketTool exportBucketTool;
 
     @Inject
+    private ImportModelFromS3 importModelFromS3;
+
+    @Inject
     private ExportModelToS3 modelExportToS3;
 
     @Inject
@@ -86,6 +90,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     @Override
     public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(importModelFromS3) //
                 .next(importData) //
                 .next(createTableImportReport) //
                 .next(modelValidationWorkflow) //

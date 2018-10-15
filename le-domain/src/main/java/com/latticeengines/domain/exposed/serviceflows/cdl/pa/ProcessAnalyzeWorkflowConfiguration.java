@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatistic
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -50,7 +50,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
-        private ExportToS3StepConfiguration exportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);

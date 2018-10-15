@@ -18,12 +18,12 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("exportProcessAnalyzeToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ExportProcessAnalyzeToS3 extends BaseExportToS3<ExportToS3StepConfiguration> {
+public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportProcessAnalyzeToS3.class);
 
@@ -31,7 +31,7 @@ public class ExportProcessAnalyzeToS3 extends BaseExportToS3<ExportToS3StepConfi
     private DataCollectionProxy dataCollectionProxy;
 
     @Override
-    protected void buildRequests(List<ExportRequest> requests) {
+    protected void buildRequests(List<ImportExportRequest> requests) {
 
         DataCollection.Version inactiveVersion = getObjectFromContext(CDL_INACTIVE_VERSION,
                 DataCollection.Version.class);
@@ -47,7 +47,7 @@ public class ExportProcessAnalyzeToS3 extends BaseExportToS3<ExportToS3StepConfi
         }
     }
 
-    private void addTableDir(String tableName, List<ExportRequest> requests, Long paTs) {
+    private void addTableDir(String tableName, List<ImportExportRequest> requests, Long paTs) {
         if (StringUtils.isBlank(tableName)) {
             return;
         }
@@ -68,7 +68,7 @@ public class ExportProcessAnalyzeToS3 extends BaseExportToS3<ExportToS3StepConfi
                     + " file=" + srcDir + " tenantId=" + customer);
             if (fileStatus.getModificationTime() > paTs) {
                 String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                requests.add(new ExportRequest(srcDir, tgtDir, tableName));
+                requests.add(new ImportExportRequest(srcDir, tgtDir, tableName, true));
             }
         } catch (Exception ex) {
             log.warn("Can not get time stamp of table=" + tableName + " for tenant=" + customer + " error="

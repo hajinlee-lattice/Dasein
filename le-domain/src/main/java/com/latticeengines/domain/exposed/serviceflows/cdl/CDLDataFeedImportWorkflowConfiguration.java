@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -15,7 +15,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         private CDLDataFeedImportWorkflowConfiguration configuration = new CDLDataFeedImportWorkflowConfiguration();
 
         private ImportDataFeedTaskConfiguration importDataFeedTaskConfiguration = new ImportDataFeedTaskConfiguration();
-        private ExportToS3StepConfiguration exportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,

@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AttributeCategoryModifierConfiguration;
@@ -64,7 +64,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
 
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
-        private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration modelImportExportToS3 = new ImportExportS3StepConfiguration();
 
         private UseConfiguredModelingAttributesConfiguration.Builder useConfiguredModelingAttributesBuilder = new UseConfiguredModelingAttributesConfiguration.Builder();
         private AttributeCategoryModifierConfiguration.Builder attributeCategoryModifierConfigurationBuilder = new AttributeCategoryModifierConfiguration.Builder();
@@ -82,7 +82,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.microServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
-            modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
+            modelImportExportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -100,7 +100,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.customer(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
-            modelExportToS3.setCustomerSpace(customerSpace);
+            modelImportExportToS3.setCustomerSpace(customerSpace);
             useConfiguredModelingAttributesBuilder.customerSpace(customerSpace);
             attributeCategoryModifierConfigurationBuilder.customerSpace(customerSpace);
             return this;
@@ -118,7 +118,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
             mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
-            modelExportToS3.setInternalResourceHostPort(internalResourceHostPort);
+            modelImportExportToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -330,6 +330,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             cdlEventTable.setDataCollectionVersion(version);
             generateAIRating.dataCollectionVersion(version);
             useConfiguredModelingAttributesBuilder.dataCollectionVersion(version);
+            modelImportExportToS3.setVersion(version);
             return this;
         }
 
@@ -395,7 +396,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
 
         public Builder modelIteration(Integer modelIteration) {
             useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
-            if (modelIteration != null && modelIteration.intValue() == 1) {
+            if (modelIteration != null && modelIteration.intValue() == 0) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
             return this;
@@ -426,7 +427,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(generateAIRating.build());
             configuration.add(mergeUserRefinedAttributes);
-            configuration.add(modelExportToS3);
+            configuration.add(modelImportExportToS3);
             configuration.add(useConfiguredModelingAttributesBuilder.build());
             configuration.add(attributeCategoryModifierConfigurationBuilder.build());
             return configuration;

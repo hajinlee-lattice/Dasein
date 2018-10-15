@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AttributeCategoryModifierConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
@@ -74,7 +74,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private UseConfiguredModelingAttributesConfiguration.Builder useConfiguredModelingAttributesBuilder = new UseConfiguredModelingAttributesConfiguration.Builder();
         private AttributeCategoryModifierConfiguration.Builder attributeCategoryModifierConfigurationBuilder = new AttributeCategoryModifierConfiguration.Builder();
 
-        private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration modelImportExportS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -91,7 +91,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             setConfigForScoring.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
             mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
-            modelExportToS3.setCustomerSpace(customerSpace);
+            modelImportExportS3.setCustomerSpace(customerSpace);
             useConfiguredModelingAttributesBuilder.customerSpace(customerSpace);
             attributeCategoryModifierConfigurationBuilder.customerSpace(customerSpace);
             return this;
@@ -114,7 +114,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             generateAIRating.microServiceHostPort(microServiceHostPort);
 
             mergeUserRefinedAttributes.setMicroServiceHostPort(microServiceHostPort);
-            modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
+            modelImportExportS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -161,7 +161,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
             mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
-            modelExportToS3.setInternalResourceHostPort(internalResourceHostPort);
+            modelImportExportS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -216,6 +216,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
                     : ScoreResultField.RawScore.name();
             generateAIRating.scoreField(scoreField);
             setConfigForScoring.setCustomEventModelingType(customEventModelingType);
+            modelImportExportS3.setCustomEventModelingType(customEventModelingType);
             return this;
         }
 
@@ -428,6 +429,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder dataCollectionVersion(DataCollection.Version version) {
             generateAIRating.dataCollectionVersion(version);
             useConfiguredModelingAttributesBuilder.dataCollectionVersion(version);
+            modelImportExportS3.setVersion(version);
             return this;
         }
 
@@ -438,7 +440,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder modelIteration(Integer modelIteration) {
             useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
-            if (modelIteration != null && modelIteration.intValue() == 1) {
+            if (modelIteration != null && modelIteration.intValue() == 0) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
             return this;
@@ -469,7 +471,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(generateAIRating.build());
             configuration.add(exportBucketTool);
             configuration.add(exportScoreTrainingFile);
-            configuration.add(modelExportToS3);
+            configuration.add(modelImportExportS3);
             configuration.add(mergeUserRefinedAttributes);
             configuration.add(useConfiguredModelingAttributesBuilder.build());
             configuration.add(attributeCategoryModifierConfigurationBuilder.build());

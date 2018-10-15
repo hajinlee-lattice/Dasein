@@ -22,10 +22,13 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
@@ -33,9 +36,9 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> extends BaseWorkflowStep<T> {
+public abstract class BaseImportExportS3<T extends ImportExportS3StepConfiguration> extends BaseWorkflowStep<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseExportToS3.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseImportExportS3.class);
 
     @Inject
     private DataUnitProxy dataUnitProxy;
@@ -46,17 +49,11 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
     @Inject
     protected SourceFileProxy sourceFileProxy;
 
+    @Inject
+    protected DataCollectionProxy dataCollectionProxy;
+
     @Resource(name = "distCpConfiguration")
-    private Configuration distCpConfiguration;
-
-    @Value("${aws.region}")
-    private String awsRegion;
-
-    @Value("${aws.default.access.key}")
-    private String awsAccessKey;
-
-    @Value("${aws.default.secret.key.encrypted}")
-    private String awsSecretKey;
+    protected Configuration distCpConfiguration;
 
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
@@ -88,49 +85,72 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
 
     @Override
     public void execute() {
-        List<ExportRequest> requests = new ArrayList<>();
+        List<ImportExportRequest> requests = new ArrayList<>();
         buildRequests(requests);
         if (CollectionUtils.isEmpty(requests)) {
             log.info("There's no source dir found.");
             return;
         }
-        log.info("Starting to export from hdfs to s3. size=" + requests.size());
-        List<HdfsS3Exporter> exporters = new ArrayList<>();
+        log.info("Starting to export from hdfs to s3 or vice versa. size=" + requests.size());
+        List<HdfsS3ImporterExporter> exporters = new ArrayList<>();
         for (int i = 0; i < requests.size(); i++) {
-            exporters.add(new HdfsS3Exporter(requests.get(i)));
+            exporters.add(new HdfsS3ImporterExporter(requests.get(i)));
         }
         int threadPoolSize = Math.min(5, requests.size());
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-export", threadPoolSize);
+        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-import-export", threadPoolSize);
         ThreadPoolUtils.runRunnablesInParallel(executorService, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
-        log.info("Finished to export from hdfs to s3.");
+        executorService.shutdown();
+        log.info("Finished to export from hdfs to s3 or vice versa.");
     }
 
-    protected abstract void buildRequests(List<ExportRequest> requests);
+    protected abstract void buildRequests(List<ImportExportRequest> requests);
 
-    private class HdfsS3Exporter implements Runnable {
-        private String srcDir;
-        private String tgtDir;
+    protected void addTableToRequestForImport(Table table, List<ImportExportRequest> requests) {
+        List<Extract> extracts = table.getExtracts();
+        if (CollectionUtils.isNotEmpty(extracts)) {
+            extracts.forEach(extract -> {
+                if (StringUtils.isNotBlank(extract.getPath())) {
+                    String hdfsPath = pathBuilder.getFullPath(extract.getPath());
+                    try {
+                        if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
+                            String s3Dir = pathBuilder.convertAtlasTableDir(hdfsPath, podId, tenantId, s3Bucket);
+                            requests.add(new ImportExportRequest(s3Dir, hdfsPath, table.getName()));
+                        }
+                    } catch (Exception ex) {
+                        throw new RuntimeException("Failed to check Hdfs file=" + hdfsPath, ex);
+                    }
+                }
+            });
+        }
+    }
+
+    private class HdfsS3ImporterExporter implements Runnable {
+        private String srcPath;
+        private String tgtPath;
         private String tableName;
+        private boolean hasDataUnit;
 
-        HdfsS3Exporter(ExportRequest request) {
-            this.srcDir = request.srcDir;
-            this.tgtDir = request.tgtDir;
+        HdfsS3ImporterExporter(ImportExportRequest request) {
+            this.srcPath = request.srcPath;
+            this.tgtPath = request.tgtPath;
             this.tableName = request.tableName;
+            this.hasDataUnit = request.hasDataUnit;
         }
 
         @Override
         public void run() {
-            try (PerformanceTimer timer = new PerformanceTimer("Copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    "Copying src path=" + srcPath + " to tgt path=" + tgtPath)) {
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
-                    HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
-                    if (StringUtils.isNotBlank(tableName)) {
+                    HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
+                    if (hasDataUnit && StringUtils.isNotBlank(tableName)) {
                         registerDataUnit();
                     }
 
                 } catch (Exception ex) {
-                    String msg = String.format("Failed to copy hdfs dir=%s to s3 dir=%s for tenant=%s", srcDir, tgtDir,
-                            getConfiguration().getCustomerSpace().toString());
+                    String msg = String.format("Failed to copy src path=%s to tgt path=%s for tenant=%s", srcPath,
+                            tgtPath, getConfiguration().getCustomerSpace().toString());
                     log.error(msg, ex);
                     throw new RuntimeException(msg);
                 }
@@ -151,31 +171,41 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
             unit.setTenant(tenantId);
 
             unit.setName(tableName);
-            unit.setLinkedDir(tgtDir);
+            unit.setLinkedDir(tgtPath);
             DataUnit created = dataUnitProxy.create(configuration.getCustomerSpace().toString(), unit);
             log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         }
     }
 
-    class ExportRequest {
-        String srcDir;
-        String tgtDir;
+    class ImportExportRequest {
+        String srcPath;
+        String tgtPath;
         String tableName;
+        boolean hasDataUnit;
+        boolean isSync;
 
-        public ExportRequest() {
+        public ImportExportRequest() {
         }
 
-        public ExportRequest(String srcDir, String tgtDir) {
+        public ImportExportRequest(String srcPath, String tgtPath) {
             super();
-            this.srcDir = srcDir;
-            this.tgtDir = tgtDir;
+            this.srcPath = srcPath;
+            this.tgtPath = tgtPath;
         }
 
-        public ExportRequest(String srcDir, String tgtDir, String tableName) {
+        public ImportExportRequest(String srcPath, String tgtPath, String tableName) {
             super();
-            this.srcDir = srcDir;
-            this.tgtDir = tgtDir;
+            this.srcPath = srcPath;
+            this.tgtPath = tgtPath;
             this.tableName = tableName;
+        }
+
+        public ImportExportRequest(String srcPath, String tgtPath, String tableName, boolean hasDataUnit) {
+            super();
+            this.srcPath = srcPath;
+            this.tgtPath = tgtPath;
+            this.tableName = tableName;
+            this.hasDataUnit = hasDataUnit;
         }
     }
 }

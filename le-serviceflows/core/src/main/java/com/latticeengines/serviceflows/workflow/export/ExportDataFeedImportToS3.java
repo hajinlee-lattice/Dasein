@@ -11,13 +11,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 
 @Component("exportDataFeedImportToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ExportDataFeedImportToS3 extends BaseExportToS3<ExportToS3StepConfiguration> {
+public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportDataFeedImportToS3.class);
 
@@ -25,7 +25,7 @@ public class ExportDataFeedImportToS3 extends BaseExportToS3<ExportToS3StepConfi
     private EaiJobDetailProxy eaiJobDetailProxy;
 
     @Override
-    protected void buildRequests(List<ExportRequest> requests) {
+    protected void buildRequests(List<ImportExportRequest> requests) {
         String applicationId = getOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
         if (applicationId == null) {
             log.warn("There's no application Id! tenentId=" + tenantId);
@@ -44,7 +44,7 @@ public class ExportDataFeedImportToS3 extends BaseExportToS3<ExportToS3StepConfi
             if (index > 0)
                 p = p.substring(index);
             String tgtDir = pathBuilder.convertAtlasTableDir(p, podId, tenantId, s3Bucket);
-            requests.add(new ExportRequest(p, tgtDir));
+            requests.add(new ImportExportRequest(p, tgtDir));
         });
 
     }

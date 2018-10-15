@@ -19,6 +19,7 @@ import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportModelToS3;
+import com.latticeengines.serviceflows.workflow.export.ImportModelFromS3;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -68,7 +69,10 @@ public class CrossSellImportMatchAndModelWorkflow
     private ExportBucketTool exportBucketTool;
 
     @Inject
-    private ExportModelToS3 modelExportToS3;
+    private ImportModelFromS3 importModelFromS3;
+
+    @Inject
+    private ExportModelToS3 exportModelToS3;
 
     @Inject
     private ExportScoreTrainingFile exportScoreTrainingFile;
@@ -79,6 +83,7 @@ public class CrossSellImportMatchAndModelWorkflow
     @Override
     public Workflow defineWorkflow(CrossSellImportMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(importModelFromS3) //
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //
@@ -92,7 +97,7 @@ public class CrossSellImportMatchAndModelWorkflow
                 .next(generateRating) //
                 .next(exportScoreTrainingFile) //
                 .next(exportBucketTool) //
-                .next(modelExportToS3) //
+                .next(exportModelToS3) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

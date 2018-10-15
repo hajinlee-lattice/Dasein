@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 
 public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -22,7 +22,7 @@ public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfigura
         private SegmentExportWorkflowConfiguration configuration = new SegmentExportWorkflowConfiguration();
         private SegmentExportStepConfiguration initStepConf = new SegmentExportStepConfiguration();
         private ExportStepConfiguration avroToCsvExportStepConf = new ExportStepConfiguration();
-        private ExportToS3StepConfiguration exportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("segmentExportWorkflow", customerSpace,

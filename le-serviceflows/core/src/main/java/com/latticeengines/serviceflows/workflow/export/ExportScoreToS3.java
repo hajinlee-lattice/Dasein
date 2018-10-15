@@ -11,17 +11,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @Component("exportScoreToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ExportScoreToS3 extends BaseExportToS3<ExportToS3StepConfiguration> {
+public class ExportScoreToS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportScoreToS3.class);
 
     @Override
-    protected void buildRequests(List<ExportRequest> requests) {
+    protected void buildRequests(List<ImportExportRequest> requests) {
         String outputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
         String hdfsDir = StringUtils.substringBeforeLast(outputPath, "/");
         String filePrefix = StringUtils.substringAfterLast(outputPath, "/");
@@ -34,7 +34,7 @@ public class ExportScoreToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
         }
         if (CollectionUtils.isNotEmpty(paths)) {
             paths.forEach(p -> {
-                requests.add(new ExportRequest(p, pathBuilder.convertAtlasFile(p, podId, tenantId, s3Bucket)));
+                requests.add(new ImportExportRequest(p, pathBuilder.convertAtlasFile(p, podId, tenantId, s3Bucket)));
             });
         } else {
             log.warn("There was no score output files.");

@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
@@ -56,7 +56,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportBucketToolStepConfiguration export = new ExportBucketToolStepConfiguration();
-        private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
+        private ImportExportS3StepConfiguration modelExportToS3 = new ImportExportS3StepConfiguration();
         public Builder microServiceHostPort(String microServiceHostPort) {
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
