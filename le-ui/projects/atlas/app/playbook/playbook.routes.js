@@ -9,6 +9,7 @@ angular
     'lp.playbook.dashboard.sidebar',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.rating',
+    'lp.playbook.wizard.segmentcreate',
     'lp.playbook.wizard.targets',
     'lp.playbook.wizard.name',
     'lp.playbook.wizard.crmselection',
@@ -598,16 +599,23 @@ angular
                 WizardProgressItems: function($state, PlaybookWizardStore) {
                     return [
                         {
-                            label: 'Model', 
-                            state: 'rating', 
+                            label: 'Segment', 
+                            state: 'segment', 
                             nextFn: function(nextState) {
                                 $state.go(nextState); // we don't want to auto save anymore, but go to the next step (it'll be saved in the store)
                             },
                             //PlaybookWizardStore.nextSaveGeneric, 
                             progressDisabled: true 
                         },{
+                            label: 'Model', 
+                            state: 'segment.rating', 
+                            nextFn: function(nextState) {
+                                $state.go(nextState); 
+                            },
+                            progressDisabled: true 
+                        },{
                             label: 'Name', 
-                            state: 'rating.name', 
+                            state: 'segment.rating.name', 
                             secondaryLinkValidation: true,
                             secondaryLinkLabel: 'Save & Create Insights',
                             secondaryFn: function() {
@@ -661,10 +669,33 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.playbook.create.rating'
+            redirectTo: 'home.playbook.create.segment'
         })
-        .state('home.playbook.create.rating', {
-            url: '/rating/:rating_id',
+        .state('home.playbook.create.segment', {
+            url: '/segment/:rating_id',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Campaign Playbook',
+                rating_id: ''
+            },
+            resolve: {
+                // Ratings: function(PlaybookWizardStore) {
+                //     return PlaybookWizardStore.getRatings({active: true});
+                // },
+                Segments: function(SegmentService) {
+                    return SegmentService.GetSegments();
+                }
+            },
+            views: {
+                'wizard_content@home.playbook.create': {
+                    controller: 'PlaybookWizardSegmentCreate',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/segment_create/segment_create.component.html'
+                }
+            }
+        })
+        .state('home.playbook.create.segment.rating', {
+            url: '/rating/',
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Campaign Playbook',
@@ -683,7 +714,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.name', {
+        .state('home.playbook.create.segment.rating.name', {
             url: '/name',
             params: {
                 section: 'wizard.insights',

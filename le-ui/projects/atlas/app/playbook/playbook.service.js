@@ -52,6 +52,7 @@ angular.module('lp.playbook')
         this.validation = {
             name: false,
             settings: false,
+            segment: true,
             rating: true,
             targets: false,
             name: true,

@@ -17,7 +17,7 @@
         <div class="content-body">
             <div class="filters">
                 <div class="ng-search">
-                <input type="text" class="form-control" placeholder="Search {{vm.ratings.length}} Models" ng-model="vm.search" />
+                <input type="text" class="form-control" placeholder="Search {{vm.ratings.length}} Segments" ng-model="vm.search" />
                     <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
                         <span class="fa fa-search" ng-show="!vm.search.length"></span>
                         <span class="fa fa-times" ng-show="vm.search.length"></span>
@@ -27,14 +27,14 @@
             <ul class="list">
                 <li class="item header rating_">
                     <ul>
-                        <li class="ratingengine">Model</li>
-                        <li class="unscored">Unscored Accounts<br /> by Model</li> 
-                        <li class="scored">Scored Accounts<br /> by Model</li> 
+                        <li class="name">Segment</li>
+                        <li class="accounts">Accounts</li> 
+                        <li class="contacts">Contacts</li>
                     </ul>
                 </li>
                 <li 
-                    ng-repeat="rating in (filteredList = (vm.ratings | filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
-                    ng-class="{'selected': vm.stored.rating_selection == rating.id}"
+                    ng-repeat="segment in (filteredList = (vm.segments | filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                    ng-class="{'selected': vm.stored.segment_selection == segment.name}"
                     ng-disabled="vm.block_user"
                     class="item rating_"
                     ng-if="filteredList.length">
@@ -42,24 +42,24 @@
                         <li class="segment">
                             <input 
                                 type="radio" 
-                                id="{{rating.id}}" 
-                                name="{{rating.id}}" 
-                                ng-value="rating.id"
+                                id="{{segment.name}}" 
+                                name="{{segment.name}}" 
+                                ng-value="segment.name"
                                 ng-change="vm.checkValid(rating_form)"
-                                ng-click="vm.saveRating(rating)"
-                                ng-model="vm.stored.rating_selection" />
-                            <label for="{{rating.id}}">{{rating.displayName}}</label>
+                                ng-click="vm.saveSegment(segment)"
+                                ng-model="vm.stored.segment_selection" />
+                            <label for="{{segment.name}}">{{segment.display_name}}</label>
                         </li>
-                        <li class="unscored">
-                            <label for="{{rating.id}}">0</label>
+                        <li class="accounts">
+                            <label for="{{segment.name}}">{{segment.accounts||0|number}}</label>
                         </li>
-                        <li class="scored">
-                            <label for="{{rating.id}}">0</label>
+                        <li class="contacts">
+                            <label for="{{segment.name}}">{{segment.contacts||0|number}}</label>
                         </li>
                     </ul>
                 </li>
                 <li class="item centered-info-message" ng-if="!filteredList.length">
-                    No Models Found
+                    No Segments Found
                 </li>
             </ul>
             <div class="pd-pagination-container-margin-top pull-right" ng-if="(filteredList.length / vm.pageSize) > 0">

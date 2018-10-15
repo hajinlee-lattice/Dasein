@@ -7,6 +7,7 @@ import './content/launchhistory/launchhistory.component';
 import './content/playlist/playlist.index';
 import './content/preview/preview.component';
 import './content/rating/rating.component';
+import './content/segment_create/segment_create.component';
 import './content/segment/segment.component';
 import './content/settings/settings.component';
 import './content/targets/targets.component';

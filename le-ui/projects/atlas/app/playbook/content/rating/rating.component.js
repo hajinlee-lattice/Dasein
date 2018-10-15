@@ -31,7 +31,6 @@ angular.module('lp.playbook.wizard.rating', [])
     }
 
     vm.init = function() {
-
         PlaybookWizardStore.setValidation('rating', false);
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setValidation('rating', true);
@@ -66,14 +65,13 @@ angular.module('lp.playbook.wizard.rating', [])
     }
 
     vm.saveRating = function(rating) {
-        PlaybookWizardStore.setRating(rating);
+        var _rating = angular.merge({}, PlaybookWizardStore.savedRating, rating);
+        PlaybookWizardStore.setRating(_rating);
     }
 
     vm.searchFields = function(rating){
         if (vm.search) {
-            if (rating.segmentDisplayName && textSearch(rating.segmentDisplayName, vm.search)) {
-                return true;
-            } else if (rating.displayName && textSearch(rating.displayName, vm.search)) {
+            if (rating.displayName && textSearch(rating.displayName, vm.search)) {
                 return true;
             } else {
                 return false;
