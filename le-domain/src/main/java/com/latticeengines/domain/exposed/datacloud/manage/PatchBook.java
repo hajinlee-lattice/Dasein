@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -17,6 +21,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Entity class to represent one patch item for DataCloud patcher
@@ -25,9 +30,14 @@ import java.util.Date;
 @Access(AccessType.FIELD)
 @Table(name = "PatchBook")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@TypeDefs({
+        @TypeDef(name = "json", typeClass = JsonStringType.class),
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+})
 public class PatchBook implements HasPid, Serializable {
 
     public static final String COLUMN_PID = "PID";
+    public static final String COLUMN_TYPE = "Type";
     public static final String COLUMN_HOTFIX = "HotFix";
     public static final String COLUMN_EOL = "EOL";
     public static final String COLUMN_EFFECTIVE_SINCE_VERSION = "EffectiveSinceVersion";
@@ -39,18 +49,15 @@ public class PatchBook implements HasPid, Serializable {
         Attribute, Lookup, Domain
     }
 
-    /* TODO add comments for fields */
-    /* TODO add index or modify column definition if necessary */
-
     @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = COLUMN_PID, unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("Type")
+    @JsonProperty(COLUMN_TYPE)
     @Enumerated(EnumType.STRING)
-    @Column(name = "Type", nullable = false)
+    @Column(name = COLUMN_TYPE, nullable = false)
     private Type type;
 
     @JsonProperty("Domain")
@@ -78,8 +85,9 @@ public class PatchBook implements HasPid, Serializable {
     private String city;
 
     @JsonProperty("PatchItems")
-    @Column(name = "PatchItems")
-    private String patchItems;
+    @Column(name = "PatchItems", columnDefinition = "'JSON'")
+    @org.hibernate.annotations.Type(type = "json")
+    private Map<String, Object> patchItems;
 
     @JsonProperty("Cleanup")
     @Column(name = "Cleanup", nullable = false)
@@ -195,11 +203,11 @@ public class PatchBook implements HasPid, Serializable {
         this.city = city;
     }
 
-    public String getPatchItems() {
+    public Map<String, Object> getPatchItems() {
         return patchItems;
     }
 
-    public void setPatchItems(String patchItems) {
+    public void setPatchItems(Map<String, Object> patchItems) {
         this.patchItems = patchItems;
     }
 
