@@ -72,10 +72,10 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, accountId, periodName);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
-            periodTransaction.setTotalAmount((Double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
-            periodTransaction.setTotalQuantity((Double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
+            periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
+            periodTransaction.setTotalQuantity((double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
             periodTransaction
-                    .setTransactionCount((Double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
+                    .setTransactionCount((double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
             periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
@@ -121,10 +121,10 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 productType.toString());
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
-            periodTransaction.setTotalAmount((Double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
-            periodTransaction.setTotalQuantity((Double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
+            periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
+            periodTransaction.setTotalQuantity((double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
             periodTransaction
-                    .setTransactionCount((Double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
+                    .setTransactionCount((double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
             periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
