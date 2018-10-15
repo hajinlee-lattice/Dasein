@@ -77,7 +77,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction
                     .setTransactionCount((double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
-            periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
+            periodTransaction.setPeriodId((int) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
         log.info("resultList for account is " + resultList);
@@ -126,7 +126,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction
                     .setTransactionCount((double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
-            periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
+            periodTransaction.setPeriodId((int) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
         log.info("resultList for segment is " + resultList);
