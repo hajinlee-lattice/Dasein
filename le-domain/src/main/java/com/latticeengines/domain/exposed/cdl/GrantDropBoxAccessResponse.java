@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.cdl;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,6 +24,12 @@ public class GrantDropBoxAccessResponse {
 
     @JsonProperty("ExternalAccountId")
     private String externalAccountId;
+
+    @JsonProperty("Bucket")
+    private String bucket;
+
+    @JsonProperty("DropBox")
+    private String dropBox;
 
     public DropBoxAccessMode getAccessMode() {
         return accessMode;
@@ -64,6 +69,22 @@ public class GrantDropBoxAccessResponse {
 
     public void setExternalAccountId(String externalAccountId) {
         this.externalAccountId = externalAccountId;
+    }
+
+    public String getBucket() {
+        return bucket;
+    }
+
+    public void setBucket(String bucket) {
+        this.bucket = bucket;
+    }
+
+    public String getDropBox() {
+        return dropBox;
+    }
+
+    public void setDropBox(String dropBox) {
+        this.dropBox = dropBox;
     }
 
 }

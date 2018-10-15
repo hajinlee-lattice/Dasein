@@ -134,6 +134,8 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(summary.getAccessKeyId(), response.getAccessKey());
 
         GrantDropBoxAccessResponse newResponse = dropboxService.refreshAccessKey();
+        Assert.assertNotNull(newResponse.getBucket());
+        Assert.assertNotNull(newResponse.getDropBox());
         BasicAWSCredentialsProvider newCreds = //
                 new BasicAWSCredentialsProvider(newResponse.getAccessKey(), newResponse.getSecretKey());
         verifyAccessWithRetries(newCreds, false);

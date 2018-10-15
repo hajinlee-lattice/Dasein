@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -47,7 +49,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${monitor.email.pm:dev@lattice-engines.com}")
     private String pmEmail;
-    
+
     @Value("${monitor.urls.helpcenter}")
     private String helpCenterUrl;
 
@@ -88,8 +90,7 @@ public class EmailServiceImpl implements EmailService {
             String appUrl = null;
             if (hostport == null) {
                 appUrl = helpCenterUrl;
-            }
-            else {
+            } else {
                 appUrl = hostport;
             }
 
@@ -127,7 +128,7 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
             log.info("Sending new PLS internal user email to " + user.getEmail() + " succeeded.");
-        } catch (Exception e) {   
+        } catch (Exception e) {
             log.error("Failed to send new PLS internal user email to " + user.getEmail() + " " + e.getMessage());
         }
     }
@@ -649,7 +650,7 @@ public class EmailServiceImpl implements EmailService {
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_SUCCESS);
             String successSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT;
             String requestType = "a segment";
-            if (type.contains(ORPHAN_FILTER)){
+            if (type.contains(ORPHAN_FILTER)) {
                 successSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT;
                 requestType = "orphan records";
             }
@@ -659,13 +660,12 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{exportID}}", exportID);
             builder.replaceToken("{{exportType}}", type);
             builder.replaceToken("{{url}}", hostport);
-            builder.replaceToken("{{requestType}}",requestType);
+            builder.replaceToken("{{requestType}}", requestType);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png", "image/png",
                     "instruction");
 
-            sendMultiPartEmail(String.format(successSubject, exportID), mp,
-                    Collections.singleton(user.getEmail()));
+            sendMultiPartEmail(String.format(successSubject, exportID), mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS export segment complete email to " + user.getEmail() + " " + e.getMessage());
@@ -680,7 +680,7 @@ public class EmailServiceImpl implements EmailService {
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_ERROR);
 
             String errorSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT;
-            if (type.contains(ORPHAN_FILTER)){
+            if (type.contains(ORPHAN_FILTER)) {
                 errorSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_ERROR_SUBJECT;
             }
             builder.replaceToken("{{firstname}}", user.getFirstName());
@@ -688,8 +688,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{exportType}}", type);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(errorSubject, exportID), mp,
-                    Collections.singleton(user.getEmail()));
+            sendMultiPartEmail(String.format(errorSubject, exportID), mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS export segment error email to " + user.getEmail() + " " + e.getMessage());
@@ -698,22 +697,22 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsExportSegmentRunningEmail(User user, String exportID) {
-        sendPlsExportRunningEmail(user,exportID,"segment");
+        sendPlsExportRunningEmail(user, exportID, "segment");
     }
 
     @Override
-    public void sendPlsExportOrphanRecordRunningEmail(User user, String exportID, String type){
-        sendPlsExportRunningEmail(user,exportID,type);
+    public void sendPlsExportOrphanRecordRunningEmail(User user, String exportID, String type) {
+        sendPlsExportRunningEmail(user, exportID, type);
     }
 
-    private void sendPlsExportRunningEmail(User user, String exportID, String type){
+    private void sendPlsExportRunningEmail(User user, String exportID, String type) {
         try {
             log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_RUNNING);
             String inProgressSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT;
             String requestType = "a segment";
-            if (type.contains(ORPHAN_FILTER)){
+            if (type.contains(ORPHAN_FILTER)) {
                 inProgressSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT;
                 requestType = "orphan records";
             }
@@ -722,15 +721,13 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{requestType}}", requestType);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(inProgressSubject, exportID),
-                    mp, Collections.singleton(user.getEmail()));
+            sendMultiPartEmail(String.format(inProgressSubject, exportID), mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error(
                     "Failed to send PLS export segment in-progress email to " + user.getEmail() + " " + e.getMessage());
         }
     }
-
 
     private void sendEmailForEnrichInternalAttribute(User user, String hostport, String tenantName, String modelName,
             boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,
@@ -840,7 +837,8 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.POC_STATE_NOTICE_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+            log.info(
+                    "Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());
@@ -848,29 +846,33 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendCredentialEmail(User user, Tenant tenant, String credentials) {
+    public void sendS3CredentialEmail(User user, Tenant tenant, DropBoxSummary dropBoxSummary,
+            GrantDropBoxAccessResponse response) {
         try {
-            log.info("Sending s3 credentials to " + user.getEmail() + " on " + tenant.getName()
-                    + " started.");
+            log.info("Sending s3 credentials to " + user.getEmail() + " on " + tenant.getName() + " started.");
             EmailTemplateBuilder builder;
-            if (StringUtils.isNotEmpty(credentials)) {
-                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.S3_CREDENTIALS);
-            } else {
-                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.S3_EMPTY_CREDENTIALS);
-            }
+            builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.S3_CREDENTIALS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
-            if (StringUtils.isNotEmpty(credentials)) {
-                builder.replaceToken("{{credentials}}", credentials);
+            if (StringUtils.isNotEmpty(dropBoxSummary.getBucket())) {
+                builder.replaceToken("{{bucket}}", dropBoxSummary.getBucket());
+            }
+            if (StringUtils.isNotEmpty(dropBoxSummary.getDropBox())) {
+                builder.replaceToken("{{dropBox}}", dropBoxSummary.getDropBox());
+            }
+            if (StringUtils.isNotEmpty(response.getAccessKey())) {
+                builder.replaceToken("{{accessKey}}", response.getAccessKey());
+            }
+            if (StringUtils.isNotEmpty(response.getSecretKey())) {
+                builder.replaceToken("{{secretKey}}", response.getSecretKey());
             }
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.S3_CREDENTIALS_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
-            log.info(
-                    "Sending s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+            log.info("Sending s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send s3 credentials email to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " "
+                    + e.getMessage());
         }
     }
 
@@ -906,8 +908,7 @@ public class EmailServiceImpl implements EmailService {
                     + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
-                    + " "
-                    + e.getMessage());
+                    + " " + e.getMessage());
         }
     }
 }

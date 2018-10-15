@@ -112,7 +112,6 @@ public class DropBoxServiceImpl implements DropBoxService {
         return entityMgr.getDropBoxOwner(dropBox);
     }
 
-
     @Override
     public DropBoxSummary getDropBoxSummary() {
         DropBox dropbox = entityMgr.getDropBox();
@@ -151,17 +150,16 @@ public class DropBoxServiceImpl implements DropBoxService {
         dropbox.setAccessMode(request.getAccessMode());
         GrantDropBoxAccessResponse response;
         switch (request.getAccessMode()) {
-            case LatticeUser:
-                response = grantAccessToLatticeUser(request.getExistingUser());
-                dropbox.setLatticeUser(response.getLatticeUser());
-                break;
-            case ExternalAccount:
-                response = grantAccessToExternalAccount(request.getExternalAccountId());
-                dropbox.setExternalAccount(response.getExternalAccountId());
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        "Unknown access mode " + request.getAccessMode());
+        case LatticeUser:
+            response = grantAccessToLatticeUser(request.getExistingUser());
+            dropbox.setLatticeUser(response.getLatticeUser());
+            break;
+        case ExternalAccount:
+            response = grantAccessToExternalAccount(request.getExternalAccountId());
+            dropbox.setExternalAccount(response.getExternalAccountId());
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
         }
         entityMgr.update(dropbox);
         return response;
@@ -179,6 +177,8 @@ public class DropBoxServiceImpl implements DropBoxService {
                     + " has not been granted to a lattice IAM user. Cannot refresh the access key.");
         }
         GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
+        response.setDropBox(dropbox.getDropBox());
+        response.setBucket(customersBucket);
         response.setAccessMode(DropBoxAccessMode.LatticeUser);
         response.setLatticeUser(userName);
         AccessKey newKey = iamService.refreshCustomerKey(userName);
@@ -192,15 +192,14 @@ public class DropBoxServiceImpl implements DropBoxService {
         DropBox dropbox = entityMgr.getDropBox();
         if (dropbox != null && dropbox.getAccessMode() != null) {
             switch (dropbox.getAccessMode()) {
-                case LatticeUser:
-                    revokeAccessToLatticeUser(dropbox.getLatticeUser());
-                    break;
-                case ExternalAccount:
-                    revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
-                    break;
-                default:
-                    throw new UnsupportedOperationException(
-                            "Unknown access mode " + dropbox.getAccessMode());
+            case LatticeUser:
+                revokeAccessToLatticeUser(dropbox.getLatticeUser());
+                break;
+            case ExternalAccount:
+                revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
             }
         }
     }
@@ -275,8 +274,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         policy.getStatements().forEach(stmt -> {
             if ("Objects".equals(stmt.getId())) {
                 List<Resource> resourceList = stmt.getResources();
-                Set<String> resources = resourceList.stream().map(Resource::getId)
-                        .collect(Collectors.toSet());
+                Set<String> resources = resourceList.stream().map(Resource::getId).collect(Collectors.toSet());
                 String rsc = ARN_PREFIX + bucket + SLASH + DROPBOX + SLASH + dropBoxId + WILD_CARD;
                 if (!resources.contains(rsc)) {
                     resourceList.add(new Resource(rsc));
@@ -313,8 +311,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             Policy policy = Policy.fromJson(policyDoc);
             removeDropBoxFromUser(policy, dropBoxId);
             if (CollectionUtils.isEmpty(policy.getStatements())) {
-                String msg = "After revoking access to dropbox " + dropBoxId + " from user "
-                        + userName + ", " //
+                String msg = "After revoking access to dropbox " + dropBoxId + " from user " + userName + ", " //
                         + POLICY_NAME + " policy becomes dummy, remove it";
                 log.info(msg);
                 iamService.deleteUserPolicy(userName, POLICY_NAME);
@@ -398,8 +395,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withResources(new Resource(arn + STAR));
     }
 
-    private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId,
-            String accountId) {
+    private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId, String accountId) {
         return new Statement(Statement.Effect.Allow) //
                 .withId(accountId + "_" + dropBoxId + "_list") //
                 .withPrincipals(new Principal(accountId)) //
@@ -426,8 +422,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                     boolean keep = true;
                     if (CollectionUtils.isEmpty(stmt.getResources())) {
                         keep = false;
-                    } else if (stmt.getId().contains(accountId)
-                            && stmt.getId().contains(dropBoxId)) {
+                    } else if (stmt.getId().contains(accountId) && stmt.getId().contains(dropBoxId)) {
                         keep = false;
                     }
                     return keep;
@@ -489,8 +484,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     private void addAccountFromPutStatement(Statement statement, String accountId) {
         List<Principal> principals = statement.getPrincipals();
-        boolean hasAccount = principals.stream()
-                .anyMatch(principal -> principal.getId().contains(accountId));
+        boolean hasAccount = principals.stream().anyMatch(principal -> principal.getId().contains(accountId));
         if (!hasAccount) {
             principals.add(new Principal(accountId));
             statement.setPrincipals(principals);
@@ -500,8 +494,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private void removeAccountFromPutStatement(Statement statement, String accountId) {
         List<Principal> principals = statement.getPrincipals();
         principals = principals.stream() //
-                .filter(principal -> !principal.getId().contains(accountId))
-                .collect(Collectors.toList());
+                .filter(principal -> !principal.getId().contains(accountId)).collect(Collectors.toList());
         statement.setPrincipals(principals);
     }
 

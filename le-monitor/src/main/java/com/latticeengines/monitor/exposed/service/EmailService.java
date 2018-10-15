@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.mail.Multipart;
 
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -83,7 +85,8 @@ public interface EmailService {
 
     void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days);
 
-    void sendCredentialEmail(User user, Tenant tenant, String credentials);
+    void sendS3CredentialEmail(User user, Tenant tenant, DropBoxSummary dropBoxSummary,
+            GrantDropBoxAccessResponse response);
 
     void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
             String fileName, String failedMessage, String type);

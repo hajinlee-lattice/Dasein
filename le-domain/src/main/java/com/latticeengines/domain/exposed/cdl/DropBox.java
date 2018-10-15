@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.cdl;
 
-
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -27,8 +26,8 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "ATLAS_DROPBOX",
-        uniqueConstraints = { @UniqueConstraint(name = "UX_DROPBOX", columnNames = { "DROPBOX" }) })
+@Table(name = "ATLAS_DROPBOX", uniqueConstraints = {
+        @UniqueConstraint(name = "UX_DROPBOX", columnNames = { "DROPBOX" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class DropBox implements HasPid, HasTenant {
 
@@ -45,7 +44,7 @@ public class DropBox implements HasPid, HasTenant {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @JsonProperty("dropboxy")
+    @JsonProperty("dropbox")
     @Column(name = "DROPBOX", length = 8)
     private String dropBox;
 
