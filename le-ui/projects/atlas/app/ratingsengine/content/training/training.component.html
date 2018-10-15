@@ -21,13 +21,21 @@
                                 ng-change="$ctrl.checkForDisable()" />
                             <div>Your matched 3rd-Party Attributes provided through Lattice</div>
                         </li>
-                        <li class="form-group">
+                        <li class="form-group" ng-if="$ctrl.filters.customEventModelingType == 'CDL'">
                             <input 
                                 type="checkbox"
                                 class="form-control"
                                 ng-model="$ctrl.checkboxModel.cdl"
                                 ng-change="$ctrl.checkForDisable()" />
                             <div>Your Imported 1st-Party Attributes (My Data Attributes)</div>
+                        </li>
+                        <li class="form-group" ng-if="$ctrl.filters.customEventModelingType == 'LPI'">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.customFile"
+                                ng-change="$ctrl.checkForDisable()" />
+                            <div>Attributes in the Training File</div>
                         </li>
                     </ul>
 

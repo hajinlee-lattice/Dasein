@@ -89,12 +89,13 @@ angular.module('lp.ratingsengine.wizard.training', [
                 } else {
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
-                    
+
                     RatingsEngineStore.setDisplayFileName(vm.filters.sourceFileName);
 
                     vm.checkboxModel = {
                         datacloud: (vm.filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
                         cdl: (vm.filters.dataStores.indexOf('CDL') > -1) ? true : false,
+                        customFile: (vm.filters.dataStores.indexOf('CustomFileAttributes') > -1) ? true : false,
                         deduplicationType: (vm.filters.deduplicationType == 'ONELEADPERDOMAIN') ? true : false,
                         excludePublicDomains: (vm.filters.excludePublicDomains == true) ? false : true,
                         transformationGroup: (vm.filters.transformationGroup == 'NONE') ? false : true
@@ -108,6 +109,9 @@ angular.module('lp.ratingsengine.wizard.training', [
                     }
                     if(vm.checkboxModel.cdl) {
                         vm.configFilters.dataStores.push('CDL');
+                    }
+                    if(vm.checkboxModel.customFile) {
+                        vm.configFilters.dataStores.push('CustomFileAttributes');
                     }
 
                     vm.checkForDisable();
@@ -375,6 +379,17 @@ angular.module('lp.ratingsengine.wizard.training', [
                     }, 200);
                 } else {
                     var index = vm.dataStores.indexOf('CDL');
+                    vm.dataStores.splice(index, 1);
+                }
+
+                if(vm.checkboxModel.customFile) {
+                    $timeout(function () {
+                        if(vm.dataStores.indexOf('CustomFileAttributes') == -1){
+                            vm.configFilters.dataStores.push('CustomFileAttributes');
+                        }
+                    }, 200);
+                } else {
+                    var index = vm.dataStores.indexOf('CustomFileAttributes');
                     vm.dataStores.splice(index, 1);
                 }
 
