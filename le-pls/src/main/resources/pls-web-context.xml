@@ -4,6 +4,16 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment" />
+        <property name="targetMethod" value="setService" />
+        <property name="arguments">
+            <list>
+                <value>pls</value>
+            </list>
+        </property>
+    </bean>
+
     <import resource="classpath:common-webapp-env-context.xml"/>
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:pls-security-context.xml"/>

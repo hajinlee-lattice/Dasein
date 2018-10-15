@@ -5,6 +5,16 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment" />
+        <property name="targetMethod" value="setService" />
+        <property name="arguments">
+            <list>
+                <value>cdl</value>
+            </list>
+        </property>
+    </bean>
+
     <import resource="classpath:microservice-context.xml"/>
     <import resource="classpath:serviceapps-cdl-context.xml"/>
     <context:component-scan base-package="com.latticeengines.apps.cdl.provision, com.latticeengines.apps.core.controller, com.latticeengines.apps.cdl.controller, com.latticeengines.microservice.cdl" />

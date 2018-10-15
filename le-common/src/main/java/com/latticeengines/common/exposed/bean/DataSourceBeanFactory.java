@@ -13,6 +13,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jndi.JndiTemplate;
 
 import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment.Environment;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.util.StackTraceUtils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -21,7 +22,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private static final Logger log = LoggerFactory.getLogger(DataSourceBeanFactory.class);
     private static final String WRITE_CONNECTION_TEST_QUERY = "SELECT CASE WHEN @@read_only + @@innodb_read_only < 1 THEN 1 "
             + "ELSE (SELECT table_name FROM information_schema.tables LIMIT 2) END AS `1`";
-    
+
     // if use jndi
     private String jndiName;
 
@@ -34,6 +35,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private Boolean writerConnection;
     private int minPoolSize = -1;
     private int maxPoolSize = -1;
+    private String poolSizePropKeyPrefix;
     private int maxPoolSizeForWebApp = -1;
     private int maxPoolSizeForAppMaster = -1;
     private int acquireIncrement = -1;
@@ -80,40 +82,44 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setUser(user);
         cpds.setPassword(password);
 
-        int maxPoolSize = -1;
-        BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
-        switch (currentEnv) {
-            case WebApp:
-                maxPoolSize = this.maxPoolSizeForWebApp;
-                break;
-            case AppMaster:
-                maxPoolSize = this.maxPoolSizeForAppMaster;
-                break;
-            case TestClient:
-            default:
-                maxPoolSize = this.maxPoolSize;
-        }
-        //If MaxPoolSize is not configured at environment level, then use default MaxPoolSize
-        maxPoolSize = maxPoolSize > 0 ? maxPoolSize : this.maxPoolSize;
-        int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : 0;
-        maxPoolSize = maxPoolSize > minPoolSize ? maxPoolSize : Math.max(minPoolSize, 8);
-        
-        if (log.isInfoEnabled()) {
-            log.info("Setting Max Connections to: {},  for Envrionment: {}", maxPoolSize, currentEnv);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Stack Trace: {} ", StackTraceUtils.getCurrentStackTrace());
-        }
         // Give a meaningful name for better troubleshooting
-        
-        String dbName="";
+        String dbName;
         try {
             dbName = jdbcUrl.substring(jdbcUrl.lastIndexOf("/"), jdbcUrl.indexOf("?", jdbcUrl.lastIndexOf("/")));
         } catch (Exception e) {
             dbName = jdbcUrl.substring(0, jdbcUrl.lastIndexOf("/"));
         }
+
+        BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
+        String currentSvc = BeanFactoryEnvironment.getService();
+        int maxPoolSize;
+        int minPoolSize;
+        if (StringUtils.isBlank(this.poolSizePropKeyPrefix)) {
+            maxPoolSize = assignLegacyMaxPoolSize(currentEnv);
+            minPoolSize = assignLegacyMinPoolSize();
+        } else {
+            maxPoolSize = getMaxPoolFromProp(currentEnv, currentSvc);
+            minPoolSize = getMinPoolFromProp(currentEnv, currentSvc);
+        }
+        // avoid max < min
+        maxPoolSize = maxPoolSize > minPoolSize ? maxPoolSize : Math.max(minPoolSize, 8);
+
+        if (log.isInfoEnabled()) {
+            if (maxPoolSize > 1) {
+                log.info("Setting Max Connections of {} to: {}, for Envrionment: {}, Service: {}", //
+                        dbName, maxPoolSize, currentEnv, currentSvc);
+            }
+            if (minPoolSize > 0) {
+                log.info("Setting Min Connections of {} to: {}, for Envrionment: {}, Service: {}", //
+                        dbName, minPoolSize, currentEnv, currentSvc);
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Stack Trace: {} ", StackTraceUtils.getCurrentStackTrace());
+        }
+
         cpds.setDataSourceName(String.format("%s-%s", currentEnv, dbName.replaceAll("[^A-Za-z0-9]", "")));
-        
         int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : (Math.max(3, maxPoolSize/10));
         cpds.setMinPoolSize(minPoolSize);
         cpds.setInitialPoolSize(minPoolSize);
@@ -127,11 +133,11 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setMaxIdleTimeExcessConnections(maxIdleTimeExcessConnections);
         //cpds.setPreferredTestQuery(preferredTestQuery);
         cpds.setNumHelperThreads(this.numHelperThreads > 0 ? this.numHelperThreads : Math.max(3, maxPoolSize/10));
-        
+
         if (Boolean.TRUE.equals(this.writerConnection)) {
             // For Failover case, we need to evict the old cached connection and get latest writer connection.
             cpds.setTestConnectionOnCheckout(true);
-            cpds.setPreferredTestQuery(WRITE_CONNECTION_TEST_QUERY);    
+            cpds.setPreferredTestQuery(WRITE_CONNECTION_TEST_QUERY);
         } else if (Environment.AppMaster == currentEnv) {
             // For Yarn jobs, we want to make sure that connection is in good state, because retry of Yarn job will be costly.
             cpds.setTestConnectionOnCheckout(true);
@@ -139,8 +145,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             cpds.setIdleConnectionTestPeriod(60);
             cpds.setTestConnectionOnCheckin(true);
         }
-        
-        Boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true : this.enableDebugSlowSql;
+
+        boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true : this.enableDebugSlowSql;
         if (enableDebugSlowSql) {
             cpds.setUnreturnedConnectionTimeout(30);
             cpds.setDebugUnreturnedConnectionStackTraces(true);
@@ -158,6 +164,75 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             // As this is expected warning message on QA and Prod, we no need to log the full exception trace
             log.warn("Cannot read jndi datasource named:{}, Reason: {}", jndiName, e.getMessage());
             return null;
+        }
+    }
+
+    private int assignLegacyMaxPoolSize(BeanFactoryEnvironment.Environment env) {
+        int maxPoolSize;
+        switch (env) {
+            case WebApp:
+                maxPoolSize = this.maxPoolSizeForWebApp;
+                break;
+            case AppMaster:
+                maxPoolSize = this.maxPoolSizeForAppMaster;
+                break;
+            case TestClient:
+            default:
+                maxPoolSize = this.maxPoolSize;
+        }
+        //If MaxPoolSize is not configured at environment level, then use default MaxPoolSize
+        maxPoolSize = maxPoolSize > 0 ? maxPoolSize : this.maxPoolSize;
+        return maxPoolSize;
+    }
+
+    private int assignLegacyMinPoolSize() {
+        return this.minPoolSize > 0 ? this.minPoolSize : 0;
+    }
+
+    private int getMaxPoolFromProp(BeanFactoryEnvironment.Environment env, String svc) {
+        String prefix = this.poolSizePropKeyPrefix + ".max";
+        String prop = getPropertyStr(prefix, env, svc);
+        if (StringUtils.isBlank(prop)) {
+            return 1;
+        } else {
+            return Integer.valueOf(prop);
+        }
+    }
+
+    private int getMinPoolFromProp(BeanFactoryEnvironment.Environment env, String svc) {
+        String prefix = this.poolSizePropKeyPrefix + ".min";
+        String prop = getPropertyStr(prefix, env, svc);
+        if (StringUtils.isBlank(prop)) {
+            return 0;
+        } else {
+            return Integer.valueOf(prop);
+        }
+    }
+
+    private static String getPropertyStr(String prefix, BeanFactoryEnvironment.Environment env, String svc) {
+        String key = prefix + getFullSuffix(env, svc);
+        String prop = PropertyUtils.getProperty(key);
+        if (StringUtils.isBlank(prop)) {
+            key = prefix + getEnvSuffix(env);
+            prop = PropertyUtils.getProperty(key);
+        }
+        if (StringUtils.isBlank(prop)) {
+            key = prefix;
+            prop = PropertyUtils.getProperty(key);
+        }
+        return prop;
+    }
+
+    private static String getEnvSuffix(BeanFactoryEnvironment.Environment env) {
+        return "." + env.name().toLowerCase();
+    }
+
+    private static String getFullSuffix(BeanFactoryEnvironment.Environment env, String svc) {
+        String suffix = getEnvSuffix(env);
+        if (StringUtils.isNotBlank(svc)) {
+            return suffix + "." + svc.toLowerCase();
+        } else {
+            return suffix;
         }
     }
 
@@ -199,6 +274,14 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPoolSizePropKeyPrefix() {
+        return poolSizePropKeyPrefix;
+    }
+
+    public void setPoolSizePropKeyPrefix(String poolSizePropKeyPrefix) {
+        this.poolSizePropKeyPrefix = poolSizePropKeyPrefix;
     }
 
     public int getMinPoolSize() {
