@@ -39,8 +39,8 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     private static final Logger log = LoggerFactory.getLogger(DropBoxServiceImpl.class);
 
-    private static final String DROPBOX = "dropbox";
-    private static final String POLICY_NAME = "dropbox";
+    private static final String DROP_FOLDER = "dropfolder";
+    private static final String POLICY_NAME = "dropfolder";
     private static final String SLASH = "/";
     private static final String STAR = "*";
     private static final String WILD_CARD = "/*";
@@ -246,7 +246,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private Policy newDropBoxPolicy(String bucket, String dropBoxId) {
-        String arnPrefix = ARN_PREFIX + bucket + SLASH + DROPBOX + SLASH + dropBoxId;
+        String arnPrefix = ARN_PREFIX + bucket + SLASH + DROP_FOLDER + SLASH + dropBoxId;
         return new Policy().withStatements(//
                 listDropBoxStatement(bucket, dropBoxId), //
                 new Statement(Statement.Effect.Allow) //
@@ -275,7 +275,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             if ("Objects".equals(stmt.getId())) {
                 List<Resource> resourceList = stmt.getResources();
                 Set<String> resources = resourceList.stream().map(Resource::getId).collect(Collectors.toSet());
-                String rsc = ARN_PREFIX + bucket + SLASH + DROPBOX + SLASH + dropBoxId + WILD_CARD;
+                String rsc = ARN_PREFIX + bucket + SLASH + DROP_FOLDER + SLASH + dropBoxId + WILD_CARD;
                 if (!resources.contains(rsc)) {
                     resourceList.add(new Resource(rsc));
                     resources.add(rsc);
@@ -295,7 +295,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
-                        DROPBOX + SLASH + dropBoxId + STAR //
+                        DROP_FOLDER + SLASH + dropBoxId + STAR //
         ));
     }
 
@@ -404,7 +404,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
-                        DROPBOX + SLASH + dropBoxId + STAR //
+                        DROP_FOLDER + SLASH + dropBoxId + STAR //
         ));
     }
 
@@ -499,7 +499,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private String toPrefix(DropBox dropbox) {
-        return DROPBOX + SLASH + dropbox.getDropBox();
+        return DROP_FOLDER + SLASH + dropbox.getDropBox();
     }
 
     // for tests

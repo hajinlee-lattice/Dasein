@@ -34,7 +34,7 @@ import com.latticeengines.aws.s3.S3Service;
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
 public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
-    private static String DROP_BOX = "dropbox";
+    private static String DROP_FOLDER = "dropfolder";
 
     @Inject
     private S3Service s3Service;
@@ -65,9 +65,9 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     @BeforeClass(groups = "functional")
     public void setup() {
         dropBoxId = RandomStringUtils.randomAlphanumeric(6).toLowerCase();
-        dropBoxDir = DROP_BOX + "/" + dropBoxId;
-        if (!s3Service.objectExist(testBucket, DROP_BOX)) {
-            s3Service.createFolder(testBucket, DROP_BOX);
+        dropBoxDir = DROP_FOLDER + "/" + dropBoxId;
+        if (!s3Service.objectExist(testBucket, DROP_FOLDER)) {
+            s3Service.createFolder(testBucket, DROP_FOLDER);
         }
         BasicAWSCredentialsProvider credentialsProvider = //
                 new BasicAWSCredentialsProvider(customerAccessKey, customerSecret);
@@ -173,7 +173,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private Statement getAccountStatement(String bucketName, String dropBoxId, String accountId) {
-        String arn = "arn:aws:s3:::" + bucketName + "/dropbox/" + dropBoxId;
+        String arn = "arn:aws:s3:::" + bucketName + "/" + DROP_FOLDER + "/" + dropBoxId;
         return new Statement(Statement.Effect.Allow) //
                         .withId(accountId) //
                         .withPrincipals(new Principal(accountId)) //
@@ -196,7 +196,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                 .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
-                        DROP_BOX + "/" + dropBoxId + "*" //
+                        DROP_FOLDER + "/" + dropBoxId + "*" //
                 ));
     }
 
@@ -245,7 +245,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private void insertAccountStatement(String bucketName, String dropBoxId, Statement statement) {
-        String arn = "arn:aws:s3:::" + bucketName + "/dropbox/" + dropBoxId;
+        String arn = "arn:aws:s3:::" + bucketName + "/" + DROP_FOLDER + "/" + dropBoxId;
         List<Resource> rscs = new ArrayList<>(statement.getResources());
         rscs.add(new Resource(arn));
         rscs.add(new Resource(arn + "*"));
