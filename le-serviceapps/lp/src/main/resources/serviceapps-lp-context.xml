@@ -15,6 +15,7 @@
 
     <context:component-scan base-package="com.latticeengines.apps.lp">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.lp.controller.*" />
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.lp.qbean.*" />
     </context:component-scan>
 
     <bean name="modelSummaryParser" class="com.latticeengines.domain.exposed.pls.ModelSummaryParser">

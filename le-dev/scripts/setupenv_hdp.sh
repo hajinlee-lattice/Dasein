@@ -8,7 +8,8 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     bash $WSHOME/le-dev/scripts/stop-cluster.sh || true
 
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
-    HDP_VERSION="2.7.1.2.4.3.0-227"
+    # HDP_VERSION="2.7.1.2.4.3.0-227"
+    HDP_VERSION=2.8.5
 
     sudo rm -rf ${HADOOP_HOME} || true
     sudo mkdir -p ${HADOOP_HOME}
@@ -43,7 +44,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo mkdir -p /opt/java
     sudo rm -f /opt/java/default || true
     sudo ln -s $JAVA_HOME /opt/java/default
-	
+
 fi
 
 UNAME=`uname`
@@ -67,7 +68,7 @@ sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|"
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     hdfs namenode -format
-    
+
     echo "Bootstrapping sqoop ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
     SQOOP_VERSION="1.4.6.2.4.3.0-227"

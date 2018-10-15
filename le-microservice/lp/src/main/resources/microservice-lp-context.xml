@@ -18,7 +18,11 @@
     <import resource="classpath:microservice-context.xml"/>
     <import resource="classpath:serviceapps-lp-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
-    <context:component-scan base-package="com.latticeengines.apps.core.controller, com.latticeengines.apps.lp.controller, com.latticeengines.microservice.lp" />
+    <context:component-scan base-package="
+        com.latticeengines.apps.core.controller,
+        com.latticeengines.apps.lp.controller,
+        com.latticeengines.apps.lp.qbean,
+        com.latticeengines.microservice.lp" />
 
     <bean id="lpHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="lp" />

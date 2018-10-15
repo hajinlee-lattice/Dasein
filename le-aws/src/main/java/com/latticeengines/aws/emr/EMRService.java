@@ -1,5 +1,7 @@
 package com.latticeengines.aws.emr;
 
+import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
+
 public interface EMRService {
 
     String getMasterIp();
@@ -9,5 +11,9 @@ public interface EMRService {
     String getWebHdfsUrl();
 
     String getSqoopHostPort();
+
+    InstanceGroup getTaskGroup(String clusterName);
+
+    void scaleTaskGroup(String clusterName, int targetCount);
 
 }
