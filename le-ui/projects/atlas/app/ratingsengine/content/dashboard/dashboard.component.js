@@ -220,6 +220,7 @@ angular.module('lp.ratingsengine.dashboard', [
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
             if (vm.dashboard.dependencies[type]) {
                 vm.dashboard.dependencies[type].forEach(function(name) {
+                    type = type == 'Play' ? 'Campaign' : type;
                     vm.relatedItems.push({
                         type: type,
                         name: name
