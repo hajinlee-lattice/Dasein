@@ -135,6 +135,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         MetadataSegment segment = new MetadataSegment();
         segment.setDisplayName(SEGMENT_NAME);
         play.setDisplayName(PLAY_DISPLAY_NAME);
+        play.setTargetSegment(testRatingEngine.getSegment());
         play.setRatingEngine(testRatingEngine);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
