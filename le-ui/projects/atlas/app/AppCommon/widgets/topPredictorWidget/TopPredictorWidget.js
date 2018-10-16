@@ -17,7 +17,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.ResourceUtility = ResourceUtility;
     var chartData = data.ChartData;
 
-    console.log(chartData);
+    // console.log(chartData);
 
     if (chartData && chartData.children) {
         // THIS IS PART OF THE UI BAND-AID TO COMBINE INTERNAL, EXTERNAL CATEGORIES WITH SAME NAME
@@ -26,7 +26,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 chartData.children.splice(i, 1);
             }
         }
-
         $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     }
 
@@ -39,31 +38,24 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.internalCategories = internalCategoryObj.categories;
         $scope.showInternalCategories = internalCategoryObj.total > 0;
 
-        console.log($scope.internalCategories);
         for (var i = 0; i < $scope.internalCategories.length; i++) {
             if ($scope.internalCategories[i].name == 'My Attributes') {
-                console.log("My Attributes");
 
                 $scope.hasAccountAttributes = false;
                 $scope.internalCategories[i].color = '#457DB9';
                 
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'My Attributes' });
-
-                console.log(myAttributesCategory);
                 if (myAttributesCategory) {
                     setAttributeColor(myAttributesCategory, '#457DB9');
                 }
             }
             if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
-                console.log("Account Attributes");
-
                 $scope.hasAccountAttributes = true;
                 
                 $scope.internalCategories[i].name = 'My Attributes';
                 $scope.internalCategories[i].color = '#457DB9';
                 
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
-                console.log(myAttributesCategory);
                 if (myAttributesCategory) {
                     setAttributeColor(myAttributesCategory, '#457DB9');
                 }
