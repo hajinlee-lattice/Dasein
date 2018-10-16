@@ -16,11 +16,11 @@ BOOTSTRAP_MODE=$1
 pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
 echo "REVIEWBOARD_URL='http://bodcdevvrvw65.lattice.local/rb'" > ~/.reviewboardrc
 
-bash $WSHOME/le-dev/scripts/setupenv_aws.sh || true
-bash $WSHOME/le-dev/scripts/setupenv_hdp.sh $BOOTSTRAP_MODE || true
-bash $WSHOME/le-dev/scripts/setupenv_tomcat.sh $BOOTSTRAP_MODE || true
-bash $WSHOME/le-dev/scripts/setupenv_dynamo.sh $BOOTSTRAP_MODE || true
-bash $WSHOME/le-dev/scripts/setupenv_anaconda.sh $BOOTSTRAP_MODE || true
+bash $WSHOME/le-dev/scripts/setupenv_anaconda.sh $BOOTSTRAP_MODE && \
+bash $WSHOME/le-dev/scripts/setupenv_aws.sh && \
+bash $WSHOME/le-dev/scripts/setupenv_tomcat.sh $BOOTSTRAP_MODE && \
+bash $WSHOME/le-dev/scripts/setupenv_hdp.sh $BOOTSTRAP_MODE && \
+bash $WSHOME/le-dev/scripts/setupenv_dynamo.sh $BOOTSTRAP_MODE
 
 bash $WSHOME/le-dev/scripts/start-cluster.sh || true
 

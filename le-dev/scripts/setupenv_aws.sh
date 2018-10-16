@@ -17,24 +17,13 @@ if [ `which pip3` != "" ]; then
 fi
 
 AWS_HOME="${HOME}/.aws"
-if [ ! -d "${AWS_HOME}" ]; then
-    mkdir -p ${AWS_HOME}
+if [ ! -f "${AWS_HOME}/config" ]; then
+    mkdir -p ${AWS_HOME} || true
+    echo '[default]' > ${AWS_HOME}/config
+    echo "aws_access_key_id=${AWS_KEY}" >> ${AWS_HOME}/config
+    echo "aws_secret_access_key=${AWS_SECRET}" >> ${AWS_HOME}/config
+    echo "region=us-east-1" >> ${AWS_HOME}/config
+    echo "output=json" >> ${AWS_HOME}/config
 fi
-
-if [ -f "${AWS_HOME}/config" ]; then
-    rm -rf ${AWS_HOME}/config
-fi
-
-if [ -f "${AWS_HOME}/config-qa" ]; then
-    rm -rf ${AWS_HOME}/config-qa
-fi
-
-echo '[default]' > ${AWS_HOME}/config-qa
-echo "aws_access_key_id=${AWS_KEY}" >> ${AWS_HOME}/config-qa
-echo "aws_secret_access_key=${AWS_SECRET}" >> ${AWS_HOME}/config-qa
-echo "region=us-east-1" >> ${AWS_HOME}/config-qa
-echo "output=json" >> ${AWS_HOME}/config-qa
-
-ln -s ${AWS_HOME}/config-qa ${AWS_HOME}/config
 
 aws --version
