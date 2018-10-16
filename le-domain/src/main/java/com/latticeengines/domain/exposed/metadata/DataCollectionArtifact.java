@@ -1,0 +1,151 @@
+package com.latticeengines.domain.exposed.metadata;
+
+import java.io.Serializable;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Filters;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
+
+@Entity
+@Table(name = "METADATA_DATA_COLLECTION_ARTIFACT")
+@Filters(value = {
+        @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId") })
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@TypeDefs(value = {
+        @TypeDef(name = "json", typeClass = JsonStringType.class),
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
+public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
+    private static final long serialVersionUID = 3886398415278083037L;
+    public static final String NOT_SET = "not set";
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @Column(name = "CREATE_TIME", nullable = false)
+    private Long createTime;
+
+    @Column(name = "NAME")
+    private String name;
+
+    @Column(name = "URL")
+    private String url;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "VERSION", nullable = false)
+    private DataCollection.Version version;
+
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private DataCollection dataCollection;
+
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Tenant tenant;
+
+    @Override
+    @JsonIgnore
+    public Long getPid() {
+        return pid;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    @Override
+    @JsonIgnore
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    @JsonIgnore
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    @JsonIgnore
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    @JsonProperty("ArtifactName")
+    public String getName() {
+        return name;
+    }
+
+    @JsonProperty("ArtifactName")
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @JsonProperty("ArtifactURL")
+    public String getUrl() {
+        return url;
+    }
+
+    @JsonProperty("ArtifactURL")
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    @JsonIgnore
+    public DataCollection.Version getVersion() {
+        return version;
+    }
+
+    @JsonIgnore
+    public void setVersion(DataCollection.Version version) {
+        this.version = version;
+    }
+
+    @JsonIgnore
+    public DataCollection getDataCollection() {
+        return dataCollection;
+    }
+
+    @JsonIgnore
+    public void setDataCollection(DataCollection dataCollection) {
+        this.dataCollection = dataCollection;
+    }
+}

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -61,4 +62,11 @@ public interface DataCollectionService {
 
     Map<TableRoleInCollection, Map<DataCollection.Version, List<Table>>> getTableRoleMap(String customerSpace, String collectionName);
 
+    List<DataCollectionArtifact> getArtifacts(String customerSpace, DataCollection.Version version);
+
+    DataCollectionArtifact getArtifact(String customerSpace, String name, DataCollection.Version version);
+
+    DataCollectionArtifact createArtifact(String customerSpace, String name, String url, DataCollection.Version version);
+
+    DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version);
 }

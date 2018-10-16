@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -252,7 +253,7 @@ public class DataCollectionResource {
     public ResponseDocument<String> reset(@PathVariable String customerSpace,
                                           @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         String customerSpaceString = CustomerSpace.parse(customerSpace).toString();
-        Boolean status;
+        boolean status;
         if (entity == null) {
             status = collectionMgrSvc.resetAll(customerSpaceString);
         } else {
@@ -287,5 +288,33 @@ public class DataCollectionResource {
     public CDLDataSpace getCDLDataSpace(@PathVariable String customerSpace){
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.createCDLDataSpace(customerSpace);
+    }
+
+    @GetMapping(value = "/artifact")
+    public List<DataCollectionArtifact> getArtifacts(@PathVariable String customerSpace,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.getArtifacts(customerSpace, version);
+    }
+
+    @GetMapping(value = "/artifact/{name}")
+    public DataCollectionArtifact getArtifact(@PathVariable String customerSpace, @PathVariable String name,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.getArtifact(customerSpace, name, version);
+    }
+
+    @PostMapping(value = "/artifact/version/{version}")
+    public DataCollectionArtifact createArtifact(@PathVariable String customerSpace,
+            @PathVariable DataCollection.Version version, @RequestBody DataCollectionArtifact artifact) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.createArtifact(customerSpace, artifact.getName(), artifact.getUrl(), version);
+    }
+
+    @DeleteMapping(value = "/artifact/{name}")
+    public DataCollectionArtifact deleteArtifact(@PathVariable String customerSpace, @PathVariable String name,
+            @RequestParam(value = "version") DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.deleteArtifact(customerSpace, name, version);
     }
 }

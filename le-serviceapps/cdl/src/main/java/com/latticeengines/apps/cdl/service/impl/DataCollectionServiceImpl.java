@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionArtifactEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.cdl.CDLDataSpace.TableSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -59,6 +61,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
+
+    @Inject
+    private DataCollectionArtifactEntityMgr dataCollectionArtifactEntityMgr;
 
     @Inject
     private TableEntityMgr tableEntityMgr;
@@ -468,7 +473,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (BusinessEntity entity : BusinessEntity.values()) {
             Map<BusinessEntity.DataStore, List<TableSpace>> dataStoreMap = new HashMap<>();
             for (BusinessEntity.DataStore dataStore:BusinessEntity.DataStore.values()) {
-                List<TableSpace> tableSpaceList = new ArrayList<TableSpace>();
+                List<TableSpace> tableSpaceList = new ArrayList<>();
                 for (DataCollection.Version version:DataCollection.Version.values()) {
                     TableRoleInCollection tableRole = getTableRoleFromStore(entity,dataStore);
                     tableRolesWithEntity.add(tableRole);
@@ -500,7 +505,61 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         return cdlDataSpace;
     }
-    private TableRoleInCollection getTableRoleFromStore(BusinessEntity entity,BusinessEntity.DataStore dataStore) {
+
+    @Override
+    public List<DataCollectionArtifact> getArtifacts(String customerSpace, Version version) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (version == null) {
+            version = dataCollectionEntityMgr.findActiveVersion();
+        }
+
+        return dataCollectionArtifactEntityMgr.findByTenantAndVersion(tenant, version);
+    }
+
+    @Override
+    public DataCollectionArtifact getArtifact(String customerSpace, String name, Version version) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (version == null) {
+            version = dataCollectionEntityMgr.findActiveVersion();
+        }
+
+        return dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(tenant, name, version);
+    }
+
+    @Override
+    public DataCollectionArtifact createArtifact(String customerSpace, String name, String url,
+                                                 DataCollection.Version version) {
+        if (version == null) {
+            throw new UnsupportedOperationException("Data collection version cannot be null.");
+        }
+
+        Tenant tenant = MultiTenantContext.getTenant();
+        DataCollectionArtifact artifact = new DataCollectionArtifact();
+        artifact.setName(name);
+        artifact.setUrl(url);
+        artifact.setTenant(tenant);
+        artifact.setDataCollection(getDefaultCollection(customerSpace));
+        artifact.setVersion(version);
+        artifact.setCreateTime(System.currentTimeMillis());
+        dataCollectionArtifactEntityMgr.create(artifact);
+        return artifact;
+    }
+
+    @Override
+    public DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version) {
+        if (version == null) {
+            throw new UnsupportedOperationException("Data collection version cannot be null.");
+        }
+
+        Tenant tenant = MultiTenantContext.getTenant();
+        DataCollectionArtifact artifact = dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(
+                tenant, name, version);
+        log.info(String.format("Removing artifact %s at version %s in collection.", name, version));
+        dataCollectionArtifactEntityMgr.delete(artifact);
+        return artifact;
+    }
+
+    private TableRoleInCollection getTableRoleFromStore(BusinessEntity entity, BusinessEntity.DataStore dataStore) {
         switch(dataStore) {
         case Batch:
             if(entity.getBatchStore() != null) {
@@ -518,7 +577,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return null;
     }
 
-    private TableSpace createTableSpace(List<String> tableNames,List<Table> tables,BusinessEntity.DataStore dataStore,DataCollection.Version version){
+    private TableSpace createTableSpace(List<String> tableNames, List<Table> tables,
+                                        BusinessEntity.DataStore dataStore, DataCollection.Version version){
         TableSpace tableSpace = new TableSpace();
         List<String> hdfsPaths = new ArrayList<>();
         if (dataStore == null) {
@@ -550,7 +610,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return tableSpace;
     }
 
-    private Map<String, List<TableSpace>> getOtherTableRoles(Set<TableRoleInCollection> tableRolesWithEntity,Map<TableRoleInCollection, Map<Version, List<Table>>> tableRoleNames){
+    private Map<String, List<TableSpace>> getOtherTableRoles(Set<TableRoleInCollection> tableRolesWithEntity,
+                                                             Map<TableRoleInCollection, Map<Version, List<Table>>> tableRoleNames){
         Map<String, List<TableSpace>> others = new HashMap<>();
         for (TableRoleInCollection tableRole:TableRoleInCollection.values()) {
             if (!tableRolesWithEntity.contains(tableRole)) {
