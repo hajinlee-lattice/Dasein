@@ -46,6 +46,12 @@ public class MatchKeyTuple implements Fact {
     @JsonIgnore
     private String serializedFormat;
 
+    @JsonIgnore
+    private String uniqueIdForKey;
+
+    @JsonIgnore
+    private String uniqueIdForValue;
+
     @MetricField(name = MatchConstants.DOMAIN_FIELD)
     public String getDomain() {
         return domain;
@@ -53,7 +59,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setDomain(String domain) {
         this.domain = domain;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.NAME_FIELD)
@@ -63,7 +69,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setName(String name) {
         this.name = name;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.CITY_FIELD)
@@ -73,7 +79,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setCity(String city) {
         this.city = city;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.STATE_FIELD)
@@ -83,7 +89,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setState(String state) {
         this.state = state;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.COUNTRY_FIELD)
@@ -93,7 +99,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setCountry(String country) {
         this.country = country;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = "CountryCode")
@@ -103,7 +109,8 @@ public class MatchKeyTuple implements Fact {
 
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
-        constructSerializedFormat();
+        // NOTE not actually required, just keep consistent in case unique ID implementation changed
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.ZIPCODE_FIELD)
@@ -113,7 +120,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.PHONE_NUM_FIELD)
@@ -123,7 +130,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.DUNS_FIELD)
@@ -133,7 +140,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setDuns(String duns) {
         this.duns = duns;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     @MetricField(name = MatchConstants.EMAIL_FIELD)
@@ -143,7 +150,7 @@ public class MatchKeyTuple implements Fact {
 
     public void setEmail(String email) {
         this.email = email;
-        constructSerializedFormat();
+        refreshCachedStrings();
     }
 
     public boolean hasDomain() {
@@ -177,6 +184,32 @@ public class MatchKeyTuple implements Fact {
     @Override
     public String toString() {
         return serializedFormat;
+    }
+
+    /**
+     * Return a unique string to represent the combination of {@link MatchKey}s of this tuple
+     *
+     * Note that {@link MatchKeyTuple#getCountryCode()} is not evaluated and should be in sync with country
+     * @return generated unique string
+     */
+    public String buildIdForKey() {
+        return uniqueIdForKey;
+    }
+
+    /**
+     * Return a unique string to represent the {@link MatchKey} and value pairs of this tuple
+     * Note that {@link MatchKeyTuple#getCountryCode()} is not evaluated and should be in sync with country
+     *
+     * @return generated unique string
+     */
+    public String buildIdForValue() {
+        return uniqueIdForValue;
+    }
+
+    private void refreshCachedStrings() {
+        constructSerializedFormat();
+        constructIdForKey();
+        constructIdForValue();
     }
 
     private void constructSerializedFormat() {
@@ -213,5 +246,180 @@ public class MatchKeyTuple implements Fact {
         }
         sb.append(")");
         serializedFormat = sb.toString();
+    }
+
+    /*
+     * refresh the cached unique ID that represents non-empty match key combination in this tuple
+     */
+    private void constructIdForKey() {
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotEmpty(duns)) {
+            appendKey(sb, MatchKey.DUNS.name());
+        }
+        if (StringUtils.isNotEmpty(domain)) {
+            appendKey(sb, MatchKey.Domain.name());
+        }
+        if (StringUtils.isNotEmpty(name)) {
+            appendKey(sb, MatchKey.Name.name());
+        }
+        if (StringUtils.isNotEmpty(city)) {
+            appendKey(sb, MatchKey.City.name());
+        }
+        if (StringUtils.isNotEmpty(state)) {
+            appendKey(sb, MatchKey.State.name());
+        }
+        if (StringUtils.isNotEmpty(zipcode)) {
+            appendKey(sb, MatchKey.Zipcode.name());
+        }
+        if (StringUtils.isNotEmpty(country)) {
+            appendKey(sb, MatchKey.Country.name());
+        }
+        // NOTE no country code
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            appendKey(sb, MatchKey.PhoneNumber.name());
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            appendKey(sb, MatchKey.Email.name());
+        }
+        uniqueIdForKey = sb.toString();
+    }
+
+    /*
+     * refresh the cached unique ID that represents non-empty match key/value pairs in this tuple
+     */
+    private void constructIdForValue() {
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotEmpty(duns)) {
+            appendKeyValue(sb, MatchKey.DUNS.name(), duns);
+        }
+        if (StringUtils.isNotEmpty(domain)) {
+            appendKeyValue(sb, MatchKey.Domain.name(), domain);
+        }
+        if (StringUtils.isNotEmpty(name)) {
+            appendKeyValue(sb, MatchKey.Name.name(), name);
+        }
+        if (StringUtils.isNotEmpty(city)) {
+            appendKeyValue(sb, MatchKey.City.name(), city);
+        }
+        if (StringUtils.isNotEmpty(state)) {
+            appendKeyValue(sb, MatchKey.State.name(), state);
+        }
+        if (StringUtils.isNotEmpty(zipcode)) {
+            appendKeyValue(sb, MatchKey.Zipcode.name(), zipcode);
+        }
+        if (StringUtils.isNotEmpty(country)) {
+            appendKeyValue(sb, MatchKey.Country.name(), country);
+        }
+        // NOTE no country code
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            appendKeyValue(sb, MatchKey.PhoneNumber.name(), phoneNumber);
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            appendKeyValue(sb, MatchKey.Email.name(), email);
+        }
+        uniqueIdForValue = sb.toString();
+    }
+
+    private void appendKey(StringBuilder sb, String key) {
+        if (sb.length() > 0) {
+            sb.append(",");
+        }
+        sb.append(key);
+    }
+
+    private void appendKeyValue(StringBuilder sb, String key, String value) {
+        if (sb.length() > 0) {
+            sb.append(",");
+        }
+        sb.append(String.format("%s=%s", key, value));
+    }
+
+
+    /*
+     * generated builder
+     */
+    public static final class Builder {
+        private String domain;
+        private String name;
+        private String city;
+        private String state;
+        private String country;
+        private String countryCode;
+        private String zipcode;
+        private String phoneNumber;
+        private String duns;
+        private String email;
+
+        private Builder() {
+        }
+
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+
+        public Builder withDomain(String domain) {
+            this.domain = domain;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withCity(String city) {
+            this.city = city;
+            return this;
+        }
+
+        public Builder withState(String state) {
+            this.state = state;
+            return this;
+        }
+
+        public Builder withCountry(String country) {
+            this.country = country;
+            return this;
+        }
+
+        public Builder withCountryCode(String countryCode) {
+            this.countryCode = countryCode;
+            return this;
+        }
+
+        public Builder withZipcode(String zipcode) {
+            this.zipcode = zipcode;
+            return this;
+        }
+
+        public Builder withPhoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+            return this;
+        }
+
+        public Builder withDuns(String duns) {
+            this.duns = duns;
+            return this;
+        }
+
+        public Builder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public MatchKeyTuple build() {
+            MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
+            matchKeyTuple.setDomain(domain);
+            matchKeyTuple.setName(name);
+            matchKeyTuple.setCity(city);
+            matchKeyTuple.setState(state);
+            matchKeyTuple.setCountry(country);
+            matchKeyTuple.setCountryCode(countryCode);
+            matchKeyTuple.setZipcode(zipcode);
+            matchKeyTuple.setPhoneNumber(phoneNumber);
+            matchKeyTuple.setDuns(duns);
+            matchKeyTuple.setEmail(email);
+            return matchKeyTuple;
+        }
     }
 }
