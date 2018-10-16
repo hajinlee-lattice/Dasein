@@ -71,6 +71,27 @@ sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|"
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     hdfs namenode -format
 
+    bash $WSHOME/le-dev/scripts/start-cluster.sh || true
+    hdfs dfsadmin -safemode leave
+    if [ "${BOOTSTRAP_MODE}" = "true" ]; then
+        for app in 'dataplatform' 'sqoop' 'eai' 'dataflow' 'dataflowapi' 'datacloud' 'workflowapi' 'scoring' 'dellebi'
+        do
+            hdfs dfs -mkdir -p /app/${app} || true &
+        done
+        wait
+    fi
+
+    echo "Uploading TEZ ..."
+    TEZ_VERSION=0.9.0
+    if [ ! -f "$ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz" ]; then
+        wget --trust-server-names "https://s3.amazonaws.com/latticeengines-dev/artifacts/tez/${TEZ_VERSION}/tez-${TEZ_VERSION}.tar.gz" \
+            -O $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz
+    fi
+    hdfs dfs -mkdir -p /apps/tez || true
+    hdfs dfs -put -f $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz /apps/tez/tez-${TEZ_VERSION}.tar.gz
+
+    bash $WSHOME/le-dev/scripts/stop-cluster.sh || true
+
     echo "Bootstrapping sqoop ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
     SQOOP_VERSION="1.4.6.2.4.3.0-227"
