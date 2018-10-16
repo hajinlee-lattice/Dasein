@@ -17,7 +17,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     if [ ! -f "${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz" ]; then
         aws s3api get-object \
             --bucket latticeengines-dev \
-            --object "artifacts/hadoop/common/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}.tar.gz" \
+            --key "artifacts/hadoop/common/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}.tar.gz" \
             ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz
     fi
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION} || true
