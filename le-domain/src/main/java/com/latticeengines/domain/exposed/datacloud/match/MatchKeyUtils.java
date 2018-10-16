@@ -26,7 +26,9 @@ public class MatchKeyUtils {
             Arrays.asList("domain", "website", "email", "url"));
     private static final String latticeAccountId = "latticeaccountid";
 
-    // Map MatchKey to field names in AccountMaster
+    /**
+     * Map MatchKey to field names in AccountMaster
+     */
     public static final Map<MatchKey, String> AM_FIELD_MAP = ImmutableMap.<MatchKey, String> builder() //
             .put(MatchKey.LatticeAccountID, DataCloudConstants.LATTIC_ID) //
             .put(MatchKey.DUNS, DataCloudConstants.ATTR_LDC_DUNS) //
@@ -37,8 +39,10 @@ public class MatchKeyUtils {
             .put(MatchKey.City, DataCloudConstants.ATTR_CITY) //
             .build();
 
-    // Map MatchKey to field names in AccountMasterSeed (before adding LDC_
-    // prefix)
+    /**
+     * Map MatchKey to field names in AccountMasterSeed (before adding LDC_
+     * prefix)
+     */
     public static final Map<MatchKey, String> AMS_FIELD_MAP = ImmutableMap.<MatchKey, String> builder() //
             .put(MatchKey.LatticeAccountID, DataCloudConstants.LATTIC_ID) //
             .put(MatchKey.DUNS, DataCloudConstants.AMS_ATTR_DUNS) //
