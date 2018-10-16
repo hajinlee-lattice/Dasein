@@ -83,9 +83,9 @@ angular.module('lp.import')
                     // });
                 }
             },{ 
-                label: 'Import File', 
+                label: 'Save Template', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
-                nextLabel: 'Submit', 
+                nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -99,13 +99,20 @@ angular.module('lp.import')
                 label: 'Contact IDs', 
                 state: 'contacts.ids',
                 backState: 'home.segment.explorer.attributes',
-                nextLabel: 'Next, Map to Lattice Fields', 
+                nextLabel: 'Next, Provide CRM/MAP IDs', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                } 
+            },{ 
+                label: 'Other IDs', 
+                state: 'contacts.ids.thirdpartyids', 
+                nextLabel: 'Next, Map to Lattice Fields',
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'contacts.ids.latticefields', 
+                state: 'contacts.ids.thirdpartyids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
                     // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
@@ -113,7 +120,7 @@ angular.module('lp.import')
                 } 
             },{ 
                 label: 'Custom Fields', 
-                state: 'contacts.ids.latticefields.customfields', 
+                state: 'contacts.ids.thirdpartyids.latticefields.customfields', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
@@ -125,9 +132,9 @@ angular.module('lp.import')
                     // });
                 }
             },{ 
-                label: 'Import File', 
-                state: 'contacts.ids.latticefields.customfields.jobstatus', 
-                nextLabel: 'Submit', 
+                label: 'Save Template', 
+                state: 'contacts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
+                nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -155,9 +162,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import File', 
+                label: 'Save Template', 
                 state: 'product_purchases.ids.latticefields.jobstatus', 
-                nextLabel: 'Submit', 
+                nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -184,9 +191,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import File', 
+                label: 'Save Template', 
                 state: 'product_bundles.ids.latticefields.jobstatus', 
-                nextLabel: 'Submit', 
+                nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(){
@@ -214,9 +221,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import File', 
+                label: 'Save Template', 
                 state: 'product_hierarchy.ids.product_hierarchy.jobstatus', 
-                nextLabel: 'Submit', 
+                nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(){

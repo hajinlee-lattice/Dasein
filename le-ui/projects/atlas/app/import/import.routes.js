@@ -383,7 +383,28 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.latticefields', {
+        .state('home.import.data.contacts.ids.thirdpartyids', {
+            url: '/thirdpartyids',
+            resolve: {
+                Identifiers: function() {
+                    return [
+                        { name: 'CRM ID', value: '' },
+                        { name: 'MAP ID', value: '' }
+                    ];
+                },
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
+                }
+            },
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardThirdPartyIDs',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/thirdpartyids/thirdpartyids.component.html'
+                }
+            }
+        })
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields', {
             url: '/latticefields',
             onExit: function($transition$, ImportWizardStore){
                 ImportWizardStore.setIgnore([]);
@@ -442,7 +463,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.latticefields.customfields', {
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.customfields', {
             url: '/customfields',
             onExit: function($transition$, ImportWizardStore){
                 ImportWizardStore.setIgnore([]);
@@ -465,7 +486,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.latticefields.customfields.jobstatus', {
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
