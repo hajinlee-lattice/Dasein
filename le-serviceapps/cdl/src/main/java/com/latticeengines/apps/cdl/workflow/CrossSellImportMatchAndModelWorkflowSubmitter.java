@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -19,7 +20,6 @@ import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -67,7 +67,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
     private RatingEngineType ratingEngineType = RatingEngineType.CROSS_SELL;
 
     public CrossSellImportMatchAndModelWorkflowConfiguration generateConfiguration(
-            RatingEngineModelingParameters parameters) {
+            CrossSellModelingParameters parameters) {
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "CrossSellImportMatchAndModelWorkflow");
@@ -155,7 +155,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
         return builder.build();
     }
 
-    private String getTableName(RatingEngineModelingParameters parameters) {
+    private String getTableName(CrossSellModelingParameters parameters) {
         String tableName = parameters.getTableName();
         if (StringUtils.isNotEmpty(tableName)) {
             return tableName;
@@ -163,7 +163,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
         return "RatingEngineModel_" + System.currentTimeMillis();
     }
 
-    private String getTrainPath(RatingEngineModelingParameters parameters) {
+    private String getTrainPath(CrossSellModelingParameters parameters) {
         String outputFileName = "file_" + getTableName(parameters) + ".csv";
         return PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), getCustomerSpace()).toString() + "/"
                 + outputFileName;
@@ -180,7 +180,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
         return null;
     }
 
-    public ApplicationId submit(RatingEngineModelingParameters parameters) {
+    public ApplicationId submit(CrossSellModelingParameters parameters) {
         TransformationGroup transformationGroup = TransformationGroup.NONE; // TODO:
                                                                             // plsFeatureFlagService.getTransformationGroupFromZK();
         if (parameters.getTransformationGroup() == null) {

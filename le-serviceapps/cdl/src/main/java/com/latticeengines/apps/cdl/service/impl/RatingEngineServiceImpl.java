@@ -48,13 +48,12 @@ import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.documentdb.entity.AttrConfigEntity;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
-import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -652,64 +651,68 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         case CROSS_SELL:
             modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
             DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
-            RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
-            parameters.setName(aiModel.getId());
-            parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
-            parameters.setDescription(ratingEngine.getDisplayName());
-            parameters.setModuleName("Module");
-            parameters.setUserId(userEmail);
-            parameters.setRatingEngineId(ratingEngine.getId());
-            parameters.setAiModelId(aiModel.getId());
-            parameters.setTargetFilterQuery(
+            CrossSellModelingParameters crossSellModelingParameters = new CrossSellModelingParameters();
+            crossSellModelingParameters.setName(aiModel.getId());
+            crossSellModelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+            crossSellModelingParameters.setDescription(ratingEngine.getDisplayName());
+            crossSellModelingParameters.setModuleName("Module");
+            crossSellModelingParameters.setUserId(userEmail);
+            crossSellModelingParameters.setRatingEngineId(ratingEngine.getId());
+            crossSellModelingParameters.setAiModelId(aiModel.getId());
+            crossSellModelingParameters.setTargetFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET, activeVersion));
-            parameters.setTargetFilterTableName(aiModel.getId() + "_target");
-            parameters.setTrainFilterQuery(
+            crossSellModelingParameters.setTargetFilterTableName(aiModel.getId() + "_target");
+            crossSellModelingParameters.setTrainFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING, activeVersion));
-            parameters.setTrainFilterTableName(aiModel.getId() + "_train");
-            parameters.setEventFilterQuery(
+            crossSellModelingParameters.setTrainFilterTableName(aiModel.getId() + "_train");
+            crossSellModelingParameters.setEventFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
-            parameters.setEventFilterTableName(aiModel.getId() + "_event");
-            parameters.setUserRefinedAttributes(userRefinedAttributes);
-            parameters.setModelIteration(aiModel.getIteration());
+            crossSellModelingParameters.setEventFilterTableName(aiModel.getId() + "_event");
+            crossSellModelingParameters.setUserRefinedAttributes(userRefinedAttributes);
+            crossSellModelingParameters.setModelIteration(aiModel.getIteration());
+            crossSellModelingParameters.setDataCloudVersion(aiModel.getAdvancedModelingConfig().getDataCloudVersion());
 
             if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
-                parameters.setExpectedValue(true);
+                crossSellModelingParameters.setExpectedValue(true);
             }
 
-            log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
-            jobId = crossSellImportMatchAndModelWorkflowSubmitter.submit(parameters);
+            log.info(String.format("Cross-sell modelling job submitted with crossSellModelingParameters %s",
+                    crossSellModelingParameters.toString()));
+            jobId = crossSellImportMatchAndModelWorkflowSubmitter.submit(crossSellModelingParameters);
             break;
         case CUSTOM_EVENT:
             CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
-            ModelingParameters modelingParameters = new ModelingParameters();
-            modelingParameters.setName(aiModel.getId());
-            modelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
-            modelingParameters.setDescription(ratingEngine.getDisplayName());
-            modelingParameters.setModuleName("Module");
-            modelingParameters.setUserId(userEmail);
-            modelingParameters.setRatingEngineId(ratingEngine.getId());
-            modelingParameters.setAiModelId(aiModel.getId());
-            modelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
-            modelingParameters.setFilename(config.getSourceFileName());
-            modelingParameters.setActivateModelSummaryByDefault(true);
-            modelingParameters.setDeduplicationType(config.getDeduplicationType());
-            modelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
-            modelingParameters.setTransformationGroup(config.getConvertedTransformationGroup());
-            modelingParameters.setExcludePropDataColumns(
+            ModelingParameters customEventModelingParameters = new ModelingParameters();
+            customEventModelingParameters.setName(aiModel.getId());
+            customEventModelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+            customEventModelingParameters.setDescription(ratingEngine.getDisplayName());
+            customEventModelingParameters.setModuleName("Module");
+            customEventModelingParameters.setUserId(userEmail);
+            customEventModelingParameters.setRatingEngineId(ratingEngine.getId());
+            customEventModelingParameters.setAiModelId(aiModel.getId());
+            customEventModelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
+            customEventModelingParameters.setFilename(config.getSourceFileName());
+            customEventModelingParameters.setActivateModelSummaryByDefault(true);
+            customEventModelingParameters.setDeduplicationType(config.getDeduplicationType());
+            customEventModelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
+            customEventModelingParameters.setTransformationGroup(config.getConvertedTransformationGroup());
+            customEventModelingParameters.setExcludePropDataColumns(
                     !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
-            modelingParameters
+            customEventModelingParameters
                     .setExcludeCDLAttributes(!config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
-            modelingParameters.setExcludeCustomFileAttributes(
+            customEventModelingParameters.setExcludeCustomFileAttributes(
                     !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
-            modelingParameters.setUserRefinedAttributes(userRefinedAttributes);
-            modelingParameters.setModelIteration(aiModel.getIteration());
+            customEventModelingParameters.setUserRefinedAttributes(userRefinedAttributes);
+            customEventModelingParameters.setModelIteration(aiModel.getIteration());
+            customEventModelingParameters
+                    .setDataCloudVersion(aiModel.getAdvancedModelingConfig().getDataCloudVersion());
 
             modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
-            log.debug(String.format("Custom event modelling job submitted with parameters %s",
-                    modelingParameters.toString()));
+            log.debug(String.format("Custom event modelling job submitted with crossSellModelingParameters %s",
+                    customEventModelingParameters.toString()));
             jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
-                    modelingParameters);
+                    customEventModelingParameters);
             break;
         default:
             throw new LedpException(LedpCode.LEDP_31107,

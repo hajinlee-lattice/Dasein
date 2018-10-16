@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
-public class RatingEngineModelingParameters extends ModelingParameters {
+public class CrossSellModelingParameters extends ModelingParameters {
 
     @JsonProperty
     private EventFrontEndQuery trainFilterQuery;

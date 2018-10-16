@@ -18,7 +18,7 @@ import com.latticeengines.apps.cdl.service.CdlModelMetadataService;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
-import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.lp.ModelMetadataProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -81,9 +81,9 @@ public class ModelResource {
 
     @RequestMapping(value = "/rating/{modelName}", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Kick off a modeling job given the RatingEngineModelingParameters")
+    @ApiOperation(value = "Kick off a modeling job given the CrossSellModelingParameters")
     public String modelByParameters(@PathVariable String customerSpace, @PathVariable String modelName,
-            @RequestBody RatingEngineModelingParameters ratingEngineModelingParameters) {
+            @RequestBody CrossSellModelingParameters crossSellModelingParameters) {
         if (!NameValidationUtils.validateModelName(modelName)) {
             String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
@@ -91,7 +91,7 @@ public class ModelResource {
         }
         modelSummaryProxy.setDownloadFlag(customerSpace);
         log.debug(String.format("Rating Engine model endpoint called with parameters %s",
-                ratingEngineModelingParameters.toString()));
-        return crossSellImportMatchAndModelWorkflowSubmitter.submit(ratingEngineModelingParameters).toString();
+                crossSellModelingParameters.toString()));
+        return crossSellImportMatchAndModelWorkflowSubmitter.submit(crossSellModelingParameters).toString();
     }
 }

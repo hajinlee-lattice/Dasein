@@ -6,7 +6,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 
 @Service("plsModelProxy")
 public class PlsModelProxy extends PlsRestApiProxyBase {
@@ -15,7 +15,7 @@ public class PlsModelProxy extends PlsRestApiProxyBase {
         super("pls/models");
     }
 
-    public ApplicationId createRatingModel(RatingEngineModelingParameters parameters) {
+    public ApplicationId kickOffCrossSellModel(CrossSellModelingParameters parameters) {
         String url = constructUrl("/rating/{modelName}", parameters.getName());
         ResponseDocument<?> responseDoc = post("create rating model", url, parameters, ResponseDocument.class);
         if (responseDoc == null) {

@@ -28,6 +28,8 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
 
     private String transformationGroup;
 
+    private String dataCloudVersion;
+
     public CustomEventModelingType getCustomEventModelingType() {
         return customEventModelingType;
     }
@@ -93,6 +95,15 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         this.transformationGroup = transformationGroup;
     }
 
+    @Override
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+
     public enum DataStore {
         DataCloud, //
         CDL, //
@@ -110,6 +121,7 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         advancedConfInRetrievedAIModel.setDeduplicationType(advancedConfInAIModel.getDeduplicationType());
         advancedConfInRetrievedAIModel.setExcludePublicDomains(advancedConfInAIModel.isExcludePublicDomains());
         advancedConfInRetrievedAIModel.setTransformationGroup(advancedConfInAIModel.getTransformationGroup());
+        advancedConfInRetrievedAIModel.setDataCloudVersion(advancedConfInAIModel.getDataCloudVersion());
     }
 
     public static CustomEventModelingConfig getAdvancedModelingConfig(AIModel aiModel) {

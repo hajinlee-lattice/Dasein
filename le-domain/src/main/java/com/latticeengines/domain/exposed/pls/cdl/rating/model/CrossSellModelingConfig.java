@@ -24,6 +24,9 @@ public class CrossSellModelingConfig implements AdvancedModelingConfig {
     @JsonProperty("modelingStrategy")
     private ModelingStrategy modelingStrategy;
 
+    @JsonProperty("dataCloudVersion")
+    private String dataCloudVersion;
+
     @JsonProperty("filters")
     private Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters;
 
@@ -62,6 +65,11 @@ public class CrossSellModelingConfig implements AdvancedModelingConfig {
         this.filters = filters;
     }
 
+    @Override
+    public String getDataCloudVersion() { return dataCloudVersion; }
+
+    public void setDataCloudVersion(String dataCloudVersion) { this.dataCloudVersion = dataCloudVersion; }
+
     public static CrossSellModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
         if (aiModel.getAdvancedModelingConfig() == null) {
             aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
@@ -77,5 +85,6 @@ public class CrossSellModelingConfig implements AdvancedModelingConfig {
         advancedConfInRetrievedAIModel.setTargetProducts(advancedConfInAIModel.getTargetProducts());
         advancedConfInRetrievedAIModel.setTrainingProducts(advancedConfInAIModel.getTrainingProducts());
         advancedConfInRetrievedAIModel.setFilters(advancedConfInAIModel.getFilters());
+        advancedConfInRetrievedAIModel.setDataCloudVersion(advancedConfInAIModel.getDataCloudVersion());
     }
 }

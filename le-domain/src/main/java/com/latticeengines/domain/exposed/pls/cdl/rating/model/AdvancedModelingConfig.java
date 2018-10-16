@@ -17,4 +17,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 })
 public interface AdvancedModelingConfig {
     void copyConfig(AdvancedModelingConfig config);
+
+    String getDataCloudVersion();
 }
