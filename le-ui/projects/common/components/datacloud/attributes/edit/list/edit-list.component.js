@@ -4,7 +4,7 @@ angular.module('common.attributes.edit.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, $timeout, AttrConfigStore, AttrConfigService, DataCloudStore) {
+    controller: function ($state, $timeout, AttrConfigStore, AttrConfigService, DataCloudStore, Banner) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -16,6 +16,22 @@ angular.module('common.attributes.edit.list', [])
             vm.data = vm.store.get('data');
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
+
+            if (vm.isUser()) {
+                vm.showImmutable();
+            }
+        };
+
+        this.showImmutable = function() {
+            Banner.info({
+                title: "Immutable Data Notification",
+                message: "Your access level has placed certain restrictions on modifications in this section."
+            });
+        };
+
+        this.isUser = function() {
+            var access = ['INTERNAL_USER','LATTICE_USER','EXTERNAL_USER','USER'];
+            return access.indexOf(this.accesslevel) >= 0;
         };
         
         this.getResults = function() {
@@ -24,6 +40,14 @@ angular.module('common.attributes.edit.list', [])
 
         this.getPageSize = function() {
             return this.filters.pagesize;
+        };
+
+        this.isStartsDisabled = function(item) {
+            if (vm.isUser()) {
+                return true;
+            }
+
+            return false;
         };
 
         this.onBlur = function(item, name) {

@@ -54,7 +54,8 @@
                         class="form-control"
                         maxlength="63"
                         ng-model="item.DisplayName"
-                        ng-blur="$ctrl.onBlur(item, 'attrDisplayName_' + $index)">
+                        ng-blur="$ctrl.onBlur(item, 'attrDisplayName_' + $index)"
+                        ng-disabled="$ctrl.isStartsDisabled()">
                 </input>
             </div>
 
@@ -64,7 +65,8 @@
                         id="attrDescription_{{$index}}" 
                         class="form-control"
                         ng-model="item.Description" 
-                        ng-blur="$ctrl.onBlur(item, 'attrDescription_' + $index)">
+                        ng-blur="$ctrl.onBlur(item, 'attrDescription_' + $index)"
+                        ng-disabled="$ctrl.isStartsDisabled()">
                 </textarea>
             </div>
 

@@ -2,7 +2,7 @@ angular.module('lp.jobs.import.row', [
     'common.modal'
 ])
 .directive('importJobRow', [function () {
-    var controller = ['$scope', '$q', '$timeout', 'JobsStore', 'Modal', 'AuthorizationUtility', 'ServiceErrorUtility', function ($scope, $q, $timeout, JobsStore, Modal, AuthorizationUtility, ServiceErrorUtility) {
+    var controller = ['$scope', '$q', '$timeout', 'JobsStore', 'Modal', 'AuthorizationUtility', 'Banner', function ($scope, $q, $timeout, JobsStore, Modal, AuthorizationUtility, Banner) {
         $scope.thejob = $scope.job;
         $scope.disableButton = false;
         $scope.maxRowsTooltip = 3;
@@ -42,7 +42,8 @@ angular.module('lp.jobs.import.row', [
                         $scope.job.jobStatus = 'Pending';
                     } else {
                         var errorMsg = result.errorMsg;
-                        ServiceErrorUtility.showBanner({data: {errorMsg: errorMsg}});
+
+                        Banner.error({ message: errorMsg });
                     }
                     
                 });

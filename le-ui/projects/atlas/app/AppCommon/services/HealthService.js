@@ -1,7 +1,7 @@
 angular.module('mainApp.appCommon.services.HealthService', [
     'common.exceptions'
 ])
-.service('HealthService', function($q, $http, $timeout, ServiceErrorUtility, ResourceUtility) {
+.service('HealthService', function($q, $http, $timeout, Banner, ResourceUtility) {
     var CHECK_SYSTEM_STATUS_TIMEOUT = 2000;
 
     this.checkSystemStatus = function() {
@@ -19,11 +19,10 @@ angular.module('mainApp.appCommon.services.HealthService', [
             if (response.data.status === 'OK') {
                 deferred.resolve();
             } else {
-                ServiceErrorUtility.showBanner({
-                    data: {
-                        errorMsg: response.data.message || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-                    }
+                Banner.error({
+                    message: response.data.message || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
                 });
+
                 deferred.reject();
             }
         }).catch(function() {
@@ -31,11 +30,10 @@ angular.module('mainApp.appCommon.services.HealthService', [
                 return;
             }
 
-            ServiceErrorUtility.showBanner({
-                data: {
-                    errorMsg: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-                }
+            Banner.error({
+                message: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
             });
+            
             deferred.reject();
         });
 

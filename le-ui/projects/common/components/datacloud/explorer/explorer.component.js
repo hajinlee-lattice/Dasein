@@ -166,6 +166,8 @@ angular.module('common.datacloud.explorer', [
                 vm.collectionStatus = result;
             });
         }
+
+        DataCloudStore.setMetadata('current', 1);
     }
 
     /* some rules that might hide the page */

@@ -5,7 +5,7 @@ angular.module('common.attributes.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, AttrConfigStore, BrowserStorageUtility) {
+    controller: function ($state, AttrConfigStore, BrowserStorageUtility, Banner) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -29,6 +29,17 @@ angular.module('common.attributes.list', [])
             vm.countSelected();
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
+
+            if ((vm.isUser() || vm.isExternalAdmin()) && vm.section == 'activate') {
+                vm.showImmutable();
+            }
+        };
+
+        vm.showImmutable = function() {
+            Banner.info({
+                title: "Immutable Data Notification",
+                message: "Your access level has placed certain restrictions on modifications in this section."
+            });
         };
         
         vm.autoDrillDown = function() {
@@ -203,14 +214,38 @@ angular.module('common.attributes.list', [])
             return item.Attributes ? overLimit : (isFrozen || overLimit);
         };
 
-        vm.isStartsDisabled = function(item) {
-            var Users = ['LATTICE_USER','EXTERNAL_USER','EXTERNAL_ADMIN'];
-            var isAdmin = Users.indexOf(this.accesslevel) < 0;
+        vm.isUser = function() {
+            var access = ['INTERNAL_USER','LATTICE_USER','EXTERNAL_USER','USER'];
+            return access.indexOf(this.accesslevel) >= 0;
+        };
 
-            if (item.Attributes || vm.section == 'enable' || isAdmin) {
+        vm.isInternalAdmin = function() {
+            var access = ['INTERNAL_ADMIN','LATTICE_ADMIN','SUPER_ADMIN'];
+            return access.indexOf(this.accesslevel) >= 0;
+        };
+
+        vm.isExternalAdmin = function() {
+            var access = ['EXTERNAL_ADMIN'];
+            return access.indexOf(this.accesslevel) >= 0;
+        };
+
+        vm.isStartsDisabled = function(item) {
+            if (item.Attributes || vm.section == 'enable') {
                 return false;
             }
 
+            if (!item.Selected && (vm.isInternalAdmin() || vm.isExternalAdmin())) {
+                return false;
+            }
+
+            if (item.Selected && vm.isInternalAdmin()) {
+                return false;
+            }
+
+            if (vm.isUser()) {
+                return true;
+            }
+            
             var startsDisabled = vm.startChecked[item.Attribute];
 
             return startsDisabled;
