@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DunsGuideBookUnitTestNG {
@@ -40,6 +41,8 @@ public class DunsGuideBookUnitTestNG {
         Assert.assertNotNull(result.getItems());
         // null will be changed into an empty list before serialization for safety
         Assert.assertEquals(result.getItems().size(), book.getItems() == null ? 0 : book.getItems().size());
+        // patched field will NOT be serialized to avro
+        Assert.assertFalse(result.isPatched());
 
         // verify each item
         for (int i = 0; i < result.getItems().size(); i++) {
@@ -48,7 +51,45 @@ public class DunsGuideBookUnitTestNG {
             Assert.assertNotNull(item);
             Assert.assertEquals(item.getDuns(), expectedItem.getDuns());
             Assert.assertEquals(item.getKeyPartition(), expectedItem.getKeyPartition());
+            Assert.assertEquals(item.getPatched(), expectedItem.getPatched());
         }
+    }
+
+    @Test(groups = "unit")
+    public void testBackwardCompatibility() {
+        // DunsGuideBook without new fields
+        DunsGuideBook book = new DunsGuideBook();
+        book.setId(SRC_DUNS);
+        DunsGuideBook.Item item = new DunsGuideBook.Item();
+        item.setDuns(TARGET_DUNS_PREFIX);
+        item.setKeyPartition(MatchKey.DUNS.name());
+        // old entry does not have patched field in book & item
+        book.setPatched(null);
+        item.setPatched(null);
+        book.setItems(Collections.singletonList(item));
+
+        ByteBuffer buf  = FabricEntityTestUtils
+                .avroToBytes(book.toFabricAvroRecord(RECORD_TYPE), true, algo);
+        Assert.assertNotNull(buf);
+        GenericRecord record = FabricEntityTestUtils
+                .bytesToAvro(buf.array(), book.getSchema(RECORD_TYPE), true, algo);
+        Assert.assertNotNull(record);
+
+        DunsGuideBook result = new DunsGuideBook();
+        try {
+            result = result.fromFabricAvroRecord(record);
+        } catch (Exception e) {
+            Assert.fail("Should be able to deserialize from legacy avro record, err=" + e.getMessage());
+        }
+
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        Assert.assertEquals(result.getItems().size(), 1);
+        DunsGuideBook.Item resItem = result.getItems().get(0);
+        Assert.assertNotNull(resItem);
+        // should get the default value
+        Assert.assertEquals(resItem.getPatched(), Boolean.FALSE);
+        Assert.assertFalse(result.isPatched());
     }
 
     @DataProvider(name = "dunsGuideBookSerDe")
@@ -74,6 +115,7 @@ public class DunsGuideBookUnitTestNG {
     private DunsGuideBook newBook(String srcDuns, String targetDunsPrefix, int nItems) {
         DunsGuideBook book = new DunsGuideBook();
         book.setId(srcDuns);
+        book.setPatched(true);
         if (nItems >= 0) {
             book.setItems(newItemList(targetDunsPrefix, nItems));
         }
@@ -83,15 +125,24 @@ public class DunsGuideBookUnitTestNG {
     private List<DunsGuideBook.Item> newItemList(String dunsPrefix, int nItems) {
         List<DunsGuideBook.Item> items = new ArrayList<>();
         for (int i = 0; i < nItems; i++) {
-            items.add(newItem(dunsPrefix + i, MatchKey.City));
+            Boolean patched = null;
+            if (i % 3 == 1) {
+                patched = true;
+            } else if (i % 3 == 2) {
+                patched = false;
+            }
+            items.add(newItem(dunsPrefix + i, MatchKey.City, patched));
         }
         return items;
     }
 
-    private DunsGuideBook.Item newItem(String targetDuns, MatchKey matchKey) {
+    private DunsGuideBook.Item newItem(String targetDuns, MatchKey matchKey, Boolean patched) {
         DunsGuideBook.Item item = new DunsGuideBook.Item();
         item.setDuns(targetDuns);
         item.setKeyPartition(matchKey.name());
+        if (patched != null) {
+            item.setPatched(patched);
+        }
         return item;
     }
 }

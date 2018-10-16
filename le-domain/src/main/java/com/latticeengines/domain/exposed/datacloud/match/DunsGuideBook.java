@@ -28,6 +28,9 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
 
     private static final String SRC_DUNS_KEY = "Duns";
     private static final String ITEMS_KEY = "Items";
+    // name of the tag used to check whether this entry is patched
+    // the tag value will NOT be serialized to avro
+    private static final String PATCHED_TAG = "Patched";
 
     private static final TypeReference<List<Item>> ITEMS_TYPE_REFERENCE = new TypeReference<List<Item>>() {};
 
@@ -97,6 +100,14 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
         this.items = items;
     }
 
+    public boolean isPatched() {
+        return Boolean.TRUE.equals(getTag(PATCHED_TAG, Boolean.class));
+    }
+
+    public void setPatched(Boolean patched) {
+        setTag(PATCHED_TAG, patched);
+    }
+
     private String getString(Object avroValue) {
         if (avroValue instanceof Utf8) {
             return ((Utf8) avroValue).toString();
@@ -120,6 +131,7 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
         private static final String DUNS_KEY = "TargetDuns";
         private static final String KEYPARTITION_KEY = "KeyPartition";
         private static final String BOOKSOURCE_KEY = "BookSource";
+        private static final String PATCHED_KEY = "Patched";
 
         @JsonProperty(DUNS_KEY)
         private String duns;
@@ -127,6 +139,8 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
         private String keyPartition;
         @JsonProperty(BOOKSOURCE_KEY)
         private String bookSource;
+        @JsonProperty(PATCHED_KEY)
+        private Boolean patched = false;
 
         public Item(String duns, String keyPartition, String bookSource) {
             this.duns = duns;
@@ -160,6 +174,14 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
 
         public void setBookSource(String bookSource) {
             this.bookSource = bookSource;
+        }
+
+        public Boolean getPatched() {
+            return patched;
+        }
+
+        public void setPatched(Boolean patched) {
+            this.patched = patched;
         }
     }
 }
