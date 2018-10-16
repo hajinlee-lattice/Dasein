@@ -218,6 +218,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     private void updateDataFeedTaskAfterRegister(DataFeedTask datafeedTask) {
         datafeedTask.setLastImported(new Date());
+        datafeedTask.setLastUpdated(new Date());
         boolean templateTableChanged = Status.Updated.equals(datafeedTask.getStatus());
         if (templateTableChanged) {
             datafeedTask.setStatus(Status.Active);
@@ -301,6 +302,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         TableEntityMgr.inflateTable(task.getImportTemplate());
         TableEntityMgr.inflateTable(task.getImportData());
         task.setLastImported(dataFeedTask.getLastImported());
+        task.setLastUpdated(dataFeedTask.getLastUpdated());
         task.setActiveJob(dataFeedTask.getActiveJob());
         task.setStartTime(dataFeedTask.getStartTime());
         task.setSourceConfig(dataFeedTask.getSourceConfig());

@@ -33,6 +33,7 @@ public class DataFeedImportUtilsTestNG {
         task.setImportData(null);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
+        task.setLastUpdated(new Date());
         task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
 
         DataFeedImport dfImport = DataFeedImportUtils.createImportFromTask(task);

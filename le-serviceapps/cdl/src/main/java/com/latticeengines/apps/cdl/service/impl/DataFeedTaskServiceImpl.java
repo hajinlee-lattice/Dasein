@@ -57,12 +57,14 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             dataFeedTask.setSourceConfig("Not specified");
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
+            dataFeedTask.setLastUpdated(new Date());
             dataFeedTaskEntityMgr.create(dataFeedTask);
         } else {
             if (!dataFeedTask.getImportTemplate().getName().equals(tableName)) {
                 Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, true);
                 dataFeedTask.setImportTemplate(metaData);
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
+                dataFeedTask.setLastUpdated(new Date());
                 dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
             }
         }

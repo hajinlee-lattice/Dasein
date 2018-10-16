@@ -389,6 +389,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             dataFeedTask.setSourceConfig("Not specified");
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
+            dataFeedTask.setLastUpdated(new Date());
             dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             feedTaskId = dataFeedTask.getUniqueId();

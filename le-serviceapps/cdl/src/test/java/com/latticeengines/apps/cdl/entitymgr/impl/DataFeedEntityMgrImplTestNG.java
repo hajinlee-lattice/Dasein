@@ -91,6 +91,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         task.setImportTemplate(importTable);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
+        task.setLastUpdated(new Date());
         task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
         datafeed.addTask(task);
 

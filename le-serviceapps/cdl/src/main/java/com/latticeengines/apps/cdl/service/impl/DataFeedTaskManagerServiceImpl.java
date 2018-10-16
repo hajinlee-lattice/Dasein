@@ -162,6 +162,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
+                dataFeedTask.setLastUpdated(new Date());
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
             }
@@ -186,6 +187,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedTask.setSourceConfig("Not specified");
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
+            dataFeedTask.setLastUpdated(new Date());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             dropFolderProxy.createTemplateFolder(customerSpace.toString(), entity, feedType);
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);

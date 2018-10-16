@@ -136,7 +136,7 @@ public class CDLResource {
     @GetMapping(value = "/s3import/template")
     @ResponseBody
     @ApiOperation("get template table fields")
-    public List<S3ImportTemplateDisplay> getActivationOverview() {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return cdlService.getS3ImportTemplate(customerSpace.toString());
     }

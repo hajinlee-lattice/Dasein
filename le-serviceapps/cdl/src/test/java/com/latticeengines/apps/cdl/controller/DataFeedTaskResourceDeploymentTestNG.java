@@ -59,6 +59,7 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         dataFeedTask.setFeedType(DATA_FEED_TASK_FEED_TYPE);
         dataFeedTask.setActiveJob(DATA_FEED_TASK_ACTIVE_JOB);
         dataFeedTask.setLastImported(DATE);
+        dataFeedTask.setLastUpdated(DATE);
         dataFeedTask.setSourceConfig(DATA_FEED_TASK_SOURCE_CONFIG);
         dataFeedTask.setStartTime(DATE);
         dataFeedTask.setStatus(DataFeedTask.Status.Active);

@@ -104,6 +104,11 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonProperty("last_imported")
     private Date lastImported;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LAST_UPDATED", nullable = false)
+    @JsonProperty("last_updated")
+    private Date lastUpdated;
+
     @JsonIgnore
     @Transient
     private List<DataFeedTaskTable> tables = new ArrayList<>();
@@ -221,6 +226,14 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setTables(List<DataFeedTaskTable> tables) {
         this.tables = tables;
+    }
+
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     public enum Status {

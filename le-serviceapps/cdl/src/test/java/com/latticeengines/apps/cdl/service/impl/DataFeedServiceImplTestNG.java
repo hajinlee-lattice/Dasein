@@ -138,6 +138,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         task.setImportData(dataTable);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
+        task.setLastUpdated(new Date());
         task.setUniqueId(UUID.randomUUID().toString());
         datafeed.addTask(task);
         datafeedService.createDataFeed(MultiTenantContext.getTenant().getId(), dataCollection.getName(), datafeed);

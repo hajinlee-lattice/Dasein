@@ -6,28 +6,35 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class S3ImportTemplateDisplay {
-    @JsonProperty("Type")
-    private String type;
+    @JsonProperty("Object")
+    private String object;
     @JsonProperty("Path")
     private String path;
     @JsonProperty("TemplateName")
     private String templateName;
-    @JsonProperty("LastImported")
-    private Date lastImported;
-    @JsonProperty("Status")
-    private JobStatus status;
+    @JsonProperty("LastEditedDate")
+    private Date lastEditedDate;
+    @JsonProperty("Exist")
+    private Boolean exist;
 
-    public String getType() {
-        return type;
+    public String getObject() {
+        return object;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setObject(String object) {
+        this.object = object;
+    }
+
+    public Date getLastEditedDate() {
+        return lastEditedDate;
+    }
+
+    public void setLastEditedDate(Date lastEditedDate) {
+        this.lastEditedDate = lastEditedDate;
     }
 
     public String getPath() {
@@ -46,20 +53,12 @@ public class S3ImportTemplateDisplay {
         this.templateName = templateName;
     }
 
-    public Date getLastImported() {
-        return lastImported;
+    public Boolean getExist() {
+        return exist;
     }
 
-    public void setLastImported(Date lastImported) {
-        this.lastImported = lastImported;
-    }
-
-    public JobStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(JobStatus status) {
-        this.status = status;
+    public void setExist(Boolean exist) {
+        this.exist = exist;
     }
 
     @Override
