@@ -3,7 +3,9 @@
     <div class="row">
         <div class="ten columns offset-one">
 
-            <ul class="tabs_" ng-if="vm.section !== 'dashboard.scoring'">
+            <ul 
+                class="tabs_" 
+                ng-if="vm.section !== 'dashboard.scoring'">
                 <li class="active">Rating Setup</li>
                 <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })"  ui-sref-opts="{reload: true}">History</li>
             </ul>
@@ -18,7 +20,7 @@
                         class="iteration-selection"
                     ></select>
                 </h2>
-                <h2>
+                <h2 ng-if="vm.hasRatingsAvailable">
                     How do you want to configure your ratings?
                     <span class="more-info show-tooltip top delay">
                         i
@@ -32,16 +34,13 @@
                 </h2>
             </div>
 
-            <div class="chart-header">
-                <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong></div>
+            <div 
+                class="chart-header" 
+                ng-if="(vm.hasRatingsAvailable && vm.section === 'dashboard.ratings') || vm.section != 'dashboard.ratings'">
+                <div class="list-data pull-left">
+                    All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong>
+                </div>
                 <div class="actions pull-right">
-                    <button 
-                        type="button" 
-                        class="button white-button"
-                        ui-sref="home.ratingsengine.dashboard({ rating_id: vm.stateParams.rating_id, modelId: vm.modelId })"
-                        ui-sref-opts="{reload: true, notify: true}"
-                        ng-if="vm.section === 'dashboard.scoring'">
-                        Back to Dashboard</button>
                 	<button 
                 		type="button" 
                 		class="button orange-button"
@@ -52,14 +51,17 @@
                 </div>
             </div><!-- End .chart-header -->
 
-            <!--
-            <model-ratings-chart workingBuckets="vm.workingBuckets" ratingsSummary="vm.ratingsSummary" />
-            -->
+            <div 
+                ng-if="!vm.hasRatingsAvailable && vm.section === 'dashboard.ratings'"
+                class="no-ratings-header">
+                <h2>No Ratings Available for Iteration {{vm.activeIteration.iteration}}</h2>
+            </div><!-- End .no-ratings-header -->
 
             <div 
                 id="ratingsChart"
                 class="ratings-chart"
-                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
+                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}"
+                ng-if="(vm.hasRatingsAvailable && vm.section === 'dashboard.ratings') || vm.section != 'dashboard.ratings'">
 
                 <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
                 
@@ -153,7 +155,10 @@
                 </ul><!-- End .horizontal-axis -->
             </div><!-- End .ratings-chart -->
 
-            <ul id="bucketTiles" class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}">
+            <ul 
+                id="bucketTiles" 
+                class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}"
+                ng-if="(vm.hasRatingsAvailable && vm.section === 'dashboard.ratings') || vm.section != 'dashboard.ratings'">
             	<li ng-repeat="bucket in vm.workingBuckets">
             		<div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{bucket.bucket_name}}</div>
             		<dl>
@@ -176,7 +181,9 @@
                 
                 <ul class="bucket-tiles published buckets-{{::vm.currentConfiguration.length}}">
                     <li ng-repeat="bucket in ::vm.currentConfiguration">
-                        <div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{::bucket.bucket_name}}</div>
+                        <div 
+                            class="bucket-label" 
+                            ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{::bucket.bucket_name}}</div>
                         <dl>
                             <dt>Lift</dt>
                             <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
@@ -186,10 +193,10 @@
                             <dd>{{::bucket.num_leads | number}}</dd>
                         </dl>
                     </li>
-                </ul><!-- End .bucket-tiles -->
+                </ul>
                 
                 </refresher>
-            </div>
+            </div><!-- End Currently Published Configuration -->
             
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->

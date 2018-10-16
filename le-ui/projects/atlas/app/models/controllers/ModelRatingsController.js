@@ -49,18 +49,15 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
-        // console.log(vm.ratingsSummary);
-        // console.log(vm.currentConfiguration);
-        // console.log(vm.workingBuckets);
-
-        if(vm.section === 'dashboard.scoring') {
-
-            vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
-
-        } else if (vm.section === 'dashboard.ratings') {
-            // Get dahsboard data for list of iterations
+        // Atlas uses dashboard.ratings for vm.section
+        if (vm.section === 'dashboard.ratings') {
+            
+            // Get dashboard data for list of iterations
             vm.dashboard = ModelStore.getDashboardData();
             var dashboardIterations = vm.dashboard.iterations;
+
+            // Show 'No Ratings Available' message if dashboard bucketMetadata isn't present for the selected iteration
+            vm.hasRatingsAvailable = vm.dashboard.summary.bucketMetadata ? true : false;
 
             // use only iterations that have active modelSummaryId by creating new array
             vm.activeIterations = [];
@@ -76,7 +73,7 @@ angular.module('lp.models.ratings', [
             // and working buckets (vm.workingBuckets is what drives the chart data)
             if ($stateParams.toggleRatings){
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
-                vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
+                vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
 
                 var id = vm.activeIteration.modelSummaryId;
                 ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
@@ -84,16 +81,24 @@ angular.module('lp.models.ratings', [
                 });
 
             } else {
+
+                // If the model has been published previously and is Active
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+
+                    // Set active iteration and working buckets (determines what is displayed in the chart)
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
-                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata;
+                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
 
                     var id = vm.activeIteration.modelSummaryId;
                     ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                        // Helps with chart data and display
                         vm.ratingsSummary = result;
                     });
 
                 } else {
+
+                    // If the model has not been published or is inactive, 
+                    // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
                 }
             }
@@ -110,6 +115,7 @@ angular.module('lp.models.ratings', [
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 
+        // Give the above code time to catch up before rendering the chart
         $timeout(function() {
             renderChart();
         }, 500);
@@ -285,6 +291,10 @@ angular.module('lp.models.ratings', [
         var leftCheck = right <= vm.sliderBoundaryLeft;
         var rightCheck = right >= vm.sliderBoundaryRight;
 
+        console.log(right);
+        // console.log(vm.workingBuckets);
+
+
         if (leftCheck && rightCheck) {
             this.right = right;
             vm.slider.style.right = right + '%';
@@ -292,6 +302,13 @@ angular.module('lp.models.ratings', [
         } else if (!leftCheck && rightCheck) {
             vm.right = 98;
         } else if (leftCheck && !rightCheck) {
+
+            console.log(vm.sliderBoundaryRight); //7 
+            console.log(vm.workingBuckets.length); // 4
+            console.log(vm.index); // 2
+            console.log(vm.workingBuckets[Object.keys(vm.workingBuckets)]); // undefined
+            // console.log(vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index]]);
+
             vm.right = 5;
         } else {
             vm.slider.style.right = (leftCheck ? vm.sliderBoundaryRight : vm.sliderBoundaryLeft) + '%';
