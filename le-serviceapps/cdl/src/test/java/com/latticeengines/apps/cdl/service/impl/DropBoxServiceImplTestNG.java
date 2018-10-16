@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.ExternalAccount;
 import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.LatticeUser;
 
 import java.io.InputStream;
@@ -93,15 +92,6 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         testDelete(prefix);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCrudLatticeUser")
-    public void testCrudExternalAccount() {
-        DropBoxServiceImpl impl = (DropBoxServiceImpl) dropboxService;
-        impl.setCustomersBucket(testBucket);
-        String prefix = testCreate();
-        testGrantAccessToExternalAccount();
-        testDelete(prefix);
-    }
-
     private String testCreate() {
         dropboxService.create();
         String prefix = dropboxService.getDropBoxPrefix();
@@ -174,23 +164,6 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         iamService.deleteCustomerUser(userName);
     }
 
-    private void testGrantAccessToExternalAccount() {
-        GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
-        request.setAccessMode(ExternalAccount);
-        request.setExternalAccountId(accountId);
-        GrantDropBoxAccessResponse response = dropboxService.grantAccess(request);
-        Assert.assertEquals(response.getAccessMode(), ExternalAccount);
-
-        BasicAWSCredentialsProvider creds = //
-                new BasicAWSCredentialsProvider(customerAccessKey, customerSecret);
-        verifyAccessWithRetries(creds, true);
-        verifyAccessWithRetries(latticeProvider, false);
-
-        dropboxService.revokeAccess();
-        verifyNoAccessWithRetries(creds, true);
-        verifyAccessWithRetries(latticeProvider, false);
-    }
-
     private void verifyAccessWithRetries(BasicAWSCredentialsProvider creds, boolean upload) {
         String bucket = dropboxService.getDropBoxBucket();
         String prefix = dropboxService.getDropBoxPrefix();
@@ -228,18 +201,25 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         retry.execute(context -> {
             int count = context.getRetryCount();
             if (count > 3) {
-                log.info("Verify no access, attempt=" + count);
+                log.info("Verify no list object access, attempt=" + count);
             }
             verifyNoAccess(s3Client, bucket, objectKey);
             return true;
         });
         if (!skipGet) {
-            try {
-                s3Client.getObject(bucket, objectKey);
-                Assert.fail("Should throw AmazonS3Exception.");
-            } catch (AmazonS3Exception e) {
-                Assert.assertTrue(e.getMessage().contains("403"));
-            }
+            retry.execute(context -> {
+                int count = context.getRetryCount();
+                if (count > 3) {
+                    log.info("Verify no get object access, attempt=" + count);
+                }
+                try {
+                    s3Client.getObject(bucket, objectKey);
+                    Assert.fail("Should throw AmazonS3Exception.");
+                } catch (AmazonS3Exception e) {
+                    Assert.assertTrue(e.getMessage().contains("403"));
+                }
+                return true;
+            });
         }
     }
 
