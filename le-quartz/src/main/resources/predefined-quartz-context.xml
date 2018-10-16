@@ -207,6 +207,7 @@
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
+        <ref bean="lpEmrScaling"/>
         <ref bean="plsSegmentExportCleanupJob"/>
         <ref bean="playmakerRecommendationCleanupJob"/>
         <ref bean="dataplatformDLOrchestration"/>
