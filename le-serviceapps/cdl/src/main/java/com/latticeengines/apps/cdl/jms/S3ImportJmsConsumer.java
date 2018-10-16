@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.jms;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +13,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -26,6 +29,8 @@ public class S3ImportJmsConsumer {
     private static final Logger log = LoggerFactory.getLogger(S3ImportJmsConsumer.class);
 
     private static final String RECORDS = "Records";
+    private static final String SNS = "Sns";
+    private static final String MESSAGE = "Message";
     private static final String S3 = "s3";
     private static final String BUCKET = "bucket";
     private static final String NAME = "name";
@@ -38,7 +43,6 @@ public class S3ImportJmsConsumer {
     @Inject
     private DropBoxService dropBoxService;
 
-
     @JmsListener(destination = "${cdl.s3.file.import.sqs.name:}")
     public void processMessage(@Payload String message) {
         if (StringUtils.isEmpty(message)) {
@@ -50,6 +54,8 @@ public class S3ImportJmsConsumer {
     }
 
     private void submitImport(String message) {
+        // TODO: this log is to be removed (YSong)
+        log.info("Got message from SQS: " + message);
         JsonNode records = null;
         try {
             ObjectNode node = JsonUtils.deserialize(message, ObjectNode.class);
@@ -58,6 +64,21 @@ public class S3ImportJmsConsumer {
             log.error("Cannot deserialize message : " + message);
             return;
         }
+        if (records != null && records.isArray()) {
+            for (JsonNode record : records) {
+                ObjectMapper om = new ObjectMapper();
+                JsonNode innerRecords = null;
+                try {
+                    innerRecords = om.readTree(record.get(SNS).get(MESSAGE).asText());
+                } catch (IOException e) {
+                    log.error("Failed to parse inner records", e);
+                }
+                processS3Events(innerRecords);
+            }
+        }
+    }
+
+    private void processS3Events(JsonNode records) {
         if (records != null && records.isArray()) {
             for (JsonNode record : records) {
                 JsonNode s3Node = record.get(S3);

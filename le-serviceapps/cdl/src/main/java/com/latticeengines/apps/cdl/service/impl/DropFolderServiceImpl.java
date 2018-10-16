@@ -37,8 +37,6 @@ public class DropFolderServiceImpl implements DropFolderService {
 
     @Override
     public void createTenantDefaultFolder(String customerSpace) {
-        customerSpace = CustomerSpace.shortenCustomerSpace(customerSpace);
-
         String dropBoxBucket = dropBoxService.getDropBoxBucket();
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 
@@ -53,8 +51,6 @@ public class DropFolderServiceImpl implements DropFolderService {
 
     @Override
     public void createFolder(String customerSpace, String objectName, String path) {
-        customerSpace = CustomerSpace.shortenCustomerSpace(customerSpace);
-
         String dropBoxBucket = dropBoxService.getDropBoxBucket();
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 
@@ -72,8 +68,6 @@ public class DropFolderServiceImpl implements DropFolderService {
 
     @Override
     public List<String> getDropFolders(String customerSpace, String objectName, String path) {
-        customerSpace = CustomerSpace.shortenCustomerSpace(customerSpace);
-
         String dropBoxBucket = dropBoxService.getDropBoxBucket();
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 

@@ -26,7 +26,7 @@ public class S3ImportJmsConfig {
     @Inject
     private SQSConnectionFactory sqsConnectionFactory;
 
-    @Value("${cdl.s3.sqs.listener.start:false}")
+    @Value("${cdl.s3.sqs.listener.start}")
     private boolean autoStart;
 
     @Bean
@@ -44,19 +44,12 @@ public class S3ImportJmsConfig {
 
     @Bean
     public JmsTemplate jmsTemplate() {
-        JmsTemplate jmsTemplate = new JmsTemplate(this.sqsConnectionFactory);
-        return jmsTemplate;
+        return new JmsTemplate(this.sqsConnectionFactory);
     }
 
     @Bean
     public ErrorHandler messageError() {
-        ErrorHandler errorHandler = new ErrorHandler() {
-            @Override
-            public void handleError(Throwable throwable) {
-                log.error(throwable.getMessage());
-            }
-        };
-        return errorHandler;
+        return throwable -> log.error(throwable.getMessage());
     }
 
 }
