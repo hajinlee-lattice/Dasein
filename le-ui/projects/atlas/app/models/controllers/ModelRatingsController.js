@@ -42,8 +42,6 @@ angular.module('lp.models.ratings', [
         workingBuckets: CurrentConfiguration,
         ratingsSummary: RatingsSummary,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
-        slidersContainer: document.getElementById("sliders"),
-        barColors: document.getElementById("barColors"),
         section: ($state.params && $state.params.section ? $state.params.section : '')
     });
 
@@ -133,6 +131,9 @@ angular.module('lp.models.ratings', [
     }
 
     function renderChart(){
+
+        vm.slidersContainer = document.getElementById("sliders");
+        vm.barColors = document.getElementById("barColors");
         var verticalAxis = document.getElementById("verticalAxis");
 
         // Get tallest bar in set
@@ -291,10 +292,6 @@ angular.module('lp.models.ratings', [
         var leftCheck = right <= vm.sliderBoundaryLeft;
         var rightCheck = right >= vm.sliderBoundaryRight;
 
-        console.log(right);
-        // console.log(vm.workingBuckets);
-
-
         if (leftCheck && rightCheck) {
             this.right = right;
             vm.slider.style.right = right + '%';
@@ -303,13 +300,17 @@ angular.module('lp.models.ratings', [
             vm.right = 98;
         } else if (leftCheck && !rightCheck) {
 
-            console.log(vm.sliderBoundaryRight); //7 
-            console.log(vm.workingBuckets.length); // 4
-            console.log(vm.index); // 2
-            console.log(vm.workingBuckets[Object.keys(vm.workingBuckets)]); // undefined
+            // console.log(vm.sliderBoundaryRight); //7 
+            // console.log(vm.workingBuckets.length); // 4
+            // console.log(vm.index); // 2
             // console.log(vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index]]);
 
-            vm.right = 5;
+            if(vm.index == (vm.workingBuckets.length - 1)){
+                vm.right = 5;    
+            } else {
+                vm.right = vm.sliderBoundaryRight;
+            }
+            
         } else {
             vm.slider.style.right = (leftCheck ? vm.sliderBoundaryRight : vm.sliderBoundaryLeft) + '%';
         }
