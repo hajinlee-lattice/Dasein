@@ -7,7 +7,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
     RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore, JobsService, ModelRatingsService,
-    ConfigureAttributesStore, FilterService
+    ConfigureAttributesStore, FilterService, DataCloudStore
 ) {
     var vm = this;
 
@@ -121,6 +121,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             vm.current.tileStates[obj.id].editRating = false;
         }else{
             updateRating(obj, newData);
+            DataCloudStore.clear();
         }
     }
 

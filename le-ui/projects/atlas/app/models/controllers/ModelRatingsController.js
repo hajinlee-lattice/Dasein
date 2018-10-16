@@ -299,12 +299,6 @@ angular.module('lp.models.ratings', [
         } else if (!leftCheck && rightCheck) {
             vm.right = 98;
         } else if (leftCheck && !rightCheck) {
-
-            // console.log(vm.sliderBoundaryRight); //7 
-            // console.log(vm.workingBuckets.length); // 4
-            // console.log(vm.index); // 2
-            // console.log(vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index]]);
-
             if(vm.index == (vm.workingBuckets.length - 1)){
                 vm.right = 5;    
             } else {
