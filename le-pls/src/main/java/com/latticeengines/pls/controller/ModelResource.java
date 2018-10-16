@@ -24,7 +24,7 @@ import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -113,9 +113,9 @@ public class ModelResource {
 
     @RequestMapping(value = "/rating/{modelName}", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Generate a Rating Engine model from the table name(or query) and parameters. Returns the job id.")
-    public ResponseDocument<String> ratingEngineModel(@PathVariable String modelName, //
-            @RequestBody RatingEngineModelingParameters parameters) {
+    @ApiOperation(value = "Generate a cross sell model from the table name(or query) and parameters. Returns the job id.")
+    public ResponseDocument<String> crossSellModel(@PathVariable String modelName, //
+            @RequestBody CrossSellModelingParameters parameters) {
         parameters.setUserId(MultiTenantContext.getEmailAddress());
         try {
             return ResponseDocument.successResponse(
