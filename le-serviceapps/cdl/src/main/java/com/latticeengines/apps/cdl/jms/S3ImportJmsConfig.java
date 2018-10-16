@@ -27,7 +27,7 @@ public class S3ImportJmsConfig {
     private SQSConnectionFactory sqsConnectionFactory;
 
     @Value("${cdl.s3.sqs.listener.start}")
-    private boolean autoStart;
+    private Boolean autoStart;
 
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
@@ -38,7 +38,7 @@ public class S3ImportJmsConfig {
         factory.setConcurrency("3-10");
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setErrorHandler(messageError());
-        factory.setAutoStartup(this.autoStart);
+        factory.setAutoStartup(Boolean.TRUE.equals(this.autoStart));
         return factory;
     }
 
