@@ -134,6 +134,9 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     private String[][] updateInputFields; // for strategy UPDATE, fields used to
                                           // update target fields
 
+    @JsonProperty("SampleFraction")
+    private Float sampleFraction;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -471,6 +474,14 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setUpdateInputFields(String[][] updateInputFields) {
         this.updateInputFields = updateInputFields;
+    }
+
+    public Float getSampleFraction() {
+        return sampleFraction;
+    }
+
+    public void setSampleFraction(Float sampleFraction) {
+        this.sampleFraction = sampleFraction;
     }
 
 }

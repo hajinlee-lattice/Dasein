@@ -142,6 +142,9 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("UpdateExpressions")
     private String[] updateExpressions; // for strategy UPDATE
 
+    @JsonProperty("SampleFraction")
+    private Float sampleFraction; // for strategy SAMPLE
+
     @JsonProperty("SyncSchemaProp")
     private boolean syncSchemaProp; // If true, target schema will retain all
                                     // the properties from base schema
@@ -167,7 +170,8 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         CONSOLIDATE_RANGE, //
         COPY, //
         CHECKSUM, //
-        UPDATE //
+        UPDATE, //
+        SAMPLE, //
     }
 
     public enum FieldType {
@@ -512,6 +516,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setUpdateInputFields(String[][] updateInputFields) {
         this.updateInputFields = updateInputFields;
+    }
+
+    public Float getSampleFraction() {
+        return sampleFraction;
+    }
+
+    public void setSampleFraction(Float sampleFraction) {
+        this.sampleFraction = sampleFraction;
     }
 
     public boolean isSyncSchemaProp() {

@@ -134,6 +134,9 @@ public class SourceStandardizationFlow
                 source = update(source, parameters.getUpdateFields(), parameters.getUpdateExpressions(),
                         parameters.getUpdateInputFields());
                 break;
+            case SAMPLE:
+                source = sample(source, parameters.getSampleFraction());
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Standardization strategy %s is not supported", strategy.name()));
@@ -141,6 +144,10 @@ public class SourceStandardizationFlow
         }
 
         return source;
+    }
+
+    private Node sample(Node source, Float fraction) {
+        return source.sample(fraction);
     }
 
     private Node update(Node source, String[] updateFields, String[] updateExpressions, String[][] updateInputFields) {

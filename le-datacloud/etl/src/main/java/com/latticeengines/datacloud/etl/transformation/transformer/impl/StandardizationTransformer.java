@@ -494,6 +494,21 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case SAMPLE:
+                if (config.getSampleFraction() == null) {
+                    error = "SampleFraction cannot be empty";
+                    log.error(error);
+                    RequestContext.logError(error);
+                    return false;
+                }
+                if ((config.getSampleFraction() <= 0) || (config.getSampleFraction() >= 1)) {
+                    error = "SampleFraction must be within range (0, 1) -- bound exclusive, but got "
+                            + config.getSampleFraction();
+                    log.error(error);
+                    RequestContext.logError(error);
+                    return false;
+                }
+                break;
             default:
                 error = String.format("Standardization strategy %s is not supported", strategy.name());
                 log.error(error);
@@ -590,6 +605,7 @@ public class StandardizationTransformer
         parameters.setUpdateFields(config.getUpdateFields());
         parameters.setUpdateExpressions(config.getUpdateExpressions());
         parameters.setUpdateInputFields(config.getUpdateInputFields());
+        parameters.setSampleFraction(config.getSampleFraction());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 
