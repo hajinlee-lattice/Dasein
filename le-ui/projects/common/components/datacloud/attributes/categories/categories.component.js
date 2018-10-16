@@ -6,7 +6,7 @@ angular.module('common.attributes.categories', [])
         store: '<',
         callback: '&'
     },
-    controller: function ($state, $scope, $stateParams, StateHistory) {
+    controller: function ($state, $scope, $stateParams, StateHistory, DataCloudStore) {
         var vm = this;
 
         vm.current = 1;
@@ -20,6 +20,11 @@ angular.module('common.attributes.categories', [])
             vm.catmap = vm.pruneEmptyCategories(angular.copy(vm.categories));
             vm.categories = Object.keys(vm.catmap);
             vm.catlength = vm.categories.length;
+
+            var categoriesSortOrder = DataCloudStore.getCategoriesSortOrder();
+            vm.categories = vm.categories.sort(function(a, b){
+              return categoriesSortOrder[a] - categoriesSortOrder[b];
+            });
 
             var index = vm.categories.indexOf(vm.category) + 1;
 

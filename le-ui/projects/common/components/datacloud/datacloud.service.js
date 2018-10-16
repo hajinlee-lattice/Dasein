@@ -57,6 +57,20 @@ angular.module('common.datacloud')
         };
         this.attributesCount = null;
         this.validFreeTextTypes = ['alpha', 'enum', 'email', 'phone', 'uri']; //PLS-8870
+        this.topCategories = [
+            'Lattice Ratings',
+            'Firmographics',
+            'My Attributes',
+            'Curated Account Attributes',
+            'Contact Attributes',
+            'Product Spend Profile',
+            'Intent',
+            'Website Profile',
+            'Technology Profile',
+            'Online Presence',
+            'Growth Trends',
+            'Website Keywords'
+        ];
     };
 
     this.init();
@@ -170,6 +184,14 @@ angular.module('common.datacloud')
     this.setSubcategories = function(category, item){
         this.subcategories[category] = item;
     };
+
+    this.getCategoriesSortOrder = function() {
+        var categoriesIndices = {};
+        this.topCategories.forEach(function(category, index) {
+            categoriesIndices[category] = index;
+        });
+        return categoriesIndices;
+    }
 
     this.getAllEnrichmentsConcurrently = function(){
         var deferred = $q.defer(),

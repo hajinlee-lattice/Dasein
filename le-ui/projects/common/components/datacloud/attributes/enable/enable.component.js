@@ -30,7 +30,7 @@ angular.module('common.attributes.enable', [])
 
                     return deferred.promise;
                 }],
-                config: ['$q', '$state', '$stateParams', 'AttrConfigService', 'AttrConfigStore', 'overview', function($q, $state, $stateParams, AttrConfigService, AttrConfigStore, overview) {
+                config: ['$q', '$state', '$stateParams', 'AttrConfigService', 'AttrConfigStore', 'overview', 'DataCloudStore', function($q, $state, $stateParams, AttrConfigService, AttrConfigStore, overview, DataCloudStore) {
                     var deferred = $q.defer();
                     var section = $stateParams.section;
                     var category = $stateParams.category;
@@ -42,7 +42,7 @@ angular.module('common.attributes.enable', [])
                     var categories = tab[0].Categories;
 
                     if (!category) {
-                        Object.keys(categories).some(function(key) {
+                        DataCloudStore.topCategories.some(function(key) {
                             if (key != 'Lattice Ratings' && categories[key] > 0) {
                                 return category = key;
                             }

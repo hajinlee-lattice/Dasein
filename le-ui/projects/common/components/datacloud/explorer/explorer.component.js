@@ -905,22 +905,7 @@ angular.module('common.datacloud.explorer', [
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
 
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
-            var topCategories = [
-                'Lattice Ratings',
-                'Firmographics',
-                'My Attributes',
-                'Contact Attributes',
-                'Curated Account Attributes',
-                'Product Spend Profile',
-                'Intent',
-                'Website Profile',
-                'Technology Profile',
-                'Online Presence',
-                'Growth Trends',
-                'Website Keywords'
-            ];
-
-            topCategories.forEach(function(category, index) {
+            DataCloudStore.topCategories.forEach(function(category, index) {
                 if (vm.categories.indexOf(category) >= 0) {
                     swap(vm.categories, vm.categories.indexOf(category), index);
                 }
