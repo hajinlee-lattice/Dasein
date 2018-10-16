@@ -859,7 +859,7 @@ public class EmailServiceImpl implements EmailService {
                 builder.replaceToken("{{bucket}}", dropBoxSummary.getBucket());
             }
             if (StringUtils.isNotEmpty(dropBoxSummary.getDropBox())) {
-                builder.replaceToken("{{dropBox}}", dropBoxSummary.getDropBox());
+                builder.replaceToken("{{dropfolder}}", dropBoxSummary.getDropBox());
             }
             if (StringUtils.isNotEmpty(response.getAccessKey())) {
                 builder.replaceToken("{{accessKey}}", response.getAccessKey());
@@ -901,8 +901,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{apppublicurl}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(
-                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), templateName),
-                    mp,
+                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), templateName), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");

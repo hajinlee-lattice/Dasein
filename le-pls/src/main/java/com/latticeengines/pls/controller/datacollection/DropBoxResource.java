@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -71,7 +72,8 @@ public class DropBoxResource {
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
-    private UIAction generateUIActionBasedOnDropBox(DropBoxSummary dropBoxSummary) {
+    @VisibleForTesting
+    UIAction generateUIActionBasedOnDropBox(DropBoxSummary dropBoxSummary) {
         String customerSpace = MultiTenantContext.getShortTenantId();
         UIAction uiAction = new UIAction();
         if (dropBoxSummary == null) {
@@ -123,15 +125,6 @@ public class DropBoxResource {
         }
         ThreadPoolUtils.runRunnablesInParallel(tpForParallelStream, runnables, 10, 1);
         log.info(String.format("Sending emails to %d external admins finishes", runnables.size()));
-    }
-
-    @PutMapping("/access")
-    @ResponseBody
-    @ApiOperation(value = "Grant external access to drop box")
-    @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
-    public GrantDropBoxAccessResponse grantAccess(@RequestBody GrantDropBoxAccessRequest request) {
-        String customerSpace = MultiTenantContext.getShortTenantId();
-        return dropBoxProxy.grantAccess(customerSpace, request);
     }
 
     @PutMapping("/key")
