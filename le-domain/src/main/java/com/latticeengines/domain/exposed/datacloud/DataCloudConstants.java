@@ -50,8 +50,10 @@ public final class DataCloudConstants {
 
     public static final String AMS_ATTR_DOMAIN = "Domain";
     public static final String AMS_ATTR_DUNS = "DUNS";
+    public static final String AMS_ATTR_NAME = "Name";
     public static final String AMS_ATTR_COUNTRY = "Country";
     public static final String AMS_ATTR_STATE = "State";
+    public static final String AMS_ATTR_CITY = "City";
     public static final String AMS_ATTR_ZIP = "ZipCode";
     public static final String AMS_ATTR_PRIMARY_INDUSTRY = "PrimaryIndustry";
 
