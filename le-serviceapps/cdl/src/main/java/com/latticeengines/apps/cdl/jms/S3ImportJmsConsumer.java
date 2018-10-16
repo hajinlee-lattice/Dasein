@@ -67,7 +67,7 @@ public class S3ImportJmsConsumer {
                 String bucket = s3Node.get(BUCKET).get(NAME).asText();
                 String key = s3Node.get(OBJECT).get(KEY).asText();
                 String[] parts = key.split("/");
-                if (parts.length < 5) {
+                if (parts.length < 5 || !key.endsWith(".csv")) {
                     log.warn("S3 import path is not correct: " + key);
                     return;
                 }
