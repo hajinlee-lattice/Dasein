@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "algo")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "algo")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = CategoricalBucket.class, name = CATEGORICAL),
         @JsonSubTypes.Type(value = IntervalBucket.class, name = INTEVAL),
