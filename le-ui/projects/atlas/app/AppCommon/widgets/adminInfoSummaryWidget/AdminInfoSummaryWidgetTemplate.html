@@ -42,8 +42,8 @@
                     <td>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/modeljson?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
-                        <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_TRAINING_SET_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="TrainingFilePath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFilePath">N/A</a>
+                        <span ng-if="!IsPmml && TrainingFileExist">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_TRAINING_SET_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a ng-if="!IsPmml && TrainingFileExist" href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="TrainingFilePath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFilePath">N/A</a>
                         <br/></span>
 
                     </td>
