@@ -11,7 +11,7 @@ public class SlackSettings {
 
     private String userName;
 
-    private Color color = Color.NORMAL;
+    private Color color;
 
     public SlackSettings(String webHookUrl, String title, String pretext, String text, String userName, Color color) {
         this.webHookUrl = webHookUrl;
@@ -72,10 +72,10 @@ public class SlackSettings {
 
     public enum Color {
         GOOD("good"), DANGER("danger"), NORMAL("");
-        
+
         private String color;
-        
-        private Color(String color) {
+
+        Color(String color) {
             this.color = color;
         }
 

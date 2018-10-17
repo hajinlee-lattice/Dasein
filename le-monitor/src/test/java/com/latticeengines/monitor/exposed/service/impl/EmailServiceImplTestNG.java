@@ -31,10 +31,10 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
     private static final String HOSTPORT = "hostport";
     private static final String TENANT_NAME = "tenantName";
     private static final String MODEL_NAME = "modelName";
-    
+
     @Inject
     private EmailService emailService;
-    
+
     private Tenant tenant;
     private User user;
     private Logger origLog;
@@ -79,6 +79,15 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         EmailServiceImpl.log = origLog;
     }
 
+    @Test(groups = "manual", enabled = false)
+    public void sendPlsNewExternalUserEmailToGmail() {
+        User user = new User();
+        user.setFirstName("FirstName");
+        user.setUsername("build.lattice.engines@gmail.com");
+        user.setEmail("build.lattice.engines@gmail.com");
+        emailService.sendPlsNewExternalUserEmail(user, PASSWORD, HOSTPORT, false);
+    }
+
     @Test(groups = "functional")
     public void sendPlsNewInternalUserEmail() {
         emailService.sendPlsNewInternalUserEmail(tenant, user, PASSWORD, HOSTPORT);
@@ -99,7 +108,7 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("new PLS external user"));
     }
-    
+
     @Test(groups = "functional")
     public void sendPlsNewProspectingUserEmail() {
         emailService.sendPlsNewProspectingUserEmail(user, PASSWORD, null);
@@ -344,6 +353,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("PLS export segment in-progress"));
-    } 
+    }
 
 }

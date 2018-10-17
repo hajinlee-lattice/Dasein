@@ -4,6 +4,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -23,12 +26,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
@@ -43,7 +48,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     protected static final Logger log = LoggerFactory.getLogger(EmailServiceImplDeploymentTestNG.class);
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
-    private static final String EXTERNAL_USER_EMAIL = "developers.lattice.engines@gmail.com";
+    private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
     private static final String EXTERNAL_USER_EMAIL_PASSWORD = "MrB2uild";
     private static final String APP_URL_PATTERN = "href=\"[^\"]*";
 
@@ -71,16 +76,20 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testSendAndReceiveExternalEmail() throws InterruptedException {
-        Date registrationTimestamp = new Date(System.currentTimeMillis());
+    public void testSendAndReceiveExternalEmail() throws Exception {
+        LocalDateTime registrationTime = LocalDateTime.now();
+        Thread.sleep(1000);
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
-        int numOfRetries = 30;
-        boolean verified = false;
-        while (numOfRetries-- > 0 && !verified) {
-            Thread.sleep(3000L);
-            verified = verifyReceivedEmailInGmail(registrationTimestamp);
-        }
-        Assert.assertTrue(verified, "Should find the new user email in Gmail's INBOX.");
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            try {
+                verifyReceivedEmailInGmail(registrationTime);
+                return true;
+            } catch (Exception e) {
+                throw e;
+            }
+        });
     }
 
     private void createNewUserAndSendEmail(String email) {
@@ -126,8 +135,8 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void verifyReceivedEmailInOutlook() {
     }
 
-    @SuppressWarnings("unused")
-    private boolean verifyReceivedEmailInGmail(Date registrationTimestamp) {
+    private void verifyReceivedEmailInGmail(LocalDateTime registrationTimestamp) //
+            throws MessagingException, IOException {
         String receivingHost = "imap.gmail.com";
 
         Properties props = System.getProperties();
@@ -136,45 +145,41 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         props.setProperty("mail.imaps.port", "993");
         props.setProperty("mail.imaps.ssl.trust", "*");
         Session session = Session.getDefaultInstance(props, null);
-
+        boolean foundTheEmail = false;
+        Store store = session.getStore("imaps");
         try {
-            Store store = session.getStore("imaps");
-            // String appCode = System.getProperty("GMAIL_APP_PASSWORD");
-            String password = EXTERNAL_USER_EMAIL_PASSWORD;
+            String appCode = System.getProperty("GMAIL_APP_PASSWORD");
+            String password = StringUtils.isNotEmpty(appCode) ? appCode : EXTERNAL_USER_EMAIL_PASSWORD;
             store.connect(receivingHost, EXTERNAL_USER_EMAIL, password);
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
-            Message[] messages = folder.getMessages();
-
-            for (Message message : messages) {
-                if (!message.getSubject().equalsIgnoreCase(EmailSettings.PLS_NEW_USER_SUBJECT)) {
-                    continue;
-                }
-
-                Date receivedDate = message.getReceivedDate();
-
-                MimeMessage m = (MimeMessage) message;
-
-                if (message.getReceivedDate().after(registrationTimestamp)) {
-                    String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
-                    if (appUrl.equalsIgnoreCase(url)) {
-                        // delete the message
-                        message.setFlag(Flags.Flag.DELETED, true);
-                        return true;
+            try {
+                Message[] messages = folder.getMessages();
+                for (Message message : messages) {
+                    if (message.getSubject().equalsIgnoreCase(EmailSettings.PLS_NEW_USER_SUBJECT)) {
+                        Date receivedDate = message.getReceivedDate();
+                        LocalDateTime receivedLocalDate = receivedDate.toInstant() //
+                                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        if (receivedLocalDate.isAfter(registrationTimestamp)) {
+                            MimeMessage m = (MimeMessage) message;
+                            String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
+                            log.info("Found one new user email received after registration time, with app url " + url);
+                            if (appUrl.equalsIgnoreCase(url)) {
+                                // delete the message
+                                message.setFlag(Flags.Flag.DELETED, true);
+                                foundTheEmail = true;
+                                break;
+                            }
+                        }
                     }
-
                 }
+            } finally {
+                folder.close(true);
             }
-
-            folder.close(true);
+        } finally {
             store.close();
-
-            return false;
-
-        } catch (Exception e) {
-            Assert.fail("Failed to verify receiving Gmail.", e);
-            return false;
         }
+        Assert.assertTrue(foundTheEmail, "Did not find the new user email.");
     }
 
     private static String getHrefUrlFromMultiPart(Multipart multipart) throws MessagingException, IOException {
