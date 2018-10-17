@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.repository;
 
+import org.springframework.data.jpa.repository.Query;
+
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -12,6 +14,7 @@ public interface DropBoxRepository extends BaseJpaRepository<DropBox, Long> {
 
     boolean existsByDropBox(String dropBox);
 
-    DropBox findByDropBox(String dropBox);
+    @Query("SELECT tenant from DropBox where dropBox = ?1")
+    Tenant findTenantByDropBox(String dropBox);
 
 }
