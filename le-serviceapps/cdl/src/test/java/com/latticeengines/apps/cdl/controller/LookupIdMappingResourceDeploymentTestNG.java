@@ -26,12 +26,12 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
     private String configId = null;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void getLookupIdsMapping() {
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
                 null, null, true);
@@ -39,7 +39,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertTrue(lookupIdConfigs.keySet().size() == 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void registerExternalSystem() {
         LookupIdMap lookupIdsMap = new LookupIdMap();
         lookupIdsMap.setOrgId(orgId);
@@ -60,7 +60,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         confirmNonEmptyLookupConfigs(Boolean.TRUE);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void updateLookupIdMap() {
 
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
@@ -100,7 +100,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testDeregisterExternalSystem() {
         LookupIdMap configBeforeDeregister = lookupIdMappingProxy.getLookupIdMap(mainCustomerSpace, configId);
         Assert.assertEquals(configBeforeDeregister.getExternalSystemType(), externalSystemType);
@@ -145,7 +145,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     }
 
     // TODO - anoop - enable it
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment-app", enabled = false)
     public void getAllLookupIds() {
         Map<String, List<CDLExternalSystemMapping>> allLookupIds = lookupIdMappingProxy
                 .getAllLookupIds(mainCustomerSpace, null);
@@ -166,7 +166,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void getAllCDLExternalSystemType() {
         List<CDLExternalSystemType> allCDLExternalSystemType = lookupIdMappingProxy
                 .getAllCDLExternalSystemType(mainCustomerSpace);
