@@ -49,7 +49,7 @@ public class S3ImportJmsConfig {
 
     @Bean
     public ErrorHandler messageError() {
-        return throwable -> log.error(throwable.getMessage());
+        return throwable -> log.error(throwable.getMessage(), throwable);
     }
 
 }
