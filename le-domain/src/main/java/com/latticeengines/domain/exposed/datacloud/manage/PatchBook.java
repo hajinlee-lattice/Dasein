@@ -84,6 +84,10 @@ public class PatchBook implements HasPid, Serializable {
     @Column(name = "City")
     private String city;
 
+    @JsonProperty("ZipCode")
+    @Column(name = "ZipCode")
+    private String zipcode;
+
     @JsonProperty("PatchItems")
     @Column(name = "PatchItems", columnDefinition = "'JSON'")
     @org.hibernate.annotations.Type(type = "json")
@@ -201,6 +205,14 @@ public class PatchBook implements HasPid, Serializable {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
     }
 
     public Map<String, Object> getPatchItems() {
