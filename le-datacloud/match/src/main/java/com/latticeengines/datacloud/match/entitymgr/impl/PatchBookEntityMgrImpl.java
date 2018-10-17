@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.entitymgr.impl;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.dao.PatchBookDao;
 import com.latticeengines.datacloud.match.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -20,6 +22,20 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     @Override
     public PatchBookDao getDao() {
         return patchBookDao;
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<PatchBook> findByType(@NotNull PatchBook.Type type) {
+        Preconditions.checkNotNull(type);
+        return getDao().findAllByField(PatchBook.COLUMN_TYPE, type.name());
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<PatchBook> findByTypeAndHotFix(@NotNull PatchBook.Type type, boolean hotFix) {
+        Preconditions.checkNotNull(type);
+        return getDao().findAllByFields(PatchBook.COLUMN_TYPE, type.name(), PatchBook.COLUMN_HOTFIX, hotFix);
     }
 
     /* override methods that require write access to use the correct manager (write connection) */
