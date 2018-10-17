@@ -103,7 +103,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
     private final Set<String> deprecatedAttrs = new HashSet<>();
     private Scheduler scheduler = Schedulers.newParallel("verification");
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(() -> {
@@ -145,7 +145,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void test() {
         testLDCAttrs();
         testContactAttributes();
@@ -153,7 +153,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         testProductSpendAttributes();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testServingStoreProxy() {
         Flux<ColumnMetadata> newModelingAttrs = servingStoreProxy.getNewModelingAttrs(mainTestTenant.getId());
         Predicate<ColumnMetadata> p = attr -> ApprovedUsage.MODEL_ALLINSIGHTS.equals(attr.getApprovedUsageList().get(0))

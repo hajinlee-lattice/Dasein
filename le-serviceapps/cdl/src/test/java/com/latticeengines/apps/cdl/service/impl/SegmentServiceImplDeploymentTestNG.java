@@ -38,14 +38,14 @@ public class SegmentServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     private String segmentName1;
     private String segmentName2;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId(), 4);
         createSegments();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testUpdateCounts() {
         Map<String, Map<BusinessEntity, Long>> review = segmentService.updateSegmentsCounts();
         Assert.assertEquals(review.size(), 3);

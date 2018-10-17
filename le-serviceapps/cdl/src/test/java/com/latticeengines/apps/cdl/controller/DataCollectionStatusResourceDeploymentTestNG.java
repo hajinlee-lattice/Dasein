@@ -16,12 +16,12 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCrud() throws Exception {
         // post empty node, verify insert default node
         DataCollectionStatus emptyStatus = new DataCollectionStatus();

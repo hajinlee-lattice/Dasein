@@ -57,7 +57,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     @Inject
     private SegmentProxy segmentProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId(), 3);
@@ -70,7 +70,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         re = createRuleBasedRatingEngine(retrievedSegment);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testGetAttrConfig() {
         createRatingEngine(re);
         cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), re.getId(), null);
@@ -90,7 +90,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Assert.assertNotNull(request.getAttrConfigs());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testVerifyGetTable() {
         List<Table> tables = metadataProxy.getTables(mainTestTenant.getId());
         assertNotNull(tables);
@@ -101,7 +101,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         });
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testPartialUpdate() throws InterruptedException {
         AttrConfigRequest request = new AttrConfigRequest();
         AttrConfig config1 = new AttrConfig();
@@ -152,7 +152,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         assertFalse(dateConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Segment.name()));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testPartialUpdate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testPartialUpdate" })
     public void testDeleteConfigWhenEmptyProps() throws Exception {
         // save two configs, make sure added and no impacts to existing
         AttrConfig config3 = new AttrConfig();

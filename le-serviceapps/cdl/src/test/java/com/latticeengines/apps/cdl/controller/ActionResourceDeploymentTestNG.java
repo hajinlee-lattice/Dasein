@@ -48,7 +48,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private List<Action> actions;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
 
@@ -76,7 +76,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         return action;
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCreate() {
         for (Action action : actions) {
             createAction(action);
@@ -85,7 +85,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(retrievedActions.size(), 3);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreate" })
     public void testGet() {
         List<Action> actionsWithOwner = findByOwnerId(OWNER_ID);
         Assert.assertEquals(actionsWithOwner.size(), 1);
@@ -100,7 +100,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertTrue(CollectionUtils.isEmpty(retrievedJobs));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGet" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGet" })
     public void testUpdate() {
         Action actionWithoutOwner = findByOwnerId(null).get(0);
         actionWithoutOwner.setOwnerId(OWNER_ID);

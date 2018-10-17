@@ -39,7 +39,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Inject
     private ExternalSystemMetadataStore externalSystemMetadataStore;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() {
         super.setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId(), 3);
@@ -48,7 +48,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCreateAndGet() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
@@ -74,7 +74,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(system.getErpIds().contains("TechIndicator_SysAid"));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet", enabled = true)
+    @Test(groups = "deployment-app", dependsOnMethods = "testCreateAndGet", enabled = true)
     public void testLookupIdAttrGroup() {
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
         List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
@@ -86,7 +86,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     }
 
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
+    @Test(groups = "deployment-app", dependsOnMethods = "testCreateAndGet")
     public void testGetMapping() {
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
         List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
@@ -104,7 +104,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     }
 
 
-    @Test(groups = "deployment", dependsOnMethods = "testGetMapping")
+    @Test(groups = "deployment-app", dependsOnMethods = "testGetMapping")
     public void testUpdate() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();

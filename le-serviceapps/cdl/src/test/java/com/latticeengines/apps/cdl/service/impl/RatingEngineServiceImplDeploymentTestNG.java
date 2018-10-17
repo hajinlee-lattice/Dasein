@@ -82,7 +82,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     private Date createdDate;
     private Date updatedDate;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId(), 3);
@@ -93,7 +93,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         log.info(String.format("Created metadata segment with name %s", reTestSegment.getName()));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCreate() {
         // Test Rulebased Rating Engine
         rbRatingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
@@ -194,7 +194,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
                 });
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreate" })
     public void testGet() {
         // test get a list
         List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
@@ -288,7 +288,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         return ratingEngine;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGet" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGet" })
     public void testUpdateRatingEngine() {
         updateRatingEngine(rbRatingEngine);
         updateRatingEngine(aiRatingEngine);
@@ -354,7 +354,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(ratingEngineNotes.get(1).getNotesContents(), RATING_ENGINE_NEW_NOTE);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingEngine" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testUpdateRatingEngine" })
     public void testReplicate() {
         RatingEngine replicatedRule = ratingEngineService.replicateRatingEngine(rbRatingEngineId);
         assertReplicatedEngine(replicatedRule, rbRatingEngine);
@@ -401,7 +401,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(replicated.getAdvancedRatingConfigStr(), original.getAdvancedRatingConfigStr());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testReplicate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testReplicate" })
     public void testCreateModelIteration() {
         RuleBasedModel ruleBasedModel = createRuleBasedModel();
         boolean exception = false;
@@ -443,7 +443,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         return aiModel;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreateModelIteration" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateModelIteration" })
     public void testDelete() {
         // update Rating Engine to be inactive for deletion
         deactivateRatingEngine(rbRatingEngineId);
@@ -482,7 +482,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(ratingEngineList.size(), 0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testDelete" })
     public void testCyclicDependency() {
         MetadataSegment segment1 = createSegment(SEGMENT_NAME + "1");
         MetadataSegment segment2 = createSegment(SEGMENT_NAME + "2");

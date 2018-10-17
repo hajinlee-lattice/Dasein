@@ -62,7 +62,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     private RatingEngine re1;
     private RatingEngine re2;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId(), 3);
@@ -77,7 +77,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         re2 = createAIRatingEngine(retrievedSegment);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCreate() {
         testCreate(re1);
         // Only mock the Rulebased Rating data in Redshift to test the filtering
@@ -88,7 +88,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         testRatingEngineNoteCreation(re2, false);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreate" })
     public void testGet() {
         // test get all rating engine summary list
         List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
@@ -177,7 +177,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertTrue(ratingModel instanceof AIModel);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGet" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGet" })
     public void testUpdate() {
         // test update rating engine
         testUpdateRuleBasedModel();
@@ -377,7 +377,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         return selectedAttributes;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         // Soft Delete Rule Based Rating Engine
         ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), false, CREATED_BY);

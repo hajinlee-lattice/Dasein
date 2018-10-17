@@ -52,7 +52,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private long totalRatedAccounts;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         if (USE_EXISTING_TENANT) {
             setupTestEnvironment(EXISTING_TENANT);
@@ -73,13 +73,13 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         return playCreationHelper.createSegment(NamingUtils.timestamp("Segment"), null, null);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCrud() {
         playCreationHelper.testCrud();
         playName = playCreationHelper.getPlayName();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCrud" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
     public void createPlayLaunch() {
         playCreationHelper.createPlayLaunch();
         play = playCreationHelper.getPlay();
@@ -94,7 +94,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         totalRatedAccounts = playLaunch.getAccountsSelected();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "createPlayLaunch" })
     private void searchPlayLaunch() {
         List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Collections.singletonList(LaunchState.Failed));
@@ -146,7 +146,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(count.longValue(), expectedVal);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "searchPlayLaunch" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "searchPlayLaunch" })
     private void testGetFullPlays() {
         Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);
@@ -164,7 +164,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(retrievedFullPlayList.size(), 2);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGetFullPlays" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGetFullPlays" })
     private void testIdempotentCreateOrUpdatePlays() {
         Play createdPlay1 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), play);
         Assert.assertNotNull(createdPlay1.getTalkingPoints());
@@ -174,7 +174,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(retrievedFullPlayList.size(), 2);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testIdempotentCreateOrUpdatePlays" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testIdempotentCreateOrUpdatePlays" })
     public void testDeletePlayLaunch() {
         deletePlayLaunch(playName, playLaunch.getLaunchId());
 
@@ -185,7 +185,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(launchList.size(), 0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDeletePlayLaunch" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testDeletePlayLaunch" })
     private void testPlayDelete() {
         List<Play> playList;
         Play retrievedPlay;

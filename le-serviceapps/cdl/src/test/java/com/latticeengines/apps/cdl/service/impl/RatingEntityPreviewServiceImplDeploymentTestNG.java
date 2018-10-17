@@ -67,7 +67,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     private String actualNameInOneOfTheAccounts = null;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
@@ -102,23 +102,23 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     }
 
-    @AfterClass(groups = { "deployment" })
+    @AfterClass(groups = { "deployment-app" })
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testEntityPreviewFirstTime() {
         testEntityPreview(0L, 5L);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewFirstTime" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testEntityPreviewFirstTime" })
     public void testEntityPreviewSecondTime() {
         // it is imp to run same query twice to be able to test caching effect
         testEntityPreview(0L, 5L);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewSecondTime" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testEntityPreviewSecondTime" })
     public void testEntityPreviewThirdTimeWithDifferentPages() {
         Set<String> accIds0 = testEntityPreview(0L, 5L);
         if (accIds0.size() < 2) {
@@ -134,7 +134,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         accIds2.forEach(id -> Assert.assertFalse(accIds1.contains(id)));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewThirdTimeWithDifferentPages" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testEntityPreviewThirdTimeWithDifferentPages" })
     public void testEntityPreviewThirdTimeWithPartiallyOverlappingPages() {
         Set<String> accIds0 = testEntityPreview(0L, 5L);
         if (accIds0.size() < 2) {
@@ -155,7 +155,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertEquals(overlappingCount.get(), 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewThirdTimeWithPartiallyOverlappingPages" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testEntityPreviewThirdTimeWithPartiallyOverlappingPages" })
     public void testGetSegmentAccountCount() {
         RatingsCountRequest request = new RatingsCountRequest();
         List<String> segmentIds = Arrays.asList(play.getRatingEngine().getSegment().getName());
@@ -178,7 +178,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGetSegmentAccountCount" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGetSegmentAccountCount" })
     public void testEntityPreviewCount() {
         List<String> allRatingBuckets = Arrays.asList(RatingBucketName.values()).stream().map(b -> b.getName())
                 .collect(Collectors.toList());
@@ -245,7 +245,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     // disabled it for now as mock rating has only 2 accounts with non-null
     // rating
-    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "testEntityPreviewCount" })
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = { "testEntityPreviewCount" })
     public void testEntityPreviewFourthTimeToTestEdgeCase() {
         Set<String> accIds1 = testEntityPreview(segmentAccountsCount - 3L, 6L);
         Assert.assertEquals(accIds1.size(), 3);

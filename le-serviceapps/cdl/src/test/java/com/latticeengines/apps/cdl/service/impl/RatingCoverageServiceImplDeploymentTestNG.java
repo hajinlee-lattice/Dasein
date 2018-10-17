@@ -64,7 +64,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     private RatingRule ratingRule;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
@@ -90,12 +90,12 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     }
 
-    @AfterClass(groups = { "deployment" })
+    @AfterClass(groups = { "deployment-app" })
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testRatingIdCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
 
@@ -136,7 +136,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testSegmentIdCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
         List<String> segmentIds = Arrays
@@ -170,7 +170,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testRatingModelIdCoverage() {
         @SuppressWarnings("deprecation")
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
@@ -201,7 +201,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testRatingIdLookupColumnPairCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
         String p1Key = "p1Key";
@@ -257,7 +257,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
                 Assert.assertFalse(response.getRatingIdLookupColumnPairsCoverageMap()
                         .containsKey(ratingIdLookupColumnPair.getResponseKeyId()));
                 key = key == null ? "NULL_KEY" : key;
-                
+
                 Assert.assertNotNull(response.getErrorMap());
                 Map<String, String> errorMap = response.getErrorMap().get("processRatingIdLookupColumnPairs");
                 Assert.assertNotNull(errorMap);
@@ -274,7 +274,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testSegmentIdModelRulesCoverage() {
         @SuppressWarnings("deprecation")
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
@@ -302,7 +302,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testSegmentIdSingleRulesCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
 

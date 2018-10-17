@@ -1,13 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -17,17 +13,16 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
 
 public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(DropFolderResourceDeploymentTestNG.class);
 
     @Inject
     private DropFolderProxy dropFolderProxy;
 
-    @BeforeClass(groups = "deployment")
-    public void setup() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    @BeforeClass(groups = "deployment-app")
+    public void setup() {
         setupTestEnvironment();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void test() {
         List<String> subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
         int defaultSize = subFolders.size();
