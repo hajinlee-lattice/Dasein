@@ -67,6 +67,7 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testCreate")
     public void testGetById() {
+        sleepToAllowDbWriterReaderSync();
         // Test getting the newly made playType by Id
         String playTypeId = playType.getId();
         PlayType getPlayType = playProxy.getPlayTypeById(tenant.getId(), playTypeId);
@@ -80,11 +81,7 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         String updatedPlayTypeName = "playTypeTestPostUpdate";
         playType.setDisplayName(updatedPlayTypeName);
         playProxy.updatePlayType(tenant.getId(), playType.getId(), playType);
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        sleepToAllowDbWriterReaderSync();
         PlayType updatedPlayType = playProxy.getPlayTypeById(tenant.getId(), playType.getId());
         Assert.assertNotNull(updatedPlayType);
         Assert.assertEquals(updatedPlayType.getDisplayName(), updatedPlayTypeName);
@@ -99,5 +96,13 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         List<PlayType> playTypes = playTypeList.stream().filter(pt -> pt.getId().equals(playType.getId()))
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEmpty(playTypes));
+    }
+
+    private void sleepToAllowDbWriterReaderSync() {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
     }
 }
