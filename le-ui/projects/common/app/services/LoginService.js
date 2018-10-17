@@ -220,15 +220,15 @@ angular.module('mainApp.login.services.LoginService', [
                         authenticationRoute = (loginDocument && loginDocument.AuthenticationRoute ? loginDocument.AuthenticationRoute : null),
                         tenantId = (BrowserStorageUtility.getClientSession() && BrowserStorageUtility.getClientSession().Tenant  && BrowserStorageUtility.getClientSession().Tenant.Identifier ? BrowserStorageUtility.getClientSession().Tenant.Identifier : null);
     
-                    var paramString = Object.keys(params).map(function(k) {
+                    var paramString = params ? '?' + Object.keys(params).map(function(k) {
                         return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-                    }).join('&');
+                    }).join('&') : '';
 
                     setTimeout(function() {
                         if(authenticationRoute === 'SSO') {
-                            $window.open('/login/saml/' + tenantId + '/logout?' + paramString, '_self');
+                            $window.open('/login/saml/' + tenantId + '/logout' + paramString, '_self');
                         } else {
-                            $window.open('/login/logout?' + paramString, '_self');
+                            $window.open('/login/logout' + paramString, '_self');
                         }
                     }, 300);
                 } else {
