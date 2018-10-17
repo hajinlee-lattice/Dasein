@@ -6,7 +6,7 @@ import boto3
 import re
 import subprocess
 
-NEXUS_DOCKER_REGISTRY="bodcdevnexus75.dev.lattice.local:18666"
+NEXUS_DOCKER_REGISTRY="10.41.1.75:18666"
 NAMESPACE="latticeengines"
 REVISIONS_TO_KEEP=10
 ECR_CLIENT={}
