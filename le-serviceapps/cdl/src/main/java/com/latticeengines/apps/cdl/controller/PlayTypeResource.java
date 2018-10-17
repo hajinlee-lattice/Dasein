@@ -61,13 +61,14 @@ public class PlayTypeResource {
     @PostMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create new Play type")
-    public void createPlayType(@PathVariable String customerSpace, @RequestBody PlayType playType) {
+    public PlayType createPlayType(@PathVariable String customerSpace, @RequestBody PlayType playType) {
         List<String> validationErrors = validatePlayTypeForCreation(playType);
         if (CollectionUtils.isEmpty(validationErrors)) {
             Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
             playType.setId(PlayType.generateId());
             playType.setTenant(tenant);
             playTypeEntityMgr.create(playType);
+            return playType;
         } else {
             AtomicInteger i = new AtomicInteger(1);
             throw new LedpException(LedpCode.LEDP_32000,

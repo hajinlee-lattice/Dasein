@@ -290,10 +290,10 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return getList("get all Play Types", url, PlayType.class);
     }
 
-    public void createPlayType(String customerSpace, PlayType playType) {
+    public PlayType createPlayType(String customerSpace, PlayType playType) {
         String url = constructUrl(PLAY_TYPE_URL_PREFIX, shortenCustomerSpace(customerSpace));
         log.info("url is " + url);
-        post("create new Play Types", url, playType, PlayType.class);
+        return post("create new Play Types", url, playType, PlayType.class);
     }
 
     public PlayType getPlayTypeById(String customerSpace, String playTypeId) {

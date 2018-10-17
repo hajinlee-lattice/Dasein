@@ -55,13 +55,9 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         // Test creating a new playType
         playType = new PlayType(tenant, playTypeName, "Description", "admin.le.com", "admin.le.com");
         playType.setId(null);
-        playProxy.createPlayType(tenant.getId(), playType);
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
-
+        playType = playProxy.createPlayType(tenant.getId(), playType);
+        Assert.assertNotNull(playType.getId());
+        Assert.assertNotEquals(playType.getPid(), 0);
         List<PlayType> types = playProxy.getPlayTypes(tenant.getId()).stream()
                 .filter(pl -> pl.getDisplayName().equals(playTypeName)).collect(Collectors.toList());
         Assert.assertNotNull(types);
