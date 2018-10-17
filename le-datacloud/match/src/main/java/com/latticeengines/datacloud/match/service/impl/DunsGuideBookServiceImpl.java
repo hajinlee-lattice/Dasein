@@ -91,6 +91,19 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
     }
 
     @Override
+    public void set(String version, List<DunsGuideBook> books) {
+        Preconditions.checkNotNull(version);
+        Preconditions.checkNotNull(books);
+        books = books.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        if (books.isEmpty()) {
+            return;
+        }
+
+        DunsGuideBookEntityMgr mgr = getEntityMgr(version);
+        mgr.batchCreate(books);
+    }
+
+    @Override
     public DunsGuideBookEntityMgr getEntityMgr(String version) {
         DunsGuideBookEntityMgr mgr = entityMgrMap.get(version);
         if (mgr == null) {

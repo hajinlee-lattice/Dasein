@@ -30,6 +30,14 @@ public interface DunsGuideBookService {
     List<DunsGuideBook> get(@NotNull String version, @NotNull List<String> dunsList);
 
     /**
+     * Upsert the given list of {@link DunsGuideBook}.
+     * @param version target {@link DataCloudVersion#getVersion()}, has to be a valid version
+     * @param books list of guide books to update, should not be {@literal null}. Also, {@literal null} items in
+     *              the list will be skipped
+     */
+    void set(@NotNull String version, @NotNull List<DunsGuideBook> books);
+
+    /**
      * Retrieve a {@link DunsGuideBookEntityMgr} instance that is associated with the given datacloud version
      * @param version target {@link DataCloudVersion#getVersion()}, has to be a valid version
      * @return non-null {@link DunsGuideBookEntityMgr} instance

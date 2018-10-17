@@ -97,6 +97,31 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
         testCases.forEach(this::cleanup);
     }
 
+    @Test(groups = "functional", dataProvider = "dunsGuideBookListTestCase")
+    public void testBatchSetNGet(List<TestCase> testCases) {
+        testCases.forEach(this::cleanup);
+
+        // batch create
+        List<DunsGuideBook> booksInTable = testCases
+                .stream()
+                .filter(test -> test.inTable)
+                .map(test -> test.expectedBook)
+                .collect(Collectors.toList());
+        service.set(TEST_DATACLOUD_VERSION, booksInTable);
+
+        List<String> dunsList = testCases
+                .stream()
+                .map(testCase -> testCase.expectedBook.getId())
+                .collect(Collectors.toList());
+        List<DunsGuideBook> results = service.get(TEST_DATACLOUD_VERSION, dunsList);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(results.size(), testCases.size());
+        for (int i = 0; i < testCases.size(); i++) {
+            verify(results.get(i), testCases.get(i));
+        }
+        testCases.forEach(this::cleanup);
+    }
+
     @Test(groups = "functional", invocationCount = 200, threadPoolSize = 5)
     public void testConcurrentGetMgr() {
         // simple test just making sure contention will not cause exception
@@ -195,6 +220,11 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
         DunsGuideBook book = new DunsGuideBook();
         book.setId(duns);
         book.setItems(new ArrayList<>());
+        if (idx % 3 == 1) {
+            book.setPatched(true);
+        } else if (idx % 3 == 2) {
+            book.setPatched(false);
+        }
         for (int i = 0; i < nItems; i++) {
             book.getItems().add(newTestItem(idx + i));
         }
@@ -208,6 +238,7 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
         DunsGuideBook.Item item = new DunsGuideBook.Item();
         item.setDuns(duns);
         item.setKeyPartition(key.name());
+        item.setPatched(idx % 2 == 0);
         return item;
     }
 
@@ -240,6 +271,7 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
             Assert.assertEquals(result.getId(), standardDuns);
             Assert.assertNotNull(result.getItems());
             Assert.assertEquals(result.getItems().size(), testCase.expectedBook.getItems().size());
+            Assert.assertEquals(result.isPatched(), testCase.expectedBook.isPatched());
             List<DunsGuideBook.Item> items = result.getItems();
             for (int i = 0; i < items.size(); i++) {
                 DunsGuideBook.Item item = items.get(i);
@@ -247,6 +279,7 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
                 Assert.assertNotNull(item);
                 Assert.assertEquals(item.getDuns(), expectedItem.getDuns());
                 Assert.assertEquals(item.getKeyPartition(), expectedItem.getKeyPartition());
+                Assert.assertEquals(item.getPatched(), expectedItem.getPatched());
             }
         }
     }
