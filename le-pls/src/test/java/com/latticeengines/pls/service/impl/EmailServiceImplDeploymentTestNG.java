@@ -43,7 +43,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     protected static final Logger log = LoggerFactory.getLogger(EmailServiceImplDeploymentTestNG.class);
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
-    private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
+    private static final String EXTERNAL_USER_EMAIL = "developers.lattice.engines@gmail.com";
     private static final String EXTERNAL_USER_EMAIL_PASSWORD = "MrB2uild";
     private static final String APP_URL_PATTERN = "href=\"[^\"]*";
 
@@ -139,8 +139,8 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         try {
             Store store = session.getStore("imaps");
-            String appCode = System.getProperty("GMAIL_APP_PASSWORD");
-            String password = StringUtils.isNotEmpty(appCode) ? appCode : EXTERNAL_USER_EMAIL_PASSWORD;
+            // String appCode = System.getProperty("GMAIL_APP_PASSWORD");
+            String password = EXTERNAL_USER_EMAIL_PASSWORD;
             store.connect(receivingHost, EXTERNAL_USER_EMAIL, password);
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
