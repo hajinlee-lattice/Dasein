@@ -334,91 +334,67 @@ public class MatchKeyTuple implements Fact {
         sb.append(String.format("%s=%s", key, value));
     }
 
-
     /*
      * generated builder
      */
     public static final class Builder {
-        private String domain;
-        private String name;
-        private String city;
-        private String state;
-        private String country;
-        private String countryCode;
-        private String zipcode;
-        private String phoneNumber;
-        private String duns;
-        private String email;
+        private MatchKeyTuple matchKeyTuple;
 
-        private Builder() {
-        }
-
-        public static Builder newBuilder() {
-            return new Builder();
+        public Builder() {
+            matchKeyTuple = new MatchKeyTuple();
         }
 
         public Builder withDomain(String domain) {
-            this.domain = domain;
+            matchKeyTuple.setDomain(domain);
             return this;
         }
 
         public Builder withName(String name) {
-            this.name = name;
+            matchKeyTuple.setName(name);
             return this;
         }
 
         public Builder withCity(String city) {
-            this.city = city;
+            matchKeyTuple.setCity(city);
             return this;
         }
 
         public Builder withState(String state) {
-            this.state = state;
+            matchKeyTuple.setState(state);
             return this;
         }
 
         public Builder withCountry(String country) {
-            this.country = country;
+            matchKeyTuple.setCountry(country);
             return this;
         }
 
         public Builder withCountryCode(String countryCode) {
-            this.countryCode = countryCode;
+            matchKeyTuple.setCountryCode(countryCode);
             return this;
         }
 
         public Builder withZipcode(String zipcode) {
-            this.zipcode = zipcode;
+            matchKeyTuple.setZipcode(zipcode);
             return this;
         }
 
         public Builder withPhoneNumber(String phoneNumber) {
-            this.phoneNumber = phoneNumber;
+            matchKeyTuple.setPhoneNumber(phoneNumber);
             return this;
         }
 
         public Builder withDuns(String duns) {
-            this.duns = duns;
+            matchKeyTuple.setDuns(duns);
             return this;
         }
 
         public Builder withEmail(String email) {
-            this.email = email;
+            matchKeyTuple.setEmail(email);
             return this;
         }
 
         public MatchKeyTuple build() {
-            MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
-            matchKeyTuple.setDomain(domain);
-            matchKeyTuple.setName(name);
-            matchKeyTuple.setCity(city);
-            matchKeyTuple.setState(state);
-            matchKeyTuple.setCountry(country);
-            matchKeyTuple.setCountryCode(countryCode);
-            matchKeyTuple.setZipcode(zipcode);
-            matchKeyTuple.setPhoneNumber(phoneNumber);
-            matchKeyTuple.setDuns(duns);
-            matchKeyTuple.setEmail(email);
             return matchKeyTuple;
         }
     }
