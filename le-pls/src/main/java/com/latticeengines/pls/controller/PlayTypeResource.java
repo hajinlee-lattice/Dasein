@@ -42,12 +42,12 @@ public class PlayTypeResource {
     @PostMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create new Playtype")
-    public PlayType createPlayType(@RequestBody PlayType playType) {
+    public void createPlayType(@RequestBody PlayType playType) {
         Tenant tenant = MultiTenantContext.getTenant();
         String userId = MultiTenantContext.getEmailAddress();
         playType.setCreatedBy(userId);
         playType.setUpdatedBy(userId);
-        return playProxy.createPlayType(tenant.getId(), playType);
+        playProxy.createPlayType(tenant.getId(), playType);
     }
 
     @GetMapping(value = "/{playTypeId}", headers = "Accept=application/json")
