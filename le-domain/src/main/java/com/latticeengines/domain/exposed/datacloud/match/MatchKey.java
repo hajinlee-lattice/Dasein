@@ -7,7 +7,7 @@ public enum MatchKey {
     Name, //
     City, //
     State, //
-    Country, // default to USA
+    Country, // default to USA for name + location -> duns
     Zipcode, //
     PhoneNumber, //
     DUNS, //

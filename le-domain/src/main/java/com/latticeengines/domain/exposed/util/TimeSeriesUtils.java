@@ -407,10 +407,11 @@ public class TimeSeriesUtils {
             log.info("Looking for earliest period table " + transactionTable.getName() + " path " + avroDir);
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
             Collections.sort(avroFiles);
-            log.info(String.format("Get min period %s & max period %s from file", avroFiles.get(0),
-                    avroFiles.get(avroFiles.size() - 1)));
-            return Pair.of(getPeriodFromFileName(avroFiles.get(0)),
-                    getPeriodFromFileName(avroFiles.get(avroFiles.size() - 1)));
+            Integer minPeriod = getPeriodFromFileName(avroFiles.get(0));
+            Integer maxPeriod = getPeriodFromFileName(avroFiles.get(avroFiles.size() - 1));
+            log.info(String.format("Got min period %d from file %s and max period %d from file %s", minPeriod,
+                    avroFiles.get(0), maxPeriod, avroFiles.get(avroFiles.size() - 1)));
+            return Pair.of(minPeriod, maxPeriod);
         } catch (Exception e) {
             log.error("Failed to find earlies period", e);
             return null;
@@ -455,13 +456,13 @@ public class TimeSeriesUtils {
     private static final String TIMESERIES_FILENAME_PREFIX = "Period-";
     private static final String TIMESERIES_FILENAME_SUFFIX = "-data.avro";
 
-    private static Integer getPeriodFromFileName(String fileName) {
+    public static Integer getPeriodFromFileName(String fileName) {
         try {
-            int beginIndex = TIMESERIES_FILENAME_PREFIX.length();
+            int beginIndex = fileName.indexOf(TIMESERIES_FILENAME_PREFIX) + TIMESERIES_FILENAME_PREFIX.length();
             int endIndex = fileName.indexOf(TIMESERIES_FILENAME_SUFFIX);
             return Integer.valueOf(fileName.substring(beginIndex, endIndex));
         } catch (Exception e) {
-            return null;
+            throw new RuntimeException("Fail to get period id from file name " + fileName, e);
         }
     }
 

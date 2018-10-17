@@ -477,7 +477,7 @@ public class SourceStandardizationFlow
             for (int i = 0; i < convertTypeFields.length; i++) {
                 String convertTypeField = convertTypeFields[i];
                 TypeConvertStrategy strategy = strategies[i];
-                TypeConvertFunction function = new TypeConvertFunction(convertTypeField, strategy);
+                TypeConvertFunction function = new TypeConvertFunction(convertTypeField, strategy, false);
                 switch (strategy) {
                     case ANY_TO_STRING:
                         source = source.apply(function, new FieldList(convertTypeField),

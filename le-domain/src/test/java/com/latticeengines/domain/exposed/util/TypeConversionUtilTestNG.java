@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata.util;
+package com.latticeengines.domain.exposed.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +7,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
+import com.latticeengines.domain.exposed.util.TypeConversionUtil;
 
 public class TypeConversionUtilTestNG {
     private static final Logger log = LoggerFactory.getLogger(TypeConversionUtilTestNG.class);
@@ -14,44 +15,35 @@ public class TypeConversionUtilTestNG {
     @Test(groups = "unit", dataProvider = "batchData")
     public void testTypeConvert(Object data, TypeConvertStrategy strategy, Object expectedOutput) {
         switch (strategy) {
-            case ANY_TO_STRING:
-                Assert.assertEquals(TypeConversionUtil.convertAnyToString(data), expectedOutput);
-                break;
-            case ANY_TO_INT:
-                Assert.assertEquals(TypeConversionUtil.convertAnyToInt("IntField", data),
-                        expectedOutput);
-                break;
-            case STRING_TO_INT:
-                Assert.assertEquals(
-                        TypeConversionUtil.convertAnyToInt("StringField", String.valueOf(data)),
-                        expectedOutput);
-                break;
-            case ANY_TO_LONG:
-                Assert.assertEquals(TypeConversionUtil.convertAnyToLong("LongField", data),
-                        expectedOutput);
-                break;
-            case STRING_TO_LONG:
-                Assert.assertEquals(
-                        TypeConversionUtil.convertAnyToLong("StringField", String.valueOf(data)),
-                        expectedOutput);
-                break;
-            case ANY_TO_DOUBLE:
-                Assert.assertEquals(TypeConversionUtil.convertAnyToDouble("DoubleField", data),
-                        expectedOutput);
-                break;
-            case ANY_TO_BOOLEAN:
-                Assert.assertEquals(TypeConversionUtil.convertAnyToBoolean("BooleanField", data),
-                        expectedOutput);
-                break;
-            case STRING_TO_BOOLEAN:
-                Assert.assertEquals(
-                        TypeConversionUtil.convertAnyToBoolean("StringField", String.valueOf(data)),
-                        expectedOutput);
-                break;
-            default:
-                log.info("Strategy not found");
+        case ANY_TO_STRING:
+            Assert.assertEquals(TypeConversionUtil.toString(data), expectedOutput);
+            break;
+        case ANY_TO_INT:
+            Assert.assertEquals(TypeConversionUtil.toInteger(data), expectedOutput);
+            break;
+        case STRING_TO_INT:
+            Assert.assertEquals(TypeConversionUtil.toInteger(String.valueOf(data)), expectedOutput);
+            break;
+        case ANY_TO_LONG:
+            Assert.assertEquals(TypeConversionUtil.toLong(data), expectedOutput);
+            break;
+        case STRING_TO_LONG:
+            Assert.assertEquals(TypeConversionUtil.toLong(String.valueOf(data)), expectedOutput);
+            break;
+        case ANY_TO_DOUBLE:
+            Assert.assertEquals(TypeConversionUtil.toDouble(data), expectedOutput);
+            break;
+        case ANY_TO_BOOLEAN:
+            Assert.assertEquals(TypeConversionUtil.toBoolean(data), expectedOutput);
+            break;
+        case STRING_TO_BOOLEAN:
+            Assert.assertEquals(TypeConversionUtil.toBoolean(String.valueOf(data)),
+                    expectedOutput);
+            break;
+        default:
+            log.info("Strategy not found");
         }
-    }
+        }
 
     @DataProvider(name = "batchData")
     private Object[][] provideBatchData() {
