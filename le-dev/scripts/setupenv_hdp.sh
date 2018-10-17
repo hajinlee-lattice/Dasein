@@ -99,8 +99,10 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     if [ ! -f "$ARTIFACT_DIR/sqoop-${SQOOP_VERSION}.tar.gz" ]; then
         wget https://s3.amazonaws.com/latticeengines-dev/sqoop-${SQOOP_VERSION}.tar.gz -O $ARTIFACT_DIR/sqoop-${SQOOP_VERSION}.tar.gz
     fi
-    rm -rf $SQOOP_HOME || true
-    mkdir -p $SQOOP_HOME
-    chown -R $USER $SQOOP_HOME
+    if [ -d "${SQOOP_HOME}" ]; then
+        sudo rm -rf $SQOOP_HOME/*
+    fi
+    sudo mkdir -p $SQOOP_HOME
+    sudo chown -R $USER $SQOOP_HOME
     tar xzf $ARTIFACT_DIR/sqoop-${SQOOP_VERSION}.tar.gz -C $SQOOP_HOME
 fi
