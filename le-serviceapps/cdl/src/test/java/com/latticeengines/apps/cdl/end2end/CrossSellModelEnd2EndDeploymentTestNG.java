@@ -39,8 +39,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "JLM1536254480756"; // LETest1528844192916-14
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "JLM1537307147289"; // LETest1528844192916-14
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -166,7 +166,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertEquals(testModel.getLatestIteration().getId(), testIteration2.getId());
 
         Map<String, List<ColumnMetadata>> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId());
+                testModel.getId(), testIteration1.getId(), null);
         Assert.assertNotNull(attrs);
 
         verifyBucketMetadataGenerated();
@@ -183,7 +183,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 RatingEngineStatus.INACTIVE);
 
         attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testModel.getId(),
-                testIteration2.getId());
+                testIteration2.getId(), null);
         Assert.assertNotNull(attrs);
 
         verifyRefinedAttributes(attrs);
@@ -286,6 +286,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 }
             }
         }
+
         return attrs;
     }
 }
