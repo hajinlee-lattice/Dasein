@@ -16,6 +16,11 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                                 padding: 0 .5em;
                             }
                         }
+                        &.campaign-type {
+                            select {
+                                margin-top: .5em;
+                            }
+                        }
                         &.talking-points {
                             background-image: url('/assets/images/ico-insights.png');
                         }
@@ -263,7 +268,7 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                             padding-left: 60px;
                         }
                         h4 {
-                            font-weight: normal;
+                            font-weight: bold;
                             text-transform: uppercase;
                         }
                         h5 {
@@ -273,6 +278,11 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                             font-size: 15px;
                             margin-right: 85px;
                             overflow: hidden;
+                        }
+                        select.form-control {
+                            display: inline-block;
+                            width: auto;
+                            min-width: 40%;
                         }
                         .controls {
                             position: absolute;

@@ -219,6 +219,15 @@ angular
                         deferred.resolve(result);
                     });
                     return deferred.promise;
+                },
+                CampaignTypes: function($q, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getTypes().then(function(result){
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             views: {

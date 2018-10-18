@@ -24,7 +24,7 @@
                             </div>
                         </p>
                         <div class="dashboard-section-content-subsection rating_ has-icon" ng-if="vm.play.ratingEngine.displayName">
-                            <h4>Rating</h4>
+                            <h4>Model</h4>
                             <h5>{{vm.play.ratingEngine.displayName}}</h5>
                         </div>
                         <div class="dashboard-section-content-subsection segment has-icon">
@@ -44,6 +44,18 @@
                                 </li>
                                 -->
                             </ul>
+                        </div>
+                        <div class="dashboard-section-content-subsection campaign-type">
+                            <h4>Campaign Type</h4>
+                            <select class="form-control" 
+                                    id="type" 
+                                    ng-model="vm.campaignType" 
+                                    ng-change="vm.changeCampaignType()" 
+                                    ng-init="vm.campaignType = vm.play.playType.id"
+                                    ng-disabled="vm.loadingCampaignType"
+                                    ng-options="type.id as type.displayName for type in vm.campaignTypes">
+                                <option value="" hidden disabled>---</option>
+                            </select> <span ng-if="vm.loadingCampaignType" class="fa fa-spinner fa-spin fa-fw"></span>
                         </div>
                     </div>
                 </div>

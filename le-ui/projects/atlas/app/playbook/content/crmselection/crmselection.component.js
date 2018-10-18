@@ -64,6 +64,8 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
         vm.checkValid = function(form, accountId, orgId, isRegistered) {
             vm.orgIsRegistered = isRegistered;
+            vm.nullCount = null;
+            vm.totalCount = null;
 
             $scope.excludeItemsWithoutSalesforceId = false;
             vm.setExcludeItems(false);

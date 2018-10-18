@@ -3,7 +3,7 @@ angular.module('lp.playbook.dashboard', [
 ])
 .controller('PlaybookDashboard', function(
     $q, $scope, $stateParams, $state, $interval, $rootScope,
-    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore
+    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore, CampaignTypes
 ) {
 
     var vm = this,
@@ -33,7 +33,8 @@ angular.module('lp.playbook.dashboard', [
         showLaunchSpinner: false,
         editing: {},
         barChartConfig: PlaybookWizardStore.barChartConfig,
-        barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig
+        barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig,
+        campaignTypes: CampaignTypes
     });
 
     // $q.when($stateParams.play_name, function() {
@@ -282,6 +283,22 @@ angular.module('lp.playbook.dashboard', [
                     });
                 }, 10 * 1000);
             }
+        });
+    }
+
+    vm.changeCampaignType = function(_type) {
+        var type = vm.campaignTypes.find(function(type) { 
+                return type.id === vm.campaignType
+            }),
+            opts = {
+                name: vm.play.name,
+                playType: type,
+                //typeId: vm.campaignType
+            };
+        vm.loadingCampaignType = true;
+        PlaybookWizardStore.savePlay(opts).then(function(play){
+            vm.loadingCampaignType = false;
+            vm.campaignType = play.playType.id;
         });
     }
 

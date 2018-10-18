@@ -179,6 +179,10 @@ textarea.form-control {
 input[type="search"] {
   -webkit-appearance: none;
 }
+select.form-control {
+  height: 30px;
+  font-size: 14px;
+}
 
 
 .checkbox-input {
