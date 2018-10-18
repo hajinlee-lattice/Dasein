@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.workflow;
 
 import javax.inject.Inject;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -68,7 +68,11 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         }
         action.setTenant(tenant);
         action.setActionConfiguration(config);
-        MultiTenantContext.setTenant(tenant);
+        if (tenant.getPid() != null) {
+            MultiTenantContext.setTenant(tenant);
+        } else {
+            log.warn("The tenant in action does not have a pid: " + tenant);
+        }
         log.info(String.format("Action=%s", action));
         return actionService.create(action);
     }
@@ -84,7 +88,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .dataFeedTaskId(dataFeedTask.getUniqueId()) //
                 .importConfig(connectorConfig) //
                 .userId(csvImportFileInfo.getFileUploadInitiator()) //
-                .inputProperties(ImmutableMap.<String, String> builder()
+                .inputProperties(ImmutableMap.<String, String>builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, csvImportFileInfo.getReportFileName()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,

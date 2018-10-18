@@ -121,7 +121,11 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                     String.format("Tenant with id=%s cannot be found", customerSpace.toString()));
         }
         action.setTenant(tenant);
-        MultiTenantContext.setTenant(tenant);
+        if (tenant.getPid() != null) {
+            MultiTenantContext.setTenant(tenant);
+        } else {
+            log.warn("The tenant in action does not have a pid: " + tenant);
+        }
         return actionService.create(action);
     }
 
