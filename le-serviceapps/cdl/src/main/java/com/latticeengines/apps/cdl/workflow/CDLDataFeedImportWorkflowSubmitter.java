@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         }
         action.setTenant(tenant);
         action.setActionConfiguration(config);
+        MultiTenantContext.setTenant(tenant);
         log.info(String.format("Action=%s", action));
         return actionService.create(action);
     }

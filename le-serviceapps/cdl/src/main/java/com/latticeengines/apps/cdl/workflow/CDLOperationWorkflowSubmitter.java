@@ -16,6 +16,7 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
@@ -120,6 +121,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                     String.format("Tenant with id=%s cannot be found", customerSpace.toString()));
         }
         action.setTenant(tenant);
+        MultiTenantContext.setTenant(tenant);
         return actionService.create(action);
     }
 
