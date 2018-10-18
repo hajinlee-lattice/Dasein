@@ -60,6 +60,9 @@ public class PatchBook implements HasPid, Serializable {
     @Column(name = COLUMN_TYPE, nullable = false)
     private Type type;
 
+    /* input MatchKey fields */
+    // NOTE Column/JSON key name matches MatchKey enum for consistency
+
     @JsonProperty("Domain")
     @Column(name = "Domain")
     private String domain;
@@ -84,9 +87,11 @@ public class PatchBook implements HasPid, Serializable {
     @Column(name = "City")
     private String city;
 
-    @JsonProperty("ZipCode")
-    @Column(name = "ZipCode")
+    @JsonProperty("Zipcode")
+    @Column(name = "Zipcode")
     private String zipcode;
+
+    /* input MatchKey fields */
 
     @JsonProperty("PatchItems")
     @Column(name = "PatchItems", columnDefinition = "'JSON'")
