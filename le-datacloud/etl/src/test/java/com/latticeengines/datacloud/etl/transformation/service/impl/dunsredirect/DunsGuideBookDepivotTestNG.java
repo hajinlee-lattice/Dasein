@@ -28,7 +28,7 @@ public class DunsGuideBookDepivotTestNG extends PipelineTransformationTestNGBase
     private static final Logger log = LoggerFactory.getLogger(DunsGuideBookDepivotTestNG.class);
 
     private GeneralSource dunsGuideBook = new GeneralSource("DunsGuideBook");
-    private GeneralSource ams = new GeneralSource("AccountMasterSeeds");
+    private GeneralSource ams = new GeneralSource("AccountMasterSeed");
     private GeneralSource dunsGuideBookDepivoted = new GeneralSource("DunsGuideBookDepivoted");
     private GeneralSource source = dunsGuideBookDepivoted;
 
@@ -79,10 +79,15 @@ public class DunsGuideBookDepivotTestNG extends PipelineTransformationTestNGBase
 
         // Schema: Duns, Items
         Object[][] data = new Object[][] { //
+                // Case 1: null Items
                 { "DUNS01", null }, //
+                // Case 2: Items is empty list
                 { "DUNS02", "[]" }, //
+                // Case 3: Items list has single item
                 { "DUNS03",
                         "[{\"TargetDuns\":\"TDUNS3\",\"KeyPartition\":\"Country,Name,State\",\"BookSource\":\"DomDunsMap\"}]" }, //
+                // Case 4: Items list has multiple items. Case 3 & 4 covers all
+                // the possible KeyPartition
                 { "DUNS04",
                         "[{\"TargetDuns\":\"TDUNS4\",\"KeyPartition\":\"Country,Name\",\"BookSource\":\"ManualMatch\"},{\"TargetDuns\":\"TDUNS44\",\"KeyPartition\":\"Name\",\"BookSource\":\"DunsTree\"},{\"TargetDuns\":\"TDUNS444\",\"KeyPartition\":\"City,Country,Name,State\",\"BookSource\":\"DomDunsMap\"}]" }, //
         };
@@ -104,6 +109,8 @@ public class DunsGuideBookDepivotTestNG extends PipelineTransformationTestNGBase
                 { 1L, "dom01.com", "DUNS01", "Name01", "Country01", "State01", "City01" }, //
                 { 2L, "dom02.com", "DUNS02", "Name02", "Country02", "State02", "City02" }, //
                 { 3L, "dom03.com", "DUNS03", "Name03", "Country03", "State03", "City03" }, //
+                // duplicate duns in ams should not introduce duplicate duns in
+                // target source
                 { 4L, "dom04_1.com", "DUNS04", "Name04", "Country04", "State04", "City04" }, //
                 { 5L, "dom04_2.com", "DUNS04", "Name04", "Country04", "State04", "City04" }, //
         };

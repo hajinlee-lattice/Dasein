@@ -1,13 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -19,9 +14,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
+
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 /**
  * Entity class to represent one patch item for DataCloud patcher
@@ -36,14 +38,18 @@ import java.util.Map;
 })
 public class PatchBook implements HasPid, Serializable {
 
+    private static final long serialVersionUID = 5460817063985318621L;
+
     public static final String COLUMN_PID = "PID";
     public static final String COLUMN_TYPE = "Type";
     public static final String COLUMN_HOTFIX = "HotFix";
     public static final String COLUMN_EOL = "EOL";
     public static final String COLUMN_EFFECTIVE_SINCE_VERSION = "EffectiveSinceVersion";
     public static final String COLUMN_EXPIRE_AFTER_VERSION = "ExpireAfterVersion";
+    public static final String COLUMN_DUNS = "DUNS";
+    public static final String COLUMN_PATCH_ITEMS = "PatchItems";
+    public static final String COLUMN_CLEANUP = "Cleanup";
 
-    private static final long serialVersionUID = 5460817063985318621L;
 
     public enum Type {
         Attribute, Lookup, Domain
@@ -67,8 +73,8 @@ public class PatchBook implements HasPid, Serializable {
     @Column(name = "Domain")
     private String domain;
 
-    @JsonProperty("DUNS")
-    @Column(name = "DUNS")
+    @JsonProperty(COLUMN_DUNS)
+    @Column(name = COLUMN_DUNS)
     private String duns;
 
     @JsonProperty("Name")
@@ -93,13 +99,13 @@ public class PatchBook implements HasPid, Serializable {
 
     /* input MatchKey fields */
 
-    @JsonProperty("PatchItems")
-    @Column(name = "PatchItems", columnDefinition = "'JSON'")
+    @JsonProperty(COLUMN_PATCH_ITEMS)
+    @Column(name = COLUMN_PATCH_ITEMS, columnDefinition = "'JSON'")
     @org.hibernate.annotations.Type(type = "json")
     private Map<String, Object> patchItems;
 
-    @JsonProperty("Cleanup")
-    @Column(name = "Cleanup", nullable = false)
+    @JsonProperty(COLUMN_CLEANUP)
+    @Column(name = COLUMN_CLEANUP, nullable = false)
     private boolean cleanup;
 
     @JsonProperty(COLUMN_HOTFIX)

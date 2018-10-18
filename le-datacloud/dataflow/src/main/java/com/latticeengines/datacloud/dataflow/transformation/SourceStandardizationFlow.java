@@ -186,6 +186,9 @@ public class SourceStandardizationFlow
 
     private Node addId(Node source, String[] idFields, IDStrategy[] idStrategies) {
         for (int i = 0; i < idFields.length; i++) {
+            if (source.getSchema(idFields[i]) != null) {
+                source = source.discard(idFields[i]);
+            }
             switch (idStrategies[i]) {
             case ROWID:
                 source = source.addRowID(new FieldMetadata(idFields[i], Long.class));

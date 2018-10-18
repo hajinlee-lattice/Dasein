@@ -47,6 +47,7 @@ public final class DataCloudConstants {
     public static final String ATTR_IS_ZIP_PRIMARY_LOCATION = "IsZipPrimaryLocation";
     public static final String ATTR_ALEXA_RANK = "AlexaRank";
     public static final String ATTR_ALEXA_DOMAIN = "URL";
+    public static final String ATTR_LAST_UPLOAD_DATE = "LE_Last_Upload_Date";
 
     public static final String AMS_ATTR_DOMAIN = "Domain";
     public static final String AMS_ATTR_DUNS = "DUNS";
@@ -56,6 +57,7 @@ public final class DataCloudConstants {
     public static final String AMS_ATTR_CITY = "City";
     public static final String AMS_ATTR_ZIP = "ZipCode";
     public static final String AMS_ATTR_PRIMARY_INDUSTRY = "PrimaryIndustry";
+    public static final String AMS_ATTR_DOMAIN_SOURCE = "DomainSource";
 
     public static final String PROFILE_STAGE_SEGMENT = "SEGMENT";
     public static final String PROFILE_STAGE_ENRICH = "ENRICH";
@@ -121,4 +123,7 @@ public final class DataCloudConstants {
     public static final String TRANSACTION_STANDARDIZER = "transactionStandardizer";
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
+
+    public static final String ATTR_VAL_Y = "Y";
+    public static final String ATTR_VAL_N = "N";
 }

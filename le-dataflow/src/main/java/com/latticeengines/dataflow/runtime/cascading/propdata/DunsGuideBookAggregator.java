@@ -20,6 +20,9 @@ import cascading.tuple.TupleEntry;
 
 public class DunsGuideBookAggregator extends BaseAggregator<DunsGuideBookAggregator.Context>
         implements Aggregator<DunsGuideBookAggregator.Context> {
+
+    private static final long serialVersionUID = 4226231901493856121L;
+
     private Map<String, Integer> bookPriority;
     private int dunsIdx;
     private int itemsIdx;

@@ -23,8 +23,7 @@ import cascading.tuple.TupleEntry;
 public class DunsRedirectFromDomDunsMapFunc extends BaseOperation implements Function {
 
 	private static final long serialVersionUID = 1618206727776198248L;
-	
-	private Map<String, Integer> namePositionMap;
+
     private String bookSource;
     private String priDunsField;
     private String priCtryDunsField;
@@ -37,15 +36,15 @@ public class DunsRedirectFromDomDunsMapFunc extends BaseOperation implements Fun
     public DunsRedirectFromDomDunsMapFunc(Fields fieldDeclaration, String bookSource, String priDunsField,
             String priCtryDunsField, String priStDunsField) {
         super(fieldDeclaration);
-        this.namePositionMap = getPositionMap(fieldDeclaration);
+        Map<String, Integer> namePositionMap = getPositionMap(fieldDeclaration);
         this.bookSource = bookSource;
         this.priDunsField = priDunsField;
         this.priCtryDunsField = priCtryDunsField;
         this.priStDunsField = priStDunsField;
-        this.dunsLoc = this.namePositionMap.get(DunsRedirectBookConfig.DUNS);
-        this.targetDunsLoc = this.namePositionMap.get(DunsRedirectBookConfig.TARGET_DUNS);
-        this.keyPartitionLoc = this.namePositionMap.get(DunsRedirectBookConfig.KEY_PARTITION);
-        this.bookSourceLoc = this.namePositionMap.get(DunsRedirectBookConfig.BOOK_SOURCE);
+        this.dunsLoc = namePositionMap.get(DunsRedirectBookConfig.DUNS);
+        this.targetDunsLoc = namePositionMap.get(DunsRedirectBookConfig.TARGET_DUNS);
+        this.keyPartitionLoc = namePositionMap.get(DunsRedirectBookConfig.KEY_PARTITION);
+        this.bookSourceLoc = namePositionMap.get(DunsRedirectBookConfig.BOOK_SOURCE);
     }
 
     @Override
