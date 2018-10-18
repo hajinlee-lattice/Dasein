@@ -1,19 +1,27 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Component("s3ImportFolderService")
 public class S3ImportFolderServiceImpl implements S3ImportFolderService {
+
+    private static final Logger log = LoggerFactory.getLogger(S3ImportFolderServiceImpl.class);
 
     private static final String INPUT_ROOT = "/atlas/rawinput";
     private static final String RETRY = "/retry";
@@ -71,7 +79,16 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
             s3Service.createFolder(s3Bucket, path);
         }
         String target = path + getFileName(sourceKey);
-        s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, target);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AmazonS3Exception.class), null);
+        retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info(String.format("(Attempt=%d) Retry copying object from %s:%s to %s%s", //
+                        context.getRetryCount() + 1, sourceBucket, sourceKey, s3Bucket, target));
+            }
+            s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, target);
+            return true;
+        });
         return target;
     }
 
