@@ -3,8 +3,11 @@ package com.latticeengines.datacloud.dataflow.transformation.patch;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.ValidationUtils;
+import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -46,6 +49,9 @@ public class DomainPatch extends ConfigurableFlowBase<DomainPatchConfig> {
     private static final String PATCH_DUNS = "_LATTICE_PATCH_DUNS_";
     private static final String PATCH_DOMAINS = "_LATTICE_PATCH_DOMAINS_";
 
+    @Autowired
+    private BeanValidationService beanValidationService;
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         // The base source domainPatchBook should only have PatchBook.Type =
@@ -54,6 +60,7 @@ public class DomainPatch extends ConfigurableFlowBase<DomainPatchConfig> {
         // AMSeedMerged is guaranteed to be unique in Domain + DUNS
         Node ams = addSource(parameters.getBaseTables().get(1));
         config = getTransformerConfig(parameters);
+        ValidationUtils.check(beanValidationService, config, DomainPatchConfig.class.getName());
 
         // Retain fields: DUNS, PatchItems, Cleanup
         domainPatchBook = domainPatchBook

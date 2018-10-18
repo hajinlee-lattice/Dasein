@@ -54,7 +54,7 @@ public class DomainPatchTestNG extends PipelineTransformationTestNGBase {
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
         PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-        configuration.setName("DunsGuideBookDepivot");
+        configuration.setName("DomainPatch");
         configuration.setVersion(targetVersion);
 
         TransformationStepConfig step0 = new TransformationStepConfig();
