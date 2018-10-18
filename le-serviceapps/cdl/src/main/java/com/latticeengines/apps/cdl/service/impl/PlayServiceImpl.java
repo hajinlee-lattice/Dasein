@@ -110,11 +110,6 @@ public class PlayServiceImpl implements PlayService {
         Play retrievedPlay = null;
         boolean shouldCreateNew = false;
 
-        // TODO: Remove in M24
-        if (play.getPlayType() == null) {
-            play.setPlayType(playTypeService.getAllPlayTypes(tenantId).get(0));
-        }
-
         if (StringUtils.isBlank(play.getName())) {
             shouldCreateNew = true;
         } else {

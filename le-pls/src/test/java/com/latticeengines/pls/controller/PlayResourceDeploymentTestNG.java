@@ -2,6 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -308,7 +310,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(createTPResponse);
 
         Play createdPlay2 = createDefaultPlay();
-        createdPlay2.setPlayType(playTypes.get(1));
         createdPlay2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createdPlay2, Play.class);
         Assert.assertNotNull(createdPlay2);
 
@@ -324,14 +325,21 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Play retrievedPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
         assertRulesBasedPlay(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getPlayType().getId(), playTypes.get(0).getId());
         Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);
+
+        retrievedPlay.setPlayType(playTypes.get(2));
+
+        retrievedPlay = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", retrievedPlay, Play.class);
+        Assert.assertEquals(retrievedPlay.getPlayType().getId(), playTypes.get(2).getId());
 
         String jsonValue = JsonUtils.serialize(retrievedPlay);
         Assert.assertNotNull(jsonValue);
         this.play = retrievedPlay;
 
         Assert.assertThrows(
-                () -> restTemplate.delete(getRestAPIHostPort() + "/pls/playtypes/" + playTypes.get(1).getId()));
+                () -> restTemplate.delete(getRestAPIHostPort() + "/pls/playtypes/" + playTypes.get(2).getId()));
+
     }
 
     public int getNoOfExistingPlays() {
@@ -398,7 +406,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail1" })
     public void createPlayLaunchFail2() {
         PlayLaunch launch = createDefaultPlayLaunch();
-        launch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.F)));
+        launch.setBucketsToLaunch(new HashSet<>(Collections.singletonList(RatingBucketName.F)));
         try {
             launch = restTemplate.postForObject(getRestAPIHostPort() + //
                     "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
