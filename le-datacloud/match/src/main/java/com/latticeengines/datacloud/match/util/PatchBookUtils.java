@@ -1,18 +1,22 @@
 package com.latticeengines.datacloud.match.util;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
 /**
  * Shared utilities for {@link PatchBook}
@@ -23,13 +27,39 @@ public class PatchBookUtils {
     // TODO currently using serialized format instead
     // Key: patch book type, Value: set of supported match key tuple (in serialized format)
     private static final Map<PatchBook.Type, Set<String>> SUPPORTED_MATCH_KEY_MAP = new HashMap<>();
+    private static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
 
     static {
         // TODO init supported match key tuple here
         // FIXME remove place holder
-        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Attribute, Collections.emptySet());
-        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Lookup, Collections.emptySet());
-        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Domain, Collections.emptySet());
+        MatchKeyTuple domainDunsTuple = new MatchKeyTuple.Builder() //
+                .withDomain(MatchKey.Domain.name()) //
+                .withDuns(MatchKey.DUNS.name()) //
+                .build(); //
+        MatchKeyTuple domainTuple = new MatchKeyTuple.Builder() //
+                .withDomain(MatchKey.Domain.name()) //
+                .build(); //
+        MatchKeyTuple dunsTuple = new MatchKeyTuple.Builder() //
+                .withDuns(MatchKey.DUNS.name()) //
+                .build(); //
+        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Attribute,
+                new HashSet<>(Arrays.asList(domainTuple.buildIdForKey(), dunsTuple.buildIdForKey(),
+                        domainDunsTuple.buildIdForKey())));
+        MatchKeyTuple lookupTuple = new MatchKeyTuple.Builder() //
+                .withDomain(MatchKey.Domain.name()) //
+                .withDuns(MatchKey.DUNS.name()) //
+                .withCountry(MatchKey.Country.name()) //
+                .withState(MatchKey.State.name()) //
+                .withCity(MatchKey.City.name()) //
+                .withName(MatchKey.Name.name()) //
+                .build(); //
+        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Lookup,
+                new HashSet<>(Arrays.asList(lookupTuple.buildIdForKey())));
+        MatchKeyTuple domainPatcherType = new MatchKeyTuple.Builder() //
+                .withDuns(MatchKey.DUNS.name()) //
+                .build(); //
+        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Domain,
+                new HashSet<>(Arrays.asList(domainPatcherType.buildIdForKey())));
     }
 
     /**
@@ -38,7 +68,6 @@ public class PatchBookUtils {
      * @param book target patch book, should not be {@literal null}
      */
     public static void standardize(@NotNull PatchBook book) {
-        // TODO implement
     }
 
     /**
@@ -60,8 +89,22 @@ public class PatchBookUtils {
      * keys
      */
     public static List<PatchBookValidationError> validateDuplicateMatchKey(@NotNull List<PatchBook> patchBooks) {
-        // TODO implement
-        return null;
+        Map<String, List<Long>> matchKeyToPIDs = new HashMap<>();
+        for (PatchBook entry : patchBooks) {
+            MatchKeyTuple tuple = getMatchKeyValues(entry);
+            matchKeyToPIDs.putIfAbsent(tuple.buildIdForValue(), new ArrayList<>());
+            matchKeyToPIDs.get(tuple.buildIdForValue()).add(entry.getPid());
+        }
+
+        List<PatchBookValidationError> errorList = matchKeyToPIDs.entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1) // filter by key
+                .map(temp -> {
+                    PatchBookValidationError error = new PatchBookValidationError();
+                    error.setMessage(DUPLICATE_MATCH_KEY_ERROR + temp.getKey());
+                    error.setPatchBookIds(temp.getValue());
+                    return error;
+                }).collect(Collectors.toList());
+        return errorList;
     }
 
     /**
@@ -71,7 +114,6 @@ public class PatchBookUtils {
      * @return a list of validation errors to show which patch books have unsupported match keys
      */
     public static List<PatchBookValidationError> validateMatchKeySupport(@NotNull List<PatchBook> patchBooks) {
-        // TODO implement
         return null;
     }
 
@@ -82,7 +124,6 @@ public class PatchBookUtils {
      * @return a list of validation errors
      */
     public static List<PatchBookValidationError> validatePatchedItems(@NotNull List<PatchBook> patchBooks) {
-        // TODO implement
         return null;
     }
 
@@ -93,7 +134,6 @@ public class PatchBookUtils {
      * @return true if the patch book DO reach EOF, false otherwise
      */
     public static boolean isEndOfLife(@NotNull PatchBook book) {
-        // TODO
         return false;
     }
 
@@ -113,7 +153,7 @@ public class PatchBookUtils {
 
         MatchKeyTuple tuple = getMatchKey(patchBook, false);
         Preconditions.checkNotNull(tuple);
-        String tupleStr = tuple.toString();
+        String tupleStr = tuple.buildIdForValue();
         for (String supportedTupleStr : SUPPORTED_MATCH_KEY_MAP.get(type)) {
             if (supportedTupleStr.equals(tupleStr)) {
                 return true;
@@ -137,19 +177,19 @@ public class PatchBookUtils {
             tuple.setDomain(useValue ? book.getDomain() : MatchKey.Domain.name());
         }
         if (StringUtils.isNotBlank(book.getDuns())) {
-            tuple.setDomain(useValue ? book.getDuns() : MatchKey.DUNS.name());
+            tuple.setDuns(useValue ? book.getDuns() : MatchKey.DUNS.name());
         }
         if (StringUtils.isNotBlank(book.getName())) {
-            tuple.setDomain(useValue ? book.getName() : MatchKey.Name.name());
+            tuple.setName(useValue ? book.getName() : MatchKey.Name.name());
         }
         if (StringUtils.isNotBlank(book.getCountry())) {
-            tuple.setDomain(useValue ? book.getCountry() : MatchKey.Country.name());
+            tuple.setCountry(useValue ? book.getCountry() : MatchKey.Country.name());
         }
         if (StringUtils.isNotBlank(book.getState())) {
-            tuple.setDomain(useValue ? book.getState() : MatchKey.State.name());
+            tuple.setState(useValue ? book.getState() : MatchKey.State.name());
         }
         if (StringUtils.isNotBlank(book.getCity())) {
-            tuple.setDomain(useValue ? book.getCity() : MatchKey.City.name());
+            tuple.setCity(useValue ? book.getCity() : MatchKey.City.name());
         }
         return tuple;
     }
