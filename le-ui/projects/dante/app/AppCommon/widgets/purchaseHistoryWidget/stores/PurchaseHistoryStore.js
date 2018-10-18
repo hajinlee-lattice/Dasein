@@ -29,7 +29,7 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.stores.PurchaseH
             NotionService.findOne('DanteAccount', accountId),
             NotionService.findItemsByKey('DanteAccount', true, 'IsSegment'),
             NotionService.findAll('DanteProductHierarchy'),
-            NotionService.findOneByKey('DantePurchaseHistory', accountId, 'AccountID'),
+            NotionService.findOneByKey('DantePurchaseHistory', accountId, 'account'),
         ])
         .then(function(results) {
             var errors = {};
@@ -84,7 +84,7 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.stores.PurchaseH
 
             self.segment = segments[0];
             if (self.segment) {
-                return NotionService.findOneByKey('DantePurchaseHistory', self.segment.segmentAccountId, 'AccountID');
+                return NotionService.findOneByKey('DantePurchaseHistory', self.segment.segmentAccountId, 'spendanalyticssegment');
             } else {
                 self.segment = {};
                 return {};

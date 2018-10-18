@@ -808,6 +808,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 font-size: 14px;
                 text-overflow: ellipsis;
                 overflow: hidden;
+                max-width: 150px;
                 //margin-top: .4em;
             }
             .tenant-name {

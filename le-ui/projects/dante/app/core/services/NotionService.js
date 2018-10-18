@@ -112,8 +112,9 @@ angular.module('mainApp.core.services.NotionService', [
                 break;
             
             case "DantePurchaseHistory":
-                getNotionUrl = "/ulysses/purchasehistory/account/"+id+"/danteformat";
-                
+                getNotionUrl = "/ulysses/purchasehistory/"+idKey+"/"+id+"/danteformat";
+                //getNotionUrl = "/ulysses/purchasehistory/account/"+id+"/danteformat"
+                //getNotionUrl = "/ulysses/purchasehistory/spendanalyticssegment/"+id+"/danteformat"
                 break;
         }
 
