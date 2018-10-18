@@ -37,17 +37,23 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         }
     }
 
+    // Add sleep between each import to avoid 2 import jobs generate table
+    // extract with same timestamp in second, then extract could overwrite
+    // between each other
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 1, "Account");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 1, "Contact");
+        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
+        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Account, 2, "Account");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 2, "Contact");
+        Thread.sleep(2000);
         // TODO: (Yintao) should be changed to mock vdb import
         mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
