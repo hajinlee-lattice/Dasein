@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
@@ -19,7 +20,7 @@ public interface AIModelService extends RatingModelService<AIModel> {
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 
     Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel);
+            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores);
 
     AIModel createNewIteration(AIModel aiModel, RatingEngine ratingEngine);
 }

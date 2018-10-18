@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -295,9 +296,10 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
     public Map<String, List<ColumnMetadata>> getIterationMetadata(@PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId) {
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationMetadata(tenant.getId(), ratingEngineId, ratingModelId);
+        return ratingEngineProxy.getIterationMetadata(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setScoringIteration")

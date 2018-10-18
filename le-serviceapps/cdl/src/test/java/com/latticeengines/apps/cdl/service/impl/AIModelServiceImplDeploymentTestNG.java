@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -202,15 +203,15 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
                 modelPath, modelName, applicationId, modelVersion, uuid);
         ModelSummary modelSummary = null;
         try {
-            modelSummary = ModelSummaryUtils.createModelSummary(modelSummaryProxy, mainTestTenant,
-                    modelConfiguration);
+            modelSummary = ModelSummaryUtils.createModelSummary(modelSummaryProxy, mainTestTenant, modelConfiguration);
         } catch (IOException e) {
             Assert.fail("Could not create ModelSummary", e);
         }
         Assert.assertNotNull(modelSummary);
         log.info("Created ModelSummary ID: " + modelSummary.getId());
 
-        ModelSummary retModelSummary = modelSummaryProxy.getModelSummaryFromModelId(mainTestTenant.getId(), modelConfiguration.getModelId());
+        ModelSummary retModelSummary = modelSummaryProxy.getModelSummaryFromModelId(mainTestTenant.getId(),
+                modelConfiguration.getModelId());
         Assert.assertNotNull(retModelSummary);
         Assert.assertNotNull(retModelSummary.getId());
 
@@ -277,7 +278,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(ratingModels.size(), 2);
         Assert.assertEquals(iteration2.getIteration(), 2);
 
-        createdRatingEngine = ratingEngineService.getRatingEngineById(aiRatingEngineId, false, false);
+        ratingEngineService.getRatingEngineById(aiRatingEngineId, false, false);
         Assert.assertEquals(iteration2.getDerivedFromRatingModel(), derivedFromModelID);
 
         AIModel updatedAIModel = (AIModel) ratingEngineService.updateRatingModel(aiRatingEngineId, iteration2.getId(),

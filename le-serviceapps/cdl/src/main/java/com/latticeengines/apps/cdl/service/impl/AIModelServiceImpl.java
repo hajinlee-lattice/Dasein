@@ -1,14 +1,13 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,10 +16,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +25,10 @@ import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
 import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
 import com.latticeengines.apps.cdl.service.AIModelService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.SegmentService;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.apps.cdl.util.FeatureImportanceUtil;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -38,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -57,6 +56,7 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -71,9 +71,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
-
-    @Value("${pls.modelingservice.basedir}")
-    private String modelingServiceHdfsBaseDir;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -99,8 +96,14 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     @Inject
     private SourceFileProxy sourceFileProxy;
 
-    @Autowired
-    private Configuration yarnConfiguration;
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
+
+    @Inject
+    private FeatureImportanceUtil featureImportanceUtil;
 
     private static RatingEngineType[] types = //
             new RatingEngineType[] { //
@@ -246,7 +249,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel) {
+            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
         if (!aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40034,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
@@ -272,10 +275,25 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     new String[] { "Event table metadata", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
 
-        Map<String, Integer> importanceOrdering = getFeatureImportance(customerSpace, modelSummary);
+        Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
+                ? new HashSet<>(Arrays.asList(Category.values()))
+                : CustomEventModelingConfig.DataStore.getCategoriesByDataStores(dataStores);
 
-        Map<String, List<ColumnMetadata>> toReturn = metadataStoreProxy.getMetadata(MetadataStoreName.Table,
-                CustomerSpace.shortenCustomerSpace(customerSpace), table.getName())
+        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
+                modelSummary);
+
+        Collection<ColumnMetadata> attributes = metadataStoreProxy
+                .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
+                        table.getName())
+                .concatWith(servingStoreProxy.getNewModelingAttrs(customerSpace,
+                        dataCollectionService.getActiveVersion(customerSpace)))
+                .collect(HashMap<String, ColumnMetadata>::new,
+                        // to de-duplicates attributes from two data sources
+                        (returnMap, cm) -> returnMap.put(cm.getCategory().getName() + cm.getAttrName(), cm))
+                .block().values();
+
+        Map<String, List<ColumnMetadata>> toReturn = Flux.fromIterable(attributes)
+                .filter(cm -> selectedCategories.contains(cm.getCategory()))
                 .collect(HashMap<String, List<ColumnMetadata>>::new, (returnMap, cm) -> {
                     if (importanceOrdering.containsKey(cm.getAttrName())) {
                         // could move this into le-metadata as a decorator
@@ -304,66 +322,25 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .map(k -> new MutablePair<>(k, toReturn.get(k))) //
                 .filter(pair -> CollectionUtils.isNotEmpty(pair.getRight())) //
                 .forEach(pair -> {
-                    List<ColumnMetadata> attrs = //
+                    List<ColumnMetadata> cms = //
                             pair.getRight().stream() //
-                                    .filter(atr -> (atr.isHiddenForRemodelingUI() != Boolean.TRUE)) //
+                                    .filter(cm -> (cm.isHiddenForRemodelingUI() != Boolean.TRUE)) //
                                     .collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(attrs)) {
+                    if (CollectionUtils.isEmpty(cms)) {
                         log.info(String.format(
                                 "Removed all '%d' attributes and '%s' category as all attributes under it "
                                         + "were marked as hidden from remodeling UI",
                                 pair.getRight().size(), pair.getLeft()));
                         toReturn.remove(pair.getLeft());
                     } else {
-                        if (pair.getRight().size() != attrs.size()) {
+                        if (pair.getRight().size() != cms.size()) {
                             log.info(
                                     String.format("Removed '%d' attributes from list of attributes under '%s' category",
-                                            (pair.getRight().size() - attrs.size()), pair.getLeft()));
-                            toReturn.put(pair.getLeft(), attrs);
+                                            (pair.getRight().size() - cms.size()), pair.getLeft()));
+                            toReturn.put(pair.getLeft(), new ArrayList<>(cms));
                         }
                     }
                 });
     }
 
-    private Map<String, Integer> getFeatureImportance(String customerSpace, ModelSummary modelSummary) {
-        try {
-            String featureImportanceFilePathPattern = "{0}/{1}/models/{2}/{3}/{4}/rf_model.txt";
-
-            String[] filePathParts = modelSummary.getLookupId().split("\\|");
-            String featureImportanceFilePath = MessageFormat.format(featureImportanceFilePathPattern, //
-                    modelingServiceHdfsBaseDir, // 0
-                    filePathParts[0], // 1
-                    filePathParts[1], // 2
-                    filePathParts[2], // 3
-                    modelSummary.getApplicationId().substring("application_".length())); // 4
-            if (!HdfsUtils.fileExists(yarnConfiguration, featureImportanceFilePath)) {
-                log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
-                throw new LedpException(LedpCode.LEDP_10011, new String[] { featureImportanceFilePath });
-            }
-            log.info("Attempting to get feature importance from the file: " + featureImportanceFilePath);
-            String featureImportanceRaw = HdfsUtils.getHdfsFileContents(yarnConfiguration, featureImportanceFilePath);
-            if (StringUtils.isEmpty(featureImportanceRaw)) {
-                log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
-                throw new LedpException(LedpCode.LEDP_40037,
-                        new String[] { featureImportanceFilePath, modelSummary.getId(), customerSpace });
-            }
-            TreeMap<Double, String> sortedImportance = Flux.fromArray(featureImportanceRaw.split("\n"))
-                    .collect(TreeMap<Double, String>::new, (sortedMap, line) -> {
-                        try {
-                            sortedMap.put(Double.parseDouble(line.split(",")[1]), line.split(",")[0]);
-                        } catch (NumberFormatException e) {
-                            // ignore since this is for the first row
-                        }
-                    }).block();
-
-            AtomicInteger i = new AtomicInteger(1);
-            return Flux.fromIterable(sortedImportance.descendingMap().entrySet())
-                    .collect(HashMap<String, Integer>::new, (map, es) -> map.put(es.getValue(), i.getAndIncrement()))
-                    .block();
-
-        } catch (Exception e) {
-            log.error("Unable to populate feature importance due to " + e.getLocalizedMessage());
-            return new HashMap<>();
-        }
-    }
 }

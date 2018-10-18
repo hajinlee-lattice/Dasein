@@ -235,6 +235,21 @@ public class JsonUtils {
         return output;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <K, V> Map<K, Set<V>> convertMapWithSetValue(Map<?, Set<?>> raw, Class<K> keyClazz,
+            Class<V> listValueClazz) {
+        if (raw == null) {
+            return null;
+        }
+        Map<K, Set<V>> output = new HashMap<>();
+        for (Object entry : raw.entrySet()) {
+            Map.Entry<Object, List> casted = (Map.Entry<Object, List>) entry;
+            output.put(convertValue(casted.getKey(), keyClazz),
+                    new HashSet<>(convertList(casted.getValue(), listValueClazz)));
+        }
+        return output;
+    }
+
     public static <T> String pprint(T object) {
         try {
             ObjectMapper mapper = getObjectMapper();

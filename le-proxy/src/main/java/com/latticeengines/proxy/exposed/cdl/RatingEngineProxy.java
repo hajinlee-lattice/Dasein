@@ -167,9 +167,10 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     @SuppressWarnings("unchecked")
     public Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, String ratingEngineId,
-            String ratingModelId) {
+            String ratingModelId, String dataStores) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata",
-                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId)
+                + (StringUtils.isNotEmpty(dataStores) ? "?data_stores=" + dataStores : "");
         return JsonUtils.convertMapWithListValue(get("get metadata for a rating model", url, Map.class), String.class,
                 ColumnMetadata.class);
     }
@@ -249,15 +250,17 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     public EventFrontEndQuery getModelingQueryByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
-                + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        String url = constructUrl(
+                URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery?querytype=" + modelingQueryType,
+                shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         return get("getModelingQuery", url, EventFrontEndQuery.class);
     }
 
     public EventFrontEndQuery getModelingQueryByRating(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
-                + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        String url = constructUrl(
+                URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery?querytype=" + modelingQueryType,
+                shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         return post("getModelingQuery", url, ratingEngine, EventFrontEndQuery.class);
     }
 
@@ -268,8 +271,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     public Long getModelingQueryCountByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType, DataCollection.Version version) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
-                + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count?querytype="
+                + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         if (version != null) {
             url += "&version=" + version;
         }
@@ -348,9 +351,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         if (user != null) {
             sb.append("?user={user}");
         }
-        String url = constructUrl(sb.toString(), shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId,
-                user);
-        return url;
+        return constructUrl(sb.toString(), shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, user);
     }
 
     @VisibleForTesting
@@ -382,8 +383,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
             sb.append("create-action={create-action}");
             paramObjects.add(creaateAction);
         }
-        String url = constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
-        return url;
+
+        return constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
     }
 
     public DataPage getEntityPreview(String customerSpace, String ratingEngineId, long offset, long maximum,

@@ -5,9 +5,11 @@ import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -335,10 +338,22 @@ public class RatingEngineResource {
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
+    @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
     public Map<String, List<ColumnMetadata>> getIterationMetadata(@PathVariable String customerSpace,
-            @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
-        return ratingEngineService.getIterationMetadata(ratingEngineId, ratingModelId);
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
+        List<CustomEventModelingConfig.DataStore> stores = null;
+        if (StringUtils.isNotEmpty(dataStores)) {
+            stores = Arrays.asList(dataStores.split(",")).stream().map(x -> {
+                if (EnumUtils.isValidEnum(CustomEventModelingConfig.DataStore.class, x)) {
+                    return CustomEventModelingConfig.DataStore.valueOf(x);
+                } else {
+                    throw new LedpException(LedpCode.LEDP_32000, new String[] { "Invalid DataStore " + x });
+                }
+            }).collect(Collectors.toList());
+        }
+        return ratingEngineService.getIterationMetadata(ratingEngineId, ratingModelId, stores);
+
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")

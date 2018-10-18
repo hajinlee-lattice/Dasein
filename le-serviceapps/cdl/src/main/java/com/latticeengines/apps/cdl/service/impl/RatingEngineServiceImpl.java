@@ -460,7 +460,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId) {
+    @SuppressWarnings("")
+    public Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId,
+            List<CustomEventModelingConfig.DataStore> dataStores) {
         log.info(String.format("Attempting to collate Metadata for Iteration %s of Model %s", ratingModelId,
                 ratingEngineId));
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
@@ -469,7 +471,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         AIModel aiModel = (AIModel) getRatingModel(ratingEngineId, ratingModelId);
         AIModelService aiModelService = (AIModelService) getRatingModelService(ratingEngine.getType());
 
-        return aiModelService.getIterationMetadata(customerSpace, ratingEngine, aiModel);
+        return aiModelService.getIterationMetadata(customerSpace, ratingEngine, aiModel, dataStores);
     }
 
     @Override
@@ -599,13 +601,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (CollectionUtils.isEmpty(dataStores)) {
                 errors.add("No datastore selected, atleast one attribute set needed for modeling");
             }
-            Set<Category> selectedCategories = new HashSet<>();
-            if (dataStores.contains(CustomEventModelingConfig.DataStore.DataCloud)) {
-                selectedCategories.addAll(Category.getLdcReservedCategories());
-            }
-            if (dataStores.contains(CustomEventModelingConfig.DataStore.CDL)) {
-                selectedCategories.add(Category.ACCOUNT_ATTRIBUTES);
-            }
+            Set<Category> selectedCategories = CustomEventModelingConfig.DataStore
+                    .getCategoriesByDataStores(dataStores);
             List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
                     .getNewModelingAttrs(customerSpace, dataCollectionService.getActiveVersion(customerSpace))
                     .filter(cm -> selectedCategories.contains(cm.getCategory())).collectList().block();

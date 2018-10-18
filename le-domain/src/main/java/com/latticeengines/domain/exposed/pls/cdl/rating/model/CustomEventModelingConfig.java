@@ -1,11 +1,16 @@
 package com.latticeengines.domain.exposed.pls.cdl.rating.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -107,8 +112,23 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
     public enum DataStore {
         DataCloud, //
         CDL, //
-        CustomFileAttributes
+        CustomFileAttributes;
+
+        public static Set<Category> getCategoriesByDataStores(List<DataStore> dataStores) {
+            Set<Category> selectedCategories = new HashSet<>();
+            if (CollectionUtils.isEmpty(dataStores)) {
+                return selectedCategories;
+            }
+            if (dataStores.contains(CustomEventModelingConfig.DataStore.DataCloud)) {
+                selectedCategories.addAll(Category.getLdcReservedCategories());
+            }
+            if (dataStores.contains(CustomEventModelingConfig.DataStore.CDL)) {
+                selectedCategories.add(Category.ACCOUNT_ATTRIBUTES);
+            }
+            return selectedCategories;
+        }
     }
+
 
     @Override
     public void copyConfig(AdvancedModelingConfig config) {
