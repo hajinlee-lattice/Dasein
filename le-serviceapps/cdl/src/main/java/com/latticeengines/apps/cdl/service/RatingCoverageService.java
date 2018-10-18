@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 
@@ -16,5 +18,8 @@ public interface RatingCoverageService {
     String RATING_ID_LOOKUP_COL_PAIR_ERROR_MAP_KEY = "processRatingIdLookupColumnPairs";
 
     RatingsCountResponse getCoverageInfo(String customeSpace, RatingsCountRequest request);
+
+    RatingModelsCoverageResponse getRatingsCoverageForSegment(String customerSpace, String segmentName,
+            RatingModelsCoverageRequest ratingCoverageRequest);
 
 }

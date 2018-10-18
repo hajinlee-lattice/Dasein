@@ -27,7 +27,7 @@ public class ResourceAspect {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof HttpServletRequest) {
             // for certain microservice endpoints (PlaymakerTenantResource -
             // authToken to *) we do not have mandatory customer space in URL
-            // path. Skip setting multi tenant context for suck calls
+            // path. Skip setting multi tenant context for such calls
             return;
         }
         String customerSpace = (String) joinPoint.getArgs()[0];

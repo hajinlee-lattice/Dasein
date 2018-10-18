@@ -260,7 +260,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
      * tenantName.tenantName.Production
      */
     @Override
-    public void useExistingTenantAsMain(String tenantName) {
+    public Tenant useExistingTenantAsMain(String tenantName) {
         String fullTenantId = CustomerSpace.parse(tenantName).toString();
         addExtraTestTenant(fullTenantId);
         Tenant tenant = new Tenant(fullTenantId);
@@ -272,6 +272,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
             excludedCleanupTenantIds = new ArrayList<>();
         }
         excludedCleanupTenantIds.add(fullTenantId);
+        return tenant;
     }
 
     /**

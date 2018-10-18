@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,8 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 @Component
 public class TestPlayCreationHelper {
 
+    private static final String ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = "PREMIUM_MARKETING_PRESCREEN";
+
     private static final Logger log = LoggerFactory.getLogger(TestPlayCreationHelper.class);
 
     @Autowired
@@ -145,15 +148,28 @@ public class TestPlayCreationHelper {
     }
 
     public void setupTenantAndData() {
-        destinationOrgId = "O_" + System.currentTimeMillis();
-        destinationOrgType = CDLExternalSystemType.CRM;
+        log.info("Creating new Tenant");
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier, 3);
-        tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
-        MultiTenantContext.setTenant(tenant);
+        postInitializeTenantCreation(tenantIdentifier);
+        
+    }
+
+    private void postInitializeTenantCreation(String fullTenantId) {
+        tenant = tenantEntityMgr.findByTenantId(fullTenantId);
         log.info("Tenant = " + tenant.getId());
+        tenantIdentifier = tenant.getId();
+        MultiTenantContext.setTenant(tenant);
         deploymentTestBed.switchToSuperAdmin(tenant);
+        destinationOrgId = "O_" + System.currentTimeMillis();
+        destinationOrgType = CDLExternalSystemType.CRM;
+    }
+    
+    public void useExistingTenant(String tenantName) {
+        log.info("Reusing Existing Tenant and Data from Redshift: " + tenantName);
+        Tenant tenant = deploymentTestBed.useExistingTenantAsMain(tenantName);
+        postInitializeTenantCreation(tenant.getId());
     }
 
     public String getDestinationOrgId() {
@@ -206,7 +222,15 @@ public class TestPlayCreationHelper {
     }
 
     public void setupTenantAndCreatePlay() throws Exception {
-        setupTenantAndData();
+        setupTenantAndCreatePlay(null);
+    }
+    
+    public void setupTenantAndCreatePlay(String existingTenant) throws Exception {
+        if (StringUtils.isNotBlank(existingTenant)) {
+            useExistingTenant(existingTenant);
+        } else {
+            setupTenantAndData();
+        }
         setupPlayTestEnv();
         cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
         testCrud();
@@ -217,7 +241,8 @@ public class TestPlayCreationHelper {
     }
 
     public void setupPlayTestEnv() throws Exception {
-        Restriction accountRestriction = createAccountRestriction();
+        Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
         RatingRule ratingRule = createRatingRule();
 
@@ -404,15 +429,17 @@ public class TestPlayCreationHelper {
 
     public MetadataSegment createSegment(String segmentName, Restriction accountRestriction,
             Restriction contactRestriction) {
-        segment = new MetadataSegment();
-        segment.setAccountRestriction(accountRestriction);
-        segment.setContactRestriction(contactRestriction);
-        segment.setDisplayName(segmentName);
+        MetadataSegment newSegment = new MetadataSegment();
+        newSegment.setAccountRestriction(accountRestriction);
+        newSegment.setContactRestriction(contactRestriction);
+        newSegment.setDisplayName(segmentName);
         MetadataSegment createdSegment = segmentProxy
-                .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
+                .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), newSegment);
         MetadataSegment retrievedSegment = segmentProxy
                 .getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
+        log.info("Created Segment with DisplayName {}, Account Count:{}, Contact Count: {}",
+                retrievedSegment.getDisplayName(), retrievedSegment.getAccounts(), retrievedSegment.getContacts());
         return retrievedSegment;
     }
 
@@ -434,10 +461,8 @@ public class TestPlayCreationHelper {
         Assert.assertEquals(play.getRatingEngine().getId(), ruleBasedRatingEngine.getId());
     }
 
-    private Restriction createAccountRestriction() {
-        Restriction b2 = //
-                createBucketRestriction(1, ComparisonType.EQUAL, //
-                        BusinessEntity.Account, "PREMIUM_MARKETING_PRESCREEN");
+    private Restriction createAccountRestriction(Restriction dynRestriction) {
+
         Restriction b3 = //
                 createBucketRestriction(2, ComparisonType.LESS_THAN, //
                         BusinessEntity.Account, "CloudTechnologies_ContactCenterManagement");
@@ -448,8 +473,13 @@ public class TestPlayCreationHelper {
                 createBucketRestriction(3, ComparisonType.LESS_THAN, //
                         BusinessEntity.Account, "BusinessTechnologiesAnalytics");
 
+        List<Restriction> restrictionList = new ArrayList<>(Arrays.asList(b3, b4, b5));
+        if (dynRestriction != null) {
+            restrictionList.add(dynRestriction);
+        }
+
         Restriction innerLogical1 = LogicalRestriction.builder()//
-                .and(Arrays.asList(b2, b3, b4, b5)).build();
+                .and(restrictionList).build();
         Restriction innerLogical2 = LogicalRestriction.builder()//
                 .or(new ArrayList<>()).build();
 
@@ -565,6 +595,7 @@ public class TestPlayCreationHelper {
     }
 
     public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
+        log.info("Creating Rating Engine");
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
@@ -749,8 +780,25 @@ public class TestPlayCreationHelper {
     }
 
     public MetadataSegment createPlayTargetSegment() {
-        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlaySegmentResourceTest"), null, null);
+        Restriction dynRest = createBucketRestriction(2, ComparisonType.EQUAL,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction accountRestriction = createAccountRestriction(dynRest);
+        Restriction contactRestriction = createContactRestriction();
+        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlayTargetSegment"), accountRestriction, contactRestriction);
         return playTargetSegment;
     }
 
+    public MetadataSegment getPlayTargetSegment() {
+        if (playTargetSegment == null) {
+            playTargetSegment = createPlayTargetSegment();
+        }
+        return playTargetSegment;
+    }
+
+    public MetadataSegment createAggregatedSegment() {
+        Restriction dynRest = createBucketRestriction(3, ComparisonType.LESS_THAN,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction accountRestriction = createAccountRestriction(dynRest);
+        Restriction contactRestriction = createContactRestriction();
+        this.playTargetSegment = createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
+        return playTargetSegment;
+    }
 }

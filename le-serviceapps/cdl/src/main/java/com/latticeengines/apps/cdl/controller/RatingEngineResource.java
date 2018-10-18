@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.annotation.Action;
-import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineDashboardService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
@@ -55,8 +54,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 import io.swagger.annotations.Api;
@@ -73,8 +70,6 @@ public class RatingEngineResource {
 
     private final RatingEngineNoteService ratingEngineNoteService;
 
-    private final RatingCoverageService ratingCoverageService;
-
     private final RatingEngineDashboardService ratingEngineDashboardService;
 
     private final RatingEntityPreviewService ratingEntityPreviewService;
@@ -84,13 +79,11 @@ public class RatingEngineResource {
     @Inject
     public RatingEngineResource(RatingEngineService ratingEngineService, //
             RatingEngineNoteService ratingEngineNoteService, //
-            RatingCoverageService ratingCoverageService, //
             RatingEngineDashboardService ratingEngineDashboardService, //
             RatingEntityPreviewService ratingEntityPreviewService, //
             ActionService actionService) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
-        this.ratingCoverageService = ratingCoverageService;
         this.ratingEngineDashboardService = ratingEngineDashboardService;
         this.ratingEntityPreviewService = ratingEntityPreviewService;
         this.actionService = actionService;
@@ -214,14 +207,6 @@ public class RatingEngineResource {
             @PathVariable String ratingEngineId) {
         log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
         return ratingEngineService.getRatingEngineDependencies(customerSpace, ratingEngineId);
-    }
-
-    @PostMapping(value = "/coverage")
-    @ResponseBody
-    @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingsCountResponse getRatingEngineCoverageInfo(@PathVariable String customerSpace,
-            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
-        return ratingCoverageService.getCoverageInfo(customerSpace, ratingModelSegmentIds);
     }
 
     @GetMapping(value = "/{ratingEngineId}/dashboard", headers = "Accept=application/json")

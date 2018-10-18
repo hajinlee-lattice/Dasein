@@ -780,6 +780,7 @@ public enum LedpCode {
     LEDP_40042("Cannot perform deletion as there are direct dependencies: {0}"), //
     LEDP_40043("S3 File missing the following required fields: {0}"),
     LEDP_40044("Please add Attributes to your model. You can also change usage settings in Attribute Management"),
+    LEDP_40045("Cannot count rating models coverage for segment {0}, as it doesn't exists"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

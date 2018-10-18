@@ -31,6 +31,8 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -45,6 +47,8 @@ import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingIdLookupColumnPair;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingModelIdPair;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
@@ -153,9 +157,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private void processRatingIds(RatingsCountRequest request, RatingsCountResponse result) {
         Tenant tenant = MultiTenantContext.getTenant();
-
-        Map<String, CoverageInfo> ratingEngineIdCoverageMap = new ConcurrentHashMap<>();
-        result.setRatingEngineIdCoverageMap(ratingEngineIdCoverageMap);
+        result.setRatingEngineIdCoverageMap(new ConcurrentHashMap<>());
         Map<String, String> errorMap = new ConcurrentHashMap<>();
         result.getErrorMap().put(RATING_IDS_ERROR_MAP_KEY, errorMap);
 
@@ -165,7 +167,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<String> stream = //
                     request.getRatingEngineIds().stream();
-            ratingEngineStreamProcessing(request, tenant, ratingEngineIdCoverageMap, errorMap, stream);
+            ratingEngineStreamProcessing(request, tenant, result, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -174,7 +176,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getRatingEngineIds().stream() //
                                         .parallel();
 
-                        ratingEngineStreamProcessing(request, tenant, ratingEngineIdCoverageMap, errorMap,
+                        ratingEngineStreamProcessing(request, tenant, result,
                                 parallelStream);
                     }) //
                     .join();
@@ -316,12 +318,17 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     // this method can accept parallel or sequential stream
     private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenant,
-            Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
-        stream //
-                .forEach( //
-                        ratingEngineId -> //
-                        processSingleRatingId(tenant, ratingEngineIdCoverageMap, errorMap, //
-                                ratingEngineId, request.isRestrictNotNullSalesforceId()));
+            RatingsCountResponse result, Stream<String> stream) {
+        stream.forEach(ratingEngineId -> {
+            try {
+                CoverageInfo coverageInfo = processSingleRatingId(tenant, null, ratingEngineId,
+                        request.isRestrictNotNullSalesforceId(), true);
+                result.getRatingEngineIdCoverageMap().put(ratingEngineId, coverageInfo);
+            } catch (Exception ex) {
+                log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
+                result.getErrorMap().get(RATING_IDS_ERROR_MAP_KEY).put(ratingEngineId, ex.getMessage());
+            }
+        });
     }
 
     // this method can accept parallel or sequential stream
@@ -504,35 +511,33 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     }
 
-    private void processSingleRatingId(Tenant tenant, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
-            Map<String, String> errorMap, String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
+    private CoverageInfo processSingleRatingId(Tenant tenant, MetadataSegment targetSegment, String ratingEngineId, boolean isRestrictNotNullSalesforceId, boolean loadContactCount) {
         try {
             MultiTenantContext.setTenant(tenant);
 
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
 
             if (ratingEngine == null || ratingEngine.getSegment() == null) {
-                logInErrorMap(errorMap, ratingEngineId, "Invalid rating engine");
-                return;
+                throw new RuntimeException("Invalid rating engine. Doesn't have segment association.");
             }
 
-            MetadataSegment segment = ratingEngine.getSegment();
+            MetadataSegment querySegment = targetSegment != null ? targetSegment : ratingEngine.getSegment();
 
-            FrontEndQuery accountFrontEndQuery0 = //
+            FrontEndQuery accountFrontEndQuery = //
                     createEntityFronEndQuery(BusinessEntity.Account, //
-                            isRestrictNotNullSalesforceId, segment);
+                            isRestrictNotNullSalesforceId, querySegment);
             FrontEndQuery contactFrontEndQuery = //
                     createEntityFronEndQuery(BusinessEntity.Contact, //
-                            isRestrictNotNullSalesforceId, segment);
+                            isRestrictNotNullSalesforceId, querySegment);
 
-            RatingEngineFrontEndQuery accountFrontEndQuery = RatingEngineFrontEndQuery
-                    .fromFrontEndQuery(accountFrontEndQuery0);
-            accountFrontEndQuery.setRatingEngineId(ratingEngineId);
+            RatingEngineFrontEndQuery reAccountFrontEndQuery = RatingEngineFrontEndQuery
+                    .fromFrontEndQuery(accountFrontEndQuery);
+            reAccountFrontEndQuery.setRatingEngineId(ratingEngineId);
 
-            log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
+            log.info("Front end query for Account: " + JsonUtils.serialize(reAccountFrontEndQuery));
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
                     tenant.getId(), //
-                    accountFrontEndQuery);
+                    reAccountFrontEndQuery);
 
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
@@ -542,20 +547,11 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Long accountCount = accountCountOption.orElse(0L);
             coverageInfo.setAccountCount(accountCount);
 
-            try {
-                Long contactCount = getContactCount(tenant, contactFrontEndQuery);
-                coverageInfo.setContactCount(contactCount);
-            } catch (Exception ex) {
-                log.info("Got error in fetching contact count", ex);
-            }
-
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
             for (RatingBucketName bucket : RatingBucketName.values()) {
                 Long countInBucket = 0L;
 
                 if (countInfo.containsKey(bucket.getName())) {
-                    countInBucket = countInfo.get(bucket.getName());
-                } else if (countInfo.containsKey(bucket.name())) {
                     countInBucket = countInfo.get(bucket.name());
                 } else {
                     // do not put bucket info for bucket which is not defined
@@ -568,10 +564,19 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 bucketCoverageCounts.add(coveragePair);
             }
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-            ratingEngineIdCoverageMap.put(ratingEngineId, coverageInfo);
+
+            if (loadContactCount) {
+                try {
+                    Long contactCount = getContactCount(tenant, contactFrontEndQuery);
+                    coverageInfo.setContactCount(contactCount);
+                } catch (Exception ex) {
+                    log.info("Got error in fetching contact count", ex);
+                }
+            }
+
+            return coverageInfo;
         } catch (Exception ex) {
-            log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
-            logInErrorMap(errorMap, ratingEngineId, ex.getMessage());
+            throw ex;
         }
 
     }
@@ -855,5 +860,48 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     @VisibleForTesting
     void setRatingProxy(RatingProxy ratingProxy) {
         this.ratingProxy = ratingProxy;
+    }
+
+    @Override
+    public RatingModelsCoverageResponse getRatingsCoverageForSegment(String customerSpace, String segmentName,
+            RatingModelsCoverageRequest request) {
+        RatingModelsCoverageResponse response = null;
+        Tenant tenant = MultiTenantContext.getTenant();
+        
+        MetadataSegment targetSegment = segmentService.findByName(segmentName);
+        if (targetSegment == null) {
+            throw new LedpException(LedpCode.LEDP_40045, new String[] {segmentName});
+        }
+        
+        if (request.getRatingModelIds().size() < thresholdForParallelProcessing) {
+            // it is more efficient to use sequential stream (will use current thread) if
+            // collection size is small. It also ensures that small requests are not blocked
+            // if threadpool is used by bigger requests
+            Stream<String> stream = request.getRatingModelIds().stream();
+            response = processRatingModelStream(tenant, stream, targetSegment, request.isRestrictNotNullSalesforceId());
+        } else {
+            response = tpForParallelStream.submit(() -> {
+                Stream<String> parallelStream = request.getRatingModelIds().stream().parallel();
+                return processRatingModelStream(tenant, parallelStream, targetSegment, request.isRestrictNotNullSalesforceId());
+            }).join();
+        }
+
+        return response;
+    }
+
+    // This method can accept parallel or sequential stream
+    private RatingModelsCoverageResponse processRatingModelStream(Tenant tenant, Stream<String> stream,
+            MetadataSegment targetSegment, boolean restrictNotNullSalesforceId) {
+        RatingModelsCoverageResponse response = new RatingModelsCoverageResponse();
+        stream.forEach(ratingModelId -> {
+            try {
+                CoverageInfo coverageInfo = processSingleRatingId(tenant, targetSegment, ratingModelId, restrictNotNullSalesforceId, false);
+                response.getRatingModelsCoverageMap().put(ratingModelId, coverageInfo);
+            } catch (Exception ex) {
+                log.info("Ignoring exception in getting coverage info for rating id: " + ratingModelId, ex);
+                response.getErrorMap().put(ratingModelId, ex.getMessage());
+            }
+        });
+        return response;
     }
 }

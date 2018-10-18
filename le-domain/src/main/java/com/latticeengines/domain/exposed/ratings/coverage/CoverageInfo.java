@@ -93,4 +93,12 @@ public class CoverageInfo {
         }
         return null;
     }
+
+    public RatingBucketCoverage getCoverageForBucket(String bucket) {
+        if (this.bucketCoverageCounts == null) {
+            return null;
+        }
+        return this.bucketCoverageCounts.stream().filter(rbc -> rbc.getBucket().equalsIgnoreCase(bucket)).findFirst()
+                .orElse(null);
+    }
 }

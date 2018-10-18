@@ -837,7 +837,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         String tenantId = MultiTenantContext.getShortTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
-        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataLakeCMCache);
         servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
     }
 

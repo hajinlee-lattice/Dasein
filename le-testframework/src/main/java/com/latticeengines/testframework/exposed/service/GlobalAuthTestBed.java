@@ -36,7 +36,7 @@ public interface GlobalAuthTestBed {
 
     void setMainTestTenant(Tenant tenant);
 
-    void useExistingTenantAsMain(String tenantName);
+    Tenant useExistingTenantAsMain(String tenantName);
 
     UserDocument loginAndAttach(String username, String password, Tenant tenant);
 

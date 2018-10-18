@@ -1,11 +1,15 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -21,6 +25,7 @@ import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -31,8 +36,11 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingIdLookupColumnPair;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingModelIdPair;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
@@ -47,6 +55,8 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-context.xml" })
 public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
+    private static final Logger log = LoggerFactory.getLogger(RatingCoverageServiceImplDeploymentTestNG.class);
+    
     private static final String DUMMY_ID = "DUMMY_ID";
 
     @Autowired
@@ -66,7 +76,9 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndCreatePlay();
+        String existingTenant = null;
+
+        testPlayCreationHelper.setupTenantAndCreatePlay(existingTenant);
 
         play = testPlayCreationHelper.getPlay();
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
@@ -87,12 +99,12 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotNull(ratingRule);
         Assert.assertNotNull(ratingRule.getBucketToRuleMap());
         Assert.assertNotNull(ratingRule.getDefaultBucketName());
-
     }
 
     @AfterClass(groups = { "deployment-app" })
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
+        log.info("Cleaned up all artifacts");
     }
 
     @Test(groups = "deployment-app")
@@ -130,8 +142,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
                 uniqueBuckets.addAll(ratingRule.getBucketToRuleMap().keySet());
                 uniqueBuckets.add(ratingRule.getDefaultBucketName());
 
-                System.out.println(uniqueBuckets);
-                System.out.println(JsonUtils.serialize(response.getRatingEngineIdCoverageMap().get(ratingId)));
+                log.info("Unique Buckets: " + uniqueBuckets);
+                log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingEngineIdCoverageMap().get(ratingId)));
             }
         }
     }
@@ -346,5 +358,64 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
             Assert.assertNotNull(response.getSegmentIdAndSingleRulesCoverageMap()
                     .get(segmentIdAndSingleRulePair.getResponseKeyId()));
         }
+    }
+    
+    @Test(groups = "deployment-app")
+    public void testRatingModelsCoverageForSegment() {
+        RatingModelsCoverageRequest request = new RatingModelsCoverageRequest();
+        String ratingId1 = ratingEngine.getId();
+        List<String> ratingEngineIds = Arrays.asList(ratingId1);
+        request.setRatingModelIds(ratingEngineIds);
+
+        // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 1
+        MetadataSegment currentSegment = ratingEngine.getSegment();
+        RatingModelsCoverageResponse response = ratingCoverageProxy.getCoverageInfoForSegment(
+                testPlayCreationHelper.getTenant().getId(), currentSegment.getName(), request);
+        assertRatingModelsCoverageResponse(ratingId1, response);
+        log.info("Rating Engine Segment {}, Account Count:{}, Contact Count: {}", ratingEngine.getSegment().getName(),
+                currentSegment.getAccounts(), currentSegment.getContacts());
+        log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
+        CoverageInfo coverage1 = response.getRatingModelsCoverageMap().get(ratingId1);
+
+        // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 2
+        currentSegment = testPlayCreationHelper.getPlayTargetSegment();
+        response = ratingCoverageProxy.getCoverageInfoForSegment(testPlayCreationHelper.getTenant().getId(),
+                currentSegment.getName(), request);
+        assertRatingModelsCoverageResponse(ratingId1, response);
+        log.info("Rating Engine Segment {}, Account Count:{}, Contact Count: {}", ratingEngine.getSegment().getName(),
+                currentSegment.getAccounts(), currentSegment.getContacts());
+        log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
+        CoverageInfo coverage2 = response.getRatingModelsCoverageMap().get(ratingId1);
+
+        // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN < 3
+        // And check whether the coverage counts matches with other 2 segment coverages
+        currentSegment = testPlayCreationHelper.createAggregatedSegment();
+        response = ratingCoverageProxy.getCoverageInfoForSegment(testPlayCreationHelper.getTenant().getId(),
+                currentSegment.getName(), request);
+        assertRatingModelsCoverageResponse(ratingId1, response);
+        log.info("Rating Engine Segment {}, Account Count:{}, Contact Count: {}", ratingEngine.getSegment().getName(),
+                currentSegment.getAccounts(), currentSegment.getContacts());
+        log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
+        CoverageInfo coverageAggregated = response.getRatingModelsCoverageMap().get(ratingId1);
+        
+        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()), coverageAggregated.getAccountCount());
+        coverageAggregated.getBucketCoverageCounts().forEach(rbc -> {
+            RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());
+            RatingBucketCoverage coverage2Bucket = coverage2.getCoverageForBucket(rbc.getBucket());
+            Long computedCnt = (coverage1Bucket != null ? coverage1Bucket.getCount() : 0)
+                    + (coverage1Bucket != null ? coverage2Bucket.getCount() : 0);
+            Assert.assertEquals(computedCnt, rbc.getCount(), "Bucket Count doesnot match for: " + rbc.getBucket());
+        });
+    }
+
+    private void assertRatingModelsCoverageResponse(String ratingId1, RatingModelsCoverageResponse response) {
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getRatingModelsCoverageMap());
+        Assert.assertNotNull(response.getErrorMap());
+        Assert.assertTrue(response.getErrorMap().isEmpty());
+        
+        Assert.assertEquals(response.getRatingModelsCoverageMap().size(), 1);
+        Assert.assertTrue(response.getRatingModelsCoverageMap().containsKey(ratingId1));
+        Assert.assertNotNull(response.getRatingModelsCoverageMap().get(ratingId1));
     }
 }

@@ -63,21 +63,24 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
-        MetadataSegment segment1 = null;
+        MetadataSegment persistedSegment = null;
 
         if (segment.getName() != null) {
             MetadataSegment existingSegment = findByName(segment.getName());
             if (existingSegment != null) {
-                segment1 = segmentEntityMgr.updateSegment(segment, existingSegment);
-                evictRatingMetadataCache();
-                return segment1;
+                persistedSegment = segmentEntityMgr.updateSegment(segment, existingSegment);
+                evictRatingMetadataCache(existingSegment, segment);
             }
+        } else {
+            if (StringUtils.isBlank(segment.getName())) {
+                segment.setName(NamingUtils.timestamp("Segment"));
+            }
+            persistedSegment = segmentEntityMgr.createSegment(segment);
         }
-
-        if (StringUtils.isBlank(segment.getName())) {
-            segment.setName(NamingUtils.timestamp("Segment"));
+        if (persistedSegment != null) {
+            updateSegmentCounts(persistedSegment);
         }
-        return segmentEntityMgr.createSegment(segment);
+        return persistedSegment;
     }
 
     @Override
@@ -128,7 +131,6 @@ public class SegmentServiceImpl implements SegmentService {
         if (existingSegment != null) {
             map = updateSegmentCounts(existingSegment);
         }
-        evictRatingMetadataCache();
         return map;
     }
 
@@ -154,7 +156,6 @@ public class SegmentServiceImpl implements SegmentService {
             timer.setTimerMessage("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
             return review;
         } finally {
-            evictRatingMetadataCache();
         }
     }
 
@@ -212,11 +213,18 @@ public class SegmentServiceImpl implements SegmentService {
         return dependencyChecker.getDependencies(customerSpace, segmentName, CDLObjectTypes.Segment.name());
     }
 
-    private void evictRatingMetadataCache() {
+    // Only when a segment displayName got changed, then we need to evict this DataLakeCache
+    private void evictRatingMetadataCache(MetadataSegment existingSegment, MetadataSegment updatedSegment) {
+        if (existingSegment == null || updatedSegment == null) {
+            return;
+        }
+        if (StringUtils.equalsAny(existingSegment.getDisplayName(), updatedSegment.getDisplayName())) {
+            return;
+        }
         String tenantId = MultiTenantContext.getShortTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
-        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataLakeCMCache);
     }
 
     @Override

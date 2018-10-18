@@ -33,8 +33,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -335,12 +333,6 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         String url = constructUrl(URL_PREFIX + "/dependingattrs/type/{engineType}/model/{modelId}",
                 shortenCustomerSpace(customerSpace), engineType, modelId);
         return getList("get depending attrs for rating model", url, AttributeLookup.class);
-    }
-
-    public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace,
-            RatingsCountRequest ratingModelSegmentIds) {
-        String url = constructUrl(URL_PREFIX + "/coverage", shortenCustomerSpace(customerSpace));
-        return post("getCoverage", url, ratingModelSegmentIds, RatingsCountResponse.class);
     }
 
     @VisibleForTesting
