@@ -99,7 +99,7 @@ public class S3ImportJmsConsumer {
             ApplicationId applicationId =  cdlProxy.submitS3ImportJob(tenantId, config);
             log.info("Start S3 file import by applicationId : " + applicationId.toString());
         } catch (Exception e) {
-            log.error("Failed to submit s3 import job." + e.getMessage());
+            log.error("Failed to submit s3 import job.", e);
         }
     }
 }

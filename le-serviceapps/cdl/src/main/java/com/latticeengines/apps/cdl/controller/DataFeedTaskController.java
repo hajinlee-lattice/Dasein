@@ -121,6 +121,7 @@ public class DataFeedTaskController {
                     s3FileToHdfsConfiguration);
             return ResponseDocument.successResponse(applicationId);
         } catch (Exception e) {
+            log.info("Failed to start s3 import", e);
             return ResponseDocument.failedResponse(e);
         }
     }
