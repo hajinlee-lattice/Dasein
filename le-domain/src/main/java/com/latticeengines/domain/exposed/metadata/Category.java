@@ -19,23 +19,24 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.Sets;
 
 public enum Category {
-    FIRMOGRAPHICS("Firmographics"), //
-    GROWTH_TRENDS("Growth Trends"), //
-    INTENT("Intent"), //
-    LEAD_INFORMATION("Lead Information"), //
-    ACCOUNT_INFORMATION("Account Information"), //
-    ONLINE_PRESENCE("Online Presence"), //
-    TECHNOLOGY_PROFILE("Technology Profile"), //
-    WEBSITE_KEYWORDS("Website Keywords"), //
-    WEBSITE_PROFILE("Website Profile"), //
-    ACCOUNT_ATTRIBUTES("My Attributes"), //
-    CONTACT_ATTRIBUTES("Contact Attributes"), //
-    PRODUCT_SPEND("Product Spend Profile"), //
-    RATING("Lattice Ratings"), //
-    CURATED_ACCOUNT_ATTRIBUTES("Curated Account Attributes"), //
-    DEFAULT("Default");
+    RATING("Lattice Ratings", 0), //
+    FIRMOGRAPHICS("Firmographics", 1), //
+    ACCOUNT_ATTRIBUTES("My Attributes", 2), //
+    CURATED_ACCOUNT_ATTRIBUTES("Curated Account Attributes", 3), //
+    CONTACT_ATTRIBUTES("Contact Attributes", 4), //
+    PRODUCT_SPEND("Product Spend Profile", 5), //
+    INTENT("Intent", 6), //
+    WEBSITE_PROFILE("Website Profile", 7), //
+    TECHNOLOGY_PROFILE("Technology Profile", 8), //
+    ONLINE_PRESENCE("Online Presence", 9), //
+    GROWTH_TRENDS("Growth Trends", 10), //
+    WEBSITE_KEYWORDS("Website Keywords", 11), //
+    ACCOUNT_INFORMATION("Account Information", 12), //
+    LEAD_INFORMATION("Lead Information", 13), //
+    DEFAULT("Default", 14);
 
     private final String name;
+    private final int order;
     private static Map<String, Category> nameMap;
     private static Set<String> values;
     private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE, WEBSITE_KEYWORDS,
@@ -62,12 +63,17 @@ public enum Category {
         values = new HashSet<>(Arrays.stream(values()).map(Category::name).collect(Collectors.toSet()));
     }
 
-    Category(String name) {
+    Category(String name, int order) {
         this.name = name;
+        this.order = order;
     }
 
     public String getName() {
         return this.name;
+    }
+
+    public Integer getOrder() {
+        return this.order;
     }
 
     public String toString() {

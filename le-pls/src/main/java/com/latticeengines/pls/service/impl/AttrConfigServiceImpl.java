@@ -15,7 +15,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import javax.inject.Inject;
 
@@ -175,7 +177,13 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
             selection.setDisplayName(mapUsageToDisplayName(property));
             selections.add(selection);
-            Map<String, Long> categories = new HashMap<>();
+            TreeMap<String, Long> categories = new TreeMap<String, Long>(new Comparator<String>() {
+                @Override
+                public int compare(String a, String b) {
+                    return Category.fromName(a).getOrder()
+                            .compareTo(Category.fromName(b).getOrder());
+                }
+            });
             selection.setCategories(categories);
             long selectedNum = 0L;
             for (String category : map.keySet()) {

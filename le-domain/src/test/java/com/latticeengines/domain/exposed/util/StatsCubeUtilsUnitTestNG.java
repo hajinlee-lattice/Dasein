@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket.Change;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -115,6 +116,7 @@ public class StatsCubeUtilsUnitTestNG {
         }
 
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
+        verifyCategoryOrder(topNTree);
         verifyDateAttrInTopN(topNTree, cmMap);
     }
 
@@ -181,6 +183,13 @@ public class StatsCubeUtilsUnitTestNG {
                 Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);
             });
         })));
+    }
+
+    private void verifyCategoryOrder(TopNTree topNTree) {
+        List<Category> categories = new ArrayList<>(topNTree.getCategories().keySet());
+        for (int i = 1; i < categories.size(); i++) {
+            Assert.assertTrue(categories.get(i).getOrder() > categories.get(i - 1).getOrder());
+        }
     }
 
     private Iterator<GenericRecord> readAvro() throws IOException {

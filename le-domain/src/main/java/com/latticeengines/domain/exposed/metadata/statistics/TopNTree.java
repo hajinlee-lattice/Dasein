@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.metadata.statistics;
 
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,7 +22,12 @@ public class TopNTree {
     @JsonProperty("Categories")
     @JsonDeserialize(keyUsing = Category.CategoryKeyDeserializer.class)
     @JsonSerialize(keyUsing = Category.CategoryKeySerializer.class)
-    private Map<Category, CategoryTopNTree> categories = new HashMap<>();
+    private Map<Category, CategoryTopNTree> categories = new TreeMap<>(new Comparator<Category>() {
+        @Override
+        public int compare(Category a, Category b) {
+            return a.getOrder().compareTo(b.getOrder());
+        }
+    });
 
     public Map<Category, CategoryTopNTree> getCategories() {
         return categories;
