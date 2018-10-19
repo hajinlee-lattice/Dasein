@@ -276,8 +276,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
 
         Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
-                ? new HashSet<>(Arrays.asList(Category.values()))
-                : CustomEventModelingConfig.DataStore.getCategoriesByDataStores(dataStores);
+                || ratingEngine.getType() != RatingEngineType.CUSTOM_EVENT
+                        ? new HashSet<>(Arrays.asList(Category.values()))
+                        : CustomEventModelingConfig.DataStore.getCategoriesByDataStores(dataStores);
 
         Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
                 modelSummary);
