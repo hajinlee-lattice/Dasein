@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -48,6 +49,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Inject
     private SegmentExportWorkflowSubmitter segmentExportWorkflowSubmitter;
+
+    @Inject
+    private ImportFromS3Service importFromS3Service;
 
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
@@ -167,7 +171,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             String fileName) {
         CustomerSpaceHdfsFileDownloader.FileDownloadBuilder builder = new CustomerSpaceHdfsFileDownloader.FileDownloadBuilder();
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName);
+                .setFileName(fileName).setImportFromS3Service(importFromS3Service);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 
