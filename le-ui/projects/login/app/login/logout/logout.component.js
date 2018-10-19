@@ -27,7 +27,6 @@ angular.module('login')
 
             redirectDelayInterval = $interval(function(){
                 vm.delay = countDown--
-                console.log(vm.delay);
             }, 1000, redirectDelaySeconds);
 
             $scope.$on('$destroy', function() {
