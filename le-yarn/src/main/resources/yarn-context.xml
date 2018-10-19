@@ -21,4 +21,8 @@
     <import resource="classpath:common-threadpool-context.xml" />
     <import resource="classpath:swlib-context.xml" />
 
+    <bean id="sprintYarnClient" class="org.springframework.yarn.client.YarnClientFactoryBean">
+        <property name="configuration" ref="baseConfiguration" />
+    </bean>
+
 </beans>
