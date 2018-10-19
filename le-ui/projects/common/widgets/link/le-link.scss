@@ -1,0 +1,19 @@
+.le-link-container {
+  &.le-flex-h-panel {
+    flex-wrap: nowrap;
+  }
+  .wrapper {
+    padding: 0.5em;
+    // border: 1px solid white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+ 
+  .le-link {
+    overflow: hidden;
+  }
+  .le-link-icon {
+    padding: 0 0.5em;
+  }
+}

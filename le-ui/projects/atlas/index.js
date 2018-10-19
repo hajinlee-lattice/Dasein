@@ -1,5 +1,4 @@
 console.log("Entry point of atlas app");
-
 // console.log('Start ------------------------------');
 /********* Styles ****************************/
 import "../common/assets/sass/lattice.scss";

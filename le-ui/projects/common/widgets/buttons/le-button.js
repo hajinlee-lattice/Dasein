@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
+import React, { Component } from "../../react-vendor";
 import PropTypes from 'prop-types';
-
 import './buttons.scss';
 
 export default class LeButton extends Component {

@@ -7,6 +7,7 @@ import menus from './modules/menus/state';
 import panels from './modules/panels/state';
 import grid from './modules/grid/state';
 import inputs from './modules/inputs/state';
+import table from './modules/table/state';
 
 
 // Create instance + router setup
@@ -21,7 +22,8 @@ const states = [
     menus,
     panels,
     grid,
-    inputs
+    inputs,
+    table
 ];
 states.forEach(state => router.stateRegistry.register(state));
 

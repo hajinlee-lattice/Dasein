@@ -23,7 +23,7 @@ export default class MenusPage extends Component {
                     <LeMenu classNames="personalMenu" image="fa fa-ellipsis-v" name="main">
                         <LeMenuItem
                             name="users"
-                            label="Mange Users"
+                            image="fa fa-users"
                             callback={(name) => {
                                 console.log('NAME ', name);
                             }} >

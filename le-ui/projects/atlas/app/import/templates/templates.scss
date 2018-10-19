@@ -1,0 +1,45 @@
+@import "../../../../common/widgets/layout/layout.scss";
+@import "../../../../common/widgets/colors.scss";
+.templates-main-container {
+  max-width: 1200px;
+
+  .import-templates {
+    .cell-error {
+      background-color: $ruby;
+    }
+    .disabled-error {
+      pointer-events: all;
+      background-color: $orange-text;
+    }
+    .le-table-cell {
+      .always {
+        display: initial;
+      }
+      .over {
+        display: none;
+      }
+      .le-blu-link{
+        color: $blue-text;
+      }
+    }
+    .le-table-row:hover {
+      color: $pearl-white;
+      .le-table-cell .disables {
+        color: $gun-metal;
+      }
+      opacity: 1;
+      .over {
+        display: initial;
+      }
+      .borders-over > div {
+        border: 1px solid $pearl-white;
+      }
+      .le-blu-link{
+        color: $pearl-white;
+      }
+    }
+    .le-table-row-no-select:hover {
+      color: $black;
+    }
+  }
+}

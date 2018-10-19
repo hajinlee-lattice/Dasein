@@ -9,7 +9,6 @@ var mainApp = angular.module('mainApp', [
     'oc.lazyLoad',
     'angulartics',
     'angulartics.mixpanel',
-    'react',
     'mainApp.appCommon.Widgets',
 
     'common.modules',
@@ -32,6 +31,7 @@ var mainApp = angular.module('mainApp', [
     'lp.notes',
     'lp.playbook',
     'lp.ratingsengine',
+    'lp.importtemplates',
     'lp.import',
     'lp.delete',
     'lp.create.import',

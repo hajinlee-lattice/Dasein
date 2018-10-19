@@ -4,6 +4,11 @@
     box-sizing: border-box;
     flex-wrap: wrap;
     padding: .5em;
+
+    &.main-container {
+        padding: 0;
+    }
+
     &.push-left{
         justify-content: flex-start;
     }
@@ -42,6 +47,11 @@
     flex-wrap: wrap;
     flex-direction: column;
     padding: .5em;
+
+    &.main-container {
+        padding: 0;
+    }
+    
     &.center-h {
         align-items: center;
     }

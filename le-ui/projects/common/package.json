@@ -10,6 +10,7 @@
   "dependencies": {
     "@uirouter/angularjs": "~1.0.18",
     "@uirouter/react": "^0.8.7",
+    "@uirouter/react-hybrid": "^0.3.4",
     "angular": "~1.5.8",
     "angulartics": "^1.6.0",
     "angulartics-mixpanel": "^0.1.4",
@@ -27,7 +28,6 @@
     "jstorage": "^0.4.8",
     "lodash": "^4.17.10",
     "ng-annotate-loader": "^0.6.1",
-    "ngreact": "^0.5.1",
     "node-sass": "^4.8.3",
     "nodemon": "^1.9.1",
     "pako": "^1.0.6",
@@ -35,6 +35,7 @@
     "raw-loader": "^0.5.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react2angular": "^4.0.4",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
     "underscore": "^1.9.1",
