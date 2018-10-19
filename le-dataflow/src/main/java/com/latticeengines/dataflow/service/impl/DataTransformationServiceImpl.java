@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -22,6 +23,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
+import javax.inject.Inject;
+
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
 
@@ -36,8 +39,8 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    private String yarnQueueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {
@@ -113,7 +116,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     private void overwriteYarnQueueAssignment(DataFlowContext dataFlowContext) {
         String queue = dataFlowContext.getProperty(DataFlowProperty.QUEUE, String.class);
-        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, yarnQueueScheme);
+        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         dataFlowContext.setProperty(DataFlowProperty.QUEUE, translatedQueue);
     }
 

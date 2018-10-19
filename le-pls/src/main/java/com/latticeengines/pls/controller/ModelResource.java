@@ -89,8 +89,11 @@ public class ModelResource {
     @Inject
     private ImportFromS3Service importFromS3Service;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
+    private String ambariQueueScheme;
 
     @Inject
     protected SourceFileProxy sourceFileProxy;
@@ -187,7 +190,7 @@ public class ModelResource {
 
     private void importFromS3IfNeeded(Table trainigTable, ModelSummary modelSummary) {
         String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        String queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        String queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, getYarnQueueScheme());
         String tenantId = MultiTenantContext.getTenant().getId();
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
         importFromS3Service.importTable(tenantId, trainigTable, queueName);
@@ -331,5 +334,13 @@ public class ModelResource {
         }
 
         return filteredMetadataFields;
+    }
+
+    private String getYarnQueueScheme() {
+        if (Boolean.TRUE.equals(useEmr)) {
+            return "default";
+        } else {
+            return ambariQueueScheme;
+        }
     }
 }

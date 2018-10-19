@@ -51,6 +51,8 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
                     properties.getProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name()));
             config.set(ScoringProperty.USE_SCOREDERIVATION.name(),
                     properties.getProperty(ScoringProperty.USE_SCOREDERIVATION.name()));
+            config.set(ScoringProperty.CONDA_ENV.name(),
+                    properties.getProperty(ScoringProperty.CONDA_ENV.name()));
             if (properties.containsKey(ScoringProperty.MODEL_GUID.name())) {
                 config.set(ScoringProperty.MODEL_GUID.name(),
                         properties.getProperty(ScoringProperty.MODEL_GUID.name()));

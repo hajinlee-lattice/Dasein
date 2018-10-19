@@ -20,7 +20,6 @@ import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.MRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.sqoop.LedpSqoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,6 @@ public class SqoopJobServiceImpl implements SqoopJobService {
 
     @Inject
     private DbMetadataService dbMetadataService;
-
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
 
     @Value("${dataplatform.hdfs.stack}")
     private String stackName;
@@ -326,7 +322,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         if (StringUtils.isEmpty(queue)) {
             queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         }
-        return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        return LedpQueueAssigner.overwriteQueueAssignment(queue, "default");
     }
 
     protected String overwriteQueueInHadoopOpt(String hadoopOpt) {

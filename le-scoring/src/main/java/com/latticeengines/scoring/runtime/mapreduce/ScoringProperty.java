@@ -9,5 +9,6 @@ public enum ScoringProperty {
     USE_SCOREDERIVATION, //
     MODEL_GUID, //
     READ_MODEL_ID_FROM_RECORD, //
+    CONDA_ENV, //
     SCORE_INPUT_TYPE; //
 }

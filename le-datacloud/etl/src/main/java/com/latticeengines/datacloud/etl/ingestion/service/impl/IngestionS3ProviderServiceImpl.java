@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Service("ingestionS3Provider")
 public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl {
@@ -30,8 +30,8 @@ public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl
     @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Override
     public void ingest(IngestionProgress progress) {
@@ -45,7 +45,7 @@ public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl
             throw new IllegalArgumentException("Must provide both source name and source version");
         }
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         s3SourceEntityMgr.downloadToHdfs(sourceName, sourceVersion, queue);
 
         if (Boolean.TRUE.equals(destination.getUpdateCurrentVersion())) {

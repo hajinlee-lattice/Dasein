@@ -9,7 +9,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -43,9 +42,6 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
 
     @Inject
     private MatchDataCloudWorkflow matchDataCloud;

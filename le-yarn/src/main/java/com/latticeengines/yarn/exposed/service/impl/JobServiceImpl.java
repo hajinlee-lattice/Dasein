@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -74,8 +75,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    private String queueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -106,7 +107,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     private String overwriteQueueInternal(String queue) {
-        return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        return LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
     }
 
     private void overwriteAMQueueAssignment(Properties appMasterProperties) {

@@ -20,7 +20,6 @@ import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
@@ -212,11 +211,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         Action action = new Action();
         action.setType(ActionType.RATING_ENGINE_CHANGE);
         action.setActionInitiator(userId);
-        ActionConfiguration actionConfiguration = new RatingEngineActionConfiguration();
-        ((RatingEngineActionConfiguration) actionConfiguration)
+        RatingEngineActionConfiguration actionConfiguration = new RatingEngineActionConfiguration();
+        actionConfiguration
                 .setSubType(RatingEngineActionConfiguration.SubType.AI_MODEL_BUCKET_CHANGE);
-        ((RatingEngineActionConfiguration) actionConfiguration).setRatingEngineId(ratingEngineId);
-        ((RatingEngineActionConfiguration) actionConfiguration).setModelId(modelGuid);
+        actionConfiguration.setRatingEngineId(ratingEngineId);
+        actionConfiguration.setModelId(modelGuid);
         action.setActionConfiguration(actionConfiguration);
         action.setDescription(action.getActionConfiguration().serialize());
         log.debug(String.format("Registering action %s", action));

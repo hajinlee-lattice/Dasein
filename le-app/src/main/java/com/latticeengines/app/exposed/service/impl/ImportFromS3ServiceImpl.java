@@ -82,7 +82,7 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
                 prefix = prefix + delimiter;
             }
             List<String> files = s3Service.getFilesForDir(s3Bucket, prefix);
-            return files.stream().filter(file -> fileFilter.accept(file))
+            return files.stream().filter(fileFilter::accept)
                     .map(file -> pathBuilder.getS3BucketDir(s3Bucket) + "/" + file).collect(Collectors.toList());
         } catch (
 

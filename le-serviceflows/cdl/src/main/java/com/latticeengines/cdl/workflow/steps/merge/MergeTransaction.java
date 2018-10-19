@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 
 @Component(MergeTransaction.BEAN_NAME)
@@ -63,6 +64,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private EMREnvService emrEnvService;
 
     List<String> stringFields;
     List<String> longFields;
@@ -116,14 +120,14 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             dataCollectionProxy.upsertTable(customerSpace.toString(), rawTable.getName(),
                     TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         }
-        
+
     }
 
 
     private void getTableFields(Table table, List<String> stringFields, List<String> longFields, List<String> intFields) {
         List<Attribute> attrs = table.getAttributes();
         for (Attribute attr: attrs) {
-            Type attrType = Type.valueOf(attr.getPhysicalDataType()); 
+            Type attrType = Type.valueOf(attr.getPhysicalDataType());
             String attrName = attr.getName();
             if (attrType == Type.STRING) {
                 stringFields.add(attrName);
@@ -333,7 +337,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
         String cloneName = NamingUtils.timestamp(role.name());
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         Table inactiveTable = TableCloneUtils //
                 .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
         metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);

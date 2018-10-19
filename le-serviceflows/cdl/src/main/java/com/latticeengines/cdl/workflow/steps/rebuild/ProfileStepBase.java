@@ -19,7 +19,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -52,9 +51,6 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     protected TransformationProxy transformationProxy;
-
-    @Value("${dataplatform.queue.scheme}")
-    protected String queueScheme;
 
     protected CustomerSpace customerSpace;
 

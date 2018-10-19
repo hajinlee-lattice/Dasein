@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -26,6 +28,7 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("scoringJobService")
@@ -57,6 +60,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Value("${dataplatform.hdfs.stack:}")
     protected String stackName;
+
+    @Inject
+    private EMREnvService emrEnvService;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
@@ -119,6 +125,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
         properties.setProperty(ScoringProperty.SCORE_INPUT_TYPE.name(), scoringConfig.getScoreInputType().name());
         properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(), String.valueOf(scoringConfig.readModelIdFromRecord()));
+        properties.setProperty(ScoringProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
 
         List<String> cacheFiles = new ArrayList<>();
         try {

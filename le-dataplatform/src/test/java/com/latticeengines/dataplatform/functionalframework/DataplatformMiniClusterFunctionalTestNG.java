@@ -21,7 +21,4 @@ public class DataplatformMiniClusterFunctionalTestNG extends YarnMiniClusterFunc
     @Value("${dataplatform.hdfs.stack:}")
     protected String stackName;
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    protected String queueScheme;
-
 }

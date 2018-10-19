@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -58,8 +59,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
 
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
@@ -75,7 +76,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
     @Override
     public void onConfigurationInitialized() {
         String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
 
         customer = configuration.getCustomerSpace().toString();
         tenantId = configuration.getCustomerSpace().getTenantId();

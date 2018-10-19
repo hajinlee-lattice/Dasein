@@ -33,6 +33,7 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
@@ -42,11 +43,11 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Value("${dataplatform.hdfs.stack}")
     private String stackName;
 
-    @Value("${dataplatform.python.conda.env}")
-    private String condaEnv;
-
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Inject
     private EMRService emrService;
@@ -102,7 +103,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
-            properties.put(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+            properties.put(PythonContainerProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
             if (Boolean.TRUE.equals(useEmr)) {
                 properties.put(PythonContainerProperty.WEBHDFS_URL.name(), emrService.getWebHdfsUrl());
             } else {

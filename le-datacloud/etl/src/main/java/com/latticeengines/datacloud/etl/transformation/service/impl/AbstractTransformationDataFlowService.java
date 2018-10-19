@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +23,15 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class AbstractTransformationDataFlowService {
 
     protected static final String SPLIT_REGEX = "\\|";
     protected static final String HIPHEN = "-";
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    private String yarnQueueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Value("${datacloud.etl.cascading.platform}")
     private String cascadingPlatform;
@@ -76,7 +79,8 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
         String translatedQueue = LedpQueueAssigner
-                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
+                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(),
+                        emrEnvService.getYarnQueueScheme());
         ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);

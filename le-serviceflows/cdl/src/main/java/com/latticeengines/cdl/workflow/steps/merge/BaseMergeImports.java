@@ -15,7 +15,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,9 +71,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
-
-    @Value("${dataplatform.queue.scheme}")
-    protected String queueScheme;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {

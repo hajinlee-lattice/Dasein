@@ -7,6 +7,8 @@ import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -40,6 +42,7 @@ import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
 import com.latticeengines.yarn.exposed.client.YarnClientCustomization;
 import com.latticeengines.yarn.exposed.runtime.mapreduce.MRJobCustomizationBase;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 import com.latticeengines.yarn.exposed.service.impl.YarnClientCustomizationServiceImpl;
@@ -66,8 +69,8 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     @Value("${dataplatform.hdfs.stack:}")
     protected String stackName;
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    protected String queueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Value("${yarn.use.minicluster}")
     private boolean useMiniCluster;
@@ -210,7 +213,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         ((DefaultYarnClientCustomization) customization).setConfiguration(miniclusterConfiguration);
 
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
-                appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));
+                appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), emrEnvService.getYarnQueueScheme()));
 
         if (StringUtils.isNotBlank(JACOCO_AGENT_FILE) && StringUtils.isNotBlank(jacocoDestFile)) {
             containerProperties.put(ContainerProperty.JACOCO_AGENT_FILE.name(), JACOCO_AGENT_FILE);
@@ -237,7 +240,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     }
 
     private String overwriteQueueInternal(String queue) {
-        return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        return LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
     }
 
     private void overwriteAMQueueAssignment(Properties appMasterProperties) {

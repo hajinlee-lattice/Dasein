@@ -34,11 +34,10 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("exportToS3Service")
 public class ExportToS3ServiceImpl implements ExportToS3Service {
@@ -51,14 +50,11 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     @Inject
     protected MetadataProxy metadataProxy;
 
-    @Inject
-    protected SourceFileProxy sourceFileProxy;
-
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
 
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
@@ -67,21 +63,16 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     private Configuration distCpConfiguration;
 
     @Inject
-    private Configuration yarnConfiguration;
-
-    @Inject
-    protected ModelSummaryProxy modelSummaryProxy;
-
-    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     private String queueName;
-    protected HdfsToS3PathBuilder pathBuilder;
+
+    private HdfsToS3PathBuilder pathBuilder;
 
     @PostConstruct
     public void init() {
         String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         pathBuilder = new HdfsToS3PathBuilder();
 
     }

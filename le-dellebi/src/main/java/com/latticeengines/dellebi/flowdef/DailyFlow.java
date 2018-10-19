@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.version.VersionManager;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -62,31 +64,31 @@ public class DailyFlow {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    private String yarnQueueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
-    @Autowired
+    @Inject
     private DellEbiFlowService dellEbiFlowService;
 
-    @Autowired
+    @Inject
     private HadoopFileSystemOperations hadoopfilesystemoperations;
 
-    @Autowired
+    @Inject
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
-    @Autowired
+    @Inject
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
 
-    @Autowired
+    @Inject
     private MailSender mailSender;
 
-    @Autowired
+    @Inject
     private FlowDefinition flowDefinition;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     public DataFlowContext doDailyFlow(String[] typesList) {
@@ -123,7 +125,7 @@ public class DailyFlow {
         }
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, yarnQueueScheme);
+        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         properties.put("mapred.job.queue.name", translatedQueue);
 
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);

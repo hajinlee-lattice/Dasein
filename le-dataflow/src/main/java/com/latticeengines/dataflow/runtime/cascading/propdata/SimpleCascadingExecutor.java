@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 
+import javax.inject.Inject;
+
 public class SimpleCascadingExecutor {
     private static final Logger log = LoggerFactory.getLogger(SimpleCascadingExecutor.class);
 
@@ -50,8 +53,8 @@ public class SimpleCascadingExecutor {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Value("${dataplatform.queue.scheme:legacy}")
-    private String yarnQueueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     public SimpleCascadingExecutor(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
@@ -108,7 +111,8 @@ public class SimpleCascadingExecutor {
             AppProps.setApplicationJarPath(properties, appJarPath);
         }
         String translatedQueue = LedpQueueAssigner
-                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
+                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(),
+                        emrEnvService.getYarnQueueScheme());
         ExecutionEngine engine = ExecutionEngine.get(ENGINE);
         DataFlowContext dataFlowCtx = new DataFlowContext();
         dataFlowCtx.setProperty(DataFlowProperty.QUEUE, translatedQueue);

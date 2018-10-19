@@ -24,6 +24,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -65,7 +66,11 @@ public class ScoringMapperPredictUtil {
         for (String modelGuid : uuidSet) {
             sb.append(modelGuid + " ");
         }
-        String pythonCommand = String.format("./pythonlauncher.sh lattice scoring.py %s ", type);
+        String condaEnv = config.get(ScoringProperty.CONDA_ENV.name());
+        if (StringUtils.isBlank(condaEnv)) {
+            condaEnv = "lattice";
+        }
+        String pythonCommand = String.format("./pythonlauncher.sh %s scoring.py %s ", condaEnv, type);
         if (type.equals(ScoringInputType.Avro.name())) {
             pythonCommand += config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name()) + " ";
         }

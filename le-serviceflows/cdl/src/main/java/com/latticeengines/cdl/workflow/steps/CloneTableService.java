@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -42,8 +43,8 @@ public class CloneTableService {
     @Inject
     private Configuration yarnConfiguration;
 
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
+    @Inject
+    private EMREnvService emrEnvService;
 
     private CustomerSpace customerSpace;
     private DataCollection.Version active;
@@ -87,7 +88,7 @@ public class CloneTableService {
                     String cloneName = PeriodStrategyUtils.getTablePrefixFromPeriodStrategyName(periodStrategyName)
                             + NamingUtils.timestamp(role.name());
                     String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-                    queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+                    queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
                     Table inactiveTable = TableCloneUtils //
                             .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
                     metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
@@ -99,7 +100,7 @@ public class CloneTableService {
                 Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
                 String cloneName = NamingUtils.timestamp(role.name());
                 String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-                queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+                queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
                 Table inactiveTable = TableCloneUtils //
                         .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
                 metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
