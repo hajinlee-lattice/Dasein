@@ -105,6 +105,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         srcTables.put(BusinessEntity.Transaction, "cdl_test_transaction_%d");
         srcTables.put(BusinessEntity.PeriodTransaction, "cdl_test_period_transaction_%d");
         srcTables.put(BusinessEntity.DepivotedPurchaseHistory, "cdl_test_purchase_history_%d");
+        srcTables.put(BusinessEntity.CuratedAccount, "cdl_test_curated_account_%d");
     }
 
     @Override
