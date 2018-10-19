@@ -1,8 +1,11 @@
 package com.latticeengines.serviceflows.service.impl;
 
+import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 
@@ -37,6 +40,26 @@ public class ServiceflowsCoreEmrEnvServiceImpl implements EMREnvService {
         } else {
             return ambariQueueScheme;
         }
+    }
+
+    @Override
+    public YarnConfiguration getYarnConfiguration(String emrCluster) {
+        return null;
+    }
+
+    @Override
+    public org.springframework.yarn.client.YarnClient getSpringYarnClient(String emrCluster) {
+        return null;
+    }
+
+    @Override
+    public YarnClient getYarnClient(String emrCluster) {
+        return null;
+    }
+
+    @Override
+    public ClusterMetrics getClusterMetrics(String emrCluster) {
+        return null;
     }
 
 }
