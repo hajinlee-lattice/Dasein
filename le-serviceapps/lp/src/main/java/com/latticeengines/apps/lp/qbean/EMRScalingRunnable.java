@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,6 +44,9 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MAX_AVAIL_VCORES = 2 * UNIT_VCORES + CORE_VCORES;
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(2);
+    private static final long SCALE_UP_COOLING_PERIOD = TimeUnit.MINUTES.toMillis(10);
+
+    private static final AtomicLong lastScalingUp = new AtomicLong(0);
 
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
             Sets.newEnumSet(Arrays.asList(//
@@ -105,27 +109,31 @@ public class EMRScalingRunnable implements Runnable {
                     + " and vcores " + availableVCores);
             scale = false;
         }
-
         return scale;
     }
 
     private boolean needToScaleDown() {
         String scaleLogPrefix = "Need to scale down " + emrCluster + ": ";
         String noScaleLogPrefix = "No need to scale down " + emrCluster + ": ";
-        int availableMB = metrics.availableMB;
-        int availableVCores = metrics.availableVirtualCores;
 
         boolean scale;
-        if (availableMB <= MAX_AVAIL_MEM_MB) {
-            log.info(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
-            scale = false;
-        } else if (availableVCores <= MAX_AVAIL_VCORES) {
-            log.info(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
+        if (System.currentTimeMillis() - lastScalingUp.get() < SCALE_UP_COOLING_PERIOD) {
+            log.info(noScaleLogPrefix + "still in cooling period.");
             scale = false;
         } else {
-            log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
-                    + availableVCores + " are both too high.");
-            scale = true;
+            int availableMB = metrics.availableMB;
+            int availableVCores = metrics.availableVirtualCores;
+            if (availableMB <= MAX_AVAIL_MEM_MB) {
+                log.info(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
+                scale = false;
+            } else if (availableVCores <= MAX_AVAIL_VCORES) {
+                log.info(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
+                scale = false;
+            } else {
+                log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
+                        + availableVCores + " are both too high.");
+                scale = true;
+            }
         }
 
         return scale;
@@ -140,7 +148,7 @@ public class EMRScalingRunnable implements Runnable {
         int requested = taskGrp.getRequestedInstanceCount();
         log.info(String.format("%s TASK group, running=%d, requested=%d, target=%d", //
                 emrCluster, running, requested, target));
-        return true;
+        return scale(target);
     }
 
     private void scaleDown() {
@@ -152,6 +160,18 @@ public class EMRScalingRunnable implements Runnable {
         int requested = taskGrp.getRequestedInstanceCount();
         log.info(String.format("%s TASK group, running=%d, requested=%d, target=%d", //
                 emrCluster, running, requested, target));
+        scale(target);
+    }
+
+    private boolean scale(int target) {
+        try {
+            emrService.scaleTaskGroup(emrCluster, target);
+            lastScalingUp.set(System.currentTimeMillis());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to scale " + emrCluster + " to " + target, e);
+            return false;
+        }
     }
 
     private Pair<Integer, Integer> getRequestingResources() {
