@@ -86,7 +86,7 @@ public class PatchBookUtils {
         AM_LOOKUP_PATCH_MATCH_KEYS.add(new MatchKeyTuple.Builder() //
                 .withDomain(MatchKey.Domain.name()) //
                 .withCountry(MatchKey.Country.name()) //
-                .withState(MatchKey.Zipcode.name()) //
+                .withZipcode(MatchKey.Zipcode.name()) //
                 .build().buildIdForKey()); // Domain, Country, Zipcode
 
         /* duns guide book */
