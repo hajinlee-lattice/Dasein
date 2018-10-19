@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.joda.time.DateTime;
@@ -38,12 +40,12 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
     @Autowired
     private ExtractFilterBuilder extractFilterBuilder;
 
-    private Configuration configuration = new Configuration();
+    @Resource(name = "yarnConfiguration")
+    private Configuration configuration;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(configuration, INPUT_PATH);
-
         String extract1 = "com/latticeengines/dataflow/exposed/service/impl/extractFilterTest/ExtractFilterTest1.avro";
         String extract2 = "com/latticeengines/dataflow/exposed/service/impl/extractFilterTest/ExtractFilterTest2.avro";
         FileSystem fs = FileSystem.get(configuration);

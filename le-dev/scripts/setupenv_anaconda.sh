@@ -71,8 +71,6 @@ pip install \
 
 pip install --no-deps kazoo==2.2.1 patsy==0.3.0 python-dateutil==2.4.1
 
-$ANACONDA_HOME/bin/conda install -y pandas=0.13.1=np18py27_0
-
 $ANACONDA_HOME/bin/conda install -y \
     libiconv=1.14=0 \
     libxml2=2.9.4=0 \
@@ -80,6 +78,7 @@ $ANACONDA_HOME/bin/conda install -y \
     lxml=3.4.0=py27_0 \
     numpy=1.8.2=py27_0 \
     openssl=1.0.2j=0 \
+    pandas=0.13.1=np18py27_0 \
     py=1.4.31=py27_0 \
     pytest=2.9.2=py27_0 \
     pytz=2016.10=py27_0 \

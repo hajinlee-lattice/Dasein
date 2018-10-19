@@ -6,9 +6,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,11 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -65,7 +70,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @AfterClass(groups = { "deployment" })
-    public void tearDown() throws Exception {
+    public void tearDown() {
         deleteUserByRestCall(INTERNAL_USER_EMAIL);
         deleteUserByRestCall(EXTERNAL_USER_EMAIL);
     }
@@ -77,13 +82,15 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testSendAndReceiveExternalEmail() throws Exception {
-        LocalDateTime registrationTime = LocalDateTime.now();
+        long registrationTime = getTimeWorldClockApi();
         Thread.sleep(1000);
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             try {
+                log.info("(Attempt=" + (context.getRetryCount() + 1) //
+                        + ") start verifying receiving emails in Gmail.");
                 verifyReceivedEmailInGmail(registrationTime);
                 return true;
             } catch (Exception e) {
@@ -135,7 +142,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void verifyReceivedEmailInOutlook() {
     }
 
-    private void verifyReceivedEmailInGmail(LocalDateTime registrationTimestamp) //
+    private void verifyReceivedEmailInGmail(long registrationTimestamp) //
             throws MessagingException, IOException {
         String receivingHost = "imap.gmail.com";
 
@@ -155,12 +162,11 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             folder.open(Folder.READ_WRITE);
             try {
                 Message[] messages = folder.getMessages();
+                log.info("There are " + messages.length + " messages in the INBOX.");
                 for (Message message : messages) {
                     if (message.getSubject().equalsIgnoreCase(EmailSettings.PLS_NEW_USER_SUBJECT)) {
                         Date receivedDate = message.getReceivedDate();
-                        LocalDateTime receivedLocalDate = receivedDate.toInstant() //
-                                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-                        if (receivedLocalDate.isAfter(registrationTimestamp)) {
+                        if (receivedDate.getTime() > registrationTimestamp) {
                             MimeMessage m = (MimeMessage) message;
                             String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
                             log.info("Found one new user email received after registration time, with app url " + url);
@@ -170,7 +176,12 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                                 foundTheEmail = true;
                                 break;
                             }
+                        } else {
+                            log.info("A new user email received at " + receivedDate
+                                    + ", before registration time " + new Date(registrationTimestamp));
                         }
+                    } else {
+                        log.info("Subject: " + message.getSubject());
                     }
                 }
             } finally {
@@ -195,6 +206,16 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             }
         }
         return "";
+    }
+
+    private long getTimeWorldClockApi() {
+        RestTemplate restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+        JsonNode jsonNode = restTemplate.getForObject("http://worldclockapi.com/api/json/utc/now", JsonNode.class);
+        Assert.assertNotNull(jsonNode);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
+        LocalDateTime localDateTime = LocalDateTime.parse(jsonNode.get("currentDateTime").asText(), formatter);
+        long milli = localDateTime.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+        return milli - TimeUnit.SECONDS.toMillis(30);
     }
 
 }

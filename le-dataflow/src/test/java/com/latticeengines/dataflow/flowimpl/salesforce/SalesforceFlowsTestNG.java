@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
@@ -32,11 +34,13 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     @Autowired
     private DataTransformationService dataTransformationService;
 
+    @Resource(name = "yarnConfiguration")
+    private Configuration config;
+
     private String lead;
     private String opportunity;
     private String contact;
     private String opportunityContactRole;
-    private Configuration config = new Configuration();
 
     private static final String PATH_TEST = String.format("/tmp/%s", SalesforceFlowsTestNG.class.getSimpleName());
     private static final String PATH_PDTABLE = String.format("%s/PDTable", PATH_TEST);
@@ -44,7 +48,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     private static final String PATH_TMPEVENTTABLE = String.format("%s/TmpEventTable", PATH_TEST);
     private static final String PATH_AVRO = String.format("%s/avro", PATH_TEST);
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void setup() throws Exception {
         HdfsUtils.rmdir(config, PATH_TEST);
         log.info(PATH_TEST + " is cleaned up");
@@ -71,7 +75,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
                 "Lead.avro, Opportunity.avro, Contact.avro and OpportunityContactRole.avro have been copied to target hdfs dir");
     }
 
-    @Test(groups = "functional", dataProvider = "checkpointProvider")
+    @Test(groups = "functional", dataProvider = "checkpointProvider", enabled = false)
     public void constructFlowDefinition(boolean checkpoint) throws Exception {
         Map<String, String> sources = new HashMap<>();
 

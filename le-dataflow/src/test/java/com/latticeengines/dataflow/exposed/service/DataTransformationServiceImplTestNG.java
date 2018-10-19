@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,9 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     @Autowired
     private CascadingDataFlowBuilder tableWithExtractsDataFlowBuilder;
 
-    private Configuration config = new Configuration();
+    @Resource(name = "yarnConfiguration")
+    private Configuration config;
+
     private String lead;
     private String opportunity;
     private String contact;
