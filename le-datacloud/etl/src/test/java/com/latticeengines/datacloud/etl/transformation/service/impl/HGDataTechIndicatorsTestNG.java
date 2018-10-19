@@ -140,11 +140,11 @@ public class HGDataTechIndicatorsTestNG
     }
 
     private Object[][] hgCleanData = new Object[][] { //
-            { "google.com", "Supplier", "1010Data" }, //
+            { "google.com", "Supplier", "1010data" }, //
             { "google.com", "Supplier", "CommVault" }, //
             { "google.com", "24/7 Customer, Inc.", "Segment" }, //
             { "google.com", "3M Company", "Segment" }, //
-            { "facebook.com", "Supplier", "1010Data" }, //
+            { "facebook.com", "Supplier", "1010data" }, //
             { "facebook.com", "Supplier", "CommVault" }, //
             { "facebook.com", "24/7 Customer, Inc.", "Segment" }, //
             { "facebook.com", "3M Company", "Segment" }, //
