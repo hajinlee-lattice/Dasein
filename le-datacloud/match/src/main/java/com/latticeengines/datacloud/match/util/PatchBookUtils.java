@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -33,8 +34,6 @@ public class PatchBookUtils {
             "ExpireAfter date should not be earlier than EffectiveSince date";
     private static final String UNSUPPORTED_MATCH_KEY = "Unsupported match key combination found for PID : ";
 
-    // TODO consider using equals & hashCode implementation for MatchKeyTuple, but probably too complicated
-    // TODO currently using serialized format instead
     // Key: patch book type, Value: set of supported match key tuple (in serialized format)
     private static final Map<PatchBook.Type, Set<String>> SUPPORTED_MATCH_KEY_MAP = new HashMap<>();
 
@@ -46,8 +45,6 @@ public class PatchBookUtils {
     private static final Set<String> DUNS_GUIDE_BOOK_LOOKUP_PATCH_MATCH_KEYS = new HashSet<>();
 
     static {
-        // TODO init supported match key tuple here
-        // FIXME remove place holder
         MatchKeyTuple domainDunsTuple = new MatchKeyTuple.Builder() //
                 .withDomain(MatchKey.Domain.name()) //
                 .withDuns(MatchKey.DUNS.name()) //
@@ -64,8 +61,7 @@ public class PatchBookUtils {
         MatchKeyTuple domainPatcherType = new MatchKeyTuple.Builder() //
                 .withDuns(MatchKey.DUNS.name()) //
                 .build(); //
-        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Domain,
-                new HashSet<>(Arrays.asList(domainPatcherType.buildIdForKey())));
+        SUPPORTED_MATCH_KEY_MAP.put(PatchBook.Type.Domain, Collections.singleton(domainPatcherType.buildIdForKey()));
 
         /* init match key constants for lookup patch */
 
@@ -125,8 +121,9 @@ public class PatchBookUtils {
      * Standardize all input match key fields of target patch book
      *
      * @param book target patch book, should not be {@literal null}
+     * @param countryCodeService service to standardize country string, should not be {@literal null}
      */
-    public static void standardize(@NotNull PatchBook book) {
+    public static void standardize(@NotNull PatchBook book, @NotNull CountryCodeService countryCodeService) {
         // TODO implement
     }
 
@@ -168,8 +165,11 @@ public class PatchBookUtils {
 
     /**
      * Validate whether there are duplicate match key combination (same combination of match keys AND with the same
+     * values) in the given list of patch books.
      *
-     * values) in the given list of patch books
+     * NOTE no filtering will be performed in this method. it is suggested that all input {@link PatchBook} have the
+     * same {@link PatchBook.Type}
+     *
      * @param patchBooks list of patch books, should not be {@literal null}
      * @return a list of validation errors where each error represents a group of patch books with duplicated match
      * keys
@@ -195,6 +195,9 @@ public class PatchBookUtils {
     /**
      * Validate whether there are patch books that contain unsupported match key combination
      *
+     * NOTE no filtering will be performed in this method. it is suggested that all input {@link PatchBook} have the
+     * same {@link PatchBook.Type}
+     *
      * @param patchBooks list of patch books, should not be {@literal null}
      * @return a list of validation errors to show which patch books have unsupported match keys
      */
@@ -204,7 +207,7 @@ public class PatchBookUtils {
             if (!isMatchKeySupported(entry)) {
                 PatchBookValidationError error = new PatchBookValidationError();
                 error.setMessage(UNSUPPORTED_MATCH_KEY + entry.getPid());
-                error.setPatchBookIds(Arrays.asList(entry.getPid()));
+                error.setPatchBookIds(Collections.singletonList(entry.getPid()));
                 errorList.add(error);
             }
         }
@@ -214,6 +217,9 @@ public class PatchBookUtils {
     /**
      * Validate whether {@link PatchBook#getEffectiveSince()} and {@link PatchBook#getExpireAfter()} is set correctly.
      * {@literal null} books will be skipped.
+     *
+     * NOTE no other filtering will be performed in this method. it is suggested that all input {@link PatchBook} have
+     * the same {@link PatchBook.Type}
      *
      * @param patchBooks list of {@link PatchBook} to validate, should not be {@literal null}
      * @return a list of validation errors
@@ -241,6 +247,9 @@ public class PatchBookUtils {
     /**
      * Validate whether there are patch items with invalid format in the given patch books
      *
+     * NOTE no filtering will be performed in this method. it is suggested that all input {@link PatchBook} have the
+     * same {@link PatchBook.Type}
+     *
      * @param patchBooks list of patch books, should not be {@literal null}
      * @return a list of validation errors
      */
@@ -253,6 +262,7 @@ public class PatchBookUtils {
      * Check if the patch book already reaches end of life
      *
      * @param book target patch book, should not be {@literal null}
+     * @param currentDate date object that represents current time, if null, a new date object will be created
      * @return true if the patch book DO reach EOF, false otherwise
      */
     public static boolean isEndOfLife(@NotNull PatchBook book, Date currentDate) {
