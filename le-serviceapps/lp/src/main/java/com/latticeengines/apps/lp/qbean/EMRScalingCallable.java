@@ -18,6 +18,7 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 class EMRScalingCallable implements Callable<Boolean> {
 
     private static final Logger log = LoggerFactory.getLogger(EMRScalingCallable.class);
+    private static final ExecutorService pool = ThreadPoolUtils.getFixedSizeThreadPool("emr-scaling", 8);
 
     private List<String> scalingClusters;
 
@@ -54,13 +55,7 @@ class EMRScalingCallable implements Callable<Boolean> {
             if (CollectionUtils.size(runnables) == 1) {
                 runnables.get(0).run();
             } else {
-                int poolSize = Math.min(CollectionUtils.size(runnables), 4);
-                ExecutorService pool = ThreadPoolUtils.getFixedSizeThreadPool("emr-scaling", poolSize);
-                try {
-                    ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 10, 1);
-                } finally {
-                    pool.shutdown();
-                }
+                ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 10, 1);
             }
         }
         return true;
