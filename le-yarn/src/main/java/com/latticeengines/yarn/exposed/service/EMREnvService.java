@@ -1,7 +1,5 @@
 package com.latticeengines.yarn.exposed.service;
 
-import java.io.IOException;
-
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 

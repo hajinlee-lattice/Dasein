@@ -29,7 +29,7 @@ public class YarnClientFactoryTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "manual")
     public void testYarnClient() throws IOException, YarnException {
-        String emrCluster = "devcluster_20181019";
+        String emrCluster = "qa_b";
         try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
             yarnClient.start();
             List<ApplicationReport> apps = yarnClient.getApplications();

@@ -2,10 +2,13 @@ package com.latticeengines.apps.lp.qbean;
 
 import java.util.concurrent.Callable;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("emrScalingBean")
 public class EMRScalingBean implements QuartzJobBean {
@@ -13,10 +16,14 @@ public class EMRScalingBean implements QuartzJobBean {
     @Value("${lp.emr.scaling.clusters}")
     private String scalingClusters;
 
+    @Inject
+    private EMREnvService emrEnvServicel;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         return EMRScalingCallable.builder() //
                 .scalingClusters(scalingClusters) //
+                .emrEnvService(emrEnvServicel) //
                 .build();
     }
 
