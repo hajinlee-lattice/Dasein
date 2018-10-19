@@ -1,6 +1,7 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,13 +12,11 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.jpmml.evaluator.CacheUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
@@ -27,6 +26,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PrecisionUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.exposed.ScoreEvaluation;
 import com.latticeengines.scoringapi.exposed.ScoreType;
@@ -59,6 +60,12 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     @Autowired
     private Warnings warnings;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     private Map<String, FieldSchema> defaultFieldSchemaForMatch;
 
@@ -103,23 +110,31 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     public ModelEvaluator getModelEvaluator(String hdfsScoreArtifactBaseDir, //
             String modelJsonType, //
             String localPathToPersist) {
-        FSDataInputStream is = null;
         String path = hdfsScoreArtifactBaseDir + PMML_FILENAME;
 
         ModelEvaluator modelEvaluator = null;
         try {
-            FileSystem fs = FileSystem.newInstance(yarnConfiguration);
-            is = fs.open(new Path(path));
-
-            modelEvaluator = initModelEvaluator(is);
+            path = getS3PathIfNeeded(path, false);
+            modelEvaluator = initModelEvaluator(HdfsUtils.getInputStream(yarnConfiguration, path));
 
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
             }
-        } catch (IOException e) {
+        } catch (
+
+        IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
         return modelEvaluator;
+    }
+
+    private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) throws IOException {
+        String[] tokens = hdfsPath.split("/");
+        CustomerSpace space = CustomerSpace.parse(tokens[4]);
+        String customer = space.toString();
+        String tenantId = space.getTenantId();
+        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, customer, tenantId,
+                podId, s3Bucket);
     }
 
     @Override
@@ -129,6 +144,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + SCORE_DERIVATION_FILENAME;
         String content = null;
         try {
+            path = getS3PathIfNeeded(path, false);
             if (shouldStopCheckForScoreDerivation(path)) {
                 return null;
             }
@@ -150,11 +166,13 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + DATA_COMPOSITION_FILENAME;
         String content = null;
         try {
+            path = getS3PathIfNeeded(path, false);
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
             }
         } catch (IOException e) {
+            log.error("Failed to get DataComposition file, error=", e.getMessage());
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
         DataComposition dataComposition = JsonUtils.deserialize(content, DataComposition.class);
@@ -169,9 +187,12 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
         try {
             path = hdfsScoreArtifactTableDirWithWildChar;
-
+            hdfsScoreArtifactTableDirWithWildChar = getS3PathIfNeeded(hdfsScoreArtifactTableDirWithWildChar, true);
+            log.info("Event table composition dir=" + hdfsScoreArtifactTableDirWithWildChar);
             List<String> resolvedHdfsScoreArtifactTableDirs = HdfsUtils.getFilesByGlob(yarnConfiguration,
                     hdfsScoreArtifactTableDirWithWildChar);
+            resolvedHdfsScoreArtifactTableDirs = new HdfsToS3PathBuilder()
+                    .toHdfsPaths(resolvedHdfsScoreArtifactTableDirs);
             String resolvedHdfsScoreArtifactTableDir = null;
             if (resolvedHdfsScoreArtifactTableDirs.size() == 1) {
                 resolvedHdfsScoreArtifactTableDir = resolvedHdfsScoreArtifactTableDirs.get(0);
@@ -191,7 +212,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             }
 
             path = resolvedHdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
-
+            path = getS3PathIfNeeded(path, false);
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
@@ -431,7 +452,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         return false;
     }
 
-    protected ModelEvaluator initModelEvaluator(FSDataInputStream is) {
+    protected ModelEvaluator initModelEvaluator(InputStream is) {
         return new DefaultModelEvaluator(is);
     }
 

@@ -81,7 +81,7 @@ public class HdfsUtils {
         return FileSystem.newInstance(configuration);
     }
 
-    private static FileSystem getFileSystem(Configuration configuration, String path) throws IOException {
+    public static FileSystem getFileSystem(Configuration configuration, String path) throws IOException {
         if (path.startsWith("/")) {
             return FileSystem.newInstance(configuration);
         } else {
@@ -108,9 +108,8 @@ public class HdfsUtils {
     }
 
     public static String getHdfsFileContents(Configuration configuration, String hdfsPath) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             Path schemaPath = new Path(hdfsPath);
-
             try (InputStream is = fs.open(schemaPath)) {
                 try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
                     StreamUtils.copy(is, os);
@@ -189,13 +188,13 @@ public class HdfsUtils {
 
     public static void copyHdfsToLocal(Configuration configuration, String hdfsPath, String localPath)
             throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             fs.copyToLocalFile(new Path(hdfsPath), new Path(localPath));
         }
     }
 
     public static void writeToFile(Configuration configuration, String hdfsPath, String contents) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             Path filePath = new Path(hdfsPath);
 
             try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
@@ -272,7 +271,7 @@ public class HdfsUtils {
 
     public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFilenameFilter filter)
             throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
             for (FileStatus status : statuses) {
@@ -496,7 +495,7 @@ public class HdfsUtils {
     }
 
     public static InputStream getInputStream(Configuration configuration, String hdfsPath) throws IOException {
-        FileSystem fs = FileSystem.newInstance(configuration);
+        FileSystem fs = getFileSystem(configuration, hdfsPath);
         return fs.open(new Path(hdfsPath));
     }
 

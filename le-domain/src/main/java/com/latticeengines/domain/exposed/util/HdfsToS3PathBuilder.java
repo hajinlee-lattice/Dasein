@@ -1,14 +1,26 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class HdfsToS3PathBuilder {
 
+    private static final Logger log = LoggerFactory.getLogger(HdfsToS3PathBuilder.class);
+
     private static final String PATH_SEPARATOR = "/";
 
-    private String hddfAnalyticsBaseDir = "/user/s-analytics/customers";
-    private String hdfsAnalyticsDir = hddfAnalyticsBaseDir + "/%s";
+    private String hdfsAnalyticsBaseDir = "/user/s-analytics/customers";
+    private String hdfsAnalyticsDir = hdfsAnalyticsBaseDir + "/%s";
     private String hdfsEventTableModelDir = hdfsAnalyticsDir + "/models";
     private String hdfsEventTableDataDir = hdfsAnalyticsDir + "/data";
 
@@ -55,6 +67,10 @@ public class HdfsToS3PathBuilder {
     }
 
     // Hdfs Analytics
+    public String getHdfsAnalyticsBaseDir() {
+        return hdfsAnalyticsBaseDir;
+    }
+
     public String getHdfsAnalyticsDir(String customer) {
         return String.format(hdfsAnalyticsDir, customer);
     }
@@ -209,5 +225,48 @@ public class HdfsToS3PathBuilder {
     private String getMetadataTableFolderName(String eventTable, String eventColumn) {
         return String.format("%s-%s-Metadata", eventTable.replaceAll("[^A-Za-z0-9_-]", "_"),
                 eventColumn.replaceAll("[^A-Za-z0-9_-]", "_"));
+    }
+
+    // Some ad hoc methods
+    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String customer,
+            String tenantId, String podId, String s3Bucket) {
+        try {
+            String s3Path = exploreS3FilePath(path, podId, customer, tenantId, s3Bucket);
+            if (isGlob) {
+                if (CollectionUtils.isNotEmpty(HdfsUtils.getFilesByGlob(yarnConfiguration, s3Path))) {
+                    path = s3Path;
+                }
+            } else {
+                if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
+                    path = s3Path;
+                }
+            }
+            return path;
+        } catch (Exception ex) {
+            log.warn("Could not get S3 path!", ex.getMessage());
+        }
+        return path;
+    }
+
+    public List<String> toHdfsPaths(List<String> dirs) {
+        List<String> newDirs = new ArrayList<>();
+        dirs.forEach(dir -> {
+            String newDir = toHdfsPath(dir);
+            newDirs.add(newDir);
+        });
+        return newDirs;
+    }
+
+    public String toHdfsPath(String dir) {
+        if (dir.startsWith(getHdfsAnalyticsBaseDir())) {
+            return dir;
+        }
+        String[] tokens = dir.split("/");
+        CustomerSpace space = CustomerSpace.parse(tokens[1]);
+        StringBuilder strBuilder = new StringBuilder();
+        for (int i = 3; i < tokens.length; i++) {
+            strBuilder.append("/").append(tokens[i]);
+        }
+        return getHdfsAnalyticsDir(space.toString()) + strBuilder.toString();
     }
 }

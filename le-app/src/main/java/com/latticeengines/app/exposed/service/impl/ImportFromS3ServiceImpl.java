@@ -84,9 +84,7 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
             List<String> files = s3Service.getFilesForDir(s3Bucket, prefix);
             return files.stream().filter(fileFilter::accept)
                     .map(file -> pathBuilder.getS3BucketDir(s3Bucket) + "/" + file).collect(Collectors.toList());
-        } catch (
-
-        Exception ex) {
+        } catch (Exception ex) {
             log.warn("Failed to get files for prefix=" + prefix + " Error=" + ex.getMessage());
         }
         return Collections.emptyList();

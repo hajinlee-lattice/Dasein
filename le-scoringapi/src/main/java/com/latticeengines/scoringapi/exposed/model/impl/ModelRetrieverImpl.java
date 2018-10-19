@@ -61,6 +61,7 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -132,6 +133,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Value("${scoringapi.modeljson.cache.dir}")
     private String localModelJsonCacheDirProperty;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     private String localModelJsonCacheDirIdentifier;
 
@@ -309,8 +316,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @VisibleForTesting
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
-        List<ModelSummary> modelSummaryList = modelSummaryProxy
-                .getModelSummariesModifiedWithinTimeFrame(timeFrame);
+        List<ModelSummary> modelSummaryList = modelSummaryProxy.getModelSummariesModifiedWithinTimeFrame(timeFrame);
         return modelSummaryList;
     }
 
@@ -349,7 +355,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
         String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
-        String modelJsonType = getModelJsonType(modelSummary.getEventTableName(), hdfsScoreArtifactBaseDir);
+        String modelJsonType = getModelJsonType(customerSpace, modelSummary.getEventTableName(),
+                hdfsScoreArtifactBaseDir);
 
         DataComposition dataScienceDataComposition = getModelJsonTypeHandler(modelJsonType)
                 .getDataScienceDataComposition(hdfsScoreArtifactBaseDir, localPathToPersist);
@@ -418,6 +425,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String hdfsScoreArtifactAppIdDir = String.format(HDFS_SCORE_ARTIFACT_APPID_DIR, customerSpace.toString(),
                 modelNameAndVersion.getKey(), modelNameAndVersion.getValue());
         try {
+            hdfsScoreArtifactAppIdDir = getS3PathIfNeeded(customerSpace, hdfsScoreArtifactAppIdDir, false);
             List<String> folders = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactAppIdDir);
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
@@ -434,18 +442,20 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return appId;
     }
 
-    private String getScoredTxt(String hdfsScoreArtifactBaseDir) {
+    private String getScoredTxt(CustomerSpace customerSpace, String hdfsScoreArtifactBaseDir) {
         String content = null;
 
-        List<String> scoredTxtHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir,
-                SCORED_TXT);
+        List<String> scoredTxtHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(customerSpace,
+                hdfsScoreArtifactBaseDir, SCORED_TXT);
 
         if (scoredTxtHdfsPath.size() == 1) {
+            String hdfsPath = scoredTxtHdfsPath.get(0);
             try {
-                content = HdfsUtils.getHdfsFileContents(yarnConfiguration, scoredTxtHdfsPath.get(0));
+                hdfsPath = getS3PathIfNeeded(customerSpace, hdfsPath, false);
+                content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
-                throw new LedpException(LedpCode.LEDP_31000, new String[] { scoredTxtHdfsPath.get(0) });
+                throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsPath });
             }
         } else if (scoredTxtHdfsPath.size() == 0) {
             throw new LedpException(LedpCode.LEDP_31019, new String[] { hdfsScoreArtifactBaseDir });
@@ -456,9 +466,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return content;
     }
 
-    private List<String> getListOfFilesBasedOnBaseDirectoryAndFilter(String baseDirectory, String filterStr) {
+    private List<String> getListOfFilesBasedOnBaseDirectoryAndFilter(CustomerSpace customerSpace, String baseDirectory,
+            String filterStr) {
         List<String> hdfsPaths = null;
         try {
+            baseDirectory = getS3PathIfNeeded(customerSpace, baseDirectory, false);
             hdfsPaths = HdfsUtils.getFilesForDir(yarnConfiguration, baseDirectory, new HdfsFilenameFilter() {
                 @Override
                 public boolean accept(String filename) {
@@ -476,11 +488,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return hdfsPaths;
     }
 
-    private String getModelRecordExportCsv(String hdfsScoreArtifactBaseDir) {
+    private String getModelRecordExportCsv(CustomerSpace customerSpace, String hdfsScoreArtifactBaseDir) {
         String content = "";
 
-        List<String> dataExportHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir,
-                DATA_EXPORT_CSV);
+        List<String> dataExportHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(customerSpace,
+                hdfsScoreArtifactBaseDir, DATA_EXPORT_CSV);
 
         if (dataExportHdfsPath.size() == 1) {
             try {
@@ -508,20 +520,22 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 localPathToPersist);
     }
 
-    private String getModelJsonType(String eventTableName, //
+    private String getModelJsonType(CustomerSpace customerSpace, String eventTableName, //
             String hdfsScoreArtifactBaseDir) {
         String globPath = hdfsScoreArtifactBaseDir + "*" + MODEL_JSON_SUFFIX;
         FSDataInputStream is = null;
 
         String modelJsonType = null;
-        try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
+        globPath = getS3PathIfNeeded(customerSpace, globPath, true);
+        try (FileSystem fs = HdfsUtils.getFileSystem(yarnConfiguration, globPath)) {
             List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, globPath);
 
             if (CollectionUtils.isEmpty(files)) {
                 throw new LedpException(LedpCode.LEDP_31000, new String[] { globPath });
             }
             String modelJsonPath = files.get(0);
-
+            modelJsonPath = new HdfsToS3PathBuilder().toHdfsPath(modelJsonPath);
+            modelJsonPath = getS3PathIfNeeded(customerSpace, modelJsonPath, false);
             is = fs.open(new Path(modelJsonPath));
             ObjectMapper om = new ObjectMapper();
             JsonNode node = om.readValue((InputStream) is, JsonNode.class);
@@ -536,11 +550,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return modelJsonType;
     }
 
+    private String getS3PathIfNeeded(CustomerSpace customerSpace, String path, boolean isGlob) {
+        String customer = customerSpace.toString();
+        String tenantId = customerSpace.getTenantId();
+        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, path, isGlob, customer, tenantId, podId,
+                s3Bucket);
+    }
+
     private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, //
             CustomerSpace customerSpace, //
             String modelId) {
-        List<String> modelJsonHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir,
-                MODEL_JSON);
+        List<String> modelJsonHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(customerSpace,
+                hdfsScoreArtifactBaseDir, MODEL_JSON);
 
         String localModelJsonCacheDir = String.format(localModelJsonCacheDirProperty, localModelJsonCacheDirIdentifier,
                 customerSpace.toString(), modelId);
@@ -659,15 +680,16 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
         String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
-        String modelJsonType = getModelJsonType(modelSummary.getEventTableName(), hdfsScoreArtifactBaseDir);
+        String modelJsonType = getModelJsonType(customerSpace, modelSummary.getEventTableName(),
+                hdfsScoreArtifactBaseDir);
 
         DataComposition dataScienceDataComposition = getModelJsonTypeHandler(modelJsonType)
                 .getDataScienceDataComposition(hdfsScoreArtifactBaseDir, localPathToPersist);
         DataComposition eventTableDataComposition = getModelJsonTypeHandler(modelJsonType)
                 .getEventTableDataComposition(hdfsScoreArtifactTableDir, localPathToPersist);
         Map<String, FieldSchema> mergedFields = mergeFields(eventTableDataComposition, dataScienceDataComposition);
-        String expectedRecords = getModelRecordExportCsv(hdfsScoreArtifactBaseDir);
-        String scoredTxt = getScoredTxt(hdfsScoreArtifactBaseDir);
+        String expectedRecords = getModelRecordExportCsv(customerSpace, hdfsScoreArtifactBaseDir);
+        String scoredTxt = getScoredTxt(customerSpace, hdfsScoreArtifactBaseDir);
 
         ScoreCorrectnessArtifacts artifacts = new ScoreCorrectnessArtifacts();
         artifacts.setExpectedRecords(expectedRecords);
@@ -692,8 +714,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             int maximum, //
             boolean considerAllStatus, //
             boolean considerDeleted) {
-        List<ModelSummary> modelSummaries = modelSummaryProxy.findPaginatedModels(customerSpace.toString(),
-                start, considerAllStatus, offset, maximum);
+        List<ModelSummary> modelSummaries = modelSummaryProxy.findPaginatedModels(customerSpace.toString(), start,
+                considerAllStatus, offset, maximum);
         List<ModelDetail> models = new ArrayList<>();
         convertModelSummaryToModelDetail(models, modelSummaries, considerDeleted, customerSpace);
         return models;
@@ -704,7 +726,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
-        List<String> pmmlFilePaths = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir, MODEL_PMML);
+        List<String> pmmlFilePaths = getListOfFilesBasedOnBaseDirectoryAndFilter(customerSpace,
+                hdfsScoreArtifactBaseDir, MODEL_PMML);
 
         long length = 0;
         for (String path : pmmlFilePaths) {

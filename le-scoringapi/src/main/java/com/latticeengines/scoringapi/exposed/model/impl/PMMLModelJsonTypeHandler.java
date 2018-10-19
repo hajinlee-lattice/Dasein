@@ -1,13 +1,13 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
     }
 
     @Override
-    protected ModelEvaluator initModelEvaluator(FSDataInputStream is) {
+    protected ModelEvaluator initModelEvaluator(InputStream is) {
         return new PMMLModelEvaluator(is);
     }
 

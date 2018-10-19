@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3S
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportModelFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ImportModelFromS3.class);
 
     protected void buildRequests(List<ImportExportRequest> requests) {
