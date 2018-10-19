@@ -259,16 +259,16 @@ public class StatsCubeUtilsSortUnitTestNG {
     private void verifyAttrSeq(Flux<ColumnMetadata> flux, Iterable<String> attrSeq1, Iterable<String> attrSeq2) {
         flux = flux.sort(Comparator.comparing(ColumnMetadata::getCategory)).groupBy(ColumnMetadata::getCategory).flatMapSequential(grp -> grp);
         StepVerifier.FirstStep<ColumnMetadata> verifier = StepVerifier.create(flux);
-        for (String nextAttr : attrSeq1) {
+        for (String nextAttr : attrSeq2) {
             verifier.consumeNextWith(cm -> {
-                System.out.println(cm.getAttrName() + " : " + cm.getImportanceOrdering());
+                System.out.println(idSeqMap.get(RatingEngine.toEngineId(cm.getAttrName())) + " : " + cm.getImportanceOrdering());
                 Assert.assertEquals(cm.getAttrName(), nextAttr,
                         "Next attributes should be " + nextAttr + " but actually found " + cm.getAttrName());
             });
         }
-        for (String nextAttr : attrSeq2) {
+        for (String nextAttr : attrSeq1) {
             verifier.consumeNextWith(cm -> {
-                System.out.println(idSeqMap.get(RatingEngine.toEngineId(cm.getAttrName())) + " : " + cm.getImportanceOrdering());
+                System.out.println(cm.getAttrName() + " : " + cm.getImportanceOrdering());
                 Assert.assertEquals(cm.getAttrName(), nextAttr,
                         "Next attributes should be " + nextAttr + " but actually found " + cm.getAttrName());
             });
