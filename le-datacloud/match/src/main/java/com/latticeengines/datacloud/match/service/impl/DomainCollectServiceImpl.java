@@ -13,6 +13,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -55,6 +56,9 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     private static final Set<String> VENDOR_SET = new HashSet<>();
 
+    private AtomicLong droppedEnqDomain = new AtomicLong(0);
+    private static final int LOG_DROP_NUM = 1000;
+
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -93,8 +97,16 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     @Override
     public void enqueue(String domain) {
-        if (domainCollectEnabled && domainSet.size() < MAX_DUMP_SIZE) {
+        if (!domainCollectEnabled) {
+            return;
+        }
+        if (domainSet.size() < MAX_DUMP_SIZE) {
             domainSet.add(domain);
+        } else {
+            long cnt = droppedEnqDomain.incrementAndGet();
+            if (cnt % LOG_DROP_NUM == 0) {
+                log.warn("Have dropped enqueued domains: DroppedEnqDomain=" + cnt);
+            }
         }
     }
 
