@@ -40,17 +40,21 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
-        if (CollectionUtils.isNotEmpty(scalingClusters)) {
-            log.info("Invoking EMRScalingCallable. Scaling clusters: " + StringUtils.join(scalingClusters));
-            List<Runnable> runnables = scalingClusters.stream() //
-                    .filter(emrCluster -> StringUtils.isNotBlank(emrService.getMasterIp(emrCluster))) //
-                    .map(emrCluster -> new EMRScalingRunnable(emrCluster, emrService, emrEnvService)) //
-                    .collect(Collectors.toList());
-            if (CollectionUtils.size(runnables) == 1) {
-                runnables.get(0).run();
-            } else {
-                ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 10, 1);
+        try {
+            if (CollectionUtils.isNotEmpty(scalingClusters)) {
+                log.info("Invoking EMRScalingCallable. Scaling clusters: " + StringUtils.join(scalingClusters));
+                List<Runnable> runnables = scalingClusters.stream() //
+                        .filter(emrCluster -> StringUtils.isNotBlank(emrService.getMasterIp(emrCluster))) //
+                        .map(emrCluster -> new EMRScalingRunnable(emrCluster, emrService, emrEnvService)) //
+                        .collect(Collectors.toList());
+                if (CollectionUtils.size(runnables) == 1) {
+                    runnables.get(0).run();
+                } else {
+                    ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 10, 1);
+                }
             }
+        } catch (Exception e) {
+            log.error("Failed to run emr scaling job.", e);
         }
         return true;
     }

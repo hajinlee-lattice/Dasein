@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -36,6 +37,7 @@ public class YarnClientFactoryTestNG extends AbstractTestNGSpringContextTests {
             Assert.assertTrue(CollectionUtils.isNotEmpty(apps));
         }
         ClusterMetrics clusterMetrics = emrEnvService.getClusterMetrics(emrCluster);
+        System.out.println(JsonUtils.serialize(clusterMetrics));
         Assert.assertNotNull(clusterMetrics);
         Assert.assertTrue(clusterMetrics.availableMB > 0);
     }
