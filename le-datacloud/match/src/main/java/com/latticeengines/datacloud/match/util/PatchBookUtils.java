@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,17 +11,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Sets;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
 
 /**
  * Shared utilities for {@link PatchBook}
@@ -30,6 +31,7 @@ public class PatchBookUtils {
     private static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
     private static final String INVALID_EFFECTIVE_DATE_RANGE_ERROR =
             "ExpireAfter date should not be earlier than EffectiveSince date";
+    private static final String UNSUPPORTED_MATCH_KEY = "Unsupported match key combination found for PID : ";
 
     // TODO consider using equals & hashCode implementation for MatchKeyTuple, but probably too complicated
     // TODO currently using serialized format instead
@@ -197,8 +199,16 @@ public class PatchBookUtils {
      * @return a list of validation errors to show which patch books have unsupported match keys
      */
     public static List<PatchBookValidationError> validateMatchKeySupport(@NotNull List<PatchBook> patchBooks) {
-        // TODO implement
-        return null;
+        List<PatchBookValidationError> errorList = new ArrayList<>();
+        for (PatchBook entry : patchBooks) {
+            if (!isMatchKeySupported(entry)) {
+                PatchBookValidationError error = new PatchBookValidationError();
+                error.setMessage(UNSUPPORTED_MATCH_KEY + entry.getPid());
+                error.setPatchBookIds(Arrays.asList(entry.getPid()));
+                errorList.add(error);
+            }
+        }
+        return errorList;
     }
 
     /**
@@ -245,8 +255,15 @@ public class PatchBookUtils {
      * @param book target patch book, should not be {@literal null}
      * @return true if the patch book DO reach EOF, false otherwise
      */
-    public static boolean isEndOfLife(@NotNull PatchBook book) {
-        // TODO implement
+    public static boolean isEndOfLife(@NotNull PatchBook book, Date currentDate) {
+        // checking current date
+        currentDate = currentDate != null ? currentDate : new Date();
+        if (book.getEffectiveSince() != null && currentDate.before(book.getEffectiveSince())) { // not effective yet
+            return true;
+        }
+        if (book.getExpireAfter() != null && currentDate.after(book.getExpireAfter())) { // already expired
+            return true;
+        }
         return false;
     }
 

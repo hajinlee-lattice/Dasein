@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.util;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidati
 public class PatchBookUtilsTestNG {
     private static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
     private static final String TEST_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String TEST_CONSTANT_DATE = "2018-10-16";
     private static final AtomicLong TEST_COUNTER = new AtomicLong();
 
     @Test(groups = "unit")
@@ -52,7 +54,7 @@ public class PatchBookUtilsTestNG {
         List<PatchBook> books = tests.stream().map(test -> test.book).collect(Collectors.toList());
         List<Long> expectedErrorIds = tests
                 .stream()
-                .filter(test -> !test.isValid)
+                .filter(test -> !test.expectedValue)
                 .map(test -> test.book.getPid())
                 .collect(Collectors.toList());
         List<PatchBookValidationError> errors = PatchBookUtils.validateEffectiveDateRange(books);
@@ -71,6 +73,11 @@ public class PatchBookUtilsTestNG {
             Collections.sort(err.getPatchBookIds());
             Assert.assertEquals(err.getPatchBookIds(), expectedErrorIds);
         }
+    }
+
+    @Test(groups = "unit", dataProvider = "dateRangeEOLFlagTest")
+    public void testEolFlag(DateTest test) {
+        Assert.assertEquals(PatchBookUtils.isEndOfLife(test.book, newDate(TEST_CONSTANT_DATE)), test.expectedValue);
     }
 
     private Map<String, List<Long>> expectedDataSet() {
@@ -102,9 +109,31 @@ public class PatchBookUtilsTestNG {
                 { PatchBook.Type.Attribute, 12L, null, "429489284" }, };
     }
 
+    @DataProvider(name = "dateRangeEOLFlagTest")
+    private Object[][] provideDateRangeTestDataForEOLFlag() throws Exception {
+        // NOTE ES = EffectiveSince, EA = ExpireAfter, expectedFlag = EOL flag
+        return new Object[][] {
+                // Case #1: Current Time within ES and EA
+                { newDateTest("2018-10-15", "2018-10-20", false) }, //
+                { newDateTest(null, null, false) }, //
+                { newDateTest("2018-10-16", "2018-10-16", false) }, //
+                // Case #2: Current Time not within ES and EA
+                { newDateTest(null, "2017-10-17", true) }, //
+                { newDateTest("2019-10-21", null, true) }, //
+                { newDateTest("2017-10-10", "2017-10-22", true) }, //
+                { newDateTest("2018-10-14", "2018-10-14", true) }, //
+                // Case #3: ES is not provided
+                { newDateTest(null, "2018-10-15", true) }, //
+                { newDateTest(null, "2018-10-21", false) }, //
+                // Case #4: EA is not provided
+                { newDateTest("2018-10-15", null, false) }, //
+                { newDateTest("2018-10-20", null, true) } //
+        };
+    }
+
     @DataProvider(name = "effectiveDateRangeTestData")
     private Object[][] provideEffectiveDateRangeTestData() throws Exception {
-        // NOTE ES = EffectiveSince, EA = ExpireAfter
+        // NOTE ES = EffectiveSince, EA = ExpireAfter, expectedFlag = whether date range is valid
         return new Object[][] {
                 // Case #1: All valid
                 toObjectArray(
@@ -140,19 +169,23 @@ public class PatchBookUtilsTestNG {
     }
 
     // helper to create DateTest, effectiveSince and expireAfter can be null
-    private DateTest newDateTest(String effectiveSince, String expireAfter, boolean isValid) throws Exception {
+    private DateTest newDateTest(String effectiveSince, String expireAfter, boolean expectedValue) throws Exception {
         PatchBook book = new PatchBook();
         book.setPid(TEST_COUNTER.incrementAndGet());
         book.setEffectiveSince(newDate(effectiveSince));
         book.setExpireAfter(newDate(expireAfter));
-        return new DateTest(book, isValid);
+        return new DateTest(book, expectedValue);
     }
 
-    private Date newDate(String dateStr) throws Exception {
+    private Date newDate(String dateStr) {
         if (dateStr == null) {
             return null;
         }
-        return DateUtils.parseDate(dateStr, TEST_DATE_FORMAT);
+        try {
+            return DateUtils.parseDate(dateStr, TEST_DATE_FORMAT);
+        } catch (ParseException e) {
+            throw new RuntimeException();
+        }
     }
 
     /*
@@ -160,10 +193,11 @@ public class PatchBookUtilsTestNG {
      */
     private class DateTest {
         final PatchBook book;
-        final boolean isValid;
-        DateTest(PatchBook book, boolean isValid) {
+        final boolean expectedValue;
+
+        DateTest(PatchBook book, boolean expectedValue) {
             this.book = book;
-            this.isValid = isValid;
+            this.expectedValue = expectedValue;
         }
     }
 }
