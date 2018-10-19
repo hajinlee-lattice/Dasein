@@ -18,6 +18,15 @@ angular.module('lp.playbook.wizard.segmentcreate', [])
         }
     });
 
+    if($stateParams.segment_name) {
+        vm.stored.segment_selection = $stateParams.segment_name;
+        PlaybookWizardStore.setRating({
+            targetSegment: {
+                name: $stateParams.segment_name
+            }
+        });
+    }
+
     vm.init = function() {
         PlaybookWizardStore.setValidation('segment', false);
         if(vm.stored.segment_selection) {

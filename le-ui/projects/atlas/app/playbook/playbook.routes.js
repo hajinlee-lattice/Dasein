@@ -681,7 +681,7 @@ angular
             redirectTo: 'home.playbook.create.segment'
         })
         .state('home.playbook.create.segment', {
-            url: '/segment/:rating_id',
+            url: '/segment/:segment_name',
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Campaign Playbook',

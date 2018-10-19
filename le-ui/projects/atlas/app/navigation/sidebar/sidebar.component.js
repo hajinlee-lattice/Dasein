@@ -213,6 +213,9 @@ angular
                 },{
                     if: store.showSalesforceSettings,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.sfdcsettings') && !store.isTransitingFrom(['home.sfdcsettings']);
+                    },
                     sref: "home.sfdcsettings",
                     label: !store.showCdlEnabledPage ? ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC") : "Application Settings",
                     icon: "ico-salesforce ico-light-gray"

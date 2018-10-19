@@ -7,7 +7,7 @@
 
             <div class="header">
                 <h2 class="pull-left">Model Dashboard</h2>
-
+                
                 <div class="actions pull-right">
                     <!-- ng-model="vm.status_toggle" -->
 
@@ -20,7 +20,7 @@
                     <button
                         class="button orange-button"
                         ng-if="vm.isRulesBased && vm.playbookEnabled"
-                        ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })" 
+                        ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })" 
                         ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata && !vm.status_toggle" -->
                         Create Campaign
@@ -48,7 +48,7 @@
                     <button
                         class="button orange-button"
                         ng-if="!vm.isRulesBased && vm.playbookEnabled"
-                        ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })"
+                        ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })"
                         ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'" -->
                         Create Campaign
