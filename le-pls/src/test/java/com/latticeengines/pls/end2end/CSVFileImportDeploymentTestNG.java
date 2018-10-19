@@ -84,7 +84,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
     private static final String SLASH = "/";
-    private static final String PREFIX = "/dropbox/templates";
+    private static final String PREFIX = "/dropfolder/templates";
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -548,18 +548,19 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         List<S3ImportTemplateDisplay> templates = cdlService.getS3ImportTemplate(customerSpace);
         Assert.assertNotNull(templates);
-        Assert.assertEquals(templates.size(), 0);
+        Assert.assertEquals(templates.size(), 4);
+        S3ImportTemplateDisplay display = templates.get(0);
+        Assert.assertEquals(display.getPath(), "N/A");
         // mock up one path to run through the logic
-        dropFolderProxy.createTemplateFolder(customerSpace, ENTITY_ACCOUNT, ENTITY_ACCOUNT);
+        dropFolderProxy.createTemplateFolder(customerSpace, ENTITY_ACCOUNT, PREFIX);
         dropFolderProxy.createTemplateFolder(customerSpace, ENTITY_ACCOUNT,
-                PREFIX + SLASH + ACCOUNT_SOURCE_FILE);
+                PREFIX + SLASH + "AccountSchema");
 
         templates = cdlService.getS3ImportTemplate(customerSpace);
-        log.info("System data is " + JsonUtils.serialize(templates));
         Assert.assertNotNull(templates);
-        Assert.assertEquals(templates.size(), 1);
-        S3ImportTemplateDisplay display = templates.get(0);
-        Assert.assertEquals(display.getPath(), PREFIX);
+        Assert.assertEquals(templates.size(), 4);
+        display = templates.get(0);
+        Assert.assertEquals(display.getPath(), PREFIX + SLASH + "AccountSchema");
     }
 
 }

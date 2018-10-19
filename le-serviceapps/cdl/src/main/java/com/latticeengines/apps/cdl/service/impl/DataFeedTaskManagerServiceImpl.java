@@ -162,7 +162,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
-                dataFeedTask.setLastUpdated(new Date());
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
             }

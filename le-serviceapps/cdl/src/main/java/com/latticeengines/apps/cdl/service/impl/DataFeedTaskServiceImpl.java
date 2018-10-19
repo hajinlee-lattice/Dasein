@@ -64,7 +64,6 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
                 Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, true);
                 dataFeedTask.setImportTemplate(metaData);
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
-                dataFeedTask.setLastUpdated(new Date());
                 dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
             }
         }

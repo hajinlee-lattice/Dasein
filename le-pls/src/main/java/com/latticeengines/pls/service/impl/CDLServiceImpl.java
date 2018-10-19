@@ -3,9 +3,11 @@ package com.latticeengines.pls.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -23,6 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -54,10 +58,11 @@ public class CDLServiceImpl implements CDLService {
     @Inject
     private DataFeedProxy dataFeedProxy;
 
-    private static final List<String> OBJECTS = Arrays.asList("Accounts", "Contacts", "Product Purchases",
-            "Product Bundles",
-            "Product Hierarchy");
-    private static final String PREFIX = "/dropbox/templates";
+    private static final List<BusinessEntity> ENTITIES = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
+            BusinessEntity.Transaction, BusinessEntity.Product);
+    private static final String PREFIX = "/dropfolder/templates/";
+    private static final String TEMPLATENAME = "N/A";
+    private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
     private static final String DELETE_FAIL_TITLE = "Validation Error";
     public static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
@@ -220,40 +225,60 @@ public class CDLServiceImpl implements CDLService {
         return sourceFile;
     }
 
+    /*
+     * if logic provide 5 display by default, dropfolderResource return 2 folder
+     * names if entity is product
+     */
     @Override
     public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
-        for (String object : OBJECTS) {
-            BusinessEntity entity = getBusinessEntityFromObject(object);
+        for (BusinessEntity entity : ENTITIES) {
+            S3ImportTemplateDisplay display = null;
             List<String> folderNames = dropFolderProxy.getAllSubFolders(customerSpace, entity.name(), PREFIX);
-            for (String name : folderNames) {
-                DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", name, entity.name());
-                S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
-                display.setObject(object);
-                display.setTemplateName("N/A");
-                if (task == null) {
-                    display.setPath(PREFIX);
-                    display.setExist(Boolean.FALSE);
-                } else {
-                    display.setPath(PREFIX + name);
-                    display.setExist(Boolean.TRUE);
-                    display.setLastEditedDate(task.getLastUpdated());
-                    display.setTemplateName("");// get from data feed task
-                }
-                templates.add(display);
+            if (CollectionUtils.isEmpty(folderNames)) {
+                log.info("Empty path in s3 folders for tenant %s in %s", customerSpace, entity.name());
+                display = new S3ImportTemplateDisplay();
+                display.setPath(PATHNAME);
+                display.setExist(Boolean.FALSE);
+                display.setObject(constructObject(entity, null));
+                display.setTemplateName(TEMPLATENAME);
             }
+            else {
+                for (String folderName : folderNames) {
+                    display = new S3ImportTemplateDisplay();
+                    DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName, entity.name());
+                    if (task == null) {
+                        log.info("Empty data feed task for tenant %s in %s with feedtype %s", customerSpace,
+                                entity.name(), folderName);
+                        display.setPath(PATHNAME);
+                        display.setExist(Boolean.FALSE);
+                        display.setObject(constructObject(entity, null));
+                        display.setTemplateName(TEMPLATENAME);
+                    } else {
+                        display.setPath(PREFIX + folderName);
+                        display.setExist(Boolean.TRUE);
+                        display.setLastEditedDate(task.getLastUpdated());
+                        // get from data feed task
+                        display.setTemplateName(task.getTemplateDisplayName());
+                        display.setObject(constructObject(entity, task.getSubType()));
+                    }
+                }
+            }
+            templates.add(display);
         }
-
         return templates;
     }
 
-    private BusinessEntity getBusinessEntityFromObject(String object) {
-        for (BusinessEntity entity : Arrays.asList(BusinessEntity.values())) {
-            if (object.contains(entity.name())) {
-                return entity;
-            }
+    private String constructObject(BusinessEntity entity, SubType subType) {
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            return entity.name() + "s";
+        } else if (BusinessEntity.Transaction.equals(entity)) {
+            return "Product Purchases";
+        } else if (BusinessEntity.Product.equals(entity) && subType != null) {
+            return entity.name() + " " + (subType.equals(SubType.Bundle) ? subType.name() + "s" : subType.name());
+        } else {
+            return null;
         }
-        return null;
     }
 
 }

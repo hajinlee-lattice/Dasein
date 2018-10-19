@@ -302,7 +302,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         TableEntityMgr.inflateTable(task.getImportTemplate());
         TableEntityMgr.inflateTable(task.getImportData());
         task.setLastImported(dataFeedTask.getLastImported());
-        task.setLastUpdated(dataFeedTask.getLastUpdated());
+        task.setLastUpdated(new Date());
         task.setActiveJob(dataFeedTask.getActiveJob());
         task.setStartTime(dataFeedTask.getStartTime());
         task.setSourceConfig(dataFeedTask.getSourceConfig());

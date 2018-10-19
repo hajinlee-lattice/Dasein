@@ -24,6 +24,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -35,7 +36,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK", //
         indexes = { @Index(name = "IX_UNIQUE_ID", columnList = "UNIQUE_ID") }, //
-        uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE", "ENTITY", "FEED_TYPE", "`FK_FEED_ID`" }))
+        uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE", "FEED_TYPE", "`FK_FEED_ID`" }))
 public class DataFeedTask implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -108,6 +109,14 @@ public class DataFeedTask implements HasPid, Serializable {
     @Column(name = "LAST_UPDATED", nullable = false)
     @JsonProperty("last_updated")
     private Date lastUpdated;
+
+    @Column(name = "TEMPLATE_DISPLAY_NAME")
+    @JsonProperty("template_display_name")
+    private String templateDisplayName;
+
+    @Column(name = "SUBTYPE")
+    @JsonProperty("subtype")
+    private SubType subType;
 
     @JsonIgnore
     @Transient
@@ -220,6 +229,34 @@ public class DataFeedTask implements HasPid, Serializable {
         this.sourceConfig = sourceConfig;
     }
 
+    public String getTemplateDisplayName() {
+        return templateDisplayName;
+    }
+
+    public void setTemplateDisplayName(String templateDisplayName) {
+        this.templateDisplayName = templateDisplayName;
+    }
+
+    public SubType getSubType() {
+        return subType;
+    }
+
+    public void setSubType(SubType subType) {
+        this.subType = subType;
+    }
+
+    public void setSubType(String subType) {
+        if (StringUtils.isNotBlank(subType)) {
+            try {
+                SubType dftSubType = SubType.valueOf(subType);
+                this.subType = dftSubType;
+            } catch (IllegalArgumentException e) {
+                this.subType = null;
+            }
+        }
+    }
+
+
     public List<DataFeedTaskTable> getTables() {
         return tables;
     }
@@ -241,5 +278,10 @@ public class DataFeedTask implements HasPid, Serializable {
         Active, //
         Updated, //
         Deleting
+    }
+
+    public enum SubType {
+        Bundle,
+        Hierarchy
     }
 }
