@@ -43,13 +43,7 @@ class EMRScalingCallable implements Callable<Boolean> {
         if (CollectionUtils.isNotEmpty(scalingClusters)) {
             log.info("Invoking EMRScalingCallable. Scaling clusters: " + StringUtils.join(scalingClusters));
             List<Runnable> runnables = scalingClusters.stream() //
-                    .filter(emrCluster -> {
-                        boolean hasMasterIp = StringUtils.isNotBlank(emrService.getMasterIp(emrCluster));
-                        if (!hasMasterIp) {
-                            log.info("EMR cluster " + emrCluster + " does not have a master IP, skip scaling.");
-                        }
-                        return hasMasterIp;
-                    }) //
+                    .filter(emrCluster -> StringUtils.isNotBlank(emrService.getMasterIp(emrCluster))) //
                     .map(emrCluster -> new EMRScalingRunnable(emrCluster, emrService, emrEnvService)) //
                     .collect(Collectors.toList());
             if (CollectionUtils.size(runnables) == 1) {
