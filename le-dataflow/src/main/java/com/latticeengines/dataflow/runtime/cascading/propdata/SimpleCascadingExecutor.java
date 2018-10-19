@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import com.latticeengines.yarn.exposed.service.EMREnvService;
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -19,6 +19,7 @@ import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -34,8 +35,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 
-import javax.inject.Inject;
-
 public class SimpleCascadingExecutor {
     private static final Logger log = LoggerFactory.getLogger(SimpleCascadingExecutor.class);
 
@@ -47,7 +46,7 @@ public class SimpleCascadingExecutor {
 
     private final Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
 
     @Value("${dataplatform.hdfs.stack:}")

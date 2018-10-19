@@ -12,6 +12,7 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.dantedb.*"/>
     </context:component-scan>
 
+    <import resource="classpath:yarn-context.xml"/>
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:dantedb-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
