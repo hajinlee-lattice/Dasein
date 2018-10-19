@@ -69,7 +69,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getDataflowQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 dataFlowConfig.getDataFlowBeanName().replace(" ", "_"));
-        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "2");
+        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "1");
         appMasterProperties.put(AppMasterProperty.MEMORY.name(), amMemory);
 
         Properties containerProperties = new Properties();
