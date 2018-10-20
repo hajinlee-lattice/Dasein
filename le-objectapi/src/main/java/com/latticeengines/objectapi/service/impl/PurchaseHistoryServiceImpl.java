@@ -97,7 +97,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         log.info(String.format(
                 "Get Period Transaction Table %s, Account Table %s for %s with segment %s and periodName %s, productType %s",
                 periodTransactionTableName, accountTableName, tenant.getId(), segment, periodName, productType));
-        String baseQuery = "SELECT count(pt.{0}), pt.{1}, pt.{2}, sum(pt.{3}) as totalaccount, sum(pt.{4}) as totalquantity, sum(pt.{5}) as transactioncount FROM {6} as pt "
+        String baseQuery = "SELECT count(pt.{0}), pt.{1}, pt.{2}, sum(pt.{3}) as {11}, sum(pt.{4}) as {12}, sum(pt.{5}) as {13} FROM {6} as pt "
                 + "inner join {7} as ac on  pt.{0} = ac.{0} " //
                 + "where pt.{8} = ? and ac.{9} = ? and pt.{10} = ? " //
                 + "group by pt.{1}, pt.{2} " //
@@ -114,7 +114,10 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 accountTableName, // 7
                 InterfaceName.PeriodName, // 8
                 InterfaceName.SpendAnalyticsSegment, // 9
-                InterfaceName.ProductType); // 10
+                InterfaceName.ProductType, // 10
+                InterfaceName.TotalAmount, // 11
+                InterfaceName.TotalQuantity, // 12
+                InterfaceName.TransactionCount); // 13
 
         log.info("Query for getPeriodTransactionForSegmentAccount " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, periodName, segment,

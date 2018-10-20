@@ -2,6 +2,8 @@ package com.latticeengines.objectapi.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.mockito.Mockito;
@@ -13,8 +15,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.objectapi.service.PurchaseHistoryService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
@@ -47,7 +51,12 @@ public class PurchaseHistoryServiceImplTestNG extends AbstractTestNGSpringContex
         DataPage result = purchaseHistoryService.getAllSpendAnalyticsSegments();
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getData().size(), 3);
+    }
 
+    @Test(groups = "manual")
+    public void TestGetPeriodTransactionsForSegmentAccounts() {
+        List<PeriodTransaction> results = purchaseHistoryService.getPeriodTransactionsForSegmentAccounts("SpendSegment",
+                "Month", ProductType.Spending);
     }
 
 }
