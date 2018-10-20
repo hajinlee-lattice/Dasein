@@ -27,18 +27,16 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     public static final String PYTHON_MR_JOB = "pythonMRJob";
 
     private VersionManager versionManager;
-
     private EMRService emrService;
-
     private String stackName;
-
     private String condaEnv;
-
+    private String condaEnvAmbari;
     private boolean useEmr;
 
     public PythonMRJob(Configuration config) {
         setConf(config);
         this.condaEnv = "lattice";
+        this.condaEnvAmbari = "lattice";
         this.useEmr = false;
     }
 
@@ -49,6 +47,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             EMRService emrService, //
             String stackName, //
             String condaEnv, //
+            String condaEnvAmbari, //
             Boolean useEmr) {
         setConf(config);
         mapReduceCustomizationRegistry.register(this);
@@ -56,6 +55,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         this.emrService = emrService;
         this.stackName = stackName;
         this.condaEnv = condaEnv;
+        this.condaEnvAmbari = condaEnvAmbari;
         this.useEmr = Boolean.TRUE.equals(useEmr);
     }
 
@@ -125,7 +125,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
-        config.set(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
+        config.set(PythonContainerProperty.CONDA_ENV.name(), getCondaEnv());
         if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
             config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
         }
@@ -145,6 +145,14 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             throw new LedpException(LedpCode.LEDP_15008, e);
         }
         mrJob.setInputFormatClass(NLineInputFormat.class);
+    }
+
+    private String getCondaEnv() {
+        if (Boolean.TRUE.equals(useEmr)) {
+            return condaEnv;
+        } else {
+            return condaEnvAmbari;
+        }
     }
 
 }
