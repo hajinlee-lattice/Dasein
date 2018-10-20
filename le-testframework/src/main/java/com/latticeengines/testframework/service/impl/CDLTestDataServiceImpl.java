@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.zip.GZIPInputStream;
 
@@ -47,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -119,11 +122,13 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
         List<Runnable> tasks = new ArrayList<>();
+        ConcurrentMap<String, Long> entityCounts = new ConcurrentHashMap<>();
         tasks.add(() -> populateStats(shortTenantId, String.valueOf(version)));
         for (BusinessEntity entity : BusinessEntity.values()) {
-            tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version)));
+            tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
         }
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
+        updateDataCollectionStatus(shortTenantId, entityCounts);
     }
 
     @Override
@@ -137,6 +142,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
         List<Runnable> tasks = new ArrayList<>();
+        ConcurrentMap<String, Long> entityCounts = new ConcurrentHashMap<>();
         tasks.add(() -> populateStats(shortTenantId, String.valueOf(version)));
         for (BusinessEntity entity : BusinessEntity.values()) {
             tasks.add(() -> {
@@ -144,9 +150,18 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                     cloneRedshiftTables(shortTenantId, entity, version);
                 }
             });
-            tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version)));
+            tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
         }
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
+        updateDataCollectionStatus(shortTenantId, entityCounts);
+    }
+
+    private void updateDataCollectionStatus(String shortTenantId, Map<String, Long> entityCounts) {
+        DataCollection.Version active = dataCollectionProxy.getActiveVersion(shortTenantId);
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(shortTenantId, active);
+        status.setAccountCount(entityCounts.getOrDefault("Account", 0L));
+        status.setContactCount(entityCounts.getOrDefault("Contact", 0L));
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(shortTenantId, status, active);
     }
 
     public void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
@@ -452,7 +467,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
     }
 
-    private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version) {
+    private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version, ConcurrentMap<String, Long> entityCounts) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         Table table = readTableFromS3(entity.getServingStore(), s3Version);
         if (table != null) {
@@ -463,6 +478,13 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             log.info("Metadata Table: {}, created with attributes: {}", tableName, table.getAttributes().size());
             DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
             dataCollectionProxy.upsertTable(customerSpace, tableName, entity.getServingStore(), activeVersion);
+            try {
+                if (CollectionUtils.isNotEmpty(table.getExtracts())) {
+                    entityCounts.put(entity.name(), table.getExtracts().get(0).getProcessedRecords());
+                }
+            } catch (Exception e) {
+                log.warn("Failed to update " + entity + " count.", e);
+            }
         }
     }
 
