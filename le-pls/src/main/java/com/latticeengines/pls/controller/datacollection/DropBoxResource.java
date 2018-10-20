@@ -22,7 +22,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
@@ -79,13 +78,6 @@ public class DropBoxResource {
         if (dropBoxSummary == null) {
             throw new RuntimeException("Tenant " + customerSpace //
                     + " does not have a dropbox.");
-        }
-        if (dropBoxSummary.getAccessMode() == null) {
-            throw new RuntimeException("DropBox " + dropBoxSummary.getDropBox() //
-                    + " does not have Access Mode.");
-        }
-        if (!DropBoxAccessMode.LatticeUser.equals(dropBoxSummary.getAccessMode())) {
-            throw new UnsupportedOperationException("Unsupported access mode " + dropBoxSummary.getAccessMode());
         }
 
         if (dropBoxSummary.getAccessKeyId() == null) {
