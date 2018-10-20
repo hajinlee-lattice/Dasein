@@ -40,6 +40,7 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -601,8 +602,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (CollectionUtils.isEmpty(dataStores)) {
                 errors.add("No datastore selected, atleast one attribute set needed for modeling");
             }
-            Set<Category> selectedCategories = CustomEventModelingConfig.DataStore
-                    .getCategoriesByDataStores(dataStores);
+            Set<Category> selectedCategories = CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
             List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
                     .getNewModelingAttrs(customerSpace, dataCollectionService.getActiveVersion(customerSpace))
                     .filter(cm -> selectedCategories.contains(cm.getCategory())).collectList().block();

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -278,7 +279,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
                 || ratingEngine.getType() != RatingEngineType.CUSTOM_EVENT
                         ? new HashSet<>(Arrays.asList(Category.values()))
-                        : CustomEventModelingConfig.DataStore.getCategoriesByDataStores(dataStores);
+                        : CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
 
         Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
                 modelSummary);
