@@ -24,12 +24,21 @@ public class TopNTree {
     private Map<Category, CategoryTopNTree> categories = new HashMap<>();
 
     public Map<Category, CategoryTopNTree> getCategories() {
+        if (!(this.categories instanceof TreeMap)) {
+            TreeMap<Category, CategoryTopNTree> treeMap = new TreeMap<>(Comparator.comparing(Category::getOrder));
+            treeMap.putAll(this.categories);
+            this.categories = treeMap;
+        }
         return categories;
     }
 
     public void setCategories(Map<Category, CategoryTopNTree> categories) {
-        this.categories = new TreeMap<>(Comparator.comparing(Category::getOrder));
-        this.categories.putAll(categories);
+        if (categories instanceof TreeMap) {
+            this.categories = categories;
+        } else {
+            this.categories = new TreeMap<>(Comparator.comparing(Category::getOrder));
+            this.categories.putAll(categories);
+        }
     }
 
     public boolean hasCategory(Category category) {
