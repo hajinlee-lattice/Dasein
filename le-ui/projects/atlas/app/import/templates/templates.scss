@@ -4,6 +4,7 @@
   max-width: 1200px;
 
   .import-templates {
+    margin-top: 1.5em;
     .cell-error {
       background-color: $ruby;
     }
@@ -12,34 +13,36 @@
       background-color: $orange-text;
     }
     .le-table-cell {
-      .always {
-        display: initial;
-      }
-      .over {
-        display: none;
-      }
+     
       .le-blu-link{
         color: $blue-text;
       }
     }
+    .le-table-cell > .le-cell-tools > .initially-hidden{
+      display: none;
+    }
     .le-table-row:hover {
-      color: $pearl-white;
-      .le-table-cell .disables {
-        color: $gun-metal;
-      }
-      opacity: 1;
-      .over {
+
+      & > .le-table-cell > .le-cell-tools > .initially-hidden{
         display: initial;
       }
-      .borders-over > div {
-        border: 1px solid $pearl-white;
-      }
-      .le-blu-link{
+
+      & > .le-table-cell > *{
         color: $pearl-white;
       }
+      & > .le-table-cell > .le-cell-tools > *{
+        color: $pearl-white;
+      }
+      & > .le-table-cell > .le-cell-tools > .borders-over > div{
+        border: 1px solid $pearl-white;
+      }
     }
-    .le-table-row-no-select:hover {
-      color: $black;
-    }
+    // .le-table-row-no-select{
+    //   background-color:  $pearl-white;
+    // }
+    // .le-table-row-no-select:hover {
+    //   background-color:  $pearl-white;
+    //   color: $black;
+    // }
   }
 }

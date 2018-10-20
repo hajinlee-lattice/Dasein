@@ -28,6 +28,7 @@ $font-size: 12px;
   height: 100%;
   padding: 0.5em;
 
+  
   .le-table-row {
     @include display-grid;
     @include columns-grid;
@@ -45,10 +46,14 @@ $font-size: 12px;
       pointer-events: none;
     }
   }
+  .le-table-body{
+    background: none;
+    min-height: 0px;
+  }
   .le-table-header {
     @extend .le-table-row;
     border-top: 1px solid $silver;
-    border-bottom: 1px solid $silver;
+    border-bottom: 0px solid $silver;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     background-color: $pearl-white;
@@ -59,6 +64,14 @@ $font-size: 12px;
     background-color: $blue-text;
   }
 
+  .le-table-body:hover{
+    background: none;
+  }
+  .le-table-row-no-select{
+    background-color: $pearl-white;
+    color: $black;
+    opacity: 1;
+  }
   .le-table-row-no-select:hover {
     background-color: $pearl-white;
     color: $black;

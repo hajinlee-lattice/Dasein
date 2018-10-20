@@ -1,16 +1,15 @@
 import React, { Component } from "../../../../common/react-vendor";
 import Aux from "../../../../common/widgets/hoc/_Aux";
 import LeGridList from "../../../../common/widgets/table/table";
-import LeButton from "../../../../common/widgets/buttons/le-button";
-import {
-  VISIBLE,
-  TYPE_STRING,
-  TYPE_OBJECT,
-  DISCENDENT,
-  getData,
-  ASCENDENT
-} from "../../../../common/widgets/table/table-utils";
-import LeLink, { RIGHT } from "../../../../common/widgets/link/le-link";
+import LeGridRow from "../../../../common/widgets/table/table-row";
+import LeGridCell from "../../../../common/widgets/table/table-cell";
+import CellContent from "../../../../common/widgets/table/cell-content";
+import CellTools from "../../../../common/widgets/table/cell-tools";
+import LeTableHeader from "../../../../common/widgets/table/table-header";
+import LeTableBody from "../../../../common/widgets/table/table-body";
+
+import { getData } from "../../../../common/widgets/table/table-utils";
+import LeLink from "../../../../common/widgets/link/le-link";
 import { getAngularState } from "../react/states";
 import "./templates.scss";
 
@@ -18,120 +17,11 @@ export default class GridContainer extends Component {
   constructor(props) {
     super(props);
     this.createTemplateHandler = this.createTemplateHandler.bind(this);
-    this.state = {forceReload: false};
-    this.config = {
-      emptymsg: "Ther is no data",
-      formatter: data => {
-        if (data.object === "Contacts") {
-          return "";
-        }
-        if (data.object === "Product Bundles") {
-          return "";
-        }
-      },
-      sortBy: {
-        clientSide: true,
-        colName: "name",
-        direction: ASCENDENT
-      },
-      datasource: {
-        local: false,
-        url: ''
-      },
-      columns: [
-        {
-          name: "name",
-          title: "Template Name",
-          numSpan: 2,
-          type: TYPE_STRING,
-          header: {
-            sorting: true
-          },
-          cell: {
-            toolsState: VISIBLE,
-            formatter: data => {
-              if (data.object === "Account") {
-                return "";
-              }
-            },
-            icon: data => {
-              // if (data.object == "Account") {
-              //   return <i className="fa fa-fighter-jet le-table-cell-icon" />;
-              // } else {
-              //   return <i className="fa fa-thumbs-up le-table-cell-icon" />;
-              // }
-            },
-            tools: rowData => {
-              // console.log('ROW DATA ', rowData);
-              return (
-                <li className="le-table-cell-icon le-table-cell-icon-actions over" title="Edit Name">
-                  <i className="fa fa-pencil-square-o" />
-                </li>
-              );
-            }
-          }
-        },
-        {
-          name: "object",
-          title: "Object",
-          numSpan: 2,
-          cell: {
-            formatter: data => {
-              if (data.object === "Account") {
-                return "";
-              }
-            }
-          }
-        },
-        {
-          name: "location",
-          title: "Automated Import Location",
-          numSpan: 4,
-          type: TYPE_STRING,
-          cell: {
-            tools: rowData => {
-              return (
-                <li className="le-table-cell-icon le-table-cell-icon-actions over" title="Copy Link">
-                  <i className="fa fa-files-o" />
-                </li>
-              );
-            }
-          }
-        },
-        {
-          name: "edited",
-          title: "Last Edited",
-          numSpan: 1,
-          header: {
-            sorting: true
-          },
-          cell: {}
-        },
-        {
-          name: "actions",
-          title: "",
-          numSpan: 3,
-          type: TYPE_OBJECT,
-          cell: {
-            tools: rowData => {
-              return (
-                <Aux>
-                  <LeLink
-                    config={{
-                      label: "Create Template",
-                      classes: "always borders-over le-blu-link",
-                      name: ""
-                    }}
-                    callback={() => {
-                      this.createTemplateHandler(rowData.object);
-                    }}
-                  />
-                </Aux>
-              );
-            }
-          }
-        }
-      ]
+    this.state = {
+      forceReload: false,
+      showEmpty: false,
+      showLoading: false,
+      data: []
     };
   }
 
@@ -162,28 +52,122 @@ export default class GridContainer extends Component {
     let goTo = `home.import.entry.${entity}`;
     getAngularState().go(goTo);
   }
+  getHeader() {}
+  getRows() {
+    if (this.state.data.length > 0) {
+      let rowsUI = this.state.data.map((row, index) => {
+        return (
+          <LeGridRow index={index} rowData={row}>
+            <LeGridCell colName="name" colSpan="2">
+              <CellContent name="name">
+                <span>{row.name}</span>
+              </CellContent>
+            </LeGridCell>
 
+            <LeGridCell colName="object" colSpan="2">
+              <CellContent name="object">
+                <span>{row.object}</span>
+              </CellContent>
+            </LeGridCell>
+
+            <LeGridCell colName="location" colSpan="4">
+              <CellContent name="location">
+                <span>{row.location}</span>
+              </CellContent>
+              <CellTools>
+                <li
+                  className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
+                  title="Copy Link"
+                >
+                  <i className="fa fa-files-o" />
+                </li>
+              </CellTools>
+            </LeGridCell>
+
+            <LeGridCell colName="edited" colSpan="1">
+              <CellContent name="edited">
+                <span>{row.edited}</span>
+              </CellContent>
+            </LeGridCell>
+
+            <LeGridCell colName="actions" colSpan="3">
+              <CellTools>
+                <LeLink
+                  config={{
+                    label: "Create Template",
+                    classes: "borders-over le-blu-link",
+                    name: ""
+                  }}
+                  callback={() => {
+                    this.createTemplateHandler(row.object);
+                  }}
+                />
+              </CellTools>
+            </LeGridCell>
+          </LeGridRow>
+        );
+      });
+      return rowsUI;
+    } else {
+      return null;
+    }
+  }
+
+  componentDidMount() {
+    this.setState({
+      forceReload: true,
+      showEmpty: false,
+      showLoading: true
+    });
+
+    setTimeout(() => {
+      this.setState({
+        forceReload: false,
+        showEmpty: false,
+        showLoading: false,
+        data: getData("--")
+      });
+    }, 2000);
+  }
   render() {
     return (
       <Aux>
-        {/* <button
-          onClick={() => {
-            this.data = [];
-            // this.forceUpdate();
-            this.setState({forceReload: true});
-            setTimeout(()=> {
-              this.setState({forceReload: false});
-            }, 100);
-          }}
-        >
-          Reload
-        </button> */}
         <LeGridList
           name="import-templates"
-          forceReload={this.state.forceReload}
-          data={getData('---')}
-          config={this.config}
-        />
+          showLoading={this.state.showLoading}
+          showEmpty={this.state.showEmpty}
+          emptymsg={"There is no data"}
+        >
+          <LeTableHeader>
+            <LeGridCell colName="name" colSpan="2">
+              <CellContent name="name">
+                <span>Name</span>
+              </CellContent>
+            </LeGridCell>
+
+            <LeGridCell colName="object" colSpan="2">
+              <CellContent name="object">
+                <span>Object</span>
+              </CellContent>
+            </LeGridCell>
+
+            <LeGridCell colName="location" colSpan="4">
+              <CellContent name="location">
+                <span>Automated Import Location</span>
+              </CellContent>
+            </LeGridCell>
+
+            <LeGridCell colName="edited" colSpan="1">
+              <CellContent name="edited">
+                <span>Last Edited</span>
+              </CellContent>
+            </LeGridCell>
+
+            <LeGridCell colName="actions" colSpan="3" />
+          </LeTableHeader>
+
+          <LeTableBody>{this.getRows()}</LeTableBody>
+        </LeGridList>
       </Aux>
     );
   }
