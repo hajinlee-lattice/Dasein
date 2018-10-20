@@ -206,6 +206,11 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         return predefinedSelectionVersion;
     }
 
+    @JsonProperty("predefined_selection_version")
+    public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
+        this.predefinedSelectionVersion = predefinedSelectionVersion;
+    }
+
     @JsonProperty("data_cloud_version")
     public String getDataCloudVersion() {
         return dataCloudVersion;
@@ -214,11 +219,6 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("data_cloud_version")
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
-    }
-
-    @JsonProperty("predefined_selection_version")
-    public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
-        this.predefinedSelectionVersion = predefinedSelectionVersion;
     }
 
     @JsonProperty("customized_col_selection")
@@ -265,12 +265,12 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.fetchOnly = fetchOnly;
     }
 
-    public void setMatchRequestSource(MatchRequestSource matchRequestSource) {
-        this.matchRequestSource = matchRequestSource;
-    }
-
     public MatchRequestSource getMatchRequestSource() {
         return matchRequestSource;
+    }
+
+    public void setMatchRequestSource(MatchRequestSource matchRequestSource) {
+        this.matchRequestSource = matchRequestSource;
     }
 
     public String getMatchType() {

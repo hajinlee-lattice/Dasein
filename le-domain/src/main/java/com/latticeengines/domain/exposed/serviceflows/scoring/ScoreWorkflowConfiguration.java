@@ -76,7 +76,8 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         public Builder inputTableName(String tableName) {
             match.setInputTableName(tableName);
             // result table name is set during execution
-            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores
+                    .setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
 
@@ -149,7 +150,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used.
-         * 
+         *
          * @param customizedColumnSelection
          * @return
          */
@@ -162,11 +163,12 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used. If selectionVersion is empty, will use current version.
-         * 
+         *
          * @param predefinedColumnSelection
          * @return
          */
-        public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+        public Builder columnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
             return this;
@@ -199,13 +201,14 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         }
 
         public ScoreWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("scoreWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("scoreWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
-            combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
+            combineMatchDebugWithScores
+                    .microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
 
             configuration.add(match);

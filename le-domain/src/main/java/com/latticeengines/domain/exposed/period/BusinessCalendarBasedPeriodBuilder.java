@@ -10,14 +10,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.BusinessCalendarUtils;
 
-public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuilder implements PeriodBuilder {
+public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuilder
+        implements PeriodBuilder {
 
     private static final long serialVersionUID = -1841334335642979430L;
-
-    protected BusinessCalendar calendar;
-
     private static final int DEFAULT_FIRST_YEAR = 2000;
-
+    protected BusinessCalendar calendar;
     protected int startYear;
     protected LocalDate startDate;
 
@@ -35,16 +33,18 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
         Pair<LocalDate, LocalDate> dateRange;
 
         switch (calendar.getMode()) {
-        case STARTING_DATE:
-            dateRange = BusinessCalendarUtils.parseDateRangeFromStartDate(calendar.getStartingDate(), busiYear);
-            break;
-        case STARTING_DAY:
-            dateRange = BusinessCalendarUtils
-                    .parseDateRangeFromStartDay(calendar.getStartingDay(), busiYear);
-            break;
-        default:
-            String msg = "Unknown business calendar mode " + calendar.getMode();
-            throw new LedpException(LedpCode.LEDP_40015, msg, new UnsupportedOperationException(msg));
+            case STARTING_DATE:
+                dateRange = BusinessCalendarUtils
+                        .parseDateRangeFromStartDate(calendar.getStartingDate(), busiYear);
+                break;
+            case STARTING_DAY:
+                dateRange = BusinessCalendarUtils
+                        .parseDateRangeFromStartDay(calendar.getStartingDay(), busiYear);
+                break;
+            default:
+                String msg = "Unknown business calendar mode " + calendar.getMode();
+                throw new LedpException(LedpCode.LEDP_40015, msg,
+                        new UnsupportedOperationException(msg));
         }
 
         return dateRange;
@@ -60,21 +60,25 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
         }
     }
 
-    protected int getWeekOffsetInBusiYear(LocalDate evalDate, Pair<LocalDate, LocalDate> busiYearDateRange) {
+    protected int getWeekOffsetInBusiYear(LocalDate evalDate,
+            Pair<LocalDate, LocalDate> busiYearDateRange) {
         switch (calendar.getMode()) {
-        case STARTING_DATE:
-            return Math.min((int) ChronoUnit.DAYS.between(busiYearDateRange.getLeft(), evalDate) / 7, 51);
-        case STARTING_DAY:
-            return (int) ChronoUnit.DAYS.between(busiYearDateRange.getLeft(), evalDate) / 7;
-        default:
-            String msg = "Unknown business calendar mode " + calendar.getMode();
-            throw new LedpException(LedpCode.LEDP_40015, msg, new UnsupportedOperationException(msg));
+            case STARTING_DATE:
+                return Math.min(
+                        (int) ChronoUnit.DAYS.between(busiYearDateRange.getLeft(), evalDate) / 7,
+                        51);
+            case STARTING_DAY:
+                return (int) ChronoUnit.DAYS.between(busiYearDateRange.getLeft(), evalDate) / 7;
+            default:
+                String msg = "Unknown business calendar mode " + calendar.getMode();
+                throw new LedpException(LedpCode.LEDP_40015, msg,
+                        new UnsupportedOperationException(msg));
         }
     }
 
     /**
-     * STARTING_DATE: weekoffset 0 - 12
-     * STARTING_DAY: weekoffset 0 - (11 or 12 or 13)
+     * STARTING_DATE: weekoffset 0 - 12 STARTING_DAY: weekoffset 0 - (11 or 12
+     * or 13)
      */
     protected int getMonthOffsetInBusiYear(int weekOffset) {
         int quarterOffset = Math.min(weekOffset, 51) / 13;

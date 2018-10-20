@@ -18,7 +18,8 @@ public class DataFeedImportUtils {
         Map<String, Field> map = new HashMap<>();
         Field[] fields = DataFeedTask.class.getDeclaredFields();
         for (Field taskField : fields) {
-            if (taskField.isAnnotationPresent(Column.class) && !taskField.isAnnotationPresent(Id.class)) {
+            if (taskField.isAnnotationPresent(Column.class)
+                    && !taskField.isAnnotationPresent(Id.class)) {
                 map.put(taskField.getAnnotation(Column.class).name(), taskField);
             } else if (taskField.isAnnotationPresent(JoinColumn.class)) {
                 map.put(taskField.getAnnotation(JoinColumn.class).name(), taskField);

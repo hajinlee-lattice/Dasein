@@ -26,6 +26,26 @@ public class ColumnSelection {
     public ColumnSelection() {
     }
 
+    public static ColumnSelection combine(Collection<ColumnSelection> selectionCollection) {
+        List<Column> columns = new ArrayList<>();
+        for (ColumnSelection selection : selectionCollection) {
+            if (columns.isEmpty()) {
+                columns.addAll(selection.getColumns());
+            } else {
+                List<Column> incremental = new ArrayList<>();
+                selection.getColumns().forEach(col -> {
+                    if (!columns.contains(col)) {
+                        incremental.add(col);
+                    }
+                });
+                columns.addAll(incremental);
+            }
+        }
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        return columnSelection;
+    }
+
     public void createColumnSelection(List<ExternalColumn> externalColumns) {
         List<Column> columns = new ArrayList<>();
         for (ExternalColumn externalColumn : externalColumns) {
@@ -96,26 +116,6 @@ public class ColumnSelection {
         return list;
     }
 
-    public static ColumnSelection combine(Collection<ColumnSelection> selectionCollection) {
-        List<Column> columns = new ArrayList<>();
-        for (ColumnSelection selection : selectionCollection) {
-            if (columns.isEmpty()) {
-                columns.addAll(selection.getColumns());
-            } else {
-                List<Column> incremental = new ArrayList<>();
-                selection.getColumns().forEach(col -> {
-                    if (!columns.contains(col)) {
-                        incremental.add(col);
-                    }
-                });
-                columns.addAll(incremental);
-            }
-        }
-        ColumnSelection columnSelection = new ColumnSelection();
-        columnSelection.setColumns(columns);
-        return columnSelection;
-    }
-
     @JsonIgnore
     public Boolean isEmpty() {
         return getColumns().isEmpty();
@@ -136,8 +136,12 @@ public class ColumnSelection {
         TalkingPoint("TalkingPoint"), //
         CompanyProfile("CompanyProfile");
 
-        private final String name;
+        public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model,
+                DerivedColumns, RTS, ID, Enrichment, Segment, TalkingPoint, CompanyProfile);
+        public static final EnumSet<Predefined> usageProperties = EnumSet.of(Segment, Enrichment,
+                TalkingPoint, CompanyProfile);
         private static Map<String, Predefined> nameMap;
+
         static {
             nameMap = new HashMap<>();
             for (Predefined predefined : Predefined.values()) {
@@ -145,28 +149,15 @@ public class ColumnSelection {
             }
         }
 
+        private final String name;
+
         Predefined(String name) {
             this.name = name;
-        }
-
-        @MetricTag(tag = "PredefinedSelection")
-        public String getName() {
-            return this.name;
         }
 
         public static Predefined fromName(String name) {
             return nameMap.get(name);
         }
-
-        public String getJsonFileName(String version) {
-            return getName() + "_" + version + ".json";
-        }
-
-        public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID,
-                Enrichment, Segment, TalkingPoint, CompanyProfile);
-
-        public static final EnumSet<Predefined> usageProperties = EnumSet.of(Segment, Enrichment, TalkingPoint,
-                CompanyProfile);
 
         public static Predefined getLegacyDefaultSelection() {
             return DerivedColumns;
@@ -178,6 +169,15 @@ public class ColumnSelection {
 
         public static List<String> getNames() {
             return new ArrayList<>(nameMap.keySet());
+        }
+
+        @MetricTag(tag = "PredefinedSelection")
+        public String getName() {
+            return this.name;
+        }
+
+        public String getJsonFileName(String version) {
+            return getName() + "_" + version + ".json";
         }
 
     }

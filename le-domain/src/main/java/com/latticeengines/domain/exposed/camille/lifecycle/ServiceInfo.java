@@ -6,6 +6,11 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
 public class ServiceInfo {
+    public ServiceProperties properties;
+    public CustomerSpaceServiceInstaller cssInstaller;
+    public CustomerSpaceServiceUpgrader cssUpgrader;
+    public CustomerSpaceServiceDestroyer cssDestroyer;
+    public ServiceInstaller installer;
     public ServiceInfo(ServiceProperties properties, CustomerSpaceServiceInstaller cssInstaller,
             CustomerSpaceServiceUpgrader cssUpgrader, CustomerSpaceServiceDestroyer cssDestroyer,
             ServiceInstaller installer) {
@@ -15,10 +20,4 @@ public class ServiceInfo {
         this.cssDestroyer = cssDestroyer;
         this.installer = installer;
     }
-
-    public ServiceProperties properties;
-    public CustomerSpaceServiceInstaller cssInstaller;
-    public CustomerSpaceServiceUpgrader cssUpgrader;
-    public CustomerSpaceServiceDestroyer cssDestroyer;
-    public ServiceInstaller installer;
 }

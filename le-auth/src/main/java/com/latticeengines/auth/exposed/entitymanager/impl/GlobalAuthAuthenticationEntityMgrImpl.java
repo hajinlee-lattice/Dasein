@@ -16,8 +16,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 
 @Component("globalAuthAuthenticationEntityMgr")
 public class GlobalAuthAuthenticationEntityMgrImpl extends
-        BaseEntityMgrImpl<GlobalAuthAuthentication> implements
-        GlobalAuthAuthenticationEntityMgr {
+        BaseEntityMgrImpl<GlobalAuthAuthentication> implements GlobalAuthAuthenticationEntityMgr {
 
     @Inject
     private GlobalAuthAuthenticationDao gaAuthenticationDao;
@@ -48,13 +47,13 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthAuthentication gaAuthentication) {
-    	    getDao().create(gaAuthentication);
+        getDao().create(gaAuthentication);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthAuthentication gaAuthentication) {
-    	    getDao().delete(gaAuthentication);
+        getDao().delete(gaAuthentication);
     }
 
     @Override

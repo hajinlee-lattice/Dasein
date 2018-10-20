@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalTicket", indexes = {@Index(name = "IX_Ticket", columnList = "Ticket")})
+@Table(name = "GlobalTicket", indexes = { @Index(name = "IX_Ticket", columnList = "Ticket") })
 public class GlobalAuthTicket extends BaseGlobalAuthObject implements HasPid {
 
     @Id

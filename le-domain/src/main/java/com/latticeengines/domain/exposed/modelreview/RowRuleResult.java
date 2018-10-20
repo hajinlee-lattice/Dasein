@@ -14,7 +14,8 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@Table(name = "MODELREVIEW_ROWRESULT", indexes = {@Index(name = "IX_MODEL_ID", columnList = "MODEL_ID")})
+@Table(name = "MODELREVIEW_ROWRESULT", indexes = {
+        @Index(name = "IX_MODEL_ID", columnList = "MODEL_ID") })
 public class RowRuleResult extends BaseRuleResult {
 
     @JsonProperty
@@ -37,7 +38,8 @@ public class RowRuleResult extends BaseRuleResult {
         return flaggedRowIdAndColumnNames;
     }
 
-    public void setFlaggedRowIdAndColumnNames(Map<String, List<String>> flaggedRowIdAndColumnNames) {
+    public void setFlaggedRowIdAndColumnNames(
+            Map<String, List<String>> flaggedRowIdAndColumnNames) {
         this.flaggedRowIdAndColumnNames = flaggedRowIdAndColumnNames;
     }
 
@@ -61,9 +63,10 @@ public class RowRuleResult extends BaseRuleResult {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((flaggedRowIdAndColumnNames == null) ? 0 : flaggedRowIdAndColumnNames.hashCode());
-        result = prime * result
-                + ((flaggedRowIdAndPositiveEvent == null) ? 0 : flaggedRowIdAndPositiveEvent.hashCode());
+        result = prime * result + ((flaggedRowIdAndColumnNames == null) ? 0
+                : flaggedRowIdAndColumnNames.hashCode());
+        result = prime * result + ((flaggedRowIdAndPositiveEvent == null) ? 0
+                : flaggedRowIdAndPositiveEvent.hashCode());
         return result;
     }
 

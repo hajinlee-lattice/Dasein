@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "DecisionGraph", indexes = {@Index(name = "IX_NAME", columnList = "GraphName")})
+@Table(name = "DecisionGraph", indexes = { @Index(name = "IX_NAME", columnList = "GraphName") })
 public class DecisionGraph implements HasPid, Serializable {
     private static final long serialVersionUID = -803250604271710254L;
 

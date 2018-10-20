@@ -23,12 +23,12 @@ public class RandomForestAlgorithm extends AlgorithmBase {
         setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
         setPipelineProperties(StringUtils.join(getPipelinePropertyArray(), " "));
     }
-    
+
     @Override
     public void resetAlgorithmProperties() {
         setAlgorithmProperties(StringUtils.join(getAlgorithmPropertyArray(), " "));
     }
-    
+
     @JsonIgnore
     @Transient
     private String[] getAlgorithmPropertyArray() {
@@ -37,11 +37,11 @@ public class RandomForestAlgorithm extends AlgorithmBase {
                 "n_estimators=200", //
                 "n_jobs=5", //
                 "min_samples_split=25", //
-                "min_samples_leaf=20", // Should use percentage when it's available
+                "min_samples_leaf=20", // Should use percentage when it's
+                                       // available
                 "max_depth=6", //
                 "bootstrap=True", //
-                "random_state=" + new Random().nextInt(100000)
-        };
+                "random_state=" + new Random().nextInt(100000) };
     }
 
     @JsonIgnore

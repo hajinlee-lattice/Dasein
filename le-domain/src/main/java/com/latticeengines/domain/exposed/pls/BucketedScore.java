@@ -17,7 +17,8 @@ public class BucketedScore implements Serializable {
     public BucketedScore() {
     }
 
-    public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads, double leftNumConverted) {
+    public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads,
+            double leftNumConverted) {
         this.score = score;
         this.numLeads = numLeads;
         this.numConverted = numConverted;

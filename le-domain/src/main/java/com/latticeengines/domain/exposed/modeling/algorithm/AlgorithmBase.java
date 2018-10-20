@@ -128,16 +128,6 @@ public class AlgorithmBase implements Algorithm {
     public void setAlgorithmProperties(String algorithmProperties) {
         this.algorithmProperties = algorithmProperties;
     }
-    
-    @Override
-    @JsonIgnore
-    public void setAlgorithmProps(Properties props) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Object, Object> entry : props.entrySet()) {
-            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" ");
-        }
-        setAlgorithmProperties(sb.toString().trim());
-    }
 
     @Override
     @JsonProperty("priority")
@@ -170,6 +160,16 @@ public class AlgorithmBase implements Algorithm {
     @Transient
     public Properties getAlgorithmProps() {
         return StringTokenUtils.stringToProperty(getAlgorithmProperties());
+    }
+
+    @Override
+    @JsonIgnore
+    public void setAlgorithmProps(Properties props) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" ");
+        }
+        setAlgorithmProperties(sb.toString().trim());
     }
 
     @Override
@@ -219,16 +219,16 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-    public void setPipelineProperties(String pipelineProperties) {
-        this.pipelineProperties = pipelineProperties;
-    }
-
-    @Override
     @JsonProperty("pipeline_properties")
     @Column(name = "PIPELINE_PROPERTIES", nullable = true)
     @Lob
     public String getPipelineProperties() {
         return pipelineProperties;
+    }
+
+    @Override
+    public void setPipelineProperties(String pipelineProperties) {
+        this.pipelineProperties = pipelineProperties;
     }
 
     @Override
@@ -240,15 +240,15 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     @JsonProperty("pipeline_driver")
-    public void setPipelineDriver(String pipelineDriver) {
-        this.pipelineDriver = pipelineDriver;
+    @Column(name = "PIPELINE_DRIVER", nullable = true)
+    public String getPipelineDriver() {
+        return pipelineDriver;
     }
 
     @Override
     @JsonProperty("pipeline_driver")
-    @Column(name = "PIPELINE_DRIVER", nullable = true)
-    public String getPipelineDriver() {
-        return pipelineDriver;
+    public void setPipelineDriver(String pipelineDriver) {
+        this.pipelineDriver = pipelineDriver;
     }
 
     @Override

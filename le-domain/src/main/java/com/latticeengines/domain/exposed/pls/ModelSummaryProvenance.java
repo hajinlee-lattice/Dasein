@@ -48,21 +48,24 @@ public class ModelSummaryProvenance
         for (ProvenancePropertyName name : ProvenancePropertyName.values()) {
             String fmtString = " %s=%s";
             switch (name.getType().toString()) {
-            case "class java.lang.Boolean":
-                ret = ret.concat(
-                        String.format(fmtString, name.getName(), this.getBoolean(name, false)));
-                break;
-            case "class java.lang.Integer":
-                ret = ret.concat(String.format(fmtString, name.getName(), this.getInt(name, 0)));
-                break;
-            case "class java.lang.Double":
-                ret = ret.concat(String.format(fmtString, name.getName(), this.getDouble(name, 0)));
-            case "class java.lang.Long":
-                ret = ret.concat(String.format(fmtString, name.getName(), this.getLong(name, 0)));
-            default:
-                ret = ret
-                        .concat(String.format(fmtString, name.getName(), this.getString(name, "")));
-                break;
+                case "class java.lang.Boolean":
+                    ret = ret.concat(
+                            String.format(fmtString, name.getName(), this.getBoolean(name, false)));
+                    break;
+                case "class java.lang.Integer":
+                    ret = ret
+                            .concat(String.format(fmtString, name.getName(), this.getInt(name, 0)));
+                    break;
+                case "class java.lang.Double":
+                    ret = ret.concat(
+                            String.format(fmtString, name.getName(), this.getDouble(name, 0)));
+                case "class java.lang.Long":
+                    ret = ret.concat(
+                            String.format(fmtString, name.getName(), this.getLong(name, 0)));
+                default:
+                    ret = ret.concat(
+                            String.format(fmtString, name.getName(), this.getString(name, "")));
+                    break;
             }
         }
 

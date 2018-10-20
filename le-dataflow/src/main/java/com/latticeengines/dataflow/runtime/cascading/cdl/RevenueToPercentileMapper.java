@@ -3,9 +3,9 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class RevenueToPercentileMapper extends RawScoreToPercentileMapper {
-	private static final long serialVersionUID = 3934385097877681198L;
+    private static final long serialVersionUID = 3934385097877681198L;
 
-	public RevenueToPercentileMapper(ScoreDerivation scoreDerivation) {
+    public RevenueToPercentileMapper(ScoreDerivation scoreDerivation) {
         super(scoreDerivation);
     }
 

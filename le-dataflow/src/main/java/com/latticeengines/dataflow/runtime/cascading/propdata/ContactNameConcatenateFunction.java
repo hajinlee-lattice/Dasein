@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -11,20 +15,17 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class ContactNameConcatenateFunction extends BaseOperation implements Function {
-	private static final long serialVersionUID = -7494994574004771238L;
-	private static final Logger log = LoggerFactory.getLogger(ContactNameConcatenateFunction.class);
+    private static final long serialVersionUID = -7494994574004771238L;
+    private static final Logger log = LoggerFactory.getLogger(ContactNameConcatenateFunction.class);
     private Map<String, Integer> positionMap;
     private List<String> concatenateFields;
     private String resultField;
 
     public ContactNameConcatenateFunction(Fields fieldsDeclaration, List<String> concatenateFields,
-                                          String resultField) {
+            String resultField) {
         super(fieldsDeclaration);
         this.positionMap = getPositionMap(fieldsDeclaration);
         this.concatenateFields = concatenateFields;

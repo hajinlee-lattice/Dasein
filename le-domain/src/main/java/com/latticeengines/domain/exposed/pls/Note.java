@@ -30,44 +30,36 @@ import com.latticeengines.domain.exposed.db.IsUserModifiable;
 public abstract class Note implements HasId<String>, HasPid, IsUserModifiable, Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    public Note() {
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", nullable = false)
     private Long pid;
-
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
     private String id;
-
     @JsonProperty("CreationTimestamp")
     @Column(name = "CREATION_TIMESTAMP", nullable = false)
     private Long creationTimestamp;
-
     @JsonProperty("LastModificationTimestamp")
     @Column(name = "LAST_MODIFICATION_TIMESTAMP", nullable = false)
     private Long lastModificationTimestamp;
-
     @JsonProperty("CreatedByUser")
     @Column(name = "CREATED_BY_USER")
     private String createdByUser;
-
     @JsonProperty("LastModifiedByUser")
     @Column(name = "LAST_MODIFIED_BY_USER")
     private String lastModifiedByUser;
-
     @JsonProperty("NotesContents")
     @Column(name = "NOTES_CONTENTS", length = 2048)
     private String notesContents;
-
     @JsonProperty("Origin")
     @Column(name = "ORIGIN")
     private String origin = "Note";
+
+    public Note() {
+    }
 
     @Override
     public Long getPid() {

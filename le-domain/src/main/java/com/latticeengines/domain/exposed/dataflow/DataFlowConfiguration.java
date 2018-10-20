@@ -111,12 +111,12 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         this.engine = engine;
     }
 
-    public void setQueue(String queue) {
-        this.queue = queue;
-    }
-
     public String getQueue() {
         return queue;
+    }
+
+    public void setQueue(String queue) {
+        this.queue = queue;
     }
 
     public String getNamespace() {

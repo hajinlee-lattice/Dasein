@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 
 public class ProductMapperConfig extends TransformerConfig {

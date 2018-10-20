@@ -6,5 +6,5 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 
 public interface ExternalColumnDao extends BaseDao<ExternalColumn> {
-	List<ExternalColumn> findByTag(String tag);
+    List<ExternalColumn> findByTag(String tag);
 }

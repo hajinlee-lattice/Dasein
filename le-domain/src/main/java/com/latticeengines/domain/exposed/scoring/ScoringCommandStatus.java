@@ -9,10 +9,6 @@ public enum ScoringCommandStatus {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static ScoringCommandStatus valueOf(int value) {
         ScoringCommandStatus result = null;
         for (ScoringCommandStatus status : ScoringCommandStatus.values()) {
@@ -22,5 +18,9 @@ public enum ScoringCommandStatus {
             }
         }
         return result;
+    }
+
+    public int getValue() {
+        return value;
     }
 }

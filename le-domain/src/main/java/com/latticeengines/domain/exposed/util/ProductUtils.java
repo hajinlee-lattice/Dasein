@@ -61,7 +61,8 @@ public class ProductUtils {
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
         List<Product> productList = new ArrayList<>();
-        List<GenericRecord> recordList = AvroUtils.getDataFromGlob(yarnConfiguration, filePath + "/*.avro");
+        List<GenericRecord> recordList = AvroUtils.getDataFromGlob(yarnConfiguration,
+                filePath + "/*.avro");
 
         for (GenericRecord record : recordList) {
             Product product = new Product();
@@ -91,14 +92,15 @@ public class ProductUtils {
         return productList;
     }
 
-    public static void saveProducts(Configuration yarnConfiguration, String filePath, List<Product> productList)
-            throws IOException {
+    public static void saveProducts(Configuration yarnConfiguration, String filePath,
+            List<Product> productList) throws IOException {
         filePath = getPath(filePath);
         log.info("Save products to " + filePath + "/" + FILE_NAME);
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        SchemaRepository.instance().getSchema(BusinessEntity.Product).getAttributes().forEach(attribute -> {
-                columns.add(Pair.of(attribute.getName(), String.class));
-        });
+        SchemaRepository.instance().getSchema(BusinessEntity.Product).getAttributes()
+                .forEach(attribute -> {
+                    columns.add(Pair.of(attribute.getName(), String.class));
+                });
         columns.add(Pair.of(InterfaceName.Id.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductBundleId.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductLineId.name(), String.class));
@@ -159,7 +161,8 @@ public class ProductUtils {
                         builder.set(field, product.getProductCategoryId());
                         break;
                     default:
-                        log.warn(String.format("Found unknown field %s when saving product.", field.name()));
+                        log.warn(String.format("Found unknown field %s when saving product.",
+                                field.name()));
                         break;
                 }
             }
@@ -167,10 +170,12 @@ public class ProductUtils {
         }
 
         // log.info("Saving products " + JsonUtils.serialize(data));
-        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data, true);
+        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data,
+                true);
     }
 
-    public static Map<String, List<Product>> getProductMap(List<Product> productList, String... productTypes) {
+    public static Map<String, List<Product>> getProductMap(List<Product> productList,
+            String... productTypes) {
         Map<String, List<Product>> productMap = new HashMap<>();
         productList = filterProductListByType(productList, productTypes);
 
@@ -187,7 +192,8 @@ public class ProductUtils {
         return productMap;
     }
 
-    public static Map<String, List<Product>> getActiveProductMap(List<Product> productList, String... productTypes) {
+    public static Map<String, List<Product>> getActiveProductMap(List<Product> productList,
+            String... productTypes) {
         Map<String, List<Product>> productMap = new HashMap<>();
         productList = filterProductListByType(productList, productTypes);
         productList = filterProductListByStatus(productList, ProductStatus.Active.name());
@@ -206,7 +212,7 @@ public class ProductUtils {
     }
 
     public static Map<String, Product> getProductMapByCompositeId(List<Product> productList,
-                                                                  String... statuses) {
+            String... statuses) {
         Map<String, Product> productMap = new HashMap<>();
         productList = filterProductListByStatus(productList, statuses);
 
@@ -229,22 +235,26 @@ public class ProductUtils {
         return value;
     }
 
-    private static List<Product> filterProductListByType(List<Product> productList, String... productTypes) {
+    private static List<Product> filterProductListByType(List<Product> productList,
+            String... productTypes) {
         if (productTypes != null && productTypes.length > 0) {
             Set<String> typeSet = new HashSet<>(Arrays.asList(productTypes));
             productList = productList.stream()
-                    .filter(product -> product.getProductType() == null || typeSet.contains(product.getProductType()))
+                    .filter(product -> product.getProductType() == null
+                            || typeSet.contains(product.getProductType()))
                     .collect(Collectors.toList());
         }
 
         return productList;
     }
 
-    private static List<Product> filterProductListByStatus(List<Product> productList, String... productStatuses) {
+    private static List<Product> filterProductListByStatus(List<Product> productList,
+            String... productStatuses) {
         if (productStatuses != null && productStatuses.length > 0) {
             Set<String> statusSet = new HashSet<>(Arrays.asList(productStatuses));
             productList = productList.stream()
-                    .filter(product -> product.getProductStatus() == null || statusSet.contains(product.getProductStatus()))
+                    .filter(product -> product.getProductStatus() == null
+                            || statusSet.contains(product.getProductStatus()))
                     .collect(Collectors.toList());
         }
 

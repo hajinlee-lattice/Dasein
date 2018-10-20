@@ -61,7 +61,8 @@ public class DebugRecordScoreResponse extends RecordScoreResponse {
         return transformedRecordMapTypes;
     }
 
-    public void setTransformedRecordMapTypes(Map<String, Map<String, String>> transformedRecordMapTypes) {
+    public void setTransformedRecordMapTypes(
+            Map<String, Map<String, String>> transformedRecordMapTypes) {
         this.transformedRecordMapTypes = transformedRecordMapTypes;
     }
 

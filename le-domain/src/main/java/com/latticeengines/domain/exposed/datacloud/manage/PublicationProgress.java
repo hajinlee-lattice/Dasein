@@ -36,34 +36,26 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestin
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PublicationProgress implements Progress {
 
+    @Column(name = "CreateTime", nullable = false)
+    protected Date createTime = new Date();
+    @Column(name = "LatestStatusUpdate", nullable = false)
+    protected Date latestStatusUpdate;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", nullable = false)
     private Long pid;
-
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_Publication", nullable = false)
     private Publication publication;
-
     @Column(name = "SourceVersion", nullable = false, length = 50)
     private String sourceVersion;
-
     @Column(name = "Destination", nullable = false, length = 1000)
     private String destinationString;
-
     @Column(name = "RowsPublished")
     private Long rowsPublished;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false, length = 20)
     private ProgressStatus status;
-
-    @Column(name = "CreateTime", nullable = false)
-    protected Date createTime = new Date();
-
-    @Column(name = "LatestStatusUpdate", nullable = false)
-    protected Date latestStatusUpdate;
-
     @Column(name = "CreatedBy", nullable = false)
     private String createdBy;
 
@@ -272,25 +264,25 @@ public class PublicationProgress implements Progress {
 
     @Override
     @JsonIgnore
-    public void setStatusBeforeFailed(ProgressStatus status) {
-        throw new UnsupportedOperationException("Deprecated operation.");
-    }
-
-    @Override
-    @JsonIgnore
     public ProgressStatus getStatusBeforeFailed() {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 
     @Override
     @JsonIgnore
-    public void setNumRetries(int numRetries) {
+    public void setStatusBeforeFailed(ProgressStatus status) {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 
     @Override
     @JsonIgnore
     public int getNumRetries() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public void setNumRetries(int numRetries) {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 

@@ -32,6 +32,24 @@ public class PropertyMetadata extends BaseObjectMetadata {
     @JsonProperty("PropertyAggregationString")
     private String propertyAggregationString;
 
+    public PropertyMetadata() {
+    }
+
+    public PropertyMetadata(ColumnMetadata columnMetadata) {
+        interpretation = 0;
+        interpretationString = "Value";
+        setSource(MetadataSource.DataCloud);
+        nullable = true;
+        setName(columnMetadata.getAttrName());
+        setDisplayNameKey(columnMetadata.getDisplayName());
+        setDescriptionKey(columnMetadata.getDescription());
+        setPropertyType(convertFundamentalTypeToPropertyType(columnMetadata.getFundamentalType())
+                .getPropertyTypeNumber());
+        setPropertyTypeString(
+                convertFundamentalTypeToPropertyType(columnMetadata.getFundamentalType())
+                        .toString());
+    }
+
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -104,49 +122,33 @@ public class PropertyMetadata extends BaseObjectMetadata {
         this.propertyAggregationString = propertyAggregationString;
     }
 
-    public PropertyMetadata() {
-    }
-
-    public PropertyMetadata(ColumnMetadata columnMetadata) {
-        interpretation = 0;
-        interpretationString = "Value";
-        setSource(MetadataSource.DataCloud);
-        nullable = true;
-        setName(columnMetadata.getAttrName());
-        setDisplayNameKey(columnMetadata.getDisplayName());
-        setDescriptionKey(columnMetadata.getDescription());
-        setPropertyType(
-                convertFundamentalTypeToPropertyType(columnMetadata.getFundamentalType()).getPropertyTypeNumber());
-        setPropertyTypeString(convertFundamentalTypeToPropertyType(columnMetadata.getFundamentalType()).toString());
-    }
-
     private PropertyType convertFundamentalTypeToPropertyType(FundamentalType value) {
         switch (value) {
-        case ALPHA:
-        case EMAIL:
-        case URI:
-        case PHONE:
-            return PropertyType.String;
+            case ALPHA:
+            case EMAIL:
+            case URI:
+            case PHONE:
+                return PropertyType.String;
 
-        case BOOLEAN:
-            return PropertyType.Bool;
+            case BOOLEAN:
+                return PropertyType.Bool;
 
-        case CURRENCY:
-            return PropertyType.Currency;
+            case CURRENCY:
+                return PropertyType.Currency;
 
-        case DATE:
-        case YEAR:
-            return PropertyType.DateTime;
+            case DATE:
+            case YEAR:
+                return PropertyType.DateTime;
 
-        case PERCENTAGE:
-            return PropertyType.Percentage;
+            case PERCENTAGE:
+                return PropertyType.Percentage;
 
-        case NUMERIC:
-            return PropertyType.Decimal;
+            case NUMERIC:
+                return PropertyType.Decimal;
 
-        case ENUM:
-        default:
-            return PropertyType.String;
+            case ENUM:
+            default:
+                return PropertyType.String;
         }
     }
 }

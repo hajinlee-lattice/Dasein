@@ -33,72 +33,54 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "MatchCommand", indexes = {@Index(name = "IX_UID", columnList = "RootOperationUID")})
+@Table(name = "MatchCommand", indexes = {
+        @Index(name = "IX_UID", columnList = "RootOperationUID") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchCommand implements HasPid {
 
+    @Column(name = "Customer", length = 200)
+    protected String customer;
+    @Column(name = "ColumnSelection", length = 50)
+    protected String columnSelection;
+    @Column(name = "CreateTime")
+    protected Date createTime = new Date();
+    @Column(name = "LatestStatusUpdate")
+    protected Date latestStatusUpdate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "StatusBeforeFailed", length = 20)
+    protected MatchStatus statusBeforeFailed;
+    @Column(name = "ErrorMessage", length = 1000)
+    protected String errorMessage;
+    @Column(name = "NumRetries")
+    protected int numRetries;
+    @Column(name = "ApplicationId", length = 50)
+    protected String applicationId;
+    @Column(name = "Progress")
+    protected Float progress;
+    @Column(name = "ResultLocation", length = 400)
+    protected String resultLocation;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", nullable = false)
     private Long pid;
-
     @Column(name = "RootOperationUID", unique = true, nullable = false, length = 100)
     private String rootOperationUid;
-
     @Column(name = "RowsRequested", nullable = false)
     private Integer rowsRequested;
-
     @Column(name = "RowsMatched")
     private Integer rowsMatched;
-
     @Column(name = "RowsToDnB")
     private Integer rowsToDnb = 0;
-
     @Column(name = "RowsMatchedByDnB")
     private Integer rowsMatchedByDnb = 0;
-
     @Column(name = "DnBDurationAvg")
     private Integer dnbDurationAvg = 0;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "MatchStatus", nullable = false, length = 20)
     private MatchStatus matchStatus;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "JobType", nullable = false, length = 20)
     private MatchRequestSource jobType;
-
-    @Column(name = "Customer", length = 200)
-    protected String customer;
-
-    @Column(name = "ColumnSelection", length = 50)
-    protected String columnSelection;
-
-    @Column(name = "CreateTime")
-    protected Date createTime = new Date();
-
-    @Column(name = "LatestStatusUpdate")
-    protected Date latestStatusUpdate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "StatusBeforeFailed", length = 20)
-    protected MatchStatus statusBeforeFailed;
-
-    @Column(name = "ErrorMessage", length = 1000)
-    protected String errorMessage;
-
-    @Column(name = "NumRetries")
-    protected int numRetries;
-
-    @Column(name = "ApplicationId", length = 50)
-    protected String applicationId;
-
-    @Column(name = "Progress")
-    protected Float progress;
-
-    @Column(name = "ResultLocation", length = 400)
-    protected String resultLocation;
-
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "matchCommand")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SUBSELECT)
@@ -330,13 +312,13 @@ public class MatchCommand implements HasPid {
     }
 
     @JsonProperty("CascadingFlow")
-    public void setCascadingFlow(String cascadingFlow) {
-        this.cascadingFlow = cascadingFlow;
+    public String getCascadingFlow() {
+        return cascadingFlow;
     }
 
     @JsonProperty("CascadingFlow")
-    public String getCascadingFlow() {
-        return cascadingFlow;
+    public void setCascadingFlow(String cascadingFlow) {
+        this.cascadingFlow = cascadingFlow;
     }
 
 }

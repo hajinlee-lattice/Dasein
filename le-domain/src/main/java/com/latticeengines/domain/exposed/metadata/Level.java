@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_LEVEL")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Level implements HasPid, HasName, GraphNode {
 
     @Id
@@ -39,11 +39,11 @@ public class Level implements HasPid, HasName, GraphNode {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     protected Long pid;
-    
+
     @Column(name = "NAME", unique = false, nullable = false)
     @JsonProperty("name")
     protected String name;
-    
+
     @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonProperty("display_name")
     protected String displayName;
@@ -51,7 +51,7 @@ public class Level implements HasPid, HasName, GraphNode {
     @JsonProperty("attributes")
     @Transient
     private List<String> attributes = new ArrayList<>();
-    
+
     @Column(name = "ATTRIBUTES", nullable = false, length = 2048)
     @JsonIgnore
     private String attributesAsString;
@@ -59,7 +59,7 @@ public class Level implements HasPid, HasName, GraphNode {
     @Column(name = "ORDER_IN_HIERARCHY", nullable = false)
     @JsonProperty("order")
     private int orderInHierarchy;
-    
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_HIERARCHY_ID", nullable = false)
@@ -135,12 +135,12 @@ public class Level implements HasPid, HasName, GraphNode {
     public void addAttribute(String attribute) {
         attributes.add(attribute);
     }
-    
+
     @JsonIgnore
     public String getAttributesAsStr() {
         return attributesAsString;
     }
-    
+
     @JsonIgnore
     public void setAttributesAsStr(String attributesAsString) {
         this.attributesAsString = attributesAsString;

@@ -10,9 +10,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
  * This class represents the holder for all the top-level dimensions. This class
  * would be passed to the workflow that would kick off either the file-based
  * self-service modeling or the event table model workflow.
- * 
+ *
  * @author rgonzalez
- * 
+ *
  */
 public class SelectedConfig implements Fact, Dimension {
 
@@ -61,7 +61,6 @@ public class SelectedConfig implements Fact, Dimension {
         this.dataSet = dataSet;
     }
 
-
     @MetricTagGroup
     public PropData getPropData() {
         return propData;
@@ -88,7 +87,7 @@ public class SelectedConfig implements Fact, Dimension {
     public void setSampling(Sampling sampling) {
         this.sampling = sampling;
     }
-    
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

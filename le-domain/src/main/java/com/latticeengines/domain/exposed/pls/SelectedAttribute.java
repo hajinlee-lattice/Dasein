@@ -106,14 +106,14 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        setTenantPid(tenant.getPid());
+    public Tenant getTenant() {
+        return tenant;
     }
 
     @Override
-    public Tenant getTenant() {
-        return tenant;
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        setTenantPid(tenant.getPid());
     }
 
     public String getColumnId() {

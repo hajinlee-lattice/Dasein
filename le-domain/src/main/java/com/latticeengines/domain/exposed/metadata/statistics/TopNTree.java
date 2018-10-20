@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.metadata.statistics;
 
-
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 

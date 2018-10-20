@@ -2,13 +2,12 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 
 import java.io.Serializable;
 
-
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class RawScoreToPercentileMapper implements Serializable {
-	private static final long serialVersionUID = -7382907476491844959L;
-	private static final int MIN_PERCENTILE = 5;
+    private static final long serialVersionUID = -7382907476491844959L;
+    private static final int MIN_PERCENTILE = 5;
     private static final int MAX_PERCENTILE = 99;
 
     private ScoreDerivation derivation;
@@ -21,8 +20,8 @@ public class RawScoreToPercentileMapper implements Serializable {
         if (scoreDerivation.percentiles == null) {
             throw new IllegalArgumentException("No percentile buckets found");
         } else if (scoreDerivation.percentiles.isEmpty()) {
-            throw new IllegalArgumentException(
-                String.format("No buckets in scoreDerivation. size:%d", scoreDerivation.percentiles.size()));
+            throw new IllegalArgumentException(String.format(
+                    "No buckets in scoreDerivation. size:%d", scoreDerivation.percentiles.size()));
         }
         return scoreDerivation;
     }
@@ -66,7 +65,8 @@ public class RawScoreToPercentileMapper implements Serializable {
     }
 
     private boolean withinRange(BucketRange range, //
-                                double value) {
-        return (range.lower == null || value >= range.lower) && (range.upper == null || value <= range.upper);
+            double value) {
+        return (range.lower == null || value >= range.lower)
+                && (range.upper == null || value <= range.upper);
     }
 }

@@ -7,23 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.Extract;
 
 public class TimestampExtractFilter extends ExtractFilter {
-    public class Range {
-        public Range(Long min, Long max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        public boolean inRange(long millisecondsUtc) {
-            return (min == null || min <= millisecondsUtc) && (max == null || millisecondsUtc <= max);
-        }
-
-        @JsonProperty
-        public Long min;
-
-        @JsonProperty
-        public Long max;
-    }
-
     @JsonProperty
     private List<Range> validDateRanges = new ArrayList<>();
 
@@ -49,5 +32,22 @@ public class TimestampExtractFilter extends ExtractFilter {
         }
 
         return false;
+    }
+
+    public class Range {
+        @JsonProperty
+        public Long min;
+        @JsonProperty
+        public Long max;
+
+        public Range(Long min, Long max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public boolean inRange(long millisecondsUtc) {
+            return (min == null || min <= millisecondsUtc)
+                    && (max == null || millisecondsUtc <= max);
+        }
     }
 }

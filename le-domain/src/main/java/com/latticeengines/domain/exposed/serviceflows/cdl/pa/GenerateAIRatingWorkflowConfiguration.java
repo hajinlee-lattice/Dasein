@@ -31,6 +31,9 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
+    @JsonProperty("customEventModelingType")
+    private CustomEventModelingType customEventModelingType;
+
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
@@ -38,9 +41,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
                 .addAll(super.getSwpkgNames()) //
                 .build();
     }
-
-    @JsonProperty("customEventModelingType")
-    private CustomEventModelingType customEventModelingType;
 
     public CustomEventModelingType getCustomEventModelingType() {
         return customEventModelingType;
@@ -174,7 +174,8 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder inputTableName(String tableName) {
             match.matchInputTableName(tableName);
-            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores
+                    .setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
 
@@ -209,8 +210,8 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             setCdlEventTableConfig();
             setMatchConfig();
             setAddStandardAttributesConfig();
-            configuration.setContainerConfiguration("generateAIRatingWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("generateAIRatingWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
             configuration.add(cdlEventTable);
             configuration.add(addStandardAttributes);
@@ -230,7 +231,8 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         private void setAddStandardAttributesConfig() {
             if (!CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
-                addStandardAttributes.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
+                addStandardAttributes.setSourceSchemaInterpretation(
+                        SchemaInterpretation.SalesforceAccount.toString());
             }
         }
 

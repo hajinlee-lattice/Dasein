@@ -83,7 +83,7 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         if (inputAvroSchema != null && StringUtils.isNotEmpty(inputAvroSchema.toString())
                 && !"null".equalsIgnoreCase(inputAvroSchema.toString())) {
             this.inputAvroSchema = new Schema.Parser().parse(inputAvroSchema.toString());
-        } else  {
+        } else {
             this.inputAvroSchema = null;
         }
     }
@@ -167,6 +167,5 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     public void setRealTimeThreadPoolSize(Integer realTimeThreadPoolSize) {
         this.realTimeThreadPoolSize = realTimeThreadPoolSize;
     }
-    
-}
 
+}

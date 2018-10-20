@@ -32,7 +32,8 @@ public class TransformFunction extends BaseOperation implements Function {
         super(fieldDeclaration);
     }
 
-    public TransformFunction(TransformDefinition definition, RealTimeTransform transform, Fields fieldDeclaration) {
+    public TransformFunction(TransformDefinition definition, RealTimeTransform transform,
+            Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.definition = definition;
         this.transform = transform;
@@ -51,7 +52,8 @@ public class TransformFunction extends BaseOperation implements Function {
         }
 
         Map<String, Object> arguments = definition.arguments;
-        log.info(String.format("Starting %s transform with argument %s", definition.name, arguments));
+        log.info(String.format("Starting %s transform with argument %s", definition.name,
+                arguments));
         Object value = transform.transform(arguments, record);
         if (value == null) {
             value = null;
@@ -61,7 +63,8 @@ public class TransformFunction extends BaseOperation implements Function {
                     value = definition.type.type().cast(Double.valueOf("1.0"));
                 } else if (value.toString().toLowerCase().equals("false") == true) {
                     value = definition.type.type().cast(Double.valueOf("0.0"));
-                } else if (value.toString().equals("null") == false && value.toString().equals("None") == false) {
+                } else if (value.toString().equals("null") == false
+                        && value.toString().equals("None") == false) {
                     value = definition.type.type().cast(Double.valueOf(value.toString()));
                 } else {
                     value = null;

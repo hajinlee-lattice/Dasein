@@ -14,10 +14,6 @@ public class AMStatsDimensionAggregator extends BaseAggregator<AMStatsDimensionA
 
     private AMStatsDimensionUtil dimensionUtil;
 
-    public static class Context extends BaseAggregator.Context {
-        ExpandedTuple mergedTuple = null;
-    }
-
     public AMStatsDimensionAggregator(Fields fieldDeclaration) {
         super(fieldDeclaration);
         dimensionUtil = new AMStatsDimensionUtil();
@@ -53,5 +49,9 @@ public class AMStatsDimensionAggregator extends BaseAggregator<AMStatsDimensionA
         Tuple result = context.mergedTuple.generateTuple();
         context.mergedTuple = null;
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        ExpandedTuple mergedTuple = null;
     }
 }

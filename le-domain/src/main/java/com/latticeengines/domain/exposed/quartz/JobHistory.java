@@ -95,20 +95,20 @@ public class JobHistory implements HasPid, Serializable {
         this.tenantId = tenantId;
     }
 
-    public void setSequenceId(Long sequenceId) {
-        this.sequenceId = sequenceId;
-    }
-
     public Long getSequenceId() {
         return sequenceId;
     }
 
-    public void setJobIdentifier(String jobIdentifier) {
-        this.jobIdentifier = jobIdentifier;
+    public void setSequenceId(Long sequenceId) {
+        this.sequenceId = sequenceId;
     }
 
     public String getJobIdentifier() {
         return jobIdentifier;
+    }
+
+    public void setJobIdentifier(String jobIdentifier) {
+        this.jobIdentifier = jobIdentifier;
     }
 
     public String getTriggeredJobHandle() {

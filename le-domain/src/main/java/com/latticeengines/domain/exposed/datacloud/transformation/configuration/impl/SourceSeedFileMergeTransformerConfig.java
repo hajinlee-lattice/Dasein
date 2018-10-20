@@ -49,7 +49,5 @@ public class SourceSeedFileMergeTransformerConfig extends TransformerConfig {
     public void setSourcePriorityFieldValues(List<String> sourcePriorityFieldValues) {
         this.sourcePriorityFieldValues = sourcePriorityFieldValues;
     }
-    
-    
 
 }

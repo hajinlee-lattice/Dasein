@@ -6,11 +6,11 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public class MostRecentDataFlowParameters extends DataFlowParameters {
 
+    protected Date earliest;
     private String domainField;
     private String timestampField;
     private String[] groupbyFields;
     private String sourceTable;
-    protected Date earliest;
 
     public String getDomainField() {
         return domainField;
@@ -36,7 +36,9 @@ public class MostRecentDataFlowParameters extends DataFlowParameters {
         this.groupbyFields = groupbyFields;
     }
 
-    public String getSourceTable() { return sourceTable; }
+    public String getSourceTable() {
+        return sourceTable;
+    }
 
     public void setSourceTable(String sourceTable) {
         this.sourceTable = sourceTable;
@@ -50,5 +52,3 @@ public class MostRecentDataFlowParameters extends DataFlowParameters {
         this.earliest = earliest;
     }
 }
-
-

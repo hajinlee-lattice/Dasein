@@ -26,7 +26,8 @@ public final class FabricEntityFactory {
                 return ReflectData.get().getSchema(clz);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get avro schema of type " + clz.getSimpleName(), e);
+            throw new RuntimeException("Failed to get avro schema of type " + clz.getSimpleName(),
+                    e);
         }
     }
 
@@ -92,8 +93,8 @@ public final class FabricEntityFactory {
         return (Class<T>) actualType;
     }
 
-    public static <T> Pair<GenericRecord, Map<String, Object>> entityToPair(T entity, String recordType,
-            Schema schema) {
+    public static <T> Pair<GenericRecord, Map<String, Object>> entityToPair(T entity,
+            String recordType, Schema schema) {
         try {
             if (entity instanceof FabricEntity) {
                 GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
@@ -108,8 +109,8 @@ public final class FabricEntityFactory {
         }
     }
 
-    public static <T> T pairToEntity(Pair<GenericRecord, Map<String, Object>> pair, Class<T> entityClass,
-            Schema schema) {
+    public static <T> T pairToEntity(Pair<GenericRecord, Map<String, Object>> pair,
+            Class<T> entityClass, Schema schema) {
         if (pair == null || pair.getLeft() == null) {
             return null;
         }
@@ -120,8 +121,8 @@ public final class FabricEntityFactory {
         return entity;
     }
 
-    public static <T> Pair<GenericRecord, Map<String, Object>> entityToPair(T entity, Class<T> clazz,
-            String recordType) {
+    public static <T> Pair<GenericRecord, Map<String, Object>> entityToPair(T entity,
+            Class<T> clazz, String recordType) {
         try {
             if (entity instanceof FabricEntity) {
                 GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);

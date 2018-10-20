@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -175,12 +174,12 @@ public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields, S
         this.longerMonth = longerMonth;
     }
 
-    public enum Mode {
-        STARTING_DATE, STARTING_DAY
-    }
-
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public enum Mode {
+        STARTING_DATE, STARTING_DAY
     }
 }

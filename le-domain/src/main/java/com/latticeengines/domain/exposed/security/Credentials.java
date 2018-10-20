@@ -37,7 +37,8 @@ public class Credentials {
         // make sure that when this object is logged, we hide user password
         // (even though it is encrypted). First clone this object and remove
         // password from that cloned obj
-        Credentials credForLogging = JsonUtils.deserialize(JsonUtils.serialize(this), Credentials.class);
+        Credentials credForLogging = JsonUtils.deserialize(JsonUtils.serialize(this),
+                Credentials.class);
         credForLogging.setPassword("<<password_hidden>>");
         return JsonUtils.serialize(credForLogging);
     }

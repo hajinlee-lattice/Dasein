@@ -13,25 +13,38 @@ public class SelectableConfigurationField {
     private List<String> options;
     private String defaultOption;
 
-    public SelectableConfigurationField(){ }
+    public SelectableConfigurationField() {
+    }
 
     @JsonProperty("Node")
-    public String getNode() { return node; }
+    public String getNode() {
+        return node;
+    }
 
     @JsonProperty("Node")
-    public void setNode(String node) { this.node = node; }
+    public void setNode(String node) {
+        this.node = node;
+    }
 
     @JsonProperty("Options")
-    public List<String> getOptions() { return options; }
+    public List<String> getOptions() {
+        return options;
+    }
 
     @JsonProperty("Options")
-    public void setOptions(List<String> options) { this.options = options; }
+    public void setOptions(List<String> options) {
+        this.options = options;
+    }
 
     @JsonProperty("DefaultOption")
-    public String getDefaultOption() { return defaultOption; }
+    public String getDefaultOption() {
+        return defaultOption;
+    }
 
     @JsonProperty("DefaultOption")
-    public void setDefaultOption(String option) { this.defaultOption = option; }
+    public void setDefaultOption(String option) {
+        this.defaultOption = option;
+    }
 
     public void patch(SerializableDocumentDirectory sDir) {
         SerializableDocumentDirectory.Node dirNode = sDir.getNodeAtPath(this.node);
@@ -39,12 +52,15 @@ public class SelectableConfigurationField {
             throw new IllegalArgumentException("Cannot find the node to be patched.");
         }
 
-        if (!StringUtils.isEmpty(this.defaultOption) &&
-                dirNode.getData().equals(this.defaultOption)) { dirNode.setData(this.defaultOption); }
+        if (!StringUtils.isEmpty(this.defaultOption)
+                && dirNode.getData().equals(this.defaultOption)) {
+            dirNode.setData(this.defaultOption);
+        }
 
         SerializableDocumentDirectory.Metadata metadata = dirNode.getMetadata();
         // do not patch if is dynamic options
-        if (metadata != null && metadata.isDynamicOptions() != null && metadata.isDynamicOptions()) {
+        if (metadata != null && metadata.isDynamicOptions() != null
+                && metadata.isDynamicOptions()) {
             throw new IllegalArgumentException("Cannot patch dynamic options.");
         }
 
@@ -60,7 +76,7 @@ public class SelectableConfigurationField {
     }
 
     public boolean defaultIsValid() {
-        return ((defaultOption == null || StringUtils.isEmpty(defaultOption)) ||
-                (options != null && options.contains(defaultOption)));
+        return ((defaultOption == null || StringUtils.isEmpty(defaultOption))
+                || (options != null && options.contains(defaultOption)));
     }
 }

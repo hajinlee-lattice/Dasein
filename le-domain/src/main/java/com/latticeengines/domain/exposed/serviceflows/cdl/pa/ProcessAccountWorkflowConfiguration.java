@@ -53,8 +53,8 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public ProcessAccountWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("processAccountWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processAccountWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processAccountStepConfiguration);
             configuration.add(updateAccountWorkflowBuilder.build());
             configuration.add(rebuildAccountWorkflowBuilder.build());

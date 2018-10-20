@@ -47,9 +47,9 @@ import cascading.tuple.TupleEntryCollector;
  */
 public class RedshiftTap extends JDBCTap {
 
-	private static final long serialVersionUID = -6463699369427271861L;
+    private static final long serialVersionUID = -6463699369427271861L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
 
     public static final String DB_DRIVER = "org.postgresql.Driver";
 
@@ -70,9 +70,11 @@ public class RedshiftTap extends JDBCTap {
      *            incremental loading
      */
     public RedshiftTap(String connectionUrl, String username, String password, String hfsStagingDir,
-            AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc, RedshiftScheme redshiftScheme,
-            SinkMode sinkMode, boolean keepDebugHfsData, boolean useDirectInsert) {
-        super(connectionUrl, username, password, DB_DRIVER, redshiftTableDesc, redshiftScheme, sinkMode);
+            AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc,
+            RedshiftScheme redshiftScheme, SinkMode sinkMode, boolean keepDebugHfsData,
+            boolean useDirectInsert) {
+        super(connectionUrl, username, password, DB_DRIVER, redshiftTableDesc, redshiftScheme,
+                sinkMode);
         this.redshiftScheme = redshiftScheme;
         String workingDirPath = hfsStagingDir + "/" + UUID.randomUUID();
         this.s3WorkingDir = workingDirPath.replaceAll("s3n://", "s3://");
@@ -88,9 +90,10 @@ public class RedshiftTap extends JDBCTap {
     public RedshiftTap(String connectionUrl, String username, String password,
             Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String hfsStagingDir,
             AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc,
-            RedshiftScheme redshiftScheme, SinkMode sinkMode, boolean keepDebugHfsData, boolean useDirectInsert) {
-        this(connectionUrl, username, password, hfsStagingDir, awsCredentials, redshiftTableDesc, redshiftScheme,
-                sinkMode, keepDebugHfsData, useDirectInsert);
+            RedshiftScheme redshiftScheme, SinkMode sinkMode, boolean keepDebugHfsData,
+            boolean useDirectInsert) {
+        this(connectionUrl, username, password, hfsStagingDir, awsCredentials, redshiftTableDesc,
+                redshiftScheme, sinkMode, keepDebugHfsData, useDirectInsert);
 
         String workingDirPath = hfsStagingDir + "/" + UUID.randomUUID();
         this.s3WorkingDir = workingDirPath.replaceAll("s3n://", "s3://");
@@ -107,18 +110,19 @@ public class RedshiftTap extends JDBCTap {
      *            incremental loading
      */
     public RedshiftTap(String connectionUrl, String username, String password, String hfsStagingDir,
-            AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc, RedshiftScheme redshiftScheme,
-            SinkMode sinkMode) {
-        this(connectionUrl, username, password, hfsStagingDir, awsCredentials, redshiftTableDesc, redshiftScheme,
-                sinkMode, false, true);
+            AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc,
+            RedshiftScheme redshiftScheme, SinkMode sinkMode) {
+        this(connectionUrl, username, password, hfsStagingDir, awsCredentials, redshiftTableDesc,
+                redshiftScheme, sinkMode, false, true);
     }
 
     /**
      * Simplified constructor for testing
      */
-    protected RedshiftTap(String connectionUrl, RedshiftTableDesc redshiftTableDesc, RedshiftScheme redshiftScheme,
-            SinkMode sinkMode) {
-        this(connectionUrl, null, null, null, null, redshiftTableDesc, redshiftScheme, sinkMode, false, true);
+    protected RedshiftTap(String connectionUrl, RedshiftTableDesc redshiftTableDesc,
+            RedshiftScheme redshiftScheme, SinkMode sinkMode) {
+        this(connectionUrl, null, null, null, null, redshiftTableDesc, redshiftScheme, sinkMode,
+                false, true);
     }
 
     /**
@@ -129,11 +133,13 @@ public class RedshiftTap extends JDBCTap {
     }
 
     @Override
-    public void sourceConfInit(FlowProcess<? extends Configuration> process, Configuration configuration) {
+    public void sourceConfInit(FlowProcess<? extends Configuration> process,
+            Configuration configuration) {
         if (username == null)
             DBConfiguration.configureDB(configuration, driverClassName, connectionUrl);
         else
-            DBConfiguration.configureDB(configuration, driverClassName, connectionUrl, username, password);
+            DBConfiguration.configureDB(configuration, driverClassName, connectionUrl, username,
+                    password);
 
         super.sourceConfInit(process, configuration);
     }
@@ -229,8 +235,9 @@ public class RedshiftTap extends JDBCTap {
     }
 
     public String buildCopyFromS3Command() {
-        return String.format("COPY %s from '%s' %s %s ;", redshiftScheme.getRedshiftTableDesc().getTableName(),
-                s3WorkingDir, buildAuthenticationOptions(), buildCopyOptions());
+        return String.format("COPY %s from '%s' %s %s ;",
+                redshiftScheme.getRedshiftTableDesc().getTableName(), s3WorkingDir,
+                buildAuthenticationOptions(), buildCopyOptions());
     }
 
     protected String buildAuthenticationOptions() {
@@ -240,7 +247,8 @@ public class RedshiftTap extends JDBCTap {
 
     private String buildCopyOptions() {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<RedshiftFactory.CopyOption, String> copyOption : redshiftScheme.getCopyOptions().entrySet()) {
+        for (Map.Entry<RedshiftFactory.CopyOption, String> copyOption : redshiftScheme
+                .getCopyOptions().entrySet()) {
             builder.append(" ");
             if (copyOption.getValue() == null)
                 builder.append(copyOption.getKey().toString());
@@ -254,8 +262,8 @@ public class RedshiftTap extends JDBCTap {
     @Override
     public String toString() {
         if (getIdentifier() != null)
-            return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[->\"" + hfsStagingDir.getIdentifier()
-                    + "\"->\"" + super.getIdentifier() + "\"]"; // sanitize
+            return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[->\""
+                    + hfsStagingDir.getIdentifier() + "\"->\"" + super.getIdentifier() + "\"]"; // sanitize
         else
             return getClass().getSimpleName() + "[\"" + getScheme() + "\"]" + "[no more info]";
     }

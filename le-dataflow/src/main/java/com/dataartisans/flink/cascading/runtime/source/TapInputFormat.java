@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.dataartisans.flink.cascading.runtime.source;
 
 import static cascading.util.LogUtil.logCounters;
@@ -60,264 +59,261 @@ import cascading.flow.stream.element.ElementDuct;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class TapInputFormat extends RichInputFormat<Tuple, HadoopInputSplit> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(TapInputFormat.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TapInputFormat.class);
 
-	private FlowNode flowNode;
+    private FlowNode flowNode;
 
-	private transient SourceStreamGraph streamGraph;
-	private transient TapSourceStage sourceStage;
-	private transient SingleOutBoundaryStage sinkStage;
+    private transient SourceStreamGraph streamGraph;
+    private transient TapSourceStage sourceStage;
+    private transient SingleOutBoundaryStage sinkStage;
 
-	private transient FlowProcess flowProcess;
-	private transient long processBeginTime;
+    private transient FlowProcess flowProcess;
+    private transient long processBeginTime;
 
-	private transient org.apache.hadoop.mapred.InputFormat<? extends WritableComparable, ? extends Writable> mapredInputFormat;
-	private transient JobConf jobConf;
+    private transient org.apache.hadoop.mapred.InputFormat<? extends WritableComparable, ? extends Writable> mapredInputFormat;
+    private transient JobConf jobConf;
 
-	public TapInputFormat(FlowNode flowNode) {
+    public TapInputFormat(FlowNode flowNode) {
 
-		super();
-		this.flowNode = flowNode;
+        super();
+        this.flowNode = flowNode;
 
-	}
+    }
 
-	@Override
-	public void configure(Configuration config) {
+    @Override
+    public void configure(Configuration config) {
 
-		this.jobConf = HadoopUtil.asJobConfInstance(FlinkConfigConverter.toHadoopConfig(config));
+        this.jobConf = HadoopUtil.asJobConfInstance(FlinkConfigConverter.toHadoopConfig(config));
 
-		// set the correct class loader
-		// not necessary for Flink versions >= 0.10 but we set this anyway to be on the safe side
-		jobConf.setClassLoader(this.getClass().getClassLoader());
+        // set the correct class loader
+        // not necessary for Flink versions >= 0.10 but we set this anyway to be
+        // on the safe side
+        jobConf.setClassLoader(this.getClass().getClassLoader());
 
-		this.mapredInputFormat = jobConf.getInputFormat();
+        this.mapredInputFormat = jobConf.getInputFormat();
 
-		if (this.mapredInputFormat instanceof JobConfigurable) {
-			((JobConfigurable) this.mapredInputFormat).configure(jobConf);
-		}
-	}
+        if (this.mapredInputFormat instanceof JobConfigurable) {
+            ((JobConfigurable) this.mapredInputFormat).configure(jobConf);
+        }
+    }
 
+    @Override
+    public void open(HadoopInputSplit split) throws IOException {
 
+        this.jobConf = split.getJobConf();
+        this.flowProcess = new FlinkFlowProcess(this.jobConf, this.getRuntimeContext(),
+                flowNode.getID());
 
-	@Override
-	public void open(HadoopInputSplit split) throws IOException {
+        processBeginTime = System.currentTimeMillis();
+        flowProcess.increment(SliceCounters.Process_Begin_Time, processBeginTime);
 
-		this.jobConf = split.getJobConf();
-		this.flowProcess = new FlinkFlowProcess(this.jobConf, this.getRuntimeContext(), flowNode.getID());
+        try {
 
-		processBeginTime = System.currentTimeMillis();
-		flowProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+            Set<FlowElement> sources = flowNode.getSourceElements();
+            if (sources.size() != 1) {
+                throw new RuntimeException(
+                        "FlowNode for TapInputFormat may only have a single source");
+            }
+            FlowElement sourceElement = sources.iterator().next();
+            if (!(sourceElement instanceof Tap)) {
+                throw new RuntimeException("Source of TapInputFormat must be a Tap");
+            }
+            Tap source = (Tap) sourceElement;
 
-		try {
+            streamGraph = new SourceStreamGraph(flowProcess, flowNode, source);
 
-			Set<FlowElement> sources = flowNode.getSourceElements();
-			if(sources.size() != 1) {
-				throw new RuntimeException("FlowNode for TapInputFormat may only have a single source");
-			}
-			FlowElement sourceElement = sources.iterator().next();
-			if(!(sourceElement instanceof Tap)) {
-				throw new RuntimeException("Source of TapInputFormat must be a Tap");
-			}
-			Tap source = (Tap)sourceElement;
+            sourceStage = this.streamGraph.getSourceStage();
+            sinkStage = this.streamGraph.getSinkStage();
 
-			streamGraph = new SourceStreamGraph( flowProcess, flowNode, source );
+            for (Duct head : streamGraph.getHeads()) {
+                LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
+            }
 
-			sourceStage = this.streamGraph.getSourceStage();
-			sinkStage = this.streamGraph.getSinkStage();
+            for (Duct tail : streamGraph.getTails()) {
+                LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
+            }
 
-			for( Duct head : streamGraph.getHeads() ) {
-				LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
-			}
+        } catch (Throwable throwable) {
 
-			for( Duct tail : streamGraph.getTails() ) {
-				LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
-			}
+            if (throwable instanceof CascadingException) {
+                throw (CascadingException) throwable;
+            }
 
-		}
-		catch( Throwable throwable ) {
+            throw new FlowException("internal error during TapInputFormat configuration",
+                    throwable);
+        }
 
-			if( throwable instanceof CascadingException) {
-				throw (CascadingException) throwable;
-			}
+        RecordReader<?, ?> recordReader = this.mapredInputFormat
+                .getRecordReader(split.getHadoopInputSplit(), jobConf, new HadoopDummyReporter());
 
-			throw new FlowException( "internal error during TapInputFormat configuration", throwable );
-		}
+        if (recordReader instanceof Configurable) {
+            ((Configurable) recordReader).setConf(jobConf);
+        } else if (recordReader instanceof JobConfigurable) {
+            ((JobConfigurable) recordReader).configure(jobConf);
+        }
 
-		RecordReader<?, ?> recordReader = this.mapredInputFormat.getRecordReader(split.getHadoopInputSplit(), jobConf, new HadoopDummyReporter());
+        try {
+            this.sourceStage.setRecordReader(recordReader);
+        } catch (Throwable t) {
+            if (t instanceof IOException) {
+                throw (IOException) t;
+            } else {
+                throw new RuntimeException(t);
+            }
+        }
 
-		if (recordReader instanceof Configurable) {
-			((Configurable) recordReader).setConf(jobConf);
-		}
-		else if (recordReader instanceof JobConfigurable) {
-			((JobConfigurable) recordReader).configure(jobConf);
-		}
+    }
 
-		try {
-			this.sourceStage.setRecordReader(recordReader);
-		} catch(Throwable t) {
-			if(t instanceof IOException) {
-				throw (IOException)t;
-			}
-			else {
-				throw new RuntimeException(t);
-			}
-		}
+    @Override
+    public boolean reachedEnd() throws IOException {
 
-	}
+        try {
+            return !sinkStage.hasNextTuple() && !this.sourceStage.readNextRecord();
+        } catch (OutOfMemoryError error) {
+            throw error;
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Throwable throwable) {
+            if (throwable instanceof CascadingException) {
+                throw (CascadingException) throwable;
+            }
 
-	@Override
-	public boolean reachedEnd() throws IOException {
+            throw new FlowException("internal error during TapInputFormat execution", throwable);
+        }
+    }
 
-		try {
-			return !sinkStage.hasNextTuple() && !this.sourceStage.readNextRecord();
-		}
-		catch( OutOfMemoryError error ) {
-			throw error;
-		}
-		catch( IOException exception ) {
-			throw exception;
-		}
-		catch( Throwable throwable ) {
-			if( throwable instanceof CascadingException ) {
-				throw (CascadingException) throwable;
-			}
+    @Override
+    public Tuple nextRecord(Tuple record) throws IOException {
 
-			throw new FlowException( "internal error during TapInputFormat execution", throwable );
-		}
-	}
+        if (this.reachedEnd()) {
+            return null;
+        } else {
+            return sinkStage.fetchNextTuple();
+        }
+    }
 
-	@Override
-	public Tuple nextRecord(Tuple record) throws IOException {
+    @Override
+    public void close() throws IOException {
+        try {
+            streamGraph.cleanup();
+        } finally {
 
-		if(this.reachedEnd()) {
-			return null;
-		}
-		else {
-			return sinkStage.fetchNextTuple();
-		}
-	}
+            long processEndTime = System.currentTimeMillis();
+            flowProcess.increment(SliceCounters.Process_End_Time, processEndTime);
+            flowProcess.increment(SliceCounters.Process_Duration,
+                    processEndTime - this.processBeginTime);
 
-	@Override
-	public void close() throws IOException {
-		try {
-			streamGraph.cleanup();
-		}
-		finally {
+            String message = "flow node id: " + flowNode.getID();
+            logMemory(LOG, message + ", mem on close");
+            logCounters(LOG, message + ", counter:", flowProcess);
+        }
+    }
 
-			long processEndTime = System.currentTimeMillis();
-			flowProcess.increment(SliceCounters.Process_End_Time, processEndTime);
-			flowProcess.increment( SliceCounters.Process_Duration, processEndTime - this.processBeginTime );
+    // --------------------------------------------------------------------------------------------
+    // Helper methods
+    // --------------------------------------------------------------------------------------------
 
-			String message = "flow node id: " + flowNode.getID();
-			logMemory( LOG, message + ", mem on close" );
-			logCounters( LOG, message + ", counter:", flowProcess );
-		}
-	}
+    @Override
+    public BaseStatistics getStatistics(BaseStatistics cachedStats) throws IOException {
+        // only gather base statistics for FileInputFormats
+        if (!(mapredInputFormat instanceof FileInputFormat)) {
+            return null;
+        }
 
+        final FileBaseStatistics cachedFileStats = (cachedStats != null
+                && cachedStats instanceof FileBaseStatistics) ? (FileBaseStatistics) cachedStats
+                        : null;
 
-	// --------------------------------------------------------------------------------------------
-	//  Helper methods
-	// --------------------------------------------------------------------------------------------
+        try {
+            final org.apache.hadoop.fs.Path[] paths = FileInputFormat.getInputPaths(this.jobConf);
 
-	@Override
-	public BaseStatistics getStatistics(BaseStatistics cachedStats) throws IOException {
-		// only gather base statistics for FileInputFormats
-		if (!(mapredInputFormat instanceof FileInputFormat)) {
-			return null;
-		}
+            return getFileStats(cachedFileStats, paths, new ArrayList<FileStatus>(1));
+        } catch (IOException ioex) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Could not determine statistics due to an io error: " + ioex.getMessage());
+            }
+        } catch (Throwable t) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Unexpected problem while getting the file statistics: " + t.getMessage(),
+                        t);
+            }
+        }
 
-		final FileBaseStatistics cachedFileStats = (cachedStats != null && cachedStats instanceof FileBaseStatistics) ?
-				(FileBaseStatistics) cachedStats : null;
+        // no statistics available
+        return null;
+    }
 
-		try {
-			final org.apache.hadoop.fs.Path[] paths = FileInputFormat.getInputPaths(this.jobConf);
+    @Override
+    public HadoopInputSplit[] createInputSplits(int minNumSplits) throws IOException {
 
-			return getFileStats(cachedFileStats, paths, new ArrayList<FileStatus>(1));
-		} catch (IOException ioex) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn("Could not determine statistics due to an io error: "
-						+ ioex.getMessage());
-			}
-		} catch (Throwable t) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("Unexpected problem while getting the file statistics: "
-						+ t.getMessage(), t);
-			}
-		}
+        org.apache.hadoop.mapred.InputSplit[] splitArray = mapredInputFormat.getSplits(jobConf,
+                minNumSplits);
+        HadoopInputSplit[] hiSplit = new HadoopInputSplit[splitArray.length];
+        for (int i = 0; i < splitArray.length; i++) {
+            hiSplit[i] = new HadoopInputSplit(i, splitArray[i], jobConf);
+        }
+        return hiSplit;
+    }
 
-		// no statistics available
-		return null;
-	}
+    @Override
+    public InputSplitAssigner getInputSplitAssigner(HadoopInputSplit[] inputSplits) {
+        return new LocatableInputSplitAssigner(inputSplits);
+    }
 
-	@Override
-	public HadoopInputSplit[] createInputSplits(int minNumSplits)
-			throws IOException {
+    private FileBaseStatistics getFileStats(FileBaseStatistics cachedStats,
+            org.apache.hadoop.fs.Path[] hadoopFilePaths, ArrayList<FileStatus> files)
+            throws IOException {
 
-		org.apache.hadoop.mapred.InputSplit[] splitArray = mapredInputFormat.getSplits(jobConf, minNumSplits);
-		HadoopInputSplit[] hiSplit = new HadoopInputSplit[splitArray.length];
-		for (int i = 0; i < splitArray.length; i++) {
-			hiSplit[i] = new HadoopInputSplit(i, splitArray[i], jobConf);
-		}
-		return hiSplit;
-	}
+        long latestModTime = 0L;
 
-	@Override
-	public InputSplitAssigner getInputSplitAssigner(HadoopInputSplit[] inputSplits) {
-		return new LocatableInputSplitAssigner(inputSplits);
-	}
+        // get the file info and check whether the cached statistics are still
+        // valid.
+        for (org.apache.hadoop.fs.Path hadoopPath : hadoopFilePaths) {
 
-	private FileBaseStatistics getFileStats(FileBaseStatistics cachedStats, org.apache.hadoop.fs.Path[] hadoopFilePaths,
-											ArrayList<FileStatus> files) throws IOException {
+            final Path filePath = new Path(hadoopPath.toUri());
+            final FileSystem fs = FileSystem.get(filePath.toUri());
 
-		long latestModTime = 0L;
+            final FileStatus file = fs.getFileStatus(filePath);
+            latestModTime = Math.max(latestModTime, file.getModificationTime());
 
-		// get the file info and check whether the cached statistics are still valid.
-		for (org.apache.hadoop.fs.Path hadoopPath : hadoopFilePaths) {
+            // enumerate all files and check their modification time stamp.
+            if (file.isDir()) {
+                FileStatus[] fss = fs.listStatus(filePath);
+                files.ensureCapacity(files.size() + fss.length);
 
-			final Path filePath = new Path(hadoopPath.toUri());
-			final FileSystem fs = FileSystem.get(filePath.toUri());
+                for (FileStatus s : fss) {
+                    if (!s.isDir()) {
+                        files.add(s);
+                        latestModTime = Math.max(s.getModificationTime(), latestModTime);
+                    }
+                }
+            } else {
+                files.add(file);
+            }
+        }
 
-			final FileStatus file = fs.getFileStatus(filePath);
-			latestModTime = Math.max(latestModTime, file.getModificationTime());
+        // check whether the cached statistics are still valid, if we have any
+        if (cachedStats != null && latestModTime <= cachedStats.getLastModificationTime()) {
+            return cachedStats;
+        }
 
-			// enumerate all files and check their modification time stamp.
-			if (file.isDir()) {
-				FileStatus[] fss = fs.listStatus(filePath);
-				files.ensureCapacity(files.size() + fss.length);
+        // calculate the whole length
+        long len = 0;
+        for (FileStatus s : files) {
+            len += s.getLen();
+        }
 
-				for (FileStatus s : fss) {
-					if (!s.isDir()) {
-						files.add(s);
-						latestModTime = Math.max(s.getModificationTime(), latestModTime);
-					}
-				}
-			} else {
-				files.add(file);
-			}
-		}
+        // sanity check
+        if (len <= 0) {
+            len = BaseStatistics.SIZE_UNKNOWN;
+        }
 
-		// check whether the cached statistics are still valid, if we have any
-		if (cachedStats != null && latestModTime <= cachedStats.getLastModificationTime()) {
-			return cachedStats;
-		}
-
-		// calculate the whole length
-		long len = 0;
-		for (FileStatus s : files) {
-			len += s.getLen();
-		}
-
-		// sanity check
-		if (len <= 0) {
-			len = BaseStatistics.SIZE_UNKNOWN;
-		}
-
-		return new FileBaseStatistics(latestModTime, len, BaseStatistics.AVG_RECORD_BYTES_UNKNOWN);
-	}
+        return new FileBaseStatistics(latestModTime, len, BaseStatistics.AVG_RECORD_BYTES_UNKNOWN);
+    }
 
 }

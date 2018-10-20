@@ -14,13 +14,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-
 @Entity
 @Table(name = "AccountMaster_Accounts")
 public class Company implements HasPid, Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4397856028205483092L;
     private Long pid;
@@ -31,7 +30,7 @@ public class Company implements HasPid, Serializable {
     private String state;
     private String region;
     private String country;
-    private String industry; 
+    private String industry;
     private String subIndustry;
     private String revenueRange;
     private String employeesRange;
@@ -39,7 +38,7 @@ public class Company implements HasPid, Serializable {
     private Integer insideViewId;
 
     @Id
-//  @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Override
     @JsonIgnore

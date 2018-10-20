@@ -10,8 +10,8 @@ public class CustomDelimitedParser extends DelimitedParser {
     private static final long serialVersionUID = 4519752038811745465L;
     private CsvToAvroFieldMapping fieldMap;
 
-    public CustomDelimitedParser(CsvToAvroFieldMapping fieldMap, String delimiter, String quote, boolean strict,
-            boolean safe, FieldTypeResolver fieldTypeResolver) {
+    public CustomDelimitedParser(CsvToAvroFieldMapping fieldMap, String delimiter, String quote,
+            boolean strict, boolean safe, FieldTypeResolver fieldTypeResolver) {
         super(delimiter, quote, null, strict, safe, fieldTypeResolver);
         this.fieldMap = fieldMap;
     }

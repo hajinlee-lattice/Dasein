@@ -28,37 +28,37 @@ import cascading.flow.stream.graph.StreamGraph;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class BoundaryOutStage extends ElementStage<TupleEntry, Void> implements CollectorOutput {
 
-	private Collector<Tuple> tupleCollector;
+    private Collector<Tuple> tupleCollector;
 
-	public BoundaryOutStage(FlowProcess flowProcess, FlowElement flowElement) {
-		super(flowProcess, flowElement);
-	}
+    public BoundaryOutStage(FlowProcess flowProcess, FlowElement flowElement) {
+        super(flowProcess, flowElement);
+    }
 
-	@Override
-	public void setTupleCollector(Collector<Tuple> tupleCollector) {
-		this.tupleCollector = tupleCollector;
-	}
+    @Override
+    public void setTupleCollector(Collector<Tuple> tupleCollector) {
+        this.tupleCollector = tupleCollector;
+    }
 
-	@Override
-	public void receive(Duct previous, int ordinal, TupleEntry tupleEntry) {
-		this.tupleCollector.collect(tupleEntry.getTuple());
-	}
+    @Override
+    public void receive(Duct previous, int ordinal, TupleEntry tupleEntry) {
+        this.tupleCollector.collect(tupleEntry.getTuple());
+    }
 
-	@Override
-	public void bind( StreamGraph streamGraph ) {
-		// don't do anything
-	}
+    @Override
+    public void bind(StreamGraph streamGraph) {
+        // don't do anything
+    }
 
-	@Override
-	public void start( Duct previous ) {
-		// don't do anything
-	}
+    @Override
+    public void start(Duct previous) {
+        // don't do anything
+    }
 
-	@Override
-	public void complete(Duct previous) {
-		// don't do anything
-	}
+    @Override
+    public void complete(Duct previous) {
+        // don't do anything
+    }
 }

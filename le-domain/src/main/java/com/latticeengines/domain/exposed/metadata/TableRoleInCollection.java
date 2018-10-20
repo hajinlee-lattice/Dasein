@@ -30,7 +30,8 @@ public enum TableRoleInCollection {
     CalculatedPurchaseHistory, //
     CalculatedDepivotedPurchaseHistory, //
 
-    // Curated Account Attribute has only requires one table for serving for now.
+    // Curated Account Attribute has only requires one table for serving for
+    // now.
     CalculatedCuratedAccountAttribute, //
 
     AnalyticPurchaseState, //
@@ -40,17 +41,6 @@ public enum TableRoleInCollection {
     AccountBatchSlim, //
 
     AccountMaster;
-
-    private InterfaceName primaryKey;
-    private ImmutableList<InterfaceName> foreignKeys;
-
-    public InterfaceName getPrimaryKey() {
-        return primaryKey;
-    }
-
-    public List<String> getForeignKeysAsStringList() {
-        return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
-    }
 
     static {
         ConsolidatedAccount.primaryKey = InterfaceName.AccountId;
@@ -86,14 +76,27 @@ public enum TableRoleInCollection {
         CalculatedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         CalculatedDepivotedPurchaseHistory.primaryKey = InterfaceName.__Composite_Key__;
-        CalculatedDepivotedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        CalculatedDepivotedPurchaseHistory.foreignKeys = ImmutableList
+                .copyOf(Collections.emptyList());
 
         CalculatedCuratedAccountAttribute.primaryKey = InterfaceName.AccountId;
-        CalculatedCuratedAccountAttribute.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        CalculatedCuratedAccountAttribute.foreignKeys = ImmutableList
+                .copyOf(Collections.emptyList());
 
         PivotedRating.primaryKey = InterfaceName.AccountId;
         PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
+    }
+
+    private InterfaceName primaryKey;
+    private ImmutableList<InterfaceName> foreignKeys;
+
+    public InterfaceName getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public List<String> getForeignKeysAsStringList() {
+        return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
     }
 }

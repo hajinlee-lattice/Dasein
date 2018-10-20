@@ -37,16 +37,14 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AlgorithmPropertyDef implements HasName, HasPid {
 
+    @Column(name = "NAME", nullable = false)
+    public String name;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-
-    @Column(name = "NAME", nullable = false)
-    public String name;
-
     @ManyToOne
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
     @JsonIgnore

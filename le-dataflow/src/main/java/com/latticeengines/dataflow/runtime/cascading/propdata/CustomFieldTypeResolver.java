@@ -14,7 +14,8 @@ public class CustomFieldTypeResolver implements FieldTypeResolver {
 
     @Override
     public String cleanField(int ordinal, String fieldName, Type type) {
-        return (fieldMap.getAvroFieldName(fieldName) != null) ? fieldMap.getAvroFieldName(fieldName) : fieldName;
+        return (fieldMap.getAvroFieldName(fieldName) != null) ? fieldMap.getAvroFieldName(fieldName)
+                : fieldName;
     }
 
     @Override

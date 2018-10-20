@@ -8,11 +8,11 @@ public class DataRuleLists {
 
     public static List<DataRule> getDataRules(DataRuleListName listName) {
         switch (listName) {
-        case NONE:
-            return Collections.emptyList();
-        case STANDARD:
-        default:
-            return getStandardDataRules();
+            case NONE:
+                return Collections.emptyList();
+            case STANDARD:
+            default:
+                return getStandardDataRules();
         }
     }
 

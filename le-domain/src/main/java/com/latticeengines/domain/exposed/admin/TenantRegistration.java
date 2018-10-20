@@ -16,7 +16,9 @@ public class TenantRegistration {
     private List<SerializableDocumentDirectory> configDirectories;
 
     @JsonProperty("ContractInfo")
-    public ContractInfo getContractInfo() { return contractInfo; }
+    public ContractInfo getContractInfo() {
+        return contractInfo;
+    }
 
     @JsonProperty("ContractInfo")
     public void setContractInfo(ContractInfo contractInfo) {
@@ -24,7 +26,9 @@ public class TenantRegistration {
     }
 
     @JsonProperty("TenantInfo")
-    public TenantInfo getTenantInfo() { return tenantInfo; }
+    public TenantInfo getTenantInfo() {
+        return tenantInfo;
+    }
 
     @JsonProperty("TenantInfo")
     public void setTenantInfo(TenantInfo tenantInfo) {
@@ -32,7 +36,9 @@ public class TenantRegistration {
     }
 
     @JsonProperty("CustomerSpaceInfo")
-    public CustomerSpaceInfo getSpaceInfo() { return spaceInfo; }
+    public CustomerSpaceInfo getSpaceInfo() {
+        return spaceInfo;
+    }
 
     @JsonProperty("CustomerSpaceInfo")
     public void setSpaceInfo(CustomerSpaceInfo spaceInfo) {
@@ -40,7 +46,9 @@ public class TenantRegistration {
     }
 
     @JsonProperty("SpaceConfig")
-    public SpaceConfiguration getSpaceConfig() { return spaceConfig; }
+    public SpaceConfiguration getSpaceConfig() {
+        return spaceConfig;
+    }
 
     @JsonProperty("SpaceConfig")
     public void setSpaceConfig(SpaceConfiguration spaceConfig) {
@@ -48,7 +56,9 @@ public class TenantRegistration {
     }
 
     @JsonProperty("ConfigDirectories")
-    public List<SerializableDocumentDirectory> getConfigDirectories() { return configDirectories; }
+    public List<SerializableDocumentDirectory> getConfigDirectories() {
+        return configDirectories;
+    }
 
     @JsonProperty("ConfigDirectories")
     public void setConfigDirectories(List<SerializableDocumentDirectory> configDirectories) {

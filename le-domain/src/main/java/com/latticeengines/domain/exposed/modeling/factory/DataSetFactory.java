@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.modeling.factory;
 
-
 public class DataSetFactory {
 
     public static final String DATASET_NAME_KEY = "dataset.name";
@@ -10,6 +9,5 @@ public class DataSetFactory {
     public static final String DATASET_TENANT_ID_KEY = "dataset.tenant.id";
     public static final String DATASET_TRAINING_HDFS_PATH_KEY = "dataset.training.hdfs.path";
     public static final String DATASET_TEST_HDFS_PATH_KEY = "dataset.test.hdfs.path";
-
 
 }

@@ -17,7 +17,8 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = CreatePMMLModelConfiguration.class, name = "CreatePMMLModelConfiguration"), })
+@JsonSubTypes({
+        @Type(value = CreatePMMLModelConfiguration.class, name = "CreatePMMLModelConfiguration"), })
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @NotEmptyString
     @NotNull

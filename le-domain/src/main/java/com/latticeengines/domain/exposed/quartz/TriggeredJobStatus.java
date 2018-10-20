@@ -9,10 +9,6 @@ public enum TriggeredJobStatus {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static TriggeredJobStatus valueOf(int value) {
         TriggeredJobStatus result = null;
         for (TriggeredJobStatus status : TriggeredJobStatus.values()) {
@@ -22,5 +18,9 @@ public enum TriggeredJobStatus {
             }
         }
         return result;
+    }
+
+    public int getValue() {
+        return value;
     }
 }

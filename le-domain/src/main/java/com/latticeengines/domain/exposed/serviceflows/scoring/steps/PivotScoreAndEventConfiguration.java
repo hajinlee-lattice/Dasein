@@ -20,12 +20,12 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
         setBeanName("pivotScoreAndEvent");
     }
 
-    public void setEventColumn(String eventColumn) {
-        this.eventColumn = eventColumn;
-    }
-
     public String getEventColumn() {
         return eventColumn;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 
     public Boolean getSaveBucketMetadata() {

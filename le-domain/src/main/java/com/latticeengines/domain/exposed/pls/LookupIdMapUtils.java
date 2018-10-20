@@ -17,7 +17,8 @@ public class LookupIdMapUtils {
         if (MapUtils.isNotEmpty(orgInfo)) {
             if (StringUtils.isNotBlank(orgInfo.get(CDLConstants.ORG_ID))
                     && StringUtils.isNotBlank(orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE))) {
-                effectiveOrgInfo = new ImmutablePair<String, String>(orgInfo.get(CDLConstants.ORG_ID).trim(),
+                effectiveOrgInfo = new ImmutablePair<String, String>(
+                        orgInfo.get(CDLConstants.ORG_ID).trim(),
                         orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE).trim());
             }
         }

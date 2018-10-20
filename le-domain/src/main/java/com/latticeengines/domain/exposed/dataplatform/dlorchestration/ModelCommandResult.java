@@ -30,11 +30,11 @@ public class ModelCommandResult implements HasPid, Serializable {
     @Id
     @Column(name = "CommandId", unique = true, nullable = false)
     private Long commandId;
-    
+
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private ModelCommand modelCommand;
-        
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "BeginTime", nullable = false)
     private Date beginTime;
@@ -42,7 +42,7 @@ public class ModelCommandResult implements HasPid, Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "EndTime", nullable = false)
     private Date endTime;
-    
+
     @Column(name = "ProcessStatus", nullable = false)
     @Type(type = "com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatusUserType", parameters = {
             @Parameter(name = "enumClassName", value = "com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus"),
@@ -52,9 +52,10 @@ public class ModelCommandResult implements HasPid, Serializable {
 
     ModelCommandResult() {
         super();
-    }    
-   
-    public ModelCommandResult(ModelCommand modelCommand, Date beginTime, Date endTime, ModelCommandStatus processStatus) {
+    }
+
+    public ModelCommandResult(ModelCommand modelCommand, Date beginTime, Date endTime,
+            ModelCommandStatus processStatus) {
         super();
         this.commandId = modelCommand.getPid();
         this.modelCommand = modelCommand;
@@ -85,12 +86,12 @@ public class ModelCommandResult implements HasPid, Serializable {
         return endTime;
     }
 
-    public ModelCommandStatus getProcessStatus() {
-        return processStatus;
-    }
-
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public ModelCommandStatus getProcessStatus() {
+        return processStatus;
     }
 
     public void setProcessStatus(ModelCommandStatus processStatus) {

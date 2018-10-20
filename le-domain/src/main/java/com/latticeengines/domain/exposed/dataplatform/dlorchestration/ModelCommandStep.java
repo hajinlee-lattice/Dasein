@@ -1,14 +1,10 @@
 package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 
-
 public enum ModelCommandStep {
-    RETRIEVE_METADATA("Retrieve metadata"),
-    LOAD_DATA("Load data"),
-    GENERATE_SAMPLES("Generate samples"),
-    PROFILE_DATA("Profile data"),
-    SUBMIT_MODELS("Submit models"),
-    OUTPUT_COMMAND_RESULTS("Output command results"),
-    FINISH("Finished");
+    RETRIEVE_METADATA("Retrieve metadata"), LOAD_DATA("Load data"), GENERATE_SAMPLES(
+            "Generate samples"), PROFILE_DATA("Profile data"), SUBMIT_MODELS(
+                    "Submit models"), OUTPUT_COMMAND_RESULTS(
+                            "Output command results"), FINISH("Finished");
 
     private String description;
 
@@ -21,6 +17,6 @@ public enum ModelCommandStep {
     }
 
     public ModelCommandStep getNextStep() {
-        return ModelCommandStep.values()[ordinal()+1];
+        return ModelCommandStep.values()[ordinal() + 1];
     }
 }

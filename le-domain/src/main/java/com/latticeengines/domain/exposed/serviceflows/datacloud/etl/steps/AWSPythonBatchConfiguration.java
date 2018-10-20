@@ -45,20 +45,20 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
         this.runInAws = runInAws;
     }
 
-    public void setInputPaths(List<String> inputPaths) {
-        this.inputPaths = inputPaths;
-    }
-
     public List<String> getInputPaths() {
         return inputPaths;
     }
 
-    public void setOutputPath(String outputPath) {
-        this.outputPath = outputPath;
+    public void setInputPaths(List<String> inputPaths) {
+        this.inputPaths = inputPaths;
     }
 
     public String getOutputPath() {
         return outputPath;
+    }
+
+    public void setOutputPath(String outputPath) {
+        this.outputPath = outputPath;
     }
 
     public Set<String> getRebuildSteps() {

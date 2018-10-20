@@ -22,9 +22,9 @@ public class CleanAmSeedWithDomOwnTabFunction extends BaseOperation implements F
     private String amSeedDunsField;
     private Map<String, Integer> namePositionMap;
 
-    public CleanAmSeedWithDomOwnTabFunction(Fields fieldDeclaration, String domOwnTabDomField, String amSeedDunsField,
-            String amSeedDomainField,
-            String amSeedRootDunsField, String ownTabRootDunsField) {
+    public CleanAmSeedWithDomOwnTabFunction(Fields fieldDeclaration, String domOwnTabDomField,
+            String amSeedDunsField, String amSeedDomainField, String amSeedRootDunsField,
+            String ownTabRootDunsField) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.amSeedRootDunsField = amSeedRootDunsField;

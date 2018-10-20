@@ -32,7 +32,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
-@Table(name = "SECURITY_IDENTITY_PROVIDER", indexes = {@Index(name = "IX_ENTITY_ID", columnList = "ENTITY_ID")})
+@Table(name = "SECURITY_IDENTITY_PROVIDER", indexes = {
+        @Index(name = "IX_ENTITY_ID", columnList = "ENTITY_ID") })
 public class IdentityProvider implements HasPid, HasAuditingFields {
 
     @Id

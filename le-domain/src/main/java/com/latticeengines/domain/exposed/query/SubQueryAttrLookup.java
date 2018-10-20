@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.query;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,7 +18,8 @@ public class SubQueryAttrLookup extends Lookup {
 
     // for jackson
     @SuppressWarnings("unused")
-	private SubQueryAttrLookup() {}
+    private SubQueryAttrLookup() {
+    }
 
     public SubQueryAttrLookup(SubQuery subQuery) {
         this.subQuery = subQuery;

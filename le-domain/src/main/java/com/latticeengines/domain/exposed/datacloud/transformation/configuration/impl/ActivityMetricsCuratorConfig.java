@@ -25,8 +25,9 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
 
     @JsonProperty("Reduced")
     private boolean reduced = false; // true: DepivotedMetrics has complete AID
-                                     // + PID for purchase history; 
-                                     // false: DepivotedMetrics only has AID + PID
+                                     // + PID for purchase history;
+                                     // false: DepivotedMetrics only has AID +
+                                     // PID
                                      // which exist in Transaction
 
     @JsonProperty("AccountHasSegment")

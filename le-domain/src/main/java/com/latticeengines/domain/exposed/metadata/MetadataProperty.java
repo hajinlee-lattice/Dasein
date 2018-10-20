@@ -17,26 +17,25 @@ import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class MetadataProperty<T> implements HasOptionAndValue, HasPid {
 
-    public MetadataProperty() {}
-
-    public MetadataProperty(String property, String value) {
-        this.property = property;
-        this.value = value;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Column(name = "PID", nullable = false)
     private Long pid;
-
     @Column(name = "PROPERTY", nullable = false)
     @JsonProperty("property")
     private String property;
-
     @Column(name = "VALUE", length = 2048)
     @JsonProperty("value")
     private String value;
+
+    public MetadataProperty() {
+    }
+
+    public MetadataProperty(String property, String value) {
+        this.property = property;
+        this.value = value;
+    }
 
     @Override
     public Long getPid() {

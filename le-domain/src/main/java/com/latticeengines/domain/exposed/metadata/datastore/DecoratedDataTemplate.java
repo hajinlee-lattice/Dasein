@@ -37,7 +37,8 @@ public abstract class DecoratedDataTemplate<N extends Namespace, BaseNS extends 
     public ParallelFlux<ColumnMetadata> getUnorderedSchema(N namespace) {
         DecoratorNS metadataNamespace = projectDecoratorNamespace(namespace);
         BaseNS dataNamespace = projectBaseNamespace(namespace);
-        return factory.getDecorator(metadataNamespace).render(kernel.getUnorderedSchema(dataNamespace));
+        return factory.getDecorator(metadataNamespace)
+                .render(kernel.getUnorderedSchema(dataNamespace));
     }
 
     protected abstract DecoratorNS projectDecoratorNamespace(N namespace);

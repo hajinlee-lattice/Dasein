@@ -4,7 +4,8 @@ import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseDataFlowReportStepConfiguration;
 
-public class CreatePrematchEventTableReportConfiguration extends BaseDataFlowReportStepConfiguration {
+public class CreatePrematchEventTableReportConfiguration
+        extends BaseDataFlowReportStepConfiguration {
     @NotNull
     @NotEmptyString
     private String sourceTableName;

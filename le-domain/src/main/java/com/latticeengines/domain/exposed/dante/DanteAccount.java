@@ -18,7 +18,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "AccountCache", indexes = { @Index(name = "IX_EXTERNALID", columnList = "External_ID")})
+@Table(name = "AccountCache", indexes = {
+        @Index(name = "IX_EXTERNALID", columnList = "External_ID") })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DanteAccount implements Serializable, HasDanteAuditingFields {
     private static final long serialVersionUID = 6514634375315908857L;

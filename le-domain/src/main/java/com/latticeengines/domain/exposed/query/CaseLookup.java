@@ -25,7 +25,7 @@ public class CaseLookup extends Lookup {
 
     // for jackson
     @SuppressWarnings("unused")
-	private CaseLookup() {
+    private CaseLookup() {
     }
 
     public CaseLookup(TreeMap<String, Restriction> caseMap, String defaultCase, String alias) {

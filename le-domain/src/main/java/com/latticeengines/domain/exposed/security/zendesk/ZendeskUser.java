@@ -83,6 +83,11 @@ public class ZendeskUser {
         return role;
     }
 
+    @JsonIgnore
+    public void setRole(ZendeskRole role) {
+        this.role = role;
+    }
+
     @JsonProperty("role")
     public String getRoleName() {
         return role == null ? null : role.toString();
@@ -95,10 +100,5 @@ public class ZendeskUser {
         } catch (Exception e) {
             // ignore parsing error
         }
-    }
-
-    @JsonIgnore
-    public void setRole(ZendeskRole role) {
-        this.role = role;
     }
 }

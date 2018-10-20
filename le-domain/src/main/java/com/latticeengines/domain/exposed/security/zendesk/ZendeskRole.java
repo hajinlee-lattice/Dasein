@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.security.zendesk;
 
 public enum ZendeskRole {
-    END_USER("end-user"),
-    AGENT("agent"),
-    ADMIN("admin");
+    END_USER("end-user"), AGENT("agent"), ADMIN("admin");
 
     private final String name;
 

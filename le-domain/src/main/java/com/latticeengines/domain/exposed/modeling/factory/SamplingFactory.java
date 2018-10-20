@@ -16,14 +16,14 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class SamplingFactory extends ModelFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(SamplingFactory.class);
-
     public static final String MODEL_SAMPLING_SEED_KEY = "model.sampling.seed";
     public static final String MODEL_SAMPLING_RATE_KEY = "model.sampling.rate";
     public static final String MODEL_SAMPLING_TRAINING_PERCENTAGE_KEY = "model.sampling.training.percentage";
     public static final String MODEL_SAMPLING_TEST_PERCENTAGE_KEY = "model.sampling.test.percentage";
+    private static final Logger log = LoggerFactory.getLogger(SamplingFactory.class);
 
-    public static void configSampling(SamplingConfiguration samplingConfig, Map<String, String> runTimeParams) {
+    public static void configSampling(SamplingConfiguration samplingConfig,
+            Map<String, String> runTimeParams) {
         log.info("Check and Config sampling.");
 
         Sampling sampling = getModelSampling(runTimeParams);
@@ -33,18 +33,20 @@ public class SamplingFactory extends ModelFactory {
             try {
                 samplingConfig.setRandomSeed(123456L);
                 if (paramMap.containsKey(MODEL_SAMPLING_SEED_KEY)) {
-                    samplingConfig.setRandomSeed(Long.parseLong(paramMap.get(MODEL_SAMPLING_SEED_KEY)));
+                    samplingConfig
+                            .setRandomSeed(Long.parseLong(paramMap.get(MODEL_SAMPLING_SEED_KEY)));
                 }
                 if (paramMap.containsKey(MODEL_SAMPLING_RATE_KEY)) {
-                    samplingConfig.setSamplingRate(Integer.parseInt(paramMap.get(MODEL_SAMPLING_RATE_KEY)));
+                    samplingConfig.setSamplingRate(
+                            Integer.parseInt(paramMap.get(MODEL_SAMPLING_RATE_KEY)));
                 }
                 if (paramMap.containsKey(MODEL_SAMPLING_TRAINING_PERCENTAGE_KEY)) {
                     samplingConfig.setTrainingPercentage(
                             Integer.parseInt(paramMap.get(MODEL_SAMPLING_TRAINING_PERCENTAGE_KEY)));
                 }
                 if (paramMap.containsKey(MODEL_SAMPLING_TEST_PERCENTAGE_KEY)) {
-                    samplingConfig
-                            .setTestPercentage(Integer.parseInt(paramMap.get(MODEL_SAMPLING_TEST_PERCENTAGE_KEY)));
+                    samplingConfig.setTestPercentage(
+                            Integer.parseInt(paramMap.get(MODEL_SAMPLING_TEST_PERCENTAGE_KEY)));
                 }
             } catch (Exception ex) {
                 log.warn("Failed to config sampling!");

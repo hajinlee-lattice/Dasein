@@ -9,10 +9,6 @@ public enum JobStatus {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static JobStatus valueOf(int value) {
         JobStatus result = null;
         for (JobStatus status : JobStatus.values()) {
@@ -22,5 +18,9 @@ public enum JobStatus {
             }
         }
         return result;
+    }
+
+    public int getValue() {
+        return value;
     }
 }

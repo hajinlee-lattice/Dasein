@@ -33,7 +33,8 @@ public class DocumentDirectory implements Serializable {
         children = new ArrayList<>();
     }
 
-    public DocumentDirectory(Path root, Function<Path, List<Map.Entry<Document, Path>>> getChildren) {
+    public DocumentDirectory(Path root,
+            Function<Path, List<Map.Entry<Document, Path>>> getChildren) {
         List<Entry<Document, Path>> childPairs = getChildren.apply(this.root = root);
         if (childPairs == null) {
             children = new ArrayList<>(0);
@@ -54,6 +55,18 @@ public class DocumentDirectory implements Serializable {
             Node node = iter.next();
             add(node.getPath(), node.getDocument());
         }
+    }
+
+    private static void traverse(Node parent, Set<Node> visited) {
+        if (visited.add(parent)) {
+            for (Node child : nullSafe(parent.getChildren())) {
+                traverse(child, visited);
+            }
+        }
+    }
+
+    private static <T> List<T> nullSafe(List<T> list) {
+        return list == null ? Collections.<T> emptyList() : list;
     }
 
     public List<Node> getChildren() {
@@ -116,7 +129,8 @@ public class DocumentDirectory implements Serializable {
 
     public Node add(String path, String data, boolean pathIsAbsolute, boolean withParent) {
         Path relativePath = new Path(path);
-        if (data == null) data = "";
+        if (data == null)
+            data = "";
         if (pathIsAbsolute) {
             return add(relativePath, new Document(data), withParent);
         } else {
@@ -182,7 +196,8 @@ public class DocumentDirectory implements Serializable {
             }
         }
 
-        throw new IllegalArgumentException("Cannot delete node with " + path + ".  No such node exists");
+        throw new IllegalArgumentException(
+                "Cannot delete node with " + path + ".  No such node exists");
     }
 
     public Iterator<Node> leafFirstIterator() {
@@ -212,16 +227,53 @@ public class DocumentDirectory implements Serializable {
         return new IteratorWrapper(visited, false);
     }
 
-    private static void traverse(Node parent, Set<Node> visited) {
-        if (visited.add(parent)) {
-            for (Node child : nullSafe(parent.getChildren())) {
-                traverse(child, visited);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        if (children != null) {
+            for (Iterator<Node> iter = breadthFirstIterator(); iter.hasNext();) {
+                Node node = iter.next();
+                result = prime * result + ((node == null) ? 0 : node.hashCode());
             }
         }
+        return result;
     }
 
-    private static <T> List<T> nullSafe(List<T> list) {
-        return list == null ? Collections.<T> emptyList() : list;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof DocumentDirectory))
+            return false;
+        DocumentDirectory that = (DocumentDirectory) obj;
+        if (children == null) {
+            if (that.children != null)
+                return false;
+        } else if (that.children == null) {
+            return false;
+        } else {
+            Iterator<Node> thisIter = breadthFirstIterator(),
+                    thatIter = that.breadthFirstIterator();
+            while (thisIter.hasNext() && thatIter.hasNext()) {
+                if (!thisIter.next().equals(thatIter.next()))
+                    return false;
+            }
+            if (thisIter.hasNext() || thatIter.hasNext())
+                return false;
+        }
+        return true;
+    }
+
+    public Node getChild(String pathSuffix) {
+        for (Node child : children) {
+            if (child.getPath().getSuffix().equals(pathSuffix)) {
+                return child;
+            }
+        }
+        return null;
     }
 
     private static class IteratorWrapper implements ListIterator<Node> {
@@ -280,45 +332,6 @@ public class DocumentDirectory implements Serializable {
         }
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        if (children != null) {
-            for (Iterator<Node> iter = breadthFirstIterator(); iter.hasNext();) {
-                Node node = iter.next();
-                result = prime * result + ((node == null) ? 0 : node.hashCode());
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof DocumentDirectory))
-            return false;
-        DocumentDirectory that = (DocumentDirectory) obj;
-        if (children == null) {
-            if (that.children != null)
-                return false;
-        } else if (that.children == null) {
-            return false;
-        } else {
-            Iterator<Node> thisIter = breadthFirstIterator(), thatIter = that.breadthFirstIterator();
-            while (thisIter.hasNext() && thatIter.hasNext()) {
-                if (!thisIter.next().equals(thatIter.next()))
-                    return false;
-            }
-            if (thisIter.hasNext() || thatIter.hasNext())
-                return false;
-        }
-        return true;
-    }
-
     public static class Node implements Comparable<Node>, Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -326,7 +339,8 @@ public class DocumentDirectory implements Serializable {
         private Document document;
         private List<Node> children;
 
-        private Node(Map.Entry<Document, Path> entry, Function<Path, List<Entry<Document, Path>>> getChildren) {
+        private Node(Map.Entry<Document, Path> entry,
+                Function<Path, List<Entry<Document, Path>>> getChildren) {
             path = entry.getValue();
             document = entry.getKey();
             List<Entry<Document, Path>> childPairs = getChildren.apply(path);
@@ -406,14 +420,5 @@ public class DocumentDirectory implements Serializable {
                 return false;
             return true;
         }
-    }
-
-    public Node getChild(String pathSuffix) {
-        for (Node child : children) {
-            if (child.getPath().getSuffix().equals(pathSuffix)) {
-                return child;
-            }
-        }
-        return null;
     }
 }

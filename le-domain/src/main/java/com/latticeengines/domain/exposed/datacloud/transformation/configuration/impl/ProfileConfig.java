@@ -6,46 +6,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 public class ProfileConfig extends TblDrivenTransformerConfig {
+    @JsonProperty("NumBucketEqualSized")
+    private boolean numBucketEqualSized;// true: bucket size is roughly equal
+    @JsonProperty("BucketNum")
+    private int bucketNum = 5;// roughly bucket number (might not be exactly
+                                        // false: decide bucket upon
+                                        // distribution
+    @JsonProperty("MinBucketSize")
+    private int minBucketSize = 10; // only for numBucketEqualSized = false
+                              // same in final profiling)
+    @JsonProperty("DataCloudVersion")
+    private String dataCloudVersion; // by default, segmentation: use current
+    @JsonProperty("RandSeed")
+    private Long randSeed; // used for testing purpose, leave it null for real
+                                     // approved version; enrichment: use a
+                                     // version next to current approved version
+    @JsonProperty("EncAttrPrefix")
+    private String encAttrPrefix; // used for testing purpose, leave it null for
+                           // use case
+    @JsonProperty("MaxCat")
+    private int maxCat = 2048; // Maximum allowed category number
+                                  // real use case
+    @JsonProperty("MaxCatLen")
+    private int maxCatLength = 1024; // Maximum allowed category attribute
+    @JsonProperty("CatAttrsNotEnc")
+    private String[] catAttrsNotEnc; // Dimensional attributes for stats should
+                                     // length. If exceeded, this attribute is
+                                     // not segmentable
+    @JsonProperty("MaxDiscrete")
+    private int maxDiscrete = 5; // Maximum allowed discrete bucket number
+                                     // not be encoded
+
     public ProfileConfig() {
 
     }
-
-    @JsonProperty("NumBucketEqualSized")
-    private boolean numBucketEqualSized;// true: bucket size is roughly equal
-                                        // false: decide bucket upon distribution
-
-    @JsonProperty("BucketNum")
-    private int bucketNum = 5;// roughly bucket number (might not be exactly
-                              // same in final profiling)
-
-    @JsonProperty("MinBucketSize")
-    private int minBucketSize = 10; // only for numBucketEqualSized = false
-
-    @JsonProperty("DataCloudVersion")
-    private String dataCloudVersion; // by default, segmentation: use current
-                                     // approved version; enrichment: use a
-                                     // version next to current approved version
-
-    @JsonProperty("RandSeed")
-    private Long randSeed; // used for testing purpose, leave it null for real use case
-
-    @JsonProperty("EncAttrPrefix")
-    private String encAttrPrefix; // used for testing purpose, leave it null for real use case
-
-    @JsonProperty("MaxCat")
-    private int maxCat = 2048; // Maximum allowed category number
-
-    @JsonProperty("MaxCatLen")
-    private int maxCatLength = 1024; // Maximum allowed category attribute
-                                     // length. If exceeded, this attribute is
-                                     // not segmentable
-
-    @JsonProperty("CatAttrsNotEnc")
-    private String[] catAttrsNotEnc; // Dimensional attributes for stats should
-                                     // not be encoded
-
-    @JsonProperty("MaxDiscrete")
-    private int maxDiscrete = 5; // Maximum allowed discrete bucket number
 
     @Override
     public String getStage() {

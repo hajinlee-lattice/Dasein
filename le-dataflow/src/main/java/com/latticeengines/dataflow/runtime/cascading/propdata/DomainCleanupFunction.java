@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
@@ -11,8 +10,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class DomainCleanupFunction extends CleanupFunction implements Function
-{
+public class DomainCleanupFunction extends CleanupFunction implements Function {
     private static final long serialVersionUID = -4470533364538287281L;
     private String domainField;
 

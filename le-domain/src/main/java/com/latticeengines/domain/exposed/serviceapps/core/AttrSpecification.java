@@ -5,6 +5,39 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class AttrSpecification {
 
+    private String specification;
+    private boolean segmentationChange;
+    private boolean enrichmentChange;
+    private boolean companyProfileChange;
+    private boolean talkingPointChange;
+    private boolean modelChange;
+    private boolean typeChange;
+    private boolean displayNameChange;
+    private boolean descriptionChange;
+    private boolean categoryNameChange;
+    private boolean iconChange;
+    private boolean stateChange;
+    private boolean approvedUsageChange;
+    private AttrSpecification(String specification, boolean segmentationChange,
+            boolean enrichmentChange, boolean companyProfileChange, boolean talkingPointChange,
+            boolean modelChange, boolean typeChange, boolean displayNameChange,
+            boolean descriptionChange, boolean categoryNameChange, boolean iconChange,
+            boolean stateChange, boolean approvedUsageChange) {
+        this.specification = specification;
+        this.segmentationChange = segmentationChange;
+        this.enrichmentChange = enrichmentChange;
+        this.companyProfileChange = companyProfileChange;
+        this.talkingPointChange = talkingPointChange;
+        this.modelChange = modelChange;
+        this.typeChange = typeChange;
+        this.displayNameChange = displayNameChange;
+        this.descriptionChange = descriptionChange;
+        this.categoryNameChange = categoryNameChange;
+        this.iconChange = iconChange;
+        this.stateChange = stateChange;
+        this.approvedUsageChange = approvedUsageChange;
+    }
+
     public static AttrSpecification LDC_NON_PREMIUM() {
         return new AttrSpecification("LDC Non-Premium Attributes", true, true, true, true, true,
                 false, false, false, true, false, true, true); //
@@ -75,40 +108,6 @@ public class AttrSpecification {
                 false, // state
                 false // approved usage
         );
-    }
-
-    private String specification;
-    private boolean segmentationChange;
-    private boolean enrichmentChange;
-    private boolean companyProfileChange;
-    private boolean talkingPointChange;
-    private boolean modelChange;
-    private boolean typeChange;
-    private boolean displayNameChange;
-    private boolean descriptionChange;
-    private boolean categoryNameChange;
-    private boolean iconChange;
-    private boolean stateChange;
-    private boolean approvedUsageChange;
-
-    private AttrSpecification(String specification, boolean segmentationChange,
-            boolean enrichmentChange, boolean companyProfileChange, boolean talkingPointChange,
-            boolean modelChange, boolean typeChange, boolean displayNameChange,
-            boolean descriptionChange, boolean categoryNameChange, boolean iconChange,
-            boolean stateChange, boolean approvedUsageChange) {
-        this.specification = specification;
-        this.segmentationChange = segmentationChange;
-        this.enrichmentChange = enrichmentChange;
-        this.companyProfileChange = companyProfileChange;
-        this.talkingPointChange = talkingPointChange;
-        this.modelChange = modelChange;
-        this.typeChange = typeChange;
-        this.displayNameChange = displayNameChange;
-        this.descriptionChange = descriptionChange;
-        this.categoryNameChange = categoryNameChange;
-        this.iconChange = iconChange;
-        this.stateChange = stateChange;
-        this.approvedUsageChange = approvedUsageChange;
     }
 
     public static AttrSpecification getAttrSpecification(AttrType attrType, AttrSubType attrSubType,

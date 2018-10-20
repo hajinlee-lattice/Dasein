@@ -14,6 +14,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class LatticeIdUpdateFuction extends BaseOperation implements Function {
+    private final static String ACTIVE = "ACTIVE";
+    private final static String UPDATED = "UPDATED";
     private Map<String, Integer> namePositionMap;
     private String status;
     private String statusField;
@@ -23,9 +25,6 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
     private List<String> copyIdTo;
     private List<String> idsKeys;
     private List<String> entityKeys;
-
-    private final static String ACTIVE = "ACTIVE";
-    private final static String UPDATED = "UPDATED";
 
     public LatticeIdUpdateFuction(Fields fieldDeclaration, String status, String statusField,
             String timestampField, String copyIdFrom, List<String> copyIdTo, List<String> idsKeys,
@@ -59,7 +58,8 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
         }
         if (idsKeys != null && entityKeys != null) {
             for (int i = 0; i < idsKeys.size(); i++) {
-                result.set(namePositionMap.get(idsKeys.get(i)), arguments.getString(entityKeys.get(i)));
+                result.set(namePositionMap.get(idsKeys.get(i)),
+                        arguments.getString(entityKeys.get(i)));
             }
         }
         if (copyIdFrom != null && copyIdTo != null && arguments.getObject(copyIdFrom) != null

@@ -6,7 +6,8 @@ public class MatchStatusResponse {
 
     private String status;
 
-    public MatchStatusResponse(){}  // for serialization
+    public MatchStatusResponse() {
+    } // for serialization
 
     public MatchStatusResponse(MatchCommandStatus status) {
         this();

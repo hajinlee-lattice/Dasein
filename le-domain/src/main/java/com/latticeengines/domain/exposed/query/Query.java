@@ -91,11 +91,11 @@ public class Query implements GraphNode {
     @JsonIgnore
     private List<JoinSpecification> commonTableJoins;
 
-    public static QueryBuilder builder() {
-        return new QueryBuilder();
+    Query() {
     }
 
-    Query() {
+    public static QueryBuilder builder() {
+        return new QueryBuilder();
     }
 
     public Restriction getRestriction() {
@@ -169,7 +169,8 @@ public class Query implements GraphNode {
         return freeFormTextSearchAttributes;
     }
 
-    public void setFreeFormTextSearchAttributes(List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes) {
+    public void setFreeFormTextSearchAttributes(
+            List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes) {
         this.freeFormTextSearchAttributes = freeFormTextSearchAttributes;
     }
 

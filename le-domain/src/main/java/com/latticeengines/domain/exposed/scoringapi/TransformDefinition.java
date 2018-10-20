@@ -37,7 +37,8 @@ public class TransformDefinition implements Serializable {
     @JsonIgnore
     public TransformationMetadata transformationMetadata;
 
-    public TransformDefinition(String name, String output, FieldType type, Map<String, Object> arguments) {
+    public TransformDefinition(String name, String output, FieldType type,
+            Map<String, Object> arguments) {
         this.name = name;
         this.output = output;
         this.type = type;

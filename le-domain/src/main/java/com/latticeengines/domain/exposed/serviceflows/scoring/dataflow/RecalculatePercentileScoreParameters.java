@@ -36,16 +36,16 @@ public class RecalculatePercentileScoreParameters extends DataFlowParameters {
         return rawScoreFieldName;
     }
 
+    public void setRawScoreFieldName(String rawScoreFieldName) {
+        this.rawScoreFieldName = rawScoreFieldName;
+    }
+
     public String getScoreFieldName() {
         return scoreFieldName;
     }
 
     public void setScoreFieldName(String scoreFieldName) {
         this.scoreFieldName = scoreFieldName;
-    }
-
-    public void setRawScoreFieldName(String rawScoreFieldName) {
-        this.rawScoreFieldName = rawScoreFieldName;
     }
 
     public String getModelGuidField() {

@@ -14,12 +14,15 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MetaDataTableUtils {
 
-    public static Table createTable(Configuration yarnConfiguration, String tableName, String avroPath) {
+    public static Table createTable(Configuration yarnConfiguration, String tableName,
+            String avroPath) {
         return createTable(yarnConfiguration, tableName, avroPath, false);
     }
 
-    public static Table createTable(Configuration yarnConfiguration, String tableName, String avroPath, boolean skipCount) {
-        Table table = MetadataConverter.getTable(yarnConfiguration, avroPath, null, null, skipCount);
+    public static Table createTable(Configuration yarnConfiguration, String tableName,
+            String avroPath, boolean skipCount) {
+        Table table = MetadataConverter.getTable(yarnConfiguration, avroPath, null, null,
+                skipCount);
         table.setName(tableName);
         Extract extract = new Extract();
         String folder = StringUtils.substringAfterLast(avroPath.replace("/*.avro", ""), "/");
@@ -29,16 +32,18 @@ public class MetaDataTableUtils {
         return table;
     }
 
-    public static Table createTable(Configuration yarnConfiguration, String tableName, String[] avroPaths, String[] primaryKey) {
+    public static Table createTable(Configuration yarnConfiguration, String tableName,
+            String[] avroPaths, String[] primaryKey) {
         return createTable(yarnConfiguration, tableName, avroPaths, primaryKey, false);
     }
 
-    public static Table createTable(Configuration yarnConfiguration, String tableName, String[] avroPaths,
-            String[] primaryKey, boolean skipCount) {
-        Table table = MetadataConverter.getTable(yarnConfiguration, avroPaths[0], null, null, skipCount);
+    public static Table createTable(Configuration yarnConfiguration, String tableName,
+            String[] avroPaths, String[] primaryKey, boolean skipCount) {
+        Table table = MetadataConverter.getTable(yarnConfiguration, avroPaths[0], null, null,
+                skipCount);
         table.setName(tableName);
         List<Extract> extractList = new ArrayList<>();
-        for (String avroPath: avroPaths) {
+        for (String avroPath : avroPaths) {
             Extract extract = new Extract();
             String folder = StringUtils.substringAfterLast(avroPath.replace("/*.avro", ""), "/");
             extract.setName("extract_" + folder);

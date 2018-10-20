@@ -39,7 +39,8 @@ public class ConsolidateIndustryFromNaicsFunction extends BaseOperation implemen
             Integer length = entry.getKey();
             Map<Serializable, Serializable> map = entry.getValue();
             if (naics.length() >= length && map.containsKey(naics.substring(0, length))) {
-                functionCall.getOutputCollector().add(new Tuple(map.get(naics.substring(0, length))));
+                functionCall.getOutputCollector()
+                        .add(new Tuple(map.get(naics.substring(0, length))));
                 return;
             }
         }

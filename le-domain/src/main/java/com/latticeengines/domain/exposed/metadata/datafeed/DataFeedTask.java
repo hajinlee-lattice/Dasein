@@ -36,7 +36,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK", //
         indexes = { @Index(name = "IX_UNIQUE_ID", columnList = "UNIQUE_ID") }, //
-        uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE", "FEED_TYPE", "`FK_FEED_ID`" }))
+        uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE", "FEED_TYPE",
+                "`FK_FEED_ID`" }))
 public class DataFeedTask implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -78,7 +79,6 @@ public class DataFeedTask implements HasPid, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_TEMPLATE_ID")
     private Table importTemplate;
-
 
     @JsonProperty("import_data")
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -241,10 +241,6 @@ public class DataFeedTask implements HasPid, Serializable {
         return subType;
     }
 
-    public void setSubType(SubType subType) {
-        this.subType = subType;
-    }
-
     public void setSubType(String subType) {
         if (StringUtils.isNotBlank(subType)) {
             try {
@@ -256,6 +252,9 @@ public class DataFeedTask implements HasPid, Serializable {
         }
     }
 
+    public void setSubType(SubType subType) {
+        this.subType = subType;
+    }
 
     public List<DataFeedTaskTable> getTables() {
         return tables;
@@ -281,7 +280,6 @@ public class DataFeedTask implements HasPid, Serializable {
     }
 
     public enum SubType {
-        Bundle,
-        Hierarchy
+        Bundle, Hierarchy
     }
 }

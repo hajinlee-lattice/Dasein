@@ -6,10 +6,10 @@ public class FilePayload {
 
     @JsonProperty("file_path")
     public String filePath;
-    
+
     @JsonProperty("application_id")
     public String applicationId;
-    
+
     @JsonProperty("customer_space")
     public String customerSpace;
 }

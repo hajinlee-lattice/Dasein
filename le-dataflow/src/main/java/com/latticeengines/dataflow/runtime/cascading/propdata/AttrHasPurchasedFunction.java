@@ -35,7 +35,10 @@ public class AttrHasPurchasedFunction extends BaseOperation implements Function 
 
             functionCall.getOutputCollector().add(new Tuple(hasPurchased));
         } else {
-            double totalAmount = arguments.getDouble(InterfaceName.TotalAmount.name()); // treat null as 0
+            double totalAmount = arguments.getDouble(InterfaceName.TotalAmount.name()); // treat
+                                                                                        // null
+                                                                                        // as
+                                                                                        // 0
             boolean hasPurchased = totalAmount > 0.0;
             functionCall.getOutputCollector().add(new Tuple(hasPurchased));
         }

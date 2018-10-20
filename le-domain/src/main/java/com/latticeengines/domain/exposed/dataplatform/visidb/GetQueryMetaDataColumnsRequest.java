@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.dataplatform.visidb;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 public class GetQueryMetaDataColumnsRequest {
 
     private String tenantName;

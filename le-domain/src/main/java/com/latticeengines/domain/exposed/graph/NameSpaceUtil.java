@@ -25,12 +25,13 @@ public class NameSpaceUtil {
 
     private String defaultVersion;
 
-    public NameSpaceUtil(String defaultEnv, String defaultVersion){
+    public NameSpaceUtil(String defaultEnv, String defaultVersion) {
         this.defaultEnv = defaultEnv;
         this.defaultVersion = defaultVersion;
     }
-    
-    public String generateNS(Map<String, String> nsMap, boolean isNSPostfix, boolean withoutTypeNS) {
+
+    public String generateNS(Map<String, String> nsMap, boolean isNSPostfix,
+            boolean withoutTypeNS) {
         String env = null;
         String version = null;
         String type = null;
@@ -79,7 +80,8 @@ public class NameSpaceUtil {
         return String.format("%s%s", isNSPostfix ? label : ns, isNSPostfix ? ns : label);
     }
 
-    public Map<String, String> extractNsMapFromGraphVertexId(String graphVertexId, boolean isNSPostfix) {
+    public Map<String, String> extractNsMapFromGraphVertexId(String graphVertexId,
+            boolean isNSPostfix) {
         Map<String, String> nsMap = new HashMap<>();
         if (StringUtils.isNotBlank(graphVertexId) && graphVertexId.contains(NS_ID_SEP)) {
             String nsPart = null;
@@ -101,7 +103,8 @@ public class NameSpaceUtil {
                     if (StringUtils.isNotBlank(token)//
                             && token.contains(NS_VAL_START) //
                             && token.contains(NS_VAL_END)) {
-                        String val = token.substring(token.indexOf(NS_VAL_START) + NS_VAL_START.length(), //
+                        String val = token.substring(
+                                token.indexOf(NS_VAL_START) + NS_VAL_START.length(), //
                                 token.lastIndexOf(NS_VAL_END));
                         val = handleNullMarker(val);
 

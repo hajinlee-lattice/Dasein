@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.persistence.Id;
 
 import org.apache.avro.reflect.AvroName;
@@ -11,6 +9,8 @@ import org.apache.avro.reflect.Union;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class ScoreRecordHistory implements HasId<String> {
 

@@ -9,9 +9,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class MatchConfiguration extends MicroserviceStepConfiguration {
-    
+
     private String targetTableName;
-    
+
     private MatchInput matchInput;
 
     public MatchInput getMatchInput() {
@@ -27,7 +27,7 @@ public class MatchConfiguration extends MicroserviceStepConfiguration {
         private String inputDir;
         private CustomerSpace customerSpace;
         private String outputDir;
-        
+
         private MatchInput createMatchInput(String inputDir, CustomerSpace customerSpace) {
             MatchInput input = new MatchInput();
             input.setDataCloudVersion("2.0.1");
@@ -40,27 +40,27 @@ public class MatchConfiguration extends MicroserviceStepConfiguration {
             input.setMatchResultPath(outputDir);
             input.setOutputBufferType(IOBufferType.AVRO);
             input.setPredefinedSelection(Predefined.ID);
-            
+
             return input;
         }
-        
+
         public MatchConfiguration build() {
             MatchConfiguration matchConfig = new MatchConfiguration();
             matchConfig.targetTableName = targetTableName;
             matchConfig.matchInput = createMatchInput(inputDir, customerSpace);
             return matchConfig;
         }
-        
+
         public Builder customerSpace(CustomerSpace customerSpace) {
             this.customerSpace = customerSpace;
             return this;
         }
-        
+
         public Builder targetTableName(String targetTableName) {
             this.targetTableName = targetTableName;
             return this;
         }
-        
+
         public Builder inputDir(String inputDir) {
             this.inputDir = inputDir;
             return this;
@@ -71,6 +71,5 @@ public class MatchConfiguration extends MicroserviceStepConfiguration {
             return this;
         }
     }
-
 
 }

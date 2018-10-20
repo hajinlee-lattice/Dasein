@@ -48,17 +48,13 @@ public class DunsGuideBookNLEnrichFunction extends BaseOperation implements Func
         TupleEntry arguments = functionCall.getArguments();
         String keyPartition = arguments.getString(DunsRedirectBookConfig.KEY_PARTITION);
         String name = keyPartition.contains(MatchKey.Name.name())
-                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Name))
-                : null;
+                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Name)) : null;
         String country = keyPartition.contains(MatchKey.Country.name())
-                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Country))
-                : null;
+                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Country)) : null;
         String state = keyPartition.contains(MatchKey.State.name())
-                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.State))
-                : null;
+                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.State)) : null;
         String city = keyPartition.contains(MatchKey.City.name())
-                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.City))
-                : null;
+                ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.City)) : null;
 
         Tuple result = Tuple.size(getFieldDeclaration().size());
         result.set(nameLoc, name);

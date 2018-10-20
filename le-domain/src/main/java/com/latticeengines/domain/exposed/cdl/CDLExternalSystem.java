@@ -37,7 +37,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "CDL_EXTERNAL_SYSTEM", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID" }) })
+@Table(name = "CDL_EXTERNAL_SYSTEM", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
 
@@ -90,13 +91,18 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
     @Override
-    public Long getTenantId() {
-        return tenantId;
+    public Tenant getTenant() {
+        return tenant;
     }
 
     @Override
@@ -105,11 +111,6 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-    }
-
-    @Override
-    public Tenant getTenant() {
-        return tenant;
     }
 
     public String getCrmIds() {
@@ -228,10 +229,6 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
         return idMapping;
     }
 
-    public void setIdMapping(String idMapping) {
-        this.idMapping = idMapping;
-    }
-
     @JsonIgnore
     @Transient
     public void setIdMapping(List<Pair<String, String>> idMappings) {
@@ -240,6 +237,10 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
             idMappings.forEach(mapping -> node.put(mapping.getLeft(), mapping.getRight()));
             this.idMapping = JsonUtils.serialize(node);
         }
+    }
+
+    public void setIdMapping(String idMapping) {
+        this.idMapping = idMapping;
     }
 
     @JsonIgnore
@@ -267,6 +268,7 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
             return node.get(id) == null ? StringUtils.EMPTY : node.get(id).asText();
         }
     }
+
     @JsonIgnore
     @Transient
     public List<Pair<String, String>> getIdMappingList() {

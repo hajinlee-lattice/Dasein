@@ -18,15 +18,18 @@ public class HdfsToS3Configuration extends ExportConfiguration {
     private String s3Region = "us-east-1";
 
     // only applicable to avro source file
-    // if this is sepcified, then the original file will be splited into small files with at most this size (Byte).
-    // small files are easier to track progress, and better for loading to snowflake
+    // if this is sepcified, then the original file will be splited into small
+    // files with at most this size (Byte).
+    // small files are easier to track progress, and better for loading to
+    // snowflake
     @JsonProperty("split_size")
     private Long splitSize;
 
     @JsonProperty("target_filename")
     @NotNull
     @NotEmptyString
-    private String targetFilename; // the file name to be used in s3, may be suffixed by partition number if splitted.
+    private String targetFilename; // the file name to be used in s3, may be
+                                   // suffixed by partition number if splitted.
 
     public String getS3Bucket() {
         return s3Bucket;

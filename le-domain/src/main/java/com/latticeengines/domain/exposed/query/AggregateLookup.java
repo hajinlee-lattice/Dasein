@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.query;
 
-
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.AVG;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.COUNT;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.MAX;
@@ -17,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
-
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -109,14 +107,6 @@ public class AggregateLookup extends Lookup {
         this.nvl = nvl;
     }
 
-    public enum Aggregator {
-        COUNT, //
-        SUM, //
-        AVG, //
-        MAX, //
-        MIN
-    }
-
     @Override
     public Collection<? extends GraphNode> getChildren() {
         if (lookup != null) {
@@ -131,5 +121,12 @@ public class AggregateLookup extends Lookup {
         return JsonUtils.serialize(this);
     }
 
-}
+    public enum Aggregator {
+        COUNT, //
+        SUM, //
+        AVG, //
+        MAX, //
+        MIN
+    }
 
+}

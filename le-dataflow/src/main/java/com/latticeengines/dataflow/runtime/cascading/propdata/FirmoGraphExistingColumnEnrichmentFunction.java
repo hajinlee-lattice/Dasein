@@ -19,8 +19,8 @@ public class FirmoGraphExistingColumnEnrichmentFunction extends BaseOperation im
     private String enrichingField;
     private String enrichedField;
 
-    public FirmoGraphExistingColumnEnrichmentFunction(String leftMatchField, String rightMatchField, String enrichingField,
-            String enrichedField) {
+    public FirmoGraphExistingColumnEnrichmentFunction(String leftMatchField, String rightMatchField,
+            String enrichingField, String enrichedField) {
         super(4, new Fields(leftMatchField, rightMatchField, enrichingField, enrichedField));
         this.leftMatchField = leftMatchField;
         this.rightMatchField = rightMatchField;
@@ -36,7 +36,8 @@ public class FirmoGraphExistingColumnEnrichmentFunction extends BaseOperation im
         Object enrichingValue = arguments.getObject(enrichingField);
         Object enrichedValue = arguments.getObject(enrichedField);
         Tuple tuple = new Tuple();
-        if (StringUtils.isNotBlank(leftMatchValue) && StringUtils.isNoneBlank(rightMatchValue) && leftMatchValue.equals(rightMatchValue)) {
+        if (StringUtils.isNotBlank(leftMatchValue) && StringUtils.isNoneBlank(rightMatchValue)
+                && leftMatchValue.equals(rightMatchValue)) {
             tuple.add(leftMatchValue);
             tuple.add(rightMatchValue);
             tuple.add(enrichingValue);

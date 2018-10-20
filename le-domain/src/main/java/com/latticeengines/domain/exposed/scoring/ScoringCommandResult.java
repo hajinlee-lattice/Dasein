@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "LeadOutputQueue")
-public class ScoringCommandResult implements HasPid, HasId<String>{
+public class ScoringCommandResult implements HasPid, HasId<String> {
 
     private Long leadOutputQueueId;
     private String leDeploymentdId;
@@ -31,6 +31,21 @@ public class ScoringCommandResult implements HasPid, HasId<String>{
     private ScoringCommandStatus status;
     private Timestamp populated;
     private Timestamp consumed;
+
+    ScoringCommandResult() {
+        super();
+    }
+
+    @VisibleForTesting
+    public ScoringCommandResult(String deploymentExternalId, ScoringCommandStatus status,
+            String tableName, int total, Timestamp populated) {
+        super();
+        this.leDeploymentdId = deploymentExternalId;
+        this.status = status;
+        this.tableName = tableName;
+        this.total = total;
+        this.populated = populated;
+    }
 
     @Id
     @JsonIgnore
@@ -103,20 +118,6 @@ public class ScoringCommandResult implements HasPid, HasId<String>{
         this.consumed = consumed;
     }
 
-    ScoringCommandResult(){
-        super();
-    }
-
-    @VisibleForTesting
-    public ScoringCommandResult(String deploymentExternalId, ScoringCommandStatus status, String tableName, int total, Timestamp populated) {
-        super();
-        this.leDeploymentdId = deploymentExternalId;
-        this.status = status;
-        this.tableName = tableName;
-        this.total = total;
-        this.populated = populated;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -127,7 +128,7 @@ public class ScoringCommandResult implements HasPid, HasId<String>{
         result = prime * result + ((status == null) ? 0 : status.hashCode());
         return result;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

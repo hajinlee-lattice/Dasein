@@ -43,8 +43,8 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public RebuildAccountWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("rebuildAccountWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("rebuildAccountWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
 
             configuration.add(processAccountStepConfiguration);
             return configuration;

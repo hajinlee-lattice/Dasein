@@ -43,10 +43,8 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
 
-    private static final long serialVersionUID = 3180682380551859839L;
-
     public static final String NOT_SET = "not set";
-
+    private static final long serialVersionUID = 3180682380551859839L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -217,6 +215,8 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
 
     private static class DataCollectionStatusDetail implements Serializable {
         private static final long serialVersionUID = -6030795342397598056L;
+        @JsonProperty("DateMap")
+        Map<String, Long> dateMap;
         @JsonProperty("MinTxnDate")
         private Integer minTxnDate = 0;
         @JsonProperty("MaxTxnDate")
@@ -233,8 +233,6 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         private Long transactionCount = 0L;
         @JsonProperty("ApsRollingPeriod")
         private String apsRollingPeriod;
-        @JsonProperty("DateMap")
-        Map<String, Long> dateMap;
 
         public Integer getMinTxnDate() {
             return minTxnDate;

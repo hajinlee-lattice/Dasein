@@ -10,21 +10,16 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnrichAggregator.Context>
+public class ManualDomainEnrichAggregator
+        extends BaseAggregator<ManualDomainEnrichAggregator.Context>
         implements Aggregator<ManualDomainEnrichAggregator.Context> {
     private static final long serialVersionUID = 1059291855974074063L;
+    private final static String MANUAL_DOMAIN_SOURCE = "Manual";
     private String manSeedDomain;
     private String amSeedDomain;
     private int domainLoc;
     private int domainSourceLoc;
     private String isPrimaryDomain;
-    private final static String MANUAL_DOMAIN_SOURCE = "Manual";
-
-    public static class Context extends BaseAggregator.Context {
-        Set<String> manSeedDomainSet = new HashSet<String>();
-        Set<String> amSeedDomainSet = new HashSet<String>();
-        Tuple result;
-    }
 
     public ManualDomainEnrichAggregator(Fields fieldDeclaration, String manSeedDomain,
             String amSeedDomain, String isPrimaryDomain, String domainSource) {
@@ -87,5 +82,11 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
             context.result = null;
         }
         return context.result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Set<String> manSeedDomainSet = new HashSet<String>();
+        Set<String> amSeedDomainSet = new HashSet<String>();
+        Tuple result;
     }
 }

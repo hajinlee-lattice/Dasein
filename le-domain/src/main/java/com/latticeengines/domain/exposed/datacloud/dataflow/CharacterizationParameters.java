@@ -21,44 +21,99 @@ public class CharacterizationParameters extends DataFlowParameters {
     private List<String> groupKeys;
     private String version;
 
-    public String getTimestampField() { return timestampField; }
+    public String getTimestampField() {
+        return timestampField;
+    }
 
-    public void setTimestampField(String timestampField) { this.timestampField = timestampField; }
+    public void setTimestampField(String timestampField) {
+        this.timestampField = timestampField;
+    }
 
-    public List<String> getBaseTables() { return baseTables; }
+    public List<String> getBaseTables() {
+        return baseTables;
+    }
 
-    public void setBaseTables(List<String> baseTables) { this.baseTables = baseTables; }
+    public void setBaseTables(List<String> baseTables) {
+        this.baseTables = baseTables;
+    }
 
-    public Boolean hasSqlPresence() { return hasSqlPresence; }
+    public Boolean hasSqlPresence() {
+        return hasSqlPresence;
+    }
 
-    public void setHasSqlPresence(Boolean hasSqlPresence) { this.hasSqlPresence = hasSqlPresence; }
+    public void setHasSqlPresence(Boolean hasSqlPresence) {
+        this.hasSqlPresence = hasSqlPresence;
+    }
 
-    public Date getTimestamp() { return timestamp; }
+    public Date getTimestamp() {
+        return timestamp;
+    }
 
-    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 
-    public List<SourceColumn> getSourceColumns() { return sourceColumns; }
+    public List<SourceColumn> getSourceColumns() {
+        return sourceColumns;
+    }
 
-    public void setSourceColumns(List<SourceColumn> sourceColumns) { this.sourceColumns = sourceColumns; }
+    public void setSourceColumns(List<SourceColumn> sourceColumns) {
+        this.sourceColumns = sourceColumns;
+    }
 
-    public String[] getAttrKey() { return attrKey; }
-    public void setAttrKey(String[] attrKey) { this.attrKey =  attrKey; }
+    public String[] getAttrKey() {
+        return attrKey;
+    }
 
-    public String getTotalKey() { return totalKey; }
-    public void setTotalKey(String totalKey) { this.totalKey =  totalKey; }
+    public void setAttrKey(String[] attrKey) {
+        this.attrKey = attrKey;
+    }
 
-    public List<String> getGroupKeys() { return groupKeys; }
-    public void setGroupKeys(List<String> groupKeys) { this.groupKeys =  groupKeys; }
+    public String getTotalKey() {
+        return totalKey;
+    }
 
-    public List<String> getAttrs() { return attrs; }
-    public void setAttrs(List<String> attrs) { this.attrs =  attrs; }
+    public void setTotalKey(String totalKey) {
+        this.totalKey = totalKey;
+    }
 
-    public List<Integer> getAttrIds() { return attrIds; }
-    public void setAttrIds(List<Integer> attrIds) { this.attrIds =  attrIds; }
+    public List<String> getGroupKeys() {
+        return groupKeys;
+    }
 
-    public String getVersionKey() { return versionKey; }
-    public void setVersionKey(String versionKey) { this.versionKey =  versionKey; }
+    public void setGroupKeys(List<String> groupKeys) {
+        this.groupKeys = groupKeys;
+    }
 
-    public String getVersion() { return version; }
-    public void setVersion(String version) { this.version =  version; }
+    public List<String> getAttrs() {
+        return attrs;
+    }
+
+    public void setAttrs(List<String> attrs) {
+        this.attrs = attrs;
+    }
+
+    public List<Integer> getAttrIds() {
+        return attrIds;
+    }
+
+    public void setAttrIds(List<Integer> attrIds) {
+        this.attrIds = attrIds;
+    }
+
+    public String getVersionKey() {
+        return versionKey;
+    }
+
+    public void setVersionKey(String versionKey) {
+        this.versionKey = versionKey;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 }

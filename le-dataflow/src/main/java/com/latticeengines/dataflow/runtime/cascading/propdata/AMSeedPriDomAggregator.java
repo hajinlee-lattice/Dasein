@@ -16,8 +16,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class AMSeedPriDomAggregator
-        extends BaseAggregator<AMSeedPriDomAggregator.Context>
+public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregator.Context>
         implements Aggregator<AMSeedPriDomAggregator.Context> {
 
     private static final Logger log = LoggerFactory.getLogger(AMSeedPriDomAggregator.class);
@@ -36,19 +35,9 @@ public class AMSeedPriDomAggregator
     private int dunsLoc;
     private int priDomLoc;
 
-    public static class Context extends BaseAggregator.Context {
-        String domain = null;
-        String duns = null;
-        String priDom = null;
-        Integer alexaRank = null;
-        String domSrc = null;
-        String isPriDom = null;
-        Set<String> duDoms = null;
-    }
-
-    public AMSeedPriDomAggregator(Fields fieldDeclaration, String dunsField, String priDomField, String domField,
-            String alexaRankField, String domSrcField, String isPriDomField, String[] srcPriorityToMrkPriDom,
-            String duDomsField, String[] goldenDomSrcs) {
+    public AMSeedPriDomAggregator(Fields fieldDeclaration, String dunsField, String priDomField,
+            String domField, String alexaRankField, String domSrcField, String isPriDomField,
+            String[] srcPriorityToMrkPriDom, String duDomsField, String[] goldenDomSrcs) {
         super(fieldDeclaration);
         this.dunsField = dunsField;
         this.domField = domField;
@@ -92,21 +81,24 @@ public class AMSeedPriDomAggregator
         }
         int res;
         for (String srcPriority : goldenDomSrcs) {
-            res = checkRuleExpectedString(arguments.getString(domSrcField), context.domSrc, srcPriority);
+            res = checkRuleExpectedString(arguments.getString(domSrcField), context.domSrc,
+                    srcPriority);
             if (res > 0) {
                 return update(context, arguments);
             } else if (res < 0) {
                 return context;
             }
         }
-        res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
+        res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField),
+                context.alexaRank);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
         for (String srcPriority : srcPriorityToMrkPriDom) {
-            res = checkRuleExpectedString(arguments.getString(domSrcField), context.domSrc, srcPriority);
+            res = checkRuleExpectedString(arguments.getString(domSrcField), context.domSrc,
+                    srcPriority);
             if (res > 0) {
                 return update(context, arguments);
             } else if (res < 0) {
@@ -125,7 +117,8 @@ public class AMSeedPriDomAggregator
     private int checkRuleSmallerInteger(Integer checking, Integer checked) {
         if (checking != null && (checked == null || checking.intValue() < checked.intValue())) {
             return 1;
-        } else if (checked != null && (checking == null || checked.intValue() < checking.intValue())) {
+        } else if (checked != null
+                && (checking == null || checked.intValue() < checking.intValue())) {
             return -1;
         } else {
             return 0;
@@ -174,5 +167,15 @@ public class AMSeedPriDomAggregator
         } else {
             return null;
         }
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String domain = null;
+        String duns = null;
+        String priDom = null;
+        Integer alexaRank = null;
+        String domSrc = null;
+        String isPriDom = null;
+        Set<String> duDoms = null;
     }
 }

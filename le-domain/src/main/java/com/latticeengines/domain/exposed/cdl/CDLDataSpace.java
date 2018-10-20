@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -19,7 +19,7 @@ public class CDLDataSpace implements Serializable {
 
     private static final long serialVersionUID = -2292678716486572472L;
 
-	@JsonProperty("ActiveVersion")
+    @JsonProperty("ActiveVersion")
     private DataCollection.Version activeVersion;
 
     @JsonProperty("Entities")
@@ -28,8 +28,8 @@ public class CDLDataSpace implements Serializable {
     @JsonProperty("Others")
     private Map<String, List<TableSpace>> others;
 
-
-    public CDLDataSpace() {}
+    public CDLDataSpace() {
+    }
 
     public DataCollection.Version getActiveVersion() {
         return activeVersion;
@@ -39,13 +39,12 @@ public class CDLDataSpace implements Serializable {
         this.activeVersion = activeVersion;
     }
 
-    
-
     public Map<BusinessEntity, Map<BusinessEntity.DataStore, List<TableSpace>>> getEntities() {
         return entities;
     }
 
-    public void setEntities(Map<BusinessEntity, Map<BusinessEntity.DataStore, List<TableSpace>>> entities) {
+    public void setEntities(
+            Map<BusinessEntity, Map<BusinessEntity.DataStore, List<TableSpace>>> entities) {
         this.entities = entities;
     }
 
@@ -57,12 +56,10 @@ public class CDLDataSpace implements Serializable {
         this.others = others;
     }
 
-
-
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-    public static class TableSpace{
+    public static class TableSpace {
 
         @JsonProperty("TableRole")
         private TableRoleInCollection tableRole;
@@ -76,7 +73,8 @@ public class CDLDataSpace implements Serializable {
         @JsonProperty("Version")
         private DataCollection.Version version;
 
-        public TableSpace() {}
+        public TableSpace() {
+        }
 
         public TableRoleInCollection getTableRole() {
             return tableRole;

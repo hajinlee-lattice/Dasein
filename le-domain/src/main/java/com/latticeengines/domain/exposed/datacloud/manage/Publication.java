@@ -29,7 +29,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "Publication")
@@ -37,40 +36,30 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Publication implements HasPid {
 
+    @Column(name = "CronExpression", length = 20)
+    protected String cronExpression;
+    @Column(name = "SchedularEnabled")
+    protected Boolean schedularEnabled;
+    @Column(name = "NewJobRetryInterval")
+    protected Long newJobRetryInterval;
+    @Column(name = "NewJobMaxRetry")
+    protected Integer newJobMaxRetry;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", nullable = true)
     private Long pid;
-
     @Column(name = "PublicationName", unique = true, nullable = false, length = 100)
     private String publicationName;
-
     @Column(name = "SourceName", nullable = false, length = 100)
     private String sourceName;
-
     @Column(name = "DestinationConfig", nullable = false, length = 1000)
     private String destConfigString;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "PublicationType", nullable = false, length = 20)
     private PublicationType publicationType;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "MaterialType", nullable = false, length = 20)
     private MaterialType materialType;
-
-    @Column(name = "CronExpression", length=20)
-    protected String cronExpression;
-
-    @Column(name = "SchedularEnabled")
-    protected Boolean schedularEnabled;
-
-    @Column(name = "NewJobRetryInterval")
-    protected Long newJobRetryInterval;
-
-    @Column(name = "NewJobMaxRetry")
-    protected Integer newJobMaxRetry;
-
     @JsonIgnore
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "publication")
     @OnDelete(action = OnDeleteAction.CASCADE)

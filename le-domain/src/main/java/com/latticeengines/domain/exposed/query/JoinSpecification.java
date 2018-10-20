@@ -47,13 +47,13 @@ public class JoinSpecification {
     }
 
     public JoinSpecification(BusinessEntity sourceEntity, BusinessEntity destinationEntity,
-                             ObjectUsage destinationObjectUsage) {
+            ObjectUsage destinationObjectUsage) {
         this(sourceEntity, destinationEntity, sourceEntity.name(), destinationEntity.name(),
-             destinationObjectUsage);
+                destinationObjectUsage);
     }
 
     public JoinSpecification(BusinessEntity sourceEntity, BusinessEntity destinationEntity,
-                             String source, String destination, ObjectUsage destinationObjectUsage) {
+            String source, String destination, ObjectUsage destinationObjectUsage) {
         this.sourceEntity = sourceEntity;
         this.destinationEntity = destinationEntity;
         this.source = source;

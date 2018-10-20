@@ -30,6 +30,13 @@ public class CrossSellModelingConfig implements AdvancedModelingConfig {
     @JsonProperty("filters")
     private Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters;
 
+    public static CrossSellModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
+        if (aiModel.getAdvancedModelingConfig() == null) {
+            aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
+        }
+        return (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+    }
+
     public List<String> getTargetProducts() {
         return targetProducts;
     }
@@ -66,25 +73,25 @@ public class CrossSellModelingConfig implements AdvancedModelingConfig {
     }
 
     @Override
-    public String getDataCloudVersion() { return dataCloudVersion; }
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
 
-    public void setDataCloudVersion(String dataCloudVersion) { this.dataCloudVersion = dataCloudVersion; }
-
-    public static CrossSellModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
-        if (aiModel.getAdvancedModelingConfig() == null) {
-            aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
-        }
-        return (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     @Override
     public void copyConfig(AdvancedModelingConfig config) {
         CrossSellModelingConfig advancedConfInRetrievedAIModel = this;
         CrossSellModelingConfig advancedConfInAIModel = (CrossSellModelingConfig) config;
-        advancedConfInRetrievedAIModel.setModelingStrategy(advancedConfInAIModel.getModelingStrategy());
+        advancedConfInRetrievedAIModel
+                .setModelingStrategy(advancedConfInAIModel.getModelingStrategy());
         advancedConfInRetrievedAIModel.setTargetProducts(advancedConfInAIModel.getTargetProducts());
-        advancedConfInRetrievedAIModel.setTrainingProducts(advancedConfInAIModel.getTrainingProducts());
+        advancedConfInRetrievedAIModel
+                .setTrainingProducts(advancedConfInAIModel.getTrainingProducts());
         advancedConfInRetrievedAIModel.setFilters(advancedConfInAIModel.getFilters());
-        advancedConfInRetrievedAIModel.setDataCloudVersion(advancedConfInAIModel.getDataCloudVersion());
+        advancedConfInRetrievedAIModel
+                .setDataCloudVersion(advancedConfInAIModel.getDataCloudVersion());
     }
 }

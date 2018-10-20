@@ -33,7 +33,8 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            processTransactionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processTransactionStepConfiguration
+                    .setInternalResourceHostPort(internalResourceHostPort);
             updateTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             rebuildTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
@@ -64,8 +65,8 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         }
 
         public ProcessTransactionWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("processTransactionWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processTransactionWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processTransactionStepConfiguration);
             configuration.add(updateTransactionWorkflowBuilder.build());
             configuration.add(rebuildTransactionWorkflowBuilder.build());

@@ -22,7 +22,8 @@ public class DCEncodedAttr implements Serializable {
 
     // for jackson
     @SuppressWarnings("unused")
-	private DCEncodedAttr() {}
+    private DCEncodedAttr() {
+    }
 
     public DCEncodedAttr(String encAttr) {
         this.encAttr = encAttr;

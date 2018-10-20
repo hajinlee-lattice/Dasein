@@ -11,6 +11,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 // Defines how to construct an input record for a PMML model.
 public class DataComposition {
+    // All the fields from the event table that was used to create this model.
+    // This schema should match the input provided to the modeling service.
+    // Keyed by internal name of the column associated with this field.
+    public Map<String, FieldSchema> fields;
+    // The set of transforms to create new fields based on the existing ones.
+    // Theses will be executed in order, which should capture any dependencies.
+    public List<TransformDefinition> transforms;
+
     public DataComposition(Map<String, FieldSchema> fields, List<TransformDefinition> transforms) {
         this.fields = fields;
         this.transforms = transforms;
@@ -21,15 +29,6 @@ public class DataComposition {
         this.fields = new HashMap<String, FieldSchema>();
         this.transforms = new ArrayList<TransformDefinition>();
     }
-
-    // All the fields from the event table that was used to create this model.
-    // This schema should match the input provided to the modeling service.
-    // Keyed by internal name of the column associated with this field.
-    public Map<String, FieldSchema> fields;
-
-    // The set of transforms to create new fields based on the existing ones.
-    // Theses will be executed in order, which should capture any dependencies.
-    public List<TransformDefinition> transforms;
 
     @Override
     public int hashCode() {

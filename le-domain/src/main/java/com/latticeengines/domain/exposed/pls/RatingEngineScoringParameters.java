@@ -7,14 +7,11 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 public class RatingEngineScoringParameters {
 
     @JsonProperty
+    String sourceDisplayName;
+    @JsonProperty
     private EventFrontEndQuery targetFilterQuery;
-
     @JsonProperty
     private String tableToScoreName;
-
-    @JsonProperty
-    String sourceDisplayName;
-
     @JsonProperty
     private boolean expectedValue;
 

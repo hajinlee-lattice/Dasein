@@ -27,10 +27,6 @@ public enum SoftwareLibrary {
 
     private static final Map<String, SoftwareLibrary> nameMap = new HashMap<>();
 
-    private final String name;
-    private Set<Module> modules;
-    private final List<Dependency> depdencies = new ArrayList<>();
-
     static {
         for (SoftwareLibrary swlib : SoftwareLibrary.values()) {
             nameMap.put(swlib.getName(), swlib);
@@ -55,17 +51,23 @@ public enum SoftwareLibrary {
         ProspectDiscovery.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
     }
 
+    private final String name;
+    private final List<Dependency> depdencies = new ArrayList<>();
+    private Set<Module> modules;
+
+    SoftwareLibrary(String name) {
+        this.name = name;
+    }
+
     public static SoftwareLibrary fromName(String name) {
         return nameMap.get(name);
     }
 
-    public Set<Module> getModules() {
-        return modules;
-    }
-
-    public static List<SoftwareLibrary> getLoadingSequence(Module module, List<SoftwareLibrary> libs) {
+    public static List<SoftwareLibrary> getLoadingSequence(Module module,
+            List<SoftwareLibrary> libs) {
         TopologicalTraverse traverse = new TopologicalTraverse();
-        List<Dependency> init = libs.stream().map(l -> new Dependency(module, l)).collect(Collectors.toList());
+        List<Dependency> init = libs.stream().map(l -> new Dependency(module, l))
+                .collect(Collectors.toList());
         List<Dependency> deps = traverse.sort(init, dep -> new Dependency(dep.module, dep.lib));
         List<SoftwareLibrary> depLibs = new ArrayList<>();
         // not use stream, because not sure how it handles ordering, which is
@@ -78,8 +80,8 @@ public enum SoftwareLibrary {
         return depLibs;
     }
 
-    SoftwareLibrary(String name) {
-        this.name = name;
+    public Set<Module> getModules() {
+        return modules;
     }
 
     public String getName() {
@@ -105,7 +107,8 @@ public enum SoftwareLibrary {
 
         @Override
         public Collection<? extends GraphNode> getChildren() {
-            return lib.depdencies.stream().filter(c -> module.equals(c.module)).collect(Collectors.toList());
+            return lib.depdencies.stream().filter(c -> module.equals(c.module))
+                    .collect(Collectors.toList());
         }
 
         @Override

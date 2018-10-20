@@ -10,9 +10,8 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class ModelFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelFactory.class);
-
     public static final String MODEL_CONFIG = "modelConfig";
+    private static final Logger log = LoggerFactory.getLogger(ModelFactory.class);
 
     protected static SelectedConfig getModelConfig(Map<String, String> runTimeParams) {
         if (runTimeParams == null || !runTimeParams.containsKey(MODEL_CONFIG)) {
@@ -21,7 +20,8 @@ public class ModelFactory {
         }
         try {
             log.info("Model Config=" + runTimeParams.get(MODEL_CONFIG));
-            SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG), SelectedConfig.class);
+            SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG),
+                    SelectedConfig.class);
             return selectedConfig;
         } catch (Exception ex) {
             log.warn("Failed to get model config!");

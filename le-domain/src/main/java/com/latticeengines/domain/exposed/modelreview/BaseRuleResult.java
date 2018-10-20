@@ -62,13 +62,13 @@ public abstract class BaseRuleResult implements HasPid, HasTenant {
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    public Tenant getTenant() {
+        return tenant;
     }
 
     @Override
-    public Tenant getTenant() {
-        return tenant;
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public int getFlaggedItemCount() {

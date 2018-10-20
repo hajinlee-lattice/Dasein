@@ -37,8 +37,9 @@ public class AMSeedMergeWithoutDunsFunction extends BaseOperation implements Fun
     }
 
     public AMSeedMergeWithoutDunsFunction(Fields fieldDeclaration, Map<String, String> attrsFromLe,
-            String amsDunsColumn, String amsIsPrimaryDomainColumn, String amsIsPrimaryLocationColumn,
-            String amsNumberOfLocationColumn, String amsDomainSourceColumn, String leDomainSourceCol) {
+            String amsDunsColumn, String amsIsPrimaryDomainColumn,
+            String amsIsPrimaryLocationColumn, String amsNumberOfLocationColumn,
+            String amsDomainSourceColumn, String leDomainSourceCol) {
         this(fieldDeclaration);
         this.attrsFromLe = attrsFromLe;
         this.amsDunsLoc = namePositionMap.get(amsDunsColumn);
@@ -55,7 +56,8 @@ public class AMSeedMergeWithoutDunsFunction extends BaseOperation implements Fun
         Tuple result = Tuple.size(getFieldDeclaration().size());
         for (Map.Entry<String, String> entry : attrsFromLe.entrySet()) {
             if (entry.getValue() != null) {
-                result.set(namePositionMap.get(entry.getKey()), arguments.getObject(entry.getValue()));
+                result.set(namePositionMap.get(entry.getKey()),
+                        arguments.getObject(entry.getValue()));
             } else {
                 result.set(namePositionMap.get(entry.getKey()), null);
             }

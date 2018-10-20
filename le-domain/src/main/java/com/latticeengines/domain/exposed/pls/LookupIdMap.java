@@ -119,18 +119,13 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    @Override
     public Tenant getTenant() {
         return this.tenant;
     }
 
     @Override
-    public void setCreated(Date time) {
-        this.created = time;
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     @Override
@@ -139,13 +134,18 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     }
 
     @Override
-    public void setUpdated(Date time) {
-        this.updated = time;
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     @Override
     public Date getUpdated() {
         return this.updated;
+    }
+
+    @Override
+    public void setUpdated(Date time) {
+        this.updated = time;
     }
 
     public String getOrgId() {

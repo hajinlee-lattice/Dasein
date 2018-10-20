@@ -141,7 +141,8 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
         return rootIdsForNonRequiredDimensions;
     }
 
-    public void setRootIdsForNonRequiredDimensions(Map<String, Long> rootIdsForNonRequiredDimensions) {
+    public void setRootIdsForNonRequiredDimensions(
+            Map<String, Long> rootIdsForNonRequiredDimensions) {
         this.rootIdsForNonRequiredDimensions = rootIdsForNonRequiredDimensions;
     }
 

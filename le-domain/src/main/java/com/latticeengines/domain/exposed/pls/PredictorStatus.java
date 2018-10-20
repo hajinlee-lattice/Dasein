@@ -8,28 +8,20 @@ public enum PredictorStatus {
     NOT_USED_FOR_BUYER_INSIGHTS("0", false), //
     USED_FOR_BUYER_INSIGHTS("1", true); //
 
-    private String statusCode;
-    private boolean status;
-
-    private PredictorStatus(String statusCode, boolean status) {
-        this.statusCode = statusCode;
-        this.status = status;
-    }
-
-    public String getStatusCode() {
-        return this.statusCode;
-    }
-
-    public boolean getStatus() {
-        return this.status;
-    }
-
     private static Map<String, PredictorStatus> statusMap = new HashMap<String, PredictorStatus>();
 
     static {
         for (PredictorStatus predictorStatus : PredictorStatus.values()) {
             statusMap.put(predictorStatus.getStatusCode(), predictorStatus);
         }
+    }
+
+    private String statusCode;
+    private boolean status;
+
+    private PredictorStatus(String statusCode, boolean status) {
+        this.statusCode = statusCode;
+        this.status = status;
     }
 
     public static PredictorStatus getStatusByName(String statusName) {
@@ -45,5 +37,13 @@ public enum PredictorStatus {
             }
         }
         return "";
+    }
+
+    public String getStatusCode() {
+        return this.statusCode;
+    }
+
+    public boolean getStatus() {
+        return this.status;
     }
 }

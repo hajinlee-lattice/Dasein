@@ -13,24 +13,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ActivityMetricsActionConfiguration extends ActionConfiguration {
 
+    @JsonProperty("Activated")
+    private List<String> activated;
+    @JsonProperty("Updated")
+    private List<String> updated;
+    @JsonProperty("Deactivated")
+    private List<String> deactivated;
+
     public ActivityMetricsActionConfiguration() {
 
     }
 
-    public ActivityMetricsActionConfiguration(List<String> activated, List<String> updated, List<String> deactivated) {
+    public ActivityMetricsActionConfiguration(List<String> activated, List<String> updated,
+            List<String> deactivated) {
         this.activated = activated;
         this.updated = updated;
         this.deactivated = deactivated;
     }
-
-    @JsonProperty("Activated")
-    private List<String> activated;
-
-    @JsonProperty("Updated")
-    private List<String> updated;
-
-    @JsonProperty("Deactivated")
-    private List<String> deactivated;
 
     public List<String> getActivated() {
         return activated;

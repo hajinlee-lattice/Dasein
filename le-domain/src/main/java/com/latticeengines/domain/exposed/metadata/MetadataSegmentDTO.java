@@ -5,14 +5,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class MetadataSegmentDTO {
 
-    public MetadataSegmentDTO() {
-    }
-
     @JsonProperty("metadataSegment")
     private MetadataSegment metadataSegment;
-
     @JsonProperty("primaryKey")
     private Long primaryKey;
+
+    public MetadataSegmentDTO() {
+    }
 
     public MetadataSegment getMetadataSegment() {
         return this.metadataSegment;

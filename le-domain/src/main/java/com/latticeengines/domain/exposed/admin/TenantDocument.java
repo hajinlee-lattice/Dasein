@@ -17,25 +17,39 @@ public class TenantDocument {
     private BootstrapState bootstrapState;
 
     @JsonProperty("CustomerSpace")
-    public CustomerSpace getSpace() { return space; }
+    public CustomerSpace getSpace() {
+        return space;
+    }
 
     @JsonProperty("CustomerSpace")
-    public void setSpace(CustomerSpace space1) { this.space = space1; }
+    public void setSpace(CustomerSpace space1) {
+        this.space = space1;
+    }
 
     @JsonProperty("SpaceConfiguration")
-    public SpaceConfiguration getSpaceConfig() { return spaceConfig; }
+    public SpaceConfiguration getSpaceConfig() {
+        return spaceConfig;
+    }
 
     @JsonProperty("SpaceConfiguration")
-    public void setSpaceConfig(SpaceConfiguration spaceConfig) { this.spaceConfig = spaceConfig; }
+    public void setSpaceConfig(SpaceConfiguration spaceConfig) {
+        this.spaceConfig = spaceConfig;
+    }
 
     @JsonProperty("ContractInfo")
-    public ContractInfo getContractInfo() { return contractInfo; }
+    public ContractInfo getContractInfo() {
+        return contractInfo;
+    }
 
     @JsonProperty("ContractInfo")
-    public void setContractInfo(ContractInfo contractInfo1) { this.contractInfo = contractInfo1; }
+    public void setContractInfo(ContractInfo contractInfo1) {
+        this.contractInfo = contractInfo1;
+    }
 
     @JsonProperty("TenantInfo")
-    public TenantInfo getTenantInfo() { return tenantInfo; }
+    public TenantInfo getTenantInfo() {
+        return tenantInfo;
+    }
 
     @JsonProperty("TenantInfo")
     public void setTenantInfo(TenantInfo tenantInfo1) {
@@ -43,13 +57,19 @@ public class TenantDocument {
     }
 
     @JsonProperty("CustomerSpaceInfo")
-    public CustomerSpaceInfo getSpaceInfo() { return spaceInfo; }
+    public CustomerSpaceInfo getSpaceInfo() {
+        return spaceInfo;
+    }
 
     @JsonProperty("CustomerSpaceInfo")
-    public void setSpaceInfo(CustomerSpaceInfo spaceInfo1) { this.spaceInfo = spaceInfo1; }
+    public void setSpaceInfo(CustomerSpaceInfo spaceInfo1) {
+        this.spaceInfo = spaceInfo1;
+    }
 
     @JsonProperty("BootstrapState")
-    public BootstrapState getBootstrapState() { return bootstrapState; }
+    public BootstrapState getBootstrapState() {
+        return bootstrapState;
+    }
 
     @JsonProperty("BootstrapState")
     public void setBootstrapState(BootstrapState bootstrapState1) {

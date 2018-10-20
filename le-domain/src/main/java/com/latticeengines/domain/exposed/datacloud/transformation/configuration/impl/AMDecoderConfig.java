@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AMDecoderConfig extends TransformerConfig {
 
     @JsonProperty("DecodeFields")
-    private String[] decodeFields;  // attributes to decode
+    private String[] decodeFields; // attributes to decode
 
     @JsonProperty("RetainFields")
-    private String[] retainFields;  // plain attributes in target source
+    private String[] retainFields; // plain attributes in target source
 
     public String[] getDecodeFields() {
         return decodeFields;

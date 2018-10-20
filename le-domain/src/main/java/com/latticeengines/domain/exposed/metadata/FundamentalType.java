@@ -9,39 +9,28 @@ import java.util.stream.Collectors;
 
 public enum FundamentalType {
 
-    ALPHA("alpha"),
-    BOOLEAN("boolean"),
-    NUMERIC("numeric"),
-    PERCENTAGE("percentage"),
-    ENUM("enum"),
-    CURRENCY("currency"),
-    EMAIL("email"),
-    PHONE("phone"),
-    URI("uri"),
-    YEAR("year"),
-    DATE("date");
+    ALPHA("alpha"), BOOLEAN("boolean"), NUMERIC("numeric"), PERCENTAGE("percentage"), ENUM(
+            "enum"), CURRENCY("currency"), EMAIL(
+                    "email"), PHONE("phone"), URI("uri"), YEAR("year"), DATE("date");
 
     public static final String AVRO_PROP_KEY = "FundamentalType";
-
-    private final String name;
     private static Map<String, FundamentalType> nameMap;
     private static Set<String> values;
 
     static {
         nameMap = new HashMap<>();
-        for (FundamentalType fundamentalType: FundamentalType.values()) {
+        for (FundamentalType fundamentalType : FundamentalType.values()) {
             nameMap.put(fundamentalType.getName(), fundamentalType);
         }
-        values = new HashSet<>(Arrays.stream(values()).map(FundamentalType::name).collect(Collectors.toSet()));
+        values = new HashSet<>(
+                Arrays.stream(values()).map(FundamentalType::name).collect(Collectors.toSet()));
     }
+
+    private final String name;
 
     FundamentalType(String name) {
         this.name = name;
     }
-
-    public String getName() { return this.name; }
-
-    public String toString() { return this.name; }
 
     public static FundamentalType fromName(String name) {
         if (name == null) {
@@ -54,6 +43,14 @@ public enum FundamentalType {
         } else {
             throw new IllegalArgumentException("Cannot find a FundamentalType with name " + name);
         }
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String toString() {
+        return this.name;
     }
 
 }

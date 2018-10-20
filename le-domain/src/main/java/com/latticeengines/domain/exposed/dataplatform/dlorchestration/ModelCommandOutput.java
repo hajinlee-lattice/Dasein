@@ -8,18 +8,19 @@ public class ModelCommandOutput implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int id;
-    
+
     private int commandId;
-    
+
     private int sampleSize;
-    
+
     private String algorithm;
-    
+
     private String jsonPath;
-    
+
     private Date timestamp;
 
-    public ModelCommandOutput(int id, int commandId, int sampleSize, String algorithm, String jsonPath, Date timestamp) {
+    public ModelCommandOutput(int id, int commandId, int sampleSize, String algorithm,
+            String jsonPath, Date timestamp) {
         super();
         this.id = id;
         this.commandId = commandId;

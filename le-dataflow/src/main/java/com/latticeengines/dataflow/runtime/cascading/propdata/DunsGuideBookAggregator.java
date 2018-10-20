@@ -27,11 +27,6 @@ public class DunsGuideBookAggregator extends BaseAggregator<DunsGuideBookAggrega
     private int dunsIdx;
     private int itemsIdx;
 
-    public static class Context extends BaseAggregator.Context {
-        List<DunsGuideBook.Item> guideBooks;
-        String duns;
-    }
-
     public DunsGuideBookAggregator(Fields fieldDeclaration, Map<String, Integer> bookPriority) {
         super(fieldDeclaration);
         this.bookPriority = bookPriority;
@@ -73,23 +68,29 @@ public class DunsGuideBookAggregator extends BaseAggregator<DunsGuideBookAggrega
         Map<String, Pair<String, String>> map = new HashMap<>();
         context.guideBooks.forEach(guideBook -> {
             // Choose DunsRedirectBook with higher priority (lower value)
-            if (!map.containsKey(guideBook.getKeyPartition())
-                    || bookPriority.get(map.get(guideBook.getKeyPartition()).getRight()) > bookPriority
+            if (!map.containsKey(guideBook.getKeyPartition()) || bookPriority
+                    .get(map.get(guideBook.getKeyPartition()).getRight()) > bookPriority
                             .get(guideBook.getBookSource())) {
-                map.put(guideBook.getKeyPartition(), Pair.of(guideBook.getDuns(), guideBook.getBookSource()));
+                map.put(guideBook.getKeyPartition(),
+                        Pair.of(guideBook.getDuns(), guideBook.getBookSource()));
             }
         });
         List<DunsGuideBook.Item> finalGuideBook = new ArrayList<>();
         // KeyPartition -> (TargetDuns, BookSource)
         for (Map.Entry<String, Pair<String, String>> ent : map.entrySet()) {
-            finalGuideBook
-                    .add(new DunsGuideBook.Item(ent.getValue().getLeft(), ent.getKey(), ent.getValue().getRight()));
+            finalGuideBook.add(new DunsGuideBook.Item(ent.getValue().getLeft(), ent.getKey(),
+                    ent.getValue().getRight()));
         }
 
         Tuple result = Tuple.size(getFieldDeclaration().size());
         result.set(dunsIdx, context.duns);
         result.set(itemsIdx, JsonUtils.serialize(finalGuideBook));
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        List<DunsGuideBook.Item> guideBooks;
+        String duns;
     }
 
 }

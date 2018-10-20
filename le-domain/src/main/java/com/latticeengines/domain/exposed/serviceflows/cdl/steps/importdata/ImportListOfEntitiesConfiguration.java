@@ -12,7 +12,7 @@ public class ImportListOfEntitiesConfiguration extends MicroserviceStepConfigura
 
     private Map<String, ImportSourceDataConfiguration> importConfigurations = new HashMap<>();
     private SourceFile sourceFile;
-    
+
     public Map<String, ImportSourceDataConfiguration> getImportConfigs() {
         return importConfigurations;
     }
@@ -36,7 +36,8 @@ public class ImportListOfEntitiesConfiguration extends MicroserviceStepConfigura
         if (importConfigurations == null) {
             return;
         }
-        importConfigurations.values().stream().forEach(x -> x.setMicroServiceHostPort(microServiceHostPort));
+        importConfigurations.values().stream()
+                .forEach(x -> x.setMicroServiceHostPort(microServiceHostPort));
     }
 
     @Override
@@ -45,7 +46,8 @@ public class ImportListOfEntitiesConfiguration extends MicroserviceStepConfigura
         if (importConfigurations == null) {
             return;
         }
-        importConfigurations.values().stream().forEach(x -> x.setInternalResourceHostPort(internalResourceHostPort));
+        importConfigurations.values().stream()
+                .forEach(x -> x.setInternalResourceHostPort(internalResourceHostPort));
     }
 
     public SourceFile getSourceFile() {
@@ -57,9 +59,9 @@ public class ImportListOfEntitiesConfiguration extends MicroserviceStepConfigura
     }
 
     public static class Builder {
-        
+
         private Map<String, ImportSourceDataConfiguration> importConfigs = new HashMap<>();
-        
+
         private ImportSourceDataConfiguration getStageConfigurationByName(String name) {
             ImportSourceDataConfiguration importConfig = importConfigs.get(name);
             if (importConfig == null) {
@@ -68,21 +70,22 @@ public class ImportListOfEntitiesConfiguration extends MicroserviceStepConfigura
             }
             return importConfig;
         }
-        
+
         public Builder sourceFile(String name, SourceFile sourceFile) {
             ImportSourceDataConfiguration config = getStageConfigurationByName(name);
             config.setSourceFile(sourceFile);
             return this;
         }
-        
+
         public ImportListOfEntitiesConfiguration build() {
             ImportListOfEntitiesConfiguration config = new ImportListOfEntitiesConfiguration();
             importConfigs.values().stream().forEach(x -> x.setSourceType(SourceType.FILE));
-            importConfigs.values().stream().forEach(x -> x.setSourceFileName(x.getSourceFile().getName()));
+            importConfigs.values().stream()
+                    .forEach(x -> x.setSourceFileName(x.getSourceFile().getName()));
             config.setImportConfigs(importConfigs);
-            
+
             return config;
         }
-        
+
     }
 }

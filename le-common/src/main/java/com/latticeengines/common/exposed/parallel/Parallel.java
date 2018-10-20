@@ -20,7 +20,8 @@ public class Parallel {
         }
     }
 
-    private static <T> Collection<Callable<Void>> createCallables(final Iterable<T> elements, final Operation<T> operation) {
+    private static <T> Collection<Callable<Void>> createCallables(final Iterable<T> elements,
+            final Operation<T> operation) {
         List<Callable<Void>> callables = new LinkedList<>();
         for (final T elem : elements) {
             callables.add(new Callable<Void>() {

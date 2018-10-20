@@ -28,7 +28,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "SEGMENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+@Table(name = "SEGMENT", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
 
@@ -56,22 +57,15 @@ public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
 
     @Override
     @JsonIgnore
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    @Override
-    @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     public Long getTenantId() {
         return tenantId;
     }
 
-    @JsonIgnore
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        setTenantId(tenant.getPid());
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
@@ -81,6 +75,13 @@ public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return tenant;
+    }
+
+    @JsonIgnore
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        setTenantId(tenant.getPid());
     }
 
     @JsonProperty("Name")

@@ -36,13 +36,12 @@ public class TransactionRestriction extends Restriction {
     }
 
     public TransactionRestriction(String productId, TimeFilter timeFilter, boolean negate, //
-                                  AggregationFilter spentFilter, AggregationFilter unitFilter) {
+            AggregationFilter spentFilter, AggregationFilter unitFilter) {
         this(productId, timeFilter, negate, spentFilter, unitFilter, false);
     }
 
     public TransactionRestriction(String productId, TimeFilter timeFilter, boolean negate, //
-                                  AggregationFilter spentFilter, AggregationFilter unitFilter,
-                                  boolean skipOffset) {
+            AggregationFilter spentFilter, AggregationFilter unitFilter, boolean skipOffset) {
         this.productId = productId;
         this.timeFilter = timeFilter;
         this.negate = negate;
@@ -89,8 +88,9 @@ public class TransactionRestriction extends Restriction {
 
     public void setSpentFilter(AggregationFilter spentFilter) {
         if (spentFilter != null && AggregationSelector.SPENT != spentFilter.getSelector()) {
-            throw new IllegalArgumentException("Invalid aggregation selector for spent filter. Valid type should be " +
-                                               AggregationSelector.SPENT);
+            throw new IllegalArgumentException(
+                    "Invalid aggregation selector for spent filter. Valid type should be "
+                            + AggregationSelector.SPENT);
         }
         this.spentFilter = spentFilter;
     }
@@ -101,8 +101,9 @@ public class TransactionRestriction extends Restriction {
 
     public void setUnitFilter(AggregationFilter unitFilter) {
         if (unitFilter != null && AggregationSelector.UNIT != unitFilter.getSelector()) {
-            throw new IllegalArgumentException("Invalid aggregation selector for unit filter. Valid type should be " +
-                                               AggregationSelector.UNIT);
+            throw new IllegalArgumentException(
+                    "Invalid aggregation selector for unit filter. Valid type should be "
+                            + AggregationSelector.UNIT);
         }
         this.unitFilter = unitFilter;
     }

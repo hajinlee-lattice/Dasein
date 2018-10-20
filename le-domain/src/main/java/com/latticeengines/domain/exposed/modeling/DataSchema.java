@@ -18,13 +18,13 @@ public class DataSchema implements HasName {
     private String doc;
     private String tableName;
     private List<Field> fields = new ArrayList<Field>();
-    
+
     public DataSchema() {
     }
-    
+
     public DataSchema(Schema avroSchema) {
         List<org.apache.avro.Schema.Field> fields = avroSchema.getFields();
-        
+
         for (org.apache.avro.Schema.Field field : fields) {
             Field f = new Field();
             f.setName(field.name());

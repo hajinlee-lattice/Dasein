@@ -13,7 +13,8 @@ public class SlackSettings {
 
     private Color color;
 
-    public SlackSettings(String webHookUrl, String title, String pretext, String text, String userName, Color color) {
+    public SlackSettings(String webHookUrl, String title, String pretext, String text,
+            String userName, Color color) {
         this.webHookUrl = webHookUrl;
         this.title = title;
         this.pretext = pretext;

@@ -7,7 +7,7 @@ public enum LedpMetricsInfo implements MetricsInfo {
     AppId("Application attempt id"), //
     ContainerId("Container id"), //
     Priority("Priority"), //
-	Queue("Queue"),
+    Queue("Queue"), //
     Customer("Customer");
 
     private final String description;

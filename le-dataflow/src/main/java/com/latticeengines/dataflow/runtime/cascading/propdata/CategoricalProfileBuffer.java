@@ -31,8 +31,8 @@ public class CategoricalProfileBuffer extends BaseOperation implements Buffer {
 
     private Map<String, Integer> namePositionMap;
 
-    public CategoricalProfileBuffer(Fields fieldDeclaration, String catAttrField, String catValueField,
-            String nonCatFlag, int maxCat) {
+    public CategoricalProfileBuffer(Fields fieldDeclaration, String catAttrField,
+            String catValueField, String nonCatFlag, int maxCat) {
         super(fieldDeclaration);
         this.catAttrField = catAttrField;
         this.catValueField = catValueField;
@@ -84,7 +84,8 @@ public class CategoricalProfileBuffer extends BaseOperation implements Buffer {
         } else {
             CategoricalBucket bucket = new CategoricalBucket();
             bucket.setCategories(new ArrayList<>(dict));
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), JsonUtils.serialize(bucket));
+            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                    JsonUtils.serialize(bucket));
         }
         bufferCall.getOutputCollector().add(result);
     }

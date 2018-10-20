@@ -23,11 +23,10 @@ import cascading.pipe.Boundary;
 
 public class BoundaryElementFactory implements ElementFactory {
 
-	public static final String BOUNDARY_FACTORY = "cascading.registry.boundary";
+    public static final String BOUNDARY_FACTORY = "cascading.registry.boundary";
 
-	@Override
-	public FlowElement create( ElementGraph graph, FlowElement flowElement )
-	{
-		return new Boundary();
-	}
+    @Override
+    public FlowElement create(ElementGraph graph, FlowElement flowElement) {
+        return new Boundary();
+    }
 }

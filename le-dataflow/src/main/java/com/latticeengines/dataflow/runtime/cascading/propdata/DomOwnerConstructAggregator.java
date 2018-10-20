@@ -14,7 +14,20 @@ import cascading.tuple.TupleEntry;
 public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstructAggregator.Context>
         implements Aggregator<DomOwnerConstructAggregator.Context> {
 
+    public final static String GOVERNMENT = "Government";
+    public final static String EDUCATION = "Education";
+    public final static String NON_PROFIT = "Non-profit";
+    public final static Long NON_PROFIT_TOTAL_SALES = 1000000L;
+    public final static Integer NON_PROFIT_TOTAL_EMP = 200;
     private static final long serialVersionUID = -4258093110031791835L;
+    private final static String FRANCHISE = "FRANCHISE";
+    private final static String HIGHER_SALES_VOLUME = "HIGHER_SALES_VOLUME";
+    private final static String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
+    private final static String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
+    private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
+    private final static String MISSING_ROOT_DUNS = "MISSING_ROOT_DUNS";
+    private final static String SINGLE_TREE = "SINGLE_TREE";
+    private final static String OTHER = "OTHER";
     private String domainField = DataCloudConstants.AMS_ATTR_DOMAIN;
     private String rootDunsField;
     private String treeRootDunsField;
@@ -25,43 +38,16 @@ public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstruc
     private String primIndustryField = DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY;
     private Long multLargeCompThreshold;
     private int franchiseThreshold;
-    private final static String FRANCHISE = "FRANCHISE";
-    private final static String HIGHER_SALES_VOLUME = "HIGHER_SALES_VOLUME";
-    private final static String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
-    private final static String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
-    private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
-    private final static String MISSING_ROOT_DUNS = "MISSING_ROOT_DUNS";
-    private final static String SINGLE_TREE = "SINGLE_TREE";
-    private final static String OTHER = "OTHER";
-    public final static String GOVERNMENT = "Government";
-    public final static String EDUCATION = "Education";
-    public final static String NON_PROFIT = "Non-profit";
-    public final static Long NON_PROFIT_TOTAL_SALES = 1000000L;
-    public final static Integer NON_PROFIT_TOTAL_EMP = 200;
 
-    public DomOwnerConstructAggregator(Fields fieldDeclaration, String rootDunsField, String treeRootDunsField,
-            String dunsTypeField, Long multLargeCompThreshold, int franchiseThreshold) {
+    public DomOwnerConstructAggregator(Fields fieldDeclaration, String rootDunsField,
+            String treeRootDunsField, String dunsTypeField, Long multLargeCompThreshold,
+            int franchiseThreshold) {
         super(fieldDeclaration);
         this.rootDunsField = rootDunsField;
         this.treeRootDunsField = treeRootDunsField;
         this.dunsTypeField = dunsTypeField;
         this.multLargeCompThreshold = multLargeCompThreshold;
         this.franchiseThreshold = franchiseThreshold;
-    }
-
-    public static class Context extends BaseAggregator.Context {
-        int numOfTrees = 0;
-        int numOfLargeComp = 0;
-        String domain = null;
-        String duns = null;
-        String rootDuns = null;
-        String dunsType = null;
-        String reasonType = null;
-        Long salesVol = 0L;
-        int empTotal = 0;
-        int numOfLoc = 0;
-        boolean isNonProfitable = false;
-        Tuple result;
     }
 
     @Override
@@ -142,7 +128,8 @@ public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstruc
         if (empTotalVal == null)
             empTotalVal = 0;
         if (primaryIndustry != null && //
-                (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION) || primaryIndustry.equals(NON_PROFIT)) //
+                (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION)
+                        || primaryIndustry.equals(NON_PROFIT)) //
                 || (salesVolVal < NON_PROFIT_TOTAL_SALES && empTotalVal > NON_PROFIT_TOTAL_EMP)) {
             return true;
         }
@@ -180,7 +167,8 @@ public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstruc
     private int checkRuleLargerLong(Long checking, Long checked) {
         if (checking != null && (checked == null || checking.longValue() > checked.longValue())) {
             return 1;
-        } else if (checked != null && (checking == null || checked.longValue() > checking.longValue())) {
+        } else if (checked != null
+                && (checking == null || checked.longValue() > checking.longValue())) {
             return -1;
         } else {
             return 0;
@@ -190,7 +178,8 @@ public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstruc
     private int checkRuleLargerIntegers(Integer checking, Integer checked) {
         if (checking != null && (checked == null || checking.intValue() > checked.intValue())) {
             return 1;
-        } else if (checked != null && (checking == null || checked.intValue() > checking.intValue())) {
+        } else if (checked != null
+                && (checking == null || checked.intValue() > checking.intValue())) {
             return -1;
         } else {
             return 0;
@@ -208,5 +197,20 @@ public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstruc
         context.result.set(4, context.reasonType);
         context.result.set(5, context.isNonProfitable);
         return context.result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        int numOfTrees = 0;
+        int numOfLargeComp = 0;
+        String domain = null;
+        String duns = null;
+        String rootDuns = null;
+        String dunsType = null;
+        String reasonType = null;
+        Long salesVol = 0L;
+        int empTotal = 0;
+        int numOfLoc = 0;
+        boolean isNonProfitable = false;
+        Tuple result;
     }
 }

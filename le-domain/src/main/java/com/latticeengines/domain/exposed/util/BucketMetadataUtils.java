@@ -17,7 +17,8 @@ public class BucketMetadataUtils {
      * @param sortedBucketMetadataList
      *            should be sorted by lower bound asc
      */
-    public static BucketMetadata bucketMetadata(List<BucketMetadata> sortedBucketMetadataList, double score) {
+    public static BucketMetadata bucketMetadata(List<BucketMetadata> sortedBucketMetadataList,
+            double score) {
         BucketMetadata result = null;
         for (BucketMetadata bucketMetadata : sortedBucketMetadataList) {
             if (score >= bucketMetadata.getRightBoundScore()) {
@@ -28,7 +29,8 @@ public class BucketMetadataUtils {
         }
         if (result == null) {
             BucketMetadata minBucket = sortedBucketMetadataList.get(0);
-            log.warn(String.format("%f is less than minimum bound, setting to %s", score, minBucket.getBucketName()));
+            log.warn(String.format("%f is less than minimum bound, setting to %s", score,
+                    minBucket.getBucketName()));
             result = minBucket;
         }
         return result;
@@ -44,7 +46,8 @@ public class BucketMetadataUtils {
     }
 
     @SuppressWarnings("deprecation")
-	public static BucketMetadata bucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+    public static BucketMetadata bucket(int leftBoundScore, int rightBoundScore,
+            BucketName bucketName) {
         BucketMetadata bucket = new BucketMetadata();
         bucket.setLeftBoundScore(leftBoundScore);
         bucket.setRightBoundScore(rightBoundScore);

@@ -19,7 +19,8 @@ public class WindowFunctionLookup extends Lookup {
     @JsonProperty("target")
     private Lookup target;
 
-    // right now we only support partition by, no order by, will add more as needed
+    // right now we only support partition by, no order by, will add more as
+    // needed
     @JsonProperty("partition_by")
     private List<Lookup> partitionBy = new ArrayList<>();
 
@@ -35,7 +36,8 @@ public class WindowFunctionLookup extends Lookup {
     }
 
     public static WindowFunctionLookup sum(Lookup target, Lookup partition, String alias) {
-        return new WindowFunctionLookup(FunctionType.SUM, target).withPartition(partition).as(alias);
+        return new WindowFunctionLookup(FunctionType.SUM, target).withPartition(partition)
+                .as(alias);
     }
 
     public static WindowFunctionLookup max(Lookup target, String alias) {
@@ -56,28 +58,28 @@ public class WindowFunctionLookup extends Lookup {
         return functionType;
     }
 
-    public Lookup getTarget() {
-        return target;
-    }
-
-    public List<Lookup> getPartitionBy() {
-        return partitionBy;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
     public void setFunctionType(FunctionType functionType) {
         this.functionType = functionType;
+    }
+
+    public Lookup getTarget() {
+        return target;
     }
 
     public void setTarget(Lookup target) {
         this.target = target;
     }
 
+    public List<Lookup> getPartitionBy() {
+        return partitionBy;
+    }
+
     public void setPartitionBy(List<Lookup> partitionBy) {
         this.partitionBy = partitionBy;
+    }
+
+    public String getAlias() {
+        return alias;
     }
 
     public void setAlias(String alias) {

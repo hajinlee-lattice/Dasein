@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.serviceapps.lp;
 
-
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

@@ -47,12 +47,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
-
-    private static final long serialVersionUID = -4779448415471374224L;
+public class Attribute
+        implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
     public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 300M
-
+    private static final long serialVersionUID = -4779448415471374224L;
     /*
      * For batching to work, we need to make a schema change to take off
      * AutoIncrement from ID column. Because of code difference between
@@ -230,10 +229,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return logicalDataType;
     }
 
-    public void setLogicalDataType(LogicalDataType logicalDataType) {
-        this.logicalDataType = logicalDataType;
-    }
-
     @JsonIgnore
     public void setLogicalDataType(String logicalDataTypeString) {
         LogicalDataType logicalDataType = null;
@@ -245,6 +240,10 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (logicalDataType != null) {
             setLogicalDataType(logicalDataType);
         }
+    }
+
+    public void setLogicalDataType(LogicalDataType logicalDataType) {
+        this.logicalDataType = logicalDataType;
     }
 
     /**
@@ -277,14 +276,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setInterfaceName(InterfaceName interfaceName) {
-        if (interfaceName != null) {
-            properties.put("InterfaceName", interfaceName.toString());
-        }
-    }
-
-    @Transient
-    @JsonIgnore
     public void setInterfaceName(String interfaceNameString) {
         InterfaceName interfaceName = null;
         try {
@@ -294,6 +285,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
         if (interfaceName != null) {
             setInterfaceName(interfaceName);
+        }
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setInterfaceName(InterfaceName interfaceName) {
+        if (interfaceName != null) {
+            properties.put("InterfaceName", interfaceName.toString());
         }
     }
 
@@ -501,14 +500,15 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setSourceAttrName(String sourceAttrName) {
-        setPropertyValue("SourceAttrName", sourceAttrName);
+    public String getSourceAttrName() {
+        return getPropertyValue("SourceAttrName") != null
+                ? getPropertyValue("SourceAttrName").toString() : null;
     }
 
     @Transient
     @JsonIgnore
-    public String getSourceAttrName() {
-        return getPropertyValue("SourceAttrName") != null ? getPropertyValue("SourceAttrName").toString() : null;
+    public void setSourceAttrName(String sourceAttrName) {
+        setPropertyValue("SourceAttrName", sourceAttrName);
     }
 
     @Transient
@@ -521,12 +521,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setApprovedUsage(ApprovedUsage... approvedUsages) {
         properties.put("ApprovedUsage", getStringValuesFromEnums(approvedUsages));
-    }
-
-    @Transient
-    @JsonIgnore
-    public void setApprovedUsage(List<String> approvedUsage) {
-        properties.put("ApprovedUsage", approvedUsage);
     }
 
     @Transient
@@ -544,8 +538,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
-        properties.put("IsCoveredByOptionalRule", isCoveredByOptionalRule);
+    public void setApprovedUsage(List<String> approvedUsage) {
+        properties.put("ApprovedUsage", approvedUsage);
     }
 
     @Transient
@@ -574,8 +568,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
-        properties.put("IsCoveredByMandatoryRule", isCoveredByMandatoryRule);
+    public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
+        properties.put("IsCoveredByOptionalRule", isCoveredByOptionalRule);
     }
 
     @Transient
@@ -585,6 +579,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             return (Boolean) properties.get("IsCoveredByMandatoryRule");
         }
         return false;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
+        properties.put("IsCoveredByMandatoryRule", isCoveredByMandatoryRule);
     }
 
     @Transient
@@ -622,18 +622,19 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public String getStatisticalType() {
+        return getPropertyValue("StatisticalType") != null
+                ? getPropertyValue("StatisticalType").toString() : null;
+    }
+
+    @Transient
+    @JsonIgnore
     public void setStatisticalType(StatisticalType statisticalType) {
         if (statisticalType == null) {
             properties.remove("StatisticalType");
         } else {
             properties.put("StatisticalType", statisticalType.getName());
         }
-    }
-
-    @Transient
-    @JsonIgnore
-    public String getStatisticalType() {
-        return getPropertyValue("StatisticalType") != null ? getPropertyValue("StatisticalType").toString() : null;
     }
 
     /**
@@ -643,6 +644,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setFundamentalType(String fundamentalType) {
         properties.put("FundamentalType", fundamentalType);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getFundamentalType() {
+        return getPropertyValue("FundamentalType") != null
+                ? getPropertyValue("FundamentalType").toString() : null;
     }
 
     @Transient
@@ -657,8 +665,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getFundamentalType() {
-        return getPropertyValue("FundamentalType") != null ? getPropertyValue("FundamentalType").toString() : null;
+    public String getDataQuality() {
+        return (String) properties.get("DataQuality");
     }
 
     /**
@@ -672,14 +680,15 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getDataQuality() {
-        return (String) properties.get("DataQuality");
-    }
-
-    @Transient
-    @JsonIgnore
     public void setDataSource(String dataSource) {
         setListPropertyFromString("DataSource", dataSource);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Transient
+    @JsonIgnore
+    public List<String> getDataSource() {
+        return (List<String>) properties.get("DataSource");
     }
 
     @Transient
@@ -688,11 +697,10 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         properties.put("DataSource", dataSource);
     }
 
-    @SuppressWarnings("unchecked")
     @Transient
     @JsonIgnore
-    public List<String> getDataSource() {
-        return (List<String>) properties.get("DataSource");
+    public String getDisplayDiscretizationStrategy() {
+        return (String) properties.get("DisplayDiscretizationStrategy");
     }
 
     /**
@@ -706,20 +714,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getDisplayDiscretizationStrategy() {
-        return (String) properties.get("DisplayDiscretizationStrategy");
+    public String getDescription() {
+        return (String) properties.get("Description");
     }
 
     @Transient
     @JsonIgnore
     public void setDescription(String description) {
         properties.put("Description", description);
-    }
-
-    @Transient
-    @JsonIgnore
-    public String getDescription() {
-        return (String) properties.get("Description");
     }
 
     /**
@@ -739,15 +741,21 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public List<String> getTags() {
+        return (List<String>) properties.get("Tags");
+    }
+
+    @Transient
+    @JsonIgnore
     public void setTags(List<String> tags) {
         properties.put("Tags", tags);
     }
 
     @Transient
     @JsonIgnore
-    @SuppressWarnings("unchecked")
-    public List<String> getTags() {
-        return (List<String>) properties.get("Tags");
+    public String getPhysicalName() {
+        return (String) properties.get("PhysicalName");
     }
 
     /**
@@ -761,14 +769,15 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getPhysicalName() {
-        return (String) properties.get("PhysicalName");
+    public void setCategory(String category) {
+        setPropertyValue("Category", category);
     }
 
     @Transient
     @JsonIgnore
-    public void setCategory(String category) {
-        setPropertyValue("Category", category);
+    public String getCategory() {
+        return getPropertyValue("Category") != null ? getPropertyValue("Category").toString()
+                : null;
     }
 
     @Transient
@@ -779,8 +788,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getCategory() {
-        return getPropertyValue("Category") != null ? getPropertyValue("Category").toString() : null;
+    public String getSubcategory() {
+        return getPropertyValue("Subcategory") != null ? getPropertyValue("Subcategory").toString()
+                : null;
     }
 
     @Transient
@@ -791,8 +801,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getSubcategory() {
-        return getPropertyValue("Subcategory") != null ? getPropertyValue("Subcategory").toString() : null;
+    public String getDataType() {
+        return getPropertyValue("DataType") != null ? getPropertyValue("DataType").toString()
+                : null;
     }
 
     /**
@@ -806,8 +817,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getDataType() {
-        return getPropertyValue("DataType") != null ? getPropertyValue("DataType").toString() : null;
+    public String getRTSModuleName() {
+        return (String) properties.get("RTSModuleName");
     }
 
     @Transient
@@ -818,20 +829,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public String getRTSModuleName() {
-        return (String) properties.get("RTSModuleName");
+    public String getRTSArguments() {
+        return (String) properties.get("RTSArguments");
     }
 
     @Transient
     @JsonIgnore
     public void setRTSArguments(String rtsArguments) {
         properties.put("RTSArguments", rtsArguments);
-    }
-
-    @Transient
-    @JsonIgnore
-    public String getRTSArguments() {
-        return (String) properties.get("RTSArguments");
     }
 
     @Transient
@@ -846,14 +851,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setRTSAttribute(Boolean rts) {
-        properties.put("RTSAttribute", rts);
+    public void setRTSAttribute(String rts) {
+        properties.put("RTSAttribute", Boolean.valueOf(rts));
     }
 
     @Transient
     @JsonIgnore
-    public void setRTSAttribute(String rts) {
-        properties.put("RTSAttribute", Boolean.valueOf(rts));
+    public void setRTSAttribute(Boolean rts) {
+        properties.put("RTSAttribute", rts);
     }
 
     @Transient
@@ -875,7 +880,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public String getDefaultValueStr() {
-        return properties.get("DefaultValueStr") != null ? properties.get("DefaultValueStr").toString() : null;
+        return properties.get("DefaultValueStr") != null
+                ? properties.get("DefaultValueStr").toString() : null;
     }
 
     @Transient
@@ -891,16 +897,16 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (List<String>) properties.get("AllowedDisplayNames");
     }
 
-    @Transient
-    @JsonIgnore
-    public void setAllowedDisplayNames(List<String> allowedDisplayNames) {
-        properties.put("AllowedDisplayNames", allowedDisplayNames);
-    }
-
     @JsonIgnore
     @Transient
     public void setAllowedDisplayNames(String allowedDisplayNamesString) {
         setListPropertyFromString("AllowedDisplayNames", allowedDisplayNamesString);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setAllowedDisplayNames(List<String> allowedDisplayNames) {
+        properties.put("AllowedDisplayNames", allowedDisplayNames);
     }
 
     @JsonIgnore
@@ -1007,26 +1013,26 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setBitOffset(Integer bitOffset) {
-        properties.put("BitOffset", bitOffset);
-    }
-
-    @Transient
-    @JsonIgnore
     public Integer getBitOffset() {
         return (Integer) properties.get("BitOffset");
     }
 
     @Transient
     @JsonIgnore
-    public void setNumOfBits(Integer numOfBits) {
-        properties.put("NumOfBits", numOfBits);
+    public void setBitOffset(Integer bitOffset) {
+        properties.put("BitOffset", bitOffset);
     }
 
     @Transient
     @JsonIgnore
     public Integer getNumOfBits() {
         return (Integer) properties.get("NumOfBits");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setNumOfBits(Integer numOfBits) {
+        properties.put("NumOfBits", numOfBits);
     }
 
     @Override
@@ -1085,7 +1091,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         List<String> tags = getTags();
         if (tags != null) {
             for (String tag : tags) {
-                if (tag.equals(Tag.INTERNAL.toString()) || tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
+                if (tag.equals(Tag.INTERNAL.toString())
+                        || tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
                     isInternalAttributeOrTransform = true;
                     break;
                 }
@@ -1103,7 +1110,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         List<String> tags = getTags();
         if (tags != null) {
             for (String tag : tags) {
-                if (tag.equals(Tag.INTERNAL.toString()) || tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
+                if (tag.equals(Tag.INTERNAL.toString())
+                        || tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
                     return true;
                 }
             }
@@ -1159,8 +1167,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             try {
                 metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
             } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Cannot parse fundamental type " + getFundamentalType() + " for attribute " + getName());
+                throw new IllegalArgumentException("Cannot parse fundamental type "
+                        + getFundamentalType() + " for attribute " + getName());
             }
         }
 
@@ -1182,8 +1190,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setNumBits(getNumOfBits());
         metadata.setPhysicalName(getPhysicalName());
         if (CollectionUtils.isNotEmpty(getApprovedUsage())) {
-            metadata.setApprovedUsageList(
-                    getApprovedUsage().stream().map(ApprovedUsage::fromName).collect(Collectors.toList()));
+            metadata.setApprovedUsageList(getApprovedUsage().stream().map(ApprovedUsage::fromName)
+                    .collect(Collectors.toList()));
         }
         metadata.setIsCoveredByMandatoryRule(getIsCoveredByMandatoryRule());
         metadata.setIsCoveredByOptionalRule(getIsCoveredByOptionalRule());

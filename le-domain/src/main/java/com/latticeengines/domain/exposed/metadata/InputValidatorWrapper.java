@@ -30,7 +30,8 @@ public class InputValidatorWrapper implements Serializable {
         try {
             return Class.forName(rawType);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(String.format("Could not locate class with name %s", rawType), e);
+            throw new RuntimeException(
+                    String.format("Could not locate class with name %s", rawType), e);
         }
     }
 

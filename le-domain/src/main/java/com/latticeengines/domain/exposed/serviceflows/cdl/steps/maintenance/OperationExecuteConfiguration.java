@@ -13,7 +13,8 @@ public class OperationExecuteConfiguration extends BaseReportStepConfiguration {
         return maintenanceOperationConfiguration;
     }
 
-    public void setMaintenanceOperationConfiguration(MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+    public void setMaintenanceOperationConfiguration(
+            MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
         this.maintenanceOperationConfiguration = maintenanceOperationConfiguration;
     }
 }

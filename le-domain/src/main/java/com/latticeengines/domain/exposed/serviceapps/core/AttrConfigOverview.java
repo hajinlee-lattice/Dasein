@@ -22,28 +22,28 @@ public class AttrConfigOverview<T extends Serializable> {
     @JsonProperty("PropSummary")
     private Map<String, Map<T, Long>> propSummary;
 
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
     public Category getCategory() {
         return this.category;
     }
 
-    public void setTotalAttrs(Long totalAttrs) {
-        this.totalAttrs = totalAttrs;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Long getTotalAttrs() {
         return this.totalAttrs;
     }
 
-    public void setLimit(Long limit) {
-        this.limit = limit;
+    public void setTotalAttrs(Long totalAttrs) {
+        this.totalAttrs = totalAttrs;
     }
 
     public Long getLimit() {
         return this.limit;
+    }
+
+    public void setLimit(Long limit) {
+        this.limit = limit;
     }
 
     public Map<String, Map<T, Long>> getPropSummary() {

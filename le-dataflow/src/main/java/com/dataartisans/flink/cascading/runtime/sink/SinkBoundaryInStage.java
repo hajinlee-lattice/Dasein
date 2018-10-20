@@ -31,59 +31,56 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class SinkBoundaryInStage extends ElementStage<Void, TupleEntry> implements InputSource {
 
-	private boolean nextStarted;
-	private TupleEntry tupleEntry;
+    private boolean nextStarted;
+    private TupleEntry tupleEntry;
 
-	public SinkBoundaryInStage(FlowProcess flowProcess, FlowElement flowElement, FlowNode node) {
-		super(flowProcess, flowElement);
-		this.nextStarted = false;
+    public SinkBoundaryInStage(FlowProcess flowProcess, FlowElement flowElement, FlowNode node) {
+        super(flowProcess, flowElement);
+        this.nextStarted = false;
 
-		Scope inScope = node.getElementGraph().incomingEdgesOf(flowElement).iterator().next();
+        Scope inScope = node.getElementGraph().incomingEdgesOf(flowElement).iterator().next();
 
-		Fields inFields;
-		if(inScope.isEvery()) {
-			inFields = inScope.getOutGroupingFields();
-		}
-		else {
-			inFields = inScope.getOutValuesFields();
-		}
+        Fields inFields;
+        if (inScope.isEvery()) {
+            inFields = inScope.getOutGroupingFields();
+        } else {
+            inFields = inScope.getOutValuesFields();
+        }
 
-		this.tupleEntry = new TupleEntry(inFields);
-	}
+        this.tupleEntry = new TupleEntry(inFields);
+    }
 
-	@Override
-	public void receive(Duct previous, int ordinal, Void v) {
-		throw new UnsupportedOperationException( "use run() instead" );
-	}
+    @Override
+    public void receive(Duct previous, int ordinal, Void v) {
+        throw new UnsupportedOperationException("use run() instead");
+    }
 
-	@Override
-	public void run(Object input) throws Throwable {
+    @Override
+    public void run(Object input) throws Throwable {
 
-		if(!this.nextStarted) {
-			next.start(this);
-			this.nextStarted = true;
-		}
+        if (!this.nextStarted) {
+            next.start(this);
+            this.nextStarted = true;
+        }
 
-		try {
-			Tuple tuple = (Tuple)input;
-			tupleEntry.setTuple(tuple);
-			flowProcess.increment( StepCounters.Tuples_Read, 1 );
-			flowProcess.increment(SliceCounters.Tuples_Read, 1);
-		}
-		catch( OutOfMemoryError error ) {
-			handleReThrowableException("out of memory, try increasing task memory allocation", error);
-		}
-		catch( CascadingException exception ) {
-			handleException(exception, null);
-		}
-		catch( Throwable throwable ) {
-			handleException(new DuctException("internal error", throwable), null);
-		}
+        try {
+            Tuple tuple = (Tuple) input;
+            tupleEntry.setTuple(tuple);
+            flowProcess.increment(StepCounters.Tuples_Read, 1);
+            flowProcess.increment(SliceCounters.Tuples_Read, 1);
+        } catch (OutOfMemoryError error) {
+            handleReThrowableException("out of memory, try increasing task memory allocation",
+                    error);
+        } catch (CascadingException exception) {
+            handleException(exception, null);
+        } catch (Throwable throwable) {
+            handleException(new DuctException("internal error", throwable), null);
+        }
 
-		next.receive( this, 0, tupleEntry );
+        next.receive(this, 0, tupleEntry);
 
-	}
+    }
 }

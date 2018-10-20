@@ -1,12 +1,13 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-import java.io.Serializable;
-
-public class DunsRedirectFromManualMatchConfig extends DunsRedirectBookConfig implements Serializable {
+public class DunsRedirectFromManualMatchConfig extends DunsRedirectBookConfig
+        implements Serializable {
     private static final long serialVersionUID = -4746860648526830247L;
 
     /* Input column names */

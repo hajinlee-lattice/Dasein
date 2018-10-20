@@ -9,9 +9,9 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.
 public class NumericHandler {
     private static StatsLabelUtil labelUtl = new StatsLabelUtil();
 
-    public void handleNumericalAttribute(Map<String, Map<String, Long>> attributeValueBucket, Object obj,
-            String fieldName, Map<String, List<String>> bucketLblOrderMap, List<Object> minMaxList,
-            Map<String, List<Object>> bucketOrderMap, int maxBucketCount,
+    public void handleNumericalAttribute(Map<String, Map<String, Long>> attributeValueBucket,
+            Object obj, String fieldName, Map<String, List<String>> bucketLblOrderMap,
+            List<Object> minMaxList, Map<String, List<Object>> bucketOrderMap, int maxBucketCount,
             Map<String, Map<String, Long>> nAttributeBucketIds) {
         Object objVal = obj;
 

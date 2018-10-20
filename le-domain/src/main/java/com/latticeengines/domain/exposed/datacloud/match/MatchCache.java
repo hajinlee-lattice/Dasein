@@ -18,32 +18,26 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public abstract class MatchCache<T> extends BaseFabricEntity<T> implements FabricEntity<T> {
 
-    public abstract T getInstance();
-
-    private static final String KEY = "Key";
-    private static final String CACHE_CONTEXT = "CacheContext";
     protected static final String TIMESTAMP = "Timestamp";
     protected static final String PATCHED = "Patched";
+    private static final String KEY = "Key";
+    private static final String CACHE_CONTEXT = "CacheContext";
     private static final String UNKNOWN = "NULL";
-
-    private Map<String, String> keyTokenValues = new TreeMap<String, String>();
-
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
-
     private static final String SCHEMA_TEMPLATE = String.format(
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"%s\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"long\",\"null\"]}"
-                    + "]}",
+                    + "{\"name\":\"%s\",\"type\":[\"long\",\"null\"]}" + "]}",
             RECORD_TYPE_TOKEN, MatchCache.class.getSimpleName(), KEY, CACHE_CONTEXT, TIMESTAMP);
-
+    private Map<String, String> keyTokenValues = new TreeMap<String, String>();
     @Id
     @JsonProperty(KEY)
     private String id;
-
     @JsonProperty(CACHE_CONTEXT)
     private Map<String, Object> cacheContext;
+
+    public abstract T getInstance();
 
     public String buildId() {
         StringBuilder sb = new StringBuilder();
@@ -119,7 +113,8 @@ public abstract class MatchCache<T> extends BaseFabricEntity<T> implements Fabri
         // we need to replace special char '.' from recordType otherwise avro
         // schema parser will run into exception
         String recordTypeStrForAvroSchema = recordType.replace('.', '_');
-        return new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
+        return new Schema.Parser()
+                .parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
     }
 
     public String getId() {

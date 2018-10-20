@@ -42,30 +42,30 @@ import com.latticeengines.domain.exposed.security.Tenant;
  *
  */
 @Entity
-@Table(name = "SCORING_REQUEST_CONFIG", indexes = {@Index(name="SCORING_REQUEST_CONFIG.REQ_CONFIG_ID", columnList="REQ_CONFIG_ID", unique=true)})
+@Table(name = "SCORING_REQUEST_CONFIG", indexes = {
+        @Index(name = "SCORING_REQUEST_CONFIG.REQ_CONFIG_ID", columnList = "REQ_CONFIG_ID", unique = true) })
 @NamedQuery(name = ScoringRequestConfig.NQ_FIND_CONFIGS_BY_CREDENTIAL_ID, query = ScoringRequestConfig.SELECT_CONFIG_SUMMARY_BY_CREDENTIAL)
 @NamedQuery(name = ScoringRequestConfig.NQ_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID, query = ScoringRequestConfig.SELECT_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-@NamedEntityGraph(name = "ScoringRequestConfig.details", attributeNodes = { @NamedAttributeNode("marketoScoringMatchFields") })
-public class ScoringRequestConfig extends ScoringRequestConfigSummary implements HasPid, HasTenant, HasAuditingFields {
+@NamedEntityGraph(name = "ScoringRequestConfig.details", attributeNodes = {
+        @NamedAttributeNode("marketoScoringMatchFields") })
+public class ScoringRequestConfig extends ScoringRequestConfigSummary
+        implements HasPid, HasTenant, HasAuditingFields {
 
-    static final String SELECT_CONFIG_SUMMARY_BY_CREDENTIAL = "SELECT new com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary "
-            + "( src.configId, src.modelUuid ) " 
-            + "FROM ScoringRequestConfig src WHERE src.marketoCredential.pid = :credentialPid";
-    
-    static final String SELECT_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID = "SELECT new com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext "
-            + "(src, src.marketoCredential) " 
-            + "FROM ScoringRequestConfig src WHERE src.configId = :configId";
-    
     public static final String NQ_FIND_CONFIGS_BY_CREDENTIAL_ID = "ScoringRequestConfig.findConfigsByCredentialId";
     public static final String NQ_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID = "ScoringRequestConfig.findScoringRequestContextByConfigId";
-    
+    static final String SELECT_CONFIG_SUMMARY_BY_CREDENTIAL = "SELECT new com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary "
+            + "( src.configId, src.modelUuid ) "
+            + "FROM ScoringRequestConfig src WHERE src.marketoCredential.pid = :credentialPid";
+    static final String SELECT_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID = "SELECT new com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext "
+            + "(src, src.marketoCredential) "
+            + "FROM ScoringRequestConfig src WHERE src.configId = :configId";
     private Long pid;
     private Tenant tenant;
     private List<MarketoScoringMatchField> marketoScoringMatchFields = new ArrayList<>();
     private MarketoCredential marketoCredential;
     private String webhookResource;
-    
+
     private Date created;
     private Date updated;
 
@@ -83,7 +83,7 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
     public void setPid(Long pid) {
         this.pid = pid;
     }
-    
+
     @Column(name = "REQ_CONFIG_ID", nullable = false)
     @Override
     public String getConfigId() {
@@ -116,7 +116,8 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
         return marketoScoringMatchFields;
     }
 
-    public void setMarketoScoringMatchFields(List<MarketoScoringMatchField> marketoScoringMatchFields) {
+    public void setMarketoScoringMatchFields(
+            List<MarketoScoringMatchField> marketoScoringMatchFields) {
         this.marketoScoringMatchFields = marketoScoringMatchFields;
     }
 
@@ -160,11 +161,6 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
     }
 
     @Override
-    public void setCreated(Date time) {
-        this.created = time;
-    }
-
-    @Override
     @JsonIgnore
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -174,8 +170,8 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
     }
 
     @Override
-    public void setUpdated(Date time) {
-        this.updated = time;
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     @Override
@@ -188,8 +184,14 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
     }
 
     @Override
-    public String toString() {
-        return String.format("PID: %d, ConfigID: %s, ModelId: %s, Mapped Column Count: %d", this.pid, this.configId, this.modelUuid, this.marketoScoringMatchFields.size());
+    public void setUpdated(Date time) {
+        this.updated = time;
     }
-    
+
+    @Override
+    public String toString() {
+        return String.format("PID: %d, ConfigID: %s, ModelId: %s, Mapped Column Count: %d",
+                this.pid, this.configId, this.modelUuid, this.marketoScoringMatchFields.size());
+    }
+
 }

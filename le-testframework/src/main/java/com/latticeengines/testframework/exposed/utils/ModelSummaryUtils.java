@@ -17,8 +17,8 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class ModelSummaryUtils {
 
-    public static ModelSummary generateModelSummary(Tenant tenant, String modelSummaryJsonLocalResourcePath)
-            throws IOException {
+    public static ModelSummary generateModelSummary(Tenant tenant,
+            String modelSummaryJsonLocalResourcePath) throws IOException {
         ModelSummary summary;
 
         summary = new ModelSummary();
@@ -39,7 +39,8 @@ public class ModelSummaryUtils {
         summary.setLastUpdateTime(summary.getConstructionTime());
         summary.setTenant(tenant);
 
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(modelSummaryJsonLocalResourcePath);
+        InputStream modelSummaryFileAsStream = ClassLoader
+                .getSystemResourceAsStream(modelSummaryJsonLocalResourcePath);
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
@@ -48,35 +49,38 @@ public class ModelSummaryUtils {
 
         return summary;
     }
-    
-    public static ModelSummary createModelSummary(ModelSummaryProxy modelSummaryProxy, Tenant tenant,
-              ModelSummaryUtils.TestModelConfiguration modelConfiguration) throws IOException {
-		CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-		ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
+
+    public static ModelSummary createModelSummary(ModelSummaryProxy modelSummaryProxy,
+            Tenant tenant, ModelSummaryUtils.TestModelConfiguration modelConfiguration)
+            throws IOException {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+        ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
         modelSummary.setEventTableName(modelConfiguration.getEventTable());
         modelSummary.setId(modelConfiguration.getModelId());
         modelSummary.setName(modelConfiguration.getModelName());
         modelSummary.setDisplayName(modelConfiguration.getModelName());
-        modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), modelConfiguration.getEventTable(),
-                modelConfiguration.getModelVersion()));
+        modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(),
+                modelConfiguration.getEventTable(), modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
 
-        ModelSummary retrievedSummary = modelSummaryProxy.getByModelId(modelConfiguration.getModelId());
+        ModelSummary retrievedSummary = modelSummaryProxy
+                .getByModelId(modelConfiguration.getModelId());
         if (retrievedSummary != null) {
-            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(),
+                    modelConfiguration.getModelId());
         }
         modelSummary.setModelType(modelConfiguration.getModelType());
         modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
 
         return modelSummary;
     }
-    
-	public static class TestModelConfiguration {
+
+    public static class TestModelConfiguration {
         private static final String DUMMY_MODEL_TYPE = "DUMMY_MODEL_TYPE";
-        
+
         private String modelId;
         private String modelName;
         private String modelType;
@@ -88,49 +92,49 @@ public class ModelSummaryUtils {
         private String sourceInterpretation;
         private String modelSummaryJsonLocalpath;
 
-		public TestModelConfiguration(String modelPath, String modelName, String applicationId, String modelVersion,
-				String uuid) {
-			this.modelId = TestFrameworkUtils.MODEL_PREFIX + uuid + "_";
-			this.modelName = modelName;
-			this.applicationId = applicationId;
-			this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);
-			this.modelVersion = modelVersion;
-			this.eventTable = modelName;
-			this.sourceInterpretation = SchemaInterpretation.SalesforceAccount.name();
-			this.localModelPath = modelPath;
-			this.modelSummaryJsonLocalpath = localModelPath + Model.MODEL_JSON;
-			this.modelType = DUMMY_MODEL_TYPE;
-		}
+        public TestModelConfiguration(String modelPath, String modelName, String applicationId,
+                String modelVersion, String uuid) {
+            this.modelId = TestFrameworkUtils.MODEL_PREFIX + uuid + "_";
+            this.modelName = modelName;
+            this.applicationId = applicationId;
+            this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);
+            this.modelVersion = modelVersion;
+            this.eventTable = modelName;
+            this.sourceInterpretation = SchemaInterpretation.SalesforceAccount.name();
+            this.localModelPath = modelPath;
+            this.modelSummaryJsonLocalpath = localModelPath + Model.MODEL_JSON;
+            this.modelType = DUMMY_MODEL_TYPE;
+        }
 
-		public String getModelId() {
+        public String getModelId() {
             return modelId;
         }
 
-		public String getModelName() {
+        public String getModelName() {
             return modelName;
         }
 
-		public String getLocalModelPath() {
+        public String getLocalModelPath() {
             return localModelPath;
         }
 
-		public String getApplicationId() {
+        public String getApplicationId() {
             return applicationId;
         }
 
-		public String getParsedApplicationId() {
+        public String getParsedApplicationId() {
             return parsedApplicationId;
         }
 
-		public String getModelVersion() {
+        public String getModelVersion() {
             return modelVersion;
         }
 
-		public String getEventTable() {
+        public String getEventTable() {
             return eventTable;
         }
 
-		public String getSourceInterpretation() {
+        public String getSourceInterpretation() {
             return sourceInterpretation;
         }
 
@@ -139,7 +143,7 @@ public class ModelSummaryUtils {
         }
 
         public String getModelType() {
-			return modelType;
-		}
+            return modelType;
+        }
     }
 }

@@ -61,13 +61,15 @@ public class Counters implements org.apache.hadoop.mapreduce.v2.api.records.Coun
 
     @Override
     @JsonIgnore
-    public void addAllCounterGroups(Map<String, org.apache.hadoop.mapreduce.v2.api.records.CounterGroup> counterGroups) {
+    public void addAllCounterGroups(
+            Map<String, org.apache.hadoop.mapreduce.v2.api.records.CounterGroup> counterGroups) {
         counterGroups.putAll(counterGroups);
     }
 
     @Override
     @JsonIgnore
-    public void setCounterGroup(String key, org.apache.hadoop.mapreduce.v2.api.records.CounterGroup value) {
+    public void setCounterGroup(String key,
+            org.apache.hadoop.mapreduce.v2.api.records.CounterGroup value) {
         removeCounterGroup(key);
         counterGroups.add((CounterGroup) value);
     }

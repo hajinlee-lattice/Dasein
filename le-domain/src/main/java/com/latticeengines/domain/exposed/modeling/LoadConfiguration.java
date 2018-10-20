@@ -77,15 +77,15 @@ public class LoadConfiguration {
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
-    
-    @JsonProperty(value = "query", required = false)
-    public void setQuery(String query) {
-        this.query = query;
-    }
-    
+
     @JsonProperty(value = "query", required = false)
     public String getQuery() {
         return query;
+    }
+
+    @JsonProperty(value = "query", required = false)
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     public void setProperty(String propertyName, String propertyValue) {

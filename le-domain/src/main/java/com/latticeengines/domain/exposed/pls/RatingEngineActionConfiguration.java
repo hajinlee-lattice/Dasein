@@ -11,17 +11,15 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RatingEngineActionConfiguration extends ActionConfiguration {
 
-    public RatingEngineActionConfiguration() {
-    }
-
     @JsonProperty("ratingEngineId")
     private String ratingEngineId;
-
     @JsonProperty("modelId")
     private String modelId;
-
     @JsonProperty("subType")
     private SubType subType;
+
+    public RatingEngineActionConfiguration() {
+    }
 
     public String getRatingEngineId() {
         return this.ratingEngineId;
@@ -55,16 +53,18 @@ public class RatingEngineActionConfiguration extends ActionConfiguration {
     @Override
     public String serialize() {
         switch (this.subType) {
-        case ACTIVATION:
-            return String.format(SubType.ACTIVATION.getFormat(), this.ratingEngineId);
-        case DELETION:
-            return String.format(SubType.DELETION.getFormat(), this.ratingEngineId);
-        case AI_MODEL_BUCKET_CHANGE:
-            return String.format(SubType.AI_MODEL_BUCKET_CHANGE.getFormat(), this.modelId, this.ratingEngineId);
-        case RULE_MODEL_BUCKET_CHANGE:
-            return String.format(SubType.RULE_MODEL_BUCKET_CHANGE.getFormat(), this.modelId, this.ratingEngineId);
-        default:
-            return toString();
+            case ACTIVATION:
+                return String.format(SubType.ACTIVATION.getFormat(), this.ratingEngineId);
+            case DELETION:
+                return String.format(SubType.DELETION.getFormat(), this.ratingEngineId);
+            case AI_MODEL_BUCKET_CHANGE:
+                return String.format(SubType.AI_MODEL_BUCKET_CHANGE.getFormat(), this.modelId,
+                        this.ratingEngineId);
+            case RULE_MODEL_BUCKET_CHANGE:
+                return String.format(SubType.RULE_MODEL_BUCKET_CHANGE.getFormat(), this.modelId,
+                        this.ratingEngineId);
+            default:
+                return toString();
         }
     }
 
@@ -72,8 +72,10 @@ public class RatingEngineActionConfiguration extends ActionConfiguration {
 
         ACTIVATION("Rating Engine %s is activated."), //
         DELETION("Rating Engine %s has been deleted."), //
-        AI_MODEL_BUCKET_CHANGE("Rating Buckets of Rating Model %s for Rating Engine %s has been updated."), //
-        RULE_MODEL_BUCKET_CHANGE("Rating Rule of Rating Model %s for Rating Engine %s has been updated.");
+        AI_MODEL_BUCKET_CHANGE(
+                "Rating Buckets of Rating Model %s for Rating Engine %s has been updated."), //
+        RULE_MODEL_BUCKET_CHANGE(
+                "Rating Rule of Rating Model %s for Rating Engine %s has been updated.");
 
         private String format;
 

@@ -11,13 +11,14 @@ public class GatewayPolicyConfiguration {
 
     @JsonProperty("principal")
     private String principal;
-    
+
     @JsonProperty("apiKey")
     private String apiKey;
 
-    //Can add allowed roles / policy configurations that can consumed on Gateway.
-    //private List<String> roles
-    
+    // Can add allowed roles / policy configurations that can consumed on
+    // Gateway.
+    // private List<String> roles
+
     public String getPrincipal() {
         return principal;
     }
@@ -33,5 +34,5 @@ public class GatewayPolicyConfiguration {
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
-    
+
 }

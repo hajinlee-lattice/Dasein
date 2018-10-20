@@ -39,9 +39,9 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 @Access(AccessType.FIELD)
 @Table(name = "TENANT")
 public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss.SSS z");
     private static final long serialVersionUID = 3412997313415383107L;
-
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -215,7 +215,8 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
         Tenant other = (Tenant) obj;
         if (id == null) {
             return other.id == null;
-        } else return id.equals(other.id);
+        } else
+            return id.equals(other.id);
     }
 
 }

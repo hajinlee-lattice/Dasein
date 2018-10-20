@@ -11,7 +11,6 @@ public enum Tag {
     INTERNAL_TRANSFORM("InternalTransform"), //
     EXTERNAL_TRANSFORM("ExternalTransform");
 
-    private final String name;
     private static Map<String, Tag> nameMap;
 
     static {
@@ -21,16 +20,10 @@ public enum Tag {
         }
     }
 
+    private final String name;
+
     Tag(String name) {
         this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String toString() {
-        return this.name;
     }
 
     public static Set<String> availableNames() {
@@ -43,6 +36,14 @@ public enum Tag {
         } else {
             throw new IllegalArgumentException("Cannot find a Tag with name " + name);
         }
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String toString() {
+        return this.name;
     }
 
 }

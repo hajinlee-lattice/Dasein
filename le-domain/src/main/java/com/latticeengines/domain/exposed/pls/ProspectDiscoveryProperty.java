@@ -6,8 +6,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.db.PropertyBag;
 
-public class ProspectDiscoveryProperty extends
-        PropertyBag<ProspectDiscoveryOption, ProspectDiscoveryOptionName> {
+public class ProspectDiscoveryProperty
+        extends PropertyBag<ProspectDiscoveryOption, ProspectDiscoveryOptionName> {
     @SuppressWarnings("unchecked")
     public ProspectDiscoveryProperty(List<ProspectDiscoveryOption> bag) {
         super(List.class.cast(bag));

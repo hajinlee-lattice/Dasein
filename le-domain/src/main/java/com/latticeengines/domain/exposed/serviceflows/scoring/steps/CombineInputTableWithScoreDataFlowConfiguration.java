@@ -7,7 +7,8 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
-public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoringDataFlowStepConfiguration {
+public class CombineInputTableWithScoreDataFlowConfiguration
+        extends BaseScoringDataFlowStepConfiguration {
 
     @JsonProperty
     private List<BucketMetadata> bucketMetadata;

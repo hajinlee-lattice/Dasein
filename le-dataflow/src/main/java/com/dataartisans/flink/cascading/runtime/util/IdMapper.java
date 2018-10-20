@@ -22,13 +22,13 @@ import cascading.tuple.Tuple;
 
 public class IdMapper implements MapFunction<Tuple, Tuple> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7257538252404874006L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -7257538252404874006L;
 
-	@Override
-	public Tuple map(Tuple value) throws Exception {
-		return value;
-	}
+    @Override
+    public Tuple map(Tuple value) throws Exception {
+        return value;
+    }
 }

@@ -31,6 +31,13 @@ public class CrossSellRatingConfig implements AdvancedRatingConfig {
         this.modelingStrategy = modelingStrategy;
     }
 
+    public static CrossSellModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
+        if (aiModel.getAdvancedModelingConfig() == null) {
+            aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
+        }
+        return (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+    }
+
     public List<String> getTargetProducts() {
         return targetProducts;
     }
@@ -66,20 +73,15 @@ public class CrossSellRatingConfig implements AdvancedRatingConfig {
         this.filters = filters;
     }
 
-    public static CrossSellModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
-        if (aiModel.getAdvancedModelingConfig() == null) {
-            aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
-        }
-        return (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
-    }
-
     @Override
     public void copyConfig(AdvancedRatingConfig config) {
         CrossSellRatingConfig advancedConfInRetrievedAIModel = this;
         CrossSellRatingConfig advancedConfInAIModel = (CrossSellRatingConfig) config;
-        advancedConfInRetrievedAIModel.setModelingStrategy(advancedConfInAIModel.getModelingStrategy());
+        advancedConfInRetrievedAIModel
+                .setModelingStrategy(advancedConfInAIModel.getModelingStrategy());
         advancedConfInRetrievedAIModel.setTargetProducts(advancedConfInAIModel.getTargetProducts());
-        advancedConfInRetrievedAIModel.setTrainingProducts(advancedConfInAIModel.getTrainingProducts());
+        advancedConfInRetrievedAIModel
+                .setTrainingProducts(advancedConfInAIModel.getTrainingProducts());
         advancedConfInRetrievedAIModel.setFilters(advancedConfInAIModel.getFilters());
     }
 

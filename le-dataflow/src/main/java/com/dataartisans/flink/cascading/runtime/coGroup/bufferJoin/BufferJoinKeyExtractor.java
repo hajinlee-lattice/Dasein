@@ -23,29 +23,28 @@ import cascading.tuple.Tuple;
 
 public class BufferJoinKeyExtractor implements MapFunction<Tuple, Tuple3<Tuple, Integer, Tuple>> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1606497592355078919L;
-	private int[] keyPos;
-	private Tuple3<Tuple, Integer, Tuple> outT;
-	private Tuple defaultKey = new Tuple(1);
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1606497592355078919L;
+    private int[] keyPos;
+    private Tuple3<Tuple, Integer, Tuple> outT;
+    private Tuple defaultKey = new Tuple(1);
 
-	public BufferJoinKeyExtractor(int inputId, int[] keyPos) {
-		this.keyPos = keyPos;
-		this.outT = new Tuple3<>(null, inputId, null);
-	}
+    public BufferJoinKeyExtractor(int inputId, int[] keyPos) {
+        this.keyPos = keyPos;
+        this.outT = new Tuple3<>(null, inputId, null);
+    }
 
-	@Override
-	public Tuple3<Tuple, Integer, Tuple> map(Tuple value) throws Exception {
+    @Override
+    public Tuple3<Tuple, Integer, Tuple> map(Tuple value) throws Exception {
 
-		if(keyPos.length > 0) {
-			outT.f0 = value.get(keyPos);
-		}
-		else {
-			outT.f0 = defaultKey;
-		}
-		outT.f2 = value;
-		return outT;
-	}
+        if (keyPos.length > 0) {
+            outT.f0 = value.get(keyPos);
+        } else {
+            outT.f0 = defaultKey;
+        }
+        outT.f2 = value;
+        return outT;
+    }
 }

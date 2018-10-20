@@ -31,21 +31,22 @@ import cascading.tuple.hadoop.collect.HadoopSpillableTupleList;
 
 public class SpillingTupleCollectionFactory implements TupleCollectionFactory<Configuration> {
 
-	private int spillThreshold;
-	private CompressionCodec codec;
-	private TupleSerialization tupleSerialization;
+    private int spillThreshold;
+    private CompressionCodec codec;
+    private TupleSerialization tupleSerialization;
 
-	public SpillingTupleCollectionFactory() {
-	}
+    public SpillingTupleCollectionFactory() {
+    }
 
-	public void initialize(FlowProcess<? extends Configuration> flowProcess) {
-		this.spillThreshold = SpillableTupleList.getThreshold(flowProcess, 10000);
-		this.codec = new GzipCodec();
-		this.tupleSerialization = new TupleSerialization(flowProcess);
-	}
+    public void initialize(FlowProcess<? extends Configuration> flowProcess) {
+        this.spillThreshold = SpillableTupleList.getThreshold(flowProcess, 10000);
+        this.codec = new GzipCodec();
+        this.tupleSerialization = new TupleSerialization(flowProcess);
+    }
 
-	public Collection<Tuple> create(FlowProcess<? extends Configuration> flowProcess) {
+    public Collection<Tuple> create(FlowProcess<? extends Configuration> flowProcess) {
 
-		return new HadoopSpillableTupleList(this.spillThreshold, this.tupleSerialization, this.codec);
-	}
+        return new HadoopSpillableTupleList(this.spillThreshold, this.tupleSerialization,
+                this.codec);
+    }
 }

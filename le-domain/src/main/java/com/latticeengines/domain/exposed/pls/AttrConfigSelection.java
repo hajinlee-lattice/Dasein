@@ -22,44 +22,44 @@ public class AttrConfigSelection {
     @JsonProperty("Categories")
     private Map<String, Long> categories;
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
     public String getDisplayName() {
         return this.displayName;
     }
 
-    public void setSelected(Long selected) {
-        this.selected = selected;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public Long getSelected() {
         return this.selected;
     }
 
-    public void setTotalAttrs(Long totalAttrs) {
-        this.totalAttrs = totalAttrs;
+    public void setSelected(Long selected) {
+        this.selected = selected;
     }
 
     public Long getTotalAttrs() {
         return this.totalAttrs;
     }
 
-    public void setLimit(Long limit) {
-        this.limit = limit;
+    public void setTotalAttrs(Long totalAttrs) {
+        this.totalAttrs = totalAttrs;
     }
 
     public Long getLimit() {
         return this.limit;
     }
 
-    public void setCategories(Map<String, Long> categories) {
-        this.categories = categories;
+    public void setLimit(Long limit) {
+        this.limit = limit;
     }
 
     public Map<String, Long> getCategories() {
         return this.categories;
+    }
+
+    public void setCategories(Map<String, Long> categories) {
+        this.categories = categories;
     }
 
     @Override

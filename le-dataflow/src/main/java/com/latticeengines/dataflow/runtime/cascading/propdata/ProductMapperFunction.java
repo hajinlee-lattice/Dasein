@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -12,9 +15,6 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class ProductMapperFunction extends BaseOperation implements Function {
@@ -24,8 +24,8 @@ public class ProductMapperFunction extends BaseOperation implements Function {
     private List<String> rolledUpFields;
     private Map<String, Integer> positionMap;
 
-    public ProductMapperFunction(Fields fieldsDeclaration, String productField, Map<String, List<Product>> productMap,
-                                 List<String> rolledUpFields) {
+    public ProductMapperFunction(Fields fieldsDeclaration, String productField,
+            Map<String, List<Product>> productMap, List<String> rolledUpFields) {
         super(fieldsDeclaration);
         this.positionMap = getPositionMap(fieldsDeclaration);
         this.productField = productField;
@@ -44,22 +44,22 @@ public class ProductMapperFunction extends BaseOperation implements Function {
                 Tuple tuple = arguments.getTupleCopy();
                 switch (ProductType.valueOf(product.getProductType())) {
                     case Bundle:
-                        updateTuple(tuple, rolledUpFields,
-                                Arrays.asList(product.getProductBundleId(), ProductType.Analytic.name()));
+                        updateTuple(tuple, rolledUpFields, Arrays
+                                .asList(product.getProductBundleId(), ProductType.Analytic.name()));
                         functionCall.getOutputCollector().add(tuple);
                         break;
                     case Hierarchy:
                         if (product.getProductLine() != null) {
-                            updateTuple(tuple, rolledUpFields,
-                                    Arrays.asList(product.getProductLineId(), ProductType.Spending.name()));
+                            updateTuple(tuple, rolledUpFields, Arrays.asList(
+                                    product.getProductLineId(), ProductType.Spending.name()));
                             functionCall.getOutputCollector().add(tuple);
                         } else if (product.getProductFamily() != null) {
-                            updateTuple(tuple, rolledUpFields,
-                                    Arrays.asList(product.getProductFamilyId(), ProductType.Spending.name()));
+                            updateTuple(tuple, rolledUpFields, Arrays.asList(
+                                    product.getProductFamilyId(), ProductType.Spending.name()));
                             functionCall.getOutputCollector().add(tuple);
                         } else if (product.getProductCategory() != null) {
-                            updateTuple(tuple, rolledUpFields,
-                                    Arrays.asList(product.getProductCategoryId(), ProductType.Spending.name()));
+                            updateTuple(tuple, rolledUpFields, Arrays.asList(
+                                    product.getProductCategoryId(), ProductType.Spending.name()));
                             functionCall.getOutputCollector().add(tuple);
                         }
                         break;

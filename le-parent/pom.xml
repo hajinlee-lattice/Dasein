@@ -21,6 +21,7 @@
         <branchPath>trunk</branchPath>
         <svnrepourl />
         <nexusrepourl />
+        <checker>warning</checker>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <compiler.version>1.8</compiler.version>
@@ -36,6 +37,7 @@
         <maven.assembly.version>3.1.0</maven.assembly.version>
         <maven.antrun.version>1.8</maven.antrun.version>
         <maven.exec.version>1.6.0</maven.exec.version>
+        <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
 
         <maven.deploy.version>2.8.2</maven.deploy.version>
         <maven.dependency.version>3.0.2</maven.dependency.version>
@@ -972,6 +974,33 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>checkstyle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>checkstyle-${checker}</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <configLocation>checkstyle/${checker}.xml</configLocation>
+                                    <encoding>UTF-8</encoding>
+                                    <consoleOutput>false</consoleOutput>
+                                    <failsOnError>false</failsOnError>
+                                    <failOnViolation>false</failOnViolation>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <distributionManagement>
@@ -983,6 +1012,7 @@
     </distributionManagement>
 
     <build>
+        <defaultGoal>install</defaultGoal>
         <plugins>
             <!-- Add svn revision into all jars and wars -->
             <plugin>
@@ -1004,6 +1034,25 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyle.version}</version>
+                <executions>
+                    <execution>
+                        <id>checkstyle-error</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <configLocation>checkstyle/error.xml</configLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>${maven.jar.version}</version><!--$NO-MVN-MAN-VER$ -->
                 <configuration>
@@ -1015,8 +1064,6 @@
                 </configuration>
             </plugin>
         </plugins>
-
-        <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -1035,8 +1082,7 @@
                     </configuration>
                 </plugin>
                 <!-- -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface,
-                    tests -->
+                <!-- jar plugin to produce 3 jars: impl (default), interface, tests -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven.jar.version}</version>

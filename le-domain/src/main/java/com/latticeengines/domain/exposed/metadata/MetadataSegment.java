@@ -47,8 +47,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID",
-        "NAME" }))
+@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "TENANT_ID", "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
@@ -321,7 +321,8 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
                 setProducts(count);
                 break;
             default:
-                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+                throw new UnsupportedOperationException(
+                        "Did not reserve a column for " + entity + " count.");
         }
     }
 
@@ -334,7 +335,8 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
             case Product:
                 return getProducts();
             default:
-                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+                throw new UnsupportedOperationException(
+                        "Did not reserve a column for " + entity + " count.");
         }
     }
 
@@ -357,17 +359,20 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
         frontEndQuery.setMainEntity(mainEntity);
 
-        Restriction innerAccountRestriction = getAccountRestriction() == null ? getAccountFrontEndRestriction().getRestriction() : getAccountRestriction();
+        Restriction innerAccountRestriction = getAccountRestriction() == null
+                ? getAccountFrontEndRestriction().getRestriction() : getAccountRestriction();
         if (!BusinessEntity.Account.equals(mainEntity)) {
             if (innerAccountRestriction != null) {
-                innerAccountRestriction = Restriction.builder().and(innerAccountRestriction, accountNotNullBucket()).build();
+                innerAccountRestriction = Restriction.builder()
+                        .and(innerAccountRestriction, accountNotNullBucket()).build();
             } else {
                 innerAccountRestriction = accountNotNullBucket();
             }
         }
 
         FrontEndRestriction accountRestriction = new FrontEndRestriction(innerAccountRestriction);
-        FrontEndRestriction contactRestriction = getContactRestriction() == null ? getContactFrontEndRestriction()
+        FrontEndRestriction contactRestriction = getContactRestriction() == null
+                ? getContactFrontEndRestriction()
                 : new FrontEndRestriction(getContactRestriction());
 
         frontEndQuery.setAccountRestriction(accountRestriction);
@@ -375,7 +380,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         return frontEndQuery;
     }
 
-    private BucketRestriction accountNotNullBucket () {
+    private BucketRestriction accountNotNullBucket() {
         Bucket bkt = Bucket.notNullBkt();
         return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
     }

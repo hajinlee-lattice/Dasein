@@ -13,40 +13,40 @@ public class LaunchJobsResult {
     private List<LaunchJob> jobs;
 
     @JsonProperty("Status")
-    public int getStatus(){
+    public int getStatus() {
         return this.status;
     }
 
-    public void setStatus(int status){
+    public void setStatus(int status) {
         this.status = status;
     }
 
     @JsonProperty("ErrorMessage")
-    public String getErrorMessage(){
+    public String getErrorMessage() {
         return this.errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage){
+    public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
     @JsonProperty("LaunchStatus")
-    public JobStatus getLaunchStatus(){
+    public JobStatus getLaunchStatus() {
         return this.launchStatus;
     }
 
     @JsonProperty("LaunchStatus")
-    public void setLaunchStatus(JobStatus launchStatus){
+    public void setLaunchStatus(JobStatus launchStatus) {
         this.launchStatus = launchStatus;
     }
 
     @JsonProperty("LaunchMessage")
-    public String getLaunchMessage(){
+    public String getLaunchMessage() {
         return this.launchMessage;
     }
 
     @JsonProperty("LaunchMessage")
-    public void setLaunchMessage(String launchMessage){
+    public void setLaunchMessage(String launchMessage) {
         this.launchMessage = launchMessage;
     }
 

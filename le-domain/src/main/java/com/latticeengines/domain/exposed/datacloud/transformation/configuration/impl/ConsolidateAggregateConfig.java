@@ -47,20 +47,20 @@ public class ConsolidateAggregateConfig extends TransformerConfig {
         this.goupByFields = goupByFields;
     }
 
-    public void setTrxDateField(String trxDateField) {
-        this.trxDateField = trxDateField;
-    }
-
     public String getTrxDateField() {
         return trxDateField;
     }
 
-    public void setPeriodStrategy(PeriodStrategy periodStrategy) {
-        this.periodStrategy = periodStrategy;
+    public void setTrxDateField(String trxDateField) {
+        this.trxDateField = trxDateField;
     }
 
     public PeriodStrategy getPeriodStrategy() {
         return periodStrategy;
+    }
+
+    public void setPeriodStrategy(PeriodStrategy periodStrategy) {
+        this.periodStrategy = periodStrategy;
     }
 
     public String getTrxTimeField() {

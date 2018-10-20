@@ -19,9 +19,8 @@ public class EVFitFunctionParameters implements Serializable {
     public EVFitFunctionParameters() {
     }
 
-    public EVFitFunctionParameters(FitFunctionParameters ev,
-                                   FitFunctionParameters revenue,
-                                   FitFunctionParameters probability) {
+    public EVFitFunctionParameters(FitFunctionParameters ev, FitFunctionParameters revenue,
+            FitFunctionParameters probability) {
         this.ev = ev;
         this.revenue = revenue;
         this.probability = probability;

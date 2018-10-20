@@ -59,7 +59,8 @@ public class StringStandardizationUtils {
     }
 
     public static String getStandardizedInputLatticeID(String latticeID) {
-        if (StringUtils.isBlank(latticeID) || latticeID.trim().startsWith("-") || latticeID.startsWith("+")) {
+        if (StringUtils.isBlank(latticeID) || latticeID.trim().startsWith("-")
+                || latticeID.startsWith("+")) {
             return null;
         }
 
@@ -81,8 +82,10 @@ public class StringStandardizationUtils {
             Long latticeIdAsLong = Long.valueOf(latticeId);
             String latticeIdAsString = latticeIdAsLong.toString();
             if (latticeIdAsString.length() > LATTICE_ID_LENGTH) {
-                log.error(String.format("LatticeAccountId %s is too long. Required length is less than or equals to " +
-                        "%s, but actual is %s", latticeId, String.valueOf(LATTICE_ID_LENGTH), latticeId.length()));
+                log.error(String.format(
+                        "LatticeAccountId %s is too long. Required length is less than or equals to "
+                                + "%s, but actual is %s",
+                        latticeId, String.valueOf(LATTICE_ID_LENGTH), latticeId.length()));
                 return null;
             }
             StringBuilder sb = new StringBuilder();
@@ -103,22 +106,35 @@ public class StringStandardizationUtils {
                 return null;
             }
             Set<Character> removedSet = new HashSet<>(getCharactersToRemove());
-            Set<Character> replacedBySpaceSet = new HashSet<>(getCharactersToReplaceWithWhiteSpace());
-            StringBuilder sb = new StringBuilder(str.toUpperCase());    // Always change to upper case
+            Set<Character> replacedBySpaceSet = new HashSet<>(
+                    getCharactersToReplaceWithWhiteSpace());
+            StringBuilder sb = new StringBuilder(str.toUpperCase()); // Always
+                                                                     // change
+                                                                     // to upper
+                                                                     // case
             for (int i = 0; i < sb.length(); i++) {
                 if (removedSet.contains(sb.charAt(i))) {
-                    sb.replace(i, i + 1, "");   // Remove specific characters
+                    sb.replace(i, i + 1, ""); // Remove specific characters
                     i--;
                 } else if (replacedBySpaceSet.contains(sb.charAt(i))) {
-                    sb.replace(i, i + 1, " ");  // Replace specific characters with whitespace
+                    sb.replace(i, i + 1, " "); // Replace specific characters
+                                               // with whitespace
                 }
             }
             String res = sb.toString();
             Map<String, String> replaced = getCharactersToReplaceWithWord();
-            for (Map.Entry<String, String> entry : replaced.entrySet()) {   // Replace specific characters with words
+            for (Map.Entry<String, String> entry : replaced.entrySet()) { // Replace
+                                                                          // specific
+                                                                          // characters
+                                                                          // with
+                                                                          // words
                 res = res.replaceAll(entry.getKey(), " " + entry.getValue() + " ");
             }
-            res = res.trim().replaceAll("( )+", " "); // Remove leading and trailing spaces; Replace multiple connected spaces with single space
+            res = res.trim().replaceAll("( )+", " "); // Remove leading and
+                                                      // trailing spaces;
+                                                      // Replace multiple
+                                                      // connected spaces with
+                                                      // single space
             return res;
         } catch (Exception ex) {
             ex.printStackTrace();

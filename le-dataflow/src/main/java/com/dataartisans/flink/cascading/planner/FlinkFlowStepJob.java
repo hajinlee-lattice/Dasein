@@ -64,305 +64,298 @@ import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
 import scala.concurrent.duration.FiniteDuration;
 
-
-public class FlinkFlowStepJob extends FlowStepJob<Configuration>
-{
-	private static final Logger LOG = LoggerFactory.getLogger( FlinkFlowStepJob.class );
-
-	private final Configuration currentConf;
-
-	private ClusterClient client;
-
-	private JobID jobID;
-	private Throwable jobException;
-
-	private List<String> classPath;
-
-	private final ExecutionEnvironment env;
-
-	private AccumulatorCache accumulatorCache;
-
-	private Future<JobSubmissionResult> jobSubmission;
-
-	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-
-	private static final int accumulatorUpdateIntervalSecs = 10;
-
-	private volatile static FlinkMiniCluster localCluster;
-	private volatile static int localClusterUsers;
-	private static final Object lock = new Object();
-
-	@SuppressWarnings("unused")
-	private static final FiniteDuration DEFAULT_TIMEOUT = new FiniteDuration(60, TimeUnit.SECONDS);
-
-
-	public FlinkFlowStepJob( ClientState clientState, FlinkFlowStep flowStep, Configuration currentConf, List<String> classPath ) {
-
-		super(clientState, currentConf, flowStep, 1000, 60000, 60000);
-
-		this.currentConf = currentConf;
-		this.env = ((FlinkFlowStep)this.flowStep).getExecutionEnvironment();
-		this.classPath = classPath;
-
-		if( flowStep.isDebugEnabled() ) {
-			flowStep.logDebug("using polling interval: " + pollingInterval);
-		}
-	}
-
-	@Override
-	public Configuration getConfig() {
-		return currentConf;
-	}
-
-	@Override
-	protected FlowStepStats createStepStats(ClientState clientState) {
-		this.accumulatorCache = new AccumulatorCache(accumulatorUpdateIntervalSecs);
-		return new FlinkFlowStepStats(this.flowStep, clientState, accumulatorCache);
-	}
-
-	protected void internalBlockOnStop() throws IOException {
-
-		if (jobSubmission != null && !jobSubmission.isDone()) {
-			try {
-				client.cancel(jobID);
-			} catch (Exception e) {
-				throw new IOException("An exception occurred while stopping the Flink job with ID: " + jobID + ": " + e.getMessage());
-			}
-		}
-
-	}
-
-	protected void internalNonBlockingStart() throws IOException {
-
-		Plan plan = env.createProgramPlan();
-
-		// set exchange mode, BATCH is default
-		String execMode = getConfig().get(FlinkConfigConstants.EXECUTION_MODE);
-		if (execMode == null || FlinkConfigConstants.EXECUTION_MODE_BATCH.equals(execMode)) {
-			env.getConfig().setExecutionMode(ExecutionMode.BATCH);
-		}
-		else if (FlinkConfigConstants.EXECUTION_MODE_PIPELINED.equals(execMode)) {
-			env.getConfig().setExecutionMode(ExecutionMode.PIPELINED);
-		}
-		else {
-			LOG.warn("Unknow value for '" + FlinkConfigConstants.EXECUTION_MODE + "' parameter. " +
-					"Only '" + FlinkConfigConstants.EXECUTION_MODE_BATCH + "' " +
-					"or '" + FlinkConfigConstants.EXECUTION_MODE_PIPELINED + "' supported. " +
-					"Using " + FlinkConfigConstants.EXECUTION_MODE_BATCH + " exchange by default.");
-			env.getConfig().setExecutionMode(ExecutionMode.BATCH);
-		}
-
-		Optimizer optimizer = new Optimizer(new DataStatistics(), new org.apache.flink.configuration.Configuration());
-		OptimizedPlan optimizedPlan = optimizer.compile(plan);
-
-		final JobGraph jobGraph = new JobGraphGenerator().compileJobGraph(optimizedPlan);
-		for (String jarPath : classPath) {
-			jobGraph.addJar(new Path(jarPath));
-		}
-
-		jobID = jobGraph.getJobID();
-		accumulatorCache.setJobID(jobID);
-
-
-		if (isLocalExecution()) {
-
-			flowStep.logInfo("Executing in local mode.");
-
-			startLocalCluster();
-
-			org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();
-			config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, localCluster.hostname());
-
-			final org.apache.flink.configuration.Configuration tmpConfig = localCluster.generateConfiguration(localCluster.configuration());
-
-			final int resourceManagerPort = tmpConfig.getInteger(
-					ConfigConstants.RESOURCE_MANAGER_IPC_PORT_KEY,
-					ConfigConstants.DEFAULT_RESOURCE_MANAGER_IPC_PORT);
-
-			final int jobManagerPort = tmpConfig
-					.getInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);
-
-			config.setInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, jobManagerPort);
-
-			flowStep.logWarn("Using local cluster at " + localCluster.hostname() + " RM port: " + resourceManagerPort + " JM port: " + jobManagerPort);
-
-			client = new StandaloneClusterClient(config);
-			client.setPrintStatusDuringExecution(env.getConfig().isSysoutLoggingEnabled());
-
-		} else {
-
-			flowStep.logInfo("Executing in cluster mode.");
-
-			try {
-				String path = this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-				jobGraph.addJar(new Path(path));
-				classPath.add(path);
-			} catch (URISyntaxException e) {
-				throw new IOException("Could not add the submission JAR as a dependency.");
-			}
-
-			client = ((ContextEnvironment) env).getClient();
-		}
-
-		List<URL> fileList = new ArrayList<URL>(classPath.size());
-		for (String path : classPath) {
-			URL url;
-			try {
-				url = new URL(path);
-			} catch (MalformedURLException e) {
-				url = new URL("file://" + path);
-			}
-			fileList.add(url);
-		}
-
-		final ClassLoader loader =
-				JobWithJars.buildUserCodeClassLoader(fileList, Collections.<URL>emptyList(), getClass().getClassLoader());
-
-		accumulatorCache.setClient(client);
-
-		final Callable<JobSubmissionResult> callable = () -> client.run(jobGraph, loader);
-
-		jobSubmission = executorService.submit(callable);
-
-		flowStep.logInfo("submitted Flink job: " + jobID);
-	}
-
-	@Override
-	protected void updateNodeStatus( FlowNodeStats flowNodeStats ) {
-		try {
-			if (internalNonBlockingIsComplete() && internalNonBlockingIsSuccessful()) {
-				flowNodeStats.markSuccessful();
-			} else if(internalIsStartedRunning()) {
-				flowNodeStats.isRunning();
-			} else {
-				flowNodeStats.markFailed(jobException);
-			}
-		} catch (IOException e) {
-			flowStep.logError("Failed to update node status.");
-		}
-	}
-
-	protected boolean internalNonBlockingIsSuccessful() throws IOException {
-		try {
-			jobSubmission.get(0, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			return false;
-		} catch (ExecutionException e) {
-			jobException = e.getCause();
-			return false;
-		} catch (TimeoutException e) {
-			return false;
-		}
-
-		boolean isDone = jobSubmission.isDone();
-		if (isDone) {
-			accumulatorCache.update(true);
-			accumulatorCache.setJobID(null);
-			accumulatorCache.setClient(null);
-			stopCluster();
-		}
-
-		return isDone;
-	}
-
-	@Override
-	public Throwable call()
-	{
-		if (env instanceof OptimizerPlanEnvironment) {
-			// We have an OptimizerPlanEnvironment.
-			//   This environment is only used to to fetch the Flink execution plan.
-			try {
-				// OptimizerPlanEnvironment does not execute but only build the execution plan.
-				env.execute("plan generation");
-			}
-			// execute() throws a ProgramAbortException if everything goes well
-			catch(OptimizerPlanEnvironment.ProgramAbortException pae) {
-				// Forward call() to get Cascading's internal job stats right.
-				//   The job will be skipped due to the overridden isSkipFlowStep method.
-				super.call();
-				// forward expected ProgramAbortException
-				return pae;
-			}
-			//
-			catch(Exception e) {
-				// forward unexpected exception
-				return e;
-			}
-		}
-		// forward to call() if we have a regular ExecutionEnvironment
-		return super.call();
-
-	}
-
-	protected boolean isSkipFlowStep() throws IOException
-	{
-		if (env instanceof OptimizerPlanEnvironment) {
-			// We have an OptimizerPlanEnvironment.
-			//   This environment is only used to to fetch the Flink execution plan.
-			//   We do not want to execute the job in this case.
-			return true;
-		} else {
-			return super.isSkipFlowStep();
-		}
-	}
-
-	@Override
-	protected boolean isRemoteExecution() {
-		return env instanceof ContextEnvironment;
-	}
-
-	@Override
-	protected Throwable getThrowable() {
-		return jobException;
-	}
-
-	protected String internalJobId() {
-		return jobID.toString();
-	}
-
-	protected boolean internalNonBlockingIsComplete() throws IOException {
-		return jobSubmission.isDone();
-	}
-
-	protected void dumpDebugInfo() {
-	}
-
-	protected boolean internalIsStartedRunning() {
-		return jobSubmission != null;
-	}
-
-	private boolean isLocalExecution() {
-		return env instanceof LocalEnvironment;
-	}
-
-	private void startLocalCluster() {
-		synchronized (lock) {
-			if (localCluster == null) {
-				org.apache.flink.configuration.Configuration configuration = new org.apache.flink.configuration.Configuration();
-				configuration.setInteger(ConfigConstants.TASK_MANAGER_NUM_TASK_SLOTS, env.getParallelism() * 2);
-				configuration.setString(ConfigConstants.AKKA_ASK_TIMEOUT, "300s");
-				LOG.info("Creating a new LocalFlinkMiniCluster.");
-				localCluster = new LocalFlinkMiniCluster(configuration, false);
-				localCluster.start();
-			}
-			localClusterUsers++;
-		}
-	}
-
-	private void stopCluster() {
-		synchronized (lock) {
-			if (localCluster != null) {
-				if (--localClusterUsers <= 0) {
-					localCluster.shutdown();
-					localCluster.awaitTermination();
-					localCluster = null;
-					localClusterUsers = 0;
-				}
-			}
-			if (executorService != null) {
-				executorService.shutdown();
-			}
-		}
-	}
+public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
+    private static final Logger LOG = LoggerFactory.getLogger(FlinkFlowStepJob.class);
+    private static final int accumulatorUpdateIntervalSecs = 10;
+    private static final Object lock = new Object();
+    @SuppressWarnings("unused")
+    private static final FiniteDuration DEFAULT_TIMEOUT = new FiniteDuration(60, TimeUnit.SECONDS);
+    private volatile static FlinkMiniCluster localCluster;
+    private volatile static int localClusterUsers;
+    private final Configuration currentConf;
+    private final ExecutionEnvironment env;
+    private ClusterClient client;
+    private JobID jobID;
+    private Throwable jobException;
+    private List<String> classPath;
+    private AccumulatorCache accumulatorCache;
+    private Future<JobSubmissionResult> jobSubmission;
+    private ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+    public FlinkFlowStepJob(ClientState clientState, FlinkFlowStep flowStep,
+            Configuration currentConf, List<String> classPath) {
+
+        super(clientState, currentConf, flowStep, 1000, 60000, 60000);
+
+        this.currentConf = currentConf;
+        this.env = ((FlinkFlowStep) this.flowStep).getExecutionEnvironment();
+        this.classPath = classPath;
+
+        if (flowStep.isDebugEnabled()) {
+            flowStep.logDebug("using polling interval: " + pollingInterval);
+        }
+    }
+
+    @Override
+    public Configuration getConfig() {
+        return currentConf;
+    }
+
+    @Override
+    protected FlowStepStats createStepStats(ClientState clientState) {
+        this.accumulatorCache = new AccumulatorCache(accumulatorUpdateIntervalSecs);
+        return new FlinkFlowStepStats(this.flowStep, clientState, accumulatorCache);
+    }
+
+    protected void internalBlockOnStop() throws IOException {
+
+        if (jobSubmission != null && !jobSubmission.isDone()) {
+            try {
+                client.cancel(jobID);
+            } catch (Exception e) {
+                throw new IOException("An exception occurred while stopping the Flink job with ID: "
+                        + jobID + ": " + e.getMessage());
+            }
+        }
+
+    }
+
+    protected void internalNonBlockingStart() throws IOException {
+
+        Plan plan = env.createProgramPlan();
+
+        // set exchange mode, BATCH is default
+        String execMode = getConfig().get(FlinkConfigConstants.EXECUTION_MODE);
+        if (execMode == null || FlinkConfigConstants.EXECUTION_MODE_BATCH.equals(execMode)) {
+            env.getConfig().setExecutionMode(ExecutionMode.BATCH);
+        } else if (FlinkConfigConstants.EXECUTION_MODE_PIPELINED.equals(execMode)) {
+            env.getConfig().setExecutionMode(ExecutionMode.PIPELINED);
+        } else {
+            LOG.warn("Unknow value for '" + FlinkConfigConstants.EXECUTION_MODE + "' parameter. "
+                    + "Only '" + FlinkConfigConstants.EXECUTION_MODE_BATCH + "' " + "or '"
+                    + FlinkConfigConstants.EXECUTION_MODE_PIPELINED + "' supported. " + "Using "
+                    + FlinkConfigConstants.EXECUTION_MODE_BATCH + " exchange by default.");
+            env.getConfig().setExecutionMode(ExecutionMode.BATCH);
+        }
+
+        Optimizer optimizer = new Optimizer(new DataStatistics(),
+                new org.apache.flink.configuration.Configuration());
+        OptimizedPlan optimizedPlan = optimizer.compile(plan);
+
+        final JobGraph jobGraph = new JobGraphGenerator().compileJobGraph(optimizedPlan);
+        for (String jarPath : classPath) {
+            jobGraph.addJar(new Path(jarPath));
+        }
+
+        jobID = jobGraph.getJobID();
+        accumulatorCache.setJobID(jobID);
+
+        if (isLocalExecution()) {
+
+            flowStep.logInfo("Executing in local mode.");
+
+            startLocalCluster();
+
+            org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();
+            config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, localCluster.hostname());
+
+            final org.apache.flink.configuration.Configuration tmpConfig = localCluster
+                    .generateConfiguration(localCluster.configuration());
+
+            final int resourceManagerPort = tmpConfig.getInteger(
+                    ConfigConstants.RESOURCE_MANAGER_IPC_PORT_KEY,
+                    ConfigConstants.DEFAULT_RESOURCE_MANAGER_IPC_PORT);
+
+            final int jobManagerPort = tmpConfig.getInteger(
+                    ConfigConstants.JOB_MANAGER_IPC_PORT_KEY,
+                    ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);
+
+            config.setInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, jobManagerPort);
+
+            flowStep.logWarn("Using local cluster at " + localCluster.hostname() + " RM port: "
+                    + resourceManagerPort + " JM port: " + jobManagerPort);
+
+            client = new StandaloneClusterClient(config);
+            client.setPrintStatusDuringExecution(env.getConfig().isSysoutLoggingEnabled());
+
+        } else {
+
+            flowStep.logInfo("Executing in cluster mode.");
+
+            try {
+                String path = this.getClass().getProtectionDomain().getCodeSource().getLocation()
+                        .toURI().getPath();
+                jobGraph.addJar(new Path(path));
+                classPath.add(path);
+            } catch (URISyntaxException e) {
+                throw new IOException("Could not add the submission JAR as a dependency.");
+            }
+
+            client = ((ContextEnvironment) env).getClient();
+        }
+
+        List<URL> fileList = new ArrayList<URL>(classPath.size());
+        for (String path : classPath) {
+            URL url;
+            try {
+                url = new URL(path);
+            } catch (MalformedURLException e) {
+                url = new URL("file://" + path);
+            }
+            fileList.add(url);
+        }
+
+        final ClassLoader loader = JobWithJars.buildUserCodeClassLoader(fileList,
+                Collections.<URL> emptyList(), getClass().getClassLoader());
+
+        accumulatorCache.setClient(client);
+
+        final Callable<JobSubmissionResult> callable = () -> client.run(jobGraph, loader);
+
+        jobSubmission = executorService.submit(callable);
+
+        flowStep.logInfo("submitted Flink job: " + jobID);
+    }
+
+    @Override
+    protected void updateNodeStatus(FlowNodeStats flowNodeStats) {
+        try {
+            if (internalNonBlockingIsComplete() && internalNonBlockingIsSuccessful()) {
+                flowNodeStats.markSuccessful();
+            } else if (internalIsStartedRunning()) {
+                flowNodeStats.isRunning();
+            } else {
+                flowNodeStats.markFailed(jobException);
+            }
+        } catch (IOException e) {
+            flowStep.logError("Failed to update node status.");
+        }
+    }
+
+    protected boolean internalNonBlockingIsSuccessful() throws IOException {
+        try {
+            jobSubmission.get(0, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            return false;
+        } catch (ExecutionException e) {
+            jobException = e.getCause();
+            return false;
+        } catch (TimeoutException e) {
+            return false;
+        }
+
+        boolean isDone = jobSubmission.isDone();
+        if (isDone) {
+            accumulatorCache.update(true);
+            accumulatorCache.setJobID(null);
+            accumulatorCache.setClient(null);
+            stopCluster();
+        }
+
+        return isDone;
+    }
+
+    @Override
+    public Throwable call() {
+        if (env instanceof OptimizerPlanEnvironment) {
+            // We have an OptimizerPlanEnvironment.
+            // This environment is only used to to fetch the Flink execution
+            // plan.
+            try {
+                // OptimizerPlanEnvironment does not execute but only build the
+                // execution plan.
+                env.execute("plan generation");
+            }
+            // execute() throws a ProgramAbortException if everything goes well
+            catch (OptimizerPlanEnvironment.ProgramAbortException pae) {
+                // Forward call() to get Cascading's internal job stats right.
+                // The job will be skipped due to the overridden isSkipFlowStep
+                // method.
+                super.call();
+                // forward expected ProgramAbortException
+                return pae;
+            }
+            //
+            catch (Exception e) {
+                // forward unexpected exception
+                return e;
+            }
+        }
+        // forward to call() if we have a regular ExecutionEnvironment
+        return super.call();
+
+    }
+
+    protected boolean isSkipFlowStep() throws IOException {
+        if (env instanceof OptimizerPlanEnvironment) {
+            // We have an OptimizerPlanEnvironment.
+            // This environment is only used to to fetch the Flink execution
+            // plan.
+            // We do not want to execute the job in this case.
+            return true;
+        } else {
+            return super.isSkipFlowStep();
+        }
+    }
+
+    @Override
+    protected boolean isRemoteExecution() {
+        return env instanceof ContextEnvironment;
+    }
+
+    @Override
+    protected Throwable getThrowable() {
+        return jobException;
+    }
+
+    protected String internalJobId() {
+        return jobID.toString();
+    }
+
+    protected boolean internalNonBlockingIsComplete() throws IOException {
+        return jobSubmission.isDone();
+    }
+
+    protected void dumpDebugInfo() {
+    }
+
+    protected boolean internalIsStartedRunning() {
+        return jobSubmission != null;
+    }
+
+    private boolean isLocalExecution() {
+        return env instanceof LocalEnvironment;
+    }
+
+    private void startLocalCluster() {
+        synchronized (lock) {
+            if (localCluster == null) {
+                org.apache.flink.configuration.Configuration configuration = new org.apache.flink.configuration.Configuration();
+                configuration.setInteger(ConfigConstants.TASK_MANAGER_NUM_TASK_SLOTS,
+                        env.getParallelism() * 2);
+                configuration.setString(ConfigConstants.AKKA_ASK_TIMEOUT, "300s");
+                LOG.info("Creating a new LocalFlinkMiniCluster.");
+                localCluster = new LocalFlinkMiniCluster(configuration, false);
+                localCluster.start();
+            }
+            localClusterUsers++;
+        }
+    }
+
+    private void stopCluster() {
+        synchronized (lock) {
+            if (localCluster != null) {
+                if (--localClusterUsers <= 0) {
+                    localCluster.shutdown();
+                    localCluster.awaitTermination();
+                    localCluster = null;
+                    localClusterUsers = 0;
+                }
+            }
+            if (executorService != null) {
+                executorService.shutdown();
+            }
+        }
+    }
 
 }

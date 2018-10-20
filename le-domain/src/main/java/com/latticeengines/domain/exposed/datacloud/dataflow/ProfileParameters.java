@@ -143,6 +143,10 @@ public class ProfileParameters extends TransformationFlowParameters {
         return numericAttrs;
     }
 
+    public void setNumericAttrs(List<Attribute> numericAttrs) {
+        this.numericAttrs = numericAttrs;
+    }
+
     public List<Attribute> getCatAttrs() {
         return catAttrs;
     }
@@ -157,10 +161,6 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public void setMaxDiscrete(int maxDiscrete) {
         this.maxDiscrete = maxDiscrete;
-    }
-
-    public void setNumericAttrs(List<Attribute> numericAttrs) {
-        this.numericAttrs = numericAttrs;
     }
 
     public List<Attribute> getAmAttrsToEnc() {
@@ -211,7 +211,8 @@ public class ProfileParameters extends TransformationFlowParameters {
         private String decodeStrategy;
         private BucketAlgorithm algo;
 
-        public Attribute(String attr, Integer encodeBitUnit, String decodeStrategy, BucketAlgorithm algo) {
+        public Attribute(String attr, Integer encodeBitUnit, String decodeStrategy,
+                BucketAlgorithm algo) {
             this.attr = attr;
             this.encodeBitUnit = encodeBitUnit;
             this.decodeStrategy = decodeStrategy;

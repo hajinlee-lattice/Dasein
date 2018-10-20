@@ -8,15 +8,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CategorizedIntervalBucket extends IntervalBucket {
     private static final long serialVersionUID = 7888809618514182701L;
+    @JsonProperty("cats")
+    private List<String> categories;
 
     @Override
     @JsonIgnore
     public String getAlgorithm() {
         return CATEGORIZED_INTERVAL;
     }
-
-    @JsonProperty("cats")
-    private List<String> categories;
 
     public List<String> getCategories() {
         return categories;

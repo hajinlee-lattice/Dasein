@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.AMStatsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
-import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AMAttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -154,7 +154,8 @@ public class AMStatsReportFunction extends BaseOperation implements Function {
             String reportOutputColWithPrePostFix = dimensionColumnPrepostfix + reportOutputCol
                     + dimensionColumnPrepostfix;
             int reportOutputColPos = functionCall.getDeclaredFields().getPos(reportOutputCol);
-            if (isDimensionKey(dimensionIds, reportOutputCol, reportOutputColWithPrePostFix, reportOutputColPos)) {
+            if (isDimensionKey(dimensionIds, reportOutputCol, reportOutputColWithPrePostFix,
+                    reportOutputColPos)) {
                 int dimensionKeyPos = reportOutputColPos;
                 result.set(dimensionKeyPos,
                         dimensionIds.containsKey(reportOutputColWithPrePostFix)
@@ -171,9 +172,9 @@ public class AMStatsReportFunction extends BaseOperation implements Function {
     }
 
     private void processRecord(Tuple tuple, String field, Object value, //
-                               AccountMasterCube cube, Map<String, AMAttributeStats> statsList, //
-                               Map<String, Object> dimensionIds, StringBuilder[] attrBuilder, //
-                               MutableInt curAttrCol) {
+            AccountMasterCube cube, Map<String, AMAttributeStats> statsList, //
+            Map<String, Object> dimensionIds, StringBuilder[] attrBuilder, //
+            MutableInt curAttrCol) {
 
         if (field.startsWith(dimensionColumnPrepostfix) //
                 && field.endsWith(dimensionColumnPrepostfix)) {

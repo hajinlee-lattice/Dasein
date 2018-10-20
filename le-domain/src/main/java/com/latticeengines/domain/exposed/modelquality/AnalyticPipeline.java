@@ -28,7 +28,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_ANALYTIC_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_ANALYTIC_PIPELINE", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
 
@@ -77,7 +78,8 @@ public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
     @Column(name = "VERSION", nullable = true)
     private Integer version;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "analyticPipelines", cascade = { CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "analyticPipelines", cascade = {
+            CascadeType.MERGE })
     @JsonIgnore
     private List<AnalyticTest> analyticTests = new ArrayList<>();
 
@@ -101,20 +103,20 @@ public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
         this.name = name;
     }
 
-    public void setPipeline(Pipeline pipeline) {
-        this.pipeline = pipeline;
-    }
-
     public Pipeline getPipeline() {
         return pipeline;
     }
 
-    public void setAlgorithm(Algorithm algorithm) {
-        this.algorithm = algorithm;
+    public void setPipeline(Pipeline pipeline) {
+        this.pipeline = pipeline;
     }
 
     public Algorithm getAlgorithm() {
         return algorithm;
+    }
+
+    public void setAlgorithm(Algorithm algorithm) {
+        this.algorithm = algorithm;
     }
 
     public PropData getPropData() {

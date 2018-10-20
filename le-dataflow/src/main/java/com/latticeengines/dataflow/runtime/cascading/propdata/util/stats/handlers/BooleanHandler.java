@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BooleanHandler {
-    public void handleBooleanAttribute(Map<String, Map<String, Long>> attributeValueBuckets, String fieldName,
-            Boolean objVal, Map<String, Map<String, Long>> nAttributeBucketIds) {
+    public void handleBooleanAttribute(Map<String, Map<String, Long>> attributeValueBuckets,
+            String fieldName, Boolean objVal, Map<String, Map<String, Long>> nAttributeBucketIds) {
         if (!attributeValueBuckets.containsKey(fieldName)) {
             attributeValueBuckets.put(fieldName, new HashMap<String, Long>());
             nAttributeBucketIds.put(fieldName, new HashMap<String, Long>());

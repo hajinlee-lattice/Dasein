@@ -71,6 +71,10 @@ public class Oauth2AccessToken implements HasPid, HasTenantId {
         this.tenantId = tenantId;
     }
 
+    public Tenant getTenant() {
+        return tenant;
+    }
+
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
@@ -78,10 +82,6 @@ public class Oauth2AccessToken implements HasPid, HasTenantId {
             setTenantId(tenant.getPid());
         }
 
-    }
-
-    public Tenant getTenant() {
-        return tenant;
     }
 
     public String getAppId() {

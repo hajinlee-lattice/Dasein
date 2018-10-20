@@ -146,7 +146,7 @@ public class PlaymakerTenant implements HasPid {
     public void setJdbcPasswordEncrypt(String jdbcPasswordEncrypt) {
         this.jdbcPasswordEncrypt = jdbcPasswordEncrypt;
     }
-    
+
     @JsonProperty("GwApiKey")
     @Column(name = "GW_API_KEY", nullable = true)
     public String getGwApiKey() {

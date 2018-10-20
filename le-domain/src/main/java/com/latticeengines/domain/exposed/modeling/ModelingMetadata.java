@@ -46,6 +46,16 @@ public class ModelingMetadata {
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
+    @JsonProperty("Metadata")
+    public List<AttributeMetadata> getAttributeMetadata() {
+        return attributeMetadata;
+    }
+
+    @JsonProperty("Metadata")
+    public void setAttributeMetadata(List<AttributeMetadata> attributeMetadata) {
+        this.attributeMetadata = attributeMetadata;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class KV implements LikeMapEntry {
         @JsonProperty("Key")
@@ -128,12 +138,13 @@ public class ModelingMetadata {
         private String displayName;
         @RequiredKeysInMap(keys = { CATEGORY_EXTENSION })
         private List<KV> extensions;
-        @AllowedValues(values = { FT_ALPHA, FT_BOOLEAN, FT_CURRENCY, FT_NUMERIC, FT_PERCENTAGE, FT_YEAR, FT_EMAIL,
-                FT_PROBABILITY, FT_PHONE, FT_URI, FT_ENUM })
+        @AllowedValues(values = { FT_ALPHA, FT_BOOLEAN, FT_CURRENCY, FT_NUMERIC, FT_PERCENTAGE,
+                FT_YEAR, FT_EMAIL, FT_PROBABILITY, FT_PHONE, FT_URI, FT_ENUM })
         private String fundamentalType;
         private List<DateTime> lastTimeSourceUpdated;
         private DateTime mostRecentUpdateDate;
-        @AllowedValues(values = { NOMINAL_STAT_TYPE, ORDINAL_STAT_TYPE, INTERVAL_STAT_TYPE, RATIO_STAT_TYPE })
+        @AllowedValues(values = { NOMINAL_STAT_TYPE, ORDINAL_STAT_TYPE, INTERVAL_STAT_TYPE,
+                RATIO_STAT_TYPE })
         @NotNull
         private String statisticalType;
         @AllowedValues(values = { INTERNAL_TAG, EXTERNAL_TAG })
@@ -281,16 +292,6 @@ public class ModelingMetadata {
             this.dataQuality = dataQuality;
         }
 
-    }
-
-    @JsonProperty("Metadata")
-    public List<AttributeMetadata> getAttributeMetadata() {
-        return attributeMetadata;
-    }
-
-    @JsonProperty("Metadata")
-    public void setAttributeMetadata(List<AttributeMetadata> attributeMetadata) {
-        this.attributeMetadata = attributeMetadata;
     }
 
 }

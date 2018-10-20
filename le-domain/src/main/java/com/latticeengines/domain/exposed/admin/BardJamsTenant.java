@@ -468,7 +468,9 @@ public class BardJamsTenant implements HasPid {
         this.status = status;
     }
 
-    public String getDanteStatus() { return danteStatus; }
+    public String getDanteStatus() {
+        return danteStatus;
+    }
 
     public void setDanteStatus(String danteStatus) {
         this.danteStatus = danteStatus;
@@ -491,7 +493,7 @@ public class BardJamsTenant implements HasPid {
 
     @Override
     public String toString() {
-        return "BardJamsTenants="
-                + new ToStringBuilder(tenantId).append(tenantId).append(tenant).append(status).toString();
+        return "BardJamsTenants=" + new ToStringBuilder(tenantId).append(tenantId).append(tenant)
+                .append(status).toString();
     }
 }

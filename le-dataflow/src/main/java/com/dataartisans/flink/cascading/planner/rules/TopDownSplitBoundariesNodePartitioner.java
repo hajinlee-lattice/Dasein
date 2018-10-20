@@ -31,34 +31,26 @@ import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.stream.graph.IORole;
 
 public class TopDownSplitBoundariesNodePartitioner extends ExpressionRulePartitioner {
-	public TopDownSplitBoundariesNodePartitioner() {
-		super(
-				PartitionNodes,
+    public TopDownSplitBoundariesNodePartitioner() {
+        super(PartitionNodes,
 
-				new RuleExpression(
-						new NoGroupJoinMergeBoundaryTapExpressionGraph(),
-						new TopDownSplitBoundariesExpressionGraph()
-				),
+                new RuleExpression(new NoGroupJoinMergeBoundaryTapExpressionGraph(),
+                        new TopDownSplitBoundariesExpressionGraph()),
 
-				new ElementAnnotation(ElementCapture.Include, IORole.sink)
-		);
-	}
+                new ElementAnnotation(ElementCapture.Include, IORole.sink));
+    }
 
-	private static class TopDownSplitBoundariesExpressionGraph extends ExpressionGraph
-	{
-		public TopDownSplitBoundariesExpressionGraph()
-		{
-			super( SearchOrder.Topological );
+    private static class TopDownSplitBoundariesExpressionGraph extends ExpressionGraph {
+        public TopDownSplitBoundariesExpressionGraph() {
+            super(SearchOrder.Topological);
 
-			this.arc(
-					new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Split ),
+            this.arc(new BoundariesElementExpression(ElementCapture.Primary,
+                    TypeExpression.Topo.Split),
 
-					PathScopeExpression.ANY,
+                    PathScopeExpression.ANY,
 
-					new BoundariesElementExpression()
-			);
-		}
-	}
-
+                    new BoundariesElementExpression());
+        }
+    }
 
 }

@@ -11,24 +11,20 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ImportActionConfiguration extends ActionConfiguration {
 
+    @JsonProperty("workflow_id")
+    private Long workflowId;
+    @JsonProperty("data_feed_task_id")
+    private String dataFeedTaskId;
+    @JsonProperty("import_count")
+    private Long importCount;
+    @JsonProperty("registered_tables")
+    private List<String> registeredTables;
+    @JsonProperty("mock_completed")
+    private Boolean mockCompleted;
+
     public ImportActionConfiguration() {
 
     }
-
-    @JsonProperty("workflow_id")
-    private Long workflowId;
-
-    @JsonProperty("data_feed_task_id")
-    private String dataFeedTaskId;
-
-    @JsonProperty("import_count")
-    private Long importCount;
-
-    @JsonProperty("registered_tables")
-    private List<String> registeredTables;
-
-    @JsonProperty("mock_completed")
-    private Boolean mockCompleted;
 
     public Long getWorkflowId() {
         return workflowId;

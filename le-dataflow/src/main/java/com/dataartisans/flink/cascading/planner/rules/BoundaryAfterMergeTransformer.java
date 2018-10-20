@@ -28,34 +28,29 @@ import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.pipe.Merge;
 
 /**
- * Injects a Boundary after a Merge in order to split of the Merge as a separate node.
+ * Injects a Boundary after a Merge in order to split of the Merge as a separate
+ * node.
  */
-public class BoundaryAfterMergeTransformer extends RuleInsertionTransformer
-{
-	public BoundaryAfterMergeTransformer() {
-		super(
-				BalanceAssembly,
-				new MergeMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.After
-		);
-	}
+public class BoundaryAfterMergeTransformer extends RuleInsertionTransformer {
+    public BoundaryAfterMergeTransformer() {
+        super(BalanceAssembly, new MergeMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.After);
+    }
 
-	public static class MergeMatcher extends RuleExpression
-	{
-		public MergeMatcher()
-		{
-			super( new MergeGraph() );
-		}
-	}
+    public static class MergeMatcher extends RuleExpression {
+        public MergeMatcher() {
+            super(new MergeGraph());
+        }
+    }
 
-	public static class MergeGraph extends ExpressionGraph {
+    public static class MergeGraph extends ExpressionGraph {
 
-		public MergeGraph() {
+        public MergeGraph() {
 
-			super(SearchOrder.ReverseTopological, new FlowElementExpression(ElementCapture.Primary, Merge.class));
+            super(SearchOrder.ReverseTopological,
+                    new FlowElementExpression(ElementCapture.Primary, Merge.class));
 
-		}
-	}
+        }
+    }
 
 }

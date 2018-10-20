@@ -44,17 +44,16 @@ public abstract class StorageMechanism implements HasPid, HasName {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-
     @Column(name = "TABLE_NAME", unique = false, nullable = false)
     @JsonProperty("table_name")
     private String tableNameInStorage;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Table table = null;
-    
+
     @Override
     public String getName() {
         DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
@@ -75,12 +74,12 @@ public abstract class StorageMechanism implements HasPid, HasName {
         this.pid = pid;
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-    
     public Table getTable() {
         return table;
+    }
+
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     public String getTableNameInStorage() {

@@ -10,7 +10,8 @@ public class SelectableConfigurationDocument {
     private String component;
     private List<SelectableConfigurationField> nodes;
 
-    public SelectableConfigurationDocument(){ }
+    public SelectableConfigurationDocument() {
+    }
 
     @JsonProperty("Nodes")
     public List<SelectableConfigurationField> getNodes() {
@@ -34,7 +35,7 @@ public class SelectableConfigurationDocument {
 
     public void patch(SerializableDocumentDirectory sDir) {
         Map<String, String> failedNodes = new HashMap<>();
-        for (SelectableConfigurationField field: nodes) {
+        for (SelectableConfigurationField field : nodes) {
             try {
                 field.patch(sDir);
             } catch (Exception e) {
@@ -42,8 +43,9 @@ public class SelectableConfigurationDocument {
             }
         }
         if (!failedNodes.isEmpty()) {
-            StringBuilder builder = new StringBuilder("Patching options for the following nodes failed:\t\n ");
-            for (Map.Entry<String, String> entry: failedNodes.entrySet()) {
+            StringBuilder builder = new StringBuilder(
+                    "Patching options for the following nodes failed:\t\n ");
+            for (Map.Entry<String, String> entry : failedNodes.entrySet()) {
                 builder.append(String.format("%s: %s\t\n", entry.getKey(), entry.getValue()));
             }
             throw new IllegalArgumentException(builder.toString());

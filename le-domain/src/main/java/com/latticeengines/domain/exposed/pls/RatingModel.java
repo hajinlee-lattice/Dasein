@@ -47,28 +47,16 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 @NamedEntityGraph(name = "RatingModel.ratingEngine", attributeNodes = @NamedAttributeNode("ratingEngine"))
 public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingFields {
 
-    private Long pid;
-
-    private String id;
-
-    private int iteration = 1;
-
-    private Date created;
-
-    private Date updated;
-
-    private String createdBy;
-
     protected RatingEngine ratingEngine;
-
+    private Long pid;
+    private String id;
+    private int iteration = 1;
+    private Date created;
+    private Date updated;
+    private String createdBy;
     private String derivedFromRatingModel;
 
     private Set<AttributeLookup> ratingModelAttributes;
-
-    @Override
-    public void setPid(Long pid) {
-        this.pid = pid;
-    }
 
     @Override
     @JsonProperty("pid")
@@ -80,8 +68,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
-    public void setId(String id) {
-        this.id = id;
+    public void setPid(Long pid) {
+        this.pid = pid;
     }
 
     @Override
@@ -92,8 +80,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
-    public void setCreated(Date time) {
-        this.created = time;
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
@@ -106,8 +94,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
-    public void setUpdated(Date time) {
-        this.updated = time;
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     @Override
@@ -119,8 +107,9 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
         return this.updated;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    @Override
+    public void setUpdated(Date time) {
+        this.updated = time;
     }
 
     @JsonProperty("createdBy")
@@ -129,8 +118,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
         return this.createdBy;
     }
 
-    public void setIteration(int iteration) {
-        this.iteration = iteration;
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     @JsonProperty("iteration")
@@ -139,8 +128,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
         return this.iteration;
     }
 
-    public void setRatingEngine(RatingEngine ratingEngine) {
-        this.ratingEngine = ratingEngine;
+    public void setIteration(int iteration) {
+        this.iteration = iteration;
     }
 
     @JsonIgnore
@@ -151,10 +140,18 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
         return this.ratingEngine;
     }
 
+    public void setRatingEngine(RatingEngine ratingEngine) {
+        this.ratingEngine = ratingEngine;
+    }
+
     @JsonProperty("ratingmodel_attributes")
     @Transient
     public Set<AttributeLookup> getRatingModelAttributes() {
         return this.ratingModelAttributes;
+    }
+
+    public void setRatingModelAttributes(Set<AttributeLookup> attributes) {
+        this.ratingModelAttributes = attributes;
     }
 
     @JsonProperty("derived_from_rating_model")
@@ -165,9 +162,5 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
 
     public void setDerivedFromRatingModel(String derivedFromRatingModel) {
         this.derivedFromRatingModel = derivedFromRatingModel;
-    }
-
-    public void setRatingModelAttributes(Set<AttributeLookup> attributes) {
-        this.ratingModelAttributes = attributes;
     }
 }

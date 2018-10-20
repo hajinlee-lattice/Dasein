@@ -33,8 +33,7 @@ public class ModelDefinition implements HasName, HasPid {
 
     private Long pid;
     private String name;
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type",
-            defaultImpl = RandomForestAlgorithm.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", defaultImpl = RandomForestAlgorithm.class)
     private List<Algorithm> algorithms = new ArrayList<Algorithm>();
     private List<Model> models = new ArrayList<Model>();
 
@@ -67,8 +66,8 @@ public class ModelDefinition implements HasName, HasPid {
     }
 
     @JsonProperty("algorithms")
-    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER,
-            cascade = { CascadeType.ALL })
+    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER, cascade = {
+            CascadeType.ALL })
     public List<Algorithm> getAlgorithms() {
         return algorithms;
     }

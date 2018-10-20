@@ -31,7 +31,8 @@ import cascading.tuple.TupleEntryCollector;
 @SuppressWarnings("rawtypes")
 public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Buffer {
 
-    private static final Logger log = LoggerFactory.getLogger(AMStatsDedupAggRollupWithHQDuns.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(AMStatsDedupAggRollupWithHQDuns.class);
 
     private static final long serialVersionUID = 4217950767704131475L;
     private static final int MAX_DEPTH = 5;
@@ -88,7 +89,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         String hqDunsFieldValuesStr = "";
 
         TupleEntry group = bufferCall.getGroup();
-        for (Object obj: group.asIterableOf(Object.class)) {
+        for (Object obj : group.asIterableOf(Object.class)) {
             hqDunsFieldValuesStr += " [" + obj + "] ";
         }
 
@@ -103,7 +104,8 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
             }
 
             ExpandedTuple expandedTuple = new ExpandedTuple(originalTuple);
-            dedupAndPut(argFieldsLength, expandedTupleMap, new Dimensions(dimValues), expandedTuple);
+            dedupAndPut(argFieldsLength, expandedTupleMap, new Dimensions(dimValues),
+                    expandedTuple);
         }
 
         Set<Dimensions> dimSet = new HashSet<>();
@@ -122,8 +124,8 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 dimAncestorMap.put(dimId, ancestorsPids);
             }
 
-            List<List<Long>> dimensionCombinations = calculationDimensionCombinations(dimAncestorMap,
-                    dim.getDimensions());
+            List<List<Long>> dimensionCombinations = calculationDimensionCombinations(
+                    dimAncestorMap, dim.getDimensions());
 
             if (max < dimensionCombinations.size()) {
                 max = dimensionCombinations.size();
@@ -135,13 +137,15 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 for (Integer dimPos : dimFieldPosList) {
                     rollupExpandedTuple.set(dimPos, ancestorTuple.get(idx++));
                 }
-                dedupAndPut(argFieldsLength, expandedTupleMap, new Dimensions(ancestorTuple), rollupExpandedTuple);
+                dedupAndPut(argFieldsLength, expandedTupleMap, new Dimensions(ancestorTuple),
+                        rollupExpandedTuple);
             }
         }
 
         for (Dimensions dim : expandedTupleMap.keySet()) {
             try {
-                log.info(String.format("Writing output tuple: hqDunsFieldValuesStr = %s, Dimensions = %s",
+                log.info(String.format(
+                        "Writing output tuple: hqDunsFieldValuesStr = %s, Dimensions = %s",
                         hqDunsFieldValuesStr, dim.toString()));
                 Tuple resultInInputOrder = expandedTupleMap.get(dim).generateTuple();
                 Tuple result = Tuple.size(fieldDeclaration.size());
@@ -156,8 +160,9 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 String msg = String.format(
                         "%s\nhqDunsFieldValuesStr=%s, Dimensions=%s, expandedTupleMapKeySet=%s, "
                                 + "tupleSize=%d, outputCollectorSize=%d\n", //
-                        ex.getMessage(), hqDunsFieldValuesStr, dim.toString(), expandedTupleMap.keySet(),
-                        expandedTupleMap.get(dim).size(), bufferCall.getDeclaredFields().size());
+                        ex.getMessage(), hqDunsFieldValuesStr, dim.toString(),
+                        expandedTupleMap.keySet(), expandedTupleMap.get(dim).size(),
+                        bufferCall.getDeclaredFields().size());
                 ObjectMapper om = new ObjectMapper();
                 try {
                     msg = String.format("%s\n\n%s\n", msg,
@@ -178,7 +183,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 outPos.put(fieldName, i);
             }
             Fields argFields = argument.getFields();
-            for (int i =0; i < argFields.size(); i++) {
+            for (int i = 0; i < argFields.size(); i++) {
                 String fieldName = (String) argFields.get(i);
                 if (outPos.containsKey(fieldName)) {
                     inOutPosMap.put(i, outPos.get(fieldName));
@@ -187,7 +192,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         }
 
         if (dimFieldPosList.isEmpty()) {
-            for (String dimField: dimensionFields) {
+            for (String dimField : dimensionFields) {
                 Integer pos = argument.getFields().getPos(dimField);
                 dimFieldPosList.add(pos);
             }
@@ -200,7 +205,8 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         ExpandedTuple dedupedTuple = expandedTuple;
 
         if (expandedTupleMap.containsKey(dim)) {
-            log.info(String.format("Dimension key already exists in map, calling dedup: %s", dim.toString()));
+            log.info(String.format("Dimension key already exists in map, calling dedup: %s",
+                    dim.toString()));
             ExpandedTuple existingExpandedTuple = expandedTupleMap.get(dim);
             dedupedTuple = dimensionUtil.dedup(existingExpandedTuple, expandedTuple, fieldLength);
         }

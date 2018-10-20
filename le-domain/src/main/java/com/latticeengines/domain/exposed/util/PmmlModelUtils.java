@@ -38,59 +38,59 @@ public class PmmlModelUtils {
     static {
         for (DataType dataType : DataType.values()) {
             switch (dataType) {
-            case STRING:
-                dataTypeValueMap.put(dataType, "");
-                break;
-            case INTEGER:
-                dataTypeValueMap.put(dataType, 0);
-                break;
-            case FLOAT:
-                dataTypeValueMap.put(dataType, 0.0);
-                break;
-            case BOOLEAN:
-                dataTypeValueMap.put(dataType, false);
-                break;
-            case DATE:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_DAYS_SINCE_0:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_DAYS_SINCE_1960:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_DAYS_SINCE_1970:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_DAYS_SINCE_1980:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_TIME:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_TIME_SECONDS_SINCE_0:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_TIME_SECONDS_SINCE_1960:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_TIME_SECONDS_SINCE_1970:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DATE_TIME_SECONDS_SINCE_1980:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case DOUBLE:
-                dataTypeValueMap.put(dataType, 0.0);
-                break;
-            case TIME:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            case TIME_SECONDS:
-                dataTypeValueMap.put(dataType, null);
-                break;
-            default:
-                break;
+                case STRING:
+                    dataTypeValueMap.put(dataType, "");
+                    break;
+                case INTEGER:
+                    dataTypeValueMap.put(dataType, 0);
+                    break;
+                case FLOAT:
+                    dataTypeValueMap.put(dataType, 0.0);
+                    break;
+                case BOOLEAN:
+                    dataTypeValueMap.put(dataType, false);
+                    break;
+                case DATE:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_DAYS_SINCE_0:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_DAYS_SINCE_1960:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_DAYS_SINCE_1970:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_DAYS_SINCE_1980:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_TIME:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_TIME_SECONDS_SINCE_0:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_TIME_SECONDS_SINCE_1960:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_TIME_SECONDS_SINCE_1970:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DATE_TIME_SECONDS_SINCE_1980:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case DOUBLE:
+                    dataTypeValueMap.put(dataType, 0.0);
+                    break;
+                case TIME:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                case TIME_SECONDS:
+                    dataTypeValueMap.put(dataType, null);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -147,7 +147,8 @@ public class PmmlModelUtils {
             skipSegmentationFilter.setParent(importFilter);
             XMLFilter skipExtensionFilter = new SkipFilter(reader, "Extension");
             skipExtensionFilter.setParent(skipSegmentationFilter);
-            SAXSource transformedSource = new SAXSource(skipExtensionFilter, new InputSource(pmmlStream));
+            SAXSource transformedSource = new SAXSource(skipExtensionFilter,
+                    new InputSource(pmmlStream));
 
             return JAXBUtil.unmarshalPMML(transformedSource);
         } else {
@@ -179,15 +180,15 @@ public class PmmlModelUtils {
             FieldUsageType fieldUsage = miningField.getUsageType();
 
             switch (fieldUsage) {
-            case TARGET:
-            case PREDICTED:
-                if (result != null) {
-                    throw new UnsupportedFeatureException(miningFields.toString());
-                }
-                result = miningField;
-                break;
-            default:
-                break;
+                case TARGET:
+                case PREDICTED:
+                    if (result != null) {
+                        throw new UnsupportedFeatureException(miningFields.toString());
+                    }
+                    result = miningField;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -202,7 +203,8 @@ public class PmmlModelUtils {
                 continue;
             }
             miningField.setInvalidValueTreatment(InvalidValueTreatmentMethodType.AS_MISSING);
-            if (miningField.getMissingValueTreatment() != null && miningField.getMissingValueReplacement() != null) {
+            if (miningField.getMissingValueTreatment() != null
+                    && miningField.getMissingValueReplacement() != null) {
                 continue;
             }
             miningField.setMissingValueTreatment(MissingValueTreatmentMethodType.AS_VALUE);
@@ -210,26 +212,29 @@ public class PmmlModelUtils {
             Map<FieldName, DataField> map = getFieldNameDataFieldMap(dataDictionary);
             if (!map.containsKey(miningField.getName())) {
                 throw new RuntimeException(
-                        String.format("MiningField %s not found in the map", miningField.getName()).toString());
+                        String.format("MiningField %s not found in the map", miningField.getName())
+                                .toString());
             }
             DataField dataField = map.get(miningField.getName());
             DataType dataType = dataField.getDataType();
             switch (dataField.getOpType()) {
-            case CATEGORICAL:
-                miningField.setMissingValueReplacement(dataField.getValues().get(0).getValue());
-                break;
-            case CONTINUOUS:
-                miningField.setMissingValueReplacement(String.valueOf(dataTypeValueMap.get(dataType)));
-                break;
-            case ORDINAL:
-            default:
-                break;
+                case CATEGORICAL:
+                    miningField.setMissingValueReplacement(dataField.getValues().get(0).getValue());
+                    break;
+                case CONTINUOUS:
+                    miningField.setMissingValueReplacement(
+                            String.valueOf(dataTypeValueMap.get(dataType)));
+                    break;
+                case ORDINAL:
+                default:
+                    break;
             }
 
         }
     }
 
-    public static Map<FieldName, DataField> getFieldNameDataFieldMap(DataDictionary dataDictionary) {
+    public static Map<FieldName, DataField> getFieldNameDataFieldMap(
+            DataDictionary dataDictionary) {
         Map<FieldName, DataField> map = new HashMap<>();
         for (DataField dataField : dataDictionary.getDataFields()) {
             map.put(dataField.getName(), dataField);

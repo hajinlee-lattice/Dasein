@@ -21,22 +21,23 @@ import org.apache.flink.api.java.tuple.Tuple2;
 
 import cascading.tuple.Tuple;
 
-public class TupleAppendJoiner implements JoinFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
+public class TupleAppendJoiner
+        implements JoinFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4322282585772670002L;
-	private int tupleListPos;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 4322282585772670002L;
+    private int tupleListPos;
 
-	public TupleAppendJoiner(int tupleListPos) {
-		this.tupleListPos = tupleListPos;
-	}
+    public TupleAppendJoiner(int tupleListPos) {
+        this.tupleListPos = tupleListPos;
+    }
 
-	@Override
-	public Tuple2<Tuple, Tuple[]> join(Tuple2<Tuple, Tuple[]> left, Tuple right) throws Exception {
+    @Override
+    public Tuple2<Tuple, Tuple[]> join(Tuple2<Tuple, Tuple[]> left, Tuple right) throws Exception {
 
-		left.f1[tupleListPos] = right;
-		return left;
-	}
+        left.f1[tupleListPos] = right;
+        return left;
+    }
 }

@@ -8,7 +8,7 @@ public class ImportSourceDataConfiguration extends ImportStepConfiguration {
 
     @NotNull
     private SourceFile sourceFile;
-    
+
     public SourceFile getSourceFile() {
         return sourceFile;
     }
@@ -16,6 +16,5 @@ public class ImportSourceDataConfiguration extends ImportStepConfiguration {
     public void setSourceFile(SourceFile sourceFile) {
         this.sourceFile = sourceFile;
     }
-
 
 }

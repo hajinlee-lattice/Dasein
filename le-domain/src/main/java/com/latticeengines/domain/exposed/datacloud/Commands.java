@@ -246,23 +246,18 @@ public class Commands implements HasPid {
         }
         CommandIds theOther = (CommandIds) other;
 
-        return new EqualsBuilder().append(commandId, theOther.getPid())
-                .isEquals();
+        return new EqualsBuilder().append(commandId, theOther.getPid()).isEquals();
 
     }
 
     @Override
     public String toString() {
-        return "Command [commandId=" + commandId + ", commandName="
-                + commandName + ", sourceTable=" + sourceTable
-                + ", destTables=" + destTables + ", commandStatus="
-                + commandStatus + ", createTime=" + createTime
-                + ", contractExternalID=" + contractExternalID
-                + ", deploymentExternalID=" + deploymentExternalID
-                + ", processUID=" + processUID + ", isDownloading="
-                + isDownloading + ", numRetries=" + numRetries
-                + ", maxNumRetries=" + maxNumRetries + ", profileID="
-                + profileID + "]";
+        return "Command [commandId=" + commandId + ", commandName=" + commandName + ", sourceTable="
+                + sourceTable + ", destTables=" + destTables + ", commandStatus=" + commandStatus
+                + ", createTime=" + createTime + ", contractExternalID=" + contractExternalID
+                + ", deploymentExternalID=" + deploymentExternalID + ", processUID=" + processUID
+                + ", isDownloading=" + isDownloading + ", numRetries=" + numRetries
+                + ", maxNumRetries=" + maxNumRetries + ", profileID=" + profileID + "]";
     }
 
 }

@@ -13,7 +13,8 @@ public abstract class ChainedDecoratorFactory<N extends Namespace> implements De
     private final List<DecoratorFactory<Namespace>> factories;
 
     @SuppressWarnings("unchecked")
-    public ChainedDecoratorFactory(String decoratorName, List<DecoratorFactory<? extends Namespace>> factories) {
+    public ChainedDecoratorFactory(String decoratorName,
+            List<DecoratorFactory<? extends Namespace>> factories) {
         this.decoratorName = decoratorName;
         this.factories = factories.stream().map(factory -> (DecoratorFactory<Namespace>) factory) //
                 .collect(Collectors.toList());
@@ -23,8 +24,7 @@ public abstract class ChainedDecoratorFactory<N extends Namespace> implements De
     public Decorator getDecorator(N namespace) {
         Iterable<Decorator> decorators = Flux.fromIterable(factories)
                 .zipWith(Flux.fromIterable(project(namespace)))
-                .map(tuple2 -> tuple2.getT1().getDecorator(tuple2.getT2()))
-                .toIterable();
+                .map(tuple2 -> tuple2.getT1().getDecorator(tuple2.getT2())).toIterable();
         return new DecoratorChain(decoratorName, decorators);
     }
 

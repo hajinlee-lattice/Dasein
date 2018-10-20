@@ -62,8 +62,8 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public ProcessContactWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("processContactWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processContactWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processContactStepConfiguration);
             configuration.add(updateContactWorkflowBuilder.build());
             configuration.add(rebuildContactWorkflowBuilder.build());

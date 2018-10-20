@@ -31,7 +31,7 @@ public class DepivotFunction extends BaseOperation implements Function {
         TupleEntry arguments = functionCall.getArguments();
         Iterable<Tuple> valueTuples = depivotStrategy.depivot(arguments);
         for (Tuple valueTuple : valueTuples) {
-            functionCall.getOutputCollector().add( valueTuple );
+            functionCall.getOutputCollector().add(valueTuple);
         }
     }
 

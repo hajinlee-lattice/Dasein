@@ -20,7 +20,8 @@ public class DedupEventTableParameters extends DataFlowParameters {
         this(eventTable, DedupType.ONELEADPERDOMAIN, null);
     }
 
-    public DedupEventTableParameters(String eventTable, DedupType deduplicationType, String eventColumn) {
+    public DedupEventTableParameters(String eventTable, DedupType deduplicationType,
+            String eventColumn) {
         this.eventTable = eventTable;
         this.deduplicationType = deduplicationType;
         this.eventColumn = eventColumn;

@@ -36,8 +36,8 @@ public class SimplePercentileCalculator {
         }
 
         if (minPct > maxPct) {
-            throw new IllegalArgumentException("Min percentile " + minPct + " can't be larger than max percentile " +
-                                               maxPct);
+            throw new IllegalArgumentException(
+                    "Min percentile " + minPct + " can't be larger than max percentile " + maxPct);
         }
     }
 
@@ -68,7 +68,7 @@ public class SimplePercentileCalculator {
         for (int pct = minPct; pct < maxPct; ++pct) {
             if (pctLowerMap.get(pct) > pctLowerMap.get(pct + 1)) {
                 throw new IllegalArgumentException(
-                    "Input data is not in descending order. Percentile calculation will be wrong.");
+                        "Input data is not in descending order. Percentile calculation will be wrong.");
             }
         }
     }

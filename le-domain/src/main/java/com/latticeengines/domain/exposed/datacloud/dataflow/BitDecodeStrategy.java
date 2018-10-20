@@ -11,10 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BitDecodeStrategy implements Serializable {
 
-    private static final long serialVersionUID = -1L;
-
     public static final String BOOLEAN_YESNO = "BOOLEAN_YESNO";
-
+    private static final long serialVersionUID = -1L;
     @JsonProperty("EncodedColumn")
     private String encodedColumn;
 

@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -7,14 +9,12 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.OrphanRecordExpo
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
-import java.util.Map;
-
 public class OrphanRecordExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
     public static final String WORK_FLOW_NAME = "OrphanRecordExportWorkflow";
 
-    public static class Builder{
+    public static class Builder {
         private OrphanRecordExportWorkflowConfiguration configuration = new OrphanRecordExportWorkflowConfiguration();
         private OrphanRecordExportConfiguration stepConf = new OrphanRecordExportConfiguration();
         private ExportStepConfiguration avroToCsvExportStepConf = new ExportStepConfiguration();
@@ -34,7 +34,6 @@ public class OrphanRecordExportWorkflowConfiguration extends BaseCDLWorkflowConf
             exportToS3.setMetadataSegmentExportId(orphanRecordExportId);
             return this;
         }
-
 
         public Builder targetPath(String targetPath) {
             avroToCsvExportStepConf.setExportTargetPath(targetPath);
@@ -83,27 +82,27 @@ public class OrphanRecordExportWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder txnTableName(String tableName){
+        public Builder txnTableName(String tableName) {
             stepConf.setTxnTableName(tableName);
             return this;
         }
 
-        public Builder accountTableName(String tableName){
+        public Builder accountTableName(String tableName) {
             stepConf.setAccountTableName(tableName);
             return this;
         }
 
-        public Builder productTableName(String tableName){
+        public Builder productTableName(String tableName) {
             stepConf.setProductTableName(tableName);
             return this;
         }
 
-        public Builder exportMergeFile(Boolean exportMergeFile){
+        public Builder exportMergeFile(Boolean exportMergeFile) {
             avroToCsvExportStepConf.setExportMergedFile(exportMergeFile);
             return this;
         }
 
-        public Builder mergedFileName(String filename){
+        public Builder mergedFileName(String filename) {
             avroToCsvExportStepConf.setMergedFileName(filename);
             return this;
         }

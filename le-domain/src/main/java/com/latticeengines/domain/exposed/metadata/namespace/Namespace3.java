@@ -16,7 +16,7 @@ public class Namespace3<T1 extends Serializable, T2 extends Serializable, T3 ext
     }
 
     public Serializable[] coords() {
-        return new Serializable[]{ coord1, coord2, coord3 };
+        return new Serializable[] { coord1, coord2, coord3 };
     }
 
     public T3 getCoord3() {

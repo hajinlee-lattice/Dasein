@@ -2,7 +2,8 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +15,10 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 
 @Component("globalAuthTicketEntityMgr")
-public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTicket> implements
-        GlobalAuthTicketEntityMgr {
+public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTicket>
+        implements GlobalAuthTicketEntityMgr {
 
-    @Autowired
+    @Inject
     private GlobalAuthTicketDao gaTicketDao;
 
     @Override
@@ -34,13 +35,13 @@ public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthTicket gaTicket) {
-    	    getDao().create(gaTicket);
+        getDao().create(gaTicket);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthTicket gaTicket) {
-    	    getDao().delete(gaTicket);
+        getDao().delete(gaTicket);
     }
 
     @Override

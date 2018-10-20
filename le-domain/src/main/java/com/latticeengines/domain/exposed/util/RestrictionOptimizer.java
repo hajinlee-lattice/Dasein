@@ -25,13 +25,15 @@ public class RestrictionOptimizer {
         if (frontEndQuery.getAccountRestriction() != null) {
             Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
             if (restriction != null) {
-                frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+                frontEndQuery.getAccountRestriction()
+                        .setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
         if (frontEndQuery.getContactRestriction() != null) {
             Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
             if (restriction != null) {
-                frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+                frontEndQuery.getContactRestriction()
+                        .setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
     }
@@ -39,14 +41,17 @@ public class RestrictionOptimizer {
     public static Restriction optimize(Restriction restriction) {
         if (restriction == null) {
             return null;
-        } else if (restriction instanceof ConcreteRestriction || restriction instanceof TransactionRestriction || restriction instanceof MetricRestriction) {
+        } else if (restriction instanceof ConcreteRestriction
+                || restriction instanceof TransactionRestriction
+                || restriction instanceof MetricRestriction) {
             return restriction;
         } else if (restriction instanceof BucketRestriction) {
             return optimizeBucketRestriction((BucketRestriction) restriction);
         } else if (restriction instanceof LogicalRestriction) {
             return optimizeLogicalRestriction((LogicalRestriction) restriction);
         } else {
-            throw new RuntimeException("Cannot optimize restriction of type " + restriction.getClass());
+            throw new RuntimeException(
+                    "Cannot optimize restriction of type " + restriction.getClass());
         }
     }
 
@@ -61,7 +66,8 @@ public class RestrictionOptimizer {
     }
 
     private static Restriction optimizeLogicalRestriction(LogicalRestriction logicalRestriction) {
-        if (logicalRestriction.getRestrictions() == null || logicalRestriction.getRestrictions().isEmpty()) {
+        if (logicalRestriction.getRestrictions() == null
+                || logicalRestriction.getRestrictions().isEmpty()) {
             return null;
         }
 
@@ -69,7 +75,8 @@ public class RestrictionOptimizer {
         logicalRestriction.getRestrictions().forEach(restriction -> {
             if (restriction != null) {
                 Restriction flatRestriction;
-                if (restriction instanceof LogicalRestriction || restriction instanceof BucketRestriction) {
+                if (restriction instanceof LogicalRestriction
+                        || restriction instanceof BucketRestriction) {
                     flatRestriction = optimize(restriction);
                 } else {
                     flatRestriction = restriction;
@@ -78,7 +85,8 @@ public class RestrictionOptimizer {
                     if (flatRestriction instanceof LogicalRestriction) {
                         LogicalRestriction flattenLogic = (LogicalRestriction) flatRestriction;
                         if (flattenLogic.getOperator().equals(logicalRestriction.getOperator())) {
-                            children.addAll(((LogicalRestriction) flatRestriction).getRestrictions());
+                            children.addAll(
+                                    ((LogicalRestriction) flatRestriction).getRestrictions());
                         } else {
                             children.add(flattenLogic);
                         }
@@ -102,7 +110,8 @@ public class RestrictionOptimizer {
 
     public static Restriction groupMetrics(Restriction restriction) {
         Restriction optimized = restriction;
-        if (restriction instanceof ConcreteRestriction || restriction instanceof BucketRestriction) {
+        if (restriction instanceof ConcreteRestriction
+                || restriction instanceof BucketRestriction) {
             BusinessEntity metricEntity = getMetricEntity(restriction);
             if (metricEntity != null) {
                 MetricRestriction metricRestriction = new MetricRestriction();
@@ -115,7 +124,7 @@ public class RestrictionOptimizer {
             if (CollectionUtils.isNotEmpty(children)) {
                 Map<BusinessEntity, List<Restriction>> groupByMetricEntity = new HashMap<>();
                 List<Restriction> newChildren = new ArrayList<>();
-                for (Restriction child: children) {
+                for (Restriction child : children) {
                     Restriction modifiedChild = child;
                     if (child instanceof LogicalRestriction) {
                         modifiedChild = groupMetrics(child);
@@ -133,7 +142,8 @@ public class RestrictionOptimizer {
                 if (MapUtils.isNotEmpty(groupByMetricEntity)) {
                     groupByMetricEntity.forEach((entity, restrictions) -> {
                         LogicalRestriction logicalRestriction = new LogicalRestriction();
-                        logicalRestriction.setOperator(((LogicalRestriction) restriction).getOperator());
+                        logicalRestriction
+                                .setOperator(((LogicalRestriction) restriction).getOperator());
                         List<Restriction> innerRestrictions = new ArrayList<>();
                         restrictions.forEach(r -> {
                             if (r instanceof MetricRestriction) {

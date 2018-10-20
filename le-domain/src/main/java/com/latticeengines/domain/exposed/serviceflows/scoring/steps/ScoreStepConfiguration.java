@@ -5,13 +5,13 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private String modelId;
-    
+
     private String sourceDir;
-    
+
     private String uniqueKeyColumn;
-    
+
     private Boolean registerScoredTable = false;
-    
+
     private Boolean useScorederivation = null;
 
     private Boolean readModelIdFromRecord = true;
@@ -19,7 +19,7 @@ public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
     public String getModelId() {
         return modelId;
     }
-    
+
     public void setModelId(String modelId) {
         this.modelId = modelId;
     }
@@ -35,7 +35,7 @@ public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
     public String getUniqueKeyColumn() {
         return uniqueKeyColumn;
     }
-    
+
     public void setUniqueKeyColumn(String uniqueKeyColumn) {
         this.uniqueKeyColumn = uniqueKeyColumn;
     }

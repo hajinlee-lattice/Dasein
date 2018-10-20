@@ -7,7 +7,9 @@ public class SqlDestination extends PublicationDestination {
     private String tableName;
 
     @JsonProperty("DestinationType")
-    protected String getDestinationType() { return this.getClass().getSimpleName(); }
+    protected String getDestinationType() {
+        return this.getClass().getSimpleName();
+    }
 
     @JsonProperty("TableName")
     public String getTableName() {

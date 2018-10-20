@@ -91,6 +91,31 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         this.documentDirectory = SerializableDocumentDirectory.deserialize(this);
     }
 
+    public static DocumentDirectory deserialize(SerializableDocumentDirectory serializedDir) {
+        DocumentDirectory dir = new DocumentDirectory();
+        if (serializedDir.getNodes() != null) {
+            deserializeNodes(dir, serializedDir.getNodes(), "");
+        }
+        dir.makePathsAbsolute(new Path(serializedDir.getRootPath()));
+        return dir;
+    }
+
+    private static void deserializeNodes(DocumentDirectory dir, Collection<Node> nodes,
+            String rootPath) {
+        for (Node node : nodes) {
+            Document doc = new Document("");
+            if (node.getData() != null) {
+                doc = new Document(String.valueOf(node.getData()));
+            }
+            doc.setVersion(node.getVersion());
+            Path path = new Path(rootPath + "/" + node.getNode());
+            dir.add(path, doc);
+            if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+                deserializeNodes(dir, node.getChildren(), path.toString());
+            }
+        }
+    }
+
     private void constructByDocumentDirectory(DocumentDirectory documentDirectory) {
         this.setDocumentDirectory(documentDirectory);
         this.rootPath = documentDirectory.getRootPath().toString();
@@ -154,31 +179,6 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
         dir.makePathsLocal();
         return dir;
-    }
-
-    public static DocumentDirectory deserialize(SerializableDocumentDirectory serializedDir) {
-        DocumentDirectory dir = new DocumentDirectory();
-        if (serializedDir.getNodes() != null) {
-            deserializeNodes(dir, serializedDir.getNodes(), "");
-        }
-        dir.makePathsAbsolute(new Path(serializedDir.getRootPath()));
-        return dir;
-    }
-
-    private static void deserializeNodes(DocumentDirectory dir, Collection<Node> nodes,
-            String rootPath) {
-        for (Node node : nodes) {
-            Document doc = new Document("");
-            if (node.getData() != null) {
-                doc = new Document(String.valueOf(node.getData()));
-            }
-            doc.setVersion(node.getVersion());
-            Path path = new Path(rootPath + "/" + node.getNode());
-            dir.add(path, doc);
-            if (node.getChildren() != null && !node.getChildren().isEmpty()) {
-                deserializeNodes(dir, node.getChildren(), path.toString());
-            }
-        }
     }
 
     public List<SelectableConfigurationField> findSelectableFields() {
@@ -251,6 +251,19 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
     public Iterator<Node> iterator() {
         return new DepthFirstIterator(this.getNodes());
+    }
+
+    public Node getNodeAtPath(Path path) {
+        for (Node node : this) {
+            if (node.path.equals(path)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    public Node getNodeAtPath(String path) {
+        return getNodeAtPath(new Path(path));
     }
 
     public static class BreathFirstIterator implements Iterator<Node> {
@@ -327,32 +340,18 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         }
     }
 
-    public Node getNodeAtPath(Path path) {
-        for (Node node : this) {
-            if (node.path.equals(path)) {
-                return node;
-            }
-        }
-        return null;
-    }
-
-    public Node getNodeAtPath(String path) {
-        return getNodeAtPath(new Path(path));
-    }
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Node {
-
-        private String node;
-        private String data;
-        private Metadata metadata;
-        private int version = -1;
-        private Collection<Node> children;
 
         @JsonIgnore
         public Path path;
         @JsonIgnore
         public boolean ignoreOptionsValidateion;
+        private String node;
+        private String data;
+        private Metadata metadata;
+        private int version = -1;
+        private Collection<Node> children;
 
         public Node() {
         }
@@ -552,6 +551,133 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         public Metadata() {
         }
 
+        private static boolean isNumber(String str) {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
+            try {
+                Double.parseDouble(str);
+            } catch (NumberFormatException nfe) {
+                return false;
+            }
+            return true;
+        }
+
+        private static boolean isBoolean(String str) {
+            return str.toLowerCase().equals("true") || str.toLowerCase().equals("false");
+        }
+
+        private static boolean isPath(String str) {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
+            try {
+                new Path(str);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        private static boolean isObject(String str) {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(str);
+                return jNode != null && jNode.isObject();
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        private static boolean isArray(String str) {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(str);
+                return jNode != null && jNode.isArray();
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        static Collection<Node> applyMetadataOnJsonArrays(JsonNode configNodes, JsonNode metaNodes)
+                throws JsonProcessingException {
+            if (configNodes == null || !configNodes.isArray()) {
+                return null;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            Collection<Node> docNodes = new ArrayList<>();
+            for (JsonNode jNode : configNodes) {
+                Node docNode = new Node();
+
+                docNode.setNode(jNode.get("Node").asText());
+
+                // read data as text
+                JsonNode dataNode = jNode.get("Data");
+                boolean mustBeString = false;
+                if (dataNode != null) {
+                    String data;
+                    if (Metadata.isObject(dataNode.toString())
+                            || Metadata.isArray(dataNode.toString())) {
+                        data = dataNode.toString();
+                    } else if (dataNode.toString().startsWith("\"")
+                            && dataNode.toString().endsWith("\"")) {
+                        data = unescapeDataText(
+                                dataNode.toString().substring(1, dataNode.toString().length() - 1));
+                        mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
+                    } else {
+                        data = unescapeDataText(dataNode.asText());
+                    }
+                    docNode.setData(data);
+                }
+
+                // sync with metadata
+                Metadata metadata = null;
+                JsonNode metaNode = null;
+                if (metaNodes != null && metaNodes.isArray()) {
+                    for (JsonNode thisMetaNode : metaNodes) {
+                        if (thisMetaNode.isObject() && thisMetaNode.has("Node")
+                                && thisMetaNode.get("Node").asText().equals(docNode.getNode())) {
+                            if (thisMetaNode.has("Data")) {
+                                metadata = mapper.treeToValue(thisMetaNode.get("Data"),
+                                        Metadata.class);
+                            }
+                            metaNode = thisMetaNode;
+                            break;
+                        }
+                    }
+                }
+                if (metaNode == null && mustBeString) {
+                    metadata = new Metadata();
+                    metadata.setType("string");
+                }
+
+                docNode.applySingleMetadata(metadata);
+
+                // process children
+                if (jNode.has("Children")) {
+                    JsonNode metaChildren = metaNode != null ? metaNode.get("Children") : null;
+                    docNode.setChildren(
+                            applyMetadataOnJsonArrays(jNode.get("Children"), metaChildren));
+                }
+
+                // add to the collection
+                docNodes.add(docNode);
+            }
+            return docNodes;
+        }
+
+        private static String unescapeDataText(String data) {
+            return StringEscapeUtils.unescapeJava(data);
+        }
+
         @JsonProperty("Type")
         public String getType() {
             return type;
@@ -663,129 +789,6 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             }
         }
 
-        private static boolean isNumber(String str) {
-            if (StringUtils.isBlank(str)) {
-                return false;
-            }
-            try {
-                Double.parseDouble(str);
-            } catch (NumberFormatException nfe) {
-                return false;
-            }
-            return true;
-        }
-
-        private static boolean isBoolean(String str) {
-            return str.toLowerCase().equals("true") || str.toLowerCase().equals("false");
-        }
-
-        private static boolean isPath(String str) {
-            if (StringUtils.isBlank(str)) {
-                return false;
-            }
-            try {
-                new Path(str);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        private static boolean isObject(String str) {
-            if (StringUtils.isBlank(str)) {
-                return false;
-            }
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jNode = mapper.readTree(str);
-                return jNode != null && jNode.isObject();
-            } catch (IOException e) {
-                return false;
-            }
-        }
-
-        private static boolean isArray(String str) {
-            if (StringUtils.isBlank(str)) {
-                return false;
-            }
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jNode = mapper.readTree(str);
-                return jNode != null && jNode.isArray();
-            } catch (IOException e) {
-                return false;
-            }
-        }
-
-        static Collection<Node> applyMetadataOnJsonArrays(JsonNode configNodes,
-                JsonNode metaNodes) throws JsonProcessingException {
-            if (configNodes == null || !configNodes.isArray()) {
-                return null;
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            Collection<Node> docNodes = new ArrayList<>();
-            for (JsonNode jNode : configNodes) {
-                Node docNode = new Node();
-
-                docNode.setNode(jNode.get("Node").asText());
-
-                // read data as text
-                JsonNode dataNode = jNode.get("Data");
-                boolean mustBeString = false;
-                if (dataNode != null) {
-                    String data;
-                    if (Metadata.isObject(dataNode.toString())
-                            || Metadata.isArray(dataNode.toString())) {
-                        data = dataNode.toString();
-                    } else if (dataNode.toString().startsWith("\"")
-                            && dataNode.toString().endsWith("\"")) {
-                        data = unescapeDataText(
-                                dataNode.toString().substring(1, dataNode.toString().length() - 1));
-                        mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
-                    } else {
-                        data = unescapeDataText(dataNode.asText());
-                    }
-                    docNode.setData(data);
-                }
-
-                // sync with metadata
-                Metadata metadata = null;
-                JsonNode metaNode = null;
-                if (metaNodes != null && metaNodes.isArray()) {
-                    for (JsonNode thisMetaNode : metaNodes) {
-                        if (thisMetaNode.isObject() && thisMetaNode.has("Node")
-                                && thisMetaNode.get("Node").asText().equals(docNode.getNode())) {
-                            if (thisMetaNode.has("Data")) {
-                                metadata = mapper.treeToValue(thisMetaNode.get("Data"),
-                                        Metadata.class);
-                            }
-                            metaNode = thisMetaNode;
-                            break;
-                        }
-                    }
-                }
-                if (metaNode == null && mustBeString) {
-                    metadata = new Metadata();
-                    metadata.setType("string");
-                }
-
-                docNode.applySingleMetadata(metadata);
-
-                // process children
-                if (jNode.has("Children")) {
-                    JsonNode metaChildren = metaNode != null ? metaNode.get("Children") : null;
-                    docNode.setChildren(
-                            applyMetadataOnJsonArrays(jNode.get("Children"), metaChildren));
-                }
-
-                // add to the collection
-                docNodes.add(docNode);
-            }
-            return docNodes;
-        }
-
         @Override
         public String toString() {
             try {
@@ -793,10 +796,6 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             } catch (JsonProcessingException e) {
                 return this.toString();
             }
-        }
-
-        private static String unescapeDataText(String data) {
-            return StringEscapeUtils.unescapeJava(data);
         }
     }
 }

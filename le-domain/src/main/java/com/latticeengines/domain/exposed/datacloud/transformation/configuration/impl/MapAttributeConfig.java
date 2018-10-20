@@ -65,10 +65,10 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
         @JsonProperty("Keys")
         List<String> keys;
-        
+
         @JsonProperty("Source")
         String source;
-        
+
         public List<String> getKeys() {
             return keys;
         }
@@ -90,10 +90,10 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
         @JsonProperty("Keys")
         List<String> keys;
-        
+
         @JsonProperty("Targets")
         List<JoinTarget> targets;
-        
+
         public List<String> getKeys() {
             return keys;
         }

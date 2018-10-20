@@ -22,6 +22,6 @@ import cascading.tuple.Tuple;
 
 public interface CollectorOutput {
 
-	void setTupleCollector(Collector<Tuple> tupleCollector);
+    void setTupleCollector(Collector<Tuple> tupleCollector);
 
 }

@@ -81,6 +81,10 @@ public class RecordScoreResponse {
         this.timestamp = timestamp;
     }
 
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
     public static class ScoreModelTuple {
         @JsonProperty("modelId")
         @ApiModelProperty(value = "Model ID")
@@ -157,9 +161,5 @@ public class RecordScoreResponse {
         public void setBucket(String bucket) {
             this.bucket = bucket;
         }
-    }
-
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }

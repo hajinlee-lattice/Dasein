@@ -70,5 +70,4 @@ public class SqlConfiguration extends ProviderConfiguration {
         this.dbTable = dbTable;
     }
 
-
 }

@@ -31,9 +31,11 @@ public class PublishWorkflowConfiguration extends BaseDataCloudWorkflowConfigura
         }
 
         public PublishWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("publishWorkflow", EngineConstants.PRODATA_CUSTOMERSPACE,
+            configuration.setContainerConfiguration("publishWorkflow",
+                    EngineConstants.PRODATA_CUSTOMERSPACE,
                     configuration.getClass().getSimpleName());
-            configuration.setCustomerSpace(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+            configuration.setCustomerSpace(
+                    CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
             configuration.add(publishConfig);
             return configuration;
         }

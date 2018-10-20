@@ -41,7 +41,8 @@ public class PrimaryField {
         this.displayName = displayName;
     }
 
-    public PrimaryField(String fieldName, String fieldType, String displayName, String externalSystemName) {
+    public PrimaryField(String fieldName, String fieldType, String displayName,
+            String externalSystemName) {
         this(fieldName, fieldType);
         this.displayName = displayName;
         this.externalSystemName = externalSystemName;

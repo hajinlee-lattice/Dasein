@@ -20,32 +20,25 @@ import cascading.tuple.TupleEntry;
 public class StatsDedupAggregator extends BaseAggregator<StatsDedupAggregator.Context>
         implements Aggregator<StatsDedupAggregator.Context> {
 
-    private static final long serialVersionUID = 1176540918011684429L;
     public static final String ALL = "__ALL__";
-
-    public static class Context extends BaseAggregator.Context {
-        Map<Integer, Long> bktCounts = new HashMap<>();
-        long count = 0L;
-        Tuple result = new Tuple();
-    }
-
+    private static final long serialVersionUID = 1176540918011684429L;
     private final String cntField;
     private final String bktsField;
     private final List<String> grpByFields;
-
     private Integer cntArgPos;
     private Integer bktsArgPos;
-
     // grpFields + cntField + bktsField
     // if rollup is null, means simply merge bkt cnts
-    public StatsDedupAggregator(List<String> grpByFields, String dedupField, String cntField, String bktsField) {
+    public StatsDedupAggregator(List<String> grpByFields, String dedupField, String cntField,
+            String bktsField) {
         super(generateFieldDeclaration(grpByFields, cntField, bktsField));
         this.grpByFields = grpByFields;
         this.cntField = cntField;
         this.bktsField = bktsField;
     }
 
-    private static Fields generateFieldDeclaration(List<String> grpByFields, String cntField, String bktsField) {
+    private static Fields generateFieldDeclaration(List<String> grpByFields, String cntField,
+            String bktsField) {
         List<String> fields = new ArrayList<>(grpByFields);
         fields.add(cntField);
         fields.add(bktsField);
@@ -100,6 +93,12 @@ public class StatsDedupAggregator extends BaseAggregator<StatsDedupAggregator.Co
             cntArgPos = pos[0];
             bktsArgPos = pos[1];
         }
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Map<Integer, Long> bktCounts = new HashMap<>();
+        long count = 0L;
+        Tuple result = new Tuple();
     }
 
 }

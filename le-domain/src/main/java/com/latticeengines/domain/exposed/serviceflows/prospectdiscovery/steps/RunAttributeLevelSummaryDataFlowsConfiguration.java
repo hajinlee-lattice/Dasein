@@ -6,25 +6,24 @@ import java.util.List;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
-
 public class RunAttributeLevelSummaryDataFlowsConfiguration extends MicroserviceStepConfiguration {
 
     private String eventColumnName;
-    
+
     private String eventTableName;
-    
+
     private List<String> attributes = new ArrayList<>();
-    
+
     private Double avgProbability;
-    
+
     private TargetMarket targetMarket;
-    
+
     private String internalResourceHostPort;
-    
+
     public String getEventColumnName() {
         return eventColumnName;
     }
-    
+
     public void setEventColumnName(String eventColumnName) {
         this.eventColumnName = eventColumnName;
     }

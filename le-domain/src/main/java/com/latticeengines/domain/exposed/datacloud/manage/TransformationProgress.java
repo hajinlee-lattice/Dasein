@@ -50,36 +50,39 @@ public class TransformationProgress implements Progress {
     @Enumerated(EnumType.STRING)
     @Column(name = "Status")
     protected ProgressStatus status;
-
-    @Column(name = "HdfsPod", nullable = false, length = 100)
-    private String hdfsPod;
-
-    @Column(name = "LatestStatusUpdate")
-    private Date latestStatusUpdate;
-
-    @Column(name = "RootOperationUID", unique = true, nullable = false)
-    private String rootOperationUID;
-
     @Column(name = "CreatedBy")
     protected String createdBy;
-
     @Column(name = "CreateTime")
     protected Date createTime = new Date();
-
     @Column(name = "ErrorMessage")
     protected String errorMessage;
-
     @Column(name = "NumRetries")
     protected int numRetries;
-
-    @Column(name = "BaseSourceVersions")
-    private String baseSourceVersions;
-
     @Column(name = "Version")
     protected String version;
-
+    @Column(name = "HdfsPod", nullable = false, length = 100)
+    private String hdfsPod;
+    @Column(name = "LatestStatusUpdate")
+    private Date latestStatusUpdate;
+    @Column(name = "RootOperationUID", unique = true, nullable = false)
+    private String rootOperationUID;
+    @Column(name = "BaseSourceVersions")
+    private String baseSourceVersions;
     @Column(name = "YarnAppId")
     private String yarnAppId;
+
+    public static TransformationProgress constructByDates(String sourceName, Date startDate,
+            Date endDate) throws InstantiationException, IllegalAccessException {
+        TransformationProgress progress = new TransformationProgress();
+        progress.setSourceName(sourceName);
+        progress.setStartDate(startDate);
+        progress.setEndDate(endDate);
+
+        progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
+        progress.setStatus(ProgressStatus.NEW);
+
+        return progress;
+    }
 
     @Override
     public Long getPid() {
@@ -180,12 +183,12 @@ public class TransformationProgress implements Progress {
         this.numRetries = numRetries;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     public String getVersion() {
         return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getBaseSourceVersions() {
@@ -196,25 +199,12 @@ public class TransformationProgress implements Progress {
         this.baseSourceVersions = baseSourceVersions;
     }
 
-    public void setYarnAppId(String yarnAppId) {
-        this.yarnAppId = yarnAppId;
-    }
-
     public String getYarnAppId() {
         return yarnAppId;
     }
 
-    public static TransformationProgress constructByDates(String sourceName, Date startDate,
-            Date endDate) throws InstantiationException, IllegalAccessException {
-        TransformationProgress progress = new TransformationProgress();
-        progress.setSourceName(sourceName);
-        progress.setStartDate(startDate);
-        progress.setEndDate(endDate);
-
-        progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
-        progress.setStatus(ProgressStatus.NEW);
-
-        return progress;
+    public void setYarnAppId(String yarnAppId) {
+        this.yarnAppId = yarnAppId;
     }
 
     public String getHdfsPod() {
@@ -232,13 +222,13 @@ public class TransformationProgress implements Progress {
 
     @Override
     @JsonIgnore
-    public void setStatusBeforeFailed(ProgressStatus status) {
+    public ProgressStatus getStatusBeforeFailed() {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 
     @Override
     @JsonIgnore
-    public ProgressStatus getStatusBeforeFailed() {
+    public void setStatusBeforeFailed(ProgressStatus status) {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 

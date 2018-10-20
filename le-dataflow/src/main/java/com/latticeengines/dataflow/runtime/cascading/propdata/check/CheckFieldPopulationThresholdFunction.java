@@ -18,15 +18,14 @@ import cascading.tuple.TupleEntry;
 public class CheckFieldPopulationThresholdFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 1798670131716639327L;
+    private static final Log log = LogFactory.getLog(CheckFieldPopulationThresholdFunction.class);
     private String numOfRecords;
     private double populatePercentThreshold;
     private String checkField;
     private String numOfPopulatedRec;
-    private static final Log log = LogFactory.getLog(CheckFieldPopulationThresholdFunction.class);
 
     public CheckFieldPopulationThresholdFunction(String numOfRecords, String numOfPopulatedRec,
-            double populatePercentThreshold,
-            String checkField) {
+            double populatePercentThreshold, String checkField) {
         super(generateFieldDeclaration());
         this.numOfRecords = numOfRecords;
         this.populatePercentThreshold = populatePercentThreshold;
@@ -61,8 +60,10 @@ public class CheckFieldPopulationThresholdFunction extends BaseOperation impleme
                 // check value
                 result.set(4, String.format("%.2f", fieldPopulationPercent));
                 // check message
-                result.set(5, CheckCode.UnderPopulatedField.getMessage(checkField,
-                        String.format("%.2f", fieldPopulationPercent), String.format("%.2f", diff)));
+                result.set(5,
+                        CheckCode.UnderPopulatedField.getMessage(checkField,
+                                String.format("%.2f", fieldPopulationPercent),
+                                String.format("%.2f", diff)));
                 functionCall.getOutputCollector().add(result);
             }
         } catch (Exception e) {

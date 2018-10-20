@@ -6,49 +6,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class AbstractGroupCheckParam extends CheckParam {
 
-    @JsonProperty("GroupByFields")
-    private List<String> groupByFields;
-
-    @JsonProperty("Status")
-    private Object status;
-
-    @JsonProperty("CountByField")
-    private Object countByField;
-
-    @JsonProperty("CheckEmptyField")
-    private Object checkEmptyField;
-
-    @JsonProperty("PrevVersionEmptyField")
-    private Object prevVersionEmptyField;
-
-    @JsonProperty("CurrVersionEmptyField")
-    private Object currVersionEmptyField;
-
-    @JsonProperty("KeyField")
-    private String keyField;
-
-    @JsonProperty("PopulationThreshold")
-    private double threshold;
-
-    @JsonProperty("ExceedCountThreshold")
-    private long exceedCountThreshold;
-
-    @JsonProperty("ExpectedFieldValues")
-    private List<Object> expectedFieldValues;
-
-    @JsonProperty("PrevVersionNotEmptyField")
-    private Object prevVersionNotEmptyField;
-
-    @JsonProperty("CurrVersionNotEmptyField")
-    private Object currVersionNotEmptyField;
-
-    @JsonProperty("CntLessThanThresholdFlag") // indicates if cnt is less than threshold
-    private boolean cntLessThanFlagThreshold;
-
     @JsonProperty("IdentifierFields")
     List<String> identifierFields;
-
-    @JsonProperty("checkDupWithStatus") // check if check is on particular status
+    @JsonProperty("GroupByFields")
+    private List<String> groupByFields;
+    @JsonProperty("Status")
+    private Object status;
+    @JsonProperty("CountByField")
+    private Object countByField;
+    @JsonProperty("CheckEmptyField")
+    private Object checkEmptyField;
+    @JsonProperty("PrevVersionEmptyField")
+    private Object prevVersionEmptyField;
+    @JsonProperty("CurrVersionEmptyField")
+    private Object currVersionEmptyField;
+    @JsonProperty("KeyField")
+    private String keyField;
+    @JsonProperty("PopulationThreshold")
+    private double threshold;
+    @JsonProperty("ExceedCountThreshold")
+    private long exceedCountThreshold;
+    @JsonProperty("ExpectedFieldValues")
+    private List<Object> expectedFieldValues;
+    @JsonProperty("PrevVersionNotEmptyField")
+    private Object prevVersionNotEmptyField;
+    @JsonProperty("CurrVersionNotEmptyField")
+    private Object currVersionNotEmptyField;
+    @JsonProperty("CntLessThanThresholdFlag") // indicates if cnt is less than
+                                              // threshold
+    private boolean cntLessThanFlagThreshold;
+    @JsonProperty("checkDupWithStatus") // check if check is on particular
+                                        // status
     private Boolean checkDupWithStatus;
 
     public Boolean getCheckDupWithStatus() {

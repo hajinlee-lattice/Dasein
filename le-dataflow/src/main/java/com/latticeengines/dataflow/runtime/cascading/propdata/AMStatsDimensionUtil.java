@@ -38,7 +38,7 @@ public class AMStatsDimensionUtil implements Serializable {
     }
 
     private ExpandedTuple mergeWithTool(ExpandedTuple existingMergedTuple, //
-                                ExpandedTuple originalTuple, int numOfFields, AttrStatsDetailsMergeTool tool) {
+            ExpandedTuple originalTuple, int numOfFields, AttrStatsDetailsMergeTool tool) {
         for (int idx = 0; idx < numOfFields; idx++) {
             Object objInExistingMergedTuple = existingMergedTuple.get(idx);
             Object objInOriginalTuple = originalTuple.get(idx);
@@ -50,7 +50,8 @@ public class AMStatsDimensionUtil implements Serializable {
                 Object finalObj = objInExistingMergedTuple;
                 if (objInOriginalTuple instanceof AttributeStats) {
                     finalObj = tool.merge(//
-                            (AttributeStats) objInExistingMergedTuple, (AttributeStats) objInOriginalTuple, false);
+                            (AttributeStats) objInExistingMergedTuple,
+                            (AttributeStats) objInOriginalTuple, false);
                 }
                 existingMergedTuple.set(idx, finalObj);
             }
@@ -72,7 +73,8 @@ public class AMStatsDimensionUtil implements Serializable {
 
                 if (objInOriginalTuple != null) {
                     if (objInOriginalTuple instanceof AttributeStats) {
-                        attrValuesArr[idx] = new AttributeStats((AttributeStats) objInOriginalTuple);
+                        attrValuesArr[idx] = new AttributeStats(
+                                (AttributeStats) objInOriginalTuple);
                     } else {
                         attrValuesArr[idx] = objInOriginalTuple;
                     }
@@ -88,13 +90,14 @@ public class AMStatsDimensionUtil implements Serializable {
             for (int idx = 0; idx < attrValuesArr.length; idx++) {
                 Object objInOriginalTuple = tuple.getObject(idx);
 
-                if (objInOriginalTuple != null
-                        && (objInOriginalTuple instanceof String || objInOriginalTuple instanceof Utf8)) {
+                if (objInOriginalTuple != null && (objInOriginalTuple instanceof String
+                        || objInOriginalTuple instanceof Utf8)) {
                     AttributeStats statsInOriginalTuple;
                     String strVal = objInOriginalTuple.toString();
                     if (strVal.startsWith("{") && strVal.endsWith("}")) {
                         try {
-                            statsInOriginalTuple = OM.readValue(objInOriginalTuple.toString(), AttributeStats.class);
+                            statsInOriginalTuple = OM.readValue(objInOriginalTuple.toString(),
+                                    AttributeStats.class);
                             attrValuesArr[idx] = statsInOriginalTuple;
                         } catch (IOException e) {
                             // ignore if type of serialized obj is not
@@ -146,8 +149,8 @@ public class AMStatsDimensionUtil implements Serializable {
             }
 
             if (tuple.size() != attrValuesArr.length) {
-                throw new RuntimeException("The size of generated tuple is " + tuple.size() + ", but there are "
-                        + attrValuesArr.length + " in attrValuesArr.");
+                throw new RuntimeException("The size of generated tuple is " + tuple.size()
+                        + ", but there are " + attrValuesArr.length + " in attrValuesArr.");
             }
 
             return tuple;

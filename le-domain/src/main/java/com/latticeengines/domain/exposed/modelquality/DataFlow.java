@@ -21,7 +21,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 @Entity
-@Table(name = "MODELQUALITY_DATAFLOW", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_DATAFLOW", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
@@ -45,7 +46,7 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLates
     @JsonProperty("transform_dedup_type")
     @Column(name = "TRANSFORM_DEDUP_TYPE", nullable = true)
     private DedupType dedupType;
-    
+
     @JsonIgnore
     @Column(name = "VERSION", nullable = true)
     private Integer version;
@@ -62,16 +63,16 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLates
         return transformationGroup;
     }
 
+    public void setTransformationGroup(TransformationGroup transformationGroup) {
+        this.transformationGroup = transformationGroup;
+    }
+
     public DedupType getDedupType() {
         return dedupType;
     }
 
     public void setDedupType(DedupType dedupType) {
         this.dedupType = dedupType;
-    }
-
-    public void setTransformationGroup(TransformationGroup transformationGroup) {
-        this.transformationGroup = transformationGroup;
     }
 
     @MetricTag(tag = "TransformationGroupName")
@@ -106,7 +107,7 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLates
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Override
     public Integer getVersion() {
         return version;

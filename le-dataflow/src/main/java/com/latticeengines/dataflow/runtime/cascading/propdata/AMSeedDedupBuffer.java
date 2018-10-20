@@ -29,7 +29,8 @@ public class AMSeedDedupBuffer extends BaseOperation implements Buffer {
     }
 
     @SuppressWarnings("unchecked")
-    private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup, TupleEntry group) {
+    private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup,
+            TupleEntry group) {
         boolean dropPendingEntry = false;
         Iterator<TupleEntry> entries = bufferCall.getArgumentsIterator();
         Tuple pendingEntry = null;

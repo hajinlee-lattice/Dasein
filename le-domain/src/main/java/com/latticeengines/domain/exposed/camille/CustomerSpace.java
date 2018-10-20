@@ -6,11 +6,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class CustomerSpace {
+    public static final String BACKWARDS_COMPATIBLE_SPACE_ID = "Production";
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
-
-    public static final String BACKWARDS_COMPATIBLE_SPACE_ID = "Production";
-
     private String contractId;
     private String tenantId;
     private String spaceId;
@@ -29,28 +27,28 @@ public class CustomerSpace {
      * Parse the specified 3-part or 1-part identifier into a CustomerSpace. The
      * identifier may be a Deployment ExternalID, such as DellAPJ, or a 3-part
      * identifier, such as Dell.APJ.Production.
-     * 
+     *
      * @param identifier
      * @return CustomerSpace
      */
     public static CustomerSpace parse(String identifier) {
         if (identifier == null) {
-            throw new NullPointerException("Identifier parameter to CustomerSpace.parse may not be null");
+            throw new NullPointerException(
+                    "Identifier parameter to CustomerSpace.parse may not be null");
         }
 
         String[] parts = identifier.split("\\.");
         if (parts.length != 3 && parts.length != 1) {
-            throw new RuntimeException(
-                    String.format(
-                            "Identifiers must either contain no dots (e.g., 'DellAPJ') or are in a 3-part format (e.g., 'Dell.APJ.Production').  Identifier %s is invalid",
-                            identifier));
+            throw new RuntimeException(String.format(
+                    "Identifiers must either contain no dots (e.g., 'DellAPJ') or are in a 3-part format (e.g., 'Dell.APJ.Production').  Identifier %s is invalid",
+                    identifier));
         }
 
         if (parts.length == 1) {
-            log.debug(String
-                    .format("Using backwards-compatible conversion to extract Contract, Tenant, and Space IDs from Deployment External ID %s.  Assuming %s is %s.",
-                            identifier, identifier,
-                            String.format("%s.%s.%s", identifier, identifier, BACKWARDS_COMPATIBLE_SPACE_ID)));
+            log.debug(String.format(
+                    "Using backwards-compatible conversion to extract Contract, Tenant, and Space IDs from Deployment External ID %s.  Assuming %s is %s.",
+                    identifier, identifier, String.format("%s.%s.%s", identifier, identifier,
+                            BACKWARDS_COMPATIBLE_SPACE_ID)));
             return new CustomerSpace(identifier, identifier, BACKWARDS_COMPATIBLE_SPACE_ID);
         }
 
@@ -67,7 +65,8 @@ public class CustomerSpace {
      */
     @JsonIgnore
     public String getBackwardsCompatibleIdentifier() {
-        if (getSpaceId().equals(BACKWARDS_COMPATIBLE_SPACE_ID) && getContractId().equals(getTenantId())) {
+        if (getSpaceId().equals(BACKWARDS_COMPATIBLE_SPACE_ID)
+                && getContractId().equals(getTenantId())) {
             return getContractId();
         }
         return toString();

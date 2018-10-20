@@ -36,36 +36,6 @@ public class AMStatsHQDunsFunction2 extends BaseOperation<Map> //
         gdunsField = params.gdunsField;
     }
 
-    @Override
-    public void operate(FlowProcess flowProcess, FunctionCall<Map> functionCall) {
-        TupleEntry entry = functionCall.getArguments();
-
-        String subIndicator = (String) entry.getObject(subIndicatorField);
-        String statusCode = (String) entry.getObject(statusCodeField);
-
-        if (subIndicator == null || statusCode == null) {
-            throw new RuntimeException("subIndicator and statusCode both should not be null ");
-        }
-
-        String duns = (String) entry.getObject(dunsField);
-        String dduns = (String) entry.getObject(ddunsField);
-        String gduns = (String) entry.getObject(gdunsField);
-        String hqDuns = null;
-
-        try {
-            hqDuns = calculateHQDuns(Integer.parseInt(subIndicator), //
-                    Integer.parseInt(statusCode), //
-                    duns, dduns, gduns);
-        } catch (NumberFormatException e) {
-            log.error("subIndicator = " + subIndicator + ", statusCode = " + statusCode
-                    + " should both be valid numbers: " + e.getMessage());
-        }
-
-        if (hqDuns != null) {
-            functionCall.getOutputCollector().add(new Tuple(hqDuns));
-        }
-    }
-
     static String calculateHQDuns(int subIndicator, int statusCode, //
             String duns, String dduns, String gduns) {
         String hqDuns = null;
@@ -101,6 +71,36 @@ public class AMStatsHQDunsFunction2 extends BaseOperation<Map> //
         return new Params.Builder();
     }
 
+    @Override
+    public void operate(FlowProcess flowProcess, FunctionCall<Map> functionCall) {
+        TupleEntry entry = functionCall.getArguments();
+
+        String subIndicator = (String) entry.getObject(subIndicatorField);
+        String statusCode = (String) entry.getObject(statusCodeField);
+
+        if (subIndicator == null || statusCode == null) {
+            throw new RuntimeException("subIndicator and statusCode both should not be null ");
+        }
+
+        String duns = (String) entry.getObject(dunsField);
+        String dduns = (String) entry.getObject(ddunsField);
+        String gduns = (String) entry.getObject(gdunsField);
+        String hqDuns = null;
+
+        try {
+            hqDuns = calculateHQDuns(Integer.parseInt(subIndicator), //
+                    Integer.parseInt(statusCode), //
+                    duns, dduns, gduns);
+        } catch (NumberFormatException e) {
+            log.error("subIndicator = " + subIndicator + ", statusCode = " + statusCode
+                    + " should both be valid numbers: " + e.getMessage());
+        }
+
+        if (hqDuns != null) {
+            functionCall.getOutputCollector().add(new Tuple(hqDuns));
+        }
+    }
+
     public static class Params {
         String statusCodeField;
         String subIndicatorField;
@@ -122,8 +122,7 @@ public class AMStatsHQDunsFunction2 extends BaseOperation<Map> //
         }
 
         public List<String> applyToFields() {
-            return Arrays.asList(
-                    statusCodeField, //
+            return Arrays.asList(statusCodeField, //
                     subIndicatorField, //
                     dunsField, //
                     ddunsField, //
@@ -170,7 +169,8 @@ public class AMStatsHQDunsFunction2 extends BaseOperation<Map> //
             }
 
             public Params build() {
-                return new Params(statusCodeField, subIndicatorField, dunsField, ddunsField, gdunsField, hqDunsField);
+                return new Params(statusCodeField, subIndicatorField, dunsField, ddunsField,
+                        gdunsField, hqDunsField);
             }
 
         }

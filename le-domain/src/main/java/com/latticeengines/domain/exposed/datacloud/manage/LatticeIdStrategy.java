@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "LatticeIdStrategy")

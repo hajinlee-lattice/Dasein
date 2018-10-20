@@ -16,12 +16,11 @@ import com.latticeengines.domain.exposed.camille.Path;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SpaceConfiguration {
 
+    private static ObjectMapper mapper = new ObjectMapper();
     private LatticeProduct product;
     private List<LatticeProduct> products = Collections.emptyList();
     private CRMTopology topology;
     private String dlAddress;
-
-    private static ObjectMapper mapper = new ObjectMapper();
 
     public SpaceConfiguration() {
     }
@@ -44,7 +43,8 @@ public class SpaceConfiguration {
             }
             if (node.getPath().toString().equals("/Products")) {
                 try {
-                    List<String> products = mapper.readValue(node.getDocument().getData(), List.class);
+                    List<String> products = mapper.readValue(node.getDocument().getData(),
+                            List.class);
                     this.products = new ArrayList<>();
                     for (String product : products) {
                         this.products.add(LatticeProduct.fromName(product));

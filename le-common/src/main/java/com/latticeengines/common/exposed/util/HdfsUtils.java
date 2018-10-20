@@ -81,7 +81,8 @@ public class HdfsUtils {
         return FileSystem.newInstance(configuration);
     }
 
-    public static FileSystem getFileSystem(Configuration configuration, String path) throws IOException {
+    public static FileSystem getFileSystem(Configuration configuration, String path)
+            throws IOException {
         if (path.startsWith("/")) {
             return FileSystem.newInstance(configuration);
         } else {
@@ -107,7 +108,8 @@ public class HdfsUtils {
         }
     }
 
-    public static String getHdfsFileContents(Configuration configuration, String hdfsPath) throws IOException {
+    public static String getHdfsFileContents(Configuration configuration, String hdfsPath)
+            throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             Path schemaPath = new Path(hdfsPath);
             try (InputStream is = fs.open(schemaPath)) {
@@ -119,8 +121,8 @@ public class HdfsUtils {
         }
     }
 
-    public static void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
-            throws IOException {
+    public static void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -128,8 +130,8 @@ public class HdfsUtils {
         }
     }
 
-    public static void copyInputStreamToDest(URI scheme, Configuration configuration, InputStream inputStream)
-            throws IOException {
+    public static void copyInputStreamToDest(URI scheme, Configuration configuration,
+            InputStream inputStream) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(scheme, configuration)) {
             try (OutputStream outputStream = fs.create(new Path(scheme.getPath()))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -137,26 +139,29 @@ public class HdfsUtils {
         }
     }
 
-    public static void copyInputStreamToHdfsWithoutBom(Configuration configuration, InputStream inputStream,
-            String hdfsPath) throws IOException {
+    public static void copyInputStreamToHdfsWithoutBom(Configuration configuration,
+            InputStream inputStream, String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
-                IOUtils.copy(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream);
+                IOUtils.copy(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
+                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                        ByteOrderMark.UTF_32BE), outputStream);
             }
         }
     }
 
-    public static void distcp(Configuration configuration, String srcPath, String tgtPath, String queue)
-            throws Exception {
+    public static void distcp(Configuration configuration, String srcPath, String tgtPath,
+            String queue) throws Exception {
         DistCpOptions options = new DistCpOptions(new Path(srcPath), new Path(tgtPath));
         log.info("Running distcp from " + srcPath + " to " + tgtPath + " using queue " + queue);
-        String[] args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-update", srcPath, tgtPath };
+        String[] args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-update", srcPath,
+                tgtPath };
         EncryptionZone srcZone = getEncryptionZone(configuration, srcPath);
         EncryptionZone dstZone = getEncryptionZone(configuration, tgtPath);
         if (srcZone != null || dstZone != null) {
             log.info("Encryption zone is involved, skipping checksum check.");
-            args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update", srcPath, tgtPath };
+            args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update",
+                    srcPath, tgtPath };
         }
         int exit = ToolRunner.run(new DistCp(configuration, options), args);
         if (exit != 0) {
@@ -165,39 +170,41 @@ public class HdfsUtils {
         log.info("Finished distcp from " + srcPath + " to " + tgtPath + ".");
     }
 
-    public static void copyLocalResourceToHdfs(Configuration configuration, String resourcePath, String hdfsPath)
-            throws IOException {
+    public static void copyLocalResourceToHdfs(Configuration configuration, String resourcePath,
+            String hdfsPath) throws IOException {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource resource = resolver.getResource(resourcePath);
         copyLocalToHdfs(configuration, resource.getFile().getAbsolutePath(), hdfsPath);
     }
 
-    public static void copyLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
-            throws IOException {
+    public static void copyLocalToHdfs(Configuration configuration, String localPath,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
         }
     }
 
-    public static void copyFromLocalDirToHdfs(Configuration configuration, String localPath, String hdfsPath)
-            throws IOException {
+    public static void copyFromLocalDirToHdfs(Configuration configuration, String localPath,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileUtil.copy(new File(localPath), fs, new Path(hdfsPath), false, configuration);
         }
     }
 
-    public static void copyHdfsToLocal(Configuration configuration, String hdfsPath, String localPath)
-            throws IOException {
+    public static void copyHdfsToLocal(Configuration configuration, String hdfsPath,
+            String localPath) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             fs.copyToLocalFile(new Path(hdfsPath), new Path(localPath));
         }
     }
 
-    public static void writeToFile(Configuration configuration, String hdfsPath, String contents) throws IOException {
+    public static void writeToFile(Configuration configuration, String hdfsPath, String contents)
+            throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             Path filePath = new Path(hdfsPath);
 
-            try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
+            try (BufferedWriter br = new BufferedWriter(
+                    new OutputStreamWriter(fs.create(filePath, true)))) {
                 br.write(contents);
             }
         }
@@ -215,8 +222,8 @@ public class HdfsUtils {
         }
     }
 
-    public static void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile,
-            String uncompressedDir) throws IOException {
+    public static void uncompressZipFileWithinHDFS(Configuration configuration,
+            String compressedFile, String uncompressedDir) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFile = new Path(compressedFile);
             Path outputFolder = new Path(uncompressedDir);
@@ -249,18 +256,20 @@ public class HdfsUtils {
         }
     }
 
-    public static boolean fileExists(Configuration configuration, String hdfsPath) throws IOException {
+    public static boolean fileExists(Configuration configuration, String hdfsPath)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(URI.create(hdfsPath), configuration)) {
             return fs.exists(new Path(hdfsPath));
         }
     }
 
-    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws IOException {
+    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir)
+            throws IOException {
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) null);
     }
 
-    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, final String regex)
-            throws IOException {
+    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir,
+            final String regex) throws IOException {
 
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) filename -> {
             Pattern p = Pattern.compile(regex);
@@ -269,8 +278,8 @@ public class HdfsUtils {
         });
     }
 
-    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFilenameFilter filter)
-            throws IOException {
+    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir,
+            HdfsFilenameFilter filter) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -290,8 +299,8 @@ public class HdfsUtils {
         }
     }
 
-    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
-            throws IOException {
+    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -312,8 +321,8 @@ public class HdfsUtils {
     }
 
     // Only return files. Exclude all the sub directory paths
-    public static List<String> onlyGetFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
-            throws IOException {
+    public static List<String> onlyGetFilesForDir(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -333,14 +342,15 @@ public class HdfsUtils {
         }
     }
 
-    public static FileStatus getFileStatus(Configuration configuration, String hdfsDir) throws IOException {
+    public static FileStatus getFileStatus(Configuration configuration, String hdfsDir)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.getFileStatus(new Path(hdfsDir));
         }
     }
 
-    public static List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws IOException {
+    public static List<FileStatus> getFileStatusesForDir(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<FileStatus> filePaths = new ArrayList<>();
@@ -364,19 +374,20 @@ public class HdfsUtils {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
-    public static List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir, String regex,
-            boolean returnFirstMatch) throws IOException {
+    public static List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
+            String regex, boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
             for (FileStatus status : statuses) {
                 if (status.isDirectory()) {
-                    filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), regex));
+                    filePaths.addAll(
+                            getFilesForDir(configuration, status.getPath().toString(), regex));
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), regex,
-                            returnFirstMatch));
+                    filePaths.addAll(getFilesForDirRecursive(configuration,
+                            status.getPath().toString(), regex, returnFirstMatch));
                 }
             }
             return new ArrayList<>(filePaths);
@@ -390,26 +401,29 @@ public class HdfsUtils {
             Set<String> filePaths = new HashSet<String>();
             for (FileStatus status : statuses) {
                 if (status.isDirectory()) {
-                    filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
+                    filePaths.addAll(
+                            getFilesForDir(configuration, status.getPath().toString(), filter));
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), filter));
+                    filePaths.addAll(getFilesForDirRecursive(configuration,
+                            status.getPath().toString(), filter));
                 }
             }
             return new ArrayList<>(filePaths);
         }
     }
 
-    public static List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
+    public static List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
             for (FileStatus status : statuses) {
                 if (status.isDirectory()) {
                     if (folderFilter.accept(status)) {
-                        filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
+                        filePaths.addAll(
+                                getFilesForDir(configuration, status.getPath().toString(), filter));
                         filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration,
                                 status.getPath().toString(), filter, folderFilter));
                     }
@@ -420,15 +434,17 @@ public class HdfsUtils {
     }
 
     // Only return files. Exclude all the sub directory paths
-    public static List<String> onlyGetFilesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+    public static List<String> onlyGetFilesForDirRecursive(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         Set<String> filePaths = new HashSet<String>();
-        onlyGetFilesForDirRecursiveHelper(configuration, hdfsDir, filter, returnFirstMatch, filePaths);
+        onlyGetFilesForDirRecursiveHelper(configuration, hdfsDir, filter, returnFirstMatch,
+                filePaths);
         return new ArrayList<>(filePaths);
     }
 
-    public static void onlyGetFilesForDirRecursiveHelper(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch, Set<String> filePaths) throws IOException {
+    public static void onlyGetFilesForDirRecursiveHelper(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter, boolean returnFirstMatch, Set<String> filePaths)
+            throws IOException {
         if (returnFirstMatch && filePaths.size() > 0) {
             return;
         }
@@ -436,8 +452,8 @@ public class HdfsUtils {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             for (FileStatus status : statuses) {
                 if (status.isDirectory()) {
-                    onlyGetFilesForDirRecursiveHelper(configuration, status.getPath().toString(), filter,
-                            returnFirstMatch, filePaths);
+                    onlyGetFilesForDirRecursiveHelper(configuration, status.getPath().toString(),
+                            filter, returnFirstMatch, filePaths);
                 } else {
                     boolean accept = true;
                     if (filter != null) {
@@ -454,32 +470,33 @@ public class HdfsUtils {
         }
     }
 
-    public static List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws IOException {
+    public static List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter) throws IOException {
         return getFileStatusesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
-    public static List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+    public static List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<FileStatus> filePaths = new HashSet<>();
             for (FileStatus status : statuses) {
                 if (status.isDirectory()) {
-                    filePaths.addAll(getFileStatusesForDir(configuration, status.getPath().toString(), filter));
+                    filePaths.addAll(getFileStatusesForDir(configuration,
+                            status.getPath().toString(), filter));
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths
-                            .addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
+                    filePaths.addAll(getFileStatusesForDirRecursive(configuration,
+                            status.getPath().toString(), filter));
                 }
             }
             return new ArrayList<>(filePaths);
         }
     }
 
-    public static String getApplicationLog(Configuration configuration, String user, String applicationId)
-            throws IOException {
+    public static String getApplicationLog(Configuration configuration, String user,
+            String applicationId) throws IOException {
         String log = "";
         try (InputStream is = getInputStream(configuration, user, applicationId)) {
             try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -494,24 +511,26 @@ public class HdfsUtils {
         return log;
     }
 
-    public static InputStream getInputStream(Configuration configuration, String hdfsPath) throws IOException {
+    public static InputStream getInputStream(Configuration configuration, String hdfsPath)
+            throws IOException {
         FileSystem fs = getFileSystem(configuration, hdfsPath);
         return fs.open(new Path(hdfsPath));
     }
 
-    public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
-            throws IOException {
+    public static void copyFromLocalToHdfs(Configuration configuration, String localPath,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
         }
     }
 
-    private static InputStream getInputStream(Configuration configuration, String user, String applicationId)
-            throws IOException {
+    private static InputStream getInputStream(Configuration configuration, String user,
+            String applicationId) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
-            String hdfsPath = configuration.get("yarn.nodemanager.remote-app-log-dir") + "/" + user + "/logs/"
-                    + applicationId;
-            String encoding = configuration.get("yarn.nodemanager.log-aggregation.compression-type");
+            String hdfsPath = configuration.get("yarn.nodemanager.remote-app-log-dir") + "/" + user
+                    + "/logs/" + applicationId;
+            String encoding = configuration
+                    .get("yarn.nodemanager.log-aggregation.compression-type");
             Path schemaPath = new Path(hdfsPath);
             RemoteIterator<LocatedFileStatus> iterator = fs.listFiles(schemaPath, false);
             InputStream is = null;
@@ -519,19 +538,20 @@ public class HdfsUtils {
                 LocatedFileStatus file = iterator.next();
                 Path filePath = file.getPath();
                 switch (LogFileEncodingType.valueOf(encoding.toUpperCase())) {
-                case NONE:
-                    is = fs.open(filePath);
-                    break;
-                case GZ:
-                    is = new GZIPInputStream(fs.open(filePath));
-                    break;
+                    case NONE:
+                        is = fs.open(filePath);
+                        break;
+                    case GZ:
+                        is = new GZIPInputStream(fs.open(filePath));
+                        break;
                 }
             }
             return is;
         }
     }
 
-    public static List<String> getFilesByGlob(Configuration configuration, String globPath) throws IOException {
+    public static List<String> getFilesByGlob(Configuration configuration, String globPath)
+            throws IOException {
         try (FileSystem fs = getFileSystem(configuration, globPath)) {
             FileStatus[] statuses = fs.globStatus(new Path(globPath));
             List<String> filePaths = new ArrayList<>();
@@ -546,7 +566,8 @@ public class HdfsUtils {
         }
     }
 
-    public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException {
+    public static boolean moveFile(Configuration configuration, String src, String dst)
+            throws IOException {
         if (inDifferentEncryptionZone(configuration, src, dst)) {
             log.info("Using copy instead of move.");
             if (copyFiles(configuration, src, dst)) {
@@ -561,29 +582,32 @@ public class HdfsUtils {
         }
     }
 
-    public static boolean inDifferentEncryptionZone(Configuration configuration, String src, String dst)
-            throws IOException {
+    public static boolean inDifferentEncryptionZone(Configuration configuration, String src,
+            String dst) throws IOException {
         EncryptionZone dstZone = getEncryptionZone(configuration, dst);
         if (dstZone != null) {
             EncryptionZone srcZone = getEncryptionZone(configuration, src);
             if (srcZone == null || !keyEquals(srcZone, dstZone)) {
                 String dstKey = "Key = " + dstZone.getKeyName();
                 String srcKey = srcZone == null ? "No Key" : srcZone.getKeyName();
-                log.info(String.format("Destination (%s) is encrypted differently than source (%s).", dstKey, srcKey));
+                log.info(
+                        String.format("Destination (%s) is encrypted differently than source (%s).",
+                                dstKey, srcKey));
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean rename(Configuration configuration, String src, String dst) throws IOException {
+    public static boolean rename(Configuration configuration, String src, String dst)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.rename(new Path(src), new Path(dst));
         }
     }
 
-    public static void moveGlobToDir(Configuration configuration, String sourceGlob, String targetDir)
-            throws IOException {
+    public static void moveGlobToDir(Configuration configuration, String sourceGlob,
+            String targetDir) throws IOException {
         if (!isDirectory(configuration, targetDir)) {
             mkdir(configuration, targetDir);
         }
@@ -594,7 +618,8 @@ public class HdfsUtils {
     }
 
     private static boolean keyEquals(EncryptionZone zone1, EncryptionZone zone2) {
-        return zone1.getKeyName().equals(zone2.getKeyName()) && zone1.getVersion().equals(zone2.getVersion());
+        return zone1.getKeyName().equals(zone2.getKeyName())
+                && zone1.getVersion().equals(zone2.getVersion());
     }
 
     public static boolean copyFiles(Configuration configuration, String src, String dst)
@@ -604,8 +629,8 @@ public class HdfsUtils {
         }
     }
 
-    public static void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir,
-            String tgtNameSuffix) throws IOException {
+    public static void copyGlobToDir(Configuration configuration, String sourceGlob,
+            String targetDir, String tgtNameSuffix) throws IOException {
         if (!isDirectory(configuration, targetDir)) {
             mkdir(configuration, targetDir);
         }
@@ -630,13 +655,15 @@ public class HdfsUtils {
         return fileName.substring(0, dotIndex) + suffix + fileName.substring(dotIndex);
     }
 
-    public static FileChecksum getCheckSum(Configuration configuration, String path) throws IOException {
+    public static FileChecksum getCheckSum(Configuration configuration, String path)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.getFileChecksum(new Path(path));
         }
     }
 
-    public static Long getFileSize(Configuration configuration, String filePath) throws IOException {
+    public static Long getFileSize(Configuration configuration, String filePath)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus status = fs.getFileStatus(new Path(filePath));
             return status.getLen();
@@ -644,7 +671,8 @@ public class HdfsUtils {
     }
 
     public static List<EncryptionZone> getEncryptionZones(Configuration configuration) {
-        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem.newInstance(configuration)) {
+        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem
+                .newInstance(configuration)) {
             List<EncryptionZone> zones = new ArrayList<>();
             RemoteIterator<EncryptionZone> iter = fs.listEncryptionZones();
             while (iter.hasNext()) {
@@ -656,8 +684,10 @@ public class HdfsUtils {
         }
     }
 
-    public static void createEncryptionZone(Configuration configuration, String path, String keyname) {
-        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem.newInstance(configuration)) {
+    public static void createEncryptionZone(Configuration configuration, String path,
+            String keyname) {
+        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem
+                .newInstance(configuration)) {
             fs.createEncryptionZone(new Path(path), keyname);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -684,7 +714,9 @@ public class HdfsUtils {
             provider.deleteKey(keyName);
             provider.flush();
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Could not delete key %s with provider %s", keyName, provider), e);
+            throw new RuntimeException(
+                    String.format("Could not delete key %s with provider %s", keyName, provider),
+                    e);
         }
     }
 
@@ -694,7 +726,9 @@ public class HdfsUtils {
             provider.createKey(keyName, new KeyProvider.Options(configuration));
             provider.flush();
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not create key %s with provider %s", keyName, provider), e);
+            throw new RuntimeException(
+                    String.format("Could not create key %s with provider %s", keyName, provider),
+                    e);
         }
     }
 
@@ -704,7 +738,8 @@ public class HdfsUtils {
             provider.rollNewVersion(keyName);
             provider.flush();
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not roll key %s with provider %s", keyName, provider), e);
+            throw new RuntimeException(
+                    String.format("Could not roll key %s with provider %s", keyName, provider), e);
         }
     }
 
@@ -717,8 +752,8 @@ public class HdfsUtils {
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Could not check if key %s exists using provider %s", keyName, provider), e);
+            throw new RuntimeException(String.format(
+                    "Could not check if key %s exists using provider %s", keyName, provider), e);
         }
     }
 
@@ -749,14 +784,16 @@ public class HdfsUtils {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 return copyLarge(
-                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
+                                ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+                                ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                         outputStream, totalRows);
             }
         }
     }
 
-    private static long copyLarge(InputStream input, OutputStream output, long totalRows) throws IOException {
+    private static long copyLarge(InputStream input, OutputStream output, long totalRows)
+            throws IOException {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         boolean stop = false;
         int n = 0;

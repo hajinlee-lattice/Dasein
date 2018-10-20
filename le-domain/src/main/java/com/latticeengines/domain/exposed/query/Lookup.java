@@ -21,7 +21,7 @@ import com.latticeengines.common.exposed.graph.GraphNode;
         @Type(value = CollectionLookup.class, name = "collection"), //
         @Type(value = CaseLookup.class, name = "case"), //
         @Type(value = SubQueryAttrLookup.class, name = "subquery"), //
-        @Type(value = AggregateLookup.class, name = "aggregate")})
+        @Type(value = AggregateLookup.class, name = "aggregate") })
 public abstract class Lookup implements GraphNode {
 
     @Override

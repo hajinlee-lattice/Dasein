@@ -26,12 +26,12 @@ public class SimpleDataFeed {
         this.nextInvokeTime = nextInvokeTime;
     }
 
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
     public Tenant getTenant() {
         return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public DataFeed.Status getStatus() {
@@ -42,7 +42,11 @@ public class SimpleDataFeed {
         this.status = status;
     }
 
-    public Date getNextInvokeTime() { return nextInvokeTime; }
+    public Date getNextInvokeTime() {
+        return nextInvokeTime;
+    }
 
-    public void setNextInvokeTime(Date nextInvokeTime) { this.nextInvokeTime = nextInvokeTime; }
+    public void setNextInvokeTime(Date nextInvokeTime) {
+        this.nextInvokeTime = nextInvokeTime;
+    }
 }

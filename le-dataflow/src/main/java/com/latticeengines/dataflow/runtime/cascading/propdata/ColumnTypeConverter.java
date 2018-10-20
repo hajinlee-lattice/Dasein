@@ -31,23 +31,23 @@ public class ColumnTypeConverter {
         }
 
         switch (normalizedTypeName) {
-        case DOUBLE:
-            fieldType = Coercions.DOUBLE_OBJECT;
-            break;
-        case BOOLEAN:
-            fieldType = Coercions.BOOLEAN_OBJECT;
-            break;
-        case FLOAT:
-            fieldType = Coercions.FLOAT_OBJECT;
-            break;
-        case INT:
-            fieldType = Coercions.INTEGER_OBJECT;
-            break;
-        case LONG:
-            fieldType = Coercions.LONG_OBJECT;
-            break;
-        default:
-            break;
+            case DOUBLE:
+                fieldType = Coercions.DOUBLE_OBJECT;
+                break;
+            case BOOLEAN:
+                fieldType = Coercions.BOOLEAN_OBJECT;
+                break;
+            case FLOAT:
+                fieldType = Coercions.FLOAT_OBJECT;
+                break;
+            case INT:
+                fieldType = Coercions.INTEGER_OBJECT;
+                break;
+            case LONG:
+                fieldType = Coercions.LONG_OBJECT;
+                break;
+            default:
+                break;
         }
         return fieldType;
     }
@@ -102,7 +102,8 @@ public class ColumnTypeConverter {
             }
 
             // extract value specified within brackets: ex. NVARCHAR(10) => 10
-            String sizeStr = normalizedTypeName.substring(STRING.length() + 1, normalizedTypeName.length() - 1);
+            String sizeStr = normalizedTypeName.substring(STRING.length() + 1,
+                    normalizedTypeName.length() - 1);
             if (MAX.equals(sizeStr)) {
                 return MAX_NVARCHAR_SIZE;
             } else {
@@ -110,8 +111,8 @@ public class ColumnTypeConverter {
                 return (size >= MAX_NVARCHAR_SIZE) ? MAX_NVARCHAR_SIZE : size;
             }
         } else {
-            throw new LedpException(LedpCode.LEDP_25018,
-                    new RuntimeException("Call is valid for " + STRING + " type but passed " + typeName));
+            throw new LedpException(LedpCode.LEDP_25018, new RuntimeException(
+                    "Call is valid for " + STRING + " type but passed " + typeName));
         }
     }
 }

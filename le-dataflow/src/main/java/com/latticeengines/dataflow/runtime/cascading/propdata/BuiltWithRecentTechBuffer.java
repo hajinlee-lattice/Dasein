@@ -33,8 +33,9 @@ public class BuiltWithRecentTechBuffer extends BaseOperation implements Buffer {
     private static final Integer RECENT_TAG_LOC = 2;
     private static final int NUM_TAG = 15;
 
-    private static Set<String> tags = new HashSet<>(Arrays.asList("Web Server", "Analytics", "Feeds", "CDN", "Widgets",
-            "CMS", "Server", "MX", "SSL", "Hosting", "Media", "Ads", "Payment", "Shop"));
+    private static Set<String> tags = new HashSet<>(
+            Arrays.asList("Web Server", "Analytics", "Feeds", "CDN", "Widgets", "CMS", "Server",
+                    "MX", "SSL", "Hosting", "Media", "Ads", "Payment", "Shop"));
 
     protected Map<String, Integer> namePositionMap;
 

@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "SourceAttribute", indexes = {
-                @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER", columnList = "Source,Stage,Transformer") }, //
+        @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER", columnList = "Source,Stage,Transformer") }, //
         uniqueConstraints = { @UniqueConstraint(columnNames = { "Source", "Stage", "Transformer",
                 "Attribute", "DataCloudVersion" }) })
 public class SourceAttribute implements HasPid, Serializable {

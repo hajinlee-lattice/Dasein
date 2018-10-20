@@ -18,14 +18,16 @@ public class LabelUtil {
                     throwException("label cannot be null or empty");
                 }
                 if (l.contains(GraphConstants.LABEL_SEP)) {
-                    throwException(String.format("label should not contain %s", GraphConstants.LABEL_SEP));
+                    throwException(
+                            String.format("label should not contain %s", GraphConstants.LABEL_SEP));
                 }
                 sb.append(l);
                 sb.append(GraphConstants.LABEL_SEP);
             });
 
             concatenatedLabel = sb.toString();
-            concatenatedLabel = concatenatedLabel.substring(0, concatenatedLabel.lastIndexOf(GraphConstants.LABEL_SEP));
+            concatenatedLabel = concatenatedLabel.substring(0,
+                    concatenatedLabel.lastIndexOf(GraphConstants.LABEL_SEP));
         } else {
             throwException("labelList should not be empty");
         }
@@ -38,10 +40,12 @@ public class LabelUtil {
                 && label.contains(GraphConstants.LABEL_SEP)) {
             String remainingPart = label;
             while (remainingPart.contains(GraphConstants.LABEL_SEP)) {
-                labels.add(remainingPart.substring(0, remainingPart.indexOf(GraphConstants.LABEL_SEP)));
+                labels.add(remainingPart.substring(0,
+                        remainingPart.indexOf(GraphConstants.LABEL_SEP)));
 
-                remainingPart = remainingPart.substring(remainingPart.indexOf(GraphConstants.LABEL_SEP) //
-                        + GraphConstants.LABEL_SEP.length());
+                remainingPart = remainingPart
+                        .substring(remainingPart.indexOf(GraphConstants.LABEL_SEP) //
+                                + GraphConstants.LABEL_SEP.length());
             }
             labels.add(remainingPart);
         } else {

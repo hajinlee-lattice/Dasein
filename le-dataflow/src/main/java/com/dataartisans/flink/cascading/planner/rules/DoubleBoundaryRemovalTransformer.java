@@ -28,25 +28,22 @@ import cascading.pipe.Boundary;
 /**
  * Replaces double Boundarys by a single one
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class DoubleBoundaryRemovalTransformer extends RuleReplaceTransformer {
 
-	public DoubleBoundaryRemovalTransformer() {
-		super(PlanPhase.PostResolveAssembly, new DoubleBoundaryMatcher());
-	}
+    public DoubleBoundaryRemovalTransformer() {
+        super(PlanPhase.PostResolveAssembly, new DoubleBoundaryMatcher());
+    }
 
-	public static class DoubleBoundaryMatcher extends RuleExpression {
+    public static class DoubleBoundaryMatcher extends RuleExpression {
 
-		public DoubleBoundaryMatcher() {
-			super(
-					(new ExpressionGraph()).
-							arc(
-									new TypeExpression(ElementCapture.Primary, Boundary.class, TypeExpression.Topo.LinearOut),
-									ScopeExpression.ALL,
-									new TypeExpression(ElementCapture.Secondary, Boundary.class, TypeExpression.Topo.LinearIn)
-							)
-			);
-		}
-	}
+        public DoubleBoundaryMatcher() {
+            super((new ExpressionGraph()).arc(
+                    new TypeExpression(ElementCapture.Primary, Boundary.class,
+                            TypeExpression.Topo.LinearOut),
+                    ScopeExpression.ALL, new TypeExpression(ElementCapture.Secondary,
+                            Boundary.class, TypeExpression.Topo.LinearIn)));
+        }
+    }
 
 }

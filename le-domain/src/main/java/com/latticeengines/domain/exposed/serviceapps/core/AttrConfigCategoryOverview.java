@@ -19,20 +19,20 @@ public class AttrConfigCategoryOverview<T extends Serializable> {
     @JsonProperty("PropSummary")
     private Map<String, Map<T, Long>> propSummary;
 
-    public void setTotalAttrs(Long totalAttrsVal) {
-        totalAttrs = totalAttrsVal;
-    }
-
     public Long getTotalAttrs() {
         return totalAttrs;
     }
 
-    public void setLimit(Long limitVal) {
-        limit = limitVal;
+    public void setTotalAttrs(Long totalAttrsVal) {
+        totalAttrs = totalAttrsVal;
     }
 
     public Long getLimit() {
         return limit;
+    }
+
+    public void setLimit(Long limitVal) {
+        limit = limitVal;
     }
 
     public Map<String, Map<T, Long>> getPropSummary() {

@@ -15,7 +15,7 @@ public class UserDocument {
     private boolean success;
     private Ticket ticket;
     private String authenticationRoute;
-    
+
     public UserDocument() {
 
     }

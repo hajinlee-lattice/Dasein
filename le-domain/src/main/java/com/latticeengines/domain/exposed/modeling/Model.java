@@ -140,15 +140,15 @@ public class Model implements HasName, HasPid, HasId<String> {
         return targets;
     }
 
+    @JsonProperty("targets")
+    public void setTargetsList(List<String> targets) {
+        this.targets = targets;
+    }
+
     @JsonIgnore
     @Column(name = "TARGETS")
     public String getTargets() {
         return StringTokenUtils.listToString(this.targets);
-    }
-
-    @JsonProperty("targets")
-    public void setTargetsList(List<String> targets) {
-        this.targets = targets;
     }
 
     @JsonIgnore
@@ -239,14 +239,14 @@ public class Model implements HasName, HasPid, HasId<String> {
         this.dataFormat = dataFormat;
     }
 
-    @JsonProperty("customer")
-    public void setCustomer(String customer) {
-        this.customer = customer;
-    }
-
     @Column(name = "CUSTOMER")
     public String getCustomer() {
         return customer;
+    }
+
+    @JsonProperty("customer")
+    public void setCustomer(String customer) {
+        this.customer = customer;
     }
 
     @JsonProperty("table")
@@ -289,6 +289,11 @@ public class Model implements HasName, HasPid, HasId<String> {
         return StringTokenUtils.listToString(this.keyCols);
     }
 
+    @JsonIgnore
+    public void setKeyCols(String keyCols) {
+        this.keyCols = StringTokenUtils.stringToList(keyCols);
+    }
+
     @JsonProperty("key_columns")
     public void setKeyCols(List<String> keyCols) {
         this.keyCols = keyCols;
@@ -316,20 +321,15 @@ public class Model implements HasName, HasPid, HasId<String> {
         this.featuresThreshold = featuresThreshold;
     }
 
-    @JsonIgnore
-    public void setKeyCols(String keyCols) {
-        this.keyCols = StringTokenUtils.stringToList(keyCols);
+    @JsonProperty("provenance_properties")
+    @Column(name = "PROVENANCE_PROPERTIES", length = 2048)
+    public String getProvenanceProperties() {
+        return this.provenanceProperties;
     }
 
     @JsonProperty("provenance_properties")
     public void setProvenanceProperties(String provenanceProperties) {
         this.provenanceProperties = provenanceProperties;
-    }
-
-    @JsonProperty("provenance_properties")
-    @Column(name = "PROVENANCE_PROPERTIES", length = 2048)
-    public String getProvenanceProperties() {
-        return this.provenanceProperties;
     }
 
     @JsonProperty(value = "schema_contents", required = false)
@@ -378,9 +378,11 @@ public class Model implements HasName, HasPid, HasId<String> {
 
         Model model = (Model) obj;
 
-        return new EqualsBuilder().append(pid, model.getPid()).append(id, model.getId()).append(name, model.getName())
-                .append(dataHdfsPath, model.getDataHdfsPath()).append(metadataHdfsPath, model.getMetadataHdfsPath())
-                .append(schemaHdfsPath, model.getSchemaHdfsPath()).append(modelHdfsDir, model.getModelHdfsDir())
+        return new EqualsBuilder().append(pid, model.getPid()).append(id, model.getId())
+                .append(name, model.getName()).append(dataHdfsPath, model.getDataHdfsPath())
+                .append(metadataHdfsPath, model.getMetadataHdfsPath())
+                .append(schemaHdfsPath, model.getSchemaHdfsPath())
+                .append(modelHdfsDir, model.getModelHdfsDir())
                 .append(features, model.getFeaturesList()).append(targets, model.getTargetsList())
                 .append(keyCols, model.getKeyColsList()).append(dataFormat, model.getDataFormat())
                 .append(customer, model.getCustomer()).append(table, model.getTable())

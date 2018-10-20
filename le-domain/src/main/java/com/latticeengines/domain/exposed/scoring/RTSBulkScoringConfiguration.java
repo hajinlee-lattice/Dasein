@@ -67,12 +67,12 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
         this.enableLeadEnrichment = enableLeadEnrichment;
     }
 
-    public void setEnableDebug(boolean enableDebug) {
-        this.enableDebug = enableDebug;
-    }
-
     public boolean isEnableDebug() {
         return this.enableDebug;
+    }
+
+    public void setEnableDebug(boolean enableDebug) {
+        this.enableDebug = enableDebug;
     }
 
     public boolean isEnableMatching() {
@@ -91,12 +91,12 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
         this.targetResultDir = targetResultDir;
     }
 
-    public void setInternalResourceHostPort(String internalResourceHostPort) {
-        this.internalResourceHostPort = internalResourceHostPort;
-    }
-
     public String getInternalResourceHostPort() {
         return this.internalResourceHostPort;
+    }
+
+    public void setInternalResourceHostPort(String internalResourceHostPort) {
+        this.internalResourceHostPort = internalResourceHostPort;
     }
 
     public String getImportErrorPath() {
@@ -107,20 +107,20 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
         this.importErrorPath = importErrorPath;
     }
 
-    public void setModelType(String modelType) {
-        this.modelType = modelType;
-    }
-
     public String getModelType() {
         return this.modelType;
     }
 
-    public void setScoreTestFile(boolean scoreTestFile) {
-        this.scoreTestFile = scoreTestFile;
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
     }
 
     public boolean getScoreTestFile() {
         return this.scoreTestFile;
+    }
+
+    public void setScoreTestFile(boolean scoreTestFile) {
+        this.scoreTestFile = scoreTestFile;
     }
 
     public String getIdColumnName() {

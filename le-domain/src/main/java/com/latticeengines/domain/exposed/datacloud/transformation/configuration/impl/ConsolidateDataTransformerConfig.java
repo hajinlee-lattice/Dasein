@@ -21,6 +21,12 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     private boolean mergeOnly;
     private List<String> trimFields = getDefaultTrimFields();
 
+    public static List<String> getDefaultTrimFields() {
+        return new ArrayList<>(Arrays.asList(InterfaceName.CompanyName.name(),
+                InterfaceName.City.name(), InterfaceName.State.name(), InterfaceName.Country.name(),
+                InterfaceName.Website.name(), InterfaceName.ContactName.name()));
+    }
+
     public String getSrcIdField() {
         return srcIdField;
     }
@@ -91,14 +97,5 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     public void setTrimFields(List<String> trimFields) {
         this.trimFields = trimFields;
-    }
-
-    public static List<String> getDefaultTrimFields() {
-        return new ArrayList<>(Arrays.asList(InterfaceName.CompanyName.name(),
-                InterfaceName.City.name(),
-                InterfaceName.State.name(),
-                InterfaceName.Country.name(),
-                InterfaceName.Website.name(),
-                InterfaceName.ContactName.name()));
     }
 }

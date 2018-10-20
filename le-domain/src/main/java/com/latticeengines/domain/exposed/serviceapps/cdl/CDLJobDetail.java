@@ -36,11 +36,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "CDL_JOB_DETAIL")
 public class CDLJobDetail implements HasPid, Serializable {
 
-    private static final long serialVersionUID = 7530709453299469324L;
-
     public static final EnumSet<CDLJobStatus> TERMINATED_STATUS = EnumSet.of(CDLJobStatus.FAIL,
             CDLJobStatus.COMPLETE);
-
+    private static final long serialVersionUID = 7530709453299469324L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore

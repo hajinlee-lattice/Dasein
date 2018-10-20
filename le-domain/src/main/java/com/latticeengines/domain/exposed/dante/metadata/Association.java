@@ -50,7 +50,11 @@ public class Association extends BaseObjectMetadata {
         this.targetKeyName = targetKeyName;
     }
 
-    public String getTargetNotion() { return targetNotion; }
+    public String getTargetNotion() {
+        return targetNotion;
+    }
 
-    public void setTargetNotion(String targetNotion) { this.targetNotion = targetNotion; }
+    public void setTargetNotion(String targetNotion) {
+        this.targetNotion = targetNotion;
+    }
 }

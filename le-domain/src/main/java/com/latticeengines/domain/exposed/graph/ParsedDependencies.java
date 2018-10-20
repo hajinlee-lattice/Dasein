@@ -9,6 +9,11 @@ public class ParsedDependencies {
     private List<Triple<String, String, String>> addDependencies;
     private List<Triple<String, String, String>> removeDependencies;
 
+    public static Triple<String, String, String> tuple(String objectId, String objectType,
+            String dependencyType) {
+        return new ImmutableTriple<String, String, String>(objectId, objectType, dependencyType);
+    }
+
     public List<Triple<String, String, String>> getAddDependencies() {
         return addDependencies;
     }
@@ -23,9 +28,5 @@ public class ParsedDependencies {
 
     public void setRemoveDependencies(List<Triple<String, String, String>> removeDependencies) {
         this.removeDependencies = removeDependencies;
-    }
-
-    public static Triple<String, String, String> tuple(String objectId, String objectType, String dependencyType) {
-        return new ImmutableTriple<String, String, String>(objectId, objectType, dependencyType);
     }
 }

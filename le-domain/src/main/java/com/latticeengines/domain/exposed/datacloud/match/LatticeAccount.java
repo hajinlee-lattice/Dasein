@@ -15,11 +15,12 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
-public class LatticeAccount extends BaseFabricEntity<LatticeAccount> implements FabricEntity<LatticeAccount> {
+public class LatticeAccount extends BaseFabricEntity<LatticeAccount>
+        implements FabricEntity<LatticeAccount> {
 
+    public static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeID";
     private static final String LATTICE_ACCOUNT_ID = "lattice_account_id";
     private static final String ATTRIBUTES = "attributes";
-    public static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeID";
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
 
     private static final String SCHEMA_TEMPLATE = String.format(
@@ -76,7 +77,8 @@ public class LatticeAccount extends BaseFabricEntity<LatticeAccount> implements 
         setId(record.get(LATTICE_ACCOUNT_ID).toString());
         if (record.get(ATTRIBUTES) != null) {
             String serializedAttributes = record.get(ATTRIBUTES).toString();
-            Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes, Map.class);
+            Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes,
+                    Map.class);
             setAttributes(mapAttributes);
         }
         return this;
@@ -112,7 +114,8 @@ public class LatticeAccount extends BaseFabricEntity<LatticeAccount> implements 
         // schema parser will run into exception
         String recordTypeStrForAvroSchema = recordType.replace('.', '_');
 
-        return new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
+        return new Schema.Parser()
+                .parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
     }
 
 }

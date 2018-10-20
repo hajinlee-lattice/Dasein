@@ -9,6 +9,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * service registration.
  */
 public class ServiceProperties extends BaseProperties {
+    public int dataVersion;
+    public String versionString;
+
     public ServiceProperties(int dataVersion, String versionString) {
         this.dataVersion = dataVersion;
         this.versionString = versionString;
@@ -17,13 +20,9 @@ public class ServiceProperties extends BaseProperties {
     public ServiceProperties(int dataVersion) {
         this.dataVersion = dataVersion;
     }
-
     // Serialization constructor
     public ServiceProperties() {
     }
-
-    public int dataVersion;
-    public String versionString;
 
     @Override
     public int hashCode() {

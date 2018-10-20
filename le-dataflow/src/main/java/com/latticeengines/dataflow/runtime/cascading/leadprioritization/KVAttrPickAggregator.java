@@ -19,22 +19,13 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class KVAttrPickAggregator
-        extends BaseAggregator<KVAttrPickAggregator.Context>
+public class KVAttrPickAggregator extends BaseAggregator<KVAttrPickAggregator.Context>
         implements Aggregator<KVAttrPickAggregator.Context> {
 
     private static final long serialVersionUID = -4360627322028214738L;
-
-    public static class Context extends BaseAggregator.Context {
-        public Object value = null;
-        public ConcurrentMap<String, Object> helpFields = new ConcurrentHashMap<>();
-        public boolean foundAlready = false;
-    }
-
     private final String valAttr;
     private final Collection<String> helpFields;
     private final KVAttrPicker picker;
-
     public KVAttrPickAggregator(Fields fieldDeclaration, KVAttrPicker picker) {
         super(fieldDeclaration);
         this.valAttr = valueAttr(picker.valClzSimpleName());
@@ -45,7 +36,7 @@ public class KVAttrPickAggregator
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
         // any group by value is either null or empty string
-        for (Object grpObj: group.asIterableOf(Object.class)) {
+        for (Object grpObj : group.asIterableOf(Object.class)) {
             if (grpObj == null) {
                 return true;
             }
@@ -71,7 +62,8 @@ public class KVAttrPickAggregator
             for (String fieldName : helpFields) {
                 newHelp.put(fieldName, arguments.getObject(fieldName));
             }
-            context.value = picker.updateHelpAndReturnValue(context.value, context.helpFields, arguments.getObject(valAttr), newHelp);
+            context.value = picker.updateHelpAndReturnValue(context.value, context.helpFields,
+                    arguments.getObject(valAttr), newHelp);
         }
         return context;
     }
@@ -87,7 +79,7 @@ public class KVAttrPickAggregator
             tuple.set(idx, group.getObject(i));
         }
 
-        for (Map.Entry<String, Object> entry: context.helpFields.entrySet()) {
+        for (Map.Entry<String, Object> entry : context.helpFields.entrySet()) {
             String fieldName = entry.getKey();
             Integer idx = namePositionMap.get(fieldName);
             tuple.set(idx, entry.getValue());
@@ -96,6 +88,12 @@ public class KVAttrPickAggregator
         tuple.set(namePositionMap.get(valAttr), context.value);
 
         return tuple;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        public Object value = null;
+        public ConcurrentMap<String, Object> helpFields = new ConcurrentHashMap<>();
+        public boolean foundAlready = false;
     }
 
 }

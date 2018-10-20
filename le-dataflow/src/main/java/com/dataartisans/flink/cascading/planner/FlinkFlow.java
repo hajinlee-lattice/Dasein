@@ -37,131 +37,127 @@ import riffle.process.ProcessConfiguration;
 
 public class FlinkFlow extends BaseFlow<Configuration> {
 
-	private Configuration config;
+    private Configuration config;
 
-	public FlinkFlow(PlatformInfo platformInfo, FlowDef flowDef, Map<Object, Object> properties, Configuration defaultConfig) {
+    public FlinkFlow(PlatformInfo platformInfo, FlowDef flowDef, Map<Object, Object> properties,
+            Configuration defaultConfig) {
 
-		super(platformInfo, properties, defaultConfig, flowDef);
-	}
+        super(platformInfo, properties, defaultConfig, flowDef);
+    }
 
-	@Override
-	protected void initConfig(Map<Object, Object> properties, Configuration parentConfig) {
-		if( properties != null ) {
-			parentConfig = createConfig( properties, parentConfig );
-		}
+    @Override
+    protected void initConfig(Map<Object, Object> properties, Configuration parentConfig) {
+        if (properties != null) {
+            parentConfig = createConfig(properties, parentConfig);
+        }
 
-		if( parentConfig == null ) {
-		// this is ok, getJobConf will pass a default parent in
-			return;
-		}
+        if (parentConfig == null) {
+            // this is ok, getJobConf will pass a default parent in
+            return;
+        }
 
-		config = HadoopUtil.copyJobConf(parentConfig);
-	}
+        config = HadoopUtil.copyJobConf(parentConfig);
+    }
 
+    @Override
+    protected void setConfigProperty(Configuration config, Object key, Object value) {
+        // don't let these objects pass, even though toString is called below.
+        if (value instanceof Class || value instanceof JobConf || value instanceof Configuration) {
+            return;
+        }
 
-	@Override
-	protected void setConfigProperty(Configuration config, Object key, Object value) {
-		// don't let these objects pass, even though toString is called below.
-		if( value instanceof Class || value instanceof JobConf || value instanceof Configuration) {
-			return;
-		}
+        config.set(key.toString(), value.toString());
+    }
 
-		config.set(key.toString(), value.toString());
-	}
+    @Override
+    protected Configuration newConfig(Configuration defaultConfig) {
+        return defaultConfig == null ? new Configuration() : HadoopUtil.copyJobConf(defaultConfig);
+    }
 
-	@Override
-	protected Configuration newConfig(Configuration defaultConfig) {
-		return defaultConfig == null ? new Configuration() : HadoopUtil.copyJobConf(defaultConfig);
-	}
+    @Override
+    @ProcessComplete
+    public void complete() {
+        try {
+            super.complete();
+        } catch (FlowException fe) {
+            // check if we need to unwrap a ProgramAbortException
+            Throwable t = fe.getCause();
+            if (t instanceof OptimizerPlanEnvironment.ProgramAbortException) {
+                throw (OptimizerPlanEnvironment.ProgramAbortException) t;
+            } else {
+                throw fe;
+            }
+        }
+    }
 
-	@Override
-	@ProcessComplete
-	public void complete() {
-		try {
-			super.complete();
-		}
-		catch(FlowException fe) {
-			// check if we need to unwrap a ProgramAbortException
-			Throwable t = fe.getCause();
-			if (t instanceof OptimizerPlanEnvironment.ProgramAbortException) {
-				throw (OptimizerPlanEnvironment.ProgramAbortException)t;
-			}
-			else {
-				throw fe;
-			}
-		}
-	}
+    @Override
+    protected void internalStart() {
+        try {
+            deleteSinksIfReplace();
+            deleteTrapsIfReplace();
+            deleteCheckpointsIfReplace();
+        } catch (IOException exception) {
+            throw new FlowException("unable to delete sinks", exception);
+        }
+    }
 
-	@Override
-	protected void internalStart() {
-		try {
-			deleteSinksIfReplace();
-			deleteTrapsIfReplace();
-			deleteCheckpointsIfReplace();
-		}
-		catch( IOException exception ) {
-			throw new FlowException( "unable to delete sinks", exception );
-		}
-	}
+    @Override
+    protected void internalClean(boolean b) {
+        // TODO: clean-up execution
+    }
 
-	@Override
-	protected void internalClean(boolean b) {
-		// TODO: clean-up execution
-	}
+    @Override
+    protected void internalShutdown() {
+        // nothing to do?
+    }
 
-	@Override
-	protected void internalShutdown() {
-		// nothing to do?
-	}
+    @Override
+    protected int getMaxNumParallelSteps() {
+        return 1;
+    }
 
-	@Override
-	protected int getMaxNumParallelSteps() {
-		return 1;
-	}
+    @Override
+    public Configuration getConfig() {
+        if (config == null) {
+            initConfig(null, new Configuration());
+        }
 
-	@Override
-	public Configuration getConfig() {
-		if( config == null ) {
-			initConfig(null, new Configuration());
-		}
+        return config;
+    }
 
-		return config;
-	}
+    @ProcessConfiguration
+    @Override
+    public Configuration getConfigCopy() {
+        return HadoopUtil.copyJobConf(getConfig());
+    }
 
-	@ProcessConfiguration
-	@Override
-	public Configuration getConfigCopy() {
-		return HadoopUtil.copyJobConf(getConfig());
-	}
+    @Override
+    public Map<Object, Object> getConfigAsProperties() {
+        Map<Object, Object> props = new HashMap<Object, Object>();
 
-	@Override
-	public Map<Object, Object> getConfigAsProperties() {
-		Map<Object, Object> props = new HashMap<Object, Object>();
+        Configuration conf = getConfig();
+        for (Map.Entry<String, String> e : conf) {
+            String key = e.getKey();
+            props.put(key, conf.get(key));
+        }
 
-		Configuration conf = getConfig();
-		for(Map.Entry<String, String> e : conf) {
-			String key = e.getKey();
-			props.put(key, conf.get(key));
-		}
+        return props;
+    }
 
-		return props;
-	}
+    @Override
+    public String getProperty(String key) {
+        return getConfig().get(key);
 
-	@Override
-	public String getProperty(String key) {
-		return getConfig().get(key);
+    }
 
-	}
+    @Override
+    public FlowProcess<Configuration> getFlowProcess() {
+        return new FlinkFlowProcess(getFlowSession(), getConfig());
+    }
 
-	@Override
-	public FlowProcess<Configuration> getFlowProcess() {
-		return new FlinkFlowProcess(getFlowSession(), getConfig());
-	}
-
-	@Override
-	public boolean stepsAreLocal() {
-		return false;
-	}
-
+    @Override
+    public boolean stepsAreLocal() {
+        return false;
+    }
 
 }

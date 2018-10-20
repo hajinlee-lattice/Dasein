@@ -20,20 +20,20 @@ public class LaunchHistory {
     @JsonProperty("lastCompletedLaunch")
     private PlayLaunch lastCompletedLaunch;
 
-    public void setNewContactsNum(Long newContactsNum) {
-        this.newContactsNum = newContactsNum;
-    }
-
     public Long getNewContactsNum() {
         return this.newContactsNum;
     }
 
-    public void setNewAccountsNum(Long newAccountsNum) {
-        this.newAccountsNum = newAccountsNum;
+    public void setNewContactsNum(Long newContactsNum) {
+        this.newContactsNum = newContactsNum;
     }
 
     public Long getNewAccountsNum() {
         return this.newAccountsNum;
+    }
+
+    public void setNewAccountsNum(Long newAccountsNum) {
+        this.newAccountsNum = newAccountsNum;
     }
 
     public PlayLaunch getMostRecentLaunch() {

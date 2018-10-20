@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author jdraadusumalli
- * 
+ *
  *         Supports complex representaion of validation expression using JSON
  *         Expression can contain list of fields along with Condition And it can
  *         contain other nested expressions along with other fields
@@ -43,7 +43,8 @@ public class ValidationExpression {
         fields = Arrays.asList(validationFields);
     }
 
-    public ValidationExpression(Condition condition, ValidationExpression... validationExpressions) {
+    public ValidationExpression(Condition condition,
+            ValidationExpression... validationExpressions) {
         this.condition = condition;
         expressions = Arrays.asList(validationExpressions);
     }
@@ -55,8 +56,8 @@ public class ValidationExpression {
         expressions.add(validationExpression);
     }
 
-    public ValidationExpression(Condition condition, List<ValidationExpression> validationExpressions,
-            ValidationField... validationFields) {
+    public ValidationExpression(Condition condition,
+            List<ValidationExpression> validationExpressions, ValidationField... validationFields) {
         this(condition, validationFields);
         expressions = validationExpressions;
     }

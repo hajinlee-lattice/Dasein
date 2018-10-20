@@ -18,8 +18,8 @@ package com.dataartisans.flink.cascading.util;
 
 public class FlinkConfigConstants {
 
-	public static final String EXECUTION_MODE = "flink.executionMode";
-	public static final String EXECUTION_MODE_BATCH = "BATCH";
-	public static final String EXECUTION_MODE_PIPELINED = "PIPELINED";
+    public static final String EXECUTION_MODE = "flink.executionMode";
+    public static final String EXECUTION_MODE_BATCH = "BATCH";
+    public static final String EXECUTION_MODE_PIPELINED = "PIPELINED";
 
 }

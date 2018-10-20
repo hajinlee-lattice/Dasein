@@ -25,23 +25,16 @@ import cascading.tuple.TupleEntry;
 public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Context>
         implements Aggregator<BitEncodeAggregator.Context> {
 
-    public static class Context extends BaseAggregator.Context {
-        List<Integer> trueBits = new ArrayList<>();
-    }
-
     private static final long serialVersionUID = -8024820880116725433L;
     private static final Logger log = LoggerFactory.getLogger(BitEncodeAggregator.class);
-
     private final BitCodeBook codeBook;
     private final String encodedField;
     private final String keyField;
-
     private final String valueField;
-
     private final int encodeFieldPos;
 
-    public BitEncodeAggregator(Fields fieldDeclaration, String keyField, String valueField, String encodedField,
-            BitCodeBook codeBook) {
+    public BitEncodeAggregator(Fields fieldDeclaration, String keyField, String valueField,
+            String encodedField, BitCodeBook codeBook) {
         super(fieldDeclaration);
         if (codeBook.getEncodeAlgo() == null) {
             throw new IllegalArgumentException("Cannot find encode algorithm in the code book.");
@@ -71,7 +64,8 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         setupTupleForGroup(result, context.groupTuple);
         try {
             List<Integer> trueBits = context.trueBits;
-            int[] trueBitsArray = ArrayUtils.toPrimitive(trueBits.toArray(new Integer[trueBits.size()]));
+            int[] trueBitsArray = ArrayUtils
+                    .toPrimitive(trueBits.toArray(new Integer[trueBits.size()]));
             String value = BitCodecUtils.encode(trueBitsArray);
             result.set(encodeFieldPos, value);
         } catch (IOException e) {
@@ -82,10 +76,10 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
 
     private List<Integer> trueBits(TupleEntry arguments, BitCodeBook codeBook) {
         switch (codeBook.getEncodeAlgo()) {
-        case KEY_EXISTS:
-            return encodeKeyExists(arguments, codeBook);
-        default:
-            return emptyList();
+            case KEY_EXISTS:
+                return encodeKeyExists(arguments, codeBook);
+            default:
+                return emptyList();
         }
     }
 
@@ -96,21 +90,22 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
                 return singletonList(codeBook.getBitPosForKey(key));
             } else {
                 switch (codeBook.getDecodeStrategy()) {
-                case NUMERIC_INT:
-                    return encodeInt(arguments, codeBook, key, true);
-                case NUMERIC_UNSIGNED_INT:
-                    return encodeInt(arguments, codeBook, key, false);
-                case ENUM_STRING:
-                    return encodeString(arguments, codeBook, key);
-                default:
-                    break;
+                    case NUMERIC_INT:
+                        return encodeInt(arguments, codeBook, key, true);
+                    case NUMERIC_UNSIGNED_INT:
+                        return encodeInt(arguments, codeBook, key, false);
+                    case ENUM_STRING:
+                        return encodeString(arguments, codeBook, key);
+                    default:
+                        break;
                 }
             }
         }
         return emptyList();
     }
-    
-    private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key, boolean signed) {
+
+    private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key,
+            boolean signed) {
         Integer value = (Integer) arguments.getObject(valueField);
         if (value == null) {
             return emptyList();
@@ -135,7 +130,6 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         return trueBits;
     }
 
-
     private List<Integer> encodeString(TupleEntry arguments, BitCodeBook codeBook, String key) {
         String value = (String) arguments.getObject(valueField);
         if (StringUtils.isBlank(value)) {
@@ -158,6 +152,10 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
             }
         }
         return trueBits;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        List<Integer> trueBits = new ArrayList<>();
     }
 
 }

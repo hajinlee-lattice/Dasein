@@ -35,7 +35,8 @@ public class ValidationDetails {
         boolean hasError = false;
         if (CollectionUtils.isNotEmpty(validations)) {
             hasError = validations.stream().anyMatch(validation -> //
-            validation.validationErrors != null && MapUtils.isNotEmpty(validation.validationErrors.getErrors()));
+            validation.validationErrors != null
+                    && MapUtils.isNotEmpty(validation.validationErrors.getErrors()));
         }
         return hasError;
     }
@@ -44,7 +45,8 @@ public class ValidationDetails {
         boolean hasWarning = false;
         if (CollectionUtils.isNotEmpty(validations)) {
             hasWarning = validations.stream().anyMatch(validation -> //
-            validation.impactWarnings != null && MapUtils.isNotEmpty(validation.impactWarnings.getWarnings()));
+            validation.impactWarnings != null
+                    && MapUtils.isNotEmpty(validation.impactWarnings.getWarnings()));
         }
         return hasWarning;
     }

@@ -23,8 +23,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "LeadInputQueue")
-public class ScoringCommand implements HasPid, HasId<String>, Serializable{
+public class ScoringCommand implements HasPid, HasId<String>, Serializable {
 
+    private static final long serialVersionUID = 1L;
     private Long leadInputQueueId;
     private String leDeploymentId;
     private String tableName;
@@ -34,7 +35,21 @@ public class ScoringCommand implements HasPid, HasId<String>, Serializable{
     private Timestamp populated;
     private Timestamp consumed;
 
-    private static final long serialVersionUID = 1L;
+    ScoringCommand() {
+        super();
+    }
+
+    @VisibleForTesting
+    public ScoringCommand(String deploymentExternalId, ScoringCommandStatus status,
+            String tableName, int lower, int total, Timestamp populated) {
+        super();
+        this.leDeploymentId = deploymentExternalId;
+        this.status = status;
+        this.tableName = tableName;
+        this.lower = lower;
+        this.total = total;
+        this.populated = populated;
+    }
 
     @Id
     @JsonIgnore
@@ -114,21 +129,6 @@ public class ScoringCommand implements HasPid, HasId<String>, Serializable{
 
     public void setConsumed(Timestamp consumed) {
         this.consumed = consumed;
-    }
-
-    ScoringCommand(){
-        super();
-    }
-
-    @VisibleForTesting
-    public ScoringCommand(String deploymentExternalId, ScoringCommandStatus status, String tableName, int lower, int total, Timestamp populated) {
-        super();
-        this.leDeploymentId = deploymentExternalId;
-        this.status = status;
-        this.tableName = tableName;
-        this.lower = lower;
-        this.total = total;
-        this.populated = populated;
     }
 
     @Override

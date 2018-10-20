@@ -80,7 +80,8 @@ public class QueryBuilder {
     public QueryBuilder freeText(String freeFormTextSearch, AttributeLookup... attrs) {
         this.freeFormTextSearch = freeFormTextSearch;
         for (AttributeLookup attr : attrs) {
-            freeFormTextSearchAttributes.add(new FreeFormTextSearchAttribute(attr.getEntity(), attr.getAttribute()));
+            freeFormTextSearchAttributes
+                    .add(new FreeFormTextSearchAttribute(attr.getEntity(), attr.getAttribute()));
         }
         return this;
     }

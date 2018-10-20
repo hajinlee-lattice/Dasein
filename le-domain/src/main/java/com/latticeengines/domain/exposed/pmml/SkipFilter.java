@@ -24,9 +24,17 @@ public class SkipFilter extends XMLFilterImpl {
         setName(name);
     }
 
+    public static SAXSource apply(InputSource source, String name) throws SAXException {
+        XMLReader reader = XMLReaderFactory.createXMLReader();
+
+        SkipFilter filter = new SkipFilter(reader, name);
+
+        return new SAXSource(filter, source);
+    }
+
     @Override
-    public void startElement(String namespaceURI, String localName, String qualifiedName, Attributes attributes)
-            throws SAXException {
+    public void startElement(String namespaceURI, String localName, String qualifiedName,
+            Attributes attributes) throws SAXException {
         if (isSkipped(namespaceURI, localName)) {
             this.depth++;
 
@@ -41,7 +49,8 @@ public class SkipFilter extends XMLFilterImpl {
     }
 
     @Override
-    public void endElement(String namespaceURI, String localName, String qualifiedName) throws SAXException {
+    public void endElement(String namespaceURI, String localName, String qualifiedName)
+            throws SAXException {
         if (isSkipped(namespaceURI, localName)) {
             this.depth--;
 
@@ -79,13 +88,5 @@ public class SkipFilter extends XMLFilterImpl {
 
     private void setName(String name) {
         this.name = name;
-    }
-
-    public static SAXSource apply(InputSource source, String name) throws SAXException {
-        XMLReader reader = XMLReaderFactory.createXMLReader();
-
-        SkipFilter filter = new SkipFilter(reader, name);
-
-        return new SAXSource(filter, source);
     }
 }

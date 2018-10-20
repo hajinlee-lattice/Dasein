@@ -79,11 +79,13 @@ public class VdbConnectorConfiguration extends ConnectorConfiguration {
         return tableConfigurations;
     }
 
-    public void setTableConfigurations(LinkedHashMap<String, ImportVdbTableConfiguration> tableConfigurations) {
+    public void setTableConfigurations(
+            LinkedHashMap<String, ImportVdbTableConfiguration> tableConfigurations) {
         this.tableConfigurations = tableConfigurations;
     }
 
-    public void addTableConfiguration(String tableName, ImportVdbTableConfiguration tableConfiguration) {
+    public void addTableConfiguration(String tableName,
+            ImportVdbTableConfiguration tableConfiguration) {
         tableConfigurations.put(tableName, tableConfiguration);
     }
 

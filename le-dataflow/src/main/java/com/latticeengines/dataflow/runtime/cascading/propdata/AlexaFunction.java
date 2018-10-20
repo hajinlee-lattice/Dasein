@@ -13,10 +13,10 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AlexaFunction extends BaseOperation implements Function {
 
+    public static final String[] OUTPUT_FIELDS = new String[] { "US_PageViews", "US_Rank",
+            "US_Users", "AU_PageViews", "AU_Rank", "AU_Users", "GB_PageViews", "GB_Rank",
+            "GB_Users", "CA_PageViews", "CA_Rank", "CA_Users" };
     private static final long serialVersionUID = -1829655353767648353L;
-
-    public static final String[] OUTPUT_FIELDS = new String[] { "US_PageViews", "US_Rank", "US_Users", "AU_PageViews",
-            "AU_Rank", "AU_Users", "GB_PageViews", "GB_Rank", "GB_Users", "CA_PageViews", "CA_Rank", "CA_Users" };
 
     public AlexaFunction() {
         super(40, new Fields(OUTPUT_FIELDS));
@@ -45,33 +45,34 @@ public class AlexaFunction extends BaseOperation implements Function {
         return new String[] { countryCode, pageViews, rank, users };
     }
 
-    private Tuple parseArgument(Tuple result, String countryCode, Double pageViews, Integer rank, Double users) {
+    private Tuple parseArgument(Tuple result, String countryCode, Double pageViews, Integer rank,
+            Double users) {
         Object[] output = new Object[OUTPUT_FIELDS.length];
         for (int i = 0; i < OUTPUT_FIELDS.length; i++) {
             output[i] = result.getObject(i);
         }
         if (StringUtils.isNotEmpty(countryCode)) {
             switch (countryCode.toUpperCase()) {
-            case "US":
-                output[0] = pageViews;
-                output[1] = rank;
-                output[2] = users;
-                break;
-            case "AU":
-                output[3] = pageViews;
-                output[4] = rank;
-                output[5] = users;
-                break;
-            case "GB":
-                output[6] = pageViews;
-                output[7] = rank;
-                output[8] = users;
-                break;
-            case "CA":
-                output[9] = pageViews;
-                output[10] = rank;
-                output[11] = users;
-                break;
+                case "US":
+                    output[0] = pageViews;
+                    output[1] = rank;
+                    output[2] = users;
+                    break;
+                case "AU":
+                    output[3] = pageViews;
+                    output[4] = rank;
+                    output[5] = users;
+                    break;
+                case "GB":
+                    output[6] = pageViews;
+                    output[7] = rank;
+                    output[8] = users;
+                    break;
+                case "CA":
+                    output[9] = pageViews;
+                    output[10] = rank;
+                    output[11] = users;
+                    break;
             }
         }
         return new Tuple(output);

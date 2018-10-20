@@ -24,11 +24,10 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
     }
 
     public static class Builder {
-        private MatchCdlAccountWorkflowConfiguration configuration = new MatchCdlAccountWorkflowConfiguration();
-
         MatchCdlAccountConfiguration matchCdlAccount = new MatchCdlAccountConfiguration();
         MatchCdlStepConfiguration matchCdlStep = new MatchCdlStepConfiguration();
         MatchDataCloudWorkflowConfiguration.Builder ldcConfigurationBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
+        private MatchCdlAccountWorkflowConfiguration configuration = new MatchCdlAccountWorkflowConfiguration();
 
         public MatchCdlAccountWorkflowConfiguration build() {
             return build("matchCdlAccountWorkflow");
@@ -98,8 +97,10 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            ldcConfigurationBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            ldcConfigurationBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 

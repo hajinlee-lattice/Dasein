@@ -9,7 +9,8 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportSourceDataConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = ImportSourceDataConfiguration.class, name = "ImportSourceDataConfiguration"), })
+@JsonSubTypes({
+        @Type(value = ImportSourceDataConfiguration.class, name = "ImportSourceDataConfiguration"), })
 public class ImportStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotNull

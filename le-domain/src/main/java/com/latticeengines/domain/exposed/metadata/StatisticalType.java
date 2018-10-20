@@ -9,30 +9,27 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 public enum StatisticalType {
 
     INTERVAL("interval"), NOMINAL("nominal"), ORDINAL("ordinal"), RATIO("ratio");
 
-    private final String name;
     private static Map<String, StatisticalType> nameMap;
     private static Set<String> values;
 
     static {
         nameMap = new HashMap<>();
-        for (StatisticalType statisticalType: StatisticalType.values()) {
+        for (StatisticalType statisticalType : StatisticalType.values()) {
             nameMap.put(statisticalType.getName(), statisticalType);
         }
-        values = new HashSet<>(Arrays.stream(values()).map(StatisticalType::name).collect(Collectors.toSet()));
+        values = new HashSet<>(
+                Arrays.stream(values()).map(StatisticalType::name).collect(Collectors.toSet()));
     }
+
+    private final String name;
 
     StatisticalType(String name) {
         this.name = name;
     }
-
-    public String toString() { return this.name; }
-
-    public String getName() { return this.name; }
 
     public static StatisticalType fromName(String name) {
         if (StringUtils.isBlank(name)) {
@@ -45,6 +42,14 @@ public enum StatisticalType {
         } else {
             throw new IllegalArgumentException("Cannot find a StatisticalType with name " + name);
         }
+    }
+
+    public String toString() {
+        return this.name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
 }

@@ -32,7 +32,8 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MODELQUALITY_DATASET", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_DATASET", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
 
@@ -74,8 +75,8 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ScoringDataSet> scoringDataSets = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "dataSets", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
-            CascadeType.REFRESH, CascadeType.DETACH })
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "dataSets", cascade = { CascadeType.MERGE,
+            CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH })
     @JsonIgnore
     private List<AnalyticTest> analyticTests = new ArrayList<>();
 
@@ -91,16 +92,16 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        customerSpace = tenant.getId();
-    }
-
-    @Override
     public Tenant getTenant() {
         if (customerSpace == null) {
             throw new IllegalStateException("Customer space cannot be null.");
         }
         return new Tenant(customerSpace);
+    }
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        customerSpace = tenant.getId();
     }
 
     @MetricTag(tag = "DataSetIndustry")

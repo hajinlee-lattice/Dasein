@@ -12,11 +12,12 @@ public class CreateScoreTableParameters extends DataFlowParameters {
     @JsonProperty("event_table")
     @SourceTableName
     private String eventTable;
-    
+
     @JsonProperty("uk_column")
     private String uniqueKeyColumn;
 
-    public CreateScoreTableParameters(String scoreResultsTable, String eventTable, String uniqueKeyColumn) {
+    public CreateScoreTableParameters(String scoreResultsTable, String eventTable,
+            String uniqueKeyColumn) {
         setScoreResultsTable(scoreResultsTable);
         setEventTable(eventTable);
         setUniqueKeyColumn(uniqueKeyColumn);

@@ -21,14 +21,8 @@ public class AMSeedDuDomAggregator extends BaseAggregator<AMSeedDuDomAggregator.
     private int duDunsLoc;
     private int duDomsLoc;
 
-
-    public static class Context extends BaseAggregator.Context {
-        String duDuns;
-        StringBuilder duDomsBuilder = new StringBuilder();
-    }
-
-    public AMSeedDuDomAggregator(Fields fieldDeclaration, String dunsField, String duDunsField, String domField,
-            String duDomsField) {
+    public AMSeedDuDomAggregator(Fields fieldDeclaration, String dunsField, String duDunsField,
+            String domField, String duDomsField) {
         super(fieldDeclaration);
         this.dunsField = dunsField;
         this.duDunsField = duDunsField;
@@ -72,7 +66,8 @@ public class AMSeedDuDomAggregator extends BaseAggregator<AMSeedDuDomAggregator.
         String duDuns = arguments.getString(duDunsField);
         String duns = arguments.getString(dunsField);
         String domain = arguments.getString(domField);
-        if (StringUtils.isNotBlank(duDuns) && StringUtils.isNotBlank(domain) && duDuns.equals(duns)) {
+        if (StringUtils.isNotBlank(duDuns) && StringUtils.isNotBlank(domain)
+                && duDuns.equals(duns)) {
             context.duDomsBuilder.append(domain + "||");
         }
         return context;
@@ -83,10 +78,16 @@ public class AMSeedDuDomAggregator extends BaseAggregator<AMSeedDuDomAggregator.
         if (context.duDomsBuilder.length() > 0) {
             Tuple result = Tuple.size(getFieldDeclaration().size());
             result.set(duDunsLoc, context.duDuns);
-            result.set(duDomsLoc, context.duDomsBuilder.substring(0, context.duDomsBuilder.length() - 2));
+            result.set(duDomsLoc,
+                    context.duDomsBuilder.substring(0, context.duDomsBuilder.length() - 2));
             return result;
         } else {
             return null;
         }
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String duDuns;
+        StringBuilder duDomsBuilder = new StringBuilder();
     }
 }

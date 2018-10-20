@@ -28,60 +28,64 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class SinkStreamGraph extends NodeStreamGraph {
 
-	private SinkBoundaryInStage sourceStage;
+    private SinkBoundaryInStage sourceStage;
 
-	public SinkStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, Boundary source) {
+    public SinkStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, Boundary source) {
 
-		super(flowProcess, node);
+        super(flowProcess, node);
 
-		sourceStage = handleHead(source);
+        sourceStage = handleHead(source);
 
-		setTraps();
-		setScopes();
+        setTraps();
+        setScopes();
 
-		printGraph( node.getID(), "sink", flowProcess.getCurrentSliceNum() );
-		bind();
-	}
+        printGraph(node.getID(), "sink", flowProcess.getCurrentSliceNum());
+        bind();
+    }
 
-	public SinkBoundaryInStage getSourceStage() {
-		return this.sourceStage;
-	}
+    public SinkBoundaryInStage getSourceStage() {
+        return this.sourceStage;
+    }
 
-	private SinkBoundaryInStage handleHead( Boundary boundary ) {
+    private SinkBoundaryInStage handleHead(Boundary boundary) {
 
-		SinkBoundaryInStage sourceStage = (SinkBoundaryInStage)createBoundaryStage(boundary, IORole.source);
-		addHead( sourceStage );
-		handleDuct( boundary, sourceStage );
-		return sourceStage;
-	}
+        SinkBoundaryInStage sourceStage = (SinkBoundaryInStage) createBoundaryStage(boundary,
+                IORole.source);
+        addHead(sourceStage);
+        handleDuct(boundary, sourceStage);
+        return sourceStage;
+    }
 
-	@Override
-	protected Duct createBoundaryStage( Boundary boundary, IORole role ) {
+    @Override
+    protected Duct createBoundaryStage(Boundary boundary, IORole role) {
 
-		if(role == IORole.source) {
-			this.sourceStage = new SinkBoundaryInStage(this.flowProcess, boundary, this.node );
-			return this.sourceStage;
-		}
-		else {
-			throw new UnsupportedOperationException("Only source boundary allowed in SinkStreamGraph");
-		}
-	}
+        if (role == IORole.source) {
+            this.sourceStage = new SinkBoundaryInStage(this.flowProcess, boundary, this.node);
+            return this.sourceStage;
+        } else {
+            throw new UnsupportedOperationException(
+                    "Only source boundary allowed in SinkStreamGraph");
+        }
+    }
 
-	@Override
-	protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a CoGroup gate in a SinkStreamGraph");
-	}
+    @Override
+    protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a CoGroup gate in a SinkStreamGraph");
+    }
 
-	@Override
-	protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a GroupBy gate in a SinkStreamGraph");
-	}
+    @Override
+    protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a GroupBy gate in a SinkStreamGraph");
+    }
 
-	protected Gate createHashJoinGate( HashJoin join ) {
-		throw new UnsupportedOperationException("Cannot create a HashJoin gate in a SinkStreamGraph");
-	}
+    protected Gate createHashJoinGate(HashJoin join) {
+        throw new UnsupportedOperationException(
+                "Cannot create a HashJoin gate in a SinkStreamGraph");
+    }
 
 }

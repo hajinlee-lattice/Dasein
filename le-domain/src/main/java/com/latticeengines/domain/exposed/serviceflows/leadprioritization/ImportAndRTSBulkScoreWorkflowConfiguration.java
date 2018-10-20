@@ -73,7 +73,8 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             importDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
-            rtsBulkScoreWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            rtsBulkScoreWorkflowConfigurationBuilder
+                    .internalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             exportScoreToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -139,8 +140,10 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            rtsBulkScoreWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 
@@ -165,8 +168,8 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         }
 
         public ImportAndRTSBulkScoreWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("importAndRTSBulkScoreWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("importAndRTSBulkScoreWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(importDataConfiguration);
             configuration.add(registerReport);
             configuration.add(exportScoreToS3);
@@ -195,7 +198,8 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            rtsBulkScoreWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            rtsBulkScoreWorkflowConfigurationBuilder
+                    .sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 

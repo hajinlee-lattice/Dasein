@@ -4,9 +4,10 @@ import java.io.Serializable;
 
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
-public class FittedConversionRateCalculatorImplV1 implements FittedConversionRateCalculator, Serializable {
-	private static final long serialVersionUID = -661135563911121355L;
-	private FitFunctionParameters params;
+public class FittedConversionRateCalculatorImplV1
+        implements FittedConversionRateCalculator, Serializable {
+    private static final long serialVersionUID = -661135563911121355L;
+    private FitFunctionParameters params;
 
     public FittedConversionRateCalculatorImplV1(FitFunctionParameters params) {
         validateParameters(params);
@@ -30,6 +31,7 @@ public class FittedConversionRateCalculatorImplV1 implements FittedConversionRat
             return Math.exp(beta + Math.log(mappedPercentile + gamma) * alpha);
         }
         double rateAtOne = Math.exp(beta + Math.log(1 + gamma) * alpha);
-        return (maxRate > rateAtOne) ? rateAtOne + (1 - mappedPercentile) * 10 * (maxRate - rateAtOne) / 5 : rateAtOne;
+        return (maxRate > rateAtOne)
+                ? rateAtOne + (1 - mappedPercentile) * 10 * (maxRate - rateAtOne) / 5 : rateAtOne;
     }
 }

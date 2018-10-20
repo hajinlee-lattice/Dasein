@@ -1,38 +1,25 @@
 package com.latticeengines.domain.exposed.metadata;
 
-
 public enum PredeterminedColumnDataTypes {
-    Interest_esb__c("Interest_esb__c"),
-    Interest_tcat__c("Interest_tcat__c"),
-    kickboxAcceptAll("kickboxAcceptAll"),
-    Free_Email_Address__c("Free_Email_Address__c"),
-    kickboxFree("kickboxFree"),
-    Unsubscribed("Unsubscribed"),
-    kickboxDisposable("kickboxDisposable"),
-    HasAnypointLogin("HasAnypointLogin"),
-    HasCEDownload("HasCEDownload"),
-    HasEEDownload("HasEEDownload"),
-    Lead_Source_Asset__c("Lead_Source_Asset__c"),
-    kickboxStatus("kickboxStatus"),
-    SICCode("SICCode"),
-    Source_Detail__c("Source_Detail__c"),
-    Cloud_Plan__c("Cloud_Plan__c");
+    Interest_esb__c("Interest_esb__c"), Interest_tcat__c("Interest_tcat__c"), kickboxAcceptAll(
+            "kickboxAcceptAll"), Free_Email_Address__c("Free_Email_Address__c"), kickboxFree(
+                    "kickboxFree"), Unsubscribed("Unsubscribed"), kickboxDisposable(
+                            "kickboxDisposable"), HasAnypointLogin(
+                                    "HasAnypointLogin"), HasCEDownload(
+                                            "HasCEDownload"), HasEEDownload(
+                                                    "HasEEDownload"), Lead_Source_Asset__c(
+                                                            "Lead_Source_Asset__c"), kickboxStatus(
+                                                                    "kickboxStatus"), SICCode(
+                                                                            "SICCode"), Source_Detail__c(
+                                                                                    "Source_Detail__c"), Cloud_Plan__c(
+                                                                                            "Cloud_Plan__c");
     private String dataType;
 
     private PredeterminedColumnDataTypes(String dataType) {
         this.dataType = dataType;
     }
 
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
-    }
-
-    public static UserDefinedType returnUserDefinedType(String preColDateTypeStr)
-    {
+    public static UserDefinedType returnUserDefinedType(String preColDateTypeStr) {
         if (preColDateTypeStr.startsWith("Activity_Count_")) {
             return UserDefinedType.NUMBER;
         }
@@ -42,7 +29,7 @@ public enum PredeterminedColumnDataTypes {
         } catch (Exception e) {
             return null;
         }
-        switch (preColDateType){
+        switch (preColDateType) {
             case Interest_esb__c:
             case Interest_tcat__c:
             case kickboxAcceptAll:
@@ -62,5 +49,13 @@ public enum PredeterminedColumnDataTypes {
                 return UserDefinedType.TEXT;
         }
         return null;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 }

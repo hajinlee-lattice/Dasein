@@ -8,6 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorDetails {
+    @JsonProperty
+    private LedpCode errorCode;
+    @JsonProperty
+    private String errorMsg;
+    @JsonProperty
+    private String stackTrace;
+
     public ErrorDetails(LedpCode errorCode, String errorMsg, String stackTrace) {
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
@@ -17,15 +24,6 @@ public class ErrorDetails {
     public ErrorDetails() {
         // do nothing
     }
-
-    @JsonProperty
-    private LedpCode errorCode;
-
-    @JsonProperty
-    private String errorMsg;
-
-    @JsonProperty
-    private String stackTrace;
 
     public LedpCode getErrorCode() {
         return errorCode;

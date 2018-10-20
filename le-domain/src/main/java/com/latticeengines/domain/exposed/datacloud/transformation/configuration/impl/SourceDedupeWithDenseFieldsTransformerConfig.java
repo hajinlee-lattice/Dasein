@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerConfig {
 
-
     @JsonProperty("DedupeFields")
     private List<String> dedupeFields;
 
@@ -15,7 +14,7 @@ public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerCon
 
     @JsonProperty("SortFields")
     private List<String> sortFields;
-    
+
     public List<String> getDedupeFields() {
         return dedupeFields;
     }
@@ -39,5 +38,5 @@ public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerCon
     public void setSortFields(List<String> sortFields) {
         this.sortFields = sortFields;
     }
-    
+
 }

@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ParallelBlockExecutionConfiguration extends MicroserviceStepConfiguration {
-    
-    
+
     private String resultLocation;
 
     @JsonProperty("resultLocation")

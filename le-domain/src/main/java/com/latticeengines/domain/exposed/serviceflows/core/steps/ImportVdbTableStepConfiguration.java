@@ -17,7 +17,6 @@ public class ImportVdbTableStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("import_configuration_str")
     private String importConfigurationStr;
 
-
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }

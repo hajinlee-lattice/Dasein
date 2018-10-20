@@ -27,165 +27,160 @@ import com.dataartisans.flink.cascading.types.tuple.NullMaskSerDeUtils;
 
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({ "unchecked" })
 public class TupleArraySerializer extends TypeSerializer<Tuple[]> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5721801144767704946L;
-	private final int length;
-	private final int fillLength;
-	private final TypeSerializer<Tuple>[] tupleSerializers;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5721801144767704946L;
+    private final int length;
+    private final int fillLength;
+    private final TypeSerializer<Tuple>[] tupleSerializers;
 
-	private final boolean[] nullFields;
+    private final boolean[] nullFields;
 
-	public TupleArraySerializer(int length, TypeSerializer<Tuple>[] tupleSerializers) {
+    public TupleArraySerializer(int length, TypeSerializer<Tuple>[] tupleSerializers) {
 
-		this.length = length;
-		this.fillLength = tupleSerializers.length;
-		this.tupleSerializers = tupleSerializers;
-		this.nullFields = new boolean[this.fillLength];
-	}
+        this.length = length;
+        this.fillLength = tupleSerializers.length;
+        this.tupleSerializers = tupleSerializers;
+        this.nullFields = new boolean[this.fillLength];
+    }
 
-	@Override
-	public Tuple[] createInstance() {
-		return new Tuple[this.length];
-	}
+    @Override
+    public Tuple[] createInstance() {
+        return new Tuple[this.length];
+    }
 
-	@Override
-	public boolean isImmutableType() {
-		return false;
-	}
+    @Override
+    public boolean isImmutableType() {
+        return false;
+    }
 
-	@Override
-	public TypeSerializer<Tuple[]> duplicate() {
+    @Override
+    public TypeSerializer<Tuple[]> duplicate() {
 
-		TypeSerializer<Tuple>[] serializerCopies = new TypeSerializer[this.fillLength];
-		for(int i=0; i<this.fillLength; i++) {
-			serializerCopies[i] = this.tupleSerializers[i].duplicate();
-		}
-		return new TupleArraySerializer(this.length, serializerCopies);
-	}
+        TypeSerializer<Tuple>[] serializerCopies = new TypeSerializer[this.fillLength];
+        for (int i = 0; i < this.fillLength; i++) {
+            serializerCopies[i] = this.tupleSerializers[i].duplicate();
+        }
+        return new TupleArraySerializer(this.length, serializerCopies);
+    }
 
-	@Override
-	public Tuple[] copy(Tuple[] from) {
+    @Override
+    public Tuple[] copy(Tuple[] from) {
 
-		Tuple[] copy = new Tuple[this.length];
-		for(int i=0; i<this.fillLength; i++) {
-			if(from[i] != null) {
-				copy[i] = this.tupleSerializers[i].copy(from[i]);
-			}
-			else {
-				copy[i] = null;
-			}
-		}
-		return copy;
-	}
+        Tuple[] copy = new Tuple[this.length];
+        for (int i = 0; i < this.fillLength; i++) {
+            if (from[i] != null) {
+                copy[i] = this.tupleSerializers[i].copy(from[i]);
+            } else {
+                copy[i] = null;
+            }
+        }
+        return copy;
+    }
 
-	@Override
-	public Tuple[] copy(Tuple[] from, Tuple[] reuse) {
-		for(int i=0; i<this.fillLength; i++) {
-			if(from[i] != null) {
-				reuse[i] = this.tupleSerializers[i].copy(from[i]);
-			}
-			else {
-				reuse[i] = null;
-			}
-		}
-		return reuse;
-	}
+    @Override
+    public Tuple[] copy(Tuple[] from, Tuple[] reuse) {
+        for (int i = 0; i < this.fillLength; i++) {
+            if (from[i] != null) {
+                reuse[i] = this.tupleSerializers[i].copy(from[i]);
+            } else {
+                reuse[i] = null;
+            }
+        }
+        return reuse;
+    }
 
-	@Override
-	public int getLength() {
-		return 0;
-	}
+    @Override
+    public int getLength() {
+        return 0;
+    }
 
-	@Override
-	public void serialize(Tuple[] tuples, DataOutputView target) throws IOException {
+    @Override
+    public void serialize(Tuple[] tuples, DataOutputView target) throws IOException {
 
-		// write null mask
-		NullMaskSerDeUtils.writeNullMask(tuples, fillLength, target);
+        // write null mask
+        NullMaskSerDeUtils.writeNullMask(tuples, fillLength, target);
 
-		for (int i = 0; i < fillLength; i++) {
-			if(tuples[i] != null) {
-				tupleSerializers[i].serialize(tuples[i], target);
-			}
-		}
-	}
+        for (int i = 0; i < fillLength; i++) {
+            if (tuples[i] != null) {
+                tupleSerializers[i].serialize(tuples[i], target);
+            }
+        }
+    }
 
-	@Override
-	public Tuple[] deserialize(DataInputView source) throws IOException {
+    @Override
+    public Tuple[] deserialize(DataInputView source) throws IOException {
 
-		// read null mask
-		NullMaskSerDeUtils.readNullMask(this.nullFields, this.fillLength, source);
+        // read null mask
+        NullMaskSerDeUtils.readNullMask(this.nullFields, this.fillLength, source);
 
-		// read non-null fields
-		Tuple[] tuples = new Tuple[this.length];
-		for (int i = 0; i < this.fillLength; i++) {
+        // read non-null fields
+        Tuple[] tuples = new Tuple[this.length];
+        for (int i = 0; i < this.fillLength; i++) {
 
-			if(!this.nullFields[i]) {
-				tuples[i] = tupleSerializers[i].deserialize(source);
-			}
-		}
-		return tuples;
-	}
+            if (!this.nullFields[i]) {
+                tuples[i] = tupleSerializers[i].deserialize(source);
+            }
+        }
+        return tuples;
+    }
 
-	@Override
-	public Tuple[] deserialize(Tuple[] reuse, DataInputView source) throws IOException {
+    @Override
+    public Tuple[] deserialize(Tuple[] reuse, DataInputView source) throws IOException {
 
-		// read null mask
-		NullMaskSerDeUtils.readNullMask(this.nullFields, this.fillLength, source);
+        // read null mask
+        NullMaskSerDeUtils.readNullMask(this.nullFields, this.fillLength, source);
 
-		// read non-null fields
-		for (int i = 0; i < this.fillLength; i++) {
+        // read non-null fields
+        for (int i = 0; i < this.fillLength; i++) {
 
-			if(!this.nullFields[i]) {
-				reuse[i] = tupleSerializers[i].deserialize(source);
-			}
-			else {
-				reuse[i] = null;
-			}
-		}
-		return reuse;
-	}
+            if (!this.nullFields[i]) {
+                reuse[i] = tupleSerializers[i].deserialize(source);
+            } else {
+                reuse[i] = null;
+            }
+        }
+        return reuse;
+    }
 
-	@Override
-	public void copy(DataInputView source, DataOutputView target) throws IOException {
+    @Override
+    public void copy(DataInputView source, DataOutputView target) throws IOException {
 
-		// read and copy null mask
-		NullMaskSerDeUtils.readAndCopyNullMask(nullFields, this.fillLength, source, target);
+        // read and copy null mask
+        NullMaskSerDeUtils.readAndCopyNullMask(nullFields, this.fillLength, source, target);
 
-		// copy non-null fields
-		for (int i = 0; i < this.fillLength; i++) {
-			if(!this.nullFields[i]) {
-				tupleSerializers[i].copy(source, target);
-			}
-		}
-	}
+        // copy non-null fields
+        for (int i = 0; i < this.fillLength; i++) {
+            if (!this.nullFields[i]) {
+                tupleSerializers[i].copy(source, target);
+            }
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof TupleArraySerializer) {
-			TupleArraySerializer other = (TupleArraySerializer) obj;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TupleArraySerializer) {
+            TupleArraySerializer other = (TupleArraySerializer) obj;
 
-			return other.canEqual(this) &&
-					this.length == other.length &&
-					Arrays.equals(this.tupleSerializers, other.tupleSerializers);
-		}
-		else {
-			return false;
-		}
-	}
+            return other.canEqual(this) && this.length == other.length
+                    && Arrays.equals(this.tupleSerializers, other.tupleSerializers);
+        } else {
+            return false;
+        }
+    }
 
-	@Override
-	public int hashCode() {
-		return 31 * this.length + Arrays.hashCode(this.tupleSerializers);
-	}
+    @Override
+    public int hashCode() {
+        return 31 * this.length + Arrays.hashCode(this.tupleSerializers);
+    }
 
-	@Override
-	public boolean canEqual(Object obj) {
-		return obj instanceof TupleArraySerializer;
-	}
+    @Override
+    public boolean canEqual(Object obj) {
+        return obj instanceof TupleArraySerializer;
+    }
 
 }

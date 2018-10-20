@@ -21,33 +21,32 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class AlgorithmFactory extends ModelFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(AlgorithmFactory.class);
-
     public static final String ALGORITHM_NAME_RF = "RF";
     public static final String ALGORITHM_NAME_LR = "LR";
     public static final String ALGORITHM_NAME_DT = "DT";
     public static final String RF_SEED_KEY = "model.algorithm.randomforest.seed";
-
+    private static final Logger log = LoggerFactory.getLogger(AlgorithmFactory.class);
     private static final String SAMPLE_NAME = "all";
 
     public static Algorithm createAlgorithm(Map<String, String> runTimeParams) {
         log.info("Check and Create new algorithm.");
 
-        com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo = getModelAlgorithm(runTimeParams);
+        com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo = getModelAlgorithm(
+                runTimeParams);
         Algorithm algorithm = null;
         if (modelAlgo != null) {
             if (modelAlgo.getType() == null)
                 modelAlgo.setType(AlgorithmType.RANDOMFOREST);
             switch (modelAlgo.getType()) {
-            case RANDOMFOREST:
-                algorithm = createRF(modelAlgo);
-                break;
-            case LOGISTICREGRESSION:
-                algorithm = createLR(modelAlgo);
-                break;
-            case DECISIONTREE:
-                algorithm = createDT(modelAlgo);
-                break;
+                case RANDOMFOREST:
+                    algorithm = createRF(modelAlgo);
+                    break;
+                case LOGISTICREGRESSION:
+                    algorithm = createLR(modelAlgo);
+                    break;
+                case DECISIONTREE:
+                    algorithm = createDT(modelAlgo);
+                    break;
             }
         } else
             algorithm = getDefaultAlgorithm(runTimeParams);
@@ -82,19 +81,22 @@ public class AlgorithmFactory extends ModelFactory {
         return selectedConfig.getAlgorithm();
     }
 
-    private static Algorithm createDT(com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
+    private static Algorithm createDT(
+            com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
         AlgorithmBase algo = new DecisionTreeAlgorithm();
         configAlgorithm(algo, modelAlgo);
         return algo;
     }
 
-    private static Algorithm createLR(com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
+    private static Algorithm createLR(
+            com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
         AlgorithmBase algo = new LogisticRegressionAlgorithm();
         configAlgorithm(algo, modelAlgo);
         return algo;
     }
 
-    private static Algorithm createRF(com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
+    private static Algorithm createRF(
+            com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
         AlgorithmBase algo = new RandomForestAlgorithm();
         configAlgorithm(algo, modelAlgo);
         return algo;
@@ -130,7 +132,8 @@ public class AlgorithmFactory extends ModelFactory {
                 if (CollectionUtils.isNotEmpty(values)) {
                     AlgorithmPropertyValue value = values.get(0);
                     if (value != null && StringUtils.isNotEmpty(value.getValue())) {
-                        builder.append(def.getName()).append("=").append(value.getValue()).append(" ");
+                        builder.append(def.getName()).append("=").append(value.getValue())
+                                .append(" ");
                     }
                 }
             }

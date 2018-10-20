@@ -14,12 +14,12 @@ import cascading.tuple.TupleEntry;
 public class DomOwnerCalRootDunsFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -2167500142900212360L;
-    private String guDunsField = DataCloudConstants.ATTR_GU_DUNS;
-    private String duDunsField = DataCloudConstants.ATTR_DU_DUNS;
-    private String dunsField = DataCloudConstants.AMS_ATTR_DUNS;
     private final static String GU_TYPE_VAL = "GU";
     private final static String DU_TYPE_VAL = "DU";
     private final static String DUNS_TYPE_VAL = "DUNS";
+    private String guDunsField = DataCloudConstants.ATTR_GU_DUNS;
+    private String duDunsField = DataCloudConstants.ATTR_DU_DUNS;
+    private String dunsField = DataCloudConstants.AMS_ATTR_DUNS;
 
     public DomOwnerCalRootDunsFunction(Fields fieldDeclaration) {
         super(fieldDeclaration);

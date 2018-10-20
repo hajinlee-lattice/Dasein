@@ -67,11 +67,11 @@ public class ModelSummaryDownloadFlag implements HasPid {
         this.markTime = markTime;
     }
 
-    public void setExcludeTenantID(String tenantId) {
-        this.excludeTenantID = tenantId;
-    }
-
     public String getExcludeTenantID() {
         return excludeTenantID;
+    }
+
+    public void setExcludeTenantID(String tenantId) {
+        this.excludeTenantID = tenantId;
     }
 }

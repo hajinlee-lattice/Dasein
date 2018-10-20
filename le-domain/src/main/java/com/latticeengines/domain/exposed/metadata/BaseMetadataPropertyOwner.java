@@ -3,7 +3,8 @@ package com.latticeengines.domain.exposed.metadata;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseMetadataPropertyOwner<P extends MetadataProperty<?>> implements HasProperties<P> {
+public abstract class BaseMetadataPropertyOwner<P extends MetadataProperty<?>>
+        implements HasProperties<P> {
 
     public abstract List<P> getProperties();
 
@@ -29,8 +30,8 @@ public abstract class BaseMetadataPropertyOwner<P extends MetadataProperty<?>> i
                 prop.setValue(value);
                 newProps.add(prop);
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(
-                        String.format("Failed to instantiate property from key=%s, value=%s", key, value));
+                throw new RuntimeException(String.format(
+                        "Failed to instantiate property from key=%s, value=%s", key, value));
             }
         }
         setProperties(newProps);

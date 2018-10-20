@@ -10,13 +10,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 
-
 public class CuratedAttributesWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
         private CuratedAttributesWorkflowConfiguration configuration = new CuratedAttributesWorkflowConfiguration();
-        private CuratedAccountAttributesStepConfiguration curatedAccountAttributesStepConfiguration =
-                new CuratedAccountAttributesStepConfiguration();
+        private CuratedAccountAttributesStepConfiguration curatedAccountAttributesStepConfiguration = new CuratedAccountAttributesStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -26,12 +24,13 @@ public class CuratedAttributesWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            curatedAccountAttributesStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            curatedAccountAttributesStepConfiguration
+                    .setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            //curatedAccountAttributesStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            // curatedAccountAttributesStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -50,12 +49,14 @@ public class CuratedAttributesWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
-        // TODO: Consider adding a rebuild version of the CuratedAccountAttributeStep with looks at the diff in Accounts
-        //       and contacts and only does the subset of computation required to update the table.
+        // TODO: Consider adding a rebuild version of the
+        // CuratedAccountAttributeStep with looks at the diff in Accounts
+        // and contacts and only does the subset of computation required to
+        // update the table.
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.CuratedAccount)) {
-                    // For now this is a no-op.  My step is not configurable.
+                    // For now this is a no-op. My step is not configurable.
                 }
             }
             return this;

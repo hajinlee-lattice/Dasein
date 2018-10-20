@@ -49,7 +49,8 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             deleteFileUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             startMaintenanceConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             operationExecuteConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            cleanupByUploadWrapperConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            cleanupByUploadWrapperConfiguration
+                    .setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -62,8 +63,10 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
 
         public Builder maintenanceOperationConfiguration(
                 MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
-            operationExecuteConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
-            cleanupByUploadWrapperConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
+            operationExecuteConfiguration
+                    .setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
+            cleanupByUploadWrapperConfiguration
+                    .setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
             configuration.setUserId(maintenanceOperationConfiguration.getOperationInitiator());
             return this;
         }

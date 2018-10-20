@@ -16,17 +16,17 @@ import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 public class DataCollectionProperty extends MetadataProperty<DataCollection>
         implements HasOptionAndValue, HasPid {
 
+    @ManyToOne
+    @JoinColumn(name = "FK_DATA_COLLECTION_ID", nullable = false)
+    @JsonIgnore
+    private DataCollection owner;
+
     public DataCollectionProperty() {
     }
 
     public DataCollectionProperty(String property, String value) {
         super(property, value);
     }
-
-    @ManyToOne
-    @JoinColumn(name = "FK_DATA_COLLECTION_ID", nullable = false)
-    @JsonIgnore
-    private DataCollection owner;
 
     @Override
     @JsonIgnore

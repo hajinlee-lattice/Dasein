@@ -25,53 +25,51 @@ import cascading.flow.planner.PlatformInfo;
 /**
  * Util class for version related information.
  */
-public class Version{
+public class Version {
 
-	private static final String PROPERTIES_FILE = "cascading/flink/version.properties";
+    private static final String PROPERTIES_FILE = "cascading/flink/version.properties";
 
-	private static Properties properties;
+    private static Properties properties;
 
-	static {
-			try {
-				properties = loadVersionProperties();
-			}
-			catch(IOException exception){
-				// ignore
-			}
-		}
+    static {
+        try {
+            properties = loadVersionProperties();
+        } catch (IOException exception) {
+            // ignore
+        }
+    }
 
-	public static String getPlatformVersion(){
-		return properties.getProperty("platform.version");
-	}
+    public static String getPlatformVersion() {
+        return properties.getProperty("platform.version");
+    }
 
-	public static String getPlatformName(){
-		return properties.getProperty("platform.name");
-	}
+    public static String getPlatformName() {
+        return properties.getProperty("platform.name");
+    }
 
-	public static String getPlatformVendor(){
-		return properties.getProperty("platform.vendor");
-	}
+    public static String getPlatformVendor() {
+        return properties.getProperty("platform.vendor");
+    }
 
-	public static PlatformInfo getPlatformInfo(){
-		return new PlatformInfo(getPlatformName(), getPlatformVendor(), getPlatformVersion());
-	}
+    public static PlatformInfo getPlatformInfo() {
+        return new PlatformInfo(getPlatformName(), getPlatformVendor(), getPlatformVersion());
+    }
 
-	public static Properties loadVersionProperties() throws IOException {
-		Properties properties = new Properties();
-		InputStream stream = Version.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+    public static Properties loadVersionProperties() throws IOException {
+        Properties properties = new Properties();
+        InputStream stream = Version.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
 
-		if(stream == null){
-			return properties;
-		}
+        if (stream == null) {
+            return properties;
+        }
 
-		try{
-			properties.load(stream);
-		}
-		finally {
-			stream.close();
-		}
+        try {
+            properties.load(stream);
+        } finally {
+            stream.close();
+        }
 
-		return properties;
-	}
+        return properties;
+    }
 
 }

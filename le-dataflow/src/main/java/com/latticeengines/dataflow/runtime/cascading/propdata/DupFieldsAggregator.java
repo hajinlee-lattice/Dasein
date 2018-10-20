@@ -18,12 +18,6 @@ public class DupFieldsAggregator extends BaseAggregator<DupFieldsAggregator.Cont
     private static final long serialVersionUID = -213929536672225492L;
     private List<String> fields;
 
-    public static class Context extends BaseAggregator.Context {
-        Map<String, Long> invalidDataCount = new HashMap<>();
-        long count = 0L;
-        Tuple result;
-    }
-
     public DupFieldsAggregator(Fields fieldDeclaration, List<String> fields) {
         super(fieldDeclaration);
         this.fields = fields;
@@ -75,5 +69,11 @@ public class DupFieldsAggregator extends BaseAggregator<DupFieldsAggregator.Cont
             }
         }
         return context.result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Map<String, Long> invalidDataCount = new HashMap<>();
+        long count = 0L;
+        Tuple result;
     }
 }

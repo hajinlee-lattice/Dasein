@@ -23,7 +23,8 @@ public class ExceededCountCheckFunction extends BaseOperation implements Functio
     private long thresholdCount;
     private boolean lessThanCntFlag;
 
-    public ExceededCountCheckFunction(String totalRecordsField, long thresholdCount, boolean lessThanCntFlag) {
+    public ExceededCountCheckFunction(String totalRecordsField, long thresholdCount,
+            boolean lessThanCntFlag) {
         super(generateFieldDeclaration());
         this.totalRecordsField = totalRecordsField;
         this.thresholdCount = thresholdCount;

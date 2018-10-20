@@ -19,7 +19,7 @@ public class DnBMatchContext implements Fact, Dimension {
     private String inputEmail;
 
     private String duns;
-    
+
     private String origDuns;
 
     private NameLocation matchedNameLocation;
@@ -63,7 +63,7 @@ public class DnBMatchContext implements Fact, Dimension {
     private Date responseTime;
 
     private boolean passAcceptanceCriteria;
-    
+
     private String rootOperationUid;
 
     public DnBMatchContext() {
@@ -86,7 +86,8 @@ public class DnBMatchContext implements Fact, Dimension {
         dataCloudVersion = context.getDataCloudVersion();
     }
 
-    // Used to copy bulk match result. Should not copy dataCloudVersion & dunsInAM
+    // Used to copy bulk match result. Should not copy dataCloudVersion &
+    // dunsInAM
     public void copyMatchResult(DnBMatchContext result) {
         duns = result.getDuns();
         dnbCode = result.getDnbCode();
@@ -123,7 +124,8 @@ public class DnBMatchContext implements Fact, Dimension {
     }
 
     /**
-     * Reset all the result copied from {@link DnBMatchContext#copyResultFromCache(DnBCache)} for white cache.
+     * Reset all the result copied from
+     * {@link DnBMatchContext#copyResultFromCache(DnBCache)} for white cache.
      * Noop if the result is copied from black cache
      */
     public void clearWhiteCacheResult() {
@@ -149,10 +151,6 @@ public class DnBMatchContext implements Fact, Dimension {
         return inputNameLocation;
     }
 
-    public void setInputNameLocation(NameLocation inputNameLocation) {
-        this.inputNameLocation = inputNameLocation;
-    }
-
     public void setInputNameLocation(MatchKeyTuple matchKeyTuple) {
         inputNameLocation.setName(matchKeyTuple.getName());
         inputNameLocation.setCountry(matchKeyTuple.getCountry());
@@ -161,6 +159,10 @@ public class DnBMatchContext implements Fact, Dimension {
         inputNameLocation.setCity(matchKeyTuple.getCity());
         inputNameLocation.setPhoneNumber(matchKeyTuple.getPhoneNumber());
         inputNameLocation.setZipcode(matchKeyTuple.getZipcode());
+    }
+
+    public void setInputNameLocation(NameLocation inputNameLocation) {
+        this.inputNameLocation = inputNameLocation;
     }
 
     @MetricField(name = "Email")
@@ -215,6 +217,10 @@ public class DnBMatchContext implements Fact, Dimension {
         return matchGrade;
     }
 
+    public void setMatchGrade(DnBMatchGrade matchGrade) {
+        this.matchGrade = matchGrade;
+    }
+
     public void setMatchGrade(String matchGrade) {
         if (StringUtils.isNotEmpty(matchGrade)) {
             this.matchGrade = new DnBMatchGrade(matchGrade);
@@ -222,10 +228,6 @@ public class DnBMatchContext implements Fact, Dimension {
             this.matchGrade = null;
         }
 
-    }
-
-    public void setMatchGrade(DnBMatchGrade matchGrade) {
-        this.matchGrade = matchGrade;
     }
 
     @MetricField(name = "DnbCode")

@@ -30,7 +30,8 @@ public class DiscreteProfileBuffer extends BaseOperation implements Buffer {
 
     private Map<String, Integer> namePositionMap;
 
-    public DiscreteProfileBuffer(Fields fieldDeclaration, int maxDisVals, Map<String, String> decStrs) {
+    public DiscreteProfileBuffer(Fields fieldDeclaration, int maxDisVals,
+            Map<String, String> decStrs) {
         super(fieldDeclaration);
         this.maxDisVals = maxDisVals;
         this.decStrs = decStrs;
@@ -59,9 +60,11 @@ public class DiscreteProfileBuffer extends BaseOperation implements Buffer {
         String attr = arguments.getString(KVDepivotStrategy.KEY_ATTR);
         boolean isInt = arguments.getObject(KVDepivotStrategy.valueAttr(Integer.class)) != null;
         if (isInt) {
-            insertIntDict(attr, arguments.getObject(KVDepivotStrategy.valueAttr(Integer.class)), intDict);
+            insertIntDict(attr, arguments.getObject(KVDepivotStrategy.valueAttr(Integer.class)),
+                    intDict);
         } else {
-            insertLongDict(attr, arguments.getObject(KVDepivotStrategy.valueAttr(Long.class)), longDict);
+            insertLongDict(attr, arguments.getObject(KVDepivotStrategy.valueAttr(Long.class)),
+                    longDict);
         }
         return isInt;
     }
@@ -111,13 +114,15 @@ public class DiscreteProfileBuffer extends BaseOperation implements Buffer {
         Tuple result = Tuple.size(getFieldDeclaration().size());
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME), attr);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR), attr);
-        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), decStrs.get(attr));
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT),
+                decStrs.get(attr));
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
         DiscreteBucket bucket = new DiscreteBucket();
         bucket.setValues(values);
-        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), JsonUtils.serialize(bucket));
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                JsonUtils.serialize(bucket));
         bufferCall.getOutputCollector().add(result);
     }
 

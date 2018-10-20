@@ -29,41 +29,6 @@ public class ResponseDocument<ResultType> {
         setErrors(Arrays.asList(e.getMessage()));
     }
 
-    @JsonProperty("Errors")
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    @JsonProperty("Errors")
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
-    }
-
-    @JsonProperty("Result")
-    public ResultType getResult() {
-        return result;
-    }
-
-    @JsonProperty("Result")
-    public void setResult(ResultType result) {
-        this.result = result;
-    }
-
-    @JsonProperty("Success")
-    public boolean isSuccess() {
-        return success;
-    }
-
-    @JsonProperty("Success")
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
     public static <T> ResponseDocument<T> successResponse(T t) {
         return new ResponseDocument<>(t);
     }
@@ -106,5 +71,40 @@ public class ResponseDocument<ResultType> {
         }
 
         return deserializedDoc;
+    }
+
+    @JsonProperty("Errors")
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    @JsonProperty("Errors")
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
+
+    @JsonProperty("Result")
+    public ResultType getResult() {
+        return result;
+    }
+
+    @JsonProperty("Result")
+    public void setResult(ResultType result) {
+        this.result = result;
+    }
+
+    @JsonProperty("Success")
+    public boolean isSuccess() {
+        return success;
+    }
+
+    @JsonProperty("Success")
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

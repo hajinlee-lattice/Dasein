@@ -16,41 +16,41 @@
 
 package com.dataartisans.flink.cascading.runtime.stats;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class EnumStringConverter {
 
-	public static String enumToGroup(Enum e) {
-		return e.getDeclaringClass().getName();
-	}
+    public static String enumToGroup(Enum e) {
+        return e.getDeclaringClass().getName();
+    }
 
-	/**
-	 * Convert an Enum to the counter portion of its name.
-	 *
-	 * @param e
-	 * @return
-	 */
-	public static String enumToCounter(Enum e) {
-		return e.name();
-	}
+    /**
+     * Convert an Enum to the counter portion of its name.
+     *
+     * @param e
+     * @return
+     */
+    public static String enumToCounter(Enum e) {
+        return e.name();
+    }
 
-	public static String mergeGroupCounter(String group, String counter) {
-		return group + "->" + counter;
-	}
+    public static String mergeGroupCounter(String group, String counter) {
+        return group + "->" + counter;
+    }
 
-	public static boolean accInGroup(String group, String accKey) {
-		return accKey.startsWith(group + "->");
-	}
+    public static boolean accInGroup(String group, String accKey) {
+        return accKey.startsWith(group + "->");
+    }
 
-	public static boolean accMatchesGroupCounter(String accKey, String group, String counter) {
-		return accKey.equals(group + "->" + counter);
-	}
+    public static boolean accMatchesGroupCounter(String accKey, String group, String counter) {
+        return accKey.equals(group + "->" + counter);
+    }
 
-	public static String groupCounterToGroup(String groupKey) {
-		return groupKey.split("->")[0];
-	}
+    public static String groupCounterToGroup(String groupKey) {
+        return groupKey.split("->")[0];
+    }
 
-	public static String groupCounterToCounter(String groupKey) {
-		return groupKey.split("->")[1];
-	}
+    public static String groupCounterToCounter(String groupKey) {
+        return groupKey.split("->")[1];
+    }
 
 }

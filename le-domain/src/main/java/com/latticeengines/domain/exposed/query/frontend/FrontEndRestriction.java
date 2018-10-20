@@ -17,7 +17,8 @@ public class FrontEndRestriction {
     @ApiModelProperty("This restriction can represent both simple and advanced queries.")
     private Restriction restriction;
 
-    public FrontEndRestriction() {}
+    public FrontEndRestriction() {
+    }
 
     public FrontEndRestriction(Restriction restriction) {
         setRestriction(restriction);

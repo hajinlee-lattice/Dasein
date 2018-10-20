@@ -8,22 +8,22 @@ public class SftpToHdfsRouteConfiguration extends CamelRouteConfiguration {
 
     @JsonProperty("sftp_host")
     private String sftpHost;
-    
+
     @JsonProperty("sftp_port")
     private Integer sftpPort;
 
     @JsonProperty("sftp_username")
     private String sftpUserName;
-    
+
     @JsonProperty("sftp_password")
     private String sftpPasswordEncrypted;
-    
+
     @JsonProperty("sftp_dir")
     private String sftpDir;
-    
+
     @JsonProperty("file_name")
     private String fileName;
-    
+
     @JsonProperty("hdfs_dir")
     private String hdfsDir;
 
@@ -34,7 +34,6 @@ public class SftpToHdfsRouteConfiguration extends CamelRouteConfiguration {
     public void setSftpHost(String sftpHost) {
         this.sftpHost = sftpHost;
     }
-
 
     public Integer getSftpPort() {
         return sftpPort;
@@ -64,11 +63,9 @@ public class SftpToHdfsRouteConfiguration extends CamelRouteConfiguration {
         return sftpDir;
     }
 
-    
     public void setSftpDir(String sftpDir) {
         this.sftpDir = sftpDir;
     }
-
 
     public String getFileName() {
         return fileName;
@@ -78,7 +75,6 @@ public class SftpToHdfsRouteConfiguration extends CamelRouteConfiguration {
         this.fileName = fileName;
     }
 
-    
     public String getHdfsDir() {
         return hdfsDir;
     }

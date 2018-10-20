@@ -105,7 +105,8 @@ public class AMStatsLeafFunction extends BaseOperation implements Function {
         functionCall.getOutputCollector().add(result);
     }
 
-    private void updateResult(Tuple result, Map<String, Map<String, Long>> dimensionFieldValuesMap, Fields fields) {
+    private void updateResult(Tuple result, Map<String, Map<String, Long>> dimensionFieldValuesMap,
+            Fields fields) {
         for (String dimension : dimensionDefinitionMap.keySet()) {
             Map<String, Long> dimensionValues = dimensionFieldValuesMap.get(dimension);
             Long dimensionId = dimensionValues.values().iterator().next();

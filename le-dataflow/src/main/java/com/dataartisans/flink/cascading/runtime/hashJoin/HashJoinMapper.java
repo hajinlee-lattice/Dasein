@@ -39,104 +39,104 @@ import cascading.flow.stream.element.ElementDuct;
 import cascading.pipe.Boundary;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class HashJoinMapper extends RichMapPartitionFunction<Tuple2<Tuple, Tuple[]>, Tuple> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7084677065339365352L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7084677065339365352L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(HashJoinMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HashJoinMapper.class);
 
-	private FlowNode flowNode;
-	private HashJoinMapperStreamGraph streamGraph;
-	private JoinBoundaryMapperInStage sourceStage;
-	private FlinkFlowProcess currentProcess;
+    private FlowNode flowNode;
+    private HashJoinMapperStreamGraph streamGraph;
+    private JoinBoundaryMapperInStage sourceStage;
+    private FlinkFlowProcess currentProcess;
 
-	public HashJoinMapper() {}
+    public HashJoinMapper() {
+    }
 
-	public HashJoinMapper(FlowNode flowNode) {
-		this.flowNode = flowNode;
-	}
+    public HashJoinMapper(FlowNode flowNode) {
+        this.flowNode = flowNode;
+    }
 
-	@Override
-	public void open(Configuration config) {
+    @Override
+    public void open(Configuration config) {
 
-		try {
+        try {
 
-			currentProcess = new FlinkFlowProcess(FlinkConfigConverter.toHadoopConfig(config), getRuntimeContext(), flowNode.getID());
+            currentProcess = new FlinkFlowProcess(FlinkConfigConverter.toHadoopConfig(config),
+                    getRuntimeContext(), flowNode.getID());
 
-			Set<FlowElement> sources = flowNode.getSourceElements();
-			// pick one (arbitrary) source
-			FlowElement sourceElement = sources.iterator().next();
-			if(!(sourceElement instanceof Boundary)) {
-				throw new RuntimeException("Source of HashJoinMapper must be a boundary");
-			}
+            Set<FlowElement> sources = flowNode.getSourceElements();
+            // pick one (arbitrary) source
+            FlowElement sourceElement = sources.iterator().next();
+            if (!(sourceElement instanceof Boundary)) {
+                throw new RuntimeException("Source of HashJoinMapper must be a boundary");
+            }
 
-			Boundary source = (Boundary)sourceElement;
+            Boundary source = (Boundary) sourceElement;
 
-			streamGraph = new HashJoinMapperStreamGraph( currentProcess, flowNode, source );
-			sourceStage = this.streamGraph.getSourceStage();
+            streamGraph = new HashJoinMapperStreamGraph(currentProcess, flowNode, source);
+            sourceStage = this.streamGraph.getSourceStage();
 
-			for( Duct head : streamGraph.getHeads() ) {
-				LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
-			}
+            for (Duct head : streamGraph.getHeads()) {
+                LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
+            }
 
-			for( Duct tail : streamGraph.getTails() ) {
-				LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
-			}
-		}
-		catch( Throwable throwable ) {
+            for (Duct tail : streamGraph.getTails()) {
+                LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
+            }
+        } catch (Throwable throwable) {
 
-			if( throwable instanceof CascadingException) {
-				throw (CascadingException) throwable;
-			}
+            if (throwable instanceof CascadingException) {
+                throw (CascadingException) throwable;
+            }
 
-			throw new FlowException( "internal error during HashJoinMapper configuration", throwable );
-		}
+            throw new FlowException("internal error during HashJoinMapper configuration",
+                    throwable);
+        }
 
-	}
+    }
 
-	@Override
-	public void mapPartition(Iterable<Tuple2<Tuple, Tuple[]>> input, Collector<Tuple> output) throws Exception {
+    @Override
+    public void mapPartition(Iterable<Tuple2<Tuple, Tuple[]>> input, Collector<Tuple> output)
+            throws Exception {
 
-		this.streamGraph.setTupleCollector(output);
-		streamGraph.prepare();
+        this.streamGraph.setTupleCollector(output);
+        streamGraph.prepare();
 
-		long processBeginTime = System.currentTimeMillis();
-		currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+        long processBeginTime = System.currentTimeMillis();
+        currentProcess.increment(SliceCounters.Process_Begin_Time, processBeginTime);
 
-		try {
-			try {
+        try {
+            try {
 
-				sourceStage.run( input.iterator() );
-			}
-			catch( OutOfMemoryError error ) {
-				throw error;
-			}
-			catch( IOException exception ) {
-				throw exception;
-			}
-			catch( Throwable throwable ) {
+                sourceStage.run(input.iterator());
+            } catch (OutOfMemoryError error) {
+                throw error;
+            } catch (IOException exception) {
+                throw exception;
+            } catch (Throwable throwable) {
 
-				if( throwable instanceof CascadingException ) {
-					throw (CascadingException) throwable;
-				}
+                if (throwable instanceof CascadingException) {
+                    throw (CascadingException) throwable;
+                }
 
-				throw new FlowException( "internal error during HashJoinMapper execution", throwable );
-			}
-		}
-		finally {
-			try {
-				streamGraph.cleanup();
-			}
-			finally {
-				long processEndTime = System.currentTimeMillis();
-				currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
-				currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
-			}
-		}
-	}
+                throw new FlowException("internal error during HashJoinMapper execution",
+                        throwable);
+            }
+        } finally {
+            try {
+                streamGraph.cleanup();
+            } finally {
+                long processEndTime = System.currentTimeMillis();
+                currentProcess.increment(SliceCounters.Process_End_Time, processEndTime);
+                currentProcess.increment(SliceCounters.Process_Duration,
+                        processEndTime - processBeginTime);
+            }
+        }
+    }
 
 }

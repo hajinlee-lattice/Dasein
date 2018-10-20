@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface DynamoHashKey {
     String name();
+
     String field() default "";
 }
-

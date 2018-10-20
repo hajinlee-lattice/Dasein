@@ -39,108 +39,105 @@ import cascading.flow.stream.element.ElementDuct;
 import cascading.pipe.Boundary;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class EachMapper extends RichMapPartitionFunction<Tuple, Tuple> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5890532680559713703L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5890532680559713703L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(EachMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EachMapper.class);
 
-	private FlowNode flowNode;
-	private EachStreamGraph streamGraph;
-	private BoundaryInStage sourceStage;
-	private FlinkFlowProcess currentProcess;
+    private FlowNode flowNode;
+    private EachStreamGraph streamGraph;
+    private BoundaryInStage sourceStage;
+    private FlinkFlowProcess currentProcess;
 
-	public EachMapper() {}
+    public EachMapper() {
+    }
 
-	public EachMapper(FlowNode flowNode) {
-		this.flowNode = flowNode;
-	}
+    public EachMapper(FlowNode flowNode) {
+        this.flowNode = flowNode;
+    }
 
-	@Override
-	public void open(Configuration config) {
+    @Override
+    public void open(Configuration config) {
 
-		try {
+        try {
 
-			currentProcess = new FlinkFlowProcess(FlinkConfigConverter.toHadoopConfig(config), getRuntimeContext(), flowNode.getID());
+            currentProcess = new FlinkFlowProcess(FlinkConfigConverter.toHadoopConfig(config),
+                    getRuntimeContext(), flowNode.getID());
 
-			Set<FlowElement> sources = flowNode.getSourceElements();
-			if(sources.size() != 1) {
-				throw new RuntimeException("FlowNode for EachMapper may only have a single source");
-			}
+            Set<FlowElement> sources = flowNode.getSourceElements();
+            if (sources.size() != 1) {
+                throw new RuntimeException("FlowNode for EachMapper may only have a single source");
+            }
 
-			FlowElement sourceElement = sources.iterator().next();
-			if(!(sourceElement instanceof Boundary)) {
-				throw new RuntimeException("Source of EachMapper must be a single Boundary");
-			}
+            FlowElement sourceElement = sources.iterator().next();
+            if (!(sourceElement instanceof Boundary)) {
+                throw new RuntimeException("Source of EachMapper must be a single Boundary");
+            }
 
-			Boundary source = (Boundary)sourceElement;
+            Boundary source = (Boundary) sourceElement;
 
-			streamGraph = new EachStreamGraph( currentProcess, flowNode, source );
-			sourceStage = this.streamGraph.getSourceStage();
+            streamGraph = new EachStreamGraph(currentProcess, flowNode, source);
+            sourceStage = this.streamGraph.getSourceStage();
 
-			for( Duct head : streamGraph.getHeads() ) {
-				LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
-			}
+            for (Duct head : streamGraph.getHeads()) {
+                LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
+            }
 
-			for( Duct tail : streamGraph.getTails() ) {
-				LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
-			}
+            for (Duct tail : streamGraph.getTails()) {
+                LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
+            }
 
-		}
-		catch( Throwable throwable ) {
+        } catch (Throwable throwable) {
 
-			if( throwable instanceof CascadingException) {
-				throw (CascadingException) throwable;
-			}
+            if (throwable instanceof CascadingException) {
+                throw (CascadingException) throwable;
+            }
 
-			throw new FlowException( "internal error during EachMapper configuration", throwable );
-		}
-	}
+            throw new FlowException("internal error during EachMapper configuration", throwable);
+        }
+    }
 
-	@Override
-	public void mapPartition(Iterable<Tuple> input, Collector<Tuple> output) throws Exception {
+    @Override
+    public void mapPartition(Iterable<Tuple> input, Collector<Tuple> output) throws Exception {
 
-		this.streamGraph.setTupleCollector(output);
-		streamGraph.prepare();
+        this.streamGraph.setTupleCollector(output);
+        streamGraph.prepare();
 
-		long processBeginTime = System.currentTimeMillis();
+        long processBeginTime = System.currentTimeMillis();
 
-		currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+        currentProcess.increment(SliceCounters.Process_Begin_Time, processBeginTime);
 
-		try {
-			try {
-				sourceStage.run( input.iterator() );
-			}
-			catch( OutOfMemoryError error ) {
-				throw error;
-			}
-			catch( IOException exception ) {
-				throw exception;
-			}
-			catch( Throwable throwable ) {
+        try {
+            try {
+                sourceStage.run(input.iterator());
+            } catch (OutOfMemoryError error) {
+                throw error;
+            } catch (IOException exception) {
+                throw exception;
+            } catch (Throwable throwable) {
 
-				if( throwable instanceof CascadingException ) {
-					throw (CascadingException) throwable;
-				}
+                if (throwable instanceof CascadingException) {
+                    throw (CascadingException) throwable;
+                }
 
-				throw new FlowException( "internal error during EachMapper execution", throwable );
-			}
-		}
-		finally {
-			try {
-				streamGraph.cleanup();
-			}
-			finally {
-				long processEndTime = System.currentTimeMillis();
+                throw new FlowException("internal error during EachMapper execution", throwable);
+            }
+        } finally {
+            try {
+                streamGraph.cleanup();
+            } finally {
+                long processEndTime = System.currentTimeMillis();
 
-				currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
-				currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
-			}
-		}
-	}
+                currentProcess.increment(SliceCounters.Process_End_Time, processEndTime);
+                currentProcess.increment(SliceCounters.Process_Duration,
+                        processEndTime - processBeginTime);
+            }
+        }
+    }
 
 }

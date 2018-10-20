@@ -22,10 +22,21 @@ public class CompreCntVersionsrDomOnlyChkFunction extends BaseOperation implemen
     private String prevVersCountField;
     private String currVersCountField;
 
-    public CompreCntVersionsrDomOnlyChkFunction(String prevVersCountField, String currVersCountField) {
+    public CompreCntVersionsrDomOnlyChkFunction(String prevVersCountField,
+            String currVersCountField) {
         super(generateFieldDeclaration());
         this.prevVersCountField = prevVersCountField;
         this.currVersCountField = currVersCountField;
+    }
+
+    private static Fields generateFieldDeclaration() {
+        return new Fields( //
+                DataCloudConstants.CHK_ATTR_CHK_CODE, //
+                DataCloudConstants.CHK_ATTR_ROW_ID, //
+                DataCloudConstants.CHK_ATTR_GROUP_ID, //
+                DataCloudConstants.CHK_ATTR_CHK_FIELD, //
+                DataCloudConstants.CHK_ATTR_CHK_VALUE, //
+                DataCloudConstants.CHK_ATTR_CHK_MSG);
     }
 
     @Override
@@ -33,8 +44,10 @@ public class CompreCntVersionsrDomOnlyChkFunction extends BaseOperation implemen
         TupleEntry arguments = functionCall.getArguments();
         Tuple result = Tuple.size(getFieldDeclaration().size());
         try {
-            int prevVersionCount = Integer.parseInt(arguments.getObject(prevVersCountField).toString());
-            int currVersionCount = Integer.parseInt(arguments.getObject(currVersCountField).toString());
+            int prevVersionCount = Integer
+                    .parseInt(arguments.getObject(prevVersCountField).toString());
+            int currVersionCount = Integer
+                    .parseInt(arguments.getObject(currVersCountField).toString());
             if (currVersionCount > prevVersionCount) {
                 double avgOfVersions = (prevVersionCount + currVersionCount) / 2.0;
                 int diffCount = (currVersionCount - prevVersionCount);
@@ -46,24 +59,13 @@ public class CompreCntVersionsrDomOnlyChkFunction extends BaseOperation implemen
                 // check value
                 result.set(4, String.format("%.2f", percentDiff));
                 // check message
-                result.set(5, CheckCode.ExceededVersionDiffForDomOnly.getMessage(String.format("%.2f", percentDiff),
-                        prevVersionCount,
-                        currVersionCount));
+                result.set(5, CheckCode.ExceededVersionDiffForDomOnly.getMessage(
+                        String.format("%.2f", percentDiff), prevVersionCount, currVersionCount));
                 functionCall.getOutputCollector().add(result);
             }
         } catch (Exception e) {
             log.info("Exception raised due to : " + e);
         }
-    }
-
-    private static Fields generateFieldDeclaration() {
-        return new Fields( //
-                DataCloudConstants.CHK_ATTR_CHK_CODE, //
-                DataCloudConstants.CHK_ATTR_ROW_ID, //
-                DataCloudConstants.CHK_ATTR_GROUP_ID, //
-                DataCloudConstants.CHK_ATTR_CHK_FIELD, //
-                DataCloudConstants.CHK_ATTR_CHK_VALUE, //
-                DataCloudConstants.CHK_ATTR_CHK_MSG);
     }
 
 }

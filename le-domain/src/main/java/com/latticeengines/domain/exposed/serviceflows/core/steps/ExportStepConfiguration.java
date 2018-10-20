@@ -56,12 +56,12 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
         return properties;
     }
 
-    public String getProperty(String key) {
-        return properties.get(key);
-    }
-
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    public String getProperty(String key) {
+        return properties.get(key);
     }
 
     public void putProperty(String property, String value) {

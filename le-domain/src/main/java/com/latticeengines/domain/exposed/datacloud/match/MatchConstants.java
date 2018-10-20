@@ -64,18 +64,18 @@ public final class MatchConstants {
     public static final String INT_MATCHED_ZIPCODE = "__Matched_Zipcode__";
     public static final String INT_MATCHED_PHONE = "__Matched_Phone__";
 
-    public static final List<String> matchDebugFields = Arrays.asList(INT_MATCHED_DUNS, INT_MATCHED_ORIG_DUNS, INT_MATCHED_CONFIDENCE_CODE,
-            INT_MATCHED_MATCH_GRADE, INT_MATCHED_CACHE_HIT, INT_MATCHED_PASS_AC, INT_MATCHED_NAME, INT_MATCHED_ADDRESS, INT_MATCHED_CITY,
-            INT_MATCHED_STATE, INT_MATCHED_COUNTRY_CODE, INT_MATCHED_ZIPCODE, INT_MATCHED_PHONE);
-
-    static final String MODEL = Predefined.Model.getName();
-    static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();
-    static final String RTS = Predefined.RTS.getName();
-
+    public static final List<String> matchDebugFields = Arrays.asList(INT_MATCHED_DUNS,
+            INT_MATCHED_ORIG_DUNS, INT_MATCHED_CONFIDENCE_CODE, INT_MATCHED_MATCH_GRADE,
+            INT_MATCHED_CACHE_HIT, INT_MATCHED_PASS_AC, INT_MATCHED_NAME, INT_MATCHED_ADDRESS,
+            INT_MATCHED_CITY, INT_MATCHED_STATE, INT_MATCHED_COUNTRY_CODE, INT_MATCHED_ZIPCODE,
+            INT_MATCHED_PHONE);
     // For MatchMonitorService
     public static final String REQUEST_NUM = "RequestNum";
     public static final String BATCH_NUM = "BatchNum";
     public static final String ADDRESS_NUM = "AddressNum";
     public static final String ACTIVE_REQ_NUM = "ActiveRequestNum";
     public static final String QUEUED_REQ_NUM = "QueuedRequestNum";
+    static final String MODEL = Predefined.Model.getName();
+    static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();
+    static final String RTS = Predefined.RTS.getName();
 }

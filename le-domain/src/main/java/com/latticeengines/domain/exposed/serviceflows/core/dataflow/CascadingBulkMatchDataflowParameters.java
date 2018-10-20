@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.datacloud.dataflow.DecodedPair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DecodedPair;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -20,21 +20,17 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
     @SourceTableName
     @NotEmptyString
     @NotNull
-    private String inputAvro;
-
+    public String accountMasterLookup;
+    @SourceTableName
+    public String publicDomainPath;
     @SourceTableName
     @NotEmptyString
     @NotNull
-    public String accountMasterLookup;
-
+    private String inputAvro;
     @SourceTableName
     @NotEmptyString
     @NotNull
     private String accountMaster;
-
-    @SourceTableName
-    public String publicDomainPath;
-
     @NotNull
     private String outputSchemaPath;
 
@@ -111,18 +107,13 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
     }
 
     @JsonProperty("output_schema")
-    public void setOutputSchemaPath(String outputSchemaPath) {
-        this.outputSchemaPath = outputSchemaPath;
-    }
-
-    @JsonProperty("output_schema")
     public String getOutputSchemaPath() {
         return this.outputSchemaPath;
     }
 
-    @JsonProperty("public_domain")
-    public void setPublicDomainPath(String publicDomainPath) {
-        this.publicDomainPath = publicDomainPath;
+    @JsonProperty("output_schema")
+    public void setOutputSchemaPath(String outputSchemaPath) {
+        this.outputSchemaPath = outputSchemaPath;
     }
 
     @JsonProperty("public_domain")
@@ -130,14 +121,19 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
         return this.publicDomainPath;
     }
 
-    @JsonProperty("key_map")
-    public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
-        this.keyMap = keyMap;
+    @JsonProperty("public_domain")
+    public void setPublicDomainPath(String publicDomainPath) {
+        this.publicDomainPath = publicDomainPath;
     }
 
     @JsonProperty("key_map")
     public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
+    }
+
+    @JsonProperty("key_map")
+    public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
+        this.keyMap = keyMap;
     }
 
     @JsonProperty("decoded_parameters")
@@ -150,12 +146,14 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
         this.decodedParameters = decodedParameters;
     }
 
-    public void wrapDecodedParameters(Map<String, Pair<BitCodeBook, List<String>>> decodedParameters) {
+    public void wrapDecodedParameters(
+            Map<String, Pair<BitCodeBook, List<String>>> decodedParameters) {
         if (decodedParameters != null) {
             this.decodedParameters = new HashMap<String, DecodedPair>();
-            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : decodedParameters.entrySet()) {
-                this.decodedParameters.put(entry.getKey(), new DecodedPair(entry.getValue().getLeft(), entry
-                        .getValue().getRight()));
+            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : decodedParameters
+                    .entrySet()) {
+                this.decodedParameters.put(entry.getKey(),
+                        new DecodedPair(entry.getValue().getLeft(), entry.getValue().getRight()));
             }
         }
     }

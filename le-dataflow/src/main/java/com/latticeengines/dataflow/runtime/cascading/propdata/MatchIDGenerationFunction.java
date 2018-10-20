@@ -40,7 +40,8 @@ public class MatchIDGenerationFunction extends BaseOperation implements Function
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String parsedDomain = parsedDomainFieldName != null ? arguments.getString(parsedDomainFieldName) : "NULL";
+        String parsedDomain = parsedDomainFieldName != null
+                ? arguments.getString(parsedDomainFieldName) : "NULL";
         String duns = dunsFieldName != null ? arguments.getString(dunsFieldName) : "NULL";
         String matchId = AccountLookupEntry.buildId(parsedDomain, duns);
         Tuple tuple = new Tuple(matchId);

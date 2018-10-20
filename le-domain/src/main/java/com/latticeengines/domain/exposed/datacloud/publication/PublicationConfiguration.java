@@ -11,17 +11,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PublishToSqlConfiguration.class, name = "PublishToSqlConfiguration"),
         @JsonSubTypes.Type(value = PublishTextToSqlConfiguration.class, name = "PublishTextToSqlConfiguration"),
-        @JsonSubTypes.Type(value = PublishToDynamoConfiguration.class, name = "PublishToDynamoConfiguration")
-})
+        @JsonSubTypes.Type(value = PublishToDynamoConfiguration.class, name = "PublishToDynamoConfiguration") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class PublicationConfiguration {
 
-    @JsonProperty("SourceName")
-    private String sourceName;
-
     @JsonProperty("Destination")
     protected PublicationDestination destination;
-
+    @JsonProperty("SourceName")
+    private String sourceName;
     @JsonProperty("Strategy")
     private PublicationStrategy publicationStrategy;
 

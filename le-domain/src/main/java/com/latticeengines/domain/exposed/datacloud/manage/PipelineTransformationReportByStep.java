@@ -17,7 +17,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "PipelineTransformationReport", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "Pipeline", "Version", "StepName" }) })
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "Pipeline", "Version", "StepName" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
 public class PipelineTransformationReportByStep implements HasPid {

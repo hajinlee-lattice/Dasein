@@ -6,11 +6,6 @@ public class ExpressionTemplateUtils {
 
     private static String currentDate = "GETDATE()";
 
-    @VisibleForTesting
-    public static void setCurrentDate(String currentDate) {
-        ExpressionTemplateUtils.currentDate = currentDate;
-    }
-
     public static String strAttrToDate(String attrName) {
         return String.format("TO_DATE(%s, %s)", attrName, "'YYYY-MM-DD'");
     }
@@ -20,10 +15,16 @@ public class ExpressionTemplateUtils {
     }
 
     public static String getDateTargetValueOnPeriodTemplate(String p, int unit, String baseDate) {
-        return String.format("DATEADD('%s', %d, %s)", p, unit, getDateOnPeriodTemplate(p, baseDate));
+        return String.format("DATEADD('%s', %d, %s)", p, unit,
+                getDateOnPeriodTemplate(p, baseDate));
     }
 
     public static String getCurrentDate() {
         return currentDate;
+    }
+
+    @VisibleForTesting
+    public static void setCurrentDate(String currentDate) {
+        ExpressionTemplateUtils.currentDate = currentDate;
     }
 }

@@ -5,8 +5,7 @@ public enum SourceType {
     MARKETO("Marketo", true), //
     ELOQUA("Eloqua", true), //
     SALESFORCE("Salesforce", true), //
-    FILE("File", false),
-    VISIDB("VisiDB", true);
+    FILE("File", false), VISIDB("VisiDB", true);
 
     private String name;
     private boolean willSubmitEaiJob;
@@ -16,16 +15,16 @@ public enum SourceType {
         this.willSubmitEaiJob = willSubmitEaiJob;
     }
 
+    public static SourceType getByName(String sourceName) {
+        return SourceType.valueOf(sourceName.toUpperCase());
+    }
+
     public String getName() {
         return name;
     }
 
     public boolean willSubmitEaiJob() {
         return willSubmitEaiJob;
-    }
-
-    public static SourceType getByName(String sourceName) {
-        return SourceType.valueOf(sourceName.toUpperCase());
     }
 
 }

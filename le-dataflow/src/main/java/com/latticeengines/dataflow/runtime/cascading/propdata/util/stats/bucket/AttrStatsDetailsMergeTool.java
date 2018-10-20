@@ -5,6 +5,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 public interface AttrStatsDetailsMergeTool {
 
     AttributeStats merge(AttributeStats firstStatsDetails, AttributeStats secondStatsDetails,
-                         boolean printTop);
+            boolean printTop);
 
 }

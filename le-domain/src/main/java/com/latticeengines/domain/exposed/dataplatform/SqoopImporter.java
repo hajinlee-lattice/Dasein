@@ -24,17 +24,13 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SqoopImporter {
 
-    private static List<String> defaultHadoopArgs = Arrays.asList(
-            "-Dmapreduce.task.timeout=600000", //
+    private static List<String> defaultHadoopArgs = Arrays.asList("-Dmapreduce.task.timeout=600000", //
             "-Dmapreduce.job.running.map.limit=32", //
-            "-Dmapreduce.tasktracker.map.tasks.maximum=32"
-    );
+            "-Dmapreduce.tasktracker.map.tasks.maximum=32");
 
-    private static List<String> defaultOptions = Arrays.asList(
-            "--relaxed-isolation", //
+    private static List<String> defaultOptions = Arrays.asList("--relaxed-isolation", //
             "--as-avrodatafile", //
-            "--compress"
-    );
+            "--compress");
 
     private static DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
 
@@ -212,7 +208,12 @@ public class SqoopImporter {
     }
 
     public String fullJobName() {
-        return StringUtils.join(Arrays.asList(getCustomer(), "sqoop-import", dateTimeFormatter.print(new DateTime())), "-");
+        return StringUtils.join(Arrays.asList(getCustomer(), "sqoop-import",
+                dateTimeFormatter.print(new DateTime())), "-");
+    }
+
+    public enum Mode {
+        TABLE, QUERY
     }
 
     public static class Builder {
@@ -234,7 +235,7 @@ public class SqoopImporter {
 
         public SqoopImporter build() {
             validate();
-            SqoopImporter importer =  new SqoopImporter();
+            SqoopImporter importer = new SqoopImporter();
             importer.setMode(mode);
             importer.setTable(this.table);
             importer.setTargetDir(this.targetDir);
@@ -250,13 +251,13 @@ public class SqoopImporter {
 
             Set<String> hadoopArgKeys = new HashSet<>();
             List<String> hadoopArgs = new ArrayList<>(importer.getHadoopArgs());
-            for (String arg: hadoopArgs) {
+            for (String arg : hadoopArgs) {
                 if (arg.contains("=")) {
                     hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
                 }
             }
 
-            for (String arg: this.hadoopArgs) {
+            for (String arg : this.hadoopArgs) {
                 String key = arg.substring(0, arg.indexOf("="));
                 if (!hadoopArgKeys.contains(key)) {
                     hadoopArgKeys.add(key);
@@ -264,7 +265,7 @@ public class SqoopImporter {
                 }
             }
 
-            for (String arg: defaultHadoopArgs) {
+            for (String arg : defaultHadoopArgs) {
                 String defaultKey = arg.substring(0, arg.indexOf("="));
                 if (!hadoopArgKeys.contains(defaultKey)) {
                     hadoopArgKeys.add(defaultKey);
@@ -350,7 +351,8 @@ public class SqoopImporter {
 
         private void validate() {
             if (Mode.TABLE.equals(this.mode) && StringUtils.isEmpty(this.table)) {
-                throw new IllegalStateException("Table name not provided when importing in TABLE mode.");
+                throw new IllegalStateException(
+                        "Table name not provided when importing in TABLE mode.");
             }
 
             if (Mode.QUERY.equals(this.mode) && StringUtils.isEmpty(this.query)) {
@@ -358,12 +360,11 @@ public class SqoopImporter {
             }
 
             if (StringUtils.isEmpty(splitColumn) && this.numMappers > 1) {
-                throw new IllegalStateException("Split column is not specified while requesting more than 1 mappers.");
+                throw new IllegalStateException(
+                        "Split column is not specified while requesting more than 1 mappers.");
             }
 
         }
     }
-
-    public enum Mode { TABLE, QUERY }
 
 }

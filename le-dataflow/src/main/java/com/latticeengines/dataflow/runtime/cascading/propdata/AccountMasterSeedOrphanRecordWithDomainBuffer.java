@@ -17,7 +17,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "unused" })
 public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation implements Buffer {
-    private static final Logger log = LoggerFactory.getLogger(AccountMasterSeedOrphanRecordWithDomainBuffer.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(AccountMasterSeedOrphanRecordWithDomainBuffer.class);
 
     private static final long serialVersionUID = 4217950767704131475L;
 

@@ -71,22 +71,22 @@ public class FrontEndResponse<T> {
         }
 
         @SuppressWarnings("unused")
-		public String getKey() {
+        public String getKey() {
             return key;
         }
 
         @SuppressWarnings("unused")
-		public void setKey(String key) {
+        public void setKey(String key) {
             this.key = key;
         }
 
         @SuppressWarnings("unused")
-		public String getValue() {
+        public String getValue() {
             return value;
         }
 
         @SuppressWarnings("unused")
-		public void setValue(String value) {
+        public void setValue(String value) {
             this.value = value;
         }
 

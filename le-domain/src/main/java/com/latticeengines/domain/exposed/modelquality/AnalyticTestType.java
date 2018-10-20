@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.modelquality;
 
 public enum AnalyticTestType {
-    Production,
-    SelectedPipelines;
+    Production, SelectedPipelines;
 }

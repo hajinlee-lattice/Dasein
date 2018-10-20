@@ -9,12 +9,12 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 // DnBMatchGrade with length = 7 does not contain zipcode
 public class DnBMatchGrade implements Fact {
 
-    private final String rawCode;
     private static final int NAME_BIT = 0;
     private static final int CITY_BIT = 3;
     private static final int STATE_BIT = 4;
     private static final int PHONE_BIT = 6;
     private static final int ZIPCODE_BIT = 7;
+    private final String rawCode;
 
     public DnBMatchGrade(String rawCode) {
         this.rawCode = rawCode;

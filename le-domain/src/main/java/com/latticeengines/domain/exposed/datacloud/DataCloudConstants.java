@@ -6,7 +6,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 public final class DataCloudConstants {
 
     public static final String SERVICE_TENANT = "DataCloudService";
-    public static final String SERVICE_CUSTOMERSPACE = CustomerSpace.parse(SERVICE_TENANT).toString();
+    public static final String SERVICE_CUSTOMERSPACE = CustomerSpace.parse(SERVICE_TENANT)
+            .toString();
 
     public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
     public static final String ACCOUNT_MASTER = "AccountMaster";

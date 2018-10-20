@@ -108,6 +108,10 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
         return imports;
     }
 
+    public void setImports(List<DataFeedImport> imports) {
+        this.imports = imports;
+    }
+
     public void addImport(DataFeedImport feedImport) {
         feedImport.setExecution(this);
         imports.add(feedImport);
@@ -115,10 +119,6 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
 
     public void addImports(List<DataFeedImport> imports) {
         imports.forEach(this::addImport);
-    }
-
-    public void setImports(List<DataFeedImport> imports) {
-        this.imports = imports;
     }
 
     public Status getStatus() {
@@ -185,7 +185,6 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
         Completed("completed"), //
         Failed("failed");
 
-        private final String name;
         private static Map<String, Status> nameMap;
 
         static {
@@ -195,16 +194,10 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
             }
         }
 
+        private final String name;
+
         Status(String name) {
             this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public String toString() {
-            return this.name;
         }
 
         public static Status fromName(String name) {
@@ -214,8 +207,17 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
             if (nameMap.containsKey(name)) {
                 return nameMap.get(name);
             } else {
-                throw new IllegalArgumentException("Cannot find a data feed excution status with name " + name);
+                throw new IllegalArgumentException(
+                        "Cannot find a data feed excution status with name " + name);
             }
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String toString() {
+            return this.name;
         }
     }
 }

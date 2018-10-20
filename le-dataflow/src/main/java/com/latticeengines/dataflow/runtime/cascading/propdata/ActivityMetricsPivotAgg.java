@@ -31,11 +31,6 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
         this.metricsFields = metricsFields;
     }
 
-    public static class Context extends BaseAggregator.Context {
-        Map<String, Object> pivotData;
-        Object groupByVal;
-    }
-
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
         return group.getObject(groupByField) == null;
@@ -53,7 +48,8 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
     protected Context updateContext(Context context, TupleEntry arguments) {
         Object pivotValue = arguments.getObject(pivotField);
         for (String metrics : metricsFields) {
-            context.pivotData.put(ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotValue)),
+            context.pivotData.put(
+                    ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotValue)),
                     arguments.getObject(metrics));
         }
         return context;
@@ -70,5 +66,10 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
             });
         });
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Map<String, Object> pivotData;
+        Object groupByVal;
     }
 }

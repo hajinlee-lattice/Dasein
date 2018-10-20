@@ -70,8 +70,10 @@ public class CsvToAvroFieldMappingImpl implements CsvToAvroFieldMapping, Seriali
         fieldTuples = new ArrayList<>();
         for (SourceColumn column : columns) {
             if (column.getCalculation() == Calculation.COLUMN_NAME_MAPPING) {
-                Coerce<?> fieldType = ColumnTypeConverter.getCoercionFromTypeName(column.getColumnType());
-                fieldTuples.add(new FieldTuple(column.getArguments(), column.getColumnName(), fieldType));
+                Coerce<?> fieldType = ColumnTypeConverter
+                        .getCoercionFromTypeName(column.getColumnType());
+                fieldTuples.add(
+                        new FieldTuple(column.getArguments(), column.getColumnName(), fieldType));
             }
 
         }
@@ -96,24 +98,29 @@ public class CsvToAvroFieldMappingImpl implements CsvToAvroFieldMapping, Seriali
     private Schema generateSchema() {
         StringBuilder avroSchemaBuilder = new StringBuilder();
         String sourceName = columns.get(0).getSourceName();
-        avroSchemaBuilder.append(LEFT_CURLY_BRACKET).append(DOUBLE_QUOTE).append(DOC_STR).append(DOUBLE_QUOTE)
-                .append(COLON).append(DOUBLE_QUOTE).append(SCHEMA_DOC_STR).append(sourceName).append(DOUBLE_QUOTE)
-                .append(COMMA).append(DOUBLE_QUOTE).append(TABLE_NAME_STR).append(DOUBLE_QUOTE).append(COLON)
-                .append(DOUBLE_QUOTE).append(sourceName).append(DOUBLE_QUOTE).append(COMMA).append(DOUBLE_QUOTE)
-                .append(TYPE_STR).append(DOUBLE_QUOTE).append(COLON).append(DOUBLE_QUOTE).append(RECORD_STR)
-                .append(DOUBLE_QUOTE).append(COMMA).append(DOUBLE_QUOTE).append(NAME_STR).append(DOUBLE_QUOTE)
-                .append(COLON).append(DOUBLE_QUOTE).append(sourceName).append(DOUBLE_QUOTE).append(COMMA)
-                .append(DOUBLE_QUOTE).append(FIELDS_STR).append(DOUBLE_QUOTE).append(COLON).append(LEFT_BRACKET);
+        avroSchemaBuilder.append(LEFT_CURLY_BRACKET).append(DOUBLE_QUOTE).append(DOC_STR)
+                .append(DOUBLE_QUOTE).append(COLON).append(DOUBLE_QUOTE).append(SCHEMA_DOC_STR)
+                .append(sourceName).append(DOUBLE_QUOTE).append(COMMA).append(DOUBLE_QUOTE)
+                .append(TABLE_NAME_STR).append(DOUBLE_QUOTE).append(COLON).append(DOUBLE_QUOTE)
+                .append(sourceName).append(DOUBLE_QUOTE).append(COMMA).append(DOUBLE_QUOTE)
+                .append(TYPE_STR).append(DOUBLE_QUOTE).append(COLON).append(DOUBLE_QUOTE)
+                .append(RECORD_STR).append(DOUBLE_QUOTE).append(COMMA).append(DOUBLE_QUOTE)
+                .append(NAME_STR).append(DOUBLE_QUOTE).append(COLON).append(DOUBLE_QUOTE)
+                .append(sourceName).append(DOUBLE_QUOTE).append(COMMA).append(DOUBLE_QUOTE)
+                .append(FIELDS_STR).append(DOUBLE_QUOTE).append(COLON).append(LEFT_BRACKET);
 
         int idx = 0;
         for (SourceColumn column : columns) {
-            String avroType = ColumnTypeConverter.getAvroTypeNameFromCoercion(getFieldType(column.getArguments()));
-            avroSchemaBuilder.append(LEFT_CURLY_BRACKET).append(DOUBLE_QUOTE).append(NAME_STR).append(DOUBLE_QUOTE)
-                    .append(COLON).append(DOUBLE_QUOTE).append(column.getColumnName()).append(DOUBLE_QUOTE)
-                    .append(COMMA).append(DOUBLE_QUOTE).append(TYPE_STR).append(DOUBLE_QUOTE).append(COLON)
-                    .append(LEFT_BRACKET).append(DOUBLE_QUOTE).append(NULL_STR).append(DOUBLE_QUOTE).append(COMMA)
-                    .append(DOUBLE_QUOTE).append(avroType).append(DOUBLE_QUOTE).append(RIGHT_BRACKET).append(COMMA)
-                    .append(DOUBLE_QUOTE).append(DEFAULT_STR).append(DOUBLE_QUOTE).append(COLON).append(NULL_STR)
+            String avroType = ColumnTypeConverter
+                    .getAvroTypeNameFromCoercion(getFieldType(column.getArguments()));
+            avroSchemaBuilder.append(LEFT_CURLY_BRACKET).append(DOUBLE_QUOTE).append(NAME_STR)
+                    .append(DOUBLE_QUOTE).append(COLON).append(DOUBLE_QUOTE)
+                    .append(column.getColumnName()).append(DOUBLE_QUOTE).append(COMMA)
+                    .append(DOUBLE_QUOTE).append(TYPE_STR).append(DOUBLE_QUOTE).append(COLON)
+                    .append(LEFT_BRACKET).append(DOUBLE_QUOTE).append(NULL_STR).append(DOUBLE_QUOTE)
+                    .append(COMMA).append(DOUBLE_QUOTE).append(avroType).append(DOUBLE_QUOTE)
+                    .append(RIGHT_BRACKET).append(COMMA).append(DOUBLE_QUOTE).append(DEFAULT_STR)
+                    .append(DOUBLE_QUOTE).append(COLON).append(NULL_STR)
                     .append(RIGHT_CURLY_BRACKET);
             if (++idx < columns.size()) {
                 avroSchemaBuilder.append(COMMA);

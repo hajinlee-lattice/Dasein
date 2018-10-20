@@ -29,25 +29,22 @@ import cascading.pipe.GroupBy;
 /**
  * Removes Boundaries in front of GroupBys
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class BoundaryBeforeGroupByRemovalTransformer extends RuleReplaceTransformer {
 
-	public BoundaryBeforeGroupByRemovalTransformer() {
-		super(PlanPhase.PostResolveAssembly, new BoundaryGroupByMatcher());
-	}
+    public BoundaryBeforeGroupByRemovalTransformer() {
+        super(PlanPhase.PostResolveAssembly, new BoundaryGroupByMatcher());
+    }
 
-	public static class BoundaryGroupByMatcher extends RuleExpression {
+    public static class BoundaryGroupByMatcher extends RuleExpression {
 
-		public BoundaryGroupByMatcher() {
-			super(
-					(new ExpressionGraph()).
-							arc(
-									new TypeExpression(ElementCapture.Primary, Boundary.class, TypeExpression.Topo.LinearOut),
-									ScopeExpression.ALL,
-									new TypeExpression(ElementCapture.Secondary, GroupBy.class, TypeExpression.Topo.LinearIn)
-					)
-			);
-		}
-	}
+        public BoundaryGroupByMatcher() {
+            super((new ExpressionGraph()).arc(
+                    new TypeExpression(ElementCapture.Primary, Boundary.class,
+                            TypeExpression.Topo.LinearOut),
+                    ScopeExpression.ALL, new TypeExpression(ElementCapture.Secondary, GroupBy.class,
+                            TypeExpression.Topo.LinearIn)));
+        }
+    }
 
 }

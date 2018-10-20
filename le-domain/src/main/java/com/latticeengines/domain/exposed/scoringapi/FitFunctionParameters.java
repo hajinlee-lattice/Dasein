@@ -29,7 +29,8 @@ public class FitFunctionParameters implements Serializable {
     public FitFunctionParameters() {
     }
 
-    public FitFunctionParameters(double alpha, double beta, double gamma, double maxRate, String version) {
+    public FitFunctionParameters(double alpha, double beta, double gamma, double maxRate,
+            String version) {
         this.alpha = alpha;
         this.beta = beta;
         this.gamma = gamma;

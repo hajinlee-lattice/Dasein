@@ -29,7 +29,8 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
         return redshiftTableConfiguration;
     }
 
-    public void setRedshiftTableConfiguration(RedshiftTableConfiguration redshiftTableConfiguration) {
+    public void setRedshiftTableConfiguration(
+            RedshiftTableConfiguration redshiftTableConfiguration) {
         this.redshiftTableConfiguration = redshiftTableConfiguration;
     }
 

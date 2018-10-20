@@ -31,7 +31,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_SAMPLING", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_SAMPLING", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
@@ -47,7 +48,7 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
 
     @Column(name = "PARALLEL_ENABLED", nullable = false)
     private boolean parallelEnabled = false;
-    
+
     @JsonIgnore
     @Column(name = "VERSION")
     private Integer version;
@@ -86,10 +87,10 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
         this.pid = pid;
     }
 
-    	public boolean isParallelEnabled() {
+    public boolean isParallelEnabled() {
         return parallelEnabled;
     }
-	
+
     public void setParallelEnabled(boolean parallelEnabled) {
         this.parallelEnabled = parallelEnabled;
     }
@@ -99,7 +100,7 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
     public String getParallelEnabledStringValue() {
         return String.valueOf(parallelEnabled);
     }
-    
+
     @Override
     public Integer getVersion() {
         return version;

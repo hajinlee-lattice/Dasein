@@ -68,7 +68,8 @@ public class ScoringCommandState extends AbstractTimestampEntity implements HasP
         super();
     }
 
-    public ScoringCommandState(ScoringCommand scoringCommand, ScoringCommandStep scoringCommandStep) {
+    public ScoringCommandState(ScoringCommand scoringCommand,
+            ScoringCommandStep scoringCommandStep) {
         super();
         this.scoringCommand = scoringCommand;
         this.scoringCommandStep = scoringCommandStep;
@@ -95,6 +96,7 @@ public class ScoringCommandState extends AbstractTimestampEntity implements HasP
     public void setScoringCommandStep(ScoringCommandStep scoringCommandStep) {
         this.scoringCommandStep = scoringCommandStep;
     }
+
     public String getYarnApplicationId() {
         return yarnApplicationId;
     }

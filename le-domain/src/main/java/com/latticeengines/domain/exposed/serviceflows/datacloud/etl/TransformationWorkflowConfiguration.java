@@ -30,7 +30,8 @@ public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowCo
             prepareConfig.setHdfsPodId(hdfsPodId);
             prepareConfig.setInternalResourceHostPort(internalResourceHostPort);
             if (transformationConfiguration != null) {
-                prepareConfig.setTransformationConfiguration(JsonUtils.serialize(transformationConfiguration));
+                prepareConfig.setTransformationConfiguration(
+                        JsonUtils.serialize(transformationConfiguration));
                 prepareConfig.setTransformationConfigurationClasspath(
                         transformationConfiguration.getClass().getCanonicalName());
             }
@@ -53,7 +54,8 @@ public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowCo
             return this;
         }
 
-        public Builder transformationConfiguration(TransformationConfiguration transformationConfiguration) {
+        public Builder transformationConfiguration(
+                TransformationConfiguration transformationConfiguration) {
             this.transformationConfiguration = transformationConfiguration;
             return this;
         }

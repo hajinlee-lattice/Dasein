@@ -60,7 +60,11 @@ public class CreateBucketMetadataRequest {
         this.ratingEngineId = ratingEngineId;
     }
 
-    public boolean isPublished() { return isPublished; }
+    public boolean isPublished() {
+        return isPublished;
+    }
 
-    public void setPublished(boolean published) { isPublished = published; }
+    public void setPublished(boolean published) {
+        isPublished = published;
+    }
 }

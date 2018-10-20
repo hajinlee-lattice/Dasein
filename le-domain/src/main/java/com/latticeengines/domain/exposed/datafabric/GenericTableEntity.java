@@ -35,8 +35,9 @@ public class GenericTableEntity extends BaseHdfsAvroFabricEntity<GenericTableEnt
 
     protected void setFabricyPartitionKey(GenericRecord record) {
         String pkField = getPartitionKeyInHdfsRecord();
-        if (StringUtils.isBlank(pkField)){
-            throw new IllegalArgumentException("Must specify primary key field in hdfs avro record.");
+        if (StringUtils.isBlank(pkField)) {
+            throw new IllegalArgumentException(
+                    "Must specify primary key field in hdfs avro record.");
         }
         Object pkObj = record.get(pkField);
         setPartitionKey(toFabricPrimaryKey(pkObj));

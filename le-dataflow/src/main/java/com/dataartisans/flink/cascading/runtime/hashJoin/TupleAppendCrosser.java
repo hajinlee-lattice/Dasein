@@ -21,22 +21,23 @@ import org.apache.flink.api.java.tuple.Tuple2;
 
 import cascading.tuple.Tuple;
 
-public class TupleAppendCrosser implements CrossFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
+public class TupleAppendCrosser
+        implements CrossFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7928751426580722037L;
-	private int tupleListPos;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -7928751426580722037L;
+    private int tupleListPos;
 
-	public TupleAppendCrosser(int tupleListPos) {
-		this.tupleListPos = tupleListPos;
-	}
+    public TupleAppendCrosser(int tupleListPos) {
+        this.tupleListPos = tupleListPos;
+    }
 
-	@Override
-	public Tuple2<Tuple, Tuple[]> cross(Tuple2<Tuple, Tuple[]> left, Tuple right) throws Exception {
+    @Override
+    public Tuple2<Tuple, Tuple[]> cross(Tuple2<Tuple, Tuple[]> left, Tuple right) throws Exception {
 
-		left.f1[tupleListPos] = right;
-		return left;
-	}
+        left.f1[tupleListPos] = right;
+        return left;
+    }
 }

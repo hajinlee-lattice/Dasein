@@ -71,12 +71,12 @@ public class FeatureFlagDefinition {
         this.modifiableAfterProvisioning = modifiableAfterProvisioning;
     }
 
-    public void setDefaultValue(boolean defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
     public boolean getDefaultValue() {
         return this.defaultValue;
+    }
+
+    public void setDefaultValue(boolean defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public boolean isDeprecated() {

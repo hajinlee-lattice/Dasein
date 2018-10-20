@@ -11,10 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @DiscriminatorValue("NoSQL")
 public class NoSQLStorage extends StorageMechanism {
 
-    public static enum DatabaseName {
-        DYNAMO
-    }
-    
     @Column(name = "DATABASE_NAME", nullable = true)
     private DatabaseName databaseName;
 
@@ -24,5 +20,9 @@ public class NoSQLStorage extends StorageMechanism {
 
     public void setDatabaseName(DatabaseName databaseName) {
         this.databaseName = databaseName;
+    }
+
+    public static enum DatabaseName {
+        DYNAMO
     }
 }

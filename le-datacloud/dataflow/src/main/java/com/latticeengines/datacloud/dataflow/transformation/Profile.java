@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -34,10 +33,8 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import cascading.tuple.Fields;
 
 @Component(Profile.BEAN_NAME)
-public class Profile extends TransformationFlowBase<BasicTransformationConfiguration, ProfileParameters> {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(Profile.class);
+public class Profile
+        extends TransformationFlowBase<BasicTransformationConfiguration, ProfileParameters> {
 
     public static final String BEAN_NAME = "SourceProfile";
 
@@ -47,7 +44,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
     private static final String CAT_ATTR = "CatAttr";
     private static final String CAT_VALUE = "CatValue";
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     private ProfileParameters config;
@@ -59,8 +56,12 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
 
         // Preparation
         List<String> numAttrs = new ArrayList<>();
-        Map<String, List<String>> numAttrsToDecode = new HashMap<>();// encoded attr -> {decoded attrs}
-        Map<String, String> decStrs = new HashMap<>(); // decode attr -> decode strategy str
+        Map<String, List<String>> numAttrsToDecode = new HashMap<>();// encoded
+                                                                     // attr ->
+                                                                     // {decoded
+                                                                     // attrs}
+        Map<String, String> decStrs = new HashMap<>(); // decode attr -> decode
+                                                       // strategy str
         parseNumAttrs(numAttrs, numAttrsToDecode, decStrs);
         List<String> catAttrs = new ArrayList<>();
         parseCatAttrs(catAttrs);
@@ -87,9 +88,10 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         mergeList.add(disProfile);
         return numProfile.merge(mergeList);
     }
-    
-    private Node retainAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode, List<String> catAttrs) {
-    	List<String> retainAttrs = new ArrayList<>();
+
+    private Node retainAttrs(Node src, List<String> numAttrs,
+            Map<String, List<String>> numAttrsToDecode, List<String> catAttrs) {
+        List<String> retainAttrs = new ArrayList<>();
         retainAttrs.addAll(numAttrs);
         retainAttrs.addAll(numAttrsToDecode.keySet());
         retainAttrs.addAll(catAttrs);
@@ -103,9 +105,11 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         for (ProfileParameters.Attribute attr : config.getNumericAttrs()) {
             if (config.getCodeBookLookup().containsKey(attr.getAttr())) {
                 if (!numAttrsToDecode.containsKey(config.getCodeBookLookup().get(attr.getAttr()))) {
-                    numAttrsToDecode.put(config.getCodeBookLookup().get(attr.getAttr()), new ArrayList<>());
+                    numAttrsToDecode.put(config.getCodeBookLookup().get(attr.getAttr()),
+                            new ArrayList<>());
                 }
-                numAttrsToDecode.get(config.getCodeBookLookup().get(attr.getAttr())).add(attr.getAttr());
+                numAttrsToDecode.get(config.getCodeBookLookup().get(attr.getAttr()))
+                        .add(attr.getAttr());
                 encAttrs.add(config.getCodeBookLookup().get(attr.getAttr()));
                 decStrs.put(attr.getAttr(), attr.getDecodeStrategy());
             } else {
@@ -120,8 +124,8 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         }
     }
 
-    private Node profileDisAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
-            Map<String, String> decStrs) {
+    private Node profileDisAttrs(Node src, List<String> numAttrs,
+            Map<String, List<String>> numAttrsToDecode, Map<String, String> decStrs) {
         List<String> retainAttrs = new ArrayList<>();
         retainAttrs.addAll(numAttrs);
         retainAttrs.addAll(numAttrsToDecode.keySet());
@@ -137,18 +141,18 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
                 numAttrs, numAttrsToDecode, config.getCodeBookMap(), config.getMaxDiscrete());
         dis = dis.groupByAndBuffer(new FieldList(DUMMY_GROUP), groupBuf, fms);
         fms = getFinalMetadata();
-        DiscreteProfileBuffer buf = new DiscreteProfileBuffer(new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME,
-                DataCloudConstants.PROFILE_ATTR_SRCATTR, DataCloudConstants.PROFILE_ATTR_DECSTRAT,
-                DataCloudConstants.PROFILE_ATTR_ENCATTR, DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
-                DataCloudConstants.PROFILE_ATTR_NUMBITS, DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                config.getMaxDiscrete(), decStrs);
-        dis = dis.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), new FieldList(dis.getFieldNames()), buf,
-                fms);
+        DiscreteProfileBuffer buf = new DiscreteProfileBuffer(new Fields(
+                DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
+                DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
+                DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
+                DataCloudConstants.PROFILE_ATTR_BKTALGO), config.getMaxDiscrete(), decStrs);
+        dis = dis.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR),
+                new FieldList(dis.getFieldNames()), buf, fms);
         return dis;
     }
 
-    private Node profileNumAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
-            Map<String, String> decStrs) {
+    private Node profileNumAttrs(Node src, List<String> numAttrs,
+            Map<String, List<String>> numAttrsToDecode, Map<String, String> decStrs) {
         List<String> retainAttrs = new ArrayList<>();
         retainAttrs.addAll(numAttrs);
         retainAttrs.addAll(numAttrsToDecode.keySet());
@@ -164,18 +168,19 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         fms.add(new FieldMetadata(KVDepivotStrategy.valueAttr(Double.class), Double.class));
         NumericProfileSampleBuffer agg = new NumericProfileSampleBuffer(
                 new Fields(KVDepivotStrategy.KEY_ATTR, KVDepivotStrategy.valueAttr(Integer.class),
-                        KVDepivotStrategy.valueAttr(Long.class), KVDepivotStrategy.valueAttr(Float.class),
+                        KVDepivotStrategy.valueAttr(Long.class),
+                        KVDepivotStrategy.valueAttr(Float.class),
                         KVDepivotStrategy.valueAttr(Double.class)),
                 numAttrs, clsMap, numAttrsToDecode, config.getCodeBookMap());
         num = num.groupByAndBuffer(new FieldList(DUMMY_GROUP), agg, fms);
         // Profiling
         fms = getFinalMetadata();
-        NumericProfileBuffer buf = new NumericProfileBuffer(
-                new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
-                        DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
-                        DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
-                        DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                KVDepivotStrategy.KEY_ATTR, clsMap, decStrs, config.isNumBucketEqualSized(), config.getBucketNum(),
+        NumericProfileBuffer buf = new NumericProfileBuffer(new Fields(
+                DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
+                DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
+                DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
+                DataCloudConstants.PROFILE_ATTR_BKTALGO), KVDepivotStrategy.KEY_ATTR, clsMap,
+                decStrs, config.isNumBucketEqualSized(), config.getBucketNum(),
                 config.getMinBucketSize(), false);
         num = num.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), buf, fms);
         return num;
@@ -190,28 +195,31 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         fms.add(new FieldMetadata(CAT_ATTR, String.class));
         fms.add(new FieldMetadata(CAT_VALUE, String.class));
         CategoricalProfileGroupingBuffer groupBuf = new CategoricalProfileGroupingBuffer(
-                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONSEG_FLAG, config.getMaxCats(),
-                config.getMaxCatLength(), catAttrs);
+                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONSEG_FLAG,
+                config.getMaxCats(), config.getMaxCatLength(), catAttrs);
         cat = cat.groupByAndBuffer(new FieldList(DUMMY_GROUP), groupBuf, fms);
         fms = getFinalMetadata();
-        CategoricalProfileBuffer buf = new CategoricalProfileBuffer(
-                new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
-                        DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
-                        DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
-                        DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                CAT_ATTR, CAT_VALUE, NONSEG_FLAG, config.getMaxCats());
-        cat = cat.groupByAndBuffer(new FieldList(CAT_ATTR), new FieldList(cat.getFieldNames()), buf, fms);
+        CategoricalProfileBuffer buf = new CategoricalProfileBuffer(new Fields(
+                DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
+                DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
+                DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
+                DataCloudConstants.PROFILE_ATTR_BKTALGO), CAT_ATTR, CAT_VALUE, NONSEG_FLAG,
+                config.getMaxCats());
+        cat = cat.groupByAndBuffer(new FieldList(CAT_ATTR), new FieldList(cat.getFieldNames()), buf,
+                fms);
         return cat;
     }
 
     private Node cleanNumProfile(Node numProfile, Node disProfile) {
         List<String> renamedDisSchema = new ArrayList<>();
         disProfile.getFieldNames().forEach(name -> renamedDisSchema.add("DIS_" + name));
-        disProfile = disProfile.rename(new FieldList(disProfile.getFieldNames()), new FieldList(renamedDisSchema));
+        disProfile = disProfile.rename(new FieldList(disProfile.getFieldNames()),
+                new FieldList(renamedDisSchema));
         List<String> retainNumSchema = numProfile.getFieldNames();
         numProfile = numProfile
                 .join(new FieldList(DataCloudConstants.PROFILE_ATTR_ATTRNAME), disProfile,
-                        new FieldList("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME), JoinType.LEFT)
+                        new FieldList("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME),
+                        JoinType.LEFT)
                 .filter("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME + " == null",
                         new FieldList("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME))
                 .retain(new FieldList(retainNumSchema));
@@ -233,13 +241,14 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
             BitCodeBook book = config.getCodeBookMap().get(fm.getFieldName());
             for (String decAttr : decAttrs) {
                 switch (book.getDecodeStrategy()) {
-                case NUMERIC_INT:
-                case NUMERIC_UNSIGNED_INT:
-                    clsMap.put(decAttr, Integer.class);
-                    break;
-                default:
-                    throw new UnsupportedOperationException(String.format(
-                            "Decode strategy %s is not supported in numeric profiling", book.getDecodeStrategy()));
+                    case NUMERIC_INT:
+                    case NUMERIC_UNSIGNED_INT:
+                        clsMap.put(decAttr, Integer.class);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(String.format(
+                                "Decode strategy %s is not supported in numeric profiling",
+                                book.getDecodeStrategy()));
                 }
             }
         }

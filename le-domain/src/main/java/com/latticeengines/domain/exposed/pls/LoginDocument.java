@@ -29,23 +29,23 @@ public class LoginDocument {
     }
 
     @JsonProperty("FirstName")
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    @JsonProperty("FirstName")
     public String getFirstName() {
         return firstName;
     }
 
-    @JsonProperty("LastName")
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    @JsonProperty("FirstName")
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     @JsonProperty("LastName")
     public String getLastName() {
         return lastName;
+    }
+
+    @JsonProperty("LastName")
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     @JsonProperty("Errors")

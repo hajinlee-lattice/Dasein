@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "MODELQUALITY_ALGORITHM_PROPERTY_VALUE")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AlgorithmPropertyValue implements HasPid {
 
     @Id
@@ -28,18 +28,19 @@ public class AlgorithmPropertyValue implements HasPid {
 
     @Column(name = "VALUE")
     private String value;
-    
+
     @ManyToOne
     @JoinColumn(name = "FK_ALGORITHM_PROPDEF_ID", nullable = false)
     @JsonIgnore
     private AlgorithmPropertyDef algorithmPropertyDef;
-    
-    public AlgorithmPropertyValue() {}
-    
+
+    public AlgorithmPropertyValue() {
+    }
+
     public AlgorithmPropertyValue(String value) {
         setValue(value);
     }
-    
+
     public AlgorithmPropertyDef getAlgorithmPropertyDef() {
         return algorithmPropertyDef;
     }

@@ -20,13 +20,15 @@ public class ActivityMetricsPivotConfig extends TransformerConfig {
 
     @JsonProperty("PivotField")
     private String pivotField;
-    
+
     @JsonProperty("Metrics")
     private List<ActivityMetrics> metrics;
 
     @JsonProperty("Expanded")
-    private boolean expanded = false;   // true: need to join Account table to include all AID
-                                        // false: DepivotedMetrics already has all AID
+    private boolean expanded = false; // true: need to join Account table to
+                                      // include all AID
+                                      // false: DepivotedMetrics already has all
+                                      // AID
 
     public ActivityType getActivityType() {
         return activityType;

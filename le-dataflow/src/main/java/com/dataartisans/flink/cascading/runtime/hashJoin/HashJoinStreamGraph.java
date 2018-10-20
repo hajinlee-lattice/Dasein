@@ -33,69 +33,70 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class HashJoinStreamGraph extends NodeStreamGraph {
 
-	private JoinBoundaryInStage sourceStage;
-	private CollectorOutput sinkStage;
+    private JoinBoundaryInStage sourceStage;
+    private CollectorOutput sinkStage;
 
-	public HashJoinStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, Boundary source) {
+    public HashJoinStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, Boundary source) {
 
-		super(flowProcess, node);
+        super(flowProcess, node);
 
-		sourceStage = handleHead(source);
+        sourceStage = handleHead(source);
 
-		setTraps();
-		setScopes();
+        setTraps();
+        setScopes();
 
-		printGraph( node.getID(), "hashjoin", flowProcess.getCurrentSliceNum() );
-		bind();
-	}
+        printGraph(node.getID(), "hashjoin", flowProcess.getCurrentSliceNum());
+        bind();
+    }
 
-	public void setTupleCollector(Collector<Tuple> tupleCollector) {
-		this.sinkStage.setTupleCollector(tupleCollector);
-	}
+    public void setTupleCollector(Collector<Tuple> tupleCollector) {
+        this.sinkStage.setTupleCollector(tupleCollector);
+    }
 
-	public JoinBoundaryInStage getSourceStage() {
-		return this.sourceStage;
-	}
+    public JoinBoundaryInStage getSourceStage() {
+        return this.sourceStage;
+    }
 
-	private JoinBoundaryInStage handleHead( Boundary boundary) {
+    private JoinBoundaryInStage handleHead(Boundary boundary) {
 
-		JoinBoundaryInStage sourceStage = (JoinBoundaryInStage)createBoundaryStage(boundary, IORole.source);
-		addHead( sourceStage );
-		handleDuct( boundary, sourceStage );
-		return sourceStage;
-	}
+        JoinBoundaryInStage sourceStage = (JoinBoundaryInStage) createBoundaryStage(boundary,
+                IORole.source);
+        addHead(sourceStage);
+        handleDuct(boundary, sourceStage);
+        return sourceStage;
+    }
 
-	@Override
-	protected Duct createBoundaryStage( Boundary boundary, IORole role ) {
+    @Override
+    protected Duct createBoundaryStage(Boundary boundary, IORole role) {
 
-		if(role == IORole.source) {
-			this.sourceStage = new JoinBoundaryInStage(this.flowProcess, boundary );
-			return this.sourceStage;
-		}
-		else if(role == IORole.sink) {
-			this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
-			return (BoundaryOutStage)this.sinkStage;
-		}
-		else {
-			throw new IllegalArgumentException("Boundary must be either source or sink!");
-		}
-	}
+        if (role == IORole.source) {
+            this.sourceStage = new JoinBoundaryInStage(this.flowProcess, boundary);
+            return this.sourceStage;
+        } else if (role == IORole.sink) {
+            this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
+            return (BoundaryOutStage) this.sinkStage;
+        } else {
+            throw new IllegalArgumentException("Boundary must be either source or sink!");
+        }
+    }
 
-	@Override
-	protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a CoGroup gate in a HashJoinStreamGraph");
-	}
+    @Override
+    protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a CoGroup gate in a HashJoinStreamGraph");
+    }
 
-	@Override
-	protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a GroupBy gate in a HashJoinStreamGraph");
-	}
+    @Override
+    protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a GroupBy gate in a HashJoinStreamGraph");
+    }
 
-	protected Gate createHashJoinGate( HashJoin join ) {
-		return new HashJoinGate(this.flowProcess, join);
-	}
+    protected Gate createHashJoinGate(HashJoin join) {
+        return new HashJoinGate(this.flowProcess, join);
+    }
 
 }

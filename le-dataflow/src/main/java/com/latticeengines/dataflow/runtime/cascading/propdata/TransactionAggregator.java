@@ -17,8 +17,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class TransactionAggregator
-        extends BaseAggregator<TransactionAggregator.Context>
+public class TransactionAggregator extends BaseAggregator<TransactionAggregator.Context>
         implements Aggregator<TransactionAggregator.Context> {
 
     private static final long serialVersionUID = 6298800516602499546L;
@@ -35,15 +34,9 @@ public class TransactionAggregator
     private List<String> uniquePeriods;
     private List<String[]> timeRanges;
 
-    public static class Context extends BaseAggregator.Context {
-        String accountId = null;
-        HashMap<String, HashMap<String, Boolean>> purchasedTable = new HashMap<String, HashMap<String, Boolean>>();
-        HashMap<String, HashMap<String, Long>> quantityTable = new HashMap<String, HashMap<String, Long>>();
-        HashMap<String, HashMap<String, Double>> amountTable = new HashMap<String, HashMap<String, Double>>();
-    }
-
-    public TransactionAggregator(Fields fieldDeclaration, List<String> productIds, List<String> periods, List<String> metrics,
-                                     String idField, String productField, String dateField, String quantityField, String amountField) {
+    public TransactionAggregator(Fields fieldDeclaration, List<String> productIds,
+            List<String> periods, List<String> metrics, String idField, String productField,
+            String dateField, String quantityField, String amountField) {
 
         super(fieldDeclaration);
         this.productIds = productIds;
@@ -70,7 +63,7 @@ public class TransactionAggregator
                 NamedPeriod namedPeriod = NamedPeriod.fromName(period);
                 timeRanges.add(namedPeriod.getTimeRange());
             }
-       }
+        }
     }
 
     // Currently, dummy group is disabled
@@ -100,14 +93,14 @@ public class TransactionAggregator
             String period = periods.get(i);
             String metric = metrics.get(i);
             if (metric.equals(TransactionMetrics.PURCHASED.getName())) {
-                    HashMap<String, Boolean> periodPurchased = new HashMap<String, Boolean>();
-                    context.purchasedTable.put(period, periodPurchased);
+                HashMap<String, Boolean> periodPurchased = new HashMap<String, Boolean>();
+                context.purchasedTable.put(period, periodPurchased);
             } else if (metric.equals(TransactionMetrics.QUANTITY.getName())) {
-                    HashMap<String, Long> periodQuantity = new HashMap<String, Long>();
-                    context.quantityTable.put(period, periodQuantity);
+                HashMap<String, Long> periodQuantity = new HashMap<String, Long>();
+                context.quantityTable.put(period, periodQuantity);
             } else if (metric.equals(TransactionMetrics.AMOUNT.getName())) {
-                    HashMap<String, Double> periodAmount = new HashMap<String, Double>();
-                    context.amountTable.put(period, periodAmount);
+                HashMap<String, Double> periodAmount = new HashMap<String, Double>();
+                context.amountTable.put(period, periodAmount);
             }
         }
 
@@ -121,8 +114,8 @@ public class TransactionAggregator
         }
         String productId = arguments.getString(productField);
         String date = arguments.getString(dateField);
-        Long quantity= arguments.getLong(quantityField);
-        Double amount= arguments.getDouble(amountField);
+        Long quantity = arguments.getLong(quantityField);
+        Double amount = arguments.getDouble(amountField);
         for (int i = 0; i < timeRanges.size(); i++) {
             String[] timeRange = timeRanges.get(i);
             if ((timeRange[0].compareTo(date) <= 0) && (timeRange[1].compareTo(date) >= 0)) {
@@ -132,7 +125,8 @@ public class TransactionAggregator
         return context;
     }
 
-    private void update(Context context, String productId, String period, Long quantity, Double amount) {
+    private void update(Context context, String productId, String period, Long quantity,
+            Double amount) {
 
         Map<String, Boolean> periodPurchased = context.purchasedTable.get(period);
         if (periodPurchased != null) {
@@ -145,12 +139,13 @@ public class TransactionAggregator
                 quantity = new Long(1);
             }
             Long curQuantity = periodQuantity.get(productId);
-            periodQuantity.put(productId, ((curQuantity == null) ? quantity : (quantity + curQuantity)));
+            periodQuantity.put(productId,
+                    ((curQuantity == null) ? quantity : (quantity + curQuantity)));
         }
 
         Map<String, Double> periodAmount = context.amountTable.get(period);
         if (periodAmount != null) {
-            if (amount !=  null) {
+            if (amount != null) {
                 Double curAmount = periodAmount.get(productId);
                 periodAmount.put(productId, ((curAmount == null) ? amount : (amount + curAmount)));
             }
@@ -185,12 +180,20 @@ public class TransactionAggregator
                     result.set(loc++, periodAmount.get(productId));
                 }
             } else {
-                for (@SuppressWarnings("unused") String productId : productIds) {
-                     result.set(loc++, null);
+                for (@SuppressWarnings("unused")
+                String productId : productIds) {
+                    result.set(loc++, null);
                 }
             }
         }
 
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String accountId = null;
+        HashMap<String, HashMap<String, Boolean>> purchasedTable = new HashMap<String, HashMap<String, Boolean>>();
+        HashMap<String, HashMap<String, Long>> quantityTable = new HashMap<String, HashMap<String, Long>>();
+        HashMap<String, HashMap<String, Double>> amountTable = new HashMap<String, HashMap<String, Double>>();
     }
 }

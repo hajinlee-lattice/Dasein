@@ -35,7 +35,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
  *
  */
 @Entity
-@Table(name = "MODELQUALITY_ALGORITHM", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_ALGORITHM", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
@@ -80,6 +81,10 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
         return type;
     }
 
+    public void setType(AlgorithmType type) {
+        this.type = type;
+    }
+
     @MetricTag(tag = "AlgorithmType")
     @JsonIgnore
     public String getTypeStrValue() {
@@ -91,18 +96,14 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
     @JsonIgnore
     public String getDataPlatformAlgorithmName() {
         switch (type) {
-        case RANDOMFOREST:
-            return "RF";
-        case LOGISTICREGRESSION:
-            return "LR";
-        case DECISIONTREE:
-            return "DT";
+            case RANDOMFOREST:
+                return "RF";
+            case LOGISTICREGRESSION:
+                return "LR";
+            case DECISIONTREE:
+                return "DT";
         }
         return "RF";
-    }
-
-    public void setType(AlgorithmType type) {
-        this.type = type;
     }
 
     @MetricTag(tag = "AlgorithmScript")

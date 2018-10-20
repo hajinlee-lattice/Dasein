@@ -27,28 +27,28 @@ public class SegmentIdAndSingleRulePair {
         return responseKeyId;
     }
 
-    public String getSegmentId() {
-        return segmentId;
-    }
-
-    public Restriction getAccountRestriction() {
-        return accountRestriction;
-    }
-
-    public Restriction getContacttRestriction() {
-        return contacttRestriction;
-    }
-
     public void setResponseKeyId(String responseKeyId) {
         this.responseKeyId = responseKeyId;
+    }
+
+    public String getSegmentId() {
+        return segmentId;
     }
 
     public void setSegmentId(String segmentId) {
         this.segmentId = segmentId;
     }
 
+    public Restriction getAccountRestriction() {
+        return accountRestriction;
+    }
+
     public void setAccountRestriction(Restriction accountRestriction) {
         this.accountRestriction = accountRestriction;
+    }
+
+    public Restriction getContacttRestriction() {
+        return contacttRestriction;
     }
 
     public void setContacttRestriction(Restriction contacttRestriction) {

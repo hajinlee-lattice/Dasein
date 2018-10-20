@@ -1,10 +1,5 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
 public enum CDLJobType {
-    IMPORT,
-    CONSOLIDATE,
-    PROFILE,
-    ORCHESTRATION,
-    PROCESSANALYZE,
-    DFEXECUTIONCLEANUP;
+    IMPORT, CONSOLIDATE, PROFILE, ORCHESTRATION, PROCESSANALYZE, DFEXECUTIONCLEANUP;
 }

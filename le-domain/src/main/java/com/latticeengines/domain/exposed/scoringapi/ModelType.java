@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-
 public enum ModelType {
 
     ACCOUNT, //
@@ -14,14 +13,16 @@ public enum ModelType {
             }
         }
 
-        // Construct an error message that indicates all possible values for the enum.
+        // Construct an error message that indicates all possible values for the
+        // enum.
         StringBuilder errorMessage = new StringBuilder();
         boolean first = true;
         for (Enum<?> enumValue : enumClass.getEnumConstants()) {
             errorMessage.append(first ? "" : ", ").append(enumValue);
             first = false;
         }
-        throw new IllegalArgumentException(value + " is an invalid value. Supported values are " + errorMessage);
+        throw new IllegalArgumentException(
+                value + " is an invalid value. Supported values are " + errorMessage);
     }
 
 }

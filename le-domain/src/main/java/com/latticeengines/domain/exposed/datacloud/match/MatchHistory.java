@@ -12,22 +12,6 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 public class MatchHistory implements HasId<String> {
 
     @Nullable
-    @AvroName("ID")
-    private String id;
-    @Nullable
-    @AvroName("Matched")
-    private Boolean matched;
-    @Nullable
-    @AvroName("HitWhiteCache")
-    private Boolean hitWhiteCache;
-    @Nullable
-    @AvroName("HitBlackCache")
-    private Boolean hitBlackCache;
-    @Nullable
-    @AvroName("MatchMode")
-    private String matchMode; // Batch or Realtime
-
-    @Nullable
     @AvroName("TypeOfApplication")
     String typeOfApplication; // Ex: Marketo, LPI, SDFC
     @Nullable
@@ -45,7 +29,6 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("LatticeAccountId")
     String latticeAccountId;
-
     @Nullable
     @AvroName("RawDomain")
     String rawDomain;
@@ -79,7 +62,6 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("RawDUNS")
     String rawDUNS;
-
     @Nullable
     @AvroName("StandardisedDomain")
     String standardisedDomain;
@@ -113,7 +95,6 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("StandardisedPhone")
     String standardisedPhone;
-
     @Nullable
     @AvroName("DnbMatchedDUNS")
     String dnbMatchedDUNS;
@@ -147,7 +128,6 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("DnbMatchedPhone")
     String dnbMatchedPhone;
-
     @Nullable
     @AvroName("MatchedDUNS")
     String matchedDUNS;
@@ -241,6 +221,21 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("DnbReturnCode")
     String dnbReturnCode;
+    @Nullable
+    @AvroName("ID")
+    private String id;
+    @Nullable
+    @AvroName("Matched")
+    private Boolean matched;
+    @Nullable
+    @AvroName("HitWhiteCache")
+    private Boolean hitWhiteCache;
+    @Nullable
+    @AvroName("HitBlackCache")
+    private Boolean hitBlackCache;
+    @Nullable
+    @AvroName("MatchMode")
+    private String matchMode; // Batch or Realtime
 
     @Override
     @Union({})
@@ -1074,8 +1069,8 @@ public class MatchHistory implements HasId<String> {
         this.dnbMatchedDUNS = dnbMatchContext.getDuns();
         this.confidenceCode = dnbMatchContext.getConfidenceCode();
         this.matchGrade = dnbMatchContext.getMatchGrade() != null
-                && dnbMatchContext.getMatchGrade().getRawCode() != null ? dnbMatchContext.getMatchGrade().getRawCode()
-                : null;
+                && dnbMatchContext.getMatchGrade().getRawCode() != null
+                        ? dnbMatchContext.getMatchGrade().getRawCode() : null;
         if (this.matchGrade != null) {
             DnBMatchGrade dnbMatchGrade = new DnBMatchGrade(this.matchGrade);
             this.nameMatchGradeText = dnbMatchGrade.getNameCode();

@@ -23,9 +23,10 @@ public class PeriodDataDistributorConfig extends TransformerConfig {
 
     @JsonProperty("MultiPeriod")
     private boolean multiPeriod;
-    
+
     @JsonProperty("TransactionIdxes")
-    private Map<String, Integer> transactionIdxes; // PeriodName -> TransactionIdx
+    private Map<String, Integer> transactionIdxes; // PeriodName ->
+                                                   // TransactionIdx
 
     public String getPeriodField() {
         return periodField;

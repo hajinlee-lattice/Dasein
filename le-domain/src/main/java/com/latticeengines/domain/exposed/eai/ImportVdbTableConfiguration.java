@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.eai;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
-
-import java.util.List;
 
 public class ImportVdbTableConfiguration {
 

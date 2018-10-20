@@ -37,8 +37,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     private List<BucketMetadata> bucketMetadata;
     private Map<String, List<BucketMetadata>> bucketMetadataMap;
 
-    public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata,
-            Integer scoreMultiplier, Double avgScore) {
+    public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName,
+            List<BucketMetadata> bucketMetadata, Integer scoreMultiplier, Double avgScore) {
         super(new Fields(ratingFieldName));
         this.scoreFieldName = scoreFieldName;
         this.bucketMetadata = sortBucketMetadata(bucketMetadata);
@@ -46,8 +46,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         this.avgScore = avgScore;
     }
 
-    public AddRatingColumnFunction(String scoreFieldName, String modelIdFieldName, String ratingFieldName,
-            Map<String, List<BucketMetadata>> bucketMetadataMap) {
+    public AddRatingColumnFunction(String scoreFieldName, String modelIdFieldName,
+            String ratingFieldName, Map<String, List<BucketMetadata>> bucketMetadataMap) {
         super(new Fields(ratingFieldName));
         this.multiModelMode = true;
         this.scoreFieldName = scoreFieldName;
@@ -93,11 +93,13 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
             // FIXME: should never go to this branch after M19
             // use default bucketing criteria
             if (log.isDebugEnabled()) {
-                log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
+                log.debug(
+                        "No bucket metadata is defined, therefore use default bucketing criteria.");
             }
             if (score < BucketName.C.getDefaultLowerBound()) {
                 if (score < BucketName.D.getDefaultLowerBound()) {
-                    log.warn(String.format("%f is less than minimum bound, setting to %s", score, BucketName.D.name()));
+                    log.warn(String.format("%f is less than minimum bound, setting to %s", score,
+                            BucketName.D.name()));
                 }
                 bucketName = BucketName.D;
             } else if (score < BucketName.B.getDefaultLowerBound()) {
@@ -106,7 +108,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                 bucketName = BucketName.B;
             } else {
                 if (score > BucketName.A.getDefaultUpperBound()) {
-                    log.warn(String.format("%f is more than maximum bound, setting to %s", score, BucketName.A.name()));
+                    log.warn(String.format("%f is more than maximum bound, setting to %s", score,
+                            BucketName.A.name()));
                 }
                 bucketName = BucketName.A;
             }
@@ -115,7 +118,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     }
 
     private List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata) {
-        return bucketMetadata.stream().sorted(Comparator.comparingInt(BucketMetadata::getRightBoundScore))
+        return bucketMetadata.stream()
+                .sorted(Comparator.comparingInt(BucketMetadata::getRightBoundScore))
                 .collect(Collectors.toList());
     }
 

@@ -19,12 +19,10 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AlexaIndustryBuffer extends BaseOperation implements Buffer {
 
-    private static final long serialVersionUID = 1833467220255737504L;
-
-    private static final String CATEGORIES = "Categories";
     public static final String BUSINESS_INDUSTRY = "BusinessIndustry";
     public static final String BUSINESS_INDUSTRY_2 = "BusinessIndustry2";
-
+    private static final long serialVersionUID = 1833467220255737504L;
+    private static final String CATEGORIES = "Categories";
     protected Map<String, Integer> namePositionMap;
     private Map<String, String> indMap;
     private Map<String, String> ind2Map;
@@ -34,7 +32,8 @@ public class AlexaIndustryBuffer extends BaseOperation implements Buffer {
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public AlexaIndustryBuffer(String domainField, Map<String, String> indMap, Map<String, String> ind2Map) {
+    public AlexaIndustryBuffer(String domainField, Map<String, String> indMap,
+            Map<String, String> ind2Map) {
         this(new Fields(domainField, BUSINESS_INDUSTRY, BUSINESS_INDUSTRY_2));
         this.indMap = indMap;
         this.ind2Map = ind2Map;

@@ -43,7 +43,8 @@ public class AttributeRepository {
     // in other cases, should always construct from data collection
     @VisibleForTesting
     public AttributeRepository(CustomerSpace customerSpace, String collectionName,
-            Map<AttributeLookup, ColumnMetadata> cmMap, Map<TableRoleInCollection, String> tableNameMap) {
+            Map<AttributeLookup, ColumnMetadata> cmMap,
+            Map<TableRoleInCollection, String> tableNameMap) {
         this.collectionName = collectionName;
         this.customerSpace = customerSpace;
         this.cmMap = cmMap;
@@ -51,6 +52,80 @@ public class AttributeRepository {
     }
 
     public AttributeRepository() {
+    }
+
+    public static AttributeRepository constructRepo(Map<String, StatsCube> statsCubes,
+            Map<TableRoleInCollection, Table> tableMap, CustomerSpace customerSpace,
+            String collectionName) {
+        Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
+        Map<AttributeLookup, AttributeStats> statsMap = expandStats(statsCubes);
+        Map<AttributeLookup, ColumnMetadata> cmMap = expandAttrs(statsMap.keySet(), tableMap);
+        cmMap.forEach((lookup, cm) -> {
+            AttributeStats stats = statsMap.get(lookup);
+            cm.setStats(stats);
+        });
+        return new AttributeRepository(customerSpace, collectionName, cmMap, tableNameMap);
+    }
+
+    private static Map<TableRoleInCollection, String> getTableNameMap(
+            Map<TableRoleInCollection, Table> tableMap) {
+        Map<TableRoleInCollection, String> map = new HashMap<>();
+        tableMap.forEach((r, t) -> map.put(r, t.getName()));
+        return map;
+    }
+
+    private static Map<AttributeLookup, ColumnMetadata> expandAttrs(
+            Collection<AttributeLookup> lookups, Map<TableRoleInCollection, Table> tableMap) {
+        Map<TableRoleInCollection, Map<String, ColumnMetadata>> attrMaps = new HashMap<>();
+        Map<AttributeLookup, ColumnMetadata> attributes = new HashMap<>();
+        lookups.forEach(lookup -> {
+            BusinessEntity entity = lookup.getEntity();
+            TableRoleInCollection role = entity.getServingStore();
+            if (tableMap.containsKey(role)) {
+                Table table = tableMap.get(role);
+                if (!attrMaps.containsKey(role)) {
+                    Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
+                    attrMaps.put(role, attrMap);
+                }
+                Map<String, ColumnMetadata> attrMap = attrMaps.get(role);
+                ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
+                if (attribute != null) {
+                    attributes.put(lookup, attribute);
+                }
+            }
+        });
+        if (tableMap.containsKey(BusinessEntity.Transaction.getServingStore())) {
+            Table table = tableMap.get(BusinessEntity.Transaction.getServingStore());
+            Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
+            attrMap.forEach((name, md) -> attributes
+                    .put(new AttributeLookup(BusinessEntity.Transaction, name), md));
+        }
+        return attributes;
+    }
+
+    private static Map<String, ColumnMetadata> expandAttrsInTable(Table table) {
+        Map<String, ColumnMetadata> attrMap = new HashMap<>();
+        table.getAttributes().forEach(attr -> {
+            ColumnMetadata metadata = new ColumnMetadata();
+            metadata.setNumBits(attr.getNumOfBits());
+            metadata.setBitOffset(attr.getBitOffset());
+            metadata.setPhysicalName(attr.getPhysicalName());
+            attrMap.put(attr.getName(), metadata);
+        });
+        return attrMap;
+    }
+
+    private static Map<AttributeLookup, AttributeStats> expandStats(
+            Map<String, StatsCube> statsCubes) {
+        Map<AttributeLookup, AttributeStats> statsMap = new HashMap<>();
+        statsCubes.forEach((name, cube) -> {
+            BusinessEntity entity = BusinessEntity.valueOf(name);
+            cube.getStatistics().forEach((attrName, attrStats) -> {
+                AttributeLookup attrLookup = new AttributeLookup(entity, attrName);
+                statsMap.put(attrLookup, attrStats);
+            });
+        });
+        return statsMap;
     }
 
     public ColumnMetadata getColumnMetadata(AttributeLookup attributeLookup) {
@@ -81,76 +156,6 @@ public class AttributeRepository {
         Map<String, ColumnMetadata> attrs = expandAttrsInTable(table);
         attrs.forEach((n, md) -> cmMap.put(new AttributeLookup(entity, n), md));
         tableNameMap.put(entity.getServingStore(), table.getName());
-    }
-
-    public static AttributeRepository constructRepo(Map<String, StatsCube> statsCubes, Map<TableRoleInCollection, Table> tableMap,
-                                                    CustomerSpace customerSpace, String collectionName) {
-        Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
-        Map<AttributeLookup, AttributeStats> statsMap = expandStats(statsCubes);
-        Map<AttributeLookup, ColumnMetadata> cmMap = expandAttrs(statsMap.keySet(), tableMap);
-        cmMap.forEach((lookup, cm) -> {
-            AttributeStats stats = statsMap.get(lookup);
-            cm.setStats(stats);
-        });
-        return new AttributeRepository(customerSpace, collectionName, cmMap, tableNameMap);
-    }
-
-    private static Map<TableRoleInCollection, String> getTableNameMap(Map<TableRoleInCollection, Table> tableMap) {
-        Map<TableRoleInCollection, String> map = new HashMap<>();
-        tableMap.forEach((r, t) -> map.put(r, t.getName()));
-        return map;
-    }
-
-    private static Map<AttributeLookup, ColumnMetadata> expandAttrs(Collection<AttributeLookup> lookups,
-            Map<TableRoleInCollection, Table> tableMap) {
-        Map<TableRoleInCollection, Map<String, ColumnMetadata>> attrMaps = new HashMap<>();
-        Map<AttributeLookup, ColumnMetadata> attributes = new HashMap<>();
-        lookups.forEach(lookup -> {
-            BusinessEntity entity = lookup.getEntity();
-            TableRoleInCollection role = entity.getServingStore();
-            if (tableMap.containsKey(role)) {
-                Table table = tableMap.get(role);
-                if (!attrMaps.containsKey(role)) {
-                    Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
-                    attrMaps.put(role, attrMap);
-                }
-                Map<String, ColumnMetadata> attrMap = attrMaps.get(role);
-                ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
-                if (attribute != null) {
-                    attributes.put(lookup, attribute);
-                }
-            }
-        });
-        if (tableMap.containsKey(BusinessEntity.Transaction.getServingStore())) {
-            Table table = tableMap.get(BusinessEntity.Transaction.getServingStore());
-            Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
-            attrMap.forEach((name, md) -> attributes.put(new AttributeLookup(BusinessEntity.Transaction, name), md));
-        }
-        return attributes;
-    }
-
-    private static Map<String, ColumnMetadata> expandAttrsInTable(Table table) {
-        Map<String, ColumnMetadata> attrMap = new HashMap<>();
-        table.getAttributes().forEach(attr -> {
-            ColumnMetadata metadata = new ColumnMetadata();
-            metadata.setNumBits(attr.getNumOfBits());
-            metadata.setBitOffset(attr.getBitOffset());
-            metadata.setPhysicalName(attr.getPhysicalName());
-            attrMap.put(attr.getName(), metadata);
-        });
-        return attrMap;
-    }
-
-    private static Map<AttributeLookup, AttributeStats> expandStats(Map<String, StatsCube> statsCubes) {
-        Map<AttributeLookup, AttributeStats> statsMap = new HashMap<>();
-        statsCubes.forEach((name, cube) -> {
-            BusinessEntity entity = BusinessEntity.valueOf(name);
-            cube.getStatistics().forEach((attrName, attrStats) -> {
-                AttributeLookup attrLookup = new AttributeLookup(entity, attrName);
-                statsMap.put(attrLookup, attrStats);
-            });
-        });
-        return statsMap;
     }
 
 }

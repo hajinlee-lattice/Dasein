@@ -108,7 +108,7 @@ public class MarketoCredential extends Credential {
     public void setLatticeSecretKey(String latticeSecretKey) {
         this.latticeSecretKey = latticeSecretKey;
     }
-    
+
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_ENRICHMENT_ID", nullable = false)

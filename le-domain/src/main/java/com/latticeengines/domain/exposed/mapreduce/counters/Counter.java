@@ -17,31 +17,15 @@ public class Counter implements org.apache.hadoop.mapreduce.v2.api.records.Count
     }
 
     @Override
-    @JsonProperty("displayName")
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    @JsonProperty("totalCounterValue")
-    public long getValue() {
-        return totalCounterValue;
-    }
-
-    @JsonProperty("mapCounterValue")
-    public long getMapValue() {
-        return mapCounterValue;
-    }
-
-    @JsonProperty("reduceCounterValue")
-    public long getReduceValue() {
-        return reduceCounterValue;
-    }
-
-    @Override
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    @JsonProperty("displayName")
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override
@@ -52,15 +36,31 @@ public class Counter implements org.apache.hadoop.mapreduce.v2.api.records.Count
 
     @Override
     @JsonProperty("totalCounterValue")
+    public long getValue() {
+        return totalCounterValue;
+    }
+
+    @Override
+    @JsonProperty("totalCounterValue")
     public void setValue(long value) {
         this.totalCounterValue = value;
     }
-    
+
+    @JsonProperty("mapCounterValue")
+    public long getMapValue() {
+        return mapCounterValue;
+    }
+
     @JsonProperty("mapCounterValue")
     public void setMapValue(long mapCounterValue) {
         this.mapCounterValue = mapCounterValue;
     }
-    
+
+    @JsonProperty("reduceCounterValue")
+    public long getReduceValue() {
+        return reduceCounterValue;
+    }
+
     @JsonProperty("reduceCounterValue")
     public void setReduceValue(long reduceCounterValue) {
         this.reduceCounterValue = reduceCounterValue;

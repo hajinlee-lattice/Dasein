@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+
 /*
  * Table to save the template or predefined config
  */
@@ -90,7 +91,8 @@ public class ModelConfig implements HasPid, HasName, HasAuditingFields {
                 return null;
             }
 
-            String uncompressedData = new String(CompressionUtils.decompressByteArray(getConfigData()));
+            String uncompressedData = new String(
+                    CompressionUtils.decompressByteArray(getConfigData()));
             selectedConfig = JsonUtils.deserialize(uncompressedData, SelectedConfig.class);
         }
         return selectedConfig;
@@ -100,7 +102,8 @@ public class ModelConfig implements HasPid, HasName, HasAuditingFields {
     public void setSelectedConfig(SelectedConfig selectedConfig) {
         this.selectedConfig = selectedConfig;
         try {
-            byte[] compressedData = CompressionUtils.compressByteArray(JsonUtils.serialize(selectedConfig).getBytes());
+            byte[] compressedData = CompressionUtils
+                    .compressByteArray(JsonUtils.serialize(selectedConfig).getBytes());
             setConfigData(compressedData);
         } catch (IOException e) {
             log.error("Failed to compress config", e);

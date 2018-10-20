@@ -11,20 +11,20 @@ public class PeriodDateConvertorConfig extends TransformerConfig {
     @JsonProperty("TrxTimeField")
     private String trxTimeField;
 
-    public void setTrxDayPeriodField(String trxDayPeriodField) {
-        this.trxDayPeriodField = trxDayPeriodField;
-    }
-
     public String getTrxDayPeriodField() {
         return trxDayPeriodField;
     }
 
-    public void setTrxDateField(String trxDateField) {
-        this.trxDateField = trxDateField;
+    public void setTrxDayPeriodField(String trxDayPeriodField) {
+        this.trxDayPeriodField = trxDayPeriodField;
     }
 
     public String getTrxDateField() {
         return trxDateField;
+    }
+
+    public void setTrxDateField(String trxDateField) {
+        this.trxDateField = trxDateField;
     }
 
     public String getTrxTimeField() {

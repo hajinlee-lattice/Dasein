@@ -15,14 +15,13 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CleanupActionConfiguration extends ActionConfiguration {
 
-    public CleanupActionConfiguration() {
-    }
-
     @JsonProperty("impact_entities")
     private List<BusinessEntity> impactEntities = new ArrayList<>();
-
     @JsonProperty("deleted_records")
     private Map<BusinessEntity, Long> deletedRecords = new HashMap<>();
+
+    public CleanupActionConfiguration() {
+    }
 
     public List<BusinessEntity> getImpactEntities() {
         return impactEntities;

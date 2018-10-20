@@ -9,10 +9,6 @@ public enum TenantDeploymentStatus {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static TenantDeploymentStatus valueOf(int value) {
         TenantDeploymentStatus result = null;
         for (TenantDeploymentStatus status : TenantDeploymentStatus.values()) {
@@ -22,5 +18,9 @@ public enum TenantDeploymentStatus {
             }
         }
         return result;
+    }
+
+    public int getValue() {
+        return value;
     }
 }

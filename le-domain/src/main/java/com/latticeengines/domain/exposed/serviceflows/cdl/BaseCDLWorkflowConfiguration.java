@@ -61,8 +61,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CrossSellImportMatchAndModelWorkflowConfiguration.class, name = "CrossSellImportMatchAndModelWorkflowConfiguration"),
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
-        @Type(value = OrphanRecordExportWorkflowConfiguration.class, name = "OrphanRecordExportWorkflowConfiguration")
-})
+        @Type(value = OrphanRecordExportWorkflowConfiguration.class, name = "OrphanRecordExportWorkflowConfiguration") })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 
     @Override

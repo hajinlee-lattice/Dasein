@@ -1,12 +1,13 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-import java.io.Serializable;
-
-public class PrepareDunsRedirectManualMatchConfig extends TransformerConfig implements Serializable {
+public class PrepareDunsRedirectManualMatchConfig extends TransformerConfig
+        implements Serializable {
     public static final String LARGE_COMPANY_EMPLOYEE_SIZE = "Large";
     public static final String SMALL_COMPANY_EMPLOYEE_SIZE = "Small";
 

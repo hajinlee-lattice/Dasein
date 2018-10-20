@@ -31,8 +31,10 @@ public class IngestionWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
 
         public IngestionWorkflowConfiguration build() {
             ingestionWorkflowConfig.setContainerConfiguration("ingestionWorkflow",
-                    EngineConstants.PRODATA_CUSTOMERSPACE, ingestionWorkflowConfig.getClass().getSimpleName());
-            ingestionWorkflowConfig.setCustomerSpace(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+                    EngineConstants.PRODATA_CUSTOMERSPACE,
+                    ingestionWorkflowConfig.getClass().getSimpleName());
+            ingestionWorkflowConfig.setCustomerSpace(
+                    CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
             ingestionWorkflowConfig.add(ingestionConfig);
             return ingestionWorkflowConfig;
         }

@@ -50,10 +50,8 @@ public class GenericFabricNode implements HasName {
 
     @Override
     public String toString() {
-        return "GenericFabricNode [name=" + name + ", totalCount=" + totalCount + ", finishedCount=" + finishedCount
-                + ", failedCount=" + failedCount + "]";
+        return "GenericFabricNode [name=" + name + ", totalCount=" + totalCount + ", finishedCount="
+                + finishedCount + ", failedCount=" + failedCount + "]";
     }
-    
-    
 
 }

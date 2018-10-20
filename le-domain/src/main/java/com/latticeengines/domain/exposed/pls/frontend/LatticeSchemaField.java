@@ -17,35 +17,35 @@ public class LatticeSchemaField {
     @JsonProperty
     private String requiredIfNoField;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return this.name;
     }
 
-    public void setRequiredType(RequiredType requiredType) {
-        this.requiredType = requiredType;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public RequiredType getRequiredType() {
         return this.requiredType;
     }
 
-    public void setFieldType(UserDefinedType fieldType) {
-        this.fieldType = fieldType;
+    public void setRequiredType(RequiredType requiredType) {
+        this.requiredType = requiredType;
     }
 
     public UserDefinedType getFieldType() {
         return this.fieldType;
     }
 
-    public void setRequiredIfNoField(String requiredIfNoField) {
-        this.requiredIfNoField = requiredIfNoField;
+    public void setFieldType(UserDefinedType fieldType) {
+        this.fieldType = fieldType;
     }
 
     public String getRequiredIfNoField() {
         return this.requiredIfNoField;
+    }
+
+    public void setRequiredIfNoField(String requiredIfNoField) {
+        this.requiredIfNoField = requiredIfNoField;
     }
 }

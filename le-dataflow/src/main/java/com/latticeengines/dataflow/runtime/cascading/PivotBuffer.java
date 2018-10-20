@@ -39,78 +39,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         this.pivotStrategy = pivotStrategy;
     }
 
-    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
-        Map<String, Integer> positionMap = new HashMap<>();
-        int pos = 0;
-        for (Object field : fieldDeclaration) {
-            String fieldName = (String) field;
-            positionMap.put(fieldName.toLowerCase(), pos++);
-        }
-        return positionMap;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
-        Tuple result = Tuple.size(getFieldDeclaration().size());
-        TupleEntry group = bufferCall.getGroup();
-        setupTupleForGroup(result, group);
-
-        Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
-        setupTupleForArgument(result, arguments);
-
-        bufferCall.getOutputCollector().add(result);
-    }
-
-    private void setupTupleForGroup(Tuple result, TupleEntry group) {
-        Fields fields = group.getFields();
-        for (Object field : fields) {
-            String fieldName = (String) field;
-            Integer loc = namePositionMap.get(fieldName.toLowerCase());
-            if (loc != null && loc >= 0) {
-                result.set(loc, group.getObject(fieldName));
-            } else {
-                System.out.println("Warning: can not find field name=" + fieldName);
-            }
-        }
-    }
-
-    private void setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
-        populateDefault(result);
-
-        List<PivotResult> pivotResults = new ArrayList<>();
-        while (argumentsInGroup.hasNext()) {
-            TupleEntry arguments = argumentsInGroup.next();
-            pivotResults.addAll(pivotStrategy.pivot(arguments));
-        }
-
-        Map<Integer, Set<Comparable<Serializable>>> countContextMap = new HashMap<>();
-        for (PivotResult pivotResult : pivotResults) {
-            Integer loc = namePositionMap.get(pivotResult.getColumnName().toLowerCase());
-            result.set(loc, aggregateValue(result.getObject(loc), loc, pivotResult, countContextMap));
-        }
-    }
-
-    private Object aggregateValue(Object oldValue, Integer loc, PivotResult result,
-            Map<Integer, Set<Comparable<Serializable>>> countContextMap) {
-        switch (result.getPivotType()) {
-        case ANY:
-            return aggregateAny(oldValue, result.getValue());
-        case MAX:
-            return aggregateMax(oldValue, result.getValue());
-        case MIN:
-            return aggregateMin(oldValue, result.getValue());
-        case SUM:
-            return aggregateSum(oldValue, result.getValue());
-        case COUNT:
-            return aggregateCount(loc, result.getValue(), countContextMap);
-        case EXISTS:
-            return aggregateExists(oldValue, result.getValue());
-        default:
-            return result.getValue();
-        }
-    }
-
     private static Object aggregateAny(Object oldValue, Object newValue) {
         if (newValue != null) {
             return newValue;
@@ -163,6 +91,83 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
+    private static Object aggregateExists(Object oldValue, Object newValue) {
+        return (Boolean) oldValue || (newValue != null);
+    }
+
+    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
+        Map<String, Integer> positionMap = new HashMap<>();
+        int pos = 0;
+        for (Object field : fieldDeclaration) {
+            String fieldName = (String) field;
+            positionMap.put(fieldName.toLowerCase(), pos++);
+        }
+        return positionMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
+        Tuple result = Tuple.size(getFieldDeclaration().size());
+        TupleEntry group = bufferCall.getGroup();
+        setupTupleForGroup(result, group);
+
+        Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
+        setupTupleForArgument(result, arguments);
+
+        bufferCall.getOutputCollector().add(result);
+    }
+
+    private void setupTupleForGroup(Tuple result, TupleEntry group) {
+        Fields fields = group.getFields();
+        for (Object field : fields) {
+            String fieldName = (String) field;
+            Integer loc = namePositionMap.get(fieldName.toLowerCase());
+            if (loc != null && loc >= 0) {
+                result.set(loc, group.getObject(fieldName));
+            } else {
+                System.out.println("Warning: can not find field name=" + fieldName);
+            }
+        }
+    }
+
+    private void setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
+        populateDefault(result);
+
+        List<PivotResult> pivotResults = new ArrayList<>();
+        while (argumentsInGroup.hasNext()) {
+            TupleEntry arguments = argumentsInGroup.next();
+            pivotResults.addAll(pivotStrategy.pivot(arguments));
+        }
+
+        Map<Integer, Set<Comparable<Serializable>>> countContextMap = new HashMap<>();
+        for (PivotResult pivotResult : pivotResults) {
+            Integer loc = namePositionMap.get(pivotResult.getColumnName().toLowerCase());
+            result.set(loc,
+                    aggregateValue(result.getObject(loc), loc, pivotResult, countContextMap));
+        }
+    }
+
+    private Object aggregateValue(Object oldValue, Integer loc, PivotResult result,
+            Map<Integer, Set<Comparable<Serializable>>> countContextMap) {
+        switch (result.getPivotType()) {
+            case ANY:
+                return aggregateAny(oldValue, result.getValue());
+            case MAX:
+                return aggregateMax(oldValue, result.getValue());
+            case MIN:
+                return aggregateMin(oldValue, result.getValue());
+            case SUM:
+                return aggregateSum(oldValue, result.getValue());
+            case COUNT:
+                return aggregateCount(loc, result.getValue(), countContextMap);
+            case EXISTS:
+                return aggregateExists(oldValue, result.getValue());
+            default:
+                return result.getValue();
+        }
+    }
+
     @SuppressWarnings({ "unchecked" })
     private Object aggregateCount(Integer loc, Object newValue,
             Map<Integer, Set<Comparable<Serializable>>> countContextMap) {
@@ -172,7 +177,8 @@ public class PivotBuffer extends BaseOperation implements Buffer {
             valueSet.add(comparable);
             countContextMap.put(loc, valueSet);
         } else {
-            Set<Comparable<Serializable>> valueSet = new HashSet<>(Collections.singleton(comparable));
+            Set<Comparable<Serializable>> valueSet = new HashSet<>(
+                    Collections.singleton(comparable));
             countContextMap.put(loc, valueSet);
         }
 
@@ -181,10 +187,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         } else {
             return countContextMap.get(loc).size();
         }
-    }
-
-    private static Object aggregateExists(Object oldValue, Object newValue) {
-        return (Boolean) oldValue || (newValue != null);
     }
 
     private void populateDefault(Tuple result) {

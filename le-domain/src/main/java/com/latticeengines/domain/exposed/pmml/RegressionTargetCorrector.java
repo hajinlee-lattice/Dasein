@@ -38,11 +38,11 @@ public class RegressionTargetCorrector extends AbstractModelVisitor {
         MiningFunctionType miningFunction = model.getFunctionName();
         PmmlModelUtils.setDefaultValueForMiningField(model, getPMML().getDataDictionary());
         switch (miningFunction) {
-        case REGRESSION:
-            processRegressionModel(model);
-            break;
-        default:
-            break;
+            case REGRESSION:
+                processRegressionModel(model);
+                break;
+            default:
+                break;
         }
 
         return VisitorAction.CONTINUE;
@@ -67,13 +67,13 @@ public class RegressionTargetCorrector extends AbstractModelVisitor {
 
         DataType dataType = dataField.getDataType();
         switch (dataType) {
-        case INTEGER:
-            break;
-        case FLOAT:
-        case DOUBLE:
-            return;
-        default:
-            throw new UnsupportedFeatureException(dataField, dataType);
+            case INTEGER:
+                break;
+            case FLOAT:
+            case DOUBLE:
+                return;
+            default:
+                throw new UnsupportedFeatureException(dataField, dataType);
         }
 
         Targets targets = model.getTargets();

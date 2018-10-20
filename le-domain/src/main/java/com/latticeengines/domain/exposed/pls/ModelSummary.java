@@ -60,6 +60,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public static final String STATUS = "Status";
     public static final String DISPLAY_NAME = "DisplayName";
     public static final String LAST_UPDATE_TIME = "LastUpdateTime";
+    boolean isMatch = true;
     private String id;
     private String name;
     private String displayName;
@@ -100,7 +101,6 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String modelType;
     private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
     private String dataCloudVersion;
-    boolean isMatch = true;
     private String moduleName;
     private Double crossValidatedMean;
     private Double crossValidatedStd;
@@ -151,25 +151,16 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         return id;
     }
 
-    @JsonIgnore
-    @MetricField(name = "ModelID", fieldType = MetricField.FieldType.STRING)
-    public String idFieldAsString() {
-        return id;
-    }
-
     @Override
     @JsonProperty("Id")
     public void setId(String id) {
         this.id = id;
     }
 
-    @Override
-    @JsonProperty("Tenant")
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        if (tenant != null) {
-            setTenantId(tenant.getPid());
-        }
+    @JsonIgnore
+    @MetricField(name = "ModelID", fieldType = MetricField.FieldType.STRING)
+    public String idFieldAsString() {
+        return id;
     }
 
     @Override
@@ -179,6 +170,15 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return tenant;
+    }
+
+    @Override
+    @JsonProperty("Tenant")
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
     }
 
     public void addPredictor(Predictor predictor) {
@@ -453,14 +453,14 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @JsonProperty("EventTableName")
-    public void setEventTableName(String eventTableName) {
-        this.eventTableName = eventTableName;
-    }
-
-    @JsonProperty("EventTableName")
     @Column(name = "EVENT_TABLE_NAME", nullable = true)
     public String getEventTableName() {
         return eventTableName;
+    }
+
+    @JsonProperty("EventTableName")
+    public void setEventTableName(String eventTableName) {
+        this.eventTableName = eventTableName;
     }
 
     @JsonProperty("SourceSchemaInterpretation")

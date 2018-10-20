@@ -18,7 +18,8 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 
 @Component("globalAuthUserEntityMgr")
-public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser> implements GlobalAuthUserEntityMgr {
+public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser>
+        implements GlobalAuthUserEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthUserEntityMgrImpl.class);
 
@@ -45,7 +46,7 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthUser gaUser) {
-    	    getDao().create(gaUser);
+        getDao().create(gaUser);
     }
 
     @Override

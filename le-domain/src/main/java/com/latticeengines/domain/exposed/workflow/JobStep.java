@@ -17,7 +17,6 @@ public class JobStep implements HasId<Long>, HasName {
     private JobStatus stepStatus;
     private String jobStepType;
 
-
     @Override
     @JsonProperty
     public String getName() {

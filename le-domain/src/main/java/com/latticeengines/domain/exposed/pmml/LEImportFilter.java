@@ -15,8 +15,8 @@ public class LEImportFilter extends ImportFilter {
     }
 
     @Override
-    public void startElement(String namespaceURI, String localName, String qualifiedName, Attributes attributes)
-            throws SAXException {
+    public void startElement(String namespaceURI, String localName, String qualifiedName,
+            Attributes attributes) throws SAXException {
 
         if ("PMML".equals(localName)) {
             int index = attributes.getIndex("", localName);

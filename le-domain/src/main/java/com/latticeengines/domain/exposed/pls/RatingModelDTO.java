@@ -14,6 +14,23 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RatingModelDTO {
 
+    @JsonProperty("id")
+    private String id;
+    @JsonProperty("iteration")
+    private int iteration;
+    @JsonProperty("created")
+    private Date created;
+    @JsonProperty("createdBy")
+    private String createdBy;
+    @JsonProperty("modelingJobStatus")
+    private JobStatus modelingJobStatus;
+    @JsonProperty("modelSummaryId")
+    private String modelSummaryId;
+    @JsonProperty("derivedFromRatingModelId")
+    private String derivedFromRatingModelId;
+    @JsonProperty("ratingmodel_attributes")
+    private Set<AttributeLookup> ratingModelAttributes;
+
     public RatingModelDTO() {
     }
 
@@ -32,76 +49,52 @@ public class RatingModelDTO {
         }
     }
 
-    @JsonProperty("id")
-    private String id;
-
-    @JsonProperty("iteration")
-    private int iteration;
-
-    @JsonProperty("created")
-    private Date created;
-
-    @JsonProperty("createdBy")
-    private String createdBy;
-
-    @JsonProperty("modelingJobStatus")
-    private JobStatus modelingJobStatus;
-
-    @JsonProperty("modelSummaryId")
-    private String modelSummaryId;
-
-    @JsonProperty("derivedFromRatingModelId")
-    private String derivedFromRatingModelId;
-
-    @JsonProperty("ratingmodel_attributes")
-    private Set<AttributeLookup> ratingModelAttributes;
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getId() {
         return this.id;
     }
 
-    public void setIteration(int iteration) {
-        this.iteration = iteration;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public int getIteration() {
         return this.iteration;
     }
 
-    public void setCreated(Date time) {
-        this.created = time;
+    public void setIteration(int iteration) {
+        this.iteration = iteration;
     }
 
     public Date getCreated() {
         return this.created;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     public String getCreatedBy() {
         return this.createdBy;
     }
 
-    public void setModelingJobStatus(JobStatus status) {
-        this.modelingJobStatus = status;
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public JobStatus getModelingJobStatus() {
         return this.modelingJobStatus;
     }
 
-    public void setModelSummaryId(String modelSummaryId) {
-        this.modelSummaryId = modelSummaryId;
+    public void setModelingJobStatus(JobStatus status) {
+        this.modelingJobStatus = status;
     }
 
     public String getModelSummaryId() {
         return this.modelSummaryId;
+    }
+
+    public void setModelSummaryId(String modelSummaryId) {
+        this.modelSummaryId = modelSummaryId;
     }
 
     public String getDerivedFromRatingModelId() {

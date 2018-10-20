@@ -6,14 +6,16 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public final class ImportConfigurationFactory {
 
-    public static ImportConfiguration getImportConfiguration(SourceType sourceType, String configStr) {
+    public static ImportConfiguration getImportConfiguration(SourceType sourceType,
+            String configStr) {
         switch (sourceType) {
             case VISIDB:
                 return getVdbImportConfiguration();
             case FILE:
                 return getCSVImportConfiguration(configStr);
             default:
-                throw new RuntimeException(String.format("Source %s not supported!", sourceType.getName()));
+                throw new RuntimeException(
+                        String.format("Source %s not supported!", sourceType.getName()));
         }
     }
 

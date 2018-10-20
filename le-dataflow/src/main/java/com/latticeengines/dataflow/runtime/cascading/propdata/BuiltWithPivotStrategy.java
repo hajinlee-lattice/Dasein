@@ -29,13 +29,15 @@ public class BuiltWithPivotStrategy implements PivotStrategy {
         List<PivotResult> results = new ArrayList<>();
         String tech = arguments.getString("Technology_Name");
         if (hasMarketingAutomation(tech)) {
-            PivotResult result = new PivotResult("BusinessTechnologiesMarketingAutomation", PivotType.EXISTS);
+            PivotResult result = new PivotResult("BusinessTechnologiesMarketingAutomation",
+                    PivotType.EXISTS);
             result.setValue(true);
             results.add(result);
         }
 
         if (hasSocialMediaPresence(tech)) {
-            PivotResult result = new PivotResult("BusinessTechnologiesSocialMediaPresence", PivotType.EXISTS);
+            PivotResult result = new PivotResult("BusinessTechnologiesSocialMediaPresence",
+                    PivotType.EXISTS);
             result.setValue(true);
             results.add(result);
         }
@@ -43,7 +45,8 @@ public class BuiltWithPivotStrategy implements PivotStrategy {
         String tag = arguments.getString("Technology_Tag").toLowerCase();
 
         if (hasOpenSource(tech, tag)) {
-            PivotResult result = new PivotResult("BusinessTechnologiesOpenSourceAdoption", PivotType.EXISTS);
+            PivotResult result = new PivotResult("BusinessTechnologiesOpenSourceAdoption",
+                    PivotType.EXISTS);
             result.setValue(true);
             results.add(result);
         }
@@ -75,20 +78,21 @@ public class BuiltWithPivotStrategy implements PivotStrategy {
     }
 
     private boolean hasMarketingAutomation(String tech) {
-        return Arrays.asList("eloqua", "marketo", "act-on", "pardot", "hubspot", "vtrenz (silverpop)").contains(
-                tech.toLowerCase());
+        return Arrays
+                .asList("eloqua", "marketo", "act-on", "pardot", "hubspot", "vtrenz (silverpop)")
+                .contains(tech.toLowerCase());
     }
 
     private boolean hasSocialMediaPresence(String tech) {
         if (StringUtils.isEmpty(tech))
             return false;
         String lowerTech = tech.toLowerCase();
-        return lowerTech.contains("facebook") || lowerTech.contains("twitter") || lowerTech.contains("linkedin");
+        return lowerTech.contains("facebook") || lowerTech.contains("twitter")
+                || lowerTech.contains("linkedin");
     }
 
     private boolean hasOpenSource(String tech, String tag) {
-        return "framework".equalsIgnoreCase(tag)
-                || ("web server".equalsIgnoreCase(tag) && (tech.toLowerCase().contains("apache") || tech.toLowerCase()
-                        .contains("nginx")));
+        return "framework".equalsIgnoreCase(tag) || ("web server".equalsIgnoreCase(tag)
+                && (tech.toLowerCase().contains("apache") || tech.toLowerCase().contains("nginx")));
     }
 }

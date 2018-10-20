@@ -10,9 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CounterGroup implements org.apache.hadoop.mapreduce.v2.api.records.CounterGroup {
 
+    List<Counter> counters = new ArrayList<>();
     private String name;
     private String displayName;
-    List<Counter> counters = new ArrayList<>();
 
     @Override
     @JsonProperty("counterGroupName")
@@ -21,9 +21,21 @@ public class CounterGroup implements org.apache.hadoop.mapreduce.v2.api.records.
     }
 
     @Override
+    @JsonProperty("counterGroupName")
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
     @JsonProperty("counterGroupDisplayName")
     public String getDisplayName() {
         return displayName;
+    }
+
+    @Override
+    @JsonProperty("counterGroupDisplayName")
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @JsonProperty("counter")
@@ -53,20 +65,9 @@ public class CounterGroup implements org.apache.hadoop.mapreduce.v2.api.records.
     }
 
     @Override
-    @JsonProperty("counterGroupName")
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    @JsonProperty("counterGroupDisplayName")
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
     @JsonIgnore
-    public void addAllCounters(Map<String, org.apache.hadoop.mapreduce.v2.api.records.Counter> counters) {
+    public void addAllCounters(
+            Map<String, org.apache.hadoop.mapreduce.v2.api.records.Counter> counters) {
         counters.putAll(counters);
     }
 

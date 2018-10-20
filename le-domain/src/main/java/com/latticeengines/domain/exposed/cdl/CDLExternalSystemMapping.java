@@ -15,10 +15,6 @@ public class CDLExternalSystemMapping {
     @JsonProperty("displayName")
     private String displayName;
 
-    public String getFieldName() {
-        return fieldName;
-    }
-
     public CDLExternalSystemMapping() {
 
     }
@@ -27,6 +23,10 @@ public class CDLExternalSystemMapping {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.displayName = displayName;
+    }
+
+    public String getFieldName() {
+        return fieldName;
     }
 
     public void setFieldName(String fieldName) {

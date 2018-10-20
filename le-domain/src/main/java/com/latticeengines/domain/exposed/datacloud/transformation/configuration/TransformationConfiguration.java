@@ -9,7 +9,11 @@ public interface TransformationConfiguration {
 
     String getSourceName();
 
+    void setSourceName(String sourceName);
+
     Map<String, String> getSourceConfigurations();
+
+    void setSourceConfigurations(Map<String, String> sourceConfigurations);
 
     InputSourceConfig getInputSourceConfig() throws UnsupportedOperationException;
 
@@ -30,10 +34,6 @@ public interface TransformationConfiguration {
     void setRootOperationId(String rootOperationId);
 
     List<SourceColumn> getSourceColumns();
-
-    void setSourceName(String sourceName);
-
-    void setSourceConfigurations(Map<String, String> sourceConfigurations);
 
     void setSourceColumns(List<SourceColumn> sourceColumns);
 }

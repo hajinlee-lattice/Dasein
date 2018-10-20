@@ -27,27 +27,29 @@ public class TransactionUtils {
 
     private static final Logger log = LoggerFactory.getLogger(TransactionUtils.class);
 
-    public static List<Table> createTxnTables(TableRoleInCollection role, List<PeriodStrategy> periodStrategies,
-            Configuration yarnConfiguration, String tableBasePath) {
+    public static List<Table> createTxnTables(TableRoleInCollection role,
+            List<PeriodStrategy> periodStrategies, Configuration yarnConfiguration,
+            String tableBasePath) {
         SchemaInterpretation schema;
         List<String> tablePrefixes = new ArrayList<>();
         switch (role) {
-        case ConsolidatedRawTransaction:
-            schema = SchemaInterpretation.TransactionRaw;
-            tablePrefixes.add("");
-            break;
-        case ConsolidatedDailyTransaction:
-            schema = SchemaInterpretation.TransactionDailyAggregation;
-            tablePrefixes.add("");
-            break;
-        case ConsolidatedPeriodTransaction:
-            schema = SchemaInterpretation.TransactionPeriodAggregation;
-            periodStrategies.forEach(strategy -> {
-                tablePrefixes.add(PeriodStrategyUtils.getTablePrefixFromPeriodStrategy(strategy));
-            });
-            break;
-        default:
-            throw new UnsupportedOperationException(role + " is not a supported period store.");
+            case ConsolidatedRawTransaction:
+                schema = SchemaInterpretation.TransactionRaw;
+                tablePrefixes.add("");
+                break;
+            case ConsolidatedDailyTransaction:
+                schema = SchemaInterpretation.TransactionDailyAggregation;
+                tablePrefixes.add("");
+                break;
+            case ConsolidatedPeriodTransaction:
+                schema = SchemaInterpretation.TransactionPeriodAggregation;
+                periodStrategies.forEach(strategy -> {
+                    tablePrefixes
+                            .add(PeriodStrategyUtils.getTablePrefixFromPeriodStrategy(strategy));
+                });
+                break;
+            default:
+                throw new UnsupportedOperationException(role + " is not a supported period store.");
         }
 
         List<Table> txnTables = new ArrayList<>();
@@ -63,7 +65,8 @@ public class TransactionUtils {
                 }
                 HdfsUtils.mkdir(yarnConfiguration, tableBasePath + "/" + tableName);
             } catch (Exception e) {
-                log.error("Failed to initialize transaction store " + tableBasePath + "/" + tableName);
+                log.error("Failed to initialize transaction store " + tableBasePath + "/"
+                        + tableName);
                 throw new RuntimeException("Failed to create transaction store " + role);
             }
 
@@ -86,7 +89,8 @@ public class TransactionUtils {
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroPath);
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            if (ProductType.Analytic.name().equals(String.valueOf(record.get(InterfaceName.ProductType.name())))) {
+            if (ProductType.Analytic.name()
+                    .equals(String.valueOf(record.get(InterfaceName.ProductType.name())))) {
                 return true;
             }
         }

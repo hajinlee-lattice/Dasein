@@ -21,7 +21,8 @@ public class ModelingConfigFilter {
 
     }
 
-    public ModelingConfigFilter(CrossSellModelingConfigKeys configName, ComparisonType criteria, Integer value) {
+    public ModelingConfigFilter(CrossSellModelingConfigKeys configName, ComparisonType criteria,
+            Integer value) {
         this.configName = configName;
         this.criteria = criteria;
         this.value = value;

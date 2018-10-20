@@ -43,126 +43,126 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class TapOutputFormat extends RichOutputFormat<Tuple> implements FinalizeOnMaster {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(TapOutputFormat.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TapOutputFormat.class);
 
-	private FlowNode flowNode;
+    private FlowNode flowNode;
 
-	private transient org.apache.hadoop.conf.Configuration config;
-	private transient FlinkFlowProcess flowProcess;
-	private transient SinkStreamGraph streamGraph;
-	private transient SinkBoundaryInStage sourceStage;
+    private transient org.apache.hadoop.conf.Configuration config;
+    private transient FlinkFlowProcess flowProcess;
+    private transient SinkStreamGraph streamGraph;
+    private transient SinkBoundaryInStage sourceStage;
 
-	private transient long processBeginTime;
+    private transient long processBeginTime;
 
-	public TapOutputFormat(FlowNode node) {
-		super();
-		this.flowNode = node;
-	}
+    public TapOutputFormat(FlowNode node) {
+        super();
+        this.flowNode = node;
+    }
 
-	@Override
-	public void configure(Configuration config) {
+    @Override
+    public void configure(Configuration config) {
 
-		this.config = FlinkConfigConverter.toHadoopConfig(config);
-	}
+        this.config = FlinkConfigConverter.toHadoopConfig(config);
+    }
 
-	@Override
-	public void open(int taskNumber, int numTasks) throws IOException {
+    @Override
+    public void open(int taskNumber, int numTasks) throws IOException {
 
-		this.processBeginTime = System.currentTimeMillis();
+        this.processBeginTime = System.currentTimeMillis();
 
-		BigInteger numId = new BigInteger(flowNode.getID(), 16);
-		String hadoopTaskId = String.format( "attempt_%012d_0000_%s_%06d_0", numId.longValue(), "m", taskNumber );
+        BigInteger numId = new BigInteger(flowNode.getID(), 16);
+        String hadoopTaskId = String.format("attempt_%012d_0000_%s_%06d_0", numId.longValue(), "m",
+                taskNumber);
 
-		this.config.setInt("mapred.task.partition", taskNumber);
-		this.config.set("mapred.task.id", hadoopTaskId);
+        this.config.setInt("mapred.task.partition", taskNumber);
+        this.config.set("mapred.task.id", hadoopTaskId);
 
-		try {
+        try {
 
-			flowProcess = new FlinkFlowProcess(this.config, this.getRuntimeContext(), flowNode.getID());
+            flowProcess = new FlinkFlowProcess(this.config, this.getRuntimeContext(),
+                    flowNode.getID());
 
-			Set<FlowElement> sources = flowNode.getSourceElements();
-			if(sources.size() != 1) {
-				throw new RuntimeException("FlowNode for TapOutputFormat may only have a single source");
-			}
-			FlowElement sourceElement = sources.iterator().next();
-			if(!(sourceElement instanceof Boundary)) {
-				throw new RuntimeException("Source of TapOutputFormat must be a Boundary");
-			}
-			Boundary source = (Boundary)sourceElement;
+            Set<FlowElement> sources = flowNode.getSourceElements();
+            if (sources.size() != 1) {
+                throw new RuntimeException(
+                        "FlowNode for TapOutputFormat may only have a single source");
+            }
+            FlowElement sourceElement = sources.iterator().next();
+            if (!(sourceElement instanceof Boundary)) {
+                throw new RuntimeException("Source of TapOutputFormat must be a Boundary");
+            }
+            Boundary source = (Boundary) sourceElement;
 
-			streamGraph = new SinkStreamGraph( flowProcess, flowNode, source );
-			sourceStage = this.streamGraph.getSourceStage();
+            streamGraph = new SinkStreamGraph(flowProcess, flowNode, source);
+            sourceStage = this.streamGraph.getSourceStage();
 
-			for( Duct head : streamGraph.getHeads() ) {
-				LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
-			}
+            for (Duct head : streamGraph.getHeads()) {
+                LOG.info("sourcing from: " + ((ElementDuct) head).getFlowElement());
+            }
 
-			for( Duct tail : streamGraph.getTails() ) {
-				LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
-			}
-		}
-		catch( Throwable throwable ) {
+            for (Duct tail : streamGraph.getTails()) {
+                LOG.info("sinking to: " + ((ElementDuct) tail).getFlowElement());
+            }
+        } catch (Throwable throwable) {
 
-			if( throwable instanceof CascadingException) {
-				throw (CascadingException) throwable;
-			}
+            if (throwable instanceof CascadingException) {
+                throw (CascadingException) throwable;
+            }
 
-			throw new FlowException( "internal error during TapOutputFormat configuration", throwable );
-		}
+            throw new FlowException("internal error during TapOutputFormat configuration",
+                    throwable);
+        }
 
-		streamGraph.prepare();
+        streamGraph.prepare();
 
-	}
+    }
 
-	@Override
-	public void writeRecord(Tuple t) throws IOException {
+    @Override
+    public void writeRecord(Tuple t) throws IOException {
 
-		try {
-			sourceStage.run( t );
-		}
-		catch( OutOfMemoryError error ) {
-			throw error;
-		}
-		catch( IOException exception ) {
-			throw exception;
-		}
-		catch( Throwable throwable ) {
+        try {
+            sourceStage.run(t);
+        } catch (OutOfMemoryError error) {
+            throw error;
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Throwable throwable) {
 
-			if( throwable instanceof CascadingException ) {
-				throw (CascadingException) throwable;
-			}
+            if (throwable instanceof CascadingException) {
+                throw (CascadingException) throwable;
+            }
 
-			throw new FlowException( "internal error during TapOutputFormat execution", throwable );
-		}
-	}
+            throw new FlowException("internal error during TapOutputFormat execution", throwable);
+        }
+    }
 
-	@Override
-	public void close() throws IOException {
-		try {
-			streamGraph.cleanup();
-		}
-		finally {
-			long processEndTime = System.currentTimeMillis();
+    @Override
+    public void close() throws IOException {
+        try {
+            streamGraph.cleanup();
+        } finally {
+            long processEndTime = System.currentTimeMillis();
 
-			flowProcess.increment( SliceCounters.Process_End_Time, processEndTime );
-			flowProcess.increment( SliceCounters.Process_Duration, processEndTime - this.processBeginTime );
-		}
-	}
+            flowProcess.increment(SliceCounters.Process_End_Time, processEndTime);
+            flowProcess.increment(SliceCounters.Process_Duration,
+                    processEndTime - this.processBeginTime);
+        }
+    }
 
-	@Override
-	public void finalizeGlobal(int parallelism) throws IOException {
+    @Override
+    public void finalizeGlobal(int parallelism) throws IOException {
 
-		org.apache.hadoop.conf.Configuration config = HadoopUtil.copyConfiguration(this.config);
-		Tap tap = this.flowNode.getSinkTaps().iterator().next();
+        org.apache.hadoop.conf.Configuration config = HadoopUtil.copyConfiguration(this.config);
+        Tap tap = this.flowNode.getSinkTaps().iterator().next();
 
-		config.setBoolean(HadoopUtil.CASCADING_FLOW_EXECUTING, false);
-		HadoopUtil.setOutputPath(config, new Path(tap.getIdentifier()));
+        config.setBoolean(HadoopUtil.CASCADING_FLOW_EXECUTING, false);
+        HadoopUtil.setOutputPath(config, new Path(tap.getIdentifier()));
 
-		Hadoop18TapUtil.cleanupJob( config );
-	}
+        Hadoop18TapUtil.cleanupJob(config);
+    }
 }

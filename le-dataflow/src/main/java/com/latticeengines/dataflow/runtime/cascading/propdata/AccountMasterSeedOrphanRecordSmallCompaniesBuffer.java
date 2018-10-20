@@ -15,7 +15,8 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterSeedOrphanRecordSmallCompaniesBuffer extends BaseOperation implements Buffer {
+public class AccountMasterSeedOrphanRecordSmallCompaniesBuffer extends BaseOperation
+        implements Buffer {
     private static final long serialVersionUID = 4217950767704131475L;
 
     private static final String FLAG_DROP_SMALL_BUSINESS = "_FLAG_DROP_SMALL_BUSINESS_";

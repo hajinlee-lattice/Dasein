@@ -28,35 +28,29 @@ import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.pipe.HashJoin;
 
 /**
- * Injects a Boundary before a CoGroup in order to split of the CoGroup as a separate node
- * and have all predecessors in individual pipes.
+ * Injects a Boundary before a CoGroup in order to split of the CoGroup as a
+ * separate node and have all predecessors in individual pipes.
  */
-public class BoundaryBeforeHashJoinTransformer extends RuleInsertionTransformer
-{
-	public BoundaryBeforeHashJoinTransformer() {
-		super(
-				BalanceAssembly,
-				new HashJoinMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.BeforeEachEdge
-		);
-	}
+public class BoundaryBeforeHashJoinTransformer extends RuleInsertionTransformer {
+    public BoundaryBeforeHashJoinTransformer() {
+        super(BalanceAssembly, new HashJoinMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.BeforeEachEdge);
+    }
 
-	public static class HashJoinMatcher extends RuleExpression
-	{
-		public HashJoinMatcher()
-		{
-			super( new HashJoinGraph() );
-		}
-	}
+    public static class HashJoinMatcher extends RuleExpression {
+        public HashJoinMatcher() {
+            super(new HashJoinGraph());
+        }
+    }
 
-	public static class HashJoinGraph extends ExpressionGraph {
+    public static class HashJoinGraph extends ExpressionGraph {
 
-		public HashJoinGraph() {
+        public HashJoinGraph() {
 
-			super(SearchOrder.ReverseTopological, new FlowElementExpression(ElementCapture.Primary, HashJoin.class));
+            super(SearchOrder.ReverseTopological,
+                    new FlowElementExpression(ElementCapture.Primary, HashJoin.class));
 
-		}
-	}
+        }
+    }
 
 }

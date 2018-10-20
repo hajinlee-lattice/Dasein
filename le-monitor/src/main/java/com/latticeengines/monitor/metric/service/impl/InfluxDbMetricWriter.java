@@ -53,9 +53,9 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private static final String DB_CACHE_KEY = "InfluxDB";
     private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
-    
+
     @Value("${monitor.influxdb.enabled:false}")
-	private String enableInflux;
+    private String enableInflux;
 
     @Value("${monitor.influxdb.url:}")
     private String url;
@@ -92,14 +92,16 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 for (MetricDB db : MetricDB.values()) {
                     if (!dbNames.contains(db.getDbName())) {
                         createDatabaseIfNotExists(db);
-                        log.info("Creating MetricDB " + db.getDbName() + " because it is not in the influxDB.");
+                        log.info("Creating MetricDB " + db.getDbName()
+                                + " because it is not in the influxDB.");
                     }
 
                     List<String> policies = listRetentionPolicies(db.getDbName());
                     for (RetentionPolicyImpl policy : RetentionPolicyImpl.values()) {
                         if (!policies.contains(policy.getName())) {
                             createRetentionPolicyIfNotExist(db, policy);
-                            log.info("Creating Retention Policy " + policy.getName() + " in db " + db.getDbName());
+                            log.info("Creating Retention Policy " + policy.getName() + " in db "
+                                    + db.getDbName());
                         }
                     }
                 }
@@ -107,7 +109,8 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 enabled = true;
             } catch (Exception e) {
                 if (enabled) {
-                    log.warn("Had problem connecting influxDb at " + url + ". Disable the metric service.");
+                    log.warn("Had problem connecting influxDb at " + url
+                            + ". Disable the metric service.");
                     enabled = false;
                 }
             }
@@ -121,7 +124,8 @@ public class InfluxDbMetricWriter implements MetricWriter {
         }
     }
 
-    public <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement) {
+    public <F extends Fact, D extends Dimension> void write(MetricDB db,
+            Measurement<F, D> measurement) {
         write(db, Collections.singletonList(measurement), null);
     }
 
@@ -138,13 +142,15 @@ public class InfluxDbMetricWriter implements MetricWriter {
             }
             if (needToWrite) {
                 try {
-                    final BatchPoints batchPoints = generateBatchPoints(db, measurements, fieldMaps);
+                    final BatchPoints batchPoints = generateBatchPoints(db, measurements,
+                            fieldMaps);
                     if (batchPoints != null) {
                         monitorExecutor.execute(new Runnable() {
                             @Override
                             public void run() {
                                 getInfluxDB().write(batchPoints);
-                                log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
+                                log.debug("Write " + batchPoints.getPoints().size()
+                                        + " points to influxDB.");
                             }
                         });
                     }
@@ -184,7 +190,8 @@ public class InfluxDbMetricWriter implements MetricWriter {
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());
         Collection<String> excludedSystemTags = measurements.get(0).excludeSystemTags();
         if (!excludedSystemTags.contains(MetricUtils.TAG_HOST)) {
-            builder.tag(MetricUtils.TAG_HOST, getAdvertiseName() == null ? MetricUtils.NULL : getAdvertiseName());
+            builder.tag(MetricUtils.TAG_HOST,
+                    getAdvertiseName() == null ? MetricUtils.NULL : getAdvertiseName());
         }
         if (!excludedSystemTags.contains(MetricUtils.TAG_ENVIRONMENT)) {
             builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
@@ -196,7 +203,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
         List<Point> points = new ArrayList<>();
 
         for (int i = 0; i < measurements.size(); i++) {
-            Measurement<F, D> measurement  = measurements.get(i);
+            Measurement<F, D> measurement = measurements.get(i);
             Fact fact = measurement.getFact();
             Dimension dimension = measurement.getDimension();
             policy = measurement.getRetentionPolicy();
@@ -241,7 +248,8 @@ public class InfluxDbMetricWriter implements MetricWriter {
                     public InfluxDB load(String key) {
                         if (DB_CACHE_KEY.equals(key)) {
                             String decryptedPassword = CipherUtils.decrypt(password);
-                            InfluxDB influxDB = InfluxDBFactory.connect(url, username, decryptedPassword);
+                            InfluxDB influxDB = InfluxDBFactory.connect(url, username,
+                                    decryptedPassword);
                             influxDB.setLogLevel(logLevel);
                             influxDB.enableGzip();
                             return influxDB;
@@ -254,12 +262,13 @@ public class InfluxDbMetricWriter implements MetricWriter {
     }
 
     private void createRetentionPolicyIfNotExist(MetricDB db, RetentionPolicyImpl policy) {
-        String queryString = String.format("CREATE RETENTION POLICY \"%s\" ON \"%s\" DURATION %s REPLICATION %d",
+        String queryString = String.format(
+                "CREATE RETENTION POLICY \"%s\" ON \"%s\" DURATION %s REPLICATION %d",
                 policy.getName(), db.getDbName(), policy.getDuration(), policy.getReplication());
         JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
         if (jsonNode.get("results").get(0).has("error")) {
-            throw new RuntimeException(
-                    "Failed to create retention policy: " + jsonNode.get("results").get(0).get("error"));
+            throw new RuntimeException("Failed to create retention policy: "
+                    + jsonNode.get("results").get(0).get("error"));
         }
     }
 
@@ -299,8 +308,8 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private JsonNode queryInfluxDb(String query, String dbName) {
         try {
             String response = HttpClientWithOptionalRetryUtils.sendGetRequest(url + "/query", false,
-                    Collections.<BasicNameValuePair> emptyList(), new BasicNameValuePair("q", query),
-                    new BasicNameValuePair("db", dbName));
+                    Collections.<BasicNameValuePair> emptyList(),
+                    new BasicNameValuePair("q", query), new BasicNameValuePair("db", dbName));
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readTree(response);
         } catch (IOException e) {

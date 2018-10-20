@@ -22,7 +22,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class DunsRedirectFromDomDunsMapFunc extends BaseOperation implements Function {
 
-	private static final long serialVersionUID = 1618206727776198248L;
+    private static final long serialVersionUID = 1618206727776198248L;
 
     private String bookSource;
     private String priDunsField;
@@ -33,8 +33,8 @@ public class DunsRedirectFromDomDunsMapFunc extends BaseOperation implements Fun
     private int keyPartitionLoc;
     private int bookSourceLoc;
 
-    public DunsRedirectFromDomDunsMapFunc(Fields fieldDeclaration, String bookSource, String priDunsField,
-            String priCtryDunsField, String priStDunsField) {
+    public DunsRedirectFromDomDunsMapFunc(Fields fieldDeclaration, String bookSource,
+            String priDunsField, String priCtryDunsField, String priStDunsField) {
         super(fieldDeclaration);
         Map<String, Integer> namePositionMap = getPositionMap(fieldDeclaration);
         this.bookSource = bookSource;
@@ -58,19 +58,23 @@ public class DunsRedirectFromDomDunsMapFunc extends BaseOperation implements Fun
         if (!duns.equals(priDuns) && StringUtils.isNotBlank(priDuns)) {
             Tuple result = Tuple.size(getFieldDeclaration().size());
             String[] keys = { MatchKey.Name.name() };
-            result = updateResult(result, duns, priDuns, MatchKeyUtils.buildKeyPartition(Arrays.asList(keys)));
+            result = updateResult(result, duns, priDuns,
+                    MatchKeyUtils.buildKeyPartition(Arrays.asList(keys)));
             functionCall.getOutputCollector().add(result);
         }
         if (!duns.equals(priCtryDuns) && StringUtils.isNotBlank(priCtryDuns)) {
             Tuple result = Tuple.size(getFieldDeclaration().size());
             String[] keys = { MatchKey.Name.name(), MatchKey.Country.name() };
-            result = updateResult(result, duns, priCtryDuns, MatchKeyUtils.buildKeyPartition(Arrays.asList(keys)));
+            result = updateResult(result, duns, priCtryDuns,
+                    MatchKeyUtils.buildKeyPartition(Arrays.asList(keys)));
             functionCall.getOutputCollector().add(result);
         }
         if (!duns.equals(priStDuns) && StringUtils.isNotBlank(priStDuns)) {
             Tuple result = Tuple.size(getFieldDeclaration().size());
-            String[] keys = { MatchKey.Name.name(), MatchKey.Country.name(), MatchKey.State.name() };
-            result = updateResult(result, duns, priStDuns, MatchKeyUtils.buildKeyPartition(Arrays.asList(keys)));
+            String[] keys = { MatchKey.Name.name(), MatchKey.Country.name(),
+                    MatchKey.State.name() };
+            result = updateResult(result, duns, priStDuns,
+                    MatchKeyUtils.buildKeyPartition(Arrays.asList(keys)));
             functionCall.getOutputCollector().add(result);
         }
     }

@@ -21,18 +21,6 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
 
     private List<String> groupFields;
 
-    public static class Context extends BaseAggregator.Context {
-        Long id = null;
-        String duns = null;
-        String duDuns = null;
-        String guDuns = null;
-        Integer employee = null;
-        Long salesVol = null;
-        String isPriLoc = null;
-        String isPriAct = null;
-        String country = null;
-    }
-
     public AMSeedPriLocAggregator(Fields fieldDeclaration, List<String> groupFields) {
         super(fieldDeclaration);
         this.groupFields = groupFields;
@@ -66,68 +54,66 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
             return update(context, arguments);
         }
         int res = RuleBasedComparator.preferBooleanValuedStringAsTrue(
-                arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT),
-                context.isPriAct);
+                arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT), context.isPriAct);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferNotEmptyString(arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
-                context.duns);
+        res = RuleBasedComparator.preferNotEmptyString(
+                arguments.getString(DataCloudConstants.AMS_ATTR_DUNS), context.duns);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferNotEmptyString(arguments.getString(DataCloudConstants.ATTR_DU_DUNS),
-                context.duDuns);
+        res = RuleBasedComparator.preferNotEmptyString(
+                arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duDuns);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
         res = RuleBasedComparator.preferLargerLongWithThreshold(
-                (Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                context.salesVol, 100000000, 10000000);
+                (Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US), context.salesVol,
+                100000000, 10000000);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferEqualStrings(arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
-                arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duns,
-                context.duDuns);
+        res = RuleBasedComparator.preferEqualStrings(
+                arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
+                arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duns, context.duDuns);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferEqualStrings(arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
-                arguments.getString(DataCloudConstants.ATTR_GU_DUNS), context.duns,
-                context.guDuns);
+        res = RuleBasedComparator.preferEqualStrings(
+                arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
+                arguments.getString(DataCloudConstants.ATTR_GU_DUNS), context.duns, context.guDuns);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferLargerLong((Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                context.salesVol);
+        res = RuleBasedComparator.preferLargerLong(
+                (Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US), context.salesVol);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
         res = RuleBasedComparator.preferBooleanValuedStringAsTrue(
-                arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_LOCATION),
-                context.isPriLoc);
+                arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_LOCATION), context.isPriLoc);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferExpectedString(arguments.getString(DataCloudConstants.AMS_ATTR_COUNTRY),
-                context.country,
+        res = RuleBasedComparator.preferExpectedString(
+                arguments.getString(DataCloudConstants.AMS_ATTR_COUNTRY), context.country,
                 LocationUtils.USA);
         if (res > 0) {
             return update(context, arguments);
@@ -165,5 +151,17 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         context.isPriAct = arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT);
         context.country = arguments.getString(DataCloudConstants.AMS_ATTR_COUNTRY);
         return context;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Long id = null;
+        String duns = null;
+        String duDuns = null;
+        String guDuns = null;
+        Integer employee = null;
+        Long salesVol = null;
+        String isPriLoc = null;
+        String isPriAct = null;
+        String country = null;
     }
 }

@@ -1,9 +1,10 @@
 package com.latticeengines.domain.exposed.datacloud.match.patch;
 
+import org.slf4j.event.Level;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.event.Level;
 
 /**
  * Request entity for DataCloud Lookup Patcher

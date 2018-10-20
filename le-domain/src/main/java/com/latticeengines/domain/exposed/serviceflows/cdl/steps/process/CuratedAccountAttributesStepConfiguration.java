@@ -9,4 +9,3 @@ public class CuratedAccountAttributesStepConfiguration extends BaseProcessEntity
         return BusinessEntity.CuratedAccount;
     }
 }
-

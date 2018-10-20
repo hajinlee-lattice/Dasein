@@ -27,7 +27,8 @@ public class FrontEndSort {
 
     // for jackson
     @SuppressWarnings("unused")
-	private FrontEndSort(){}
+    private FrontEndSort() {
+    }
 
     public List<AttributeLookup> getAttributes() {
         return attributes;
@@ -38,7 +39,7 @@ public class FrontEndSort {
     }
 
     public Boolean getDescending() {
-        if (Boolean.TRUE.equals(descending)){
+        if (Boolean.TRUE.equals(descending)) {
             return true;
         } else {
             descending = null;

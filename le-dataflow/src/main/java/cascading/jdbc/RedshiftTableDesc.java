@@ -38,24 +38,24 @@ import cascading.util.Util;
  */
 public class RedshiftTableDesc extends TableDesc {
 
-	private static final long serialVersionUID = -3792499487098752666L;
+    private static final long serialVersionUID = -3792499487098752666L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
 
     private String distStyle;
     private String distributionkey;
     private String sortKeyType;
     private String[] sortKeys;
 
-    public RedshiftTableDesc(String tableName, String[] columnNames, String[] columnDefs, String distributionkey,
-            String[] sortKeys) {
+    public RedshiftTableDesc(String tableName, String[] columnNames, String[] columnDefs,
+            String distributionkey, String[] sortKeys) {
         super(tableName, columnNames, columnDefs, null);
         this.distributionkey = distributionkey;
         this.sortKeys = sortKeys;
     }
 
-    public RedshiftTableDesc(String tableName, String[] columnNames, String[] columnDefs, String distStyle,
-            String distributionkey, String sortKeyType, String[] sortKeys) {
+    public RedshiftTableDesc(String tableName, String[] columnNames, String[] columnDefs,
+            String distStyle, String distributionkey, String sortKeyType, String[] sortKeys) {
         this(tableName, columnNames, columnDefs, distributionkey, sortKeys);
         this.distStyle = distStyle;
         this.sortKeyType = sortKeyType;

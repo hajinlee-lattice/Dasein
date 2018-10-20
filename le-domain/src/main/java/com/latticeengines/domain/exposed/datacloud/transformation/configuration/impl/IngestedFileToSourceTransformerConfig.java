@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IngestedFileToSourceTransformerConfig extends TransformerConfig {

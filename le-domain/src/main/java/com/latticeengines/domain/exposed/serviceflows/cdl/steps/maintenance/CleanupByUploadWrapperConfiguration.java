@@ -16,7 +16,8 @@ public class CleanupByUploadWrapperConfiguration extends BaseWrapperStepConfigur
         return maintenanceOperationConfiguration;
     }
 
-    public void setMaintenanceOperationConfiguration(MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+    public void setMaintenanceOperationConfiguration(
+            MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
         this.maintenanceOperationConfiguration = maintenanceOperationConfiguration;
     }
 

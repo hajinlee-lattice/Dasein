@@ -86,14 +86,14 @@ public class AIModel extends RatingModel {
         return null;
     }
 
-    public void setModelingJobId(String modelingJobId) {
-        this.modelingJobId = modelingJobId;
-    }
-
     @JsonProperty("modelingJobId")
     @Column(name = "MODELING_JOBID")
     public String getModelingJobId() {
         return modelingJobId;
+    }
+
+    public void setModelingJobId(String modelingJobId) {
+        this.modelingJobId = modelingJobId;
     }
 
     @JsonProperty("modelingJobStatus")
@@ -116,7 +116,8 @@ public class AIModel extends RatingModel {
     public void setAdvancedModelingConfigStr(String advancedModelingConfig) {
         AdvancedModelingConfig advancedModelingConfigObj = null;
         if (advancedModelingConfig != null) {
-            advancedModelingConfigObj = JsonUtils.deserialize(advancedModelingConfig, AdvancedModelingConfig.class);
+            advancedModelingConfigObj = JsonUtils.deserialize(advancedModelingConfig,
+                    AdvancedModelingConfig.class);
         }
         this.advancedModelingConfig = advancedModelingConfigObj;
     }

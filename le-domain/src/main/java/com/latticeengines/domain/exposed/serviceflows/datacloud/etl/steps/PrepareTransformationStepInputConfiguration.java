@@ -77,7 +77,8 @@ public class PrepareTransformationStepInputConfiguration extends BaseStepConfigu
     }
 
     @JsonProperty("transformation_configuration_classpath")
-    public void setTransformationConfigurationClasspath(String transformationConfigurationClasspath) {
+    public void setTransformationConfigurationClasspath(
+            String transformationConfigurationClasspath) {
         this.transformationConfigurationClasspath = transformationConfigurationClasspath;
     }
 

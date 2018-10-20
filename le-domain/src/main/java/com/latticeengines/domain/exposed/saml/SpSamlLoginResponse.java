@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SpSamlLoginResponse {
 
-    @JsonProperty(value="tenantDeploymentId")
+    @JsonProperty(value = "tenantDeploymentId")
     public String ssoUrl;
 
     public String getSsoUrl() {

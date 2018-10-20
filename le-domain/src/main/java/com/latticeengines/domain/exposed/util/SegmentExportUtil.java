@@ -4,10 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.Map;
+import java.util.TimeZone;
 
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import reactor.core.publisher.Flux;
@@ -38,17 +38,18 @@ public class SegmentExportUtil {
 
     public static Table constructSegmentExportTable(//
             Tenant tenant, MetadataSegmentExport metadataSegmentExportJob, //
-            Map<BusinessEntity,List<Attribute>> configuredBusEntityAttrMap) {
+            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
 
         String tableName = metadataSegmentExportJob.getTableName();
         String displayName = metadataSegmentExportJob.getFileName();
 
         List<Attribute> combinedAttributes = new ArrayList<>();
-        for (List<Attribute> configuredAttributes:configuredBusEntityAttrMap.values()){
+        for (List<Attribute> configuredAttributes : configuredBusEntityAttrMap.values()) {
             combineAttributes(configuredAttributes, combinedAttributes);
         }
 
-        log.info(String.format("Combined list of fields for export: %s", JsonUtils.serialize(combinedAttributes)));
+        log.info(String.format("Combined list of fields for export: %s",
+                JsonUtils.serialize(combinedAttributes)));
 
         Table segmentExportTable = new Table();
         segmentExportTable.addAttributes(combinedAttributes);
@@ -62,7 +63,8 @@ public class SegmentExportUtil {
         return segmentExportTable;
     }
 
-    private static void combineAttributes(List<Attribute> configuredAttributes, List<Attribute> combinedAttributes) {
+    private static void combineAttributes(List<Attribute> configuredAttributes,
+            List<Attribute> combinedAttributes) {
         if (CollectionUtils.isNotEmpty(configuredAttributes)) {
             combinedAttributes.addAll(Flux.fromIterable(configuredAttributes) //
                     .collectSortedList((a, b) -> a.getName().compareTo(b.getName())).block());

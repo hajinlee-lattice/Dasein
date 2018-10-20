@@ -11,7 +11,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class UnderPopulatedFieldCheckAggregator extends BaseAggregator<UnderPopulatedFieldCheckAggregator.Context>
+public class UnderPopulatedFieldCheckAggregator
+        extends BaseAggregator<UnderPopulatedFieldCheckAggregator.Context>
         implements Aggregator<UnderPopulatedFieldCheckAggregator.Context> {
 
     private static final long serialVersionUID = -5205919005219754992L;
@@ -34,11 +35,6 @@ public class UnderPopulatedFieldCheckAggregator extends BaseAggregator<UnderPopu
                 DataCloudConstants.CHK_ATTR_CHK_FIELD, //
                 DataCloudConstants.CHK_ATTR_CHK_VALUE, //
                 DataCloudConstants.CHK_ATTR_CHK_MSG);
-    }
-
-    public static class Context extends BaseAggregator.Context {
-        String value = null;
-        long count = 0;
     }
 
     @Override
@@ -84,12 +80,17 @@ public class UnderPopulatedFieldCheckAggregator extends BaseAggregator<UnderPopu
             // check value
             result.set(4, String.valueOf(context.count));
             // check message
-            result.set(5, CheckCode.UnderPopulatedField.getMessage(checkField, String.valueOf(context.count),
-                    String.valueOf(context.count)));
+            result.set(5, CheckCode.UnderPopulatedField.getMessage(checkField,
+                    String.valueOf(context.count), String.valueOf(context.count)));
             return result;
         } else {
             return null;
         }
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String value = null;
+        long count = 0;
     }
 
 }

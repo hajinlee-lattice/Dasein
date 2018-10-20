@@ -13,10 +13,9 @@ import reactor.core.scheduler.Schedulers;
 
 public class DecoratorChain implements Decorator, NeedsLoad {
 
-    private String name;
-    private final Iterable<Decorator> decorators;
     private final static Scheduler scheduler = Schedulers.newParallel("decorator-chain");
-
+    private final Iterable<Decorator> decorators;
+    private String name;
     private AtomicBoolean loaded = new AtomicBoolean();
 
     public DecoratorChain(String name, Decorator... decorators) {
@@ -57,7 +56,7 @@ public class DecoratorChain implements Decorator, NeedsLoad {
             throw new NullPointerException("Must specify metadata flux.");
         }
         Flux<ColumnMetadata> output = metadata.doOnSubscribe(s -> blockingLoad());
-        for (Decorator decorator: decorators) {
+        for (Decorator decorator : decorators) {
             output = decorator.render(output);
         }
         return output;
@@ -69,7 +68,7 @@ public class DecoratorChain implements Decorator, NeedsLoad {
             throw new NullPointerException("Must specify metadata flux.");
         }
         ParallelFlux<ColumnMetadata> output = metadata.doOnSubscribe(s -> blockingLoad());
-        for (Decorator decorator: decorators) {
+        for (Decorator decorator : decorators) {
             output = decorator.render(output);
         }
         return output;

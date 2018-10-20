@@ -32,9 +32,11 @@ public class LatticeIdFunction extends BaseOperation implements Function {
             if (idObj == null) {
                 throw new IllegalArgumentException("Found null LatticeId");
             }
-            String latticeActId = StringStandardizationUtils.getStandardizedOutputLatticeID(String.valueOf(idObj));
+            String latticeActId = StringStandardizationUtils
+                    .getStandardizedOutputLatticeID(String.valueOf(idObj));
             if (StringUtils.isBlank(latticeActId)) {
-                throw new IllegalArgumentException(String.format("Found invalid LatticeId: %s", latticeActId));
+                throw new IllegalArgumentException(
+                        String.format("Found invalid LatticeId: %s", latticeActId));
             }
             functionCall.getOutputCollector().add(new Tuple(latticeActId));
         } catch (Exception e) {

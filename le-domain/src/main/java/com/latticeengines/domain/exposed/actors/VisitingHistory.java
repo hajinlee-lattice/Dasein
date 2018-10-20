@@ -17,12 +17,13 @@ import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 public class VisitingHistory extends BaseMeasurement<VisitingHistory, VisitingHistory>
         implements Fact, Dimension, Measurement<VisitingHistory, VisitingHistory> {
 
+    private static final Set<String> excludedSystemTags = Collections
+            .singleton(MetricUtils.TAG_HOST);
     private final String site;
     private final Long duration;
     private final String travelerId;
     private Boolean rejected = false;
     private String actorSystemMode;
-    private static final Set<String> excludedSystemTags = Collections.singleton(MetricUtils.TAG_HOST);
 
     public VisitingHistory(String travelerId, String site, Long duration) {
         this.travelerId = travelerId;

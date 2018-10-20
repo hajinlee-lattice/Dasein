@@ -68,7 +68,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             matchDataCloudWorkflowBuilder.matchInputTableName(tableName);
             // result table name is set during execution
             score.setInputTableName(tableName);
-            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores
+                    .setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
 
@@ -113,8 +114,10 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 
@@ -165,11 +168,12 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         }
 
         public RTSBulkScoreWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("rtsBulkScoreWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("rtsBulkScoreWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
-            combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
+            combineMatchDebugWithScores
+                    .microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
 
             configuration.add(matchDataCloudWorkflowBuilder.build());
@@ -219,7 +223,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         }
 
         public Builder treatPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
-            matchDataCloudWorkflowBuilder.treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
+            matchDataCloudWorkflowBuilder
+                    .treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
 

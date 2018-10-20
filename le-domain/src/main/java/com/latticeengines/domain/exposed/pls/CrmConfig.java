@@ -6,7 +6,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class CrmConfig {
 
     private CrmCredential crmCredential;
-    
+
     private String dataProviderName;
     private String entityType;
     private String version;
@@ -22,13 +22,13 @@ public class CrmConfig {
     }
 
     @JsonProperty("EntityType")
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
+    public String getEntityType() {
+        return entityType;
     }
 
     @JsonProperty("EntityType")
-    public String getEntityType() {
-        return entityType;
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
     }
 
     @JsonProperty("DataProviderName")

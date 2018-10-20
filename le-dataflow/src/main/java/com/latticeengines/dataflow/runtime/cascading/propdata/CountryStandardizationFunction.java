@@ -15,7 +15,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({ "rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class CountryStandardizationFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -2044488912062585735L;
@@ -25,7 +25,8 @@ public class CountryStandardizationFunction extends BaseOperation implements Fun
     private Map<String, String> standardCountries;
     private String countryField;
 
-    public CountryStandardizationFunction(String countryField, Map<String, String> standardCountries) {
+    public CountryStandardizationFunction(String countryField,
+            Map<String, String> standardCountries) {
         super(new Fields(countryField));
         this.countryField = countryField;
         this.standardCountries = standardCountries;

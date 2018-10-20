@@ -48,12 +48,12 @@ public class LogicalRestriction extends Restriction {
         return restrictions;
     }
 
-    public void addRestriction(Restriction restriction) {
-        restrictions.add(restriction);
-    }
-
     public void setRestrictions(List<Restriction> restrictions) {
         this.restrictions = restrictions;
+    }
+
+    public void addRestriction(Restriction restriction) {
+        restrictions.add(restriction);
     }
 
     @Override

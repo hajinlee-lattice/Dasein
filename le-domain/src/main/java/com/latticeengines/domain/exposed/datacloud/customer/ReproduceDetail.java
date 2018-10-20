@@ -13,8 +13,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ReproduceDetailType")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = IncorrectLookupReproduceDetail.class, name = "IncorrectLookupReproduceDetail"),
-        @JsonSubTypes.Type(value = IncorrectMatchedAttributeReproduceDetail.class, name = "IncorrectMatchedAttributeReproduceDetail"),
-})
+        @JsonSubTypes.Type(value = IncorrectMatchedAttributeReproduceDetail.class, name = "IncorrectMatchedAttributeReproduceDetail"), })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class ReproduceDetail {
 

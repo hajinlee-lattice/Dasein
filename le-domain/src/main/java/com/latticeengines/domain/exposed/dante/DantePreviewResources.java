@@ -19,6 +19,15 @@ public class DantePreviewResources {
     @JsonProperty("oAuthToken")
     private String oAuthToken;
 
+    public DantePreviewResources() {
+    }
+
+    public DantePreviewResources(String danteUrl, String serverUrl, String oAuthToken) {
+        this.danteUrl = danteUrl;
+        this.serverUrl = serverUrl;
+        this.oAuthToken = oAuthToken;
+    }
+
     public String getDanteUrl() {
         return danteUrl;
     }
@@ -33,15 +42,6 @@ public class DantePreviewResources {
 
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
-    }
-
-    public DantePreviewResources() {
-    }
-
-    public DantePreviewResources(String danteUrl, String serverUrl, String oAuthToken) {
-        this.danteUrl = danteUrl;
-        this.serverUrl = serverUrl;
-        this.oAuthToken = oAuthToken;
     }
 
     public String getoAuthToken() {

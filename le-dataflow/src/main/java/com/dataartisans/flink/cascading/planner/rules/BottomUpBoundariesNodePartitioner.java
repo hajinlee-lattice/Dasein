@@ -40,57 +40,39 @@ import cascading.tap.Tap;
 /**
  * Partition flow steps across Boundaries, GroupBys, CoGroups, Merges
  */
-public class BottomUpBoundariesNodePartitioner extends ExpressionRulePartitioner
-{
+public class BottomUpBoundariesNodePartitioner extends ExpressionRulePartitioner {
 
-	public BottomUpBoundariesNodePartitioner() {
-		super(
-				PartitionNodes,
+    public BottomUpBoundariesNodePartitioner() {
+        super(PartitionNodes,
 
-				new RuleExpression(
-						new NoGroupJoinMergeBoundaryTapExpressionGraph(),
-						new BottomUpNoSplitConsecutiveBoundariesExpressionGraph()
-				),
+                new RuleExpression(new NoGroupJoinMergeBoundaryTapExpressionGraph(),
+                        new BottomUpNoSplitConsecutiveBoundariesExpressionGraph()),
 
-				new ElementAnnotation( ElementCapture.Primary, IORole.sink )
-		);
-	}
+                new ElementAnnotation(ElementCapture.Primary, IORole.sink));
+    }
 
-	public static class NoGroupJoinMergeBoundaryTapExpressionGraph extends ExpressionGraph {
-		public NoGroupJoinMergeBoundaryTapExpressionGraph() {
-			super(
-					not(
-							OrElementExpression.or(
-									ElementCapture.Primary,
-									new FlowElementExpression(Extent.class),
-									new FlowElementExpression(Group.class),
-									new FlowElementExpression(Boundary.class),
-									new FlowElementExpression(Tap.class)
-							)
-					)
-			);
-		}
-	}
+    public static class NoGroupJoinMergeBoundaryTapExpressionGraph extends ExpressionGraph {
+        public NoGroupJoinMergeBoundaryTapExpressionGraph() {
+            super(not(OrElementExpression.or(ElementCapture.Primary,
+                    new FlowElementExpression(Extent.class), new FlowElementExpression(Group.class),
+                    new FlowElementExpression(Boundary.class),
+                    new FlowElementExpression(Tap.class))));
+        }
+    }
 
-	public static class BottomUpNoSplitConsecutiveBoundariesExpressionGraph extends ExpressionGraph
-	{
-		public BottomUpNoSplitConsecutiveBoundariesExpressionGraph()
-		{
-			super( SearchOrder.ReverseTopological );
+    public static class BottomUpNoSplitConsecutiveBoundariesExpressionGraph
+            extends ExpressionGraph {
+        public BottomUpNoSplitConsecutiveBoundariesExpressionGraph() {
+            super(SearchOrder.ReverseTopological);
 
-			this.arc(
-					or(
-							new FlowElementExpression( Boundary.class, TypeExpression.Topo.LinearOut ),
-							new FlowElementExpression( Tap.class, TypeExpression.Topo.LinearOut ),
-							new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut )
-					),
+            this.arc(or(new FlowElementExpression(Boundary.class, TypeExpression.Topo.LinearOut),
+                    new FlowElementExpression(Tap.class, TypeExpression.Topo.LinearOut),
+                    new FlowElementExpression(Group.class, TypeExpression.Topo.LinearOut)),
 
-					PathScopeExpression.ANY,
+                    PathScopeExpression.ANY,
 
-					new BoundariesElementExpression( ElementCapture.Primary )
-			);
-		}
-	}
-
+                    new BoundariesElementExpression(ElementCapture.Primary));
+        }
+    }
 
 }

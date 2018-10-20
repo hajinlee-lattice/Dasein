@@ -32,7 +32,8 @@ public class NaNSafeDoubleType implements UserType {
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+    public Object nullSafeGet(ResultSet rs, String[] names,
+            SharedSessionContractImplementor session, Object owner)
             throws HibernateException, SQLException {
         double value = rs.getDouble(names[0]);
         if (rs.wasNull()) {
@@ -42,15 +43,15 @@ public class NaNSafeDoubleType implements UserType {
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
-            throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index,
+            SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null || Double.isNaN((Double) value)) {
             st.setNull(index, Types.DOUBLE);
         } else {
             st.setDouble(index, ((Double) value));
         }
     }
-	
+
     @Override
     public Object deepCopy(Object value) throws HibernateException {
         // returning value should be OK since doubles are immutable

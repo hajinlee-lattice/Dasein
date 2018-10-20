@@ -27,7 +27,8 @@ public class DataCollectionStatusUtils {
         return status;
     }
 
-    public static DataCollectionStatus updateTimeForDCChange(DataCollectionStatus status, Long timestamp) {
+    public static DataCollectionStatus updateTimeForDCChange(DataCollectionStatus status,
+            Long timestamp) {
         Map<String, Long> dateMap = status.getDateMap();
         if (MapUtils.isEmpty(dateMap)) {
             status = initDateMap(status, timestamp);
@@ -43,8 +44,8 @@ public class DataCollectionStatusUtils {
         return status;
     }
 
-    public static DataCollectionStatus updateTimeForCategoryChange(DataCollectionStatus status, Long timestamp,
-                                                                   Category category) {
+    public static DataCollectionStatus updateTimeForCategoryChange(DataCollectionStatus status,
+            Long timestamp, Category category) {
         Map<String, Long> dateMap = status.getDateMap();
         if (MapUtils.isEmpty(dateMap)) {
             dateMap = new HashMap<>();

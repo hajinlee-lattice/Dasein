@@ -43,108 +43,114 @@ import cascading.flow.planner.process.FlowStepFactory;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.tap.Tap;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class FlinkPlanner extends FlowPlanner<FlinkFlow, Configuration> {
 
-	private Configuration defaultConfig;
+    private Configuration defaultConfig;
 
-	private List<String> classPath;
+    private List<String> classPath;
 
-	private ExecutionEnvironment env;
+    private ExecutionEnvironment env;
 
-	public FlinkPlanner(List<String> classPath) { this(ExecutionEnvironment.getExecutionEnvironment(), classPath); }
+    public FlinkPlanner(List<String> classPath) {
+        this(ExecutionEnvironment.getExecutionEnvironment(), classPath);
+    }
 
-	public FlinkPlanner(ExecutionEnvironment env, List<String> classPath) {
-		super();
-		this.env = env;
-		this.classPath = classPath;
+    public FlinkPlanner(ExecutionEnvironment env, List<String> classPath) {
+        super();
+        this.env = env;
+        this.classPath = classPath;
 
-		env.getConfig().disableSysoutLogging();
-		if (env.getParallelism() <= 0) {
-			// load the default parallelism from config
+        env.getConfig().disableSysoutLogging();
+        if (env.getParallelism() <= 0) {
+            // load the default parallelism from config
 
-			GlobalConfiguration.loadConfiguration(new File(CliFrontend.getConfigurationDirectoryFromEnv()).getAbsolutePath());
-			org.apache.flink.configuration.Configuration configuration = GlobalConfiguration.loadConfiguration();
-			int parallelism = configuration.getInteger(ConfigConstants.DEFAULT_PARALLELISM_KEY, -1);
-			if (parallelism <= 0) {
-				throw new RuntimeException("Please set the default parallelism via the -p command-line flag");
-			} else {
-				env.setParallelism(parallelism);
-			}
-		}
+            GlobalConfiguration.loadConfiguration(
+                    new File(CliFrontend.getConfigurationDirectoryFromEnv()).getAbsolutePath());
+            org.apache.flink.configuration.Configuration configuration = GlobalConfiguration
+                    .loadConfiguration();
+            int parallelism = configuration.getInteger(ConfigConstants.DEFAULT_PARALLELISM_KEY, -1);
+            if (parallelism <= 0) {
+                throw new RuntimeException(
+                        "Please set the default parallelism via the -p command-line flag");
+            } else {
+                env.setParallelism(parallelism);
+            }
+        }
 
-	}
+    }
 
-	@Override
-	public Configuration getDefaultConfig() {
-	return defaultConfig;
-}
+    public static Configuration createConfiguration(Map<Object, Object> properties) {
+        Configuration conf = new Configuration();
+        copyProperties(conf, properties);
+        return conf;
+    }
 
-	@Override
-	public PlannerInfo getPlannerInfo(String registryName) {
-		return new PlannerInfo(getClass().getSimpleName(), "Apache Flink", registryName);
-	}
+    public static void copyProperties(Configuration config, Map<Object, Object> properties) {
+        if (properties instanceof Properties) {
+            Properties props = (Properties) properties;
+            Set<String> keys = props.stringPropertyNames();
 
-	@Override
-	public PlatformInfo getPlatformInfo() {
-		return Version.getPlatformInfo();
-	}
+            for (String key : keys) {
+                config.set(key, props.getProperty(key));
+            }
+        } else {
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                if (entry.getValue() != null) {
+                    config.set(entry.getKey().toString(), entry.getValue().toString());
+                }
+            }
+        }
+    }
 
-	@Override
-	public void initialize( FlowConnector flowConnector, Map<Object, Object> properties ) {
+    @Override
+    public Configuration getDefaultConfig() {
+        return defaultConfig;
+    }
 
-		super.initialize( flowConnector, properties );
-		defaultConfig = createConfiguration(properties);
-}
+    @Override
+    public PlannerInfo getPlannerInfo(String registryName) {
+        return new PlannerInfo(getClass().getSimpleName(), "Apache Flink", registryName);
+    }
 
-	@Override
-	public void configRuleRegistryDefaults( RuleRegistry ruleRegistry ) {
-		super.configRuleRegistryDefaults( ruleRegistry );
-	}
+    @Override
+    public PlatformInfo getPlatformInfo() {
+        return Version.getPlatformInfo();
+    }
 
-	@Override
-	protected FlinkFlow createFlow( FlowDef flowDef ) {
-		return new FlinkFlow(getPlatformInfo(), flowDef, getDefaultProperties(), getDefaultConfig());
-	}
+    @Override
+    public void initialize(FlowConnector flowConnector, Map<Object, Object> properties) {
 
-	@Override
-	public FlowStepFactory<Configuration> getFlowStepFactory() {
+        super.initialize(flowConnector, properties);
+        defaultConfig = createConfiguration(properties);
+    }
 
-		return new BaseFlowStepFactory<Configuration>( getFlowNodeFactory() ) {
-			@Override
-			public FlowStep<Configuration> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph ) {
-				return new FlinkFlowStep(env, stepElementGraph, flowNodeGraph, classPath);
-			}
-		};
-	}
+    @Override
+    public void configRuleRegistryDefaults(RuleRegistry ruleRegistry) {
+        super.configRuleRegistryDefaults(ruleRegistry);
+    }
 
-	@Override
-	protected Tap makeTempTap(String prefix, String name) {
-		return null;  // not required for Flink
-	}
+    @Override
+    protected FlinkFlow createFlow(FlowDef flowDef) {
+        return new FlinkFlow(getPlatformInfo(), flowDef, getDefaultProperties(),
+                getDefaultConfig());
+    }
 
-	public static Configuration createConfiguration( Map<Object, Object> properties ) {
-		Configuration conf = new Configuration();
-		copyProperties( conf, properties );
-		return conf;
-	}
+    @Override
+    public FlowStepFactory<Configuration> getFlowStepFactory() {
 
-	public static void copyProperties( Configuration config, Map<Object, Object> properties ) {
-		if( properties instanceof Properties) {
-			Properties props = (Properties) properties;
-			Set<String> keys = props.stringPropertyNames();
+        return new BaseFlowStepFactory<Configuration>(getFlowNodeFactory()) {
+            @Override
+            public FlowStep<Configuration> createFlowStep(ElementGraph stepElementGraph,
+                    FlowNodeGraph flowNodeGraph) {
+                return new FlinkFlowStep(env, stepElementGraph, flowNodeGraph, classPath);
+            }
+        };
+    }
 
-			for( String key : keys ) {
-				config.set(key, props.getProperty(key));
-			}
-		}
-		else {
-			for( Map.Entry<Object, Object> entry : properties.entrySet() ) {
-				if( entry.getValue() != null ) {
-					config.set(entry.getKey().toString(), entry.getValue().toString());
-				}
-			}
-		}
-	}
+    @Override
+    protected Tap makeTempTap(String prefix, String name) {
+        return null; // not required for Flink
+    }
 
 }

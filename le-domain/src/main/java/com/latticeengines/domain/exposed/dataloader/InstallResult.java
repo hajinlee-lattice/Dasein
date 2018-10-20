@@ -12,53 +12,53 @@ public class InstallResult {
     private List<ValueResult> value;
 
     @JsonProperty("ErrorMessage")
-    public String getErrorMessage(){
+    public String getErrorMessage() {
         return this.errorMessage;
     }
-    
-    public void setErrorMessage(String errorMessage){
+
+    public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
     @JsonProperty("Status")
-    public int getStatus(){
+    public int getStatus() {
         return this.status;
     }
 
-    public void setStatus(int status){
+    public void setStatus(int status) {
         this.status = status;
     }
 
     @JsonProperty("Value")
-    public List<ValueResult> getValueResult(){
+    public List<ValueResult> getValueResult() {
         return this.value;
     }
 
-    public void setValueResult(List<ValueResult> value){
+    public void setValueResult(List<ValueResult> value) {
         this.value = value;
     }
- 
-    public static class ValueResult{
+
+    public static class ValueResult {
 
         private String key;
 
         private String value;
 
         @JsonProperty("Key")
-        public String getKey(){
+        public String getKey() {
             return this.key;
         }
 
-        public void setKey(String key){
+        public void setKey(String key) {
             this.key = key;
         }
 
         @JsonProperty("Value")
-        public String getValue(){
+        public String getValue() {
             return this.value;
         }
 
-        public void setValue(String value){
+        public void setValue(String value) {
             this.value = value;
         }
     }

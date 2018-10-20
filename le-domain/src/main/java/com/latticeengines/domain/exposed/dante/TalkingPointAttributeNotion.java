@@ -11,10 +11,6 @@ public enum TalkingPointAttributeNotion {
         this.notion = notion;
     }
 
-    public String getNotion() {
-        return notion;
-    }
-
     public static boolean isValidDanteNotion(String notion) {
         for (TalkingPointAttributeNotion v : values())
             if (v.getNotion().equalsIgnoreCase(notion))
@@ -27,5 +23,9 @@ public enum TalkingPointAttributeNotion {
             if (v.getNotion().equalsIgnoreCase(notion))
                 return v;
         throw new IllegalArgumentException();
+    }
+
+    public String getNotion() {
+        return notion;
     }
 }

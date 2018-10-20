@@ -15,18 +15,12 @@ import cascading.tuple.TupleEntry;
 
 public class AMSeedPriDomainAggregator extends BaseAggregator<AMSeedPriDomainAggregator.Context>
         implements Aggregator<AMSeedPriDomainAggregator.Context> {
-	private static final long serialVersionUID = -5799582067670721843L;
-	private List<String> groupFields;
+    private static final long serialVersionUID = -5799582067670721843L;
+    private List<String> groupFields;
 
     public AMSeedPriDomainAggregator(Fields fieldDeclaration, List<String> groupFields) {
         super(fieldDeclaration);
         this.groupFields = groupFields;
-    }
-
-    public static class Context extends BaseAggregator.Context {
-        Long id = null;
-        String isPriDom = null;
-        String isPriAct = null;
     }
 
     @Override
@@ -87,5 +81,11 @@ public class AMSeedPriDomainAggregator extends BaseAggregator<AMSeedPriDomainAgg
         context.isPriDom = arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN);
         context.isPriAct = arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT);
         return context;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Long id = null;
+        String isPriDom = null;
+        String isPriAct = null;
     }
 }

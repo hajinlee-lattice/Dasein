@@ -8,12 +8,12 @@ public class UserRegistration {
     private User user;
     private Credentials credentials;
     private boolean validation = false;
-    
+
     @JsonProperty("User")
     public User getUser() {
         return user;
     }
-    
+
     @JsonProperty("User")
     public void setUser(User user) {
         this.user = user;

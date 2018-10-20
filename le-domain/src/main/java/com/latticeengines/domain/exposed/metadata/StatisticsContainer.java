@@ -47,9 +47,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @SuppressWarnings("deprecation")
 @Entity
 @javax.persistence.Table(name = "METADATA_STATISTICS", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ //
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -67,13 +67,13 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @JsonProperty("Name")
     private String name;
 
-    //TODO: to remove after M18
+    // TODO: to remove after M18
     @Column(name = "DATA", nullable = true)
     @Lob
     @JsonIgnore
     private byte[] data;
 
-    //TODO: change nullable to false after M18
+    // TODO: change nullable to false after M18
     @Column(name = "CUBES_DATA", nullable = true)
     @Lob
     @JsonIgnore
@@ -98,6 +98,10 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @Enumerated(EnumType.STRING)
     @Column(name = "VERSION", nullable = false)
     private DataCollection.Version version;
+
+    public static Logger getLog() {
+        return log;
+    }
 
     public byte[] getData() {
         return data;
@@ -159,7 +163,9 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
 
         String uncompressedData = new String(CompressionUtils.decompressByteArray(getCubesData()));
         if (StringUtils.isNotEmpty(uncompressedData)) {
-            return JsonUtils.deserialize(uncompressedData, new TypeReference<Map<String, StatsCube>>() {});
+            return JsonUtils.deserialize(uncompressedData,
+                    new TypeReference<Map<String, StatsCube>>() {
+                    });
         } else {
             return null;
         }
@@ -180,10 +186,6 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
         } catch (IOException e) {
             log.error("Failed to compress payload [" + cubes + "]", e);
         }
-    }
-
-    public static Logger getLog() {
-        return log;
     }
 
     @Override

@@ -14,37 +14,53 @@ public class MatchClientDocument {
 
     // json constructor
     @SuppressWarnings("unused")
-    private MatchClientDocument(){ }
+    private MatchClientDocument() {
+    }
 
     public MatchClientDocument(MatchClient matchClient) {
         this.matchClient = matchClient;
         this.host = matchClient.host;
         this.port = matchClient.port;
         this.database = matchClient.database;
-        this.url = String.format("jdbc:sqlserver://%s:%d;databaseName=%s;user=$$USER$$;password=$$PASSWD$$",
+        this.url = String.format(
+                "jdbc:sqlserver://%s:%d;databaseName=%s;user=$$USER$$;password=$$PASSWD$$",
                 this.getHost(), this.getPort(), this.getDatabase());
         this.username = matchClient.username;
         this.encryptedPassword = matchClient.encryptedPassword;
     }
 
     @JsonProperty("Host")
-    public String getHost() { return host; }
+    public String getHost() {
+        return host;
+    }
 
     @JsonProperty("Port")
-    public int getPort() { return port; }
+    public int getPort() {
+        return port;
+    }
 
     @JsonProperty("Database")
-    public String getDatabase() { return database; }
+    public String getDatabase() {
+        return database;
+    }
 
     @JsonProperty("Username")
-    public String getUsername() { return username; }
+    public String getUsername() {
+        return username;
+    }
 
     @JsonProperty("EncryptedPassword")
-    public String getEncryptedPassword() { return encryptedPassword; }
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
 
     @JsonProperty("Url")
-    public String getUrl() { return url; }
+    public String getUrl() {
+        return url;
+    }
 
     @JsonProperty("MatchClient")
-    public MatchClient getMatchClient() { return matchClient; }
+    public MatchClient getMatchClient() {
+        return matchClient;
+    }
 }

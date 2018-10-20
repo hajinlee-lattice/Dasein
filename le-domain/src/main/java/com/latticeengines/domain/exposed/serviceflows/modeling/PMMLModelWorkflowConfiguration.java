@@ -98,8 +98,8 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
         }
 
         public PMMLModelWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("pmmlModelWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("pmmlModelWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(pmml);
             configuration.add(model);
             configuration.add(exportModelToS3);

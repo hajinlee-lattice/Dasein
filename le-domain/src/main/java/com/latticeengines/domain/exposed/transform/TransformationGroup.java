@@ -10,7 +10,6 @@ public enum TransformationGroup {
     POC("poc"), //
     ALL("all"); //
 
-    private final String name;
     private static Map<String, TransformationGroup> nameMap;
 
     static {
@@ -20,8 +19,19 @@ public enum TransformationGroup {
         }
     }
 
+    private final String name;
+
     TransformationGroup(String name) {
         this.name = name;
+    }
+
+    public static TransformationGroup fromName(String name) {
+        if (nameMap.containsKey(name.toLowerCase())) {
+            return nameMap.get(name.toLowerCase());
+        } else {
+            throw new IllegalArgumentException(
+                    "Cannot find a TransformationGroup with name " + name);
+        }
     }
 
     public String getName() {
@@ -30,13 +40,5 @@ public enum TransformationGroup {
 
     public String toString() {
         return this.name;
-    }
-
-    public static TransformationGroup fromName(String name) {
-        if (nameMap.containsKey(name.toLowerCase())) {
-            return nameMap.get(name.toLowerCase());
-        } else {
-            throw new IllegalArgumentException("Cannot find a TransformationGroup with name " + name);
-        }
     }
 }

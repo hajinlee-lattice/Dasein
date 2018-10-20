@@ -35,152 +35,147 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class CoGroupInGate extends GroupingSpliceGate implements InputSource {
 
-	private JoinClosure closure;
-	private JoinResultIterator resultIterator;
+    private JoinClosure closure;
+    private JoinResultIterator resultIterator;
 
-	public CoGroupInGate(FlowProcess flowProcess, CoGroup splice, IORole ioRole) {
-		super(flowProcess, splice, ioRole);
-	}
+    public CoGroupInGate(FlowProcess flowProcess, CoGroup splice, IORole ioRole) {
+        super(flowProcess, splice, ioRole);
+    }
 
-	@Override
-	public void bind( StreamGraph streamGraph )
-	{
-		if( role != IORole.sink ) {
-			next = getNextFor(streamGraph);
-		}
-	}
+    @Override
+    public void bind(StreamGraph streamGraph) {
+        if (role != IORole.sink) {
+            next = getNextFor(streamGraph);
+        }
+    }
 
+    @Override
+    public void prepare() {
 
-	@Override
-	public void prepare() {
+        if (role != IORole.source) {
+            throw new UnsupportedOperationException(
+                    "Non-source group by not supported in GroupByInGate");
+        }
 
-		if( role != IORole.source ) {
-			throw new UnsupportedOperationException("Non-source group by not supported in GroupByInGate");
-		}
+        if (role != IORole.sink) {
 
-		if( role != IORole.sink ) {
+            Fields[] keyFields;
+            Fields[] valuesFields;
 
-			Fields[] keyFields;
-			Fields[] valuesFields;
+            if (splice.isSelfJoin()) {
+                keyFields = new Fields[splice.getNumSelfJoins() + 1];
+                valuesFields = new Fields[splice.getNumSelfJoins() + 1];
+                for (int i = 0; i < keyFields.length; i++) {
+                    keyFields[i] = super.keyFields[0];
+                    valuesFields[i] = super.valuesFields[0];
+                }
+            } else {
+                keyFields = super.keyFields;
+                valuesFields = super.valuesFields;
+            }
 
-			if(splice.isSelfJoin()) {
-				keyFields = new Fields[splice.getNumSelfJoins() + 1];
-				valuesFields = new Fields[splice.getNumSelfJoins() + 1];
-				for(int i=0; i<keyFields.length; i++) {
-					keyFields[i] = super.keyFields[0];
-					valuesFields[i] = super.valuesFields[0];
-				}
-			}
-			else {
-				keyFields = super.keyFields;
-				valuesFields = super.valuesFields;
-			}
+            closure = new JoinClosure(flowProcess, keyFields, valuesFields);
+        }
 
-			closure = new JoinClosure(flowProcess, keyFields, valuesFields);
-		}
+        if (grouping != null && splice.getJoinDeclaredFields() != null
+                && splice.getJoinDeclaredFields().isNone()) {
+            grouping.joinerClosure = closure;
+        }
 
-		if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() ) {
-			grouping.joinerClosure = closure;
-		}
+        this.resultIterator = new JoinResultIterator(closure, this.splice.getJoiner());
+    }
 
-		this.resultIterator = new JoinResultIterator(closure, this.splice.getJoiner());
-	}
+    @Override
+    public void start(Duct previous) {
+        if (next != null) {
+            super.start(previous);
+        }
+    }
 
-	@Override
-	public void start( Duct previous ) {
-		if( next != null ) {
-			super.start(previous);
-		}
-	}
+    public void receive(Duct previous, int ordinal, TupleEntry incomingEntry) {
+        throw new UnsupportedOperationException("Receive not implemented for CoGroupInGate.");
+    }
 
-	public void receive( Duct previous, int ordinal, TupleEntry incomingEntry ) {
-		throw new UnsupportedOperationException("Receive not implemented for CoGroupInGate.");
-	}
+    @Override
+    public void run(Object input) {
 
-	@Override
-	public void run(Object input) {
+        Iterator<Tuple2<Tuple, Tuple[]>> iterator;
+        try {
+            iterator = (Iterator<Tuple2<Tuple, Tuple[]>>) input;
+        } catch (ClassCastException cce) {
+            throw new RuntimeException("CoGroupInGate requires Iterator<Tuple2<Tuple, Tuple[]>",
+                    cce);
+        }
 
-		Iterator<Tuple2<Tuple, Tuple[]>> iterator;
-		try {
-			iterator = (Iterator<Tuple2<Tuple, Tuple[]>>) input;
-		}
-		catch(ClassCastException cce) {
-			throw new RuntimeException("CoGroupInGate requires Iterator<Tuple2<Tuple, Tuple[]>", cce);
-		}
+        resultIterator.reset(iterator);
+        resultIterator.hasNext(); // load first element into closure
 
-		resultIterator.reset(iterator);
-		resultIterator.hasNext(); // load first element into closure
+        tupleEntryIterator.reset(resultIterator);
+        keyEntry.setTuple(this.closure.getGroupTuple(null));
 
-		tupleEntryIterator.reset(resultIterator);
-		keyEntry.setTuple( this.closure.getGroupTuple(null) );
+        next.receive(this, 0, grouping);
+    }
 
-		next.receive( this, 0, grouping );
-	}
+    @Override
+    public void complete(Duct previous) {
 
-	@Override
-	public void complete( Duct previous ) {
+        if (next != null) {
+            super.complete(previous);
+        }
+    }
 
-		if( next != null ) {
-			super.complete(previous);
-		}
-	}
+    private static class JoinResultIterator implements Iterator<Tuple> {
 
-	private static class JoinResultIterator implements Iterator<Tuple> {
+        private Iterator<Tuple2<Tuple, Tuple[]>> input;
 
-		private Iterator<Tuple2<Tuple, Tuple[]>> input;
+        private JoinClosure closure;
+        private Joiner joiner;
 
-		private JoinClosure closure;
-		private Joiner joiner;
+        private Iterator<Tuple> joinedTuples;
 
-		private Iterator<Tuple> joinedTuples;
+        public JoinResultIterator(JoinClosure closure, Joiner joiner) {
+            this.closure = closure;
+            this.joiner = joiner;
+        }
 
-		public JoinResultIterator(JoinClosure closure, Joiner joiner) {
-			this.closure = closure;
-			this.joiner = joiner;
-		}
+        public void reset(Iterator<Tuple2<Tuple, Tuple[]>> input) {
+            this.input = input;
+        }
 
-		public void reset(Iterator<Tuple2<Tuple, Tuple[]>> input) {
-			this.input = input;
-		}
+        @Override
+        public boolean hasNext() {
+            if (joinedTuples != null && joinedTuples.hasNext()) {
+                return true;
+            } else {
+                do {
+                    if (input.hasNext()) {
+                        closure.reset(input.next());
+                        joinedTuples = joiner.getIterator(closure);
+                    } else {
+                        return false;
+                    }
+                } while (!joinedTuples.hasNext());
+                return true;
+            }
+        }
 
-		@Override
-		public boolean hasNext() {
-			if(joinedTuples != null && joinedTuples.hasNext()) {
-				return true;
-			}
-			else {
-				do {
-					if(input.hasNext()) {
-							closure.reset(input.next());
-							joinedTuples = joiner.getIterator(closure);
-					}
-					else {
-						return false;
-					}
-				} while(!joinedTuples.hasNext());
-				return true;
-			}
-		}
+        @Override
+        public Tuple next() {
+            if (this.hasNext()) {
+                Tuple t = joinedTuples.next();
+                return t;
+            } else {
+                throw new NoSuchElementException("Iterator is empty.");
+            }
+        }
 
-		@Override
-		public Tuple next() {
-			if(this.hasNext()) {
-				Tuple t = joinedTuples.next();
-				return t;
-			}
-			else {
-				throw new NoSuchElementException("Iterator is empty.");
-			}
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
 
 }

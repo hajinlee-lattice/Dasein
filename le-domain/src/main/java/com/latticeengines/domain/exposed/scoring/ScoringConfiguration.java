@@ -78,13 +78,13 @@ public class ScoringConfiguration {
     }
 
     @JsonProperty("bucket_metadata")
-    public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
-        this.bucketMetadata = bucketMetadata;
+    public List<BucketMetadata> getBucketMetadata() {
+        return this.bucketMetadata;
     }
 
     @JsonProperty("bucket_metadata")
-    public List<BucketMetadata> getBucketMetadata() {
-        return this.bucketMetadata;
+    public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        this.bucketMetadata = bucketMetadata;
     }
 
     @JsonProperty("score_input_type")

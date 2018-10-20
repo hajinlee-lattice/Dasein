@@ -8,11 +8,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 
 public interface TransformationInterface {
 
-	List<TransformationProgress> scan(String hdfsPod);
+    List<TransformationProgress> scan(String hdfsPod);
 
-	TransformationProgress transform(TransformationRequest transformationRequest, String hdfsPod);
+    TransformationProgress transform(TransformationRequest transformationRequest, String hdfsPod);
 
-    TransformationProgress transform(PipelineTransformationRequest transformationRequest, String hdfsPod);
+    TransformationProgress transform(PipelineTransformationRequest transformationRequest,
+            String hdfsPod);
 
     TransformationProgress getProgress(String rootOperationUid);
 

@@ -35,12 +35,10 @@ public enum Category {
     LEAD_INFORMATION("Lead Information", 13), //
     DEFAULT("Default", 14);
 
-    private final String name;
-    private final int order;
     private static Map<String, Category> nameMap;
     private static Set<String> values;
-    private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE, WEBSITE_KEYWORDS,
-            ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES);
+    private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE,
+            WEBSITE_KEYWORDS, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES);
     // used in following scenarios
     // 1. iteration metadata API called via remodeling UI
     // 2. attribute management UI
@@ -60,12 +58,37 @@ public enum Category {
         for (Category category : Category.values()) {
             nameMap.put(category.getName(), category);
         }
-        values = new HashSet<>(Arrays.stream(values()).map(Category::name).collect(Collectors.toSet()));
+        values = new HashSet<>(
+                Arrays.stream(values()).map(Category::name).collect(Collectors.toSet()));
     }
+
+    private final String name;
+    private final int order;
 
     Category(String name, int order) {
         this.name = name;
         this.order = order;
+    }
+
+    public static Category fromName(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+        if (values.contains(name)) {
+            return valueOf(name);
+        } else if (nameMap.containsKey(name)) {
+            return nameMap.get(name);
+        } else {
+            throw new IllegalArgumentException("Cannot find a Category with name " + name);
+        }
+    }
+
+    public static List<Category> getPremiumCategories() {
+        return premiumCategories;
+    }
+
+    public static Set<Category> getLdcReservedCategories() {
+        return ldcReservedCategories;
     }
 
     public String getName() {
@@ -80,17 +103,16 @@ public enum Category {
         return this.name;
     }
 
-    public static Category fromName(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-        if (values.contains(name)) {
-            return valueOf(name);
-        } else if (nameMap.containsKey(name)) {
-            return nameMap.get(name);
-        } else {
-            throw new IllegalArgumentException("Cannot find a Category with name " + name);
-        }
+    public boolean isHiddenFromUi() {
+        return hiddenFromUiCategories.contains(this);
+    }
+
+    public boolean isPremium() {
+        return premiumCategories.contains(this);
+    }
+
+    public boolean isLdcReservedCategory() {
+        return ldcReservedCategories.contains(this);
     }
 
     public static class CategoryKeyDeserializer extends KeyDeserializer {
@@ -108,28 +130,9 @@ public enum Category {
         }
 
         @Override
-        public void serialize(Category value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(Category value, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException {
             jgen.writeFieldName(value.getName());
         }
-    }
-
-    public static List<Category> getPremiumCategories() {
-        return premiumCategories;
-    }
-
-    public static Set<Category> getLdcReservedCategories() {
-        return ldcReservedCategories;
-    }
-
-    public boolean isHiddenFromUi() {
-        return hiddenFromUiCategories.contains(this);
-    }
-
-    public boolean isPremium() {
-        return premiumCategories.contains(this);
-    }
-
-    public boolean isLdcReservedCategory() {
-        return ldcReservedCategories.contains(this);
     }
 }

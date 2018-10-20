@@ -6,7 +6,7 @@ public class GetVisiDBDLRequest {
 
     private String tenantName;
 
-    public GetVisiDBDLRequest(String tenantName){
+    public GetVisiDBDLRequest(String tenantName) {
         this.tenantName = tenantName;
     }
 

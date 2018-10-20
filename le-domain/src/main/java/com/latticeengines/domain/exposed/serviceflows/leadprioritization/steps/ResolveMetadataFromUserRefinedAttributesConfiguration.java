@@ -5,7 +5,8 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
-public class ResolveMetadataFromUserRefinedAttributesConfiguration extends MicroserviceStepConfiguration {
+public class ResolveMetadataFromUserRefinedAttributesConfiguration
+        extends MicroserviceStepConfiguration {
 
     private List<Attribute> userRefinedAttributes;
 

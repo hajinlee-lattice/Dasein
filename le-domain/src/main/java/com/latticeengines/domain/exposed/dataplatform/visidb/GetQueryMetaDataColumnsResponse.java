@@ -12,7 +12,7 @@ public class GetQueryMetaDataColumnsResponse {
     private String errorMessage;
     private List<AttributeMetadata> metadata = new ArrayList<>();
     private int status;
-    
+
     @JsonProperty("ErrorMessage")
     public String getErrorMessage() {
         return errorMessage;
@@ -42,7 +42,7 @@ public class GetQueryMetaDataColumnsResponse {
     public void setStatus(int status) {
         this.status = status;
     }
-    
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

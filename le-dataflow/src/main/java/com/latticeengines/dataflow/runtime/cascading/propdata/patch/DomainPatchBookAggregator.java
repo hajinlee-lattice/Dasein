@@ -22,21 +22,14 @@ import cascading.tuple.TupleEntry;
 public class DomainPatchBookAggregator extends BaseAggregator<DomainPatchBookAggregator.Context>
         implements Aggregator<DomainPatchBookAggregator.Context> {
 
-    private static final long serialVersionUID = 2657797493053039356L;
-
     public static final String CLEANUP = "CLEANUP";
     public static final String ADD = "ADD";
-
+    private static final long serialVersionUID = 2657797493053039356L;
     private int patchDunsLoc;
     private int patchDomainsLoc;
 
-    public static class Context extends BaseAggregator.Context {
-        String duns;
-        Set<String> domainsToAdd;
-        Set<String> domainsToRemove;
-    }
-
-    public DomainPatchBookAggregator(Fields fieldDeclaration, String patchDunsField, String patchDomainsField) {
+    public DomainPatchBookAggregator(Fields fieldDeclaration, String patchDunsField,
+            String patchDomainsField) {
         super(fieldDeclaration);
         this.patchDunsLoc = namePositionMap.get(patchDunsField);
         this.patchDomainsLoc = namePositionMap.get(patchDomainsField);
@@ -105,5 +98,11 @@ public class DomainPatchBookAggregator extends BaseAggregator<DomainPatchBookAgg
         result.set(patchDunsLoc, context.duns);
         result.set(patchDomainsLoc, JsonUtils.serialize(patchDomains));
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String duns;
+        Set<String> domainsToAdd;
+        Set<String> domainsToRemove;
     }
 }

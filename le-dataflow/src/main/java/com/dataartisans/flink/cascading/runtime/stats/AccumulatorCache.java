@@ -16,75 +16,70 @@
 
 package com.dataartisans.flink.cascading.runtime.stats;
 
-
 import java.util.Collections;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.client.program.ClusterClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AccumulatorCache {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AccumulatorCache.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccumulatorCache.class);
+    private final long updateIntervalMillis;
+    private JobID jobID;
+    private ClusterClient client;
+    private volatile Map<String, Object> currentAccumulators = Collections.emptyMap();
+    private long lastUpdateTime;
 
-	private JobID jobID;
+    public AccumulatorCache(int updateIntervalSecs) {
+        this.updateIntervalMillis = updateIntervalSecs * 1000;
+    }
 
-	private ClusterClient client;
+    public void update() {
+        update(false);
+    }
 
-	private volatile Map<String, Object> currentAccumulators = Collections.emptyMap();
+    public void update(boolean force) {
 
-	private final long updateIntervalMillis;
-	private long lastUpdateTime;
+        long currentTime = System.currentTimeMillis();
+        if (!force && currentTime - lastUpdateTime <= updateIntervalMillis) {
+            return;
+        }
 
-	public AccumulatorCache(int updateIntervalSecs) {
-		this.updateIntervalMillis = updateIntervalSecs * 1000;
-	}
+        if (jobID == null) {
+            return;
+        }
 
-	public void update() {
-		update(false);
-	}
+        if (client != null) {
 
-	public void update(boolean force) {
+            try {
+                currentAccumulators = client.getAccumulators(jobID);
+                lastUpdateTime = currentTime;
 
-		long currentTime = System.currentTimeMillis();
-		if (!force && currentTime - lastUpdateTime <= updateIntervalMillis) {
-			return;
-		}
+                LOG.debug("Updated accumulators: " + currentAccumulators);
+            } catch (Exception e) {
+                LOG.error("Failed to fetch accumulators for job {}." + jobID, e);
+            }
 
-		if (jobID == null) {
-			return;
-		}
+        }
 
-		if (client != null) {
+    }
 
-			try {
-				currentAccumulators = client.getAccumulators(jobID);
-				lastUpdateTime = currentTime;
+    public Map<String, Object> getCurrentAccumulators() {
+        return currentAccumulators;
+    }
 
-				LOG.debug("Updated accumulators: " + currentAccumulators);
-			} catch (Exception e) {
-				LOG.error("Failed to fetch accumulators for job {}." + jobID, e);
-			}
+    public void setJobID(JobID jobID) {
+        this.jobID = jobID;
+    }
 
-		}
+    public void setClient(ClusterClient client) {
+        this.client = client;
+    }
 
-	}
-
-	public Map<String, Object> getCurrentAccumulators() {
-		return currentAccumulators;
-	}
-
-	public void setJobID(JobID jobID) {
-		this.jobID = jobID;
-	}
-
-	public void setClient(ClusterClient client) {
-		this.client = client;
-	}
-
-	public long getLastUpdateTime() {
-		return lastUpdateTime;
-	}
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
 }

@@ -27,45 +27,45 @@ import cascading.flow.stream.element.ElementStage;
 import cascading.flow.stream.element.InputSource;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
-public class JoinBoundaryInStage extends ElementStage<Void, Tuple2<Tuple, Tuple[]>> implements InputSource {
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class JoinBoundaryInStage extends ElementStage<Void, Tuple2<Tuple, Tuple[]>>
+        implements InputSource {
 
-	public JoinBoundaryInStage(FlowProcess flowProcess, FlowElement flowElement) {
-		super(flowProcess, flowElement);
-	}
+    public JoinBoundaryInStage(FlowProcess flowProcess, FlowElement flowElement) {
+        super(flowProcess, flowElement);
+    }
 
-	@Override
-	public void receive(Duct previous, int ordinal, Void v) {
-		throw new UnsupportedOperationException( "use run() instead" );
-	}
+    @Override
+    public void receive(Duct previous, int ordinal, Void v) {
+        throw new UnsupportedOperationException("use run() instead");
+    }
 
-	@Override
-	public void complete(Duct previous) {
+    @Override
+    public void complete(Duct previous) {
 
-		if( next != null ) {
-			super.complete(previous);
-		}
-	}
+        if (next != null) {
+            super.complete(previous);
+        }
+    }
 
-	@Override
-	public void start(Duct previous) {
-		next.start(this);
-	}
+    @Override
+    public void start(Duct previous) {
+        next.start(this);
+    }
 
-	@Override
-	public void run(Object input) throws Throwable {
+    @Override
+    public void run(Object input) throws Throwable {
 
-		Tuple2<Tuple, Tuple[]> joinInputTuples;
-		try {
-			joinInputTuples = (Tuple2<Tuple, Tuple[]>)input;
-		}
-		catch(ClassCastException cce) {
-			throw new RuntimeException("JoinBoundaryInStage expects Tuple2<Tuple, Tuple[]>", cce);
-		}
+        Tuple2<Tuple, Tuple[]> joinInputTuples;
+        try {
+            joinInputTuples = (Tuple2<Tuple, Tuple[]>) input;
+        } catch (ClassCastException cce) {
+            throw new RuntimeException("JoinBoundaryInStage expects Tuple2<Tuple, Tuple[]>", cce);
+        }
 
-		flowProcess.increment( StepCounters.Tuples_Read, 1 );
-		flowProcess.increment( SliceCounters.Tuples_Read, 1 );
+        flowProcess.increment(StepCounters.Tuples_Read, 1);
+        flowProcess.increment(SliceCounters.Tuples_Read, 1);
 
-		next.receive(this, 0, joinInputTuples);
-	}
+        next.receive(this, 0, joinInputTuples);
+    }
 }

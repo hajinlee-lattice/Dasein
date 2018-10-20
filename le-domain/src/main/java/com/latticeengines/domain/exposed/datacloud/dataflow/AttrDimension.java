@@ -13,16 +13,11 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 public class AttrDimension implements GraphNode, Serializable {
 
     private static final long serialVersionUID = 4490040218923478461L;
-    
-    private Set<AttrDimension> children = new HashSet<>();
     private final String name;
+    private Set<AttrDimension> children = new HashSet<>();
 
     public AttrDimension(String name) {
         this.name = name;
-    }
-
-    public void setChildren(Collection<AttrDimension> children) {
-        this.children = new HashSet<>(children);
     }
 
     public String getName() {
@@ -31,7 +26,8 @@ public class AttrDimension implements GraphNode, Serializable {
 
     public AttrDimension clone() {
         AttrDimension dim = new AttrDimension(name);
-        List<AttrDimension> children = this.children.stream().map(AttrDimension::clone).collect(Collectors.toList());
+        List<AttrDimension> children = this.children.stream().map(AttrDimension::clone)
+                .collect(Collectors.toList());
         dim.setChildren(children);
         return dim;
     }
@@ -39,6 +35,10 @@ public class AttrDimension implements GraphNode, Serializable {
     @Override
     public Collection<AttrDimension> getChildren() {
         return children;
+    }
+
+    public void setChildren(Collection<AttrDimension> children) {
+        this.children = new HashSet<>(children);
     }
 
     @Override

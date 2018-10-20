@@ -12,33 +12,29 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class EnrichedAccount implements HasId<String> {
 
-    public EnrichedAccount() {
-        id = UUID.randomUUID().toString();
-    }
-
     @Id
     @JsonProperty
     @DynamoAttribute
     private String id;
-
     @Id
     @JsonProperty
     @DynamoAttribute
     private String latticeAccountId;
-
     @JsonProperty
     @DynamoAttribute
     private String tenantId;
-
     @JsonProperty
     @DynamoAttribute
     private String sourceId;
-
-    // TODO Add LastModified
-
     @JsonProperty
     @DynamoAttribute
     private Map<String, String> attributes = new HashMap<>();
+
+    // TODO Add LastModified
+
+    public EnrichedAccount() {
+        id = UUID.randomUUID().toString();
+    }
 
     @Override
     public String getId() {

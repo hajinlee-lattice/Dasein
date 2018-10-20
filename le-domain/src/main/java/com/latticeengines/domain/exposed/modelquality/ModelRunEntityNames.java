@@ -44,17 +44,13 @@ public class ModelRunEntityNames implements Dimension {
         this.analyticTestTag = modelrun.getAnalyticTestTag();
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @MetricTag(tag = "ModelName")
     public String getName() {
         return name;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @MetricTag(tag = "ModelDescription")
@@ -62,8 +58,8 @@ public class ModelRunEntityNames implements Dimension {
         return description;
     }
 
-    public void setAnalyticPipelineName(String analyticPipelineName) {
-        this.analyticPipelineName = analyticPipelineName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @MetricTag(tag = "AnalyticPipelineName")
@@ -71,16 +67,16 @@ public class ModelRunEntityNames implements Dimension {
         return analyticPipelineName;
     }
 
-    public void setDataSetName(String dataSetName) {
-        this.dataSetName = dataSetName;
+    public void setAnalyticPipelineName(String analyticPipelineName) {
+        this.analyticPipelineName = analyticPipelineName;
     }
 
     public String getDataSetName() {
         return dataSetName;
     }
 
-    public void setAnalyticTestName(String analyticTestName) {
-        this.analyticTestName = analyticTestName;
+    public void setDataSetName(String dataSetName) {
+        this.dataSetName = dataSetName;
     }
 
     @MetricTag(tag = "AnalyticTestName")
@@ -88,12 +84,16 @@ public class ModelRunEntityNames implements Dimension {
         return analyticTestName;
     }
 
-    public void setAnalyticTestTag(String analyticTestTag) {
-        this.analyticTestTag = analyticTestTag;
+    public void setAnalyticTestName(String analyticTestName) {
+        this.analyticTestName = analyticTestName;
     }
 
     @MetricTag(tag = "AnalyticTestTag")
     public String getAnalyticTestTag() {
         return analyticTestTag;
+    }
+
+    public void setAnalyticTestTag(String analyticTestTag) {
+        this.analyticTestTag = analyticTestTag;
     }
 }

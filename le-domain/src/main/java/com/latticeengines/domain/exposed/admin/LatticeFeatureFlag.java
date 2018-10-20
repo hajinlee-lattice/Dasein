@@ -23,7 +23,8 @@ public enum LatticeFeatureFlag {
     ENABLE_CROSS_SELL_MODELING("EnableCrossSellModeling", "Enable Cross Sell Modeling"), //
     ENABLE_PRODUCT_PURCHASE_IMPORT("EnableProductPurchaseImport", "Enable Product Purchase Import"), //
     ENABLE_PRODUCT_BUNDLE_IMPORT("EnableProductBundleImport", "Enable Product Bundle Import"), //
-    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport", "Enable Product Hierarchy Import"), //
+    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport",
+            "Enable Product Hierarchy Import"), //
     PLAYBOOK_MODULE("PlaybookModule", "Playbook Module"), //
     LAUNCH_PLAY_TO_MAP_SYSTEM("LaunchPlayToMapSystem", "Launch Play to MAP System"), //
 
@@ -56,9 +57,17 @@ public enum LatticeFeatureFlag {
     @Deprecated
     ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"); //
 
+    private static Set<String> names;
+
+    static {
+        names = new HashSet<>();
+        for (PlsFeatureFlag flag : PlsFeatureFlag.values()) {
+            names.add(flag.getName());
+        }
+    }
+
     private String name;
     private String documentation;
-    private static Set<String> names;
     private boolean deprecated = false;
 
     LatticeFeatureFlag(String name, String documentation) {
@@ -82,13 +91,6 @@ public enum LatticeFeatureFlag {
 
     public boolean isDeprecated() {
         return deprecated;
-    }
-
-    static {
-        names = new HashSet<>();
-        for (PlsFeatureFlag flag : PlsFeatureFlag.values()) {
-            names.add(flag.getName());
-        }
     }
 
 }

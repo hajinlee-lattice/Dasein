@@ -87,8 +87,7 @@ public enum InterfaceName {
     TotalSpendOvertime, //
     AvgSpendOvertime, //
     CustomTrxField, //
-    Longitude,
-    Latitude,
+    Longitude, Latitude,
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb
@@ -106,38 +105,20 @@ public enum InterfaceName {
     ConsolidateReport, //
 
     Type, //
-    AnnualRevenueCurrency,
-    SpendAnalyticsSegment,
-    RepresentativeAccounts,
-    CustomerParentAccountID,
-    DoNotCall,
-    LeadStatus,
-    LeadType,
-    Cost,
-    TotalCost, //
+    AnnualRevenueCurrency, SpendAnalyticsSegment, RepresentativeAccounts, CustomerParentAccountID, DoNotCall, LeadStatus, LeadType, Cost, TotalCost, //
 
     // These values are for Curated Attributes.
     NumberOfContacts,
 
     // CDL External
-    SalesforceSandboxAccountID,
-    SalesforceSandboxContactID,
-    MarketoAccountID,
-    EloquaAccountID,
+    SalesforceSandboxAccountID, SalesforceSandboxContactID, MarketoAccountID, EloquaAccountID,
 
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
-    IsMatched,
-    LDC_Name,
+    IsMatched, LDC_Name,
 
     // Rating
-    ModelId,
-    Rating,
-    Score,
-    RawScore,
-    ExpectedValue,
-    Likelihood,
-    Lift,
+    ModelId, Rating, Score, RawScore, ExpectedValue, Likelihood, Lift,
 
     // Internal
     __Composite_Key__ // primary key for internal use

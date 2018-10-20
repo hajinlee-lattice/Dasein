@@ -19,12 +19,14 @@ import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 /**
- * Used to redirect source duns to a target duns that is obtained by a more accurate match key.
+ * Used to redirect source duns to a target duns that is obtained by a more
+ * accurate match key.
  *
- * 1. Use JSON string to store the list of Item instead of embedded Avro schema because other part
- * of the system support single layer Avro record better
+ * 1. Use JSON string to store the list of Item instead of embedded Avro schema
+ * because other part of the system support single layer Avro record better
  */
-public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements FabricEntity<DunsGuideBook> {
+public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
+        implements FabricEntity<DunsGuideBook> {
 
     private static final String SRC_DUNS_KEY = "Duns";
     private static final String ITEMS_KEY = "Items";
@@ -32,7 +34,8 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
     // the tag value will NOT be serialized to avro
     private static final String PATCHED_TAG = "Patched";
 
-    private static final TypeReference<List<Item>> ITEMS_TYPE_REFERENCE = new TypeReference<List<Item>>() {};
+    private static final TypeReference<List<Item>> ITEMS_TYPE_REFERENCE = new TypeReference<List<Item>>() {
+    };
 
     private String srcDuns;
     private List<Item> items;
@@ -52,14 +55,10 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
         Preconditions.checkNotNull(recordType);
         return SchemaBuilder.record(replaceSpacialChars(recordType)).fields()
                 /* source DUNS */
-                .name(SRC_DUNS_KEY)
-                .type(Schema.create(Schema.Type.STRING))
-                .noDefault()
+                .name(SRC_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
                 .name(ITEMS_KEY)
                 /* JSON string of DunsGuideBook.Item array */
-                .type(Schema.create(Schema.Type.STRING))
-                .noDefault()
-                .endRecord();
+                .type(Schema.create(Schema.Type.STRING)).noDefault().endRecord();
     }
 
     @Override

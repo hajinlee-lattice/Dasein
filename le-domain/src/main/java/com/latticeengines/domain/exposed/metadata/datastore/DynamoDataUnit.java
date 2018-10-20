@@ -5,28 +5,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DynamoDataUnit extends DataUnit {
 
+    @JsonProperty("Signature")
+    private String signature;
+    @JsonProperty("PartitionKey")
+    private String partitionKey;
+    @JsonProperty("SortKey")
+    private String sortKey;
+    // tenant id used in dynamo pk (optional)
+    @JsonProperty("LinkedTenant")
+    private String linkedTenant;
+    // table name used in dynamo pk (optional)
+    @JsonProperty("LinkedTable")
+    private String linkedTable;
+
     @Override
     @JsonIgnore
     public StorageType getStorageType() {
         return StorageType.Dynamo;
     }
-
-    @JsonProperty("Signature")
-    private String signature;
-
-    @JsonProperty("PartitionKey")
-    private String partitionKey;
-
-    @JsonProperty("SortKey")
-    private String sortKey;
-
-    // tenant id used in dynamo pk (optional)
-    @JsonProperty("LinkedTenant")
-    private String linkedTenant;
-
-    // table name used in dynamo pk (optional)
-    @JsonProperty("LinkedTable")
-    private String linkedTable;
 
     public String getSignature() {
         return signature;

@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ClassName")
-@JsonSubTypes({ @JsonSubTypes.Type(value = PredefinedScheduleConfig.class, name = "PredefinedScheduleConfig"),
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = PredefinedScheduleConfig.class, name = "PredefinedScheduleConfig"),
         @JsonSubTypes.Type(value = ExternalTriggerConfig.class, name = "ExternalTriggerConfig") })
 public abstract class OrchestrationConfig {
     private String className;
@@ -78,6 +79,5 @@ public abstract class OrchestrationConfig {
     private void setPipelineConfig(String pipelineConfig) {
         this.pipelineConfig = pipelineConfig;
     }
-
 
 }

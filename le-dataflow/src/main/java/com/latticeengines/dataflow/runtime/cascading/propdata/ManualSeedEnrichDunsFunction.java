@@ -22,8 +22,8 @@ public class ManualSeedEnrichDunsFunction extends BaseOperation implements Funct
     private String manSeedNoZipDuns;
     private String manSeedNoZipCityDuns;
 
-    public ManualSeedEnrichDunsFunction(Fields fieldDeclaration, String manSeedDuns, String manSeedNoZipDuns,
-            String manSeedNoZipCityDuns) {
+    public ManualSeedEnrichDunsFunction(Fields fieldDeclaration, String manSeedDuns,
+            String manSeedNoZipDuns, String manSeedNoZipCityDuns) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.manSeedDuns = manSeedDuns;
@@ -50,7 +50,8 @@ public class ManualSeedEnrichDunsFunction extends BaseOperation implements Funct
             if (!StringUtils.isEmpty(mSeedNoZipDuns)) {
                 result.set(this.namePositionMap.get(String.valueOf(manSeedDuns)), mSeedNoZipDuns);
             } else {
-                result.set(this.namePositionMap.get(String.valueOf(manSeedDuns)), mSeedNoZipCityDuns);
+                result.set(this.namePositionMap.get(String.valueOf(manSeedDuns)),
+                        mSeedNoZipCityDuns);
             }
         }
     }

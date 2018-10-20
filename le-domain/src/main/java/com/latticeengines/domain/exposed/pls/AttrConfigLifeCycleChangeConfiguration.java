@@ -8,17 +8,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AttrConfigLifeCycleChangeConfiguration extends ActionConfiguration {
 
-    public AttrConfigLifeCycleChangeConfiguration() {
-    }
-
     @JsonProperty("CategoryName")
     private String categoryName;
-
     @JsonProperty("subType")
     private SubType subType;
-
     @JsonProperty("AttrNums")
     private Long attrNums;
+
+    public AttrConfigLifeCycleChangeConfiguration() {
+    }
 
     public String getCategoryName() {
         return this.categoryName;

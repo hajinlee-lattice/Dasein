@@ -41,7 +41,8 @@ public class CustomEventRatingConfig implements AdvancedRatingConfig {
     public void copyConfig(AdvancedRatingConfig config) {
         CustomEventRatingConfig advancedConfInRetrievedAIModel = this;
         CustomEventRatingConfig advancedConfInAIModel = (CustomEventRatingConfig) config;
-        advancedConfInRetrievedAIModel.setCustomEventModelingType(advancedConfInAIModel.getCustomEventModelingType());
+        advancedConfInRetrievedAIModel
+                .setCustomEventModelingType(advancedConfInAIModel.getCustomEventModelingType());
         advancedConfInRetrievedAIModel.setSourceFileName(advancedConfInAIModel.getSourceFileName());
         advancedConfInRetrievedAIModel.setDataStores(advancedConfInAIModel.getDataStores());
     }

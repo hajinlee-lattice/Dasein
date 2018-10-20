@@ -31,10 +31,6 @@ public enum CacheName {
         this.name = name;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
     public static CacheName[] getDataCloudLocalCacheGroup() {
         return new CacheName[] { DataCloudVersionCache, DataCloudCMCache, DataCloudStatsCache };
     }
@@ -54,6 +50,10 @@ public enum CacheName {
 
     public static CacheName[] getCdlLocalCacheGroup() {
         return new CacheName[] { TimeTranslatorCache };
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public static class Constants {

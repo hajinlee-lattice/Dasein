@@ -61,8 +61,7 @@ public class AMSeedManualOverwriteFunction extends BaseOperation implements Func
             // employee range fields
             for (int i = 0; i < overwriteFieldsArray.length; i++) {
                 if (arguments.getObject(overwriteFieldsArray[i][0]) != null) {
-                    result.set(
-                            this.namePositionMap.get(String.valueOf(overwriteFieldsArray[i][1])),
+                    result.set(this.namePositionMap.get(String.valueOf(overwriteFieldsArray[i][1])),
                             arguments.getObject(overwriteFieldsArray[i][0]));
                 }
             }

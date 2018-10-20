@@ -28,7 +28,8 @@ public class MetricsShareOfWalletFunc extends BaseOperation implements Function 
     private String spField;
     private String stField;
 
-    public MetricsShareOfWalletFunc(String targetField, String apField, String atField, String spField, String stField) {
+    public MetricsShareOfWalletFunc(String targetField, String apField, String atField,
+            String spField, String stField) {
         super(new Fields(targetField));
         this.apField = apField;
         this.atField = atField;
@@ -51,7 +52,8 @@ public class MetricsShareOfWalletFunc extends BaseOperation implements Function 
             return;
         }
         if (spSpend != 0 && stSpend == 0) {
-            log.error("FATAL: segment spend on one product is not 0, while segment total spend is 0");
+            log.error(
+                    "FATAL: segment spend on one product is not 0, while segment total spend is 0");
             functionCall.getOutputCollector().add(Tuple.size(1));
             return;
         }

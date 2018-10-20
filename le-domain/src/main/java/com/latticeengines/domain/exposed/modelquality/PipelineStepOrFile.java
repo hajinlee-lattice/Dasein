@@ -6,7 +6,7 @@ public class PipelineStepOrFile {
 
     @JsonProperty("pipeline_step")
     public String pipelineStepName;
-    
+
     @JsonProperty("pipeline_step_dir")
     public String pipelineStepDir;
 }

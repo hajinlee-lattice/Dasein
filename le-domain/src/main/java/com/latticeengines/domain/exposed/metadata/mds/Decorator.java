@@ -11,6 +11,7 @@ public interface Decorator extends Named, DecoratorFactory<Namespace0> {
 
     // enrich/overwrite metadata in the input schema
     Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata);
+
     ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata);
 
     @Override

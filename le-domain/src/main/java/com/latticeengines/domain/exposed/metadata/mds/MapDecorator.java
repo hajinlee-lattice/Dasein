@@ -40,7 +40,8 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
             log.info(getLoggerName() + ": Start loading.");
         }).doOnSuccess(s -> {
             long duration = System.currentTimeMillis() - start.getAndIncrement();
-            log.info(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration + " msecs.");
+            log.info(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
+                    + " msecs.");
         }).doOnError(t -> log.error(getLoggerName() + ": Failed to load.", t));
     }
 

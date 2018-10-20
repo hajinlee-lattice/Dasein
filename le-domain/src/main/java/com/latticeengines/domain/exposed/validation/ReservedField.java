@@ -2,8 +2,7 @@ package com.latticeengines.domain.exposed.validation;
 
 public enum ReservedField {
 
-    Percentile("Score"),
-    Rating("Rating");
+    Percentile("Score"), Rating("Rating");
 
     public String displayName;
 

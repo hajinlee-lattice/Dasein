@@ -145,8 +145,8 @@ public class MadisonLogicDailyProgress implements HasPid {
     @Override
     public String toString() {
         return "MadisonLogicDailyProgress="
-                + new ToStringBuilder(id).append(id).append(createTime).append(status).append(destinationTable)
-                        .append(fileDate).append(errorMessage).toString();
+                + new ToStringBuilder(id).append(id).append(createTime).append(status)
+                        .append(destinationTable).append(fileDate).append(errorMessage).toString();
     }
 
 }

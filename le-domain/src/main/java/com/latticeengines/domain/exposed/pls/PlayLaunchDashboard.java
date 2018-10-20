@@ -21,12 +21,12 @@ public class PlayLaunchDashboard {
         return cumulativeStats;
     }
 
-    public List<LaunchSummary> getLaunchSummaries() {
-        return launchSummaries;
-    }
-
     public void setCumulativeStats(Stats cumulativeStats) {
         this.cumulativeStats = cumulativeStats;
+    }
+
+    public List<LaunchSummary> getLaunchSummaries() {
+        return launchSummaries;
     }
 
     public void setLaunchSummaries(List<LaunchSummary> launchSummaries) {
@@ -74,44 +74,44 @@ public class PlayLaunchDashboard {
             return playName;
         }
 
-        public String getPlayDisplayName() {
-            return playDisplayName;
-        }
-
-        public String getLaunchId() {
-            return launchId;
-        }
-
-        public Date getLaunchTime() {
-            return launchTime;
-        }
-
-        public Stats getStats() {
-            return stats;
-        }
-
-        public LaunchState getLaunchState() {
-            return launchState;
-        }
-
         public void setPlayName(String playName) {
             this.playName = playName;
+        }
+
+        public String getPlayDisplayName() {
+            return playDisplayName;
         }
 
         public void setPlayDisplayName(String playDisplayName) {
             this.playDisplayName = playDisplayName;
         }
 
+        public String getLaunchId() {
+            return launchId;
+        }
+
         public void setLaunchId(String launchId) {
             this.launchId = launchId;
+        }
+
+        public Date getLaunchTime() {
+            return launchTime;
         }
 
         public void setLaunchTime(Date launchTime) {
             this.launchTime = launchTime;
         }
 
+        public Stats getStats() {
+            return stats;
+        }
+
         public void setStats(Stats stats) {
             this.stats = stats;
+        }
+
+        public LaunchState getLaunchState() {
+            return launchState;
         }
 
         public void setLaunchState(LaunchState launchState) {
@@ -167,36 +167,36 @@ public class PlayLaunchDashboard {
             return selectedTargets;
         }
 
-        public long getSuppressed() {
-            return suppressed;
-        }
-
-        public long getErrors() {
-            return errors;
-        }
-
-        public long getRecommendationsLaunched() {
-            return recommendationsLaunched;
-        }
-
-        public long getContactsWithinRecommendations() {
-            return contactsWithinRecommendations;
-        }
-
         public void setSelectedTargets(long selectedTargets) {
             this.selectedTargets = selectedTargets;
+        }
+
+        public long getSuppressed() {
+            return suppressed;
         }
 
         public void setSuppressed(long suppressed) {
             this.suppressed = suppressed;
         }
 
+        public long getErrors() {
+            return errors;
+        }
+
         public void setErrors(long errors) {
             this.errors = errors;
         }
 
+        public long getRecommendationsLaunched() {
+            return recommendationsLaunched;
+        }
+
         public void setRecommendationsLaunched(long recommendationsLaunched) {
             this.recommendationsLaunched = recommendationsLaunched;
+        }
+
+        public long getContactsWithinRecommendations() {
+            return contactsWithinRecommendations;
         }
 
         public void setContactsWithinRecommendations(long contactsWithinRecommendations) {

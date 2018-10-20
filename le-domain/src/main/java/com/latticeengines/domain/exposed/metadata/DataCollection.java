@@ -185,11 +185,11 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
 
         public Version complement() {
             switch (this) {
-            case Blue:
-                return Green;
-            case Green:
-            default:
-                return Blue;
+                case Blue:
+                    return Green;
+                case Green:
+                default:
+                    return Blue;
             }
         }
 

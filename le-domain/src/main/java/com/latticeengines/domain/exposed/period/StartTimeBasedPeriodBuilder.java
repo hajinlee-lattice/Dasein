@@ -4,7 +4,8 @@ import java.time.LocalDate;
 
 import org.apache.commons.lang3.StringUtils;
 
-public abstract class StartTimeBasedPeriodBuilder extends BasePeriodBuilder implements PeriodBuilder {
+public abstract class StartTimeBasedPeriodBuilder extends BasePeriodBuilder
+        implements PeriodBuilder {
 
     private static final long serialVersionUID = -5148098981943162677L;
 

@@ -6,13 +6,14 @@ import java.util.List;
 public class DynamoAttributes {
 
     private List<String> attributes = new ArrayList<>();
-    
-    public DynamoAttributes() {}
-    
+
+    public DynamoAttributes() {
+    }
+
     public DynamoAttributes(List<String> attributes) {
         this.attributes = attributes;
     }
-    
+
     public DynamoAttributes(String... attributes) {
         for (String attr : attributes) {
             this.attributes.add(attr);

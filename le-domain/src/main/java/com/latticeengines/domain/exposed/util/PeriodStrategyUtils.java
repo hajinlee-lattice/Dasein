@@ -21,29 +21,35 @@ public class PeriodStrategyUtils {
         return STRATEGY + periodStrategyName;
     }
 
-    public static String getPeriodStrategyNameFromPeriodTableName(String tableName, TableRoleInCollection role) {
+    public static String getPeriodStrategyNameFromPeriodTableName(String tableName,
+            TableRoleInCollection role) {
         return tableName.substring(STRATEGY.length(), tableName.indexOf(role.name()));
     }
 
-    public static Table findPeriodTableFromStrategy(List<Table> periodTables, PeriodStrategy strategy) {
+    public static Table findPeriodTableFromStrategy(List<Table> periodTables,
+            PeriodStrategy strategy) {
         for (Table table : periodTables) {
             if (table.getName().startsWith(getTablePrefixFromPeriodStrategy(strategy))) {
                 return table;
             }
         }
-        throw new RuntimeException("Fail to find period table from period strategy " + strategy.getName());
+        throw new RuntimeException(
+                "Fail to find period table from period strategy " + strategy.getName());
     }
 
-    public static Table findPeriodTableFromStrategyName(List<Table> periodTables, String strategyName) {
+    public static Table findPeriodTableFromStrategyName(List<Table> periodTables,
+            String strategyName) {
         for (Table table : periodTables) {
             if (table.getName().startsWith(getTablePrefixFromPeriodStrategyName(strategyName))) {
                 return table;
             }
         }
-        throw new RuntimeException("Fail to find period table from period strategy named " + strategyName);
+        throw new RuntimeException(
+                "Fail to find period table from period strategy named " + strategyName);
     }
 
-    public static List<String> filterPeriodTablesByPeriods(List<String> periodTables, Set<String> periods) {
+    public static List<String> filterPeriodTablesByPeriods(List<String> periodTables,
+            Set<String> periods) {
         List<String> filtered = new ArrayList<>();
         Set<String> tablePrefixes = new HashSet<>();
         for (String period : periods) {

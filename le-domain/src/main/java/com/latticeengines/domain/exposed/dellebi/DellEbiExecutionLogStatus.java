@@ -13,15 +13,11 @@ public enum DellEbiExecutionLogStatus {
     TriedFailed(-2), //
     Failed(-1);
 
-    private int status;
     private static Map<Integer, String> enumMap;
+    private int status;
 
     DellEbiExecutionLogStatus(int status) {
         this.status = status;
-    }
-
-    public int getStatus() {
-        return this.status;
     }
 
     public static String getStatusNameByCode(int code) {
@@ -37,5 +33,9 @@ public enum DellEbiExecutionLogStatus {
         for (DellEbiExecutionLogStatus accessor : DellEbiExecutionLogStatus.values()) {
             enumMap.put(accessor.getStatus(), accessor.toString());
         }
+    }
+
+    public int getStatus() {
+        return this.status;
     }
 }

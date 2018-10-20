@@ -26,7 +26,6 @@ public class ActivityMetricsNullImputeFunc extends BaseOperation implements Func
     private List<ActivityMetrics> metrics;
     private List<String> pivotedVals;
 
-
     public ActivityMetricsNullImputeFunc(Fields fieldDeclaration, List<ActivityMetrics> metrics,
             List<String> pivotedVals) {
         super(fieldDeclaration);
@@ -42,8 +41,8 @@ public class ActivityMetricsNullImputeFunc extends BaseOperation implements Func
         if (CollectionUtils.isNotEmpty(pivotedVals)) {
             for (String p : pivotedVals)
                 for (ActivityMetrics m : metrics) {
-                    result = update(m, ActivityMetricsUtils.getFullName(ActivityMetricsUtils.getNameWithPeriod(m), p),
-                            result);
+                    result = update(m, ActivityMetricsUtils
+                            .getFullName(ActivityMetricsUtils.getNameWithPeriod(m), p), result);
                 }
         } else {
             for (ActivityMetrics m : metrics) {
@@ -56,24 +55,24 @@ public class ActivityMetricsNullImputeFunc extends BaseOperation implements Func
     private Tuple update(ActivityMetrics m, String field, Tuple result) {
         int index = namePositionMap.get(field);
         switch (m.getMetrics()) {
-        case SpendChange:
-            if (result.getObject(index) == null) {
-                result.set(index, 0);
-            }
-            break;
-        case TotalSpendOvertime:
-        case AvgSpendOvertime:
-            if (result.getObject(index) == null) {
-                result.set(index, 0.0);
-            }
-            break;
-        case HasPurchased:
-            if (result.getObject(index) == null) {
-                result.set(index, false);
-            }
-            break;
-        default:
-            break;
+            case SpendChange:
+                if (result.getObject(index) == null) {
+                    result.set(index, 0);
+                }
+                break;
+            case TotalSpendOvertime:
+            case AvgSpendOvertime:
+                if (result.getObject(index) == null) {
+                    result.set(index, 0.0);
+                }
+                break;
+            case HasPurchased:
+                if (result.getObject(index) == null) {
+                    result.set(index, false);
+                }
+                break;
+            default:
+                break;
         }
         return result;
     }

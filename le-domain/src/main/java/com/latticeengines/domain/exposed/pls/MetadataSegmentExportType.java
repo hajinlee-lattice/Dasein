@@ -23,21 +23,21 @@ public enum MetadataSegmentExportType {
     CONTACT("Contacts", BusinessEntity.Contact), //
     ACCOUNT_AND_CONTACT("Accounts and Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
     ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"), // ;
-    ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact, BusinessEntity.Account),
-    ORPHAN_TXN("Orphan Transaction");
+    ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact,
+            BusinessEntity.Account), ORPHAN_TXN("Orphan Transaction");
 
     String displayName;
 
     List<Triple<BusinessEntity, String, String>> defaultAttributeTuples;
 
-    MetadataSegmentExportType(String displayName){
+    MetadataSegmentExportType(String displayName) {
         this.displayName = displayName;
     }
 
     MetadataSegmentExportType(String displayName, InterfaceName field, String fieldDisplayName) {
         this.displayName = displayName;
-        this.defaultAttributeTuples = Collections
-                .singletonList(new ImmutableTriple<>(BusinessEntity.Account, field.name(), fieldDisplayName));
+        this.defaultAttributeTuples = Collections.singletonList(
+                new ImmutableTriple<>(BusinessEntity.Account, field.name(), fieldDisplayName));
     }
 
     MetadataSegmentExportType(String displayName, BusinessEntity... entities) {
@@ -53,7 +53,8 @@ public enum MetadataSegmentExportType {
                                     // give precedence to field from first type
                                     // if there are duplicate field names
                                     attrName.add(interfaceName);
-                                    res = new ImmutableTriple<>(e, interfaceName.name(), p.getRight());
+                                    res = new ImmutableTriple<>(e, interfaceName.name(),
+                                            p.getRight());
                                 }
                                 return res;
                             }) //
@@ -64,43 +65,56 @@ public enum MetadataSegmentExportType {
                 .collect(Collectors.toList());
     }
 
+    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
+        List<Pair<InterfaceName, String>> defaultExportAttributesPair = getDefaultExportAttributesPair(
+                entity);
+        return defaultExportAttributesPair.stream() //
+                .map(Pair::getLeft) //
+                .collect(Collectors.toSet());
+    }
+
+    private static List<Pair<InterfaceName, String>> getDefaultExportAttributesPair(
+            BusinessEntity entity) {
+        List<Pair<InterfaceName, String>> attrs = new ArrayList<>();
+        switch (entity) {
+            case Account:
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.AccountId,
+                        "Account Id"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.CompanyName,
+                        "Company Name"));
+                attrs.add(
+                        new ImmutablePair<InterfaceName, String>(InterfaceName.Website, "Website"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Address_Street_1,
+                        "Street"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.City, "City"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.State, "State"));
+                attrs.add(
+                        new ImmutablePair<InterfaceName, String>(InterfaceName.PostalCode, "Zip"));
+                attrs.add(
+                        new ImmutablePair<InterfaceName, String>(InterfaceName.Country, "Country"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PhoneNumber,
+                        "Phone"));
+                break;
+            case Contact:
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.ContactId,
+                        "Contact Id"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.ContactName,
+                        "Contact Name"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Email, "Email"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PhoneNumber,
+                        "Contact Phone"));
+                attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.AccountId,
+                        "Account Id"));
+            default:
+        }
+        return attrs;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
 
     public List<Triple<BusinessEntity, String, String>> getDefaultAttributeTuples() {
         return defaultAttributeTuples;
-    }
-
-    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
-        List<Pair<InterfaceName, String>> defaultExportAttributesPair = getDefaultExportAttributesPair(entity);
-        return defaultExportAttributesPair.stream() //
-                .map(Pair::getLeft) //
-                .collect(Collectors.toSet());
-    }
-
-    private static List<Pair<InterfaceName, String>> getDefaultExportAttributesPair(BusinessEntity entity) {
-        List<Pair<InterfaceName, String>> attrs = new ArrayList<>();
-        switch (entity) {
-        case Account:
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.AccountId, "Account Id"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.CompanyName, "Company Name"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Website, "Website"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Address_Street_1, "Street"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.City, "City"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.State, "State"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PostalCode, "Zip"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Country, "Country"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PhoneNumber, "Phone"));
-            break;
-        case Contact:
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.ContactId, "Contact Id"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.ContactName, "Contact Name"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Email, "Email"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PhoneNumber, "Contact Phone"));
-            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.AccountId, "Account Id"));
-        default:
-        }
-        return attrs;
     }
 }

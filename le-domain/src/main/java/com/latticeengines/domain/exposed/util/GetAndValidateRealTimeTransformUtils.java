@@ -10,13 +10,16 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class GetAndValidateRealTimeTransformUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(GetAndValidateRealTimeTransformUtils.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(GetAndValidateRealTimeTransformUtils.class);
 
     @SuppressWarnings("unchecked")
-    public static <T> T fetchAndValidateRealTimeTransform(TransformDefinition definition, String packageName) {
+    public static <T> T fetchAndValidateRealTimeTransform(TransformDefinition definition,
+            String packageName) {
         T transform;
         try {
-            Class<T> c = (Class<T>) Class.forName(getRTSClassFromPythonName(packageName, definition.name));
+            Class<T> c = (Class<T>) Class
+                    .forName(getRTSClassFromPythonName(packageName, definition.name));
             Constructor<T> ctor = c.getConstructor();
             transform = ctor.newInstance();
         } catch (Exception e1) {

@@ -16,10 +16,16 @@ import com.latticeengines.domain.exposed.metadata.BucketedAttribute;
 public class DCBucketedAttr extends BucketedAttribute implements Serializable {
 
     private static final long serialVersionUID = -1L;
+    @JsonProperty("dec_strat")
+    private BitDecodeStrategy decodedStrategy;
+    @JsonProperty("bkt_algo")
+    private BucketAlgorithm bucketAlgo;
+    @JsonProperty("src_attr")
+    private String sourceAttr;
 
     // for jackson
     @SuppressWarnings("unused")
-	private DCBucketedAttr() {
+    private DCBucketedAttr() {
     }
 
     public DCBucketedAttr(String nominalAttr, String sourceAttr, int lowestBit, int numBits) {
@@ -28,15 +34,6 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
             this.sourceAttr = sourceAttr;
         }
     }
-
-    @JsonProperty("dec_strat")
-    private BitDecodeStrategy decodedStrategy;
-
-    @JsonProperty("bkt_algo")
-    private BucketAlgorithm bucketAlgo;
-
-    @JsonProperty("src_attr")
-    private String sourceAttr;
 
     public BitDecodeStrategy getDecodedStrategy() {
         return decodedStrategy;

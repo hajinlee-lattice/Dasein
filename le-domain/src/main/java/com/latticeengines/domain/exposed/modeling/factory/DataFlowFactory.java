@@ -15,11 +15,10 @@ import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardA
 
 public class DataFlowFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(DataFlowFactory.class);
-
     public static final String DATAFLOW_NAME_KEY = "dataflow.name";
     public static final String DATAFLOW_MATCH_KEY = "dataflow.match";
     public static final String DATAFLOW_DO_SORT_FOR_ATTR_FLOW = "dataflow.do.sort";
+    private static final Logger log = LoggerFactory.getLogger(DataFlowFactory.class);
 
     public static void configDataFlow(SelectedConfig config, ModelingParameters parameters) {
         log.info("Check and Config DataFlow.");
@@ -37,12 +36,15 @@ public class DataFlowFactory {
         log.info("Successfully configured the DataFlow");
     }
 
-    public static AddStandardAttributesParameters getAddStandardAttributesParameters(String eventTableName, //
-            List<TransformDefinition> transforms, Map<String, String> runTimeParams, String schema) {
+    public static AddStandardAttributesParameters getAddStandardAttributesParameters(
+            String eventTableName, //
+            List<TransformDefinition> transforms, Map<String, String> runTimeParams,
+            String schema) {
         if (schema == null) {
             throw new RuntimeException("schema is null!");
         }
-        AddStandardAttributesParameters params = new AddStandardAttributesParameters(eventTableName, transforms, SchemaInterpretation.valueOf(schema));
+        AddStandardAttributesParameters params = new AddStandardAttributesParameters(eventTableName,
+                transforms, SchemaInterpretation.valueOf(schema));
 
         if (runTimeParams != null && runTimeParams.containsKey(DATAFLOW_DO_SORT_FOR_ATTR_FLOW)) {
             params.doSort = true;

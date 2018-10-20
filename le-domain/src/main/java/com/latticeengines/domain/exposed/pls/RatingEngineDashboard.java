@@ -24,28 +24,28 @@ public class RatingEngineDashboard {
         return coverageInfo;
     }
 
-    public RatingEngineSummary getSummary() {
-        return summary;
-    }
-
-    public List<Play> getPlays() {
-        return plays;
-    }
-
-    public MetadataSegment getSegment() {
-        return segment;
-    }
-
     public void setCoverageInfo(CoverageInfo coverageInfo) {
         this.coverageInfo = coverageInfo;
+    }
+
+    public RatingEngineSummary getSummary() {
+        return summary;
     }
 
     public void setSummary(RatingEngineSummary summary) {
         this.summary = summary;
     }
 
+    public List<Play> getPlays() {
+        return plays;
+    }
+
     public void setPlays(List<Play> plays) {
         this.plays = plays;
+    }
+
+    public MetadataSegment getSegment() {
+        return segment;
     }
 
     public void setSegment(MetadataSegment segment) {

@@ -7,7 +7,7 @@ public class ExternalTriggerConfig extends OrchestrationConfig {
     private DataCloudEngine engine;
     private String engineName;
     private TriggerStrategy strategy;
-    
+
     @JsonProperty("Engine")
     public DataCloudEngine getEngine() {
         return engine;
@@ -38,12 +38,12 @@ public class ExternalTriggerConfig extends OrchestrationConfig {
         this.strategy = strategy;
     }
 
-    public enum TriggerStrategy {
-        LATEST_VERSION
-    }
-
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public enum TriggerStrategy {
+        LATEST_VERSION
     }
 }

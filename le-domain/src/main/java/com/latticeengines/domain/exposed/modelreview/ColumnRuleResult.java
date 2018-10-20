@@ -12,7 +12,8 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@Table(name = "MODELREVIEW_COLUMNRESULT", indexes = {@Index(name = "IX_MODEL_ID", columnList = "MODEL_ID")})
+@Table(name = "MODELREVIEW_COLUMNRESULT", indexes = {
+        @Index(name = "IX_MODEL_ID", columnList = "MODEL_ID") })
 public class ColumnRuleResult extends BaseRuleResult {
 
     @JsonProperty
@@ -33,7 +34,8 @@ public class ColumnRuleResult extends BaseRuleResult {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((flaggedColumnNames == null) ? 0 : flaggedColumnNames.hashCode());
+        result = prime * result
+                + ((flaggedColumnNames == null) ? 0 : flaggedColumnNames.hashCode());
         return result;
     }
 

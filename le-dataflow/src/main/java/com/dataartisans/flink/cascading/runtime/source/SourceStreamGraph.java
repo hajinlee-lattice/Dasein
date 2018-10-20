@@ -27,60 +27,60 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.tap.Tap;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class SourceStreamGraph extends NodeStreamGraph {
 
-	private TapSourceStage sourceStage;
-	private SingleOutBoundaryStage sinkStage;
+    private TapSourceStage sourceStage;
+    private SingleOutBoundaryStage sinkStage;
 
-	public SourceStreamGraph(FlowProcess flowProcess, FlowNode node, Tap tap) {
-		super(flowProcess, node);
+    public SourceStreamGraph(FlowProcess flowProcess, FlowNode node, Tap tap) {
+        super(flowProcess, node);
 
-		sourceStage = translateHead(tap, flowProcess);
+        sourceStage = translateHead(tap, flowProcess);
 
-		setTraps();
-		setScopes();
+        setTraps();
+        setScopes();
 
-		printGraph( node.getID(), "source", flowProcess.getCurrentSliceNum() );
-		bind();
-	}
+        printGraph(node.getID(), "source", flowProcess.getCurrentSliceNum());
+        bind();
+    }
 
-	private TapSourceStage translateHead(Tap tap, FlowProcess flowProcess) {
+    private TapSourceStage translateHead(Tap tap, FlowProcess flowProcess) {
 
-		TapSourceStage sourceStage = new TapSourceStage(flowProcess, tap);
-		addHead( sourceStage );
-		handleDuct( tap, sourceStage );
+        TapSourceStage sourceStage = new TapSourceStage(flowProcess, tap);
+        addHead(sourceStage);
+        handleDuct(tap, sourceStage);
 
-		return sourceStage;
-	}
+        return sourceStage;
+    }
 
-	public TapSourceStage getSourceStage() {
-		return this.sourceStage;
-	}
+    public TapSourceStage getSourceStage() {
+        return this.sourceStage;
+    }
 
-	public SingleOutBoundaryStage getSinkStage() {
-		return this.sinkStage;
-	}
+    public SingleOutBoundaryStage getSinkStage() {
+        return this.sinkStage;
+    }
 
-	@Override
-	protected Duct createBoundaryStage( Boundary boundary, IORole role ) {
+    @Override
+    protected Duct createBoundaryStage(Boundary boundary, IORole role) {
 
-		if(role == IORole.sink) {
-			this.sinkStage = new SingleOutBoundaryStage(this.flowProcess, boundary);
-			return this.sinkStage;
-		}
+        if (role == IORole.sink) {
+            this.sinkStage = new SingleOutBoundaryStage(this.flowProcess, boundary);
+            return this.sinkStage;
+        }
 
-		throw new UnsupportedOperationException("Boundary may only be sink in SourceStreamGraph");
-	}
+        throw new UnsupportedOperationException("Boundary may only be sink in SourceStreamGraph");
+    }
 
-	@Override
-	protected Gate createCoGroupGate(CoGroup element, IORole role) {
-		throw new UnsupportedOperationException("SourceStreamGraph may not have a CoGroupGate");
-	}
+    @Override
+    protected Gate createCoGroupGate(CoGroup element, IORole role) {
+        throw new UnsupportedOperationException("SourceStreamGraph may not have a CoGroupGate");
+    }
 
-	@Override
-	protected Gate createGroupByGate(GroupBy element, IORole role) {
-		throw new UnsupportedOperationException("SourceStreamGraph may not have a GroupByGate");
-	}
+    @Override
+    protected Gate createGroupByGate(GroupBy element, IORole role) {
+        throw new UnsupportedOperationException("SourceStreamGraph may not have a GroupByGate");
+    }
 
 }

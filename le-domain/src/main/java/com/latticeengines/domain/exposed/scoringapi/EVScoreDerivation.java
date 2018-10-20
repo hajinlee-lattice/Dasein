@@ -20,7 +20,8 @@ public class EVScoreDerivation implements Serializable {
     public EVScoreDerivation() {
     }
 
-    public EVScoreDerivation(ScoreDerivation ev, ScoreDerivation revenue, ScoreDerivation probability) {
+    public EVScoreDerivation(ScoreDerivation ev, ScoreDerivation revenue,
+            ScoreDerivation probability) {
         this.ev = ev;
         this.revenue = revenue;
         this.probability = probability;

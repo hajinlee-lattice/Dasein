@@ -10,8 +10,6 @@ public enum TransactionMetrics {
     QUANTITY("Quantity"), //
     AMOUNT("Amount");
 
-    private final String name;
-
     private static Map<String, TransactionMetrics> nameMap;
 
     static {
@@ -21,16 +19,10 @@ public enum TransactionMetrics {
         }
     }
 
+    private final String name;
+
     TransactionMetrics(String name) {
         this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String toString() {
-        return this.name;
     }
 
     public static Set<String> availableNames() {
@@ -71,5 +63,13 @@ public enum TransactionMetrics {
 
     static public String getAttrName(String product, String period, String metrics) {
         return "PH_" + product + "_" + period + "_" + metrics;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String toString() {
+        return this.name;
     }
 }

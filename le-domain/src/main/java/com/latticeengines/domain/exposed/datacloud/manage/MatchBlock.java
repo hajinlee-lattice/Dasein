@@ -26,63 +26,51 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "MatchBlock", indexes = { @Index(name = "IX_UID", columnList = "BlockOperationUID")})
+@Table(name = "MatchBlock", indexes = { @Index(name = "IX_UID", columnList = "BlockOperationUID") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchBlock implements HasPid {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PID", nullable = false)
-    private Long pid;
-
-    @Column(name = "BlockOperationUID", nullable = false, length = 100)
-    private String blockOperationUid;
-
-    @ManyToOne(cascade = { CascadeType.MERGE })
-    @JoinColumn(name = "FK_MatchCommand", nullable = false)
-    private MatchCommand matchCommand;
-
-    @JsonProperty("NumRows")
-    @Column(name = "NumRows", nullable = false)
-    private Integer numRows;
-
-    @JsonProperty("MatchedRows")
-    @Column(name = "MatchedRows")
-    private Integer matchedRows;
 
     @JsonProperty("ApplicationId")
     @Column(name = "ApplicationId")
     protected String applicationId;
-
     @JsonProperty("Progress")
     @Column(name = "Progress")
     protected Float progress;
-
-    @JsonProperty("ApplicationState")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ApplicationState", nullable = false, length = 20)
-    private YarnApplicationState applicationState;
-
     @JsonProperty("CreateTime")
     @Column(name = "CreateTime")
     protected Date createTime = new Date();
-
     @JsonProperty("LatestStatusUpdate")
     @Column(name = "LatestStatusUpdate")
     protected Date latestStatusUpdate;
-
     @JsonProperty("StateBeforeFailed")
     @Enumerated(EnumType.STRING)
     @Column(name = "StateBeforeFailed", length = 20)
     protected YarnApplicationState stateBeforeFailed;
-
     @JsonProperty("ErrorMessage")
     @Column(name = "ErrorMessage")
     protected String errorMessage;
-
     @JsonProperty("NumRetries")
     @Column(name = "NumRetries")
     protected int numRetries;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "PID", nullable = false)
+    private Long pid;
+    @Column(name = "BlockOperationUID", nullable = false, length = 100)
+    private String blockOperationUid;
+    @ManyToOne(cascade = { CascadeType.MERGE })
+    @JoinColumn(name = "FK_MatchCommand", nullable = false)
+    private MatchCommand matchCommand;
+    @JsonProperty("NumRows")
+    @Column(name = "NumRows", nullable = false)
+    private Integer numRows;
+    @JsonProperty("MatchedRows")
+    @Column(name = "MatchedRows")
+    private Integer matchedRows;
+    @JsonProperty("ApplicationState")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ApplicationState", nullable = false, length = 20)
+    private YarnApplicationState applicationState;
 
     @Override
     @JsonIgnore
@@ -201,22 +189,22 @@ public class MatchBlock implements HasPid {
     }
 
     @SuppressWarnings("unused")
-	private String getCreateTimeAsString() {
+    private String getCreateTimeAsString() {
         return DateTimeUtils.format(createTime);
     }
 
     @SuppressWarnings("unused")
-	private void setCreateTimeByString(String createTimeString) {
+    private void setCreateTimeByString(String createTimeString) {
         this.createTime = DateTimeUtils.parse(createTimeString);
     }
 
     @SuppressWarnings("unused")
-	private String getLatestStatusUpdateAsString() {
+    private String getLatestStatusUpdateAsString() {
         return DateTimeUtils.format(latestStatusUpdate);
     }
 
     @SuppressWarnings("unused")
-	private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
+    private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
         this.latestStatusUpdate = DateTimeUtils.parse(latestStatusUpdateString);
     }
 }

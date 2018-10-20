@@ -22,22 +22,16 @@ public enum ActionType {
     DATA_CLOUD_CHANGE("datacloudChange", "Data Cloud Refresh"), //
     INTENT_CHANGE("intentChange", "Intent Data Refresh");
 
-    private String name;
-    private String displayName;
     private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
             Arrays.asList(METADATA_CHANGE, RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE,
-                    ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION, ACTIVITY_METRICS_CHANGE,
-                    BUSINESS_CALENDAR_CHANGE));
-
+                    ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION,
+                    ACTIVITY_METRICS_CHANGE, BUSINESS_CALENDAR_CHANGE));
     private static final Set<ActionType> ATTR_MANAGEMENT_TYPES = new HashSet<>(
             Arrays.asList(ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION));
-
     private static final Set<ActionType> RATING_RELATED_TYPES = new HashSet<>(
             Arrays.asList(RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE));
-
     private static final Set<ActionType> DATA_CLOUD_RELATED_TYPES = new HashSet<>(
             Arrays.asList(DATA_CLOUD_CHANGE, INTENT_CHANGE));
-
     private static Map<String, ActionType> actionTypeMap = new HashMap<>();
 
     static {
@@ -46,21 +40,12 @@ public enum ActionType {
         }
     }
 
+    private String name;
+    private String displayName;
+
     ActionType(String name, String displayName) {
         this.name = name;
         this.displayName = displayName;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getDisplayName() {
-        return this.displayName;
-    }
-
-    public ActionType getActionType(String str) {
-        return actionTypeMap.get(str);
     }
 
     public static Set<ActionType> getNonWorkflowActions() {
@@ -77,5 +62,17 @@ public enum ActionType {
 
     public static Set<ActionType> getDataCloudRelatedTypes() {
         return DATA_CLOUD_RELATED_TYPES;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public ActionType getActionType(String str) {
+        return actionTypeMap.get(str);
     }
 }

@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
 
-public class NaturalQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder implements PeriodBuilder {
+public class NaturalQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder
+        implements PeriodBuilder {
 
     private static final long serialVersionUID = -4975605566623744278L;
 
@@ -14,6 +15,10 @@ public class NaturalQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder imp
 
     public NaturalQuarterPeriodBuilder(String startDate) {
         super(startDate);
+    }
+
+    private static int getQuarter(LocalDate cal) {
+        return (cal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3;
     }
 
     @Override
@@ -41,15 +46,11 @@ public class NaturalQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder imp
         return quarters;
     }
 
-    private static int getQuarter(LocalDate cal) {
-        return (cal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3;
-    }
-
     private int getPeriodYear(int period) {
         int quarter = getQuarter(startDate) + period;
         if (quarter >= 0) {
             return startDate.get(ChronoField.YEAR) + (quarter / 4);
-        } else  {
+        } else {
             return startDate.get(ChronoField.YEAR) + ((quarter + 1) / 4) - 1;
         }
     }
@@ -58,11 +59,9 @@ public class NaturalQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder imp
         int quarter = getQuarter(startDate) + period;
         if (quarter >= 0) {
             return quarter % 4;
-        } else  {
+        } else {
             return (quarter + 1) % 4 + 3;
         }
     }
-
-
 
 }

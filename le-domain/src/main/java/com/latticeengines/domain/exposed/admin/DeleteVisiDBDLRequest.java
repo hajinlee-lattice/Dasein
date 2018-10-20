@@ -7,7 +7,7 @@ public class DeleteVisiDBDLRequest {
     private String tenantName;
     private String deleteVisiDBOption;
 
-    public DeleteVisiDBDLRequest(String tenantName, String deleteVisiDBOption){
+    public DeleteVisiDBDLRequest(String tenantName, String deleteVisiDBOption) {
         this.tenantName = tenantName;
         this.deleteVisiDBOption = deleteVisiDBOption;
     }

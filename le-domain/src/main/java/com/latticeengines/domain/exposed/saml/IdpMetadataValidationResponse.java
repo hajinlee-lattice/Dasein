@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IdpMetadataValidationResponse {
-    
+
     private boolean isValid;
 
     private String entityId;
 
     private String exceptionMessage;
-    
+
     private String singleSignOnService;
 
     public boolean isValid() {

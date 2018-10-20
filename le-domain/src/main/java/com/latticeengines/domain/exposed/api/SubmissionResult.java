@@ -10,7 +10,7 @@ public class SubmissionResult {
     }
 
     public SubmissionResult(boolean successful) {
-    	this.successful = successful;
+        this.successful = successful;
     }
 
     @JsonProperty("success")
@@ -20,6 +20,6 @@ public class SubmissionResult {
 
     @JsonProperty("success")
     public void setSuccessful(boolean successful) {
-    	this.successful = successful;
+        this.successful = successful;
     }
 }

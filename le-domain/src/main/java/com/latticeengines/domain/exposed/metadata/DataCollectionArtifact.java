@@ -38,8 +38,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @Filters(value = { @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@TypeDefs(value = {
-        @TypeDef(name = "json", typeClass = JsonStringType.class),
+@TypeDefs(value = { @TypeDef(name = "json", typeClass = JsonStringType.class),
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     private static final long serialVersionUID = 3886398415278083037L;

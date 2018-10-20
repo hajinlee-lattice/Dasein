@@ -64,21 +64,21 @@ public class Quota implements HasId<String>, HasPid, HasTenant, HasTenantId {
 
     @Override
     @JsonIgnore
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public Tenant getTenant() {
+        return this.tenant;
+    }
+
+    @Override
+    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-    }
-
-    @Override
-    @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public Tenant getTenant() {
-        return this.tenant;
     }
 
     @Override

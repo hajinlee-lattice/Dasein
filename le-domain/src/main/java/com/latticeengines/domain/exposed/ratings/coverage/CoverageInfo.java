@@ -45,6 +45,32 @@ public class CoverageInfo {
         this.bucketCoverageCounts = fromBuckets(buckets);
     }
 
+    public static List<RatingBucketCoverage> fromCounts(Map<String, Long> countsMap) {
+        if (MapUtils.isNotEmpty(countsMap)) {
+            Map<String, Long> ratingCounts = new TreeMap<>(countsMap);
+            return ratingCounts.entrySet().stream().map(entry -> {
+                RatingBucketCoverage bktCvg = new RatingBucketCoverage();
+                bktCvg.setBucket(entry.getKey());
+                bktCvg.setCount(entry.getValue());
+                return bktCvg;
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    public static List<RatingBucketCoverage> fromBuckets(List<BucketMetadata> buckets) {
+        if (CollectionUtils.isNotEmpty(buckets)) {
+            return buckets.stream().sorted(Comparator.comparing(BucketMetadata::getBucketName))
+                    .map(bucket -> {
+                        RatingBucketCoverage bktCvg = new RatingBucketCoverage();
+                        bktCvg.setBucket(bucket.getBucket().toValue());
+                        bktCvg.setCount((long) bucket.getNumLeads());
+                        return bktCvg;
+                    }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
     public Long getAccountCount() {
         return accountCount;
     }
@@ -69,36 +95,11 @@ public class CoverageInfo {
         this.bucketCoverageCounts = bucketCoverageCounts;
     }
 
-    public static List<RatingBucketCoverage> fromCounts(Map<String, Long> countsMap) {
-        if (MapUtils.isNotEmpty(countsMap)) {
-            Map<String, Long> ratingCounts = new TreeMap<>(countsMap);
-            return ratingCounts.entrySet().stream().map(entry -> {
-                RatingBucketCoverage bktCvg = new RatingBucketCoverage();
-                bktCvg.setBucket(entry.getKey());
-                bktCvg.setCount(entry.getValue());
-                return bktCvg;
-            }).collect(Collectors.toList());
-        }
-        return null;
-    }
-
-    public static List<RatingBucketCoverage> fromBuckets(List<BucketMetadata> buckets) {
-        if (CollectionUtils.isNotEmpty(buckets)) {
-            return buckets.stream().sorted(Comparator.comparing(BucketMetadata::getBucketName)).map(bucket -> {
-                RatingBucketCoverage bktCvg = new RatingBucketCoverage();
-                bktCvg.setBucket(bucket.getBucket().toValue());
-                bktCvg.setCount((long) bucket.getNumLeads());
-                return bktCvg;
-            }).collect(Collectors.toList());
-        }
-        return null;
-    }
-
     public RatingBucketCoverage getCoverageForBucket(String bucket) {
         if (this.bucketCoverageCounts == null) {
             return null;
         }
-        return this.bucketCoverageCounts.stream().filter(rbc -> rbc.getBucket().equalsIgnoreCase(bucket)).findFirst()
-                .orElse(null);
+        return this.bucketCoverageCounts.stream()
+                .filter(rbc -> rbc.getBucket().equalsIgnoreCase(bucket)).findFirst().orElse(null);
     }
 }

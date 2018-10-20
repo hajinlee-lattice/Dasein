@@ -201,10 +201,6 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
         this.attributeFlagsMap = attributeFlagsMap;
     }
 
-    public void setColumnId(String columnId) {
-        this.columnId = columnId;
-    }
-
     public String getJavaClass() {
         return javaClass;
     }
@@ -263,6 +259,10 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
     @Override
     public String getColumnId() {
         return fieldName;
+    }
+
+    public void setColumnId(String columnId) {
+        this.columnId = columnId;
     }
 
 }

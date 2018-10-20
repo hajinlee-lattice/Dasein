@@ -48,7 +48,7 @@ public class BulkMatchOutput implements Fact, Dimension {
     @JsonIgnore
     public Integer getRowsRequested() {
         int rows = 0;
-        for (MatchOutput output: getOutputList()) {
+        for (MatchOutput output : getOutputList()) {
             if (output.getResult() != null) {
                 rows += output.getResult().size();
             }

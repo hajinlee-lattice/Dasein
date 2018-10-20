@@ -51,28 +51,28 @@ public class VdbSpecMetadata {
     @JsonProperty("extensions")
     private List<VdbMetadataExtension> extensions;
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
     public String getColumnName() {
         return columnName;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     public String getDisplayName() {
         return displayName;
     }
 
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getDataType() {
         return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 
     public boolean isKeyColumn() {

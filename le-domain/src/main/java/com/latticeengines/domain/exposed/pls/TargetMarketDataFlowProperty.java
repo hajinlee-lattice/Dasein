@@ -6,7 +6,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.db.PropertyBag;
 
-public class TargetMarketDataFlowProperty extends PropertyBag<TargetMarketDataFlowOption, TargetMarketDataFlowOptionName> {
+public class TargetMarketDataFlowProperty
+        extends PropertyBag<TargetMarketDataFlowOption, TargetMarketDataFlowOptionName> {
     @SuppressWarnings("unchecked")
     public TargetMarketDataFlowProperty(List<TargetMarketDataFlowOption> bag) {
         super(List.class.cast(bag));

@@ -38,7 +38,8 @@ public class PlaymakerUtils {
                 if (contactListIntermediate1.isEmpty()) {
                     contactListIntermediate2 = new ArrayList<>();
                 } else {
-                    contactListIntermediate2 = JsonUtils.convertList(contactListIntermediate1, Map.class);
+                    contactListIntermediate2 = JsonUtils.convertList(contactListIntermediate1,
+                            Map.class);
                 }
 
                 if (!contactListIntermediate2.isEmpty()) {
@@ -50,7 +51,8 @@ public class PlaymakerUtils {
                     contactList = new ArrayList<>();
                 }
             } catch (Exception ex) {
-                log.warn("Ignoring exception while deseriazing contact data for the recommendation", ex);
+                log.warn("Ignoring exception while deseriazing contact data for the recommendation",
+                        ex);
             }
         }
 
@@ -94,11 +96,13 @@ public class PlaymakerUtils {
 
                 if (sourceLogicalDataType.contains("(")) {
 
-                    sourceLogicalDataType = sourceLogicalDataType.substring(sourceLogicalDataType.indexOf("("));
+                    sourceLogicalDataType = sourceLogicalDataType
+                            .substring(sourceLogicalDataType.indexOf("("));
 
                     if (sourceLogicalDataType.contains(")")) {
 
-                        sourceLogicalDataType = sourceLogicalDataType.substring(0, sourceLogicalDataType.indexOf(")"));
+                        sourceLogicalDataType = sourceLogicalDataType.substring(0,
+                                sourceLogicalDataType.indexOf(")"));
 
                         if (StringUtils.isNumeric(sourceLogicalDataType)) {
                             length = Integer.parseInt(sourceLogicalDataType);
@@ -111,11 +115,13 @@ public class PlaymakerUtils {
         return length;
     }
 
-    public static List<Map<String, String>> generateContactForRecommendation(List<Map<String, String>> rawContacts) {
+    public static List<Map<String, String>> generateContactForRecommendation(
+            List<Map<String, String>> rawContacts) {
         List<Map<String, String>> contactsForRecommendation = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(rawContacts)) {
-            rawContacts.stream().forEach(rawContact -> processRawContact(rawContact, contactsForRecommendation));
+            rawContacts.stream().forEach(
+                    rawContact -> processRawContact(rawContact, contactsForRecommendation));
         }
         return contactsForRecommendation;
     }
@@ -126,7 +132,8 @@ public class PlaymakerUtils {
         Map<String, String> contact = new HashMap<>();
 
         contact.put(PlaymakerConstants.Email, rawContact.get(InterfaceName.Email.name()));
-        contact.put(PlaymakerConstants.Address, rawContact.get(InterfaceName.Address_Street_1.name()));
+        contact.put(PlaymakerConstants.Address,
+                rawContact.get(InterfaceName.Address_Street_1.name()));
         contact.put(PlaymakerConstants.Phone, rawContact.get(InterfaceName.PhoneNumber.name()));
         contact.put(PlaymakerConstants.State, rawContact.get(InterfaceName.State.name()));
         contact.put(PlaymakerConstants.ZipCode, rawContact.get(InterfaceName.PostalCode.name()));

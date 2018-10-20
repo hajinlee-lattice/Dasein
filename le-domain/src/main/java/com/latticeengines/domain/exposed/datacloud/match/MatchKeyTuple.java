@@ -109,7 +109,8 @@ public class MatchKeyTuple implements Fact {
 
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
-        // NOTE not actually required, just keep consistent in case unique ID implementation changed
+        // NOTE not actually required, just keep consistent in case unique ID
+        // implementation changed
         refreshCachedStrings();
     }
 
@@ -187,9 +188,12 @@ public class MatchKeyTuple implements Fact {
     }
 
     /**
-     * Return a unique string to represent the combination of {@link MatchKey}s of this tuple
+     * Return a unique string to represent the combination of {@link MatchKey}s
+     * of this tuple
      *
-     * Note that {@link MatchKeyTuple#getCountryCode()} is not evaluated and should be in sync with country
+     * Note that {@link MatchKeyTuple#getCountryCode()} is not evaluated and
+     * should be in sync with country
+     *
      * @return generated unique string
      */
     public String buildIdForKey() {
@@ -197,8 +201,9 @@ public class MatchKeyTuple implements Fact {
     }
 
     /**
-     * Return a unique string to represent the {@link MatchKey} and value pairs of this tuple
-     * Note that {@link MatchKeyTuple#getCountryCode()} is not evaluated and should be in sync with country
+     * Return a unique string to represent the {@link MatchKey} and value pairs
+     * of this tuple Note that {@link MatchKeyTuple#getCountryCode()} is not
+     * evaluated and should be in sync with country
      *
      * @return generated unique string
      */
@@ -249,7 +254,8 @@ public class MatchKeyTuple implements Fact {
     }
 
     /*
-     * refresh the cached unique ID that represents non-empty match key combination in this tuple
+     * refresh the cached unique ID that represents non-empty match key
+     * combination in this tuple
      */
     private void constructIdForKey() {
         StringBuilder sb = new StringBuilder();
@@ -285,7 +291,8 @@ public class MatchKeyTuple implements Fact {
     }
 
     /*
-     * refresh the cached unique ID that represents non-empty match key/value pairs in this tuple
+     * refresh the cached unique ID that represents non-empty match key/value
+     * pairs in this tuple
      */
     private void constructIdForValue() {
         StringBuilder sb = new StringBuilder();

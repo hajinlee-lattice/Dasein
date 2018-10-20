@@ -20,41 +20,43 @@ public class PAReportUtils {
 
         ObjectNode consolidateSummaryNode = JsonUtils.createObjectNode();
         switch (entity) {
-        case Account:
-            consolidateSummaryNode.put(ReportConstants.NEW, "0");
-            consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
-            consolidateSummaryNode.put(ReportConstants.UNMATCH, "0");
-            break;
-        case Contact:
-            consolidateSummaryNode.put(ReportConstants.NEW, "0");
-            consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
-            break;
-        case Product:
-            consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, "0");
-            consolidateSummaryNode.put(ReportConstants.PRODUCT_HIERARCHY, "0");
-            consolidateSummaryNode.put(ReportConstants.PRODUCT_BUNDLE, "0");
-            consolidateSummaryNode.put(ReportConstants.ERROR_MESSAGE, "");
-            consolidateSummaryNode.put(ReportConstants.WARN_MESSAGE, "");
-            break;
-        case Transaction:
-            consolidateSummaryNode.put(ReportConstants.NEW, "0");
-            break;
-        case PurchaseHistory:
-            consolidateSummaryNode.set(ReportConstants.ACTIONS, new ObjectMapper().createArrayNode());
-            break;
-        default:
-            throw new UnsupportedOperationException(entity.name() + " business entity is not supported in P&A report");
+            case Account:
+                consolidateSummaryNode.put(ReportConstants.NEW, "0");
+                consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
+                consolidateSummaryNode.put(ReportConstants.UNMATCH, "0");
+                break;
+            case Contact:
+                consolidateSummaryNode.put(ReportConstants.NEW, "0");
+                consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
+                break;
+            case Product:
+                consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, "0");
+                consolidateSummaryNode.put(ReportConstants.PRODUCT_HIERARCHY, "0");
+                consolidateSummaryNode.put(ReportConstants.PRODUCT_BUNDLE, "0");
+                consolidateSummaryNode.put(ReportConstants.ERROR_MESSAGE, "");
+                consolidateSummaryNode.put(ReportConstants.WARN_MESSAGE, "");
+                break;
+            case Transaction:
+                consolidateSummaryNode.put(ReportConstants.NEW, "0");
+                break;
+            case PurchaseHistory:
+                consolidateSummaryNode.set(ReportConstants.ACTIONS,
+                        new ObjectMapper().createArrayNode());
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        entity.name() + " business entity is not supported in P&A report");
         }
         entityNode.set(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey(), consolidateSummaryNode);
 
         ObjectNode entityNumberNode = JsonUtils.createObjectNode();
         switch (entity) {
-        case Product:
-            entityNumberNode.put(ReportConstants.TOTAL, "Not Available");
-            break;
-        default:
-            entityNumberNode.put(ReportConstants.TOTAL, "0");
-            break;
+            case Product:
+                entityNumberNode.put(ReportConstants.TOTAL, "Not Available");
+                break;
+            default:
+                entityNumberNode.put(ReportConstants.TOTAL, "0");
+                break;
         }
         entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
 
@@ -63,7 +65,8 @@ public class PAReportUtils {
 
     public static ObjectNode appendMessageToProductReport(ObjectNode reportNode, String message,
             boolean isWarningMessage) {
-        ObjectNode entitiesSummaryNode = (ObjectNode) reportNode.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+        ObjectNode entitiesSummaryNode = (ObjectNode) reportNode
+                .get(ReportPurpose.ENTITIES_SUMMARY.getKey());
         if (entitiesSummaryNode == null) {
             log.info("No entity summary reports found. Create it.");
             entitiesSummaryNode = reportNode.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
@@ -75,7 +78,8 @@ public class PAReportUtils {
 
         ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                 .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-        String nodeKey = isWarningMessage ? ReportConstants.WARN_MESSAGE : ReportConstants.ERROR_MESSAGE;
+        String nodeKey = isWarningMessage ? ReportConstants.WARN_MESSAGE
+                : ReportConstants.ERROR_MESSAGE;
         JsonNode messageNode = consolidateSummaryNode.get(nodeKey);
         if (StringUtils.isNotBlank(messageNode.asText())) {
             message = messageNode.asText() + " " + message;

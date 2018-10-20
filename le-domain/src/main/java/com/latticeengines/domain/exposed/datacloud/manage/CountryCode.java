@@ -19,7 +19,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "CountryCode", uniqueConstraints = { @UniqueConstraint(columnNames = { "CountryName" }) })
+@Table(name = "CountryCode", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "CountryName" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CountryCode implements HasPid, Serializable {
 

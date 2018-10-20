@@ -29,8 +29,9 @@ public class BucketLabelSubstituteFunction extends BaseOperation implements Func
     private Integer bktIdArgPos;
 
     // generate bucketed label
-    public BucketLabelSubstituteFunction(List<DCEncodedAttr> encodedAttrs, Map<String, Integer> attrIdMap,
-            String attrIdField, String bktIdField, String bktLabelField) {
+    public BucketLabelSubstituteFunction(List<DCEncodedAttr> encodedAttrs,
+            Map<String, Integer> attrIdMap, String attrIdField, String bktIdField,
+            String bktLabelField) {
         super(new Fields(bktLabelField));
         this.attrIdField = attrIdField;
         this.bktIdField = bktIdField;

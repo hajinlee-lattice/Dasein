@@ -24,10 +24,9 @@ public class TransactionStandardizerFunction extends BaseOperation implements Fu
     private List<String> oldFields;
     private List<String> newFields;
     private List<String> customFields;
-    
 
-    public TransactionStandardizerFunction(Fields fieldDeclaration, String cField, List<String> oldFields, List<String> newFields,
-                                        List<String> customFields) {
+    public TransactionStandardizerFunction(Fields fieldDeclaration, String cField,
+            List<String> oldFields, List<String> newFields, List<String> customFields) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.cField = cField;

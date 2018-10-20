@@ -54,8 +54,8 @@ public class RebuildProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public RebuildProductWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("rebuildProductWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("rebuildProductWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processProductStepConfiguration);
             return configuration;
         }

@@ -21,10 +21,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "Config")
 public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiConfig> {
 
-    private static final long serialVersionUID = 3568465584606850312L;
-
     protected static final Logger log = LoggerFactory.getLogger(DellEbiConfig.class);
-
+    private static final long serialVersionUID = 3568465584606850312L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id", unique = true, nullable = false)
@@ -147,11 +145,13 @@ public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiCo
     @Override
     public int compareTo(DellEbiConfig dellEbiConfig) {
         // Asc
-        return ObjectUtils.compare(this.priority, dellEbiConfig != null ? dellEbiConfig.getPriority() : null);
+        return ObjectUtils.compare(this.priority,
+                dellEbiConfig != null ? dellEbiConfig.getPriority() : null);
     }
 
     public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringBuilder.getDefaultStyle()).toString();
+        return ToStringBuilder.reflectionToString(this, ToStringBuilder.getDefaultStyle())
+                .toString();
     }
 
 }

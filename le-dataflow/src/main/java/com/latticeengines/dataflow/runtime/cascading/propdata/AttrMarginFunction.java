@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -8,13 +10,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-
 @SuppressWarnings("rawtypes")
 public class AttrMarginFunction extends BaseOperation implements Function {
-	private static final long serialVersionUID = -6183109795216528748L;
+    private static final long serialVersionUID = -6183109795216528748L;
 
-	public AttrMarginFunction(InterfaceName field) {
+    public AttrMarginFunction(InterfaceName field) {
         super(new Fields(field.name()));
     }
 

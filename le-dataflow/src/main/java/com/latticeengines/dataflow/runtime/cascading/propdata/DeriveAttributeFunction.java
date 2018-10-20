@@ -20,7 +20,7 @@ public class DeriveAttributeFunction extends BaseOperation implements Function {
     int numNewAttrs;
 
     public DeriveAttributeFunction(Fields fieldDeclaration,
-                                  List<DeriveAttributeConfig.DeriveFunc> deriveFuncs) {
+            List<DeriveAttributeConfig.DeriveFunc> deriveFuncs) {
         super(fieldDeclaration);
         this.attrPositions = new ArrayList<List<Integer>>();
         this.numNewAttrs = fieldDeclaration.size();
@@ -52,7 +52,8 @@ public class DeriveAttributeFunction extends BaseOperation implements Function {
         functionCall.getOutputCollector().add(result);
     }
 
-    private Object calcOneAttr(DeriveAttributeConfig.DeriveFunc func, Tuple data, List<Integer> positions) {
+    private Object calcOneAttr(DeriveAttributeConfig.DeriveFunc func, Tuple data,
+            List<Integer> positions) {
 
         if (func.getCalculation().equals(DeriveAttributeConfig.SUM)) {
             long sum = 0;

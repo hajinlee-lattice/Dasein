@@ -21,7 +21,8 @@ public class StatusDocument {
 
     // for JSON constructor
     @SuppressWarnings("unused")
-    private StatusDocument() {}
+    private StatusDocument() {
+    }
 
     public StatusDocument(String status) {
         this.status = status;
@@ -30,26 +31,6 @@ public class StatusDocument {
     public StatusDocument(String status, String message) {
         this.status = status;
         this.message = message;
-    }
-
-    @JsonProperty("status")
-    public String getStatus() {
-        return status;
-    }
-
-    @JsonProperty("status")
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    @JsonProperty("message")
-    public String getMessage() {
-        return message;
-    }
-
-    @JsonProperty("message")
-    public void setMessage(String message) {
-        this.status = message;
     }
 
     public static StatusDocument ok() {
@@ -78,6 +59,26 @@ public class StatusDocument {
 
     public static StatusDocument underMaintenance(String message) {
         return new StatusDocument(UNDER_MAINTENANCE, message);
+    }
+
+    @JsonProperty("status")
+    public String getStatus() {
+        return status;
+    }
+
+    @JsonProperty("status")
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @JsonProperty("message")
+    public String getMessage() {
+        return message;
+    }
+
+    @JsonProperty("message")
+    public void setMessage(String message) {
+        this.status = message;
     }
 
     @Override

@@ -8,7 +8,6 @@ public enum ModelType {
     PMML("PmmlModel"), //
     PYTHONMODEL("PythonScriptModel");
 
-    private String modelType;
     private static Map<String, ModelType> map = new HashMap<>();
 
     static {
@@ -17,12 +16,10 @@ public enum ModelType {
         }
     }
 
+    private String modelType;
+
     ModelType(String modelType) {
         this.modelType = modelType;
-    }
-
-    public String getModelType() {
-        return modelType;
     }
 
     public static ModelType getByModelType(String modelType) {
@@ -31,5 +28,9 @@ public enum ModelType {
 
     public static boolean isPythonTypeModel(String modelType) {
         return modelType.equals(PYTHONMODEL.getModelType());
+    }
+
+    public String getModelType() {
+        return modelType;
     }
 }

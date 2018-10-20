@@ -38,29 +38,32 @@ public class AMLookupKeyFunction extends BaseOperation implements Function {
             String domain = arguments.getString(domainColumn);
             String zipCode = arguments.getString(zipCodeColumn);
             String country = arguments.getString(countryColumn);
-            functionCall.getOutputCollector()
-                    .add(new Tuple(AccountLookupEntry.buildIdWithLocation(domain, null, country, null, zipCode)));
+            functionCall.getOutputCollector().add(new Tuple(
+                    AccountLookupEntry.buildIdWithLocation(domain, null, country, null, zipCode)));
         } else if (domainColumn != null && stateColumn != null && countryColumn != null) {
             String domain = arguments.getString(domainColumn);
             String state = arguments.getString(stateColumn);
             String country = arguments.getString(countryColumn);
-            functionCall.getOutputCollector()
-                    .add(new Tuple(AccountLookupEntry.buildIdWithLocation(domain, null, country, state, null)));
+            functionCall.getOutputCollector().add(new Tuple(
+                    AccountLookupEntry.buildIdWithLocation(domain, null, country, state, null)));
         } else if (domainColumn != null && countryColumn != null) {
             String domain = arguments.getString(domainColumn);
             String country = arguments.getString(countryColumn);
-            functionCall.getOutputCollector()
-                    .add(new Tuple(AccountLookupEntry.buildIdWithLocation(domain, null, country, null, null)));
+            functionCall.getOutputCollector().add(new Tuple(
+                    AccountLookupEntry.buildIdWithLocation(domain, null, country, null, null)));
         } else if (domainColumn != null && dunsColumn != null) {
             String domain = arguments.getString(domainColumn);
             String duns = arguments.getString(dunsColumn);
-            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(domain, duns)));
+            functionCall.getOutputCollector()
+                    .add(new Tuple(AccountLookupEntry.buildId(domain, duns)));
         } else if (domainColumn != null) {
             String domain = arguments.getString(domainColumn);
-            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(domain, null)));
+            functionCall.getOutputCollector()
+                    .add(new Tuple(AccountLookupEntry.buildId(domain, null)));
         } else if (dunsColumn != null) {
             String duns = arguments.getString(dunsColumn);
-            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(null, duns)));
+            functionCall.getOutputCollector()
+                    .add(new Tuple(AccountLookupEntry.buildId(null, duns)));
         }
     }
 }

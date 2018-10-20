@@ -6,42 +6,43 @@ import java.util.Map;
 
 public enum ApprovedUsage {
 
-    MODEL("Model"),
-    MODEL_ALLINSIGHTS("ModelAndAllInsights"),
-    MODEL_MODELINSIGHTS("ModelAndModelInsights"),
-    ENRICHMENT("Enrichment"),
-    NONE("None"),
-    IGNORED("Ignored");
+    MODEL("Model"), MODEL_ALLINSIGHTS("ModelAndAllInsights"), MODEL_MODELINSIGHTS(
+            "ModelAndModelInsights"), ENRICHMENT("Enrichment"), NONE("None"), IGNORED("Ignored");
 
-    private final String name;
+    private static final EnumSet<ApprovedUsage> MODELING_APPROVEDUSAGE = EnumSet.of(MODEL,
+            MODEL_ALLINSIGHTS, MODEL_MODELINSIGHTS);
     private static Map<String, ApprovedUsage> nameMap;
-    private static final EnumSet<ApprovedUsage> MODELING_APPROVEDUSAGE = EnumSet.of(MODEL, MODEL_ALLINSIGHTS,
-            MODEL_MODELINSIGHTS);
 
     static {
         nameMap = new HashMap<>();
-        for (ApprovedUsage approvedUsage: ApprovedUsage.values()) {
+        for (ApprovedUsage approvedUsage : ApprovedUsage.values()) {
             nameMap.put(approvedUsage.getName(), approvedUsage);
         }
     }
+
+    private final String name;
 
     ApprovedUsage(String name) {
         this.name = name;
     }
 
-    public String getName() { return this.name; }
-
-    public String toString() { return this.name; }
-
     public static ApprovedUsage fromName(String name) {
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);
-        } else  {
+        } else {
             return ApprovedUsage.NONE;
         }
     }
 
-    public static boolean isUsedByModeling(String name){
+    public static boolean isUsedByModeling(String name) {
         return MODELING_APPROVEDUSAGE.contains(ApprovedUsage.fromName(name));
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String toString() {
+        return this.name;
     }
 }

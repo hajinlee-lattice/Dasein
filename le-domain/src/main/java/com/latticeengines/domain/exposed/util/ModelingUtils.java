@@ -29,15 +29,17 @@ import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 
 public class ModelingUtils {
 
-    public final static PivotValuesLookup getPivotValues(Configuration yarnConfiguration, String pivotArtifactPath)
-            throws Exception {
+    public final static PivotValuesLookup getPivotValues(Configuration yarnConfiguration,
+            String pivotArtifactPath) throws Exception {
         Map<String, AbstractMap.Entry<String, List<String>>> pivotValuesByTargetColumn = new HashMap<>();
         Map<String, List<AbstractMap.Entry<String, String>>> pivotValuesBySourceColumn = new HashMap<>();
         Map<String, UserDefinedType> sourceColumnTypes = new HashMap<>();
 
         if (StringUtils.isNotEmpty(pivotArtifactPath)) {
-            try (Reader reader = new InputStreamReader(new BOMInputStream(HdfsUtils.getInputStream(yarnConfiguration, //
-                    pivotArtifactPath)), "UTF-8")) {
+            try (Reader reader = new InputStreamReader(
+                    new BOMInputStream(HdfsUtils.getInputStream(yarnConfiguration, //
+                            pivotArtifactPath)),
+                    "UTF-8")) {
                 try (CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
                     for (CSVRecord record : parser) {
                         String targetColumn = record.get("TargetColumn");
@@ -48,12 +50,15 @@ public class ModelingUtils {
                         UserDefinedType userType = UserDefinedType.valueOf(sourceColumnType);
 
                         if (userType == null) {
-                            throw new LedpException(LedpCode.LEDP_10010, new String[] { sourceColumnType });
+                            throw new LedpException(LedpCode.LEDP_10010,
+                                    new String[] { sourceColumnType });
                         }
                         sourceColumnTypes.put(sourceColumn, userType);
 
-                        Map.Entry<String, List<String>> p = pivotValuesByTargetColumn.get(targetColumn);
-                        List<AbstractMap.Entry<String, String>> s = pivotValuesBySourceColumn.get(sourceColumn);
+                        Map.Entry<String, List<String>> p = pivotValuesByTargetColumn
+                                .get(targetColumn);
+                        List<AbstractMap.Entry<String, String>> s = pivotValuesBySourceColumn
+                                .get(sourceColumn);
                         if (p == null) {
                             List<String> l = new ArrayList<>();
                             l.add(value);
@@ -73,14 +78,17 @@ public class ModelingUtils {
 
             }
         }
-        return new PivotValuesLookup(pivotValuesByTargetColumn, pivotValuesBySourceColumn, sourceColumnTypes);
+        return new PivotValuesLookup(pivotValuesByTargetColumn, pivotValuesBySourceColumn,
+                sourceColumnTypes);
     }
 
-    public static String addPivotValuesToMetadataContent(ModelingMetadata metadata, PivotValuesLookup pivotValues) {
+    public static String addPivotValuesToMetadataContent(ModelingMetadata metadata,
+            PivotValuesLookup pivotValues) {
         Map<String, List<AbstractMap.Entry<String, String>>> pivotValuesBySourceColumn = pivotValues.pivotValuesBySourceColumn;
         Map<String, UserDefinedType> sourceColumnTypes = pivotValues.sourceColumnToUserType;
 
-        for (Map.Entry<String, List<AbstractMap.Entry<String, String>>> entry : pivotValuesBySourceColumn.entrySet()) {
+        for (Map.Entry<String, List<AbstractMap.Entry<String, String>>> entry : pivotValuesBySourceColumn
+                .entrySet()) {
             final String name = entry.getKey();
             UserDefinedType userType = sourceColumnTypes.get(name);
 
@@ -91,7 +99,7 @@ public class ModelingUtils {
                             return attr.getColumnName().equals(name);
                         }
                     }, null);
-            
+
             if (attrMetadatum == null) {
                 continue;
             }

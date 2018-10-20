@@ -30,7 +30,7 @@ public class Classifier implements HasName {
     private String pythonMRConfigHdfsPath;
     private String pipelineDriver;
     private String pipelineProperties;
-    
+
     @Override
     @JsonProperty("name")
     public String getName() {
@@ -255,5 +255,5 @@ public class Classifier implements HasName {
     public void setPipelineProperties(String pipelineProperties) {
         this.pipelineProperties = pipelineProperties;
     }
-    
+
 }

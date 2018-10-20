@@ -14,19 +14,17 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoricalBucket extends BucketAlgorithm {
     private static final long serialVersionUID = 974998427768883957L;
+    @JsonProperty("cats")
+    private List<String> categories;
+    // optional
+    @JsonProperty("map")
+    private Map<String, List<String>> mapping;
 
     @Override
     @JsonIgnore
     public String getAlgorithm() {
         return CATEGORICAL;
     }
-
-    @JsonProperty("cats")
-    private List<String> categories;
-
-    // optional
-    @JsonProperty("map")
-    private Map<String, List<String>> mapping;
 
     public List<String> getCategories() {
         return categories;
@@ -46,7 +44,7 @@ public class CategoricalBucket extends BucketAlgorithm {
 
     @Override
     @JsonIgnore
-    public List<String> generateLabelsInternal () {
+    public List<String> generateLabelsInternal() {
         List<String> labels = new ArrayList<>();
         labels.add(null);
         labels.addAll(categories);

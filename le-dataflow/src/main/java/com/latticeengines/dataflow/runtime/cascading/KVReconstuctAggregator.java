@@ -20,12 +20,6 @@ public class KVReconstuctAggregator extends BaseAggregator<KVReconstuctAggregato
 
     private final Map<String, String> fieldTypes;
 
-    public static class Context extends BaseAggregator.Context
-    {
-        ConcurrentMap<String, Object> row = new ConcurrentHashMap<>();
-        ConcurrentMap<String, String> fieldsToFind = new ConcurrentHashMap<>();
-    }
-
     public KVReconstuctAggregator(Fields fieldDeclaration, Map<String, String> fieldTypes) {
         super(fieldDeclaration);
         this.fieldTypes = fieldTypes;
@@ -34,7 +28,7 @@ public class KVReconstuctAggregator extends BaseAggregator<KVReconstuctAggregato
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
         // any group by value is either null or empty string
-        for (Object grpObj: group.asIterableOf(Object.class)) {
+        for (Object grpObj : group.asIterableOf(Object.class)) {
             if (grpObj == null) {
                 return true;
             }
@@ -57,16 +51,16 @@ public class KVReconstuctAggregator extends BaseAggregator<KVReconstuctAggregato
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        for (Map.Entry<String, String> entry: context.fieldsToFind.entrySet()) {
+        for (Map.Entry<String, String> entry : context.fieldsToFind.entrySet()) {
             String tgtFieldName = entry.getKey();
             String tgtFieldValue = (String) arguments.getObject(KVDepivotStrategy.KEY_ATTR);
-            
+
             if (!tgtFieldName.equals(tgtFieldValue)) {
                 continue;
             }
             String srcFieldName = KVDepivotStrategy.valueAttr(entry.getValue());
             Object srcValue = arguments.getObject(srcFieldName);
-            
+
             if (srcValue != null) {
                 context.row.put(tgtFieldName, srcValue);
                 context.fieldsToFind.remove(tgtFieldName);
@@ -84,13 +78,18 @@ public class KVReconstuctAggregator extends BaseAggregator<KVReconstuctAggregato
             Integer idx = namePositionMap.get(fieldName);
             tuple.set(idx, group.getObject(i));
         }
-        for (Map.Entry<String, Object> entry: context.row.entrySet()) {
+        for (Map.Entry<String, Object> entry : context.row.entrySet()) {
             String fieldName = entry.getKey();
             Object value = entry.getValue();
             Integer idx = namePositionMap.get(fieldName);
             tuple.set(idx, value);
         }
         return tuple;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        ConcurrentMap<String, Object> row = new ConcurrentHashMap<>();
+        ConcurrentMap<String, String> fieldsToFind = new ConcurrentHashMap<>();
     }
 
 }

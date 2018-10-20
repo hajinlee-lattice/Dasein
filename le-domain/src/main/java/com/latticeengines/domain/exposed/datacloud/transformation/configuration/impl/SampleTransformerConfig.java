@@ -60,6 +60,5 @@ public class SampleTransformerConfig extends TransformerConfig {
     public void setFilterFields(List<String> filterFields) {
         this.filterFields = filterFields;
     }
-    
-    
+
 }

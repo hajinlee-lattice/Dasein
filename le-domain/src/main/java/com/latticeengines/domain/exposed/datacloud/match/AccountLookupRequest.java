@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class AccountLookupRequest {
 
     private String version;
@@ -23,7 +22,8 @@ public class AccountLookupRequest {
         ids.add(AccountLookupEntry.buildId(domain, duns));
     }
 
-    public void addLookupPair(String domain, String duns, String country, String state, String zipCode) {
+    public void addLookupPair(String domain, String duns, String country, String state,
+            String zipCode) {
         ids.add(AccountLookupEntry.buildIdWithLocation(domain, duns, country, state, zipCode));
     }
 
@@ -35,5 +35,3 @@ public class AccountLookupRequest {
         return ids;
     }
 }
-
-

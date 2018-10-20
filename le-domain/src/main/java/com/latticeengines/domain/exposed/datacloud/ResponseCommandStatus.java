@@ -6,12 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.ResponseDocument;
 
 @SuppressWarnings("rawtypes")
-public class ResponseCommandStatus extends ResponseDocument{
-    
+public class ResponseCommandStatus extends ResponseDocument {
+
     @SuppressWarnings("unchecked")
-    public ResponseCommandStatus(Boolean success, List<String> errors, @JsonProperty("status")   String status) {
+    public ResponseCommandStatus(Boolean success, List<String> errors,
+            @JsonProperty("status") String status) {
         this.setSuccess(success);
         this.setErrors(errors);
         this.setResult(status);
-    }    
+    }
 }

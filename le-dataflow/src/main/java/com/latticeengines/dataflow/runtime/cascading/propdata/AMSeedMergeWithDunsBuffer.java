@@ -19,14 +19,11 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AMSeedMergeWithDunsBuffer.class);
-
-    private static final long serialVersionUID = -5435451652686146347L;
-
     public static final String LE = "LE";
     public static final String DNB = "DnB";
-
+    @SuppressWarnings("unused")
+    private static final Logger log = LoggerFactory.getLogger(AMSeedMergeWithDunsBuffer.class);
+    private static final long serialVersionUID = -5435451652686146347L;
     private Map<String, Integer> namePositionMap;
 
     private String dnbDomCol;
@@ -51,9 +48,9 @@ public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public AMSeedMergeWithDunsBuffer(Fields fieldDeclaration, Map<String, String> amsToDnB, 
-            String dnbDomCol, String leDomCol, String dnbIsPriDomCol, String amsIsPriDomCol, String amsDomCol,
-            String amsDomainSourceCol, String leDomSrcCol) {
+    public AMSeedMergeWithDunsBuffer(Fields fieldDeclaration, Map<String, String> amsToDnB,
+            String dnbDomCol, String leDomCol, String dnbIsPriDomCol, String amsIsPriDomCol,
+            String amsDomCol, String amsDomainSourceCol, String leDomSrcCol) {
         this(fieldDeclaration);
         this.amsToDnB = amsToDnB;
         this.dnbDomCol = dnbDomCol;
@@ -75,7 +72,8 @@ public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
         setupTupleForArgument(bufferCall, arguments, group);
     }
 
-    private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup, TupleEntry group) {
+    private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup,
+            TupleEntry group) {
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
             String leDomain = arguments.getString(leDomCol);
@@ -107,8 +105,10 @@ public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
             bufferCall.getOutputCollector().add(result);
         }
         // Clean up domains from DnB
-        dnbDomToIsPri.entrySet().removeIf(dnbDomEnt -> leDomToSrc.containsKey(dnbDomEnt.getKey())
-                || (StringUtils.isBlank(dnbDomEnt.getKey()) && (leDomToSrc.size() > 0 || dnbDomToIsPri.size() > 1)));
+        dnbDomToIsPri.entrySet()
+                .removeIf(dnbDomEnt -> leDomToSrc.containsKey(dnbDomEnt.getKey())
+                        || (StringUtils.isBlank(dnbDomEnt.getKey())
+                                && (leDomToSrc.size() > 0 || dnbDomToIsPri.size() > 1)));
         // Domains from DnB
         for (Map.Entry<String, String> dnbDomEnt : dnbDomToIsPri.entrySet()) {
             Tuple result = Tuple.size(getFieldDeclaration().size());

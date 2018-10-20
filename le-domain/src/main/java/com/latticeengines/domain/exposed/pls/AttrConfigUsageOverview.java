@@ -16,12 +16,12 @@ public class AttrConfigUsageOverview {
     @JsonProperty("Selections")
     private List<AttrConfigSelection> selections;
 
-    public void setSelections(List<AttrConfigSelection> selections) {
-        this.selections = selections;
-    }
-
     public List<AttrConfigSelection> getSelections() {
         return this.selections;
+    }
+
+    public void setSelections(List<AttrConfigSelection> selections) {
+        this.selections = selections;
     }
 
     @Override

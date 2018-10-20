@@ -68,6 +68,11 @@ public class AttrConfigSelectionDetail {
         this.subcategories = subcategories;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SubcategoryDetail {
@@ -203,10 +208,5 @@ public class AttrConfigSelectionDetail {
         public String toString() {
             return JsonUtils.serialize(this);
         }
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }

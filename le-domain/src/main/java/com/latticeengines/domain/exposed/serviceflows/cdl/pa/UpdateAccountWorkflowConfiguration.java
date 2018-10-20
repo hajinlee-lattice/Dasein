@@ -43,8 +43,8 @@ public class UpdateAccountWorkflowConfiguration extends BaseCDLWorkflowConfigura
         }
 
         public UpdateAccountWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("updateAccountWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("updateAccountWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
 
             configuration.add(processAccountStepConfiguration);
             return configuration;

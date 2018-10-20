@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -30,7 +32,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(Megatron.class);
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     private static final String avroName = "/seed.avro";
@@ -71,7 +73,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
     @SuppressWarnings("finally")
     @Override
-    protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
+    protected boolean transformInternal(TransformationProgress progress, String workflowDir,
+            TransformStep step) {
         String confStr = step.getConfig();
         MegatronConfig configuration = getConfiguration(confStr);
 
@@ -107,8 +110,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
                         finalAccounts.add(account);
                     }
                     log.info("flushing " + finalAccounts.size() + " acounts");
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, context.getSchema(), workflowDir + avroName,
-                            finalAccounts);
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, context.getSchema(),
+                            workflowDir + avroName, finalAccounts);
                 } catch (Exception e) {
                     log.error("Failed to write to avro file", e);
                 }
@@ -263,7 +266,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
         }
     }
 
-    private void addSomeDomains(MegatronContext context, GenericData.Record account, int sub) throws Exception {
+    private void addSomeDomains(MegatronContext context, GenericData.Record account, int sub)
+            throws Exception {
         int numDomains = random.nextInt(12);
 
         numDomains = (numDomains <= 4 ? 0 : numDomains - 4);
@@ -437,7 +441,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
             GenericData.Record account = new GenericData.Record(schema);
 
-            boolean sameGlobalDuns = (currentDuns == 0) ? false : ((random.nextInt(2) == 0) ? true : false);
+            boolean sameGlobalDuns = (currentDuns == 0) ? false
+                    : ((random.nextInt(2) == 0) ? true : false);
 
             if (!sameGlobalDuns) {
                 currentGDuns = currentDuns;
@@ -461,14 +466,14 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             account.put("City", random.nextInt(4096) + "");
             String state;
             switch (random.nextInt(6)) {
-            case 0:
-                state = "NY";
-                break;
-            case 1:
-                state = "NH";
-                break;
-            default:
-                state = "CA";
+                case 0:
+                    state = "NY";
+                    break;
+                case 1:
+                    state = "NH";
+                    break;
+                default:
+                    state = "CA";
             }
             account.put("State", state);
             account.put("Country", "USA");
@@ -508,7 +513,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             return account;
         }
 
-        public GenericData.Record cloneAccountWithNewDUNS(GenericData.Record other) throws Exception {
+        public GenericData.Record cloneAccountWithNewDUNS(GenericData.Record other)
+                throws Exception {
             if (getNumAccounts() >= config.getNumAccounts()) {
                 throw new Exception("Enough accounts");
             }

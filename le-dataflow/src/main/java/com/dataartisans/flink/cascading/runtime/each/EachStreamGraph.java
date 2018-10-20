@@ -34,68 +34,71 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class EachStreamGraph extends NodeStreamGraph {
 
-	private BoundaryInStage sourceStage;
-	private CollectorOutput sinkStage;
+    private BoundaryInStage sourceStage;
+    private CollectorOutput sinkStage;
 
-	public EachStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, Boundary source) {
+    public EachStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, Boundary source) {
 
-		super(flowProcess, node);
+        super(flowProcess, node);
 
-		sourceStage = handleHead(source);
+        sourceStage = handleHead(source);
 
-		setTraps();
-		setScopes();
+        setTraps();
+        setScopes();
 
-		printGraph( node.getID(), "map", flowProcess.getCurrentSliceNum() );
-		bind();
-	}
+        printGraph(node.getID(), "map", flowProcess.getCurrentSliceNum());
+        bind();
+    }
 
-	public void setTupleCollector(Collector<Tuple> tupleCollector) {
-		this.sinkStage.setTupleCollector(tupleCollector);
-	}
+    public void setTupleCollector(Collector<Tuple> tupleCollector) {
+        this.sinkStage.setTupleCollector(tupleCollector);
+    }
 
-	public BoundaryInStage getSourceStage() {
-		return this.sourceStage;
-	}
+    public BoundaryInStage getSourceStage() {
+        return this.sourceStage;
+    }
 
-	private BoundaryInStage handleHead( Boundary boundary) {
+    private BoundaryInStage handleHead(Boundary boundary) {
 
-		BoundaryInStage sourceStage = (BoundaryInStage)createBoundaryStage(boundary, IORole.source);
-		addHead( sourceStage );
-		handleDuct( boundary, sourceStage );
-		return sourceStage;
-	}
+        BoundaryInStage sourceStage = (BoundaryInStage) createBoundaryStage(boundary,
+                IORole.source);
+        addHead(sourceStage);
+        handleDuct(boundary, sourceStage);
+        return sourceStage;
+    }
 
-	@Override
-	protected Duct createBoundaryStage( Boundary boundary, IORole role ) {
+    @Override
+    protected Duct createBoundaryStage(Boundary boundary, IORole role) {
 
-		if(role == IORole.source) {
-			this.sourceStage = new BoundaryInStage(this.flowProcess, boundary );
-			return this.sourceStage;
-		}
-		else if(role == IORole.sink) {
-			this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
-			return (BoundaryOutStage)this.sinkStage;
-		}
+        if (role == IORole.source) {
+            this.sourceStage = new BoundaryInStage(this.flowProcess, boundary);
+            return this.sourceStage;
+        } else if (role == IORole.sink) {
+            this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
+            return (BoundaryOutStage) this.sinkStage;
+        }
 
-		throw new IllegalArgumentException("Boundary must be either source or sink!");
-	}
+        throw new IllegalArgumentException("Boundary must be either source or sink!");
+    }
 
-	@Override
-	protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a CoGroup gate in a MapStreamGraph.");
-	}
+    @Override
+    protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a CoGroup gate in a MapStreamGraph.");
+    }
 
-	@Override
-	protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a GroupBy gate in a MapStreamGraph.");
-	}
+    @Override
+    protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a GroupBy gate in a MapStreamGraph.");
+    }
 
-	protected Gate createHashJoinGate( HashJoin join ) {
-		throw new UnsupportedOperationException("Cannot create a HashJoin gate in a MapStreamGraph.");
-	}
+    protected Gate createHashJoinGate(HashJoin join) {
+        throw new UnsupportedOperationException(
+                "Cannot create a HashJoin gate in a MapStreamGraph.");
+    }
 
 }

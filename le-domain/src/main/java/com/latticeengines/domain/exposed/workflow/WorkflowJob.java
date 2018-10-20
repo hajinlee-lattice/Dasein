@@ -111,6 +111,10 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         this.tenantId = tenantId;
     }
 
+    public Tenant getTenant() {
+        return tenant;
+    }
+
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
@@ -118,10 +122,6 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
             setTenantId(tenant.getPid());
         }
 
-    }
-
-    public Tenant getTenant() {
-        return tenant;
     }
 
     public String getApplicationId() {

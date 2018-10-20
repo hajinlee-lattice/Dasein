@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RedshiftDataUnit extends DataUnit {
 
+    @JsonProperty("RedshiftTable")
+    private String redshiftTable;
+
     @Override
     @JsonIgnore
     public StorageType getStorageType() {
         return StorageType.Redshift;
     }
-
-    @JsonProperty("RedshiftTable")
-    private String redshiftTable;
 
     public String getRedshiftTable() {
         return redshiftTable;

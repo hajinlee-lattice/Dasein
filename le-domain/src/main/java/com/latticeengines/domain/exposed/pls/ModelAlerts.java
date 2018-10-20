@@ -131,7 +131,8 @@ public class ModelAlerts {
         }
 
         @JsonProperty("ExcessiveDiscreteValuesAttributes")
-        public void setExcessiveDiscreteValuesAttributes(List<String> excessiveDiscreteValuesAttributes) {
+        public void setExcessiveDiscreteValuesAttributes(
+                List<String> excessiveDiscreteValuesAttributes) {
             this.excessiveDiscreteValuesAttributes = excessiveDiscreteValuesAttributes;
         }
 
@@ -151,7 +152,8 @@ public class ModelAlerts {
         }
 
         @JsonProperty("ExcessivePredictiveAttributes")
-        public void setExcessivePredictiveAttributes(List<Map.Entry<String, String>> excessivePredictiveAttributes) {
+        public void setExcessivePredictiveAttributes(
+                List<Map.Entry<String, String>> excessivePredictiveAttributes) {
             this.excessivePredictiveAttributes = excessivePredictiveAttributes;
         }
 
@@ -202,7 +204,8 @@ public class ModelAlerts {
         }
 
         @JsonProperty("InvalidApprovedUsageAttributes")
-        public void setInvalidApprovedUsageMissingAttributes(List<String> invalidApprovedUsageAttributes) {
+        public void setInvalidApprovedUsageMissingAttributes(
+                List<String> invalidApprovedUsageAttributes) {
             this.invalidApprovedUsageAttributes = invalidApprovedUsageAttributes;
         }
 
@@ -242,7 +245,8 @@ public class ModelAlerts {
         }
 
         @JsonProperty("InvalidStatisticalTypeAttributes")
-        public void setInvalidStatisticalTypeAttributes(List<String> invalidStatisticalTypeAttributes) {
+        public void setInvalidStatisticalTypeAttributes(
+                List<String> invalidStatisticalTypeAttributes) {
             this.invalidStatisticalTypeAttributes = invalidStatisticalTypeAttributes;
         }
     }

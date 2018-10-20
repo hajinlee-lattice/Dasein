@@ -21,8 +21,10 @@ public class BitCodeBook implements Serializable {
     private Algorithm encodeAlgo;
     private DecodeStrategy decodeStrategy;
     private String encodedColumn;
-    private Map<Object, String> valueDict; // eg. A||B||C -> null:00, A:01, B:10, C:11
-    private Map<String, Object> valueDictRev;   // eg. A||B||C -> 00:null, 01:A, 10:B, 11:C
+    private Map<Object, String> valueDict; // eg. A||B||C -> null:00, A:01,
+                                           // B:10, C:11
+    private Map<String, Object> valueDictRev; // eg. A||B||C -> 00:null, 01:A,
+                                              // 10:B, 11:C
     private Integer bitUnit;
 
     public BitCodeBook() {
@@ -46,43 +48,34 @@ public class BitCodeBook implements Serializable {
 
     public BitCodeBook(BitDecodeStrategy bitDecodeStrategy) {
         encodedColumn = bitDecodeStrategy.getEncodedColumn();
-        decodeStrategy = BitCodeBook.DecodeStrategy.valueOf(bitDecodeStrategy.getBitInterpretation());
+        decodeStrategy = BitCodeBook.DecodeStrategy
+                .valueOf(bitDecodeStrategy.getBitInterpretation());
         switch (decodeStrategy) {
-        case ENUM_STRING:
-            String[] valueDictArr = bitDecodeStrategy.getValueDict().split("\\|\\|");
-            valueDictRev = new HashMap<>();
-            for (int i = 0; i < valueDictArr.length; i++) {
-                valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
-            }
-        case NUMERIC_INT:
-        case NUMERIC_UNSIGNED_INT:
-            bitUnit = bitDecodeStrategy.getBitUnit();
-            break;
-        default:
-            break;
+            case ENUM_STRING:
+                String[] valueDictArr = bitDecodeStrategy.getValueDict().split("\\|\\|");
+                valueDictRev = new HashMap<>();
+                for (int i = 0; i < valueDictArr.length; i++) {
+                    valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
+                }
+            case NUMERIC_INT:
+            case NUMERIC_UNSIGNED_INT:
+                bitUnit = bitDecodeStrategy.getBitUnit();
+                break;
+            default:
+                break;
         }
-    }
-
-    public void setBitsPosMap(Map<String, Integer> bitsPosMap) {
-        Map<String, Integer> copy = new HashMap<>();
-        if (bitsPosMap != null) {
-            for (Map.Entry<String, Integer> entry : bitsPosMap.entrySet()) {
-                copy.put(entry.getKey(), entry.getValue());
-            }
-        }
-        this.bitsPosMap = Collections.unmodifiableMap(copy);
     }
 
     public Algorithm getEncodeAlgo() {
         return encodeAlgo;
     }
 
-    public DecodeStrategy getDecodeStrategy() {
-        return decodeStrategy;
-    }
-
     public void setEncodeAlgo(Algorithm encodeAlgo) {
         this.encodeAlgo = encodeAlgo;
+    }
+
+    public DecodeStrategy getDecodeStrategy() {
+        return decodeStrategy;
     }
 
     public void setDecodeStrategy(DecodeStrategy decodeStrategy) {
@@ -109,6 +102,16 @@ public class BitCodeBook implements Serializable {
         return bitsPosMap;
     }
 
+    public void setBitsPosMap(Map<String, Integer> bitsPosMap) {
+        Map<String, Integer> copy = new HashMap<>();
+        if (bitsPosMap != null) {
+            for (Map.Entry<String, Integer> entry : bitsPosMap.entrySet()) {
+                copy.put(entry.getKey(), entry.getValue());
+            }
+        }
+        this.bitsPosMap = Collections.unmodifiableMap(copy);
+    }
+
     public Map<Object, String> getValueDict() {
         return valueDict;
     }
@@ -133,17 +136,6 @@ public class BitCodeBook implements Serializable {
         this.valueDictRev = valueDictRev;
     }
 
-    public enum Algorithm {
-        KEY_EXISTS
-    }
-
-    public enum DecodeStrategy {
-        BOOLEAN_YESNO, //
-        NUMERIC_INT, //
-        NUMERIC_UNSIGNED_INT, //
-        ENUM_STRING, //
-    }
-
     public Map<String, Object> decode(String encodedStr, List<String> decodeFields) {
         if (getDecodeStrategy() == null) {
             throw new IllegalArgumentException("Must provide decode strategy to decode.");
@@ -165,20 +157,22 @@ public class BitCodeBook implements Serializable {
         }
     }
 
-    public int[] assignBitPosAndUpdateIdxMap(List<String> decodeFields, Map<String, Integer> bitPositionIdx) {
+    public int[] assignBitPosAndUpdateIdxMap(List<String> decodeFields,
+            Map<String, Integer> bitPositionIdx) {
         switch (getDecodeStrategy()) {
-        case BOOLEAN_YESNO:
-            return assignSingleDigitBitPos(decodeFields, bitPositionIdx);
-        case NUMERIC_INT:
-        case NUMERIC_UNSIGNED_INT:
-        case ENUM_STRING:
-            return assignMultipleDigitBitPos(decodeFields, bitPositionIdx);
-        default:
-            return null;
+            case BOOLEAN_YESNO:
+                return assignSingleDigitBitPos(decodeFields, bitPositionIdx);
+            case NUMERIC_INT:
+            case NUMERIC_UNSIGNED_INT:
+            case ENUM_STRING:
+                return assignMultipleDigitBitPos(decodeFields, bitPositionIdx);
+            default:
+                return null;
         }
     }
 
-    private int[] assignSingleDigitBitPos(List<String> decodeFields, Map<String, Integer> bitPositionIdx) {
+    private int[] assignSingleDigitBitPos(List<String> decodeFields,
+            Map<String, Integer> bitPositionIdx) {
         List<Integer> bitPoses = new ArrayList<>();
         for (String field : decodeFields) {
             Integer bitPos = getBitPosForKey(field);
@@ -190,7 +184,8 @@ public class BitCodeBook implements Serializable {
         return ArrayUtils.toPrimitive(bitPoses.toArray(new Integer[bitPoses.size()]));
     }
 
-    private int[] assignMultipleDigitBitPos(List<String> decodeFields, Map<String, Integer> bitPositionIdx) {
+    private int[] assignMultipleDigitBitPos(List<String> decodeFields,
+            Map<String, Integer> bitPositionIdx) {
         List<Integer> bitPoses = new ArrayList<>();
         for (String field : decodeFields) {
             Integer bitPos = getBitPosForKey(field);
@@ -207,16 +202,17 @@ public class BitCodeBook implements Serializable {
     public Map<String, Object> translateBits(boolean[] bits, List<String> decodeFields,
             Map<String, Integer> bitPositionIdx) {
         switch (getDecodeStrategy()) {
-        case BOOLEAN_YESNO:
-            return translateBitsToYesNo(bits, decodeFields, bitPositionIdx);
-        case NUMERIC_INT:
-            return translateBitsToInt(bits, decodeFields, bitPositionIdx, true);
-        case NUMERIC_UNSIGNED_INT:
-            return translateBitsToInt(bits, decodeFields, bitPositionIdx, false);
-        case ENUM_STRING:
-            return translateBitsToEnumString(bits, decodeFields, bitPositionIdx);
-        default:
-            throw new UnsupportedOperationException("Unsupported decode strategy " + getDecodeStrategy());
+            case BOOLEAN_YESNO:
+                return translateBitsToYesNo(bits, decodeFields, bitPositionIdx);
+            case NUMERIC_INT:
+                return translateBitsToInt(bits, decodeFields, bitPositionIdx, true);
+            case NUMERIC_UNSIGNED_INT:
+                return translateBitsToInt(bits, decodeFields, bitPositionIdx, false);
+            case ENUM_STRING:
+                return translateBitsToEnumString(bits, decodeFields, bitPositionIdx);
+            default:
+                throw new UnsupportedOperationException(
+                        "Unsupported decode strategy " + getDecodeStrategy());
         }
     }
 
@@ -239,7 +235,9 @@ public class BitCodeBook implements Serializable {
         for (String decodeField : decodeFields) {
             if (bitPositionIdx.containsKey(decodeField)) {
                 int idx = bitPositionIdx.get(decodeField);
-                boolean notNull = bits[idx + getBitUnit() - 1]; // highest bit is null indicator
+                boolean notNull = bits[idx + getBitUnit() - 1]; // highest bit
+                                                                // is null
+                                                                // indicator
                 if (notNull) {
                     int value = 0;
                     for (int i = getBitUnit() - 2; i >= 0; i--) {
@@ -268,6 +266,17 @@ public class BitCodeBook implements Serializable {
             }
         }
         return valueMap;
+    }
+
+    public enum Algorithm {
+        KEY_EXISTS
+    }
+
+    public enum DecodeStrategy {
+        BOOLEAN_YESNO, //
+        NUMERIC_INT, //
+        NUMERIC_UNSIGNED_INT, //
+        ENUM_STRING, //
     }
 
 }

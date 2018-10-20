@@ -54,8 +54,8 @@ public class RebuildContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public RebuildContactWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("rebuildContactWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("rebuildContactWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processContactStepConfiguration);
             return configuration;
         }

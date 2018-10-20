@@ -22,7 +22,7 @@ public class TargetMarketStepConfiguration extends MicroserviceStepConfiguration
     public void setTargetMarket(TargetMarket targetMarket) {
         this.targetMarket = targetMarket;
     }
-    
+
     public String getInternalResourceHostPort() {
         return internalResourceHostPort;
     }
@@ -31,5 +31,4 @@ public class TargetMarketStepConfiguration extends MicroserviceStepConfiguration
         this.internalResourceHostPort = internalResourceHostPort;
     }
 
-    
 }

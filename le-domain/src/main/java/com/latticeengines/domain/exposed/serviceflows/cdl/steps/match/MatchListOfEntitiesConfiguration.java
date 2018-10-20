@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 public class MatchListOfEntitiesConfiguration extends MicroserviceStepConfiguration {
 
     private Map<String, MatchConfiguration> matchConfigurations = new HashMap<>();
-    
+
     public Map<String, MatchConfiguration> getMatchConfigs() {
         return matchConfigurations;
     }
@@ -35,7 +35,8 @@ public class MatchListOfEntitiesConfiguration extends MicroserviceStepConfigurat
         if (matchConfigurations == null) {
             return;
         }
-        matchConfigurations.values().stream().forEach(x -> x.setMicroServiceHostPort(microServiceHostPort));
+        matchConfigurations.values().stream()
+                .forEach(x -> x.setMicroServiceHostPort(microServiceHostPort));
     }
 
     @Override
@@ -44,14 +45,15 @@ public class MatchListOfEntitiesConfiguration extends MicroserviceStepConfigurat
         if (matchConfigurations == null) {
             return;
         }
-        matchConfigurations.values().stream().forEach(x -> x.setInternalResourceHostPort(internalResourceHostPort));
+        matchConfigurations.values().stream()
+                .forEach(x -> x.setInternalResourceHostPort(internalResourceHostPort));
     }
 
     public static class Builder {
-        
+
         private Map<String, MatchConfiguration.Builder> matchConfigsBuilder = new HashMap<>();
         private CustomerSpace customerSpace;
-        
+
         private MatchConfiguration.Builder getMatchConfigurationBuilderByName(String name) {
             MatchConfiguration.Builder matchConfigurationBldr = matchConfigsBuilder.get(name);
             if (matchConfigurationBldr == null) {
@@ -60,32 +62,33 @@ public class MatchListOfEntitiesConfiguration extends MicroserviceStepConfigurat
             }
             return matchConfigurationBldr;
         }
-        
+
         public Builder sourceFile(String name, SourceFile sourceFile, String customerDataPath) {
             String schemaInterpretation = sourceFile.getSchemaInterpretation().name();
             MatchConfiguration.Builder configBldr = getMatchConfigurationBuilderByName(name);
             configBldr.targetTableName(sourceFile.getSchemaInterpretation().name() + "Staging") //
-                .inputDir(String.format("%s/%sStagingNoLatticeId", customerDataPath, schemaInterpretation)) //
-                .outputDir(String.format("%s/%sStaging", customerDataPath, schemaInterpretation));
+                    .inputDir(String.format("%s/%sStagingNoLatticeId", customerDataPath,
+                            schemaInterpretation)) //
+                    .outputDir(
+                            String.format("%s/%sStaging", customerDataPath, schemaInterpretation));
             return this;
         }
-        
+
         public Builder customer(CustomerSpace customerSpace) {
             this.customerSpace = customerSpace;
             return this;
         }
 
-        
         public MatchListOfEntitiesConfiguration build() {
             MatchListOfEntitiesConfiguration config = new MatchListOfEntitiesConfiguration();
-            
+
             matchConfigsBuilder.values().forEach(x -> x.customerSpace(customerSpace));
-            Map<String, MatchConfiguration> matchConfigs = matchConfigsBuilder.entrySet().stream().collect( //
-                    Collectors.toMap(e -> e.getKey(), e -> e.getValue().build()));
+            Map<String, MatchConfiguration> matchConfigs = matchConfigsBuilder.entrySet().stream()
+                    .collect( //
+                            Collectors.toMap(e -> e.getKey(), e -> e.getValue().build()));
             config.setMatchConfigs(matchConfigs);
             return config;
         }
 
-        
     }
 }

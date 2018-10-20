@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AMCleanerParameters extends TransformationFlowParameters {
 
-    public enum CleanOpt {
-        RETAIN, DROP, LATTICEID, STRING, DOUBLE, INTEGER, LONG, BOOLEAN
-    }
-
     @JsonProperty("AttrOpts")
     private Map<String, CleanOpt> attrOpts;
-
     @JsonProperty("DataCloudVersion")
     private String dataCloudVersion;
+
+    public static CleanOpt castCleanOpt(String cleanOpt) {
+        return CleanOpt.valueOf(cleanOpt);
+    }
 
     public String getDataCloudVersion() {
         return dataCloudVersion;
@@ -32,8 +31,8 @@ public class AMCleanerParameters extends TransformationFlowParameters {
         this.attrOpts = attrOpts;
     }
 
-    public static CleanOpt castCleanOpt(String cleanOpt) {
-        return CleanOpt.valueOf(cleanOpt);
+    public enum CleanOpt {
+        RETAIN, DROP, LATTICEID, STRING, DOUBLE, INTEGER, LONG, BOOLEAN
     }
 
 }

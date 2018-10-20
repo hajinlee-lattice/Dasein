@@ -31,8 +31,9 @@ public class CategoricalProfileGroupingBuffer extends BaseOperation implements B
 
     private Map<String, Integer> namePositionMap;
 
-    public CategoricalProfileGroupingBuffer(Fields fieldDeclaration, String catAttrField, String catValueField,
-            String nonCatFlag, int maxCat, int maxCatLen, List<String> catAttrs) {
+    public CategoricalProfileGroupingBuffer(Fields fieldDeclaration, String catAttrField,
+            String catValueField, String nonCatFlag, int maxCat, int maxCatLen,
+            List<String> catAttrs) {
         super(fieldDeclaration);
         this.nonCatFlag = nonCatFlag;
         this.maxCat = maxCat;

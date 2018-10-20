@@ -35,7 +35,8 @@ public class AwsApsGeneratorUtils {
                 if (InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
                     attribute.setLogicalDataType(LogicalDataType.InternalId);
                 }
-                log.info(String.format("Setting category for %s attribute as %s", name, Category.DEFAULT.getName()));
+                log.info(String.format("Setting category for %s attribute as %s", name,
+                        Category.DEFAULT.getName()));
             } else {
                 attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
                 attribute.setCategory(Category.PRODUCT_SPEND);
@@ -64,7 +65,8 @@ public class AwsApsGeneratorUtils {
         }
         if (name.matches("Product_.*_RevenueMomentum3")) {
             Pattern pattern = Pattern.compile("Product_(.*)_RevenueMomentum3");
-            setDisplayName(attribute, name, productMap, pattern, "Rate of Change of 3-Period Spend for ");
+            setDisplayName(attribute, name, productMap, pattern,
+                    "Rate of Change of 3-Period Spend for ");
             attribute.setDescription(
                     "Percent change in the 3 period spend, where values > 0 show increasing spend and < 0 indicate decreasing spend");
             return;
@@ -84,13 +86,14 @@ public class AwsApsGeneratorUtils {
         }
     }
 
-    private static void setDisplayName(Attribute attribute, String name, Map<String, List<Product>> productMap,
-            Pattern pattern, String descPrefix) {
+    private static void setDisplayName(Attribute attribute, String name,
+            Map<String, List<Product>> productMap, Pattern pattern, String descPrefix) {
         Matcher matcher = pattern.matcher(name);
         matcher.matches();
         String productId = matcher.group(1);
         if (productMap != null && CollectionUtils.isNotEmpty(productMap.get(productId))) {
-            attribute.setDisplayName(descPrefix + productMap.get(productId).get(0).getProductName());
+            attribute
+                    .setDisplayName(descPrefix + productMap.get(productId).get(0).getProductName());
         } else {
             attribute.setDisplayName(descPrefix + productId);
         }

@@ -9,15 +9,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class Record {
     public static final String LATTICE_ID = "LATTICE";
-
-    @JsonProperty("recordId")
-    @ApiModelProperty(value = "Record ID")
-    private String recordId;
-
-    @JsonProperty("idType")
-    @ApiModelProperty(value = "Type of record ID")
-    private String idType;
-
     @JsonProperty("modelAttributeValuesMap")
     @ApiModelProperty(value = "Map of model ID and attributeValues. "
             + "In attributeValues (Map < String, Object > ) for a corresponding model ID, " //
@@ -27,7 +18,12 @@ public class Record {
             + "are not specified then specify both 'CompanyName' and 'State' fields", //
             required = true)
     Map<String, Map<String, Object>> modelAttributeValuesMap;
-
+    @JsonProperty("recordId")
+    @ApiModelProperty(value = "Record ID")
+    private String recordId;
+    @JsonProperty("idType")
+    @ApiModelProperty(value = "Type of record ID")
+    private String idType;
     @JsonProperty("performEnrichment")
     @ApiModelProperty(value = "Should perform enrichment or not")
     private boolean performEnrichment;
@@ -62,7 +58,8 @@ public class Record {
         return modelAttributeValuesMap;
     }
 
-    public void setModelAttributeValuesMap(Map<String, Map<String, Object>> modelAttributeValuesMap) {
+    public void setModelAttributeValuesMap(
+            Map<String, Map<String, Object>> modelAttributeValuesMap) {
         this.modelAttributeValuesMap = modelAttributeValuesMap;
     }
 

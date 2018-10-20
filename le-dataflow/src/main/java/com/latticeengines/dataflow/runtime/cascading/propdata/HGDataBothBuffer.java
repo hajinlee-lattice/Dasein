@@ -15,7 +15,6 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class HGDataBothBuffer extends BaseOperation implements Buffer {
 
-
     private static final long serialVersionUID = -6707858599535647248L;
 
     private static final String CATEGORY_1 = "HG_Category_1";
@@ -38,7 +37,7 @@ public class HGDataBothBuffer extends BaseOperation implements Buffer {
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
         List<String> categories = getCategoriesFromArguments(arguments);
 
-        for (String cat: categories) {
+        for (String cat : categories) {
             bufferCall.getOutputCollector().add(new Tuple(domain, cat));
         }
     }
@@ -54,6 +53,5 @@ public class HGDataBothBuffer extends BaseOperation implements Buffer {
         }
         return toReturn;
     }
-
 
 }

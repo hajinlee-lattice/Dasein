@@ -33,14 +33,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-
 /**
- * 
+ *
  * @startuml
  *
  */
 @Entity
-@Table(name = "MODELQUALITY_PIPELINE_STEP", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_PIPELINE_STEP", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PipelineStep implements HasName, HasPid, Serializable {
 
@@ -56,18 +56,18 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     @Column(name = "NAME", nullable = false)
     @JsonProperty("Name")
     private String name;
-    
+
     @Column(name = "MAIN_CLASS_NAME", nullable = false)
     @JsonProperty("MainClassName")
     private String mainClassName;
-    
+
     @Column(name = "OPERATES_ON_COLUMNS")
     private String operatesOnColumns;
 
     @JsonProperty("ColumnTransformFilePath")
     @Column(name = "SCRIPT", unique = true, nullable = false)
     private String script;
-    
+
     @JsonProperty("RTSFilePath")
     @Column(name = "RTS_SCRIPT", nullable = true)
     private String rtsScript;
@@ -81,18 +81,18 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SELECT)
     private List<PipelinePropertyDef> pipelinePropertyDefs = new ArrayList<>();
-    
+
     @JsonProperty("KeyWhenSortingByAscending")
     @Transient
     private int sortKey;
-    
+
     @JsonProperty("UniqueColumnTransformName")
     @Transient
     private String uniqueColumnTransformName;
-    
+
     @Column(name = "NAMED_PARAMS_TO_INIT", length = 2000)
     private String namedParameterListToInit;
-    
+
     @JsonProperty("LoadFromHdfs")
     @Column(name = "LOAD_FROM_HDFS", nullable = true)
     private boolean loadFromHdfs = false;

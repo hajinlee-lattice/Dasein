@@ -58,7 +58,8 @@ public class RatingsCountRequest {
         return segmentIdAndSingleRules;
     }
 
-    public void setSegmentIdAndSingleRules(List<SegmentIdAndSingleRulePair> segmentIdAndSingleRules) {
+    public void setSegmentIdAndSingleRules(
+            List<SegmentIdAndSingleRulePair> segmentIdAndSingleRules) {
         this.segmentIdAndSingleRules = segmentIdAndSingleRules;
     }
 
@@ -66,7 +67,8 @@ public class RatingsCountRequest {
         return ratingIdLookupColumnPairs;
     }
 
-    public void setRatingIdLookupColumnPairs(List<RatingIdLookupColumnPair> ratingIdLookupColumnPairs) {
+    public void setRatingIdLookupColumnPairs(
+            List<RatingIdLookupColumnPair> ratingIdLookupColumnPairs) {
         this.ratingIdLookupColumnPairs = ratingIdLookupColumnPairs;
     }
 

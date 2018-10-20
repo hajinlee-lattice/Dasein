@@ -26,12 +26,12 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-@Table(name = "CustomerReport", indexes = {@Index(name = "Report_ID_IDX", columnList = "ID")})
+@Table(name = "CustomerReport", indexes = { @Index(name = "Report_ID_IDX", columnList = "ID") })
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class CustomerReport implements HasId<String>, HasPid{
+public class CustomerReport implements HasId<String>, HasPid {
     @JsonIgnore
     private Long pid;
 
@@ -87,6 +87,7 @@ public class CustomerReport implements HasId<String>, HasPid{
     public String getId() {
         return id;
     }
+
     @Override
     public void setId(String id) {
         this.id = id;
@@ -97,6 +98,7 @@ public class CustomerReport implements HasId<String>, HasPid{
     public CustomerReportType getType() {
         return type;
     }
+
     public void setType(CustomerReportType type) {
         this.type = type;
     }
@@ -171,6 +173,7 @@ public class CustomerReport implements HasId<String>, HasPid{
     public Date getCreatedTime() {
         return createdTime;
     }
+
     public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
     }

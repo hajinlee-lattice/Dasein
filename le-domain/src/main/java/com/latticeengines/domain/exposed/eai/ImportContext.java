@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.BaseContext;
 
 public class ImportContext extends BaseContext {
 
-    public ImportContext(Configuration yarnConfiguration){
+    public ImportContext(Configuration yarnConfiguration) {
         super(yarnConfiguration);
     }
 

@@ -29,11 +29,13 @@ public class DimensionExpandFunction extends BaseOperation implements Function {
         dimensionValues = new HashMap<>();
         String normalizedExpandField = parameterObject.expandField.substring(
                 parameterObject.dimensionColumnPrepostfix.length(),
-                parameterObject.expandField.length() - parameterObject.dimensionColumnPrepostfix.length());
+                parameterObject.expandField.length()
+                        - parameterObject.dimensionColumnPrepostfix.length());
 
-        for (String valKey : parameterObject.requiredDimensionsValuesMap.get(normalizedExpandField).keySet()) {
-            CategoricalAttribute attr = parameterObject.requiredDimensionsValuesMap.get(normalizedExpandField)
-                    .get(valKey);
+        for (String valKey : parameterObject.requiredDimensionsValuesMap.get(normalizedExpandField)
+                .keySet()) {
+            CategoricalAttribute attr = parameterObject.requiredDimensionsValuesMap
+                    .get(normalizedExpandField).get(valKey);
 
             List<Long> ancestorPath = new ArrayList<>();
 
@@ -75,7 +77,8 @@ public class DimensionExpandFunction extends BaseOperation implements Function {
         public Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
         public String dimensionColumnPrepostfix;
 
-        public Params(int numArgs, String expandField, Map<String, List<String>> hierarchicalDimensionTraversalMap,
+        public Params(int numArgs, String expandField,
+                Map<String, List<String>> hierarchicalDimensionTraversalMap,
                 Fields fieldDeclaration, int pos,
                 Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap,
                 String dimensionColumnPrepostfix) {

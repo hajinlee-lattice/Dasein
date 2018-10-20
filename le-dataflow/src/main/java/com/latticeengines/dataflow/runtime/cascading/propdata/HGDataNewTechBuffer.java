@@ -26,8 +26,8 @@ public class HGDataNewTechBuffer extends BaseOperation implements Buffer {
     private static final String CATEGORY_1 = "HG_Category_1";
     private static final String LAST_VERIFIED = "Last_Verified_Date";
     private static final int NUM_TECH = 10;
-    private final String domainField;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+    private final String domainField;
 
     public HGDataNewTechBuffer(String domainField, String newTechField) {
         super(new Fields(domainField, newTechField));
@@ -61,14 +61,14 @@ public class HGDataNewTechBuffer extends BaseOperation implements Buffer {
         }
 
         List<String> tokens = new ArrayList<>();
-        for (Map.Entry<String, Long> entry: dateMap.entrySet()) {
+        for (Map.Entry<String, Long> entry : dateMap.entrySet()) {
             String cat = entry.getKey();
             Long date = entry.getValue();
             tokens.add(cat + "(" + dateFormat.format(new Date(date)) + ")");
-            if (tokens.size() >= NUM_TECH) break;
+            if (tokens.size() >= NUM_TECH)
+                break;
         }
         return StringUtils.join(tokens, ",");
     }
-
 
 }

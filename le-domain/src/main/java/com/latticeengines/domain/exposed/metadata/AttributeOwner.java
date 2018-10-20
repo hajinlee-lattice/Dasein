@@ -46,20 +46,17 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonProperty("display_name")
     protected String displayName;
-
-    @JsonProperty("attributes")
-    @Transient
-    private List<String> attributes = new ArrayList<>();
-
-    @Column(name = "ATTRIBUTES", nullable = false, length = 2048)
-    @JsonIgnore
-    private String attributesAsString;
-
     @JsonIgnore
     @OneToOne
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     protected Table table;
+    @JsonProperty("attributes")
+    @Transient
+    private List<String> attributes = new ArrayList<>();
+    @Column(name = "ATTRIBUTES", nullable = false, length = 2048)
+    @JsonIgnore
+    private String attributesAsString;
 
     @Override
     public Long getPid() {

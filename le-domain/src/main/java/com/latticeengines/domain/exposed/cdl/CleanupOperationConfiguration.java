@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.cdl;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -8,7 +7,8 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-@JsonSubTypes({ @JsonSubTypes.Type(value = CleanupAllConfiguration.class, name = "CleanupAllConfiguration"),
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CleanupAllConfiguration.class, name = "CleanupAllConfiguration"),
         @JsonSubTypes.Type(value = CleanupByDateRangeConfiguration.class, name = "CleanupByDateRangeConfiguration"),
         @JsonSubTypes.Type(value = CleanupByUploadConfiguration.class, name = "CleanupByUploadConfiguration") })
 public class CleanupOperationConfiguration extends MaintenanceOperationConfiguration {

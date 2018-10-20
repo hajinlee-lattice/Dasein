@@ -52,13 +52,13 @@ public class CascadingBulkMatchStepConfiguration extends DataFlowStepConfigurati
     }
 
     @JsonProperty("input_properties")
-    public void setInputProperties(Map<String, String> inputProperties) {
-        this.inputProperties = inputProperties;
+    public Map<String, String> getInputProperties() {
+        return inputProperties;
     }
 
     @JsonProperty("input_properties")
-    public Map<String, String> getInputProperties() {
-        return inputProperties;
+    public void setInputProperties(Map<String, String> inputProperties) {
+        this.inputProperties = inputProperties;
     }
 
 }

@@ -327,16 +327,18 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder prior(String period, Object value) {
         operator = ComparisonType.PRIOR;
-        restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
-                Arrays.asList(new Object[] { value })));
+        restriction = new TimeRestriction(
+                new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period),
+                        operator, period, Arrays.asList(new Object[] { value })));
         complete = true;
         return this;
     }
 
     public RestrictionBuilder inCurrentPeriod(String period) {
         operator = ComparisonType.IN_CURRENT_PERIOD;
-        restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
-                Arrays.asList(new Object[] { 0 })));
+        restriction = new TimeRestriction(
+                new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period),
+                        operator, period, Arrays.asList(new Object[] { 0 })));
         complete = true;
         return this;
     }
@@ -353,7 +355,8 @@ public class RestrictionBuilder {
             throw new IllegalArgumentException("Must define left hand side lookup first.");
         }
         if (complete) {
-            throw new IllegalArgumentException("The builder is already complete. Check your operation chaining.");
+            throw new IllegalArgumentException(
+                    "The builder is already complete. Check your operation chaining.");
         }
         restriction = new ConcreteRestriction(negate, attrLookup, operator, rhsLookup);
         complete = true;
@@ -365,7 +368,8 @@ public class RestrictionBuilder {
                     "Cannot put logical operation in concrete restriction, it should be outside.");
         }
         if (complete) {
-            throw new IllegalArgumentException("The builder is already complete. Check your operation chaining.");
+            throw new IllegalArgumentException(
+                    "The builder is already complete. Check your operation chaining.");
         }
         restriction = new LogicalRestriction(logicalOperator, children);
         complete = true;

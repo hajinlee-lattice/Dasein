@@ -38,7 +38,11 @@ public class UpdateBucketMetadataRequest {
         this.modelGuid = modelGuid;
     }
 
-    public boolean isPublished() { return isPublished; }
+    public boolean isPublished() {
+        return isPublished;
+    }
 
-    public void setPublished(boolean published) { isPublished = published; }
+    public void setPublished(boolean published) {
+        isPublished = published;
+    }
 }

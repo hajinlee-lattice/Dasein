@@ -28,158 +28,156 @@ import org.apache.flink.core.memory.MemorySegment;
 
 import cascading.tuple.Hasher;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class CustomFieldComparator extends TypeComparator<Comparable> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final boolean ascending;
+    private final boolean ascending;
 
-	private final Comparator<Comparable> comparator;
+    private final Comparator<Comparable> comparator;
 
-	private final Hasher hasher;
+    private final Hasher hasher;
+    private final TypeComparator[] cArray = new TypeComparator[] { this };
+    private TypeSerializer<Comparable> serializer;
+    private transient Comparable ref;
+    private transient Comparable tmpRef;
 
-	private TypeSerializer<Comparable> serializer;
+    public CustomFieldComparator(boolean ascending, Comparator<Comparable> comparator,
+            TypeSerializer<Comparable> serializer) {
+        this.ascending = ascending;
+        this.comparator = comparator;
+        this.hasher = initializeHasher(comparator);
+        this.serializer = serializer;
+    }
 
-	private transient Comparable ref;
+    private CustomFieldComparator(CustomFieldComparator toClone) {
+        this.ascending = toClone.ascending;
+        this.comparator = toClone.comparator;
+        this.hasher = toClone.hasher;
+        this.serializer = toClone.serializer.duplicate();
+    }
 
-	private transient Comparable tmpRef;
+    private static Hasher initializeHasher(Comparator comparator) {
 
-	private final TypeComparator[] cArray = new TypeComparator[] {this};
+        if (comparator instanceof Hasher) {
+            return (Hasher) comparator;
+        } else {
+            return new DefaultHasher();
+        }
+    }
 
-	public CustomFieldComparator(boolean ascending, Comparator<Comparable> comparator, TypeSerializer<Comparable> serializer) {
-		this.ascending = ascending;
-		this.comparator = comparator;
-		this.hasher = initializeHasher(comparator);
-		this.serializer = serializer;
-	}
+    public int hash(Comparable record) {
+        return this.hasher.hashCode(record);
+    }
 
-	private CustomFieldComparator(CustomFieldComparator toClone) {
-		this.ascending = toClone.ascending;
-		this.comparator = toClone.comparator;
-		this.hasher = toClone.hasher;
-		this.serializer = toClone.serializer.duplicate();
-	}
+    public void setReference(Comparable toCompare) {
+        if (toCompare == null) {
+            this.ref = null;
+        } else {
+            this.ref = toCompare;
+        }
+    }
 
-	private static Hasher initializeHasher(Comparator comparator) {
+    public boolean equalToReference(Comparable candidate) {
+        return this.comparator.compare(candidate, this.ref) == 0;
+    }
 
-		if(comparator instanceof Hasher) {
-			return (Hasher)comparator;
-		}
-		else {
-			return new DefaultHasher();
-		}
-	}
+    public int compareToReference(TypeComparator<Comparable> referencedComparator) {
+        Comparable otherRef = ((CustomFieldComparator) referencedComparator).ref;
 
-	public int hash(Comparable record) {
-		return this.hasher.hashCode(record);
-	}
+        int cmp = this.comparator.compare(otherRef, this.ref);
+        return this.ascending ? cmp : -cmp;
+    }
 
-	public void setReference(Comparable toCompare) {
-		if(toCompare == null) {
-			this.ref = null;
-		}
-		else {
-			this.ref = toCompare;
-		}
-	}
+    public int compare(Comparable first, Comparable second) {
+        int cmp;
 
-	public boolean equalToReference(Comparable candidate) {
-		return this.comparator.compare(candidate, this.ref) == 0;
-	}
+        cmp = this.comparator.compare(first, second);
+        return this.ascending ? cmp : -cmp;
+    }
 
-	public int compareToReference(TypeComparator<Comparable> referencedComparator) {
-		Comparable otherRef = ((CustomFieldComparator)referencedComparator).ref;
+    public int compareSerialized(DataInputView firstSource, DataInputView secondSource)
+            throws IOException {
+        if (this.ref == null) {
+            this.ref = this.serializer.createInstance();
+        }
 
-		int cmp = this.comparator.compare(otherRef, this.ref);
-		return this.ascending?cmp:-cmp;
-	}
+        if (this.tmpRef == null) {
+            this.tmpRef = this.serializer.createInstance();
+        }
 
-	public int compare(Comparable first, Comparable second) {
-		int cmp;
+        this.ref = this.serializer.deserialize(this.ref, firstSource);
+        this.tmpRef = this.serializer.deserialize(this.tmpRef, secondSource);
+        int cmp = this.comparator.compare(this.ref, this.tmpRef);
+        return this.ascending ? cmp : -cmp;
+    }
 
-		cmp = this.comparator.compare(first, second);
-		return this.ascending?cmp:-cmp;
-	}
+    public TypeComparator<Comparable> duplicate() {
+        return new CustomFieldComparator(this);
+    }
 
-	public int compareSerialized(DataInputView firstSource, DataInputView secondSource) throws IOException {
-		if(this.ref == null) {
-			this.ref = this.serializer.createInstance();
-		}
+    public int extractKeys(Object record, Object[] target, int index) {
+        target[index] = record;
+        return 1;
+    }
 
-		if(this.tmpRef == null) {
-			this.tmpRef = this.serializer.createInstance();
-		}
+    public TypeComparator[] getFlatComparators() {
+        return this.cArray;
+    }
 
-		this.ref = this.serializer.deserialize(this.ref, firstSource);
-		this.tmpRef = this.serializer.deserialize(this.tmpRef, secondSource);
-		int cmp = this.comparator.compare(this.ref, this.tmpRef);
-		return this.ascending?cmp:-cmp;
-	}
+    // Normalized keys not supported for custom comparators
 
-	public TypeComparator<Comparable> duplicate() {
-		return new CustomFieldComparator(this);
-	}
+    public boolean supportsNormalizedKey() {
+        return false;
+    }
 
-	public int extractKeys(Object record, Object[] target, int index) {
-		target[index] = record;
-		return 1;
-	}
+    public int getNormalizeKeyLen() {
+        return -1;
+    }
 
-	public TypeComparator[] getFlatComparators() {
-		return this.cArray;
-	}
+    public boolean isNormalizedKeyPrefixOnly(int keyBytes) {
+        throw new UnsupportedOperationException("Normalized keys not supported.");
+    }
 
-	// Normalized keys not supported for custom comparators
+    public void putNormalizedKey(Comparable record, MemorySegment target, int offset,
+            int numBytes) {
+        throw new UnsupportedOperationException("Normalized keys not supported.");
+    }
 
-	public boolean supportsNormalizedKey() {
-		return false;
-	}
+    public boolean invertNormalizedKey() {
+        throw new UnsupportedOperationException("Normalized keys not supported.");
+    }
 
-	public int getNormalizeKeyLen() {
-		return -1;
-	}
+    public boolean supportsSerializationWithKeyNormalization() {
+        return false;
+    }
 
-	public boolean isNormalizedKeyPrefixOnly(int keyBytes) {
-		throw new UnsupportedOperationException("Normalized keys not supported.");
-	}
+    public void writeWithKeyNormalization(Comparable record, DataOutputView target)
+            throws IOException {
+        throw new UnsupportedOperationException("Normalized keys not supported.");
+    }
 
-	public void putNormalizedKey(Comparable record, MemorySegment target, int offset, int numBytes) {
-		throw new UnsupportedOperationException("Normalized keys not supported.");
-	}
+    public Comparable readWithKeyDenormalization(Comparable reuse, DataInputView source)
+            throws IOException {
+        throw new UnsupportedOperationException("Normalized keys not supported.");
+    }
 
-	public boolean invertNormalizedKey() {
-		throw new UnsupportedOperationException("Normalized keys not supported.");
-	}
+    private static class DefaultHasher implements Hasher, Serializable {
 
-	public boolean supportsSerializationWithKeyNormalization() {
-		return false;
-	}
+        /**
+         *
+         */
+        private static final long serialVersionUID = 6267614178539933354L;
 
-	public void writeWithKeyNormalization(Comparable record, DataOutputView target) throws IOException {
-		throw new UnsupportedOperationException("Normalized keys not supported.");
-	}
-
-	public Comparable readWithKeyDenormalization(Comparable reuse, DataInputView source) throws IOException {
-		throw new UnsupportedOperationException("Normalized keys not supported.");
-	}
-
-	private static class DefaultHasher implements Hasher, Serializable {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 6267614178539933354L;
-
-		@Override
-		public int hashCode(Object value) {
-			if(value == null) {
-				return 1;
-			}
-			else {
-				return value.hashCode();
-			}
-		}
-	}
+        @Override
+        public int hashCode(Object value) {
+            if (value == null) {
+                return 1;
+            } else {
+                return value.hashCode();
+            }
+        }
+    }
 
 }

@@ -59,9 +59,9 @@ public class SimpleCascadingExecutor {
         this.yarnConfiguration = yarnConfiguration;
     }
 
-    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
-            String delimiter, String qualifier, String charset, boolean treatEqualQuoteSpecial)
-            throws IOException {
+    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath,
+            String avroDirPath, String delimiter, String qualifier, String charset,
+            boolean treatEqualQuoteSpecial) throws IOException {
         delimiter = delimiter == null ? CSV_DELIMITER : delimiter;
         log.info(String.format("Delimiter: %s, Qualifier: %s", delimiter, qualifier));
 
@@ -69,8 +69,8 @@ public class SimpleCascadingExecutor {
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
         DelimitedParser delimitedParser = (treatEqualQuoteSpecial && qualifier != null)
-                ? new CustomDelimitedParserSpecialEqualQuote(fieldMapping, delimiter, qualifier, false, true,
-                        fieldTypeResolver)
+                ? new CustomDelimitedParserSpecialEqualQuote(fieldMapping, delimiter, qualifier,
+                        false, true, fieldTypeResolver)
                 : new CustomDelimitedParser(fieldMapping, delimiter, qualifier, false, true,
                         fieldTypeResolver);
         TextDelimited textDelimited = charset == null ? new TextDelimited(true, delimitedParser)
@@ -81,8 +81,8 @@ public class SimpleCascadingExecutor {
 
         Pipe csvToAvroPipe = new Pipe(CSV_TO_AVRO_PIPE);
 
-        FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE).addSource(csvToAvroPipe, csvTap)
-                .addTailSink(csvToAvroPipe, avroTap);
+        FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE)
+                .addSource(csvToAvroPipe, csvTap).addTailSink(csvToAvroPipe, avroTap);
 
         String appJarPath = "";
         try {
@@ -109,9 +109,9 @@ public class SimpleCascadingExecutor {
             log.info("Set application jar path to " + appJarPath);
             AppProps.setApplicationJarPath(properties, appJarPath);
         }
-        String translatedQueue = LedpQueueAssigner
-                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(),
-                        emrEnvService.getYarnQueueScheme());
+        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(
+                LedpQueueAssigner.getPropDataQueueNameForSubmission(),
+                emrEnvService.getYarnQueueScheme());
         ExecutionEngine engine = ExecutionEngine.get(ENGINE);
         DataFlowContext dataFlowCtx = new DataFlowContext();
         dataFlowCtx.setProperty(DataFlowProperty.QUEUE, translatedQueue);

@@ -14,7 +14,6 @@ public class SorterParameters extends TransformationFlowParameters {
     @JsonProperty("partition_field")
     private String partitionField;
 
-
     public String getSortingField() {
         return sortingField;
     }

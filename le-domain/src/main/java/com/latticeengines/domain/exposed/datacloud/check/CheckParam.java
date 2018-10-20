@@ -14,8 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = IncompleteCoverageForColChkParam.class, name = "IncompleteCoverageForCol"),
         @JsonSubTypes.Type(value = OutOfCoverageForRowChkParam.class, name = "OutOfCoverageValForRow"),
         @JsonSubTypes.Type(value = ExceedDomDiffBetwenVersionChkParam.class, name = "ExceededVersionDiffForDomOnly"),
-        @JsonSubTypes.Type(value = ExceedCntDiffBetwenVersionChkParam.class, name = "ExceededVersionDiffForNumOfBusinesses")
-})
+        @JsonSubTypes.Type(value = ExceedCntDiffBetwenVersionChkParam.class, name = "ExceededVersionDiffForNumOfBusinesses") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class CheckParam {
 

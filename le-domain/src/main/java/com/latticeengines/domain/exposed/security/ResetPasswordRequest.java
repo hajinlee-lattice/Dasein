@@ -12,7 +12,8 @@ public class ResetPasswordRequest {
     private String hostPort;
     private LatticeProduct product;
 
-    public ResetPasswordRequest() { }
+    public ResetPasswordRequest() {
+    }
 
     @JsonProperty("Username")
     public String getUsername() {

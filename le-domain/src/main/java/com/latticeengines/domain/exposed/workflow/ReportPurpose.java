@@ -14,9 +14,11 @@ public enum ReportPurpose {
     REVENUE_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessRevenueRange"), //
     EMPLOYEE_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessEmployeesRange"), //
     INDUSTRY_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry_Probability"), //
-    SUBINDUSTRY_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry2_Probability"), //
+    SUBINDUSTRY_LIFT_ATTR_LEVEL_SUMMARY(
+            "CreateAttributeLevelSummary_BusinessIndustry2_Probability"), //
     REVENUE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessRevenueRange_Probability"), //
-    EMPLOYEE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessEmployeesRange_Probability"), //
+    EMPLOYEE_LIFT_ATTR_LEVEL_SUMMARY(
+            "CreateAttributeLevelSummary_BusinessEmployeesRange_Probability"), //
 
     /**
      * Lead Prioritization
@@ -25,7 +27,7 @@ public enum ReportPurpose {
 
     /**
      * CDL
-     * 
+     *
      */
     CONSOLIDATE_RECORDS_SUMMARY("ConsolidateRecordsSummary"), //
     PROCESS_ANALYZE_RECORDS_SUMMARY("ProcessAnalyzeRecordsSummary"), //
@@ -40,8 +42,6 @@ public enum ReportPurpose {
     ENTITIES_SUMMARY("EntitiesSummary"), //
     SYSTEM_ACTIONS("SystemActions"); //
 
-    private String key;
-
     private static Map<String, ReportPurpose> map = new HashMap<>();
 
     static {
@@ -50,16 +50,18 @@ public enum ReportPurpose {
         }
     }
 
+    private String key;
+
     ReportPurpose(String key) {
         this.key = key;
     }
 
-    public String getKey() {
-        return key;
-    }
-
     public static ReportPurpose getReportPurpose(String key) {
         return map.get(key);
+    }
+
+    public String getKey() {
+        return key;
     }
 
 }

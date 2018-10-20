@@ -29,7 +29,7 @@ public class CommandIds implements HasPid {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreateTime", nullable = false)
     private Date createTime;
-    
+
     @Column(name = "CreatedBy", nullable = false)
     private String createdBy;
 
@@ -87,9 +87,8 @@ public class CommandIds implements HasPid {
 
     @Override
     public String toString() {
-        return "CommandId [id=" + id + ", createTime=" + createTime
-                + ", createdBy=" + createdBy + "]";
+        return "CommandId [id=" + id + ", createTime=" + createTime + ", createdBy=" + createdBy
+                + "]";
     }
-    
-    
+
 }

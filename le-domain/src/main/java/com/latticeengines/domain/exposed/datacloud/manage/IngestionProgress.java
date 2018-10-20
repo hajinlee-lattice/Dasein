@@ -247,13 +247,13 @@ public class IngestionProgress implements Progress, Serializable {
 
     @Override
     @JsonIgnore
-    public void setNumRetries(int numRetries) {
+    public int getNumRetries() {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 
     @Override
     @JsonIgnore
-    public int getNumRetries() {
+    public void setNumRetries(int numRetries) {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 
@@ -265,13 +265,13 @@ public class IngestionProgress implements Progress, Serializable {
 
     @Override
     @JsonIgnore
-    public void setStatusBeforeFailed(ProgressStatus status) {
+    public ProgressStatus getStatusBeforeFailed() {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 
     @Override
     @JsonIgnore
-    public ProgressStatus getStatusBeforeFailed() {
+    public void setStatusBeforeFailed(ProgressStatus status) {
         throw new UnsupportedOperationException("Deprecated operation.");
     }
 

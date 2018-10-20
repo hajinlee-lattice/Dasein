@@ -19,7 +19,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_PROPDATA", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_PROPDATA", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PropData implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
@@ -52,7 +53,7 @@ public class PropData implements HasName, HasPid, Fact, Dimension, SupportsLates
     @JsonIgnore
     @Column(name = "VERSION", nullable = true)
     private Integer version;
-    
+
     @Override
     @MetricTag(tag = "PropDataConfigName")
     public String getName() {
@@ -88,14 +89,14 @@ public class PropData implements HasName, HasPid, Fact, Dimension, SupportsLates
         return excludePropDataColumns;
     }
 
+    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
+        this.excludePropDataColumns = excludePropDataColumns;
+    }
+
     @MetricTag(tag = "ExcludePropDataColumns")
     @JsonIgnore
     public String isExcludePropDataColumnsStrValue() {
         return "" + excludePropDataColumns;
-    }
-
-    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
-        this.excludePropDataColumns = excludePropDataColumns;
     }
 
     @MetricTag(tag = "PredefinedSelectionName")
@@ -121,7 +122,7 @@ public class PropData implements HasName, HasPid, Fact, Dimension, SupportsLates
     public String isExcludePublicDomainsStrValue() {
         return "" + excludePublicDomains;
     }
-    
+
     @Override
     public Integer getVersion() {
         return version;

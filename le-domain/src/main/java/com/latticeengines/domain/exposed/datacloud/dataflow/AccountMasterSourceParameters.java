@@ -9,11 +9,9 @@ import org.slf4j.LoggerFactory;
 
 public class AccountMasterSourceParameters {
 
-    private static final Logger log = LoggerFactory.getLogger(AccountMasterSourceParameters.class);
-
     public static final int DomainBased = 1;
     public static final int DunsBased = 2;
-
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterSourceParameters.class);
     private String sourceName;
     private int sourceType = 0;
 
@@ -23,17 +21,29 @@ public class AccountMasterSourceParameters {
     private List<String> sourceAttrs = new ArrayList<String>();
     private List<String> outputAttrs = new ArrayList<String>();
 
-    public String getSourceName() { return sourceName; }
+    public String getSourceName() {
+        return sourceName;
+    }
 
-    public void setSourceName(String sourceName) { this.sourceName = sourceName; }
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
 
-    public int getSourceType() { return sourceType; }
+    public int getSourceType() {
+        return sourceType;
+    }
 
-    public void setSourceType(int sourceType) { this.sourceType = sourceType; }
+    public void setSourceType(int sourceType) {
+        this.sourceType = sourceType;
+    }
 
-    public List<String> getSourceAttrs() { return sourceAttrs; }
+    public List<String> getSourceAttrs() {
+        return sourceAttrs;
+    }
 
-    public List<String> getOutputAttrs() { return outputAttrs; }
+    public List<String> getOutputAttrs() {
+        return outputAttrs;
+    }
 
     public void addAttribute(String sourceAttr, String outputAttr) {
         if ((joinKey != null) && joinKey.equals(sourceAttr)) {
@@ -46,20 +56,20 @@ public class AccountMasterSourceParameters {
         this.outputAttrs.add(outputAttr);
     }
 
-    public void setJoinKey(String joinKey) {
-        this.joinKey = joinKey;
-    }
-
-    public void setSecondKey(String secondKey) {
-        this.secondKey = secondKey;
-    }
-
     public String getJoinKey() {
         return joinKey;
     }
 
+    public void setJoinKey(String joinKey) {
+        this.joinKey = joinKey;
+    }
+
     public String getSecondKey() {
         return secondKey;
+    }
+
+    public void setSecondKey(String secondKey) {
+        this.secondKey = secondKey;
     }
 
     public void filterAttrs(List<String> fieldNames) {

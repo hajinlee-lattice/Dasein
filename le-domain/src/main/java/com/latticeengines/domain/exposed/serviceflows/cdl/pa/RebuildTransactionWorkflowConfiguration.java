@@ -27,7 +27,8 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            processTransactionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processTransactionStepConfiguration
+                    .setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -68,8 +69,8 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         }
 
         public RebuildTransactionWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("rebuildTransactionWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("rebuildTransactionWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processTransactionStepConfiguration);
             awsPythonDataConfiguration.setSubmission(true);
             configuration.add(awsPythonDataConfiguration);

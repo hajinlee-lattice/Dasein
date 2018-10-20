@@ -101,7 +101,8 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
                 List<TransformDefinition> stdTransformDefns) {
-            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
+            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName,
+                    transformationGroup.getName());
             return this;
         }
 
@@ -125,7 +126,8 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
         }
 
         public Builder excludePublicDomain(boolean excludePublicDomains) {
-            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
+            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
+                    excludePublicDomains);
             return this;
         }
 
@@ -204,8 +206,8 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 
-            configuration.setContainerConfiguration("cdlModelWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("cdlModelWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(model);
             configuration.add(export);
             return configuration;

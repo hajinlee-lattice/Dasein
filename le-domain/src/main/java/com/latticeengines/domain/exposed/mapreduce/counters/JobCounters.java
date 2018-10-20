@@ -7,12 +7,12 @@ public class JobCounters {
     private Counters counters;
 
     @JsonProperty("jobCounters")
-    public Counters getCounters(){
+    public Counters getCounters() {
         return counters;
     }
 
     @JsonProperty("jobCounters")
-    public void setCounters(Counters counters){
+    public void setCounters(Counters counters) {
         this.counters = counters;
     }
 }

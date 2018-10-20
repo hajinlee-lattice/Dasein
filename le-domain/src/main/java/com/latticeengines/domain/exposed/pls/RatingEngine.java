@@ -69,30 +69,28 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
-
-    private static final Logger log = LoggerFactory.getLogger(RatingEngine.class);
+public class RatingEngine
+        implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
 
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
     public static final String DEFAULT_NAME_PATTERN = "New Model - %s";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    private static final String RULES_BASED_NAME_PATTERN = "Rules %s - %s";
-    private static final String CROSS_SELL_NAME_PATTERN = "%s Purchase - %s";
-    private static final String CUSTOM_EVENT_NAME_PATTERN = "Custom Event - %s";
-
     public static final Map<ScoreType, String> SCORE_ATTR_SUFFIX = ImmutableMap.of( //
             ScoreType.Probability, "prob", //
             ScoreType.ExpectedRevenue, "ev", //
             ScoreType.Score, "score" //
     );
-
-    public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap.of( //
-            ScoreType.Probability, Double.class, //
-            ScoreType.ExpectedRevenue, Double.class, //
-            ScoreType.Score, Integer.class //
+    public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap
+            .of( //
+                    ScoreType.Probability, Double.class, //
+                    ScoreType.ExpectedRevenue, Double.class, //
+                    ScoreType.Score, Integer.class //
     );
-
+    private static final Logger log = LoggerFactory.getLogger(RatingEngine.class);
+    private static final String RULES_BASED_NAME_PATTERN = "Rules %s - %s";
+    private static final String CROSS_SELL_NAME_PATTERN = "%s Purchase - %s";
+    private static final String CUSTOM_EVENT_NAME_PATTERN = "Custom Event - %s";
     private Long pid;
 
     private String id;
@@ -137,6 +135,33 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private RatingModel publishedIteration;
 
+    public static String generateIdStr() {
+        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
+    }
+
+    public static String toRatingAttrName(String engineId) {
+        if (engineId.startsWith(RATING_ENGINE_PREFIX)) {
+            return engineId;
+        } else {
+            return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, engineId);
+        }
+    }
+
+    public static String toRatingAttrName(String engineId, ScoreType scoreType) {
+        String attr = toRatingAttrName(engineId);
+        if (!ScoreType.Rating.equals(scoreType)) {
+            attr += "_" + SCORE_ATTR_SUFFIX.get(scoreType);
+        }
+        return attr;
+    }
+
+    public static String toEngineId(String attrName) {
+        String uuid = attrName.replace(RATING_ENGINE_PREFIX + "_", "");
+        uuid = uuid.substring(0, 22);
+        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
+    }
+
     @Override
     @JsonProperty("pid")
     @Id
@@ -166,11 +191,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    @Override
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -178,8 +198,9 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.tenant;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     @JsonProperty("displayName")
@@ -188,10 +209,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.displayName;
     }
 
-    @Override
-    @JsonProperty("created")
-    public void setCreated(Date time) {
-        this.created = time;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override
@@ -203,9 +222,9 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     @Override
-    @JsonProperty("updated")
-    public void setUpdated(Date time) {
-        this.updated = time;
+    @JsonProperty("created")
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     @Override
@@ -216,9 +235,10 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.updated;
     }
 
-    @JsonProperty("note")
-    public void setNote(String note) {
-        this.note = note;
+    @Override
+    @JsonProperty("updated")
+    public void setUpdated(Date time) {
+        this.updated = time;
     }
 
     @JsonProperty("note")
@@ -227,9 +247,9 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.note;
     }
 
-    @JsonProperty("type")
-    public void setType(RatingEngineType type) {
-        this.type = type;
+    @JsonProperty("note")
+    public void setNote(String note) {
+        this.note = note;
     }
 
     @JsonProperty("type")
@@ -239,9 +259,9 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.type;
     }
 
-    @JsonProperty("status")
-    public void setStatus(RatingEngineStatus status) {
-        this.status = status;
+    @JsonProperty("type")
+    public void setType(RatingEngineType type) {
+        this.type = type;
     }
 
     @JsonProperty("status")
@@ -249,6 +269,11 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @Enumerated(EnumType.STRING)
     public RatingEngineStatus getStatus() {
         return this.status;
+    }
+
+    @JsonProperty("status")
+    public void setStatus(RatingEngineStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -270,11 +295,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     @JsonProperty("segment")
-    public void setSegment(MetadataSegment segment) {
-        this.segment = segment;
-    }
-
-    @JsonProperty("segment")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_SEGMENT_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -282,15 +302,20 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.segment;
     }
 
-    @JsonProperty("createdBy")
-    public void setCreatedBy(String user) {
-        this.createdBy = user;
+    @JsonProperty("segment")
+    public void setSegment(MetadataSegment segment) {
+        this.segment = segment;
     }
 
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     public String getCreatedBy() {
         return this.createdBy;
+    }
+
+    @JsonProperty("createdBy")
+    public void setCreatedBy(String user) {
+        this.createdBy = user;
     }
 
     @JsonProperty("lastRefreshedDate")
@@ -451,7 +476,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     public void setAdvancedRatingConfigStr(String advancedRatingConfigStr) {
         AdvancedRatingConfig advancedRatingConfig = null;
         if (advancedRatingConfigStr != null) {
-            advancedRatingConfig = JsonUtils.deserialize(advancedRatingConfigStr, AdvancedRatingConfig.class);
+            advancedRatingConfig = JsonUtils.deserialize(advancedRatingConfigStr,
+                    AdvancedRatingConfig.class);
         }
         this.advancedRatingConfig = advancedRatingConfig;
     }
@@ -464,33 +490,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public void setAdvancedRatingConfig(AdvancedRatingConfig advancedRatingConfig) {
         this.advancedRatingConfig = advancedRatingConfig;
-    }
-
-    public static String generateIdStr() {
-        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
-        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
-    }
-
-    public static String toRatingAttrName(String engineId) {
-        if (engineId.startsWith(RATING_ENGINE_PREFIX)) {
-            return engineId;
-        } else {
-            return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, engineId);
-        }
-    }
-
-    public static String toRatingAttrName(String engineId, ScoreType scoreType) {
-        String attr = toRatingAttrName(engineId);
-        if (!ScoreType.Rating.equals(scoreType)) {
-            attr += "_" + SCORE_ATTR_SUFFIX.get(scoreType);
-        }
-        return attr;
-    }
-
-    public static String toEngineId(String attrName) {
-        String uuid = attrName.replace(RATING_ENGINE_PREFIX + "_", "");
-        uuid = uuid.substring(0, 22);
-        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
     }
 
     @JsonProperty("bucketMetadata")
@@ -514,26 +513,28 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         String defaultName = String.format(DEFAULT_NAME_PATTERN, datePart);
         try {
             switch (getType()) {
-            case RULE_BASED:
-                defaultName = String.format(RULES_BASED_NAME_PATTERN, getSegment().getDisplayName(), datePart);
-                break;
-            case CUSTOM_EVENT:
-                defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
-                break;
-            case CROSS_SELL:
-                if (getAdvancedRatingConfig() != null) {
-                    defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
-                            ((CrossSellRatingConfig) getAdvancedRatingConfig())
-                                    .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE ? "First"
-                                            : "Repeat",
-                            datePart);
-                }
-                break;
-            case PROSPECTING:
-            default:
+                case RULE_BASED:
+                    defaultName = String.format(RULES_BASED_NAME_PATTERN,
+                            getSegment().getDisplayName(), datePart);
+                    break;
+                case CUSTOM_EVENT:
+                    defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
+                    break;
+                case CROSS_SELL:
+                    if (getAdvancedRatingConfig() != null) {
+                        defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
+                                ((CrossSellRatingConfig) getAdvancedRatingConfig())
+                                        .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE
+                                                ? "First" : "Repeat",
+                                datePart);
+                    }
+                    break;
+                case PROSPECTING:
+                default:
             }
         } catch (Exception e) {
-            log.error(new LedpException(LedpCode.LEDP_40021, e, new String[] { defaultName }).getMessage(), e);
+            log.error(new LedpException(LedpCode.LEDP_40021, e, new String[] { defaultName })
+                    .getMessage(), e);
         }
         return defaultName;
     }

@@ -11,11 +11,15 @@ public enum ScoreResultField {
     Rating(Type.STRING.name(), InterfaceName.Rating.name(), String.class.getSimpleName()), //
     ModelId(Type.STRING.name(), "Model_GUID", String.class.getSimpleName()), //
     Probability(Type.DOUBLE.name(), InterfaceName.Probability.name(), Double.class.getSimpleName()), //
-    NormalizedScore(Type.DOUBLE.name(), InterfaceName.NormalizedScore.name(), Double.class.getSimpleName()), //
-    PredictedRevenue(Type.DOUBLE.name(), InterfaceName.PredictedRevenue.name(), Double.class.getSimpleName()), //
-    ExpectedRevenue(Type.DOUBLE.name(), InterfaceName.ExpectedRevenue.name(), Double.class.getSimpleName()),
-    PredictedRevenuePercentile(Type.INT.name(), "PredictedRevenuePercentile", Integer.class.getSimpleName()), //
-    ExpectedRevenuePercentile(Type.INT.name(), "ExpectedRevenuePercentile", Integer.class.getSimpleName()); //
+    NormalizedScore(Type.DOUBLE.name(), InterfaceName.NormalizedScore.name(),
+            Double.class.getSimpleName()), //
+    PredictedRevenue(Type.DOUBLE.name(), InterfaceName.PredictedRevenue.name(),
+            Double.class.getSimpleName()), //
+    ExpectedRevenue(Type.DOUBLE.name(), InterfaceName.ExpectedRevenue.name(),
+            Double.class.getSimpleName()), PredictedRevenuePercentile(Type.INT.name(),
+                    "PredictedRevenuePercentile", Integer.class.getSimpleName()), //
+    ExpectedRevenuePercentile(Type.INT.name(), "ExpectedRevenuePercentile",
+            Integer.class.getSimpleName()); //
 
     public String physicalDataType;
 

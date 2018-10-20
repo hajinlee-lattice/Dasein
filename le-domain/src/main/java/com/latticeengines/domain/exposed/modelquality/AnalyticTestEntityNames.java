@@ -44,12 +44,12 @@ public class AnalyticTestEntityNames {
         }
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public AnalyticTestType getAnalyticTestType() {
@@ -60,27 +60,27 @@ public class AnalyticTestEntityNames {
         this.analyticTestType = analyticTestType;
     }
 
-    public void setAnalyticTestTag(String analyticTestTag) {
-        this.analyticTestTag = analyticTestTag;
-    }
-
     public String getAnalyticTestTag() {
         return analyticTestTag;
     }
 
-    public void setAnalyticPipelineNames(List<String> analyticPipelineNames) {
-        this.analyticPipelineNames = analyticPipelineNames;
+    public void setAnalyticTestTag(String analyticTestTag) {
+        this.analyticTestTag = analyticTestTag;
     }
 
     public List<String> getAnalyticPipelineNames() {
         return analyticPipelineNames;
     }
 
-    public void setDataSetNames(List<String> dataSetNames) {
-        this.dataSetNames = dataSetNames;
+    public void setAnalyticPipelineNames(List<String> analyticPipelineNames) {
+        this.analyticPipelineNames = analyticPipelineNames;
     }
 
     public List<String> getDataSetNames() {
         return dataSetNames;
+    }
+
+    public void setDataSetNames(List<String> dataSetNames) {
+        this.dataSetNames = dataSetNames;
     }
 }

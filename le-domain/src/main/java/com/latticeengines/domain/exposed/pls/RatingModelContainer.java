@@ -23,7 +23,7 @@ public class RatingModelContainer {
 
     // for jackson
     @SuppressWarnings("unused")
-	private RatingModelContainer() {
+    private RatingModelContainer() {
     }
 
     public RatingModelContainer(RatingModel ratingModel) {

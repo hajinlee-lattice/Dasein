@@ -28,7 +28,8 @@ public class ActivityMetricsUtils {
 
     private final static String SEPARATOR = "__";
     private final static String SUB_SEPARATOR = "_";
-    private final static String HEADER = "AM_"; // Avro field name only allows to start with letter or "_"
+    private final static String HEADER = "AM_"; // Avro field name only allows
+                                                // to start with letter or "_"
 
     private static Map<InterfaceName, String> metricsDisplayNames = new HashMap<>();
     private static Map<InterfaceName, String> metricsAbbr = new HashMap<>();
@@ -73,8 +74,8 @@ public class ActivityMetricsUtils {
                 "This curated attribute is calculated by aggregating average spend for a given product of a given account over a specified time window.");
         metricsDescription.put(InterfaceName.TotalSpendOvertime,
                 "This curated attribute is calculated by aggregating total spend for a given product of a given account over a specified time window.");
-        metricsDescription.put(InterfaceName.HasPurchased, "Indicates if this product ever was purchased by this account.");
-
+        metricsDescription.put(InterfaceName.HasPurchased,
+                "Indicates if this product ever was purchased by this account.");
 
         metricsAbbrRev.put("MG", InterfaceName.Margin);
         metricsAbbrRev.put("SC", InterfaceName.SpendChange);
@@ -100,12 +101,18 @@ public class ActivityMetricsUtils {
         nullImputation.put(InterfaceName.TotalSpendOvertime, NullMetricsImputation.ZERO);
         nullImputation.put(InterfaceName.HasPurchased, NullMetricsImputation.FALSE);
 
-        comparisonType.put(InterfaceName.Margin, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
-        comparisonType.put(InterfaceName.SpendChange, new HashSet<>(Arrays.asList(ComparisonType.WITHIN, ComparisonType.BETWEEN)));
-        comparisonType.put(InterfaceName.ShareOfWallet, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
-        comparisonType.put(InterfaceName.AvgSpendOvertime, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
-        comparisonType.put(InterfaceName.TotalSpendOvertime, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
-        comparisonType.put(InterfaceName.HasPurchased, new HashSet<>(Arrays.asList(ComparisonType.EVER)));
+        comparisonType.put(InterfaceName.Margin,
+                new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+        comparisonType.put(InterfaceName.SpendChange,
+                new HashSet<>(Arrays.asList(ComparisonType.WITHIN, ComparisonType.BETWEEN)));
+        comparisonType.put(InterfaceName.ShareOfWallet,
+                new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+        comparisonType.put(InterfaceName.AvgSpendOvertime,
+                new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+        comparisonType.put(InterfaceName.TotalSpendOvertime,
+                new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+        comparisonType.put(InterfaceName.HasPurchased,
+                new HashSet<>(Arrays.asList(ComparisonType.EVER)));
 
         maxCnt.put(InterfaceName.Margin, 1);
         maxCnt.put(InterfaceName.SpendChange, 1);
@@ -115,16 +122,17 @@ public class ActivityMetricsUtils {
         maxCnt.put(InterfaceName.HasPurchased, 1);
     }
 
-    private ActivityMetricsUtils(){}
+    private ActivityMetricsUtils() {
+    }
 
     public static boolean isHasPurchasedAttr(String fullName) {
-        return fullName.startsWith(ActivityMetricsUtils.HEADER)
-                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
+        return fullName.startsWith(ActivityMetricsUtils.HEADER) && fullName.endsWith(
+                ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
     }
 
     public static boolean isSpendChangeAttr(String fullName) {
-        return fullName.startsWith(ActivityMetricsUtils.HEADER)
-                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getSpendChangeAttr());
+        return fullName.startsWith(ActivityMetricsUtils.HEADER) && fullName.endsWith(
+                ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getSpendChangeAttr());
     }
 
     public static String getNameWithPeriod(ActivityMetrics activityMetrics) {
@@ -132,7 +140,8 @@ public class ActivityMetricsUtils {
         activityMetrics.getPeriodsConfig().forEach(config -> {
             periodNames.add(getPeriodRangeName(config));
         });
-        return String.join(SEPARATOR, periodNames) + SEPARATOR + metricsAbbr.get(activityMetrics.getMetrics());
+        return String.join(SEPARATOR, periodNames) + SEPARATOR
+                + metricsAbbr.get(activityMetrics.getMetrics());
     }
 
     public static String getFullName(ActivityMetrics activityMetrics, String prefix) {
@@ -164,7 +173,8 @@ public class ActivityMetricsUtils {
             return null;
         }
         fullName = fullName.substring(HEADER.length()); // remove header
-        return metricsAbbrRev.get(fullName.substring(fullName.lastIndexOf(SEPARATOR) + SEPARATOR.length()));
+        return metricsAbbrRev
+                .get(fullName.substring(fullName.lastIndexOf(SEPARATOR) + SEPARATOR.length()));
     }
 
     public static NullMetricsImputation getNullImputation(String fullName) {
@@ -176,7 +186,8 @@ public class ActivityMetricsUtils {
             return null;
         }
         fullName = fullName.substring(HEADER.length()); // remove header
-        return fullName.substring(fullName.indexOf(SEPARATOR) + SEPARATOR.length(), fullName.lastIndexOf(SEPARATOR));
+        return fullName.substring(fullName.indexOf(SEPARATOR) + SEPARATOR.length(),
+                fullName.lastIndexOf(SEPARATOR));
     }
 
     public static String getDescriptionFromFullName(String fullName) {
@@ -206,8 +217,8 @@ public class ActivityMetricsUtils {
     }
 
     // <DisplayName, SecondDisplayName>
-    public static Pair<String, String> getDisplayNamesFromFullName(String fullName, String evaluationDate,
-            List<PeriodStrategy> strategies) {
+    public static Pair<String, String> getDisplayNamesFromFullName(String fullName,
+            String evaluationDate, List<PeriodStrategy> strategies) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;
         }
@@ -215,7 +226,8 @@ public class ActivityMetricsUtils {
         String displayName = metricsDisplayNames.get(metrics);
         String period = getPeriodsFromFullName(fullName);
         displayName += periodStrToDisplayName(period, metrics);
-        String secDisplayName = periodStrToSecondDisplayName(period, metrics, evaluationDate, strategies);
+        String secDisplayName = periodStrToSecondDisplayName(period, metrics, evaluationDate,
+                strategies);
         return Pair.of(displayName, secDisplayName);
     }
 
@@ -227,8 +239,8 @@ public class ActivityMetricsUtils {
         return metricsAbbr.get(InterfaceName.SpendChange);
     }
 
-    private static String periodStrToSecondDisplayName(String period, InterfaceName metrics, String currentTxnDate,
-            List<PeriodStrategy> strategies) {
+    private static String periodStrToSecondDisplayName(String period, InterfaceName metrics,
+            String currentTxnDate, List<PeriodStrategy> strategies) {
         if (metrics == InterfaceName.HasPurchased || StringUtils.isBlank(currentTxnDate)
                 || CollectionUtils.isEmpty(strategies)) {
             return null;
@@ -243,10 +255,14 @@ public class ActivityMetricsUtils {
         }
 
         String[] strs = period.split(SUB_SEPARATOR);
-        TimeFilterTranslator timeFilterTranslator = new TimeFilterTranslator(strategies, currentTxnDate);
-        TimeFilter timeFilter = TimeFilter.within(Integer.valueOf(strs[1]), periodAbbrRev.get(strs[0]).name());
-        List<Object> translatedTxnDateRange = timeFilterTranslator.translate(timeFilter).getValues();
-        return "(" + translatedTxnDateRange.get(0).toString() + " to " + translatedTxnDateRange.get(1).toString() + ")";
+        TimeFilterTranslator timeFilterTranslator = new TimeFilterTranslator(strategies,
+                currentTxnDate);
+        TimeFilter timeFilter = TimeFilter.within(Integer.valueOf(strs[1]),
+                periodAbbrRev.get(strs[0]).name());
+        List<Object> translatedTxnDateRange = timeFilterTranslator.translate(timeFilter)
+                .getValues();
+        return "(" + translatedTxnDateRange.get(0).toString() + " to "
+                + translatedTxnDateRange.get(1).toString() + ")";
     }
 
     private static String periodStrToDisplayName(String period, InterfaceName metrics) {
@@ -266,7 +282,8 @@ public class ActivityMetricsUtils {
 
     private static String getDisplayNameForWithinComp(String period) {
         String[] strs = period.split(SUB_SEPARATOR);
-        return String.format(" in last %s %s%s", strs[1], periodAbbrRev.get(strs[0]).name().toLowerCase(),
+        return String.format(" in last %s %s%s", strs[1],
+                periodAbbrRev.get(strs[0]).name().toLowerCase(),
                 Integer.valueOf(strs[1]) > 1 ? "s" : "");
     }
 
@@ -300,48 +317,52 @@ public class ActivityMetricsUtils {
         }
         cnts.forEach((m, cnt) -> {
             if (cnt > maxCnt.get(m)) {
-                throw new LedpException(LedpCode.LEDP_40032, new String[] {
-                        String.format("Maximum for metrics %s is %d, but found %d", m, maxCnt.get(m), cnt) });
+                throw new LedpException(LedpCode.LEDP_40032,
+                        new String[] { String.format("Maximum for metrics %s is %d, but found %d",
+                                m, maxCnt.get(m), cnt) });
             }
         });
         if (metricsIds.size() != metrics.size()) {
-            throw new LedpException(LedpCode.LEDP_40032, new String[] { "Metrics cannot be duplicate" });
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { "Metrics cannot be duplicate" });
         }
         return true;
     }
 
     public static boolean isValidMetrics(ActivityMetrics metrics) {
         switch (metrics.getMetrics()) {
-        case Margin:
-        case ShareOfWallet:
-        case TotalSpendOvertime:
-        case AvgSpendOvertime:
-            isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 1);
-            isValidComparisonType(metrics.getMetrics(), metrics.getPeriodsConfig().get(0).getRelation());
-            isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(0));
-            break;
-        case SpendChange:
-            isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 2);
-            isValidComparisonTypes(metrics.getMetrics(), metrics.getPeriodsConfig());
-            isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(0));
-            isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(1));
-            break;
-        case HasPurchased:
-            isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 1);
-            isValidComparisonType(metrics.getMetrics(), metrics.getPeriodsConfig().get(0).getRelation());
-            break;
-        default:
-            throw new LedpException(LedpCode.LEDP_40032,
-                    new String[] { metrics.getMetrics() + " metrics is not supported" });
+            case Margin:
+            case ShareOfWallet:
+            case TotalSpendOvertime:
+            case AvgSpendOvertime:
+                isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 1);
+                isValidComparisonType(metrics.getMetrics(),
+                        metrics.getPeriodsConfig().get(0).getRelation());
+                isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(0));
+                break;
+            case SpendChange:
+                isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 2);
+                isValidComparisonTypes(metrics.getMetrics(), metrics.getPeriodsConfig());
+                isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(0));
+                isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(1));
+                break;
+            case HasPurchased:
+                isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 1);
+                isValidComparisonType(metrics.getMetrics(),
+                        metrics.getPeriodsConfig().get(0).getRelation());
+                break;
+            default:
+                throw new LedpException(LedpCode.LEDP_40032,
+                        new String[] { metrics.getMetrics() + " metrics is not supported" });
         }
         return true;
     }
 
-    private static boolean isValidPeriodConfig(InterfaceName metricsName, List<TimeFilter> timeFilters,
-            int expectedCnt) {
+    private static boolean isValidPeriodConfig(InterfaceName metricsName,
+            List<TimeFilter> timeFilters, int expectedCnt) {
         if (CollectionUtils.isEmpty(timeFilters) || timeFilters.size() != expectedCnt) {
-            throw new LedpException(LedpCode.LEDP_40032,
-                    new String[] { metricsName + " metrics should have " + expectedCnt + " period config" });
+            throw new LedpException(LedpCode.LEDP_40032, new String[] {
+                    metricsName + " metrics should have " + expectedCnt + " period config" });
         }
         Set<String> periods = new HashSet<>();
         for (TimeFilter timeFilter : timeFilters) {
@@ -364,18 +385,20 @@ public class ActivityMetricsUtils {
         expectedCnt.put(ComparisonType.BETWEEN, 2);
         if (CollectionUtils.isEmpty(timeFilter.getValues())
                 || timeFilter.getValues().size() != expectedCnt.get(timeFilter.getRelation())) {
-            throw new LedpException(LedpCode.LEDP_40032, new String[] { metricsName + " metrics should have "
-                    + expectedCnt.get(timeFilter.getRelation()) + " period values" });
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { metricsName + " metrics should have "
+                            + expectedCnt.get(timeFilter.getRelation()) + " period values" });
         }
         for (Object val : timeFilter.getValues()) {
             try {
                 if ((Integer) val <= 0) {
-                    throw new LedpException(LedpCode.LEDP_40032,
-                            new String[] { metricsName + " metrics should have positive period values" });
+                    throw new LedpException(LedpCode.LEDP_40032, new String[] {
+                            metricsName + " metrics should have positive period values" });
                 }
             } catch (Exception ex) {
-                throw new LedpException(LedpCode.LEDP_40032, new String[] {
-                        "Fail to parse period value " + String.valueOf(val) + " for metrics " + metricsName });
+                throw new LedpException(LedpCode.LEDP_40032,
+                        new String[] { "Fail to parse period value " + String.valueOf(val)
+                                + " for metrics " + metricsName });
             }
         }
         return true;
@@ -388,18 +411,21 @@ public class ActivityMetricsUtils {
                 expectedTypes.add(ct.name());
             });
             throw new LedpException(LedpCode.LEDP_40032,
-                    new String[] { String.format("%s metrics should have comparison type as %s but found %s",
+                    new String[] { String.format(
+                            "%s metrics should have comparison type as %s but found %s",
                             metricsName, String.join(",", expectedTypes), type) });
         }
         return true;
     }
 
-    private static boolean isValidComparisonTypes(InterfaceName metricsName, List<TimeFilter> timeFilters) {
+    private static boolean isValidComparisonTypes(InterfaceName metricsName,
+            List<TimeFilter> timeFilters) {
         Set<ComparisonType> types = new HashSet<>();
         timeFilters.forEach(pc -> {
             types.add(pc.getRelation());
         });
-        if (CollectionUtils.isEmpty(types) || comparisonType.get(metricsName).size() != types.size()) {
+        if (CollectionUtils.isEmpty(types)
+                || comparisonType.get(metricsName).size() != types.size()) {
             List<String> expectedTypes = new ArrayList<>();
             comparisonType.get(metricsName).forEach(ct -> {
                 expectedTypes.add(ct.name());
@@ -409,8 +435,10 @@ public class ActivityMetricsUtils {
                 actualTypes.add(t.name());
             });
             throw new LedpException(LedpCode.LEDP_40032,
-                    new String[] { String.format("%s metrics should have comparison type as %s but found %s",
-                            metricsName, String.join(",", expectedTypes), String.join(",", actualTypes)) });
+                    new String[] { String.format(
+                            "%s metrics should have comparison type as %s but found %s",
+                            metricsName, String.join(",", expectedTypes),
+                            String.join(",", actualTypes)) });
         }
         return true;
     }
@@ -436,29 +464,34 @@ public class ActivityMetricsUtils {
     public static List<ActivityMetrics> fakePurchaseMetrics(Tenant tenant) {
         ActivityMetrics margin = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         margin.setMetrics(InterfaceName.Margin);
-        margin.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+        margin.setPeriodsConfig(
+                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
 
         ActivityMetrics shareOfWallet = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         shareOfWallet.setMetrics(InterfaceName.ShareOfWallet);
-        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+        shareOfWallet.setPeriodsConfig(
+                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
 
         ActivityMetrics spendChange = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         spendChange.setMetrics(InterfaceName.SpendChange);
-        spendChange.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name()),
-                TimeFilter.between(2, 3, PeriodStrategy.Template.Quarter.name())));
+        spendChange.setPeriodsConfig(
+                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name()),
+                        TimeFilter.between(2, 3, PeriodStrategy.Template.Quarter.name())));
 
         ActivityMetrics avgSpendOvertime = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         avgSpendOvertime.setMetrics(InterfaceName.AvgSpendOvertime);
-        avgSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
+        avgSpendOvertime.setPeriodsConfig(
+                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
 
         return Arrays.asList(margin, shareOfWallet, spendChange, avgSpendOvertime);
     }
 
     public static List<ActivityMetrics> fakeUpdatedPurchaseMetrics(Tenant tenant) {
-        ActivityMetrics totalSpendOvertime = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
+        ActivityMetrics totalSpendOvertime = createFakedMetrics(tenant,
+                ActivityType.PurchaseHistory);
         totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
-        totalSpendOvertime
-                .setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
+        totalSpendOvertime.setPeriodsConfig(
+                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
 
         return Arrays.asList(totalSpendOvertime);
     }

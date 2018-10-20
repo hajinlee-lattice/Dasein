@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-@JsonSubTypes({@JsonSubTypes.Type(value = VdbImportConfig.class, name = "VdbImportConfig"),
-                @JsonSubTypes.Type(value = CSVImportConfig.class, name = "CSVImportConfig")})
+@JsonSubTypes({ @JsonSubTypes.Type(value = VdbImportConfig.class, name = "VdbImportConfig"),
+        @JsonSubTypes.Type(value = CSVImportConfig.class, name = "CSVImportConfig") })
 public class CDLImportConfig {
 
 }

@@ -45,8 +45,8 @@ public class ProcessProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public ProcessProductWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("processProductWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processProductWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processProductStepConfiguration);
             configuration.add(updateProductWorkflowBuilder.build());
             configuration.add(rebuildProductWorkflowBuilder.build());

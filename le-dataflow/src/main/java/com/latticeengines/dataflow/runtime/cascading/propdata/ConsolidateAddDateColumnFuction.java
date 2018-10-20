@@ -14,7 +14,8 @@ import cascading.tuple.TupleEntry;
 public class ConsolidateAddDateColumnFuction extends BaseOperation implements Function {
     private String trxTimeColumn;
 
-    public ConsolidateAddDateColumnFuction(String trxTimeColumn, String dateField, String datePeriodField) {
+    public ConsolidateAddDateColumnFuction(String trxTimeColumn, String dateField,
+            String datePeriodField) {
         super(new Fields(dateField, datePeriodField));
         this.trxTimeColumn = trxTimeColumn;
     }

@@ -64,6 +64,21 @@ public class ArchiveProgress implements Progress {
     @Column(name = "NumRetries")
     protected int numRetries;
 
+    public static ArchiveProgress constructByDates(String sourceName, Date startDate, Date endDate)
+            throws InstantiationException, IllegalAccessException {
+        ArchiveProgress progress = new ArchiveProgress();
+        progress.setSourceName(sourceName);
+        progress.setStartDate(startDate);
+        progress.setEndDate(endDate);
+
+        progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
+        progress.setRowsDownloadedToHdfs(0);
+        progress.setRowsUploadedToSql(0);
+        progress.setStatus(ProgressStatus.NEW);
+
+        return progress;
+    }
+
     @Override
     public Long getPid() {
         return pid;
@@ -188,21 +203,6 @@ public class ArchiveProgress implements Progress {
     @Override
     public void setNumRetries(int numRetries) {
         this.numRetries = numRetries;
-    }
-
-    public static ArchiveProgress constructByDates(String sourceName, Date startDate, Date endDate)
-            throws InstantiationException, IllegalAccessException {
-        ArchiveProgress progress = new ArchiveProgress();
-        progress.setSourceName(sourceName);
-        progress.setStartDate(startDate);
-        progress.setEndDate(endDate);
-
-        progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
-        progress.setRowsDownloadedToHdfs(0);
-        progress.setRowsUploadedToSql(0);
-        progress.setStatus(ProgressStatus.NEW);
-
-        return progress;
     }
 
     @Override

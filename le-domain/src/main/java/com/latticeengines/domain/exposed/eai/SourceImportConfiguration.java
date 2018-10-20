@@ -13,20 +13,19 @@ public class SourceImportConfiguration {
 
     @JsonProperty("source_type")
     private SourceType sourceType;
-    
+
     @JsonProperty("tables")
     private List<Table> tables;
-    
+
     @JsonProperty("filters")
     private Map<String, String> filters = new HashMap<>();
-    
+
     @JsonProperty("properties")
     private Map<String, String> properties = new HashMap<>();
-    
+
     @JsonProperty("source_cred_type")
     private SourceCredentialType sourceCredentialType = SourceCredentialType.PRODUCTION;
 
-    
     public SourceType getSourceType() {
         return sourceType;
     }
@@ -47,7 +46,6 @@ public class SourceImportConfiguration {
         filters.put(tableName, expression);
     }
 
-    
     public Map<String, String> getFilters() {
         return filters;
     }
@@ -61,7 +59,6 @@ public class SourceImportConfiguration {
         return JsonUtils.serialize(this);
     }
 
-    
     public Map<String, String> getProperties() {
         return properties;
     }

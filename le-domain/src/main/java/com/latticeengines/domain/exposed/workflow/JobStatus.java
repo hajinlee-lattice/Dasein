@@ -27,33 +27,7 @@ public enum JobStatus {
     SKIPPED(5, "Skipped", true), //
     READY(6, "Ready", false); //
 
-    JobStatus(int statusId, String status, boolean terminated) {
-        this.statusId = statusId;
-        this.statusCode = status;
-        this.terminated = terminated;
-    }
-
-    private int statusId;
-    private String statusCode;
-    private boolean terminated;
     private static Logger log = LoggerFactory.getLogger(JobStatus.class);
-
-    public int getStatusId() {
-        return statusId;
-    }
-
-    public String getStatusCode() {
-        return statusCode;
-    }
-
-    public boolean isTerminated() {
-        return terminated;
-    }
-
-    public void setTerminated(boolean terminated) {
-        this.terminated = terminated;
-    }
-
     private static Map<String, JobStatus> statusCodeMap = new HashMap<>();
 
     static {
@@ -62,9 +36,14 @@ public enum JobStatus {
         }
     }
 
-    @JsonValue
-    public String getName() {
-        return StringUtils.capitalize(super.name().toLowerCase());
+    private int statusId;
+    private String statusCode;
+    private boolean terminated;
+
+    JobStatus(int statusId, String status, boolean terminated) {
+        this.statusId = statusId;
+        this.statusCode = status;
+        this.terminated = terminated;
     }
 
     public static JobStatus getByStatusCode(String statusCode) {
@@ -91,8 +70,9 @@ public enum JobStatus {
     }
 
     /*
-     * Technically we donot need to return a list. Because we are returning JobStatus as is without any mapping.
-     * Incase, if we want to map one status to multiple values, we will keep it as List.
+     * Technically we donot need to return a list. Because we are returning
+     * JobStatus as is without any mapping. Incase, if we want to map one status
+     * to multiple values, we will keep it as List.
      */
     public static List<String> mappedWorkflowJobStatuses(String jobStatusStr) {
         if (jobStatusStr == null) {
@@ -106,7 +86,8 @@ public enum JobStatus {
         return Collections.singletonList(jobStatusStr);
     }
 
-    public static JobStatus fromYarnStatus(FinalApplicationStatus status, YarnApplicationState jobState) {
+    public static JobStatus fromYarnStatus(FinalApplicationStatus status,
+            YarnApplicationState jobState) {
         if (jobState != null) {
             if (jobState == YarnApplicationState.RUNNING) {
                 return JobStatus.RUNNING;
@@ -124,35 +105,56 @@ public enum JobStatus {
             }
         } else {
             switch (status) {
-            case SUCCEEDED:
-                return JobStatus.COMPLETED;
-            case FAILED:
-            case KILLED:
-                return JobStatus.FAILED;
-            case UNDEFINED:
-            default:
-                return JobStatus.PENDING;
+                case SUCCEEDED:
+                    return JobStatus.COMPLETED;
+                case FAILED:
+                case KILLED:
+                    return JobStatus.FAILED;
+                case UNDEFINED:
+                default:
+                    return JobStatus.PENDING;
             }
         }
     }
 
     private static JobStatus fromBatchStatus(BatchStatus status) {
         switch (status) {
-        case COMPLETED:
-            return JobStatus.COMPLETED;
-        case STARTING:
-        case STARTED:
-        case STOPPING:
-            return JobStatus.RUNNING;
-        case STOPPED:
-            return JobStatus.CANCELLED;
-        case ABANDONED:
-        case FAILED:
-        case UNKNOWN:
-            return JobStatus.FAILED;
-        default:
-            return JobStatus.PENDING;
+            case COMPLETED:
+                return JobStatus.COMPLETED;
+            case STARTING:
+            case STARTED:
+            case STOPPING:
+                return JobStatus.RUNNING;
+            case STOPPED:
+                return JobStatus.CANCELLED;
+            case ABANDONED:
+            case FAILED:
+            case UNKNOWN:
+                return JobStatus.FAILED;
+            default:
+                return JobStatus.PENDING;
         }
+    }
+
+    public int getStatusId() {
+        return statusId;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public boolean isTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(boolean terminated) {
+        this.terminated = terminated;
+    }
+
+    @JsonValue
+    public String getName() {
+        return StringUtils.capitalize(super.name().toLowerCase());
     }
 
 }

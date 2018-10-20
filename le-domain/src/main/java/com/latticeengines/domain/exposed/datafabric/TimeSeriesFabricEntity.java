@@ -10,8 +10,8 @@ public class TimeSeriesFabricEntity extends CompositeFabricEntity implements Has
     @DynamoStampKey()
     String stamp;
 
-    public void setId(String parentId, String entityName, String entityId,
-                      String bucket, String stamp) {
+    public void setId(String parentId, String entityName, String entityId, String bucket,
+            String stamp) {
         super.setId(parentId, entityName, entityId);
         this.bucket = bucket;
         this.stamp = stamp;
@@ -38,12 +38,12 @@ public class TimeSeriesFabricEntity extends CompositeFabricEntity implements Has
         return bucket;
     }
 
-    public String getStamp() {
-        return stamp;
-    }
-
     public void setBucket(String bucket) {
         this.bucket = bucket;
+    }
+
+    public String getStamp() {
+        return stamp;
     }
 
     public void setStamp(String stamp) {

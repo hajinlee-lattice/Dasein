@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepCon
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = DedupEventTableConfiguration.class, name = "DedupEventTableConfiguration") })
+@JsonSubTypes({
+        @Type(value = DedupEventTableConfiguration.class, name = "DedupEventTableConfiguration") })
 public class BaseModelingDataFlowStepConfiguration extends DataFlowStepConfiguration {
 
     @Override

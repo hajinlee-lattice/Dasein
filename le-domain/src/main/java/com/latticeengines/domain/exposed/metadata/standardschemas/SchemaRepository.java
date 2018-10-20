@@ -29,6 +29,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class SchemaRepository {
     private static SchemaRepository instance;
 
+    private SchemaRepository() {
+    }
+
     public static SchemaRepository instance() {
         if (instance == null) {
             synchronized (SchemaRepository.class) {
@@ -40,7 +43,65 @@ public class SchemaRepository {
         return instance;
     }
 
-    private SchemaRepository() {
+    public static Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
+        Set<InterfaceName> sysAttrs = new HashSet<>();
+        if (BusinessEntity.LatticeAccount.equals(entity)) {
+            sysAttrs.add(InterfaceName.LatticeAccountId);
+            sysAttrs.add(InterfaceName.IsMatched);
+        } else {
+            // common
+            if (!BusinessEntity.Account.equals(entity)) {
+                sysAttrs.add(InterfaceName.AccountId);
+            }
+            sysAttrs.add(InterfaceName.InternalId);
+            sysAttrs.add(InterfaceName.CDLCreatedTime);
+            sysAttrs.add(InterfaceName.CDLUpdatedTime);
+            // special
+            switch (entity) {
+                case Account:
+                    sysAttrs.add(InterfaceName.LatticeAccountId);
+                    sysAttrs.add(InterfaceName.CustomerParentAccountID);
+                    break;
+                default:
+            }
+        }
+        return sysAttrs;
+    }
+
+    public static Set<InterfaceName> getStandardAttributes(BusinessEntity entity) {
+        Set<InterfaceName> stdAttrs = new HashSet<>();
+        // only account and contact has standard attrs
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            // common
+            stdAttrs.add(InterfaceName.City);
+            stdAttrs.add(InterfaceName.State);
+            stdAttrs.add(InterfaceName.Country);
+            stdAttrs.add(InterfaceName.PostalCode);
+            stdAttrs.add(InterfaceName.PhoneNumber);
+            stdAttrs.add(InterfaceName.CompanyName);
+            stdAttrs.add(InterfaceName.DUNS);
+            stdAttrs.add(InterfaceName.Address_Street_1);
+            stdAttrs.add(InterfaceName.Address_Street_2);
+            // special
+            switch (entity) {
+                case Account:
+                    stdAttrs.add(InterfaceName.AccountId);
+                    stdAttrs.add(InterfaceName.Website);
+                    stdAttrs.add(InterfaceName.IsMatched);
+                    break;
+                case Contact:
+                    stdAttrs.add(InterfaceName.ContactName);
+                    stdAttrs.add(InterfaceName.ContactId);
+                    stdAttrs.add(InterfaceName.Email);
+                    break;
+                default:
+            }
+        }
+        return stdAttrs;
+    }
+
+    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
+        return MetadataSegmentExportType.getDefaultExportAttributes(entity);
     }
 
     public Table getSchema(BusinessEntity entity, boolean cdlSchema) {
@@ -1397,67 +1458,6 @@ public class SchemaRepository {
         if (entity == BusinessEntity.Account)
             return getMatchingAttributes(SchemaInterpretation.Account);
         return Collections.emptyList();
-    }
-
-    public static Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
-        Set<InterfaceName> sysAttrs = new HashSet<>();
-        if (BusinessEntity.LatticeAccount.equals(entity)) {
-            sysAttrs.add(InterfaceName.LatticeAccountId);
-            sysAttrs.add(InterfaceName.IsMatched);
-        } else {
-            // common
-            if (!BusinessEntity.Account.equals(entity)) {
-                sysAttrs.add(InterfaceName.AccountId);
-            }
-            sysAttrs.add(InterfaceName.InternalId);
-            sysAttrs.add(InterfaceName.CDLCreatedTime);
-            sysAttrs.add(InterfaceName.CDLUpdatedTime);
-            // special
-            switch (entity) {
-                case Account:
-                    sysAttrs.add(InterfaceName.LatticeAccountId);
-                    sysAttrs.add(InterfaceName.CustomerParentAccountID);
-                    break;
-                default:
-            }
-        }
-        return sysAttrs;
-    }
-
-    public static Set<InterfaceName> getStandardAttributes(BusinessEntity entity) {
-        Set<InterfaceName> stdAttrs = new HashSet<>();
-        // only account and contact has standard attrs
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
-            // common
-            stdAttrs.add(InterfaceName.City);
-            stdAttrs.add(InterfaceName.State);
-            stdAttrs.add(InterfaceName.Country);
-            stdAttrs.add(InterfaceName.PostalCode);
-            stdAttrs.add(InterfaceName.PhoneNumber);
-            stdAttrs.add(InterfaceName.CompanyName);
-            stdAttrs.add(InterfaceName.DUNS);
-            stdAttrs.add(InterfaceName.Address_Street_1);
-            stdAttrs.add(InterfaceName.Address_Street_2);
-            // special
-            switch (entity) {
-                case Account:
-                    stdAttrs.add(InterfaceName.AccountId);
-                    stdAttrs.add(InterfaceName.Website);
-                    stdAttrs.add(InterfaceName.IsMatched);
-                    break;
-                case Contact:
-                    stdAttrs.add(InterfaceName.ContactName);
-                    stdAttrs.add(InterfaceName.ContactId);
-                    stdAttrs.add(InterfaceName.Email);
-                    break;
-                default:
-            }
-        }
-        return stdAttrs;
-    }
-
-    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
-        return MetadataSegmentExportType.getDefaultExportAttributes(entity);
     }
 
     private static class AttributeBuilder {

@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "DL_TENANT_MAPPING", uniqueConstraints = @UniqueConstraint(columnNames = { "DL_TENANT_ID",
-        "DL_LOAD_GROUP" }))
+@Table(name = "DL_TENANT_MAPPING", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "DL_TENANT_ID", "DL_LOAD_GROUP" }))
 public class DLTenantMapping implements HasPid {
 
     @Id

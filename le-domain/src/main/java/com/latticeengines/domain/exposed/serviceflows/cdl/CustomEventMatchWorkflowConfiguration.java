@@ -20,6 +20,9 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
+    @JsonProperty("customEventModelingType")
+    private CustomEventModelingType customEventModelingType;
+
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
@@ -27,9 +30,6 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
                 .addAll(super.getSwpkgNames()) //
                 .build();
     }
-
-    @JsonProperty("customEventModelingType")
-    private CustomEventModelingType customEventModelingType;
 
     public CustomEventModelingType getCustomEventModelingType() {
         return customEventModelingType;
@@ -123,10 +123,14 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
-            matchAccountWithIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
-            matchAccountWithoutIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
+            matchAccountWithIdBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
+            matchAccountWithoutIdBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 
@@ -210,11 +214,12 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             matchAccountWithoutIdBuilder.matchType(MatchStepConfiguration.LDC);
             matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
 
-            configuration.setContainerConfiguration("customEventMatchWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("customEventMatchWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(matchAccountWithIdBuilder.build("matchCdlWithAccountIdWorkflow"));
-            configuration.add(matchAccountWithoutIdBuilder.build("matchCdlWithoutAccountIdWorkflow"));
+            configuration
+                    .add(matchAccountWithoutIdBuilder.build("matchCdlWithoutAccountIdWorkflow"));
             configuration.add(matchCdlAccount);
             configuration.add(matchCdlStep);
             configuration.add(split);

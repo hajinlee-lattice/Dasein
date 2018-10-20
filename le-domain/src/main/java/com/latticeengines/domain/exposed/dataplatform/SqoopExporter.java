@@ -23,11 +23,8 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SqoopExporter {
 
-    private static List<String> defaultHadoopArgs = Arrays.asList(
-            "-Dmapreduce.task.timeout=600000",
-            "-Dmapreduce.job.running.map.limit=32",
-            "-Dmapreduce.tasktracker.map.tasks.maximum=32"
-    );
+    private static List<String> defaultHadoopArgs = Arrays.asList("-Dmapreduce.task.timeout=600000",
+            "-Dmapreduce.job.running.map.limit=32", "-Dmapreduce.tasktracker.map.tasks.maximum=32");
 
     private static DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
 
@@ -169,7 +166,8 @@ public class SqoopExporter {
     }
 
     public String fullJobName() {
-        return StringUtils.join(Arrays.asList(getCustomer(), "sqoop-export", dateTimeFormatter.print(new DateTime())), "-");
+        return StringUtils.join(Arrays.asList(getCustomer(), "sqoop-export",
+                dateTimeFormatter.print(new DateTime())), "-");
     }
 
     public static class Builder {
@@ -187,7 +185,7 @@ public class SqoopExporter {
         private List<String> otherOptions = new ArrayList<>();
 
         public SqoopExporter build() {
-            SqoopExporter exporter =  new SqoopExporter();
+            SqoopExporter exporter = new SqoopExporter();
             exporter.setTable(this.table);
             exporter.setSourceDir(this.sourceDir);
             exporter.setDbCreds(this.dbCreds);
@@ -200,13 +198,13 @@ public class SqoopExporter {
 
             Set<String> hadoopArgKeys = new HashSet<>();
             List<String> hadoopArgs = new ArrayList<>(exporter.getHadoopArgs());
-            for (String arg: hadoopArgs) {
+            for (String arg : hadoopArgs) {
                 if (arg.contains("=")) {
                     hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
                 }
             }
 
-            for (String arg: this.hadoopArgs) {
+            for (String arg : this.hadoopArgs) {
                 String key = arg.substring(0, arg.indexOf("="));
                 if (!hadoopArgKeys.contains(key)) {
                     hadoopArgKeys.add(key);
@@ -214,7 +212,7 @@ public class SqoopExporter {
                 }
             }
 
-            for (String arg: defaultHadoopArgs) {
+            for (String arg : defaultHadoopArgs) {
                 String defaultKey = arg.substring(0, arg.indexOf("="));
                 if (!hadoopArgKeys.contains(defaultKey)) {
                     hadoopArgKeys.add(defaultKey);

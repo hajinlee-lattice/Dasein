@@ -7,6 +7,9 @@ public class NumberOfContactsConfig extends TransformerConfig {
     // Table field to join the left side table (in this case Account).
     @JsonProperty("LhsJoinField")
     private String lhsJoinField;
+    // Table field to join the right side table (in this case Contact).
+    @JsonProperty("RhsJoinField")
+    private String rhsJoinField;
 
     public String getLhsJoinField() {
         return lhsJoinField;
@@ -15,10 +18,6 @@ public class NumberOfContactsConfig extends TransformerConfig {
     public void setLhsJoinField(String lhsJoinField) {
         this.lhsJoinField = lhsJoinField;
     }
-
-    // Table field to join the right side table (in this case Contact).
-    @JsonProperty("RhsJoinField")
-    private String rhsJoinField;
 
     public String getRhsJoinField() {
         return rhsJoinField;

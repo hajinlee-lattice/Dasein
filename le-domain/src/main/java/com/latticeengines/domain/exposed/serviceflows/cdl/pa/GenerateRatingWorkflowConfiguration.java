@@ -93,8 +93,8 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public GenerateRatingWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("generateRatingWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("generateRatingWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(ratingStep);
             configuration.add(generateAIRating.build());
             return configuration;

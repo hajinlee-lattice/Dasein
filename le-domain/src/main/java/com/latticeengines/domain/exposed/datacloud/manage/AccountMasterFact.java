@@ -18,11 +18,11 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Access(AccessType.FIELD)
 @Table(name = "AccountMasterFact", //
         uniqueConstraints = { @UniqueConstraint(columnNames = { "Location", //
-        "Industry", //
-        "NumEmpRange", //
-        "RevRange", //
-        "NumLocRange", //
-        "Category" }) })
+                "Industry", //
+                "NumEmpRange", //
+                "RevRange", //
+                "NumLocRange", //
+                "Category" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterFact implements HasPid {
 

@@ -27,16 +27,16 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
         return modelId;
     }
 
-    public void setInputTableName(String inputTableName) {
-        this.inputTableName = inputTableName;
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 
     public String getInputTableName() {
         return this.inputTableName;
     }
 
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
+    public void setInputTableName(String inputTableName) {
+        this.inputTableName = inputTableName;
     }
 
     public boolean getEnableLeadEnrichment() {
@@ -55,36 +55,36 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
         this.registerScoredTable = registerScoredTable;
     }
 
-    public void setEnableDebug(boolean enableDebug) {
-        this.enableDebug = enableDebug;
-    }
-
     public boolean getEnableDebug() {
         return this.enableDebug;
     }
 
-    public void setEnableMatching(boolean enableMatching) {
-        this.enableMatching = enableMatching;
+    public void setEnableDebug(boolean enableDebug) {
+        this.enableDebug = enableDebug;
     }
 
     public boolean getEnableMatching() {
         return this.enableMatching;
     }
 
-    public void setModelType(String modelType) {
-        this.modelType = modelType;
+    public void setEnableMatching(boolean enableMatching) {
+        this.enableMatching = enableMatching;
     }
 
     public String getModelType() {
         return this.modelType;
     }
 
-    public void setScoreTestFile(boolean scoreTestFile) {
-        this.scoreTestFile = scoreTestFile;
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
     }
 
     public boolean getScoreTestFile() {
         return this.scoreTestFile;
+    }
+
+    public void setScoreTestFile(boolean scoreTestFile) {
+        this.scoreTestFile = scoreTestFile;
     }
 
     public String getIdColumnName() {

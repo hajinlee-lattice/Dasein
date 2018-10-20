@@ -11,11 +11,19 @@ public class QuotaFlowParameters extends DataFlowParameters {
     private Quota quota;
     private ProspectDiscoveryProperty configuration;
 
-    public QuotaFlowParameters(TargetMarket targetMarket, Quota quota, ProspectDiscoveryProperty configuration) {
+    public QuotaFlowParameters(TargetMarket targetMarket, Quota quota,
+            ProspectDiscoveryProperty configuration) {
         this.targetMarket = targetMarket;
         this.quota = quota;
         this.configuration = configuration;
         this.noFlink = true;
+    }
+
+    /**
+     * Serialization constructor
+     */
+    @Deprecated
+    public QuotaFlowParameters() {
     }
 
     @JsonProperty("target_market")
@@ -46,13 +54,6 @@ public class QuotaFlowParameters extends DataFlowParameters {
     @JsonProperty("configuration")
     public void setConfiguration(ProspectDiscoveryProperty configuration) {
         this.configuration = configuration;
-    }
-
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public QuotaFlowParameters() {
     }
 
 }

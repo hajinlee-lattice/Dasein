@@ -17,7 +17,7 @@ public class DeriveAttributeConfig extends TblDrivenTransformerConfig {
     static public class DeriveFunc extends TblDrivenFuncConfig implements Serializable {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,7 @@ public class DeriveAttributeConfig extends TblDrivenTransformerConfig {
         }
 
         public void setType(String type) {
-            this.type = type; 
+            this.type = type;
         }
 
         public String getCalculation() {
@@ -43,7 +43,7 @@ public class DeriveAttributeConfig extends TblDrivenTransformerConfig {
         }
 
         public void setCalculation(String calculation) {
-            this.calculation = calculation; 
+            this.calculation = calculation;
         }
 
         public List<String> getAttributes() {
@@ -65,6 +65,6 @@ public class DeriveAttributeConfig extends TblDrivenTransformerConfig {
             } else {
                 return String.class;
             }
-       }
-   }
+        }
+    }
 }

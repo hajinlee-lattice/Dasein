@@ -11,7 +11,7 @@ public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
     @JsonProperty("entity")
     private BusinessEntity entity;
 
-    //AKA: TemplateName
+    // AKA: TemplateName
     @JsonProperty("feed_type")
     private String feedType;
 
@@ -49,16 +49,16 @@ public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
         return s3FilePath;
     }
 
+    public void setS3FilePath(String s3FilePath) {
+        this.s3FilePath = s3FilePath;
+    }
+
     @JsonIgnore
     public String getS3FileName() {
         if (StringUtils.isEmpty(s3FilePath) || s3FilePath.lastIndexOf('/') < 0) {
             return s3FilePath;
         }
         return s3FilePath.substring(s3FilePath.lastIndexOf('/') + 1);
-    }
-
-    public void setS3FilePath(String s3FilePath) {
-        this.s3FilePath = s3FilePath;
     }
 
 }

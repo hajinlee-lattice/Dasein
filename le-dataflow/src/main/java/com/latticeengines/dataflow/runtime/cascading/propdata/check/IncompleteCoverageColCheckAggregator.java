@@ -13,7 +13,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class IncompleteCoverageColCheckAggregator extends BaseAggregator<IncompleteCoverageColCheckAggregator.Context>
+public class IncompleteCoverageColCheckAggregator
+        extends BaseAggregator<IncompleteCoverageColCheckAggregator.Context>
         implements Aggregator<IncompleteCoverageColCheckAggregator.Context> {
 
     private static final long serialVersionUID = -63265549792881813L;
@@ -25,10 +26,6 @@ public class IncompleteCoverageColCheckAggregator extends BaseAggregator<Incompl
         super(generateFieldDeclaration());
         this.checkField = checkField;
         this.coverageFieldList = coverageFieldList;
-    }
-
-    public static class Context extends BaseAggregator.Context {
-        HashSet<Object> set = new HashSet<Object>();
     }
 
     private static Fields generateFieldDeclaration() {
@@ -76,11 +73,16 @@ public class IncompleteCoverageColCheckAggregator extends BaseAggregator<Incompl
             if (missingList.size() != 0) {
                 String joinedList = String.join(",", missingList);
                 result.set(4, joinedList);
-                result.set(5, CheckCode.IncompleteCoverageForCol.getMessage(checkField, joinedList));
+                result.set(5,
+                        CheckCode.IncompleteCoverageForCol.getMessage(checkField, joinedList));
                 return result;
             }
         }
         return null;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        HashSet<Object> set = new HashSet<Object>();
     }
 
 }

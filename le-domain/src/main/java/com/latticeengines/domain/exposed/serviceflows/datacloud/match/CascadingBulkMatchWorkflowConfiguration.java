@@ -38,7 +38,8 @@ public class CascadingBulkMatchWorkflowConfiguration extends BaseDataCloudWorkfl
 
         public Builder inputProperties() {
             Map<String, String> inputProperties = new HashMap<>();
-            inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "cascadingBulkMatchWorkflow");
+            inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
+                    "cascadingBulkMatchWorkflow");
             stepConfiguration.setInputProperties(inputProperties);
             return this;
         }

@@ -18,13 +18,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-
 @Entity
 @Table(name = "AccountMaster_Attributes")
 public class AmAttribute implements HasPid, Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4126956984040990825L;
     private Long pid;
@@ -123,7 +122,7 @@ public class AmAttribute implements HasPid, Serializable {
     public String getProperty(String Key) {
         if (this.properties == null)
             this.properties = new HashMap<String, String>();
-        return (String)properties.get(Key);
+        return (String) properties.get(Key);
     }
 
     @JsonIgnore
@@ -132,7 +131,6 @@ public class AmAttribute implements HasPid, Serializable {
             this.properties = new HashMap<String, String>();
         this.properties.put(key, value);
     }
-
 
     @Override
     public String toString() {

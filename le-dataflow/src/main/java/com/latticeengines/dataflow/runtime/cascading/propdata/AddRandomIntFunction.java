@@ -15,15 +15,10 @@ public class AddRandomIntFunction extends BaseOperation<AddRandomIntFunction.Con
         implements Function<AddRandomIntFunction.Context> {
 
     private static final long serialVersionUID = -4369341989896797069L;
-
-    public static class Context {
-    }
-
     private int min;
     private int max;
     private Long seed;
     private Random rand;
-
     // Only work for generating a random int in the range of [min, max]
     public AddRandomIntFunction(String randomAttr, int min, int max, Long seed) {
         super(new Fields(randomAttr));
@@ -45,5 +40,8 @@ public class AddRandomIntFunction extends BaseOperation<AddRandomIntFunction.Con
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         int r = rand.nextInt((max - min) + 1) + min;
         functionCall.getOutputCollector().add(new Tuple(r));
+    }
+
+    public static class Context {
     }
 }

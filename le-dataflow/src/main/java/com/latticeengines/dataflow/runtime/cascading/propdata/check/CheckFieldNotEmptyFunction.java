@@ -21,15 +21,39 @@ import cascading.tuple.TupleEntry;
 public class CheckFieldNotEmptyFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 1112050510297918338L;
+    private static final Log log = LogFactory.getLog(CheckFieldNotEmptyFunction.class);
     private String checkField;
     private List<String> keyField;
-
-    private static final Log log = LogFactory.getLog(CheckFieldNotEmptyFunction.class);
 
     public CheckFieldNotEmptyFunction(String checkNullField, List<String> keyField) {
         super(generateFieldDeclaration());
         this.checkField = checkNullField;
         this.keyField = keyField;
+    }
+
+    private static Tuple setTupleValues(Tuple result, Object keyFieldValue, Object checkField,
+            Object checkEmptyField) {
+        // check code
+        result.set(0, CheckCode.EmptyField.name());
+        // row id
+        result.set(1, keyFieldValue);
+        // check field
+        result.set(3, checkField);
+        // check value
+        result.set(4, checkEmptyField);
+        // check message
+        result.set(5, CheckCode.EmptyField.getMessage(checkField));
+        return result;
+    }
+
+    private static Fields generateFieldDeclaration() {
+        return new Fields( //
+                DataCloudConstants.CHK_ATTR_CHK_CODE, //
+                DataCloudConstants.CHK_ATTR_ROW_ID, //
+                DataCloudConstants.CHK_ATTR_GROUP_ID, //
+                DataCloudConstants.CHK_ATTR_CHK_FIELD, //
+                DataCloudConstants.CHK_ATTR_CHK_VALUE, //
+                DataCloudConstants.CHK_ATTR_CHK_MSG);
     }
 
     @Override
@@ -60,30 +84,5 @@ public class CheckFieldNotEmptyFunction extends BaseOperation implements Functio
         } catch (Exception e) {
             log.info("Exception raised due to : " + e);
         }
-    }
-
-    private static Tuple setTupleValues(Tuple result, Object keyFieldValue, Object checkField,
-            Object checkEmptyField) {
-        // check code
-        result.set(0, CheckCode.EmptyField.name());
-        // row id
-        result.set(1, keyFieldValue);
-        // check field
-        result.set(3, checkField);
-        // check value
-        result.set(4, checkEmptyField);
-        // check message
-        result.set(5, CheckCode.EmptyField.getMessage(checkField));
-        return result;
-    }
-
-    private static Fields generateFieldDeclaration() {
-        return new Fields( //
-                DataCloudConstants.CHK_ATTR_CHK_CODE, //
-                DataCloudConstants.CHK_ATTR_ROW_ID, //
-                DataCloudConstants.CHK_ATTR_GROUP_ID, //
-                DataCloudConstants.CHK_ATTR_CHK_FIELD, //
-                DataCloudConstants.CHK_ATTR_CHK_VALUE, //
-                DataCloudConstants.CHK_ATTR_CHK_MSG);
     }
 }

@@ -154,7 +154,8 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
     }
 
     private void parseBooleanField(Tuple result, int pos, StatsAttributeParser attributeParser,
-            Map<String, List<Object>> minMaxInfo, String fieldName, Object val, boolean isEncodedAttr) {
+            Map<String, List<Object>> minMaxInfo, String fieldName, Object val,
+            boolean isEncodedAttr) {
 
         AttributeStats attrStatsDetails = new AttributeStats();
         Buckets buckets = new Buckets();
@@ -165,9 +166,9 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
         Map<String, Map<String, Long[]>> binaryCodedBuckets = new HashMap<>();
 
         Map<String, Map<String, Long>> nAttributeBucketIds = new HashMap<>();
-        attributeParser.parseAttribute(typeFieldMap, encodedColumnsPos, attributeValueBuckets, null, null,
-                binaryCodedBuckets, minMaxInfo, pos, val, fieldName, maxBucketCount, encodedNo, encodedYes,
-                numericalBucketsRequired, nAttributeBucketIds);
+        attributeParser.parseAttribute(typeFieldMap, encodedColumnsPos, attributeValueBuckets, null,
+                null, binaryCodedBuckets, minMaxInfo, pos, val, fieldName, maxBucketCount,
+                encodedNo, encodedYes, numericalBucketsRequired, nAttributeBucketIds);
 
         if (isRegularBooleanField(attributeValueBuckets, fieldName, isEncodedAttr)) {
             for (String lbl : attributeValueBuckets.get(fieldName).keySet()) {
@@ -242,8 +243,8 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
         setStatsForField(result, pos, fieldName, attrStatsDetails);
     }
 
-    private boolean isBooleanField(Map<String, FundamentalType> fieldFundamentalTypeMap, String fieldName, Object val,
-            boolean isEncodedAttr) {
+    private boolean isBooleanField(Map<String, FundamentalType> fieldFundamentalTypeMap,
+            String fieldName, Object val, boolean isEncodedAttr) {
 
         return val instanceof Boolean //
                 || (fieldFundamentalTypeMap.get(fieldName) == FundamentalType.BOOLEAN) //

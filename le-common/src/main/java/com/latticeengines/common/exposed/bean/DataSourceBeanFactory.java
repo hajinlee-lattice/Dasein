@@ -20,7 +20,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceBeanFactory.class);
-    private static final String WRITE_CONNECTION_TEST_QUERY = "SELECT CASE WHEN @@read_only + @@innodb_read_only < 1 THEN 1 "
+    private static final String WRITE_CONNECTION_TEST_QUERY = //
+            "SELECT CASE WHEN @@read_only + @@innodb_read_only < 1 THEN 1 "
             + "ELSE (SELECT table_name FROM information_schema.tables LIMIT 2) END AS `1`";
 
     // if use jndi
@@ -85,7 +86,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         // Give a meaningful name for better troubleshooting
         String dbName;
         try {
-            dbName = jdbcUrl.substring(jdbcUrl.lastIndexOf("/"), jdbcUrl.indexOf("?", jdbcUrl.lastIndexOf("/")));
+            dbName = jdbcUrl.substring(jdbcUrl.lastIndexOf("/"),
+                    jdbcUrl.indexOf("?", jdbcUrl.lastIndexOf("/")));
         } catch (Exception e) {
             dbName = jdbcUrl.substring(0, jdbcUrl.lastIndexOf("/"));
         }
@@ -119,8 +121,10 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             log.debug("Stack Trace: {} ", StackTraceUtils.getCurrentStackTrace());
         }
 
-        cpds.setDataSourceName(String.format("%s-%s", currentEnv, dbName.replaceAll("[^A-Za-z0-9]", "")));
-        int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : (Math.max(3, maxPoolSize/10));
+        cpds.setDataSourceName(
+                String.format("%s-%s", currentEnv, dbName.replaceAll("[^A-Za-z0-9]", "")));
+        int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement
+                : (Math.max(3, maxPoolSize / 10));
         cpds.setMinPoolSize(minPoolSize);
         cpds.setInitialPoolSize(minPoolSize);
         cpds.setMaxPoolSize(maxPoolSize);
@@ -129,24 +133,29 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setCheckoutTimeout(60000);
         int maxIdleTime = this.maxIdleTime >= 0 ? this.maxIdleTime : 3600;
         cpds.setMaxIdleTime(maxIdleTime);
-        int maxIdleTimeExcessConnections = this.maxIdleTimeExcessConnections >= 0 ? this.maxIdleTimeExcessConnections : 60;
+        int maxIdleTimeExcessConnections = this.maxIdleTimeExcessConnections >= 0
+                ? this.maxIdleTimeExcessConnections : 60;
         cpds.setMaxIdleTimeExcessConnections(maxIdleTimeExcessConnections);
-        //cpds.setPreferredTestQuery(preferredTestQuery);
-        cpds.setNumHelperThreads(this.numHelperThreads > 0 ? this.numHelperThreads : Math.max(3, maxPoolSize/10));
+        // cpds.setPreferredTestQuery(preferredTestQuery);
+        cpds.setNumHelperThreads(
+                this.numHelperThreads > 0 ? this.numHelperThreads : Math.max(3, maxPoolSize / 10));
 
         if (Boolean.TRUE.equals(this.writerConnection)) {
-            // For Failover case, we need to evict the old cached connection and get latest writer connection.
+            // For Failover case, we need to evict the old cached connection and
+            // get latest writer connection.
             cpds.setTestConnectionOnCheckout(true);
             cpds.setPreferredTestQuery(WRITE_CONNECTION_TEST_QUERY);
         } else if (Environment.AppMaster == currentEnv) {
-            // For Yarn jobs, we want to make sure that connection is in good state, because retry of Yarn job will be costly.
+            // For Yarn jobs, we want to make sure that connection is in good
+            // state, because retry of Yarn job will be costly.
             cpds.setTestConnectionOnCheckout(true);
         } else {
             cpds.setIdleConnectionTestPeriod(60);
             cpds.setTestConnectionOnCheckin(true);
         }
 
-        boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true : this.enableDebugSlowSql;
+        boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true
+                : this.enableDebugSlowSql;
         if (enableDebugSlowSql) {
             cpds.setUnreturnedConnectionTimeout(30);
             cpds.setDebugUnreturnedConnectionStackTraces(true);
@@ -161,7 +170,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             JndiTemplate jndiTemplate = new JndiTemplate();
             return jndiTemplate.lookup(jndiName, DataSource.class);
         } catch (Exception e) {
-            // As this is expected warning message on QA and Prod, we no need to log the full exception trace
+            // As this is expected warning message on QA and Prod, we no need to
+            // log the full exception trace
             log.warn("Cannot read jndi datasource named:{}, Reason: {}", jndiName, e.getMessage());
             return null;
         }
@@ -180,7 +190,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             default:
                 maxPoolSize = this.maxPoolSize;
         }
-        //If MaxPoolSize is not configured at environment level, then use default MaxPoolSize
+        // If MaxPoolSize is not configured at environment level, then use
+        // default MaxPoolSize
         maxPoolSize = maxPoolSize > 0 ? maxPoolSize : this.maxPoolSize;
         return maxPoolSize;
     }
@@ -209,7 +220,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         }
     }
 
-    private static String getPropertyStr(String prefix, BeanFactoryEnvironment.Environment env, String svc) {
+    private static String getPropertyStr(String prefix, BeanFactoryEnvironment.Environment env,
+            String svc) {
         String key = prefix + getFullSuffix(env, svc);
         String prop = PropertyUtils.getProperty(key);
         if (StringUtils.isBlank(prop)) {

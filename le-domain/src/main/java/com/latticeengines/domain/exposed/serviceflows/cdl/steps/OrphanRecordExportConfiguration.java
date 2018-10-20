@@ -2,14 +2,13 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
 public class OrphanRecordExportConfiguration extends BaseCDLDataFlowStepConfiguration {
 
-    public OrphanRecordExportConfiguration() {
-        setBeanName("OrphanTxnExportFlow");
-    }
-
     private String txnTableName;
     private String accountTableName;
     private String productTableName;
     private String orphanRecordExportId;
+    public OrphanRecordExportConfiguration() {
+        setBeanName("OrphanTxnExportFlow");
+    }
 
     public String getTxnTableName() {
         return txnTableName;

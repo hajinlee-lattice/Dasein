@@ -18,7 +18,7 @@ public class OutputRecord {
 
     @JsonProperty("Input")
     private List<Object> input;
-    
+
     @JsonProperty("PreMatchDomain")
     private String preMatchDomain;
 
@@ -74,7 +74,7 @@ public class OutputRecord {
 
     @JsonIgnore
     private List<String> dnbCacheIds;
-    
+
     @JsonProperty("NumFeatureValue")
     private int numFeatureValue;
 
@@ -130,16 +130,16 @@ public class OutputRecord {
         return preMatchEmail;
     }
 
+    public void setPreMatchEmail(String preMatchEmail) {
+        this.preMatchEmail = preMatchEmail;
+    }
+
     public String getMatchedLatticeAccountId() {
         return matchedLatticeAccountId;
     }
 
     public void setMatchedLatticeAccountId(String matchedLatticeAccountId) {
         this.matchedLatticeAccountId = matchedLatticeAccountId;
-    }
-
-    public void setPreMatchEmail(String preMatchEmail) {
-        this.preMatchEmail = preMatchEmail;
     }
 
     public String getMatchedDomain() {
@@ -166,7 +166,6 @@ public class OutputRecord {
         this.matchedDuns = matchedDuns;
     }
 
-    
     public String getMatchedDduns() {
         return matchedDduns;
     }
@@ -276,7 +275,7 @@ public class OutputRecord {
         }
         matchLogs.add(log);
     }
-    
+
     public int getNumFeatureValue() {
         return numFeatureValue;
     }

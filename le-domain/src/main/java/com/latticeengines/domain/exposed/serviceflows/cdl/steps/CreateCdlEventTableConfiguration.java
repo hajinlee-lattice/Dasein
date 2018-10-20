@@ -33,12 +33,12 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
         this.sourceSchemaInterpretation = sourceSchemaInterpretation;
     }
 
-    public void setEventColumn(String eventColumn) {
-        this.eventColumn = eventColumn;
-    }
-
     public String getEventColumn() {
         return eventColumn;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 
     public DataCollection.Version getDataCollectionVersion() {

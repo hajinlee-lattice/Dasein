@@ -16,7 +16,8 @@ public class MetricRestriction extends Restriction {
     @JsonProperty("restriction")
     private Restriction restriction;
 
-    public MetricRestriction(){}
+    public MetricRestriction() {
+    }
 
     public MetricRestriction(BusinessEntity metricEntity, Restriction restriction) {
         this.metricEntity = metricEntity;

@@ -15,20 +15,20 @@ public class CreateCdlTargetTableFilterConfiguration extends BaseCDLDataFlowStep
         setBeanName("createCdlTargetTableFilterFlow");
     }
 
-    public void setTargetFilterTableName(String targetFilterTableName) {
-        this.targetFilterTableName = targetFilterTableName;
-    }
-
     public String getTargetFilterTableName() {
         return targetFilterTableName;
     }
 
-    public void setTargetQuery(EventFrontEndQuery targetQuery) {
-        this.targetQuery = targetQuery;
+    public void setTargetFilterTableName(String targetFilterTableName) {
+        this.targetFilterTableName = targetFilterTableName;
     }
 
     public EventFrontEndQuery getTargetQuery() {
         return targetQuery;
+    }
+
+    public void setTargetQuery(EventFrontEndQuery targetQuery) {
+        this.targetQuery = targetQuery;
     }
 
     public DataCollection.Version getVersion() {

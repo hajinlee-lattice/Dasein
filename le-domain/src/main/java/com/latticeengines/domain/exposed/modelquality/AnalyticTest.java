@@ -29,7 +29,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_ANALYTIC_TEST", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_ANALYTIC_TEST", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AnalyticTest implements HasName, HasPid {
 
@@ -60,14 +61,16 @@ public class AnalyticTest implements HasName, HasPid {
     @JsonProperty("data_sets")
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET", joinColumns = {
-            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
+            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = {
+                    @JoinColumn(name = "DATASET_ID") })
     @Fetch(value = FetchMode.SUBSELECT)
     private List<DataSet> dataSets = new ArrayList<>();
 
     @JsonProperty("analytic_pipelines")
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", joinColumns = {
-            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
+            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = {
+                    @JoinColumn(name = "AP_PIPELINE_ID") })
     @Fetch(value = FetchMode.SUBSELECT)
     private List<AnalyticPipeline> analyticPipelines = new ArrayList<>();
 

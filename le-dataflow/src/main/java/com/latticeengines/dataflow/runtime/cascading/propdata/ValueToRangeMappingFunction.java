@@ -25,7 +25,8 @@ public class ValueToRangeMappingFunction extends BaseOperation implements Functi
     private String sourceField;
     private List<String[]> rangeValueMap;
 
-    public ValueToRangeMappingFunction(String sourceField, String targetField, List<String[]> rangeValueMap) {
+    public ValueToRangeMappingFunction(String sourceField, String targetField,
+            List<String[]> rangeValueMap) {
         super(1, new Fields(targetField));
         this.sourceField = sourceField;
         this.rangeValueMap = rangeValueMap;
@@ -37,9 +38,10 @@ public class ValueToRangeMappingFunction extends BaseOperation implements Functi
         try {
             Double source = Double.valueOf(String.valueOf(arguments.getObject(sourceField)));
             for (String[] valueToRange : rangeValueMap) {
-                Double min = StringUtils.isEmpty(valueToRange[1]) ? Double.MIN_VALUE : Double.valueOf(valueToRange[1]);
-                Double max = (valueToRange.length < 3 || StringUtils.isEmpty(valueToRange[2])) ? Double.MAX_VALUE
-                        : Double.valueOf(valueToRange[2]);
+                Double min = StringUtils.isEmpty(valueToRange[1]) ? Double.MIN_VALUE
+                        : Double.valueOf(valueToRange[1]);
+                Double max = (valueToRange.length < 3 || StringUtils.isEmpty(valueToRange[2]))
+                        ? Double.MAX_VALUE : Double.valueOf(valueToRange[2]);
                 if (source >= min && source <= max) {
                     functionCall.getOutputCollector().add(new Tuple(valueToRange[0]));
                     return;

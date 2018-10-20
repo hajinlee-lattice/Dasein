@@ -64,6 +64,19 @@ public class RefreshProgress implements Progress {
     @Column(name = "NumRetries")
     protected int numRetries;
 
+    public static RefreshProgress constructByDate(String sourceName, Date pivotDate)
+            throws InstantiationException, IllegalAccessException {
+        RefreshProgress progress = new RefreshProgress();
+        progress.setSourceName(sourceName);
+        progress.setPivotDate(pivotDate);
+
+        progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
+        progress.setRowsGeneratedInHdfs(0);
+        progress.setStatus(ProgressStatus.NEW);
+
+        return progress;
+    }
+
     @Override
     public Long getPid() {
         return pid;
@@ -188,19 +201,6 @@ public class RefreshProgress implements Progress {
     @Override
     public void setNumRetries(int numRetries) {
         this.numRetries = numRetries;
-    }
-
-    public static RefreshProgress constructByDate(String sourceName, Date pivotDate)
-            throws InstantiationException, IllegalAccessException {
-        RefreshProgress progress = new RefreshProgress();
-        progress.setSourceName(sourceName);
-        progress.setPivotDate(pivotDate);
-
-        progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
-        progress.setRowsGeneratedInHdfs(0);
-        progress.setStatus(ProgressStatus.NEW);
-
-        return progress;
     }
 
     @Override

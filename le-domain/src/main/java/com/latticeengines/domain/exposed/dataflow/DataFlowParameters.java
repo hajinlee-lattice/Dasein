@@ -22,8 +22,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEven
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccountParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlMergeParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlSplitParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTxnExportParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMa
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
-
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
@@ -77,7 +76,8 @@ public class DataFlowParameters {
     @Transient
     @JsonIgnore
     public final Set<String> getSourceTableNames() {
-        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(getClass(), SourceTableName.class);
+        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(getClass(),
+                SourceTableName.class);
 
         Set<String> sources = new HashSet<>();
         for (Field field : fields) {

@@ -32,18 +32,15 @@ public class RuleBasedModel extends RatingModel {
 
     public static final String RULE_BASED_MODEL_PREFIX = "rule";
     public static final String RULE_BASED_MODEL_FORMAT = "%s_%s";
+    private RatingRule ratingRule;
+    private List<String> selectedAttributes;
 
     public RuleBasedModel() {
     }
 
-    private RatingRule ratingRule;
-
-    private List<String> selectedAttributes;
-
-    public void setRatingRuleString(String ratingRuleStr) {
-        if (StringUtils.isNotBlank(ratingRuleStr)) {
-            this.ratingRule = JsonUtils.deserialize(ratingRuleStr, RatingRule.class);
-        }
+    public static String generateIdStr() {
+        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, uuid);
     }
 
     @JsonIgnore
@@ -57,8 +54,10 @@ public class RuleBasedModel extends RatingModel {
         return ratingRuleStr;
     }
 
-    public void setRatingRule(RatingRule ratingRule) {
-        this.ratingRule = ratingRule;
+    public void setRatingRuleString(String ratingRuleStr) {
+        if (StringUtils.isNotBlank(ratingRuleStr)) {
+            this.ratingRule = JsonUtils.deserialize(ratingRuleStr, RatingRule.class);
+        }
     }
 
     @Transient
@@ -67,11 +66,8 @@ public class RuleBasedModel extends RatingModel {
         return this.ratingRule;
     }
 
-    public void setSelectedAttributesString(String selectedAttributesStr) {
-        if (StringUtils.isNotBlank(selectedAttributesStr)) {
-            List<?> tempSelectedAttributes = JsonUtils.deserialize(selectedAttributesStr, List.class);
-            this.selectedAttributes = JsonUtils.convertList(tempSelectedAttributes, String.class);
-        }
+    public void setRatingRule(RatingRule ratingRule) {
+        this.ratingRule = ratingRule;
     }
 
     @JsonIgnore
@@ -85,8 +81,12 @@ public class RuleBasedModel extends RatingModel {
         return selectedAttributesStr;
     }
 
-    public void setSelectedAttributes(List<String> selectedAttributes) {
-        this.selectedAttributes = selectedAttributes;
+    public void setSelectedAttributesString(String selectedAttributesStr) {
+        if (StringUtils.isNotBlank(selectedAttributesStr)) {
+            List<?> tempSelectedAttributes = JsonUtils.deserialize(selectedAttributesStr,
+                    List.class);
+            this.selectedAttributes = JsonUtils.convertList(tempSelectedAttributes, String.class);
+        }
     }
 
     @Transient
@@ -95,13 +95,12 @@ public class RuleBasedModel extends RatingModel {
         return this.selectedAttributes;
     }
 
+    public void setSelectedAttributes(List<String> selectedAttributes) {
+        this.selectedAttributes = selectedAttributes;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
-    }
-
-    public static String generateIdStr() {
-        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
-        return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, uuid);
     }
 }

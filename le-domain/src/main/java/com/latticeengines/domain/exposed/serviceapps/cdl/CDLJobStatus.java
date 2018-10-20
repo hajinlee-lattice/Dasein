@@ -1,9 +1,5 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
 public enum CDLJobStatus {
-    RUNNING,
-    FAIL,
-    COMPLETE,
-    IDLE,
-    READY,
+    RUNNING, FAIL, COMPLETE, IDLE, READY,
 }

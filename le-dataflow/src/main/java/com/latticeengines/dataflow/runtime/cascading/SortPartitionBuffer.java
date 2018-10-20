@@ -22,8 +22,8 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Find partition boundaries of sorted ids.
- * CAUTION: This buffer needs to hold all ids in memory.
+ * Find partition boundaries of sorted ids. CAUTION: This buffer needs to hold
+ * all ids in memory.
  */
 @SuppressWarnings("rawtypes")
 public class SortPartitionBuffer extends BaseOperation implements Buffer {
@@ -39,7 +39,8 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
     private FileBackedOrderedList<?> ids;
 
     // output fields (dummyJoinKey, grpBdriesField)
-    public SortPartitionBuffer(String sortField, String dummyJoinKeyField, String grpBdriesField, Class<?> sortFieldClz, int partitions) {
+    public SortPartitionBuffer(String sortField, String dummyJoinKeyField, String grpBdriesField,
+            Class<?> sortFieldClz, int partitions) {
         super(new Fields(dummyJoinKeyField, grpBdriesField));
         this.sortField = sortField;
         this.dummyJoinKeyField = dummyJoinKeyField;
@@ -54,7 +55,7 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
         // input is already sorted by id
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
         Set<Long> dummyJoinKeys = new HashSet<>();
-        while  (arguments.hasNext()) {
+        while (arguments.hasNext()) {
             TupleEntry entry = arguments.next();
             Object id = entry.getObject(sortField);
             dummyJoinKeys.add(entry.getLong(dummyJoinKeyField));
@@ -67,7 +68,7 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
             ids.add(id);
         }
         List<String> boundaries = partitionIds();
-        for (Long key: dummyJoinKeys) {
+        for (Long key : dummyJoinKeys) {
             Tuple result = new Tuple(key, StringUtils.join(boundaries, "|"));
             bufferCall.getOutputCollector().add(result);
         }
@@ -93,9 +94,10 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
         int partitionSize = numRows / partitions;
         int currentPartition = 0;
         List<String> boundaries = new ArrayList<>();
-        for (Object id: ids) {
+        for (Object id : ids) {
             currentPartition++;
-            if (id != null && boundaries.size() < partitions - 1 && currentPartition >= partitionSize) {
+            if (id != null && boundaries.size() < partitions - 1
+                    && currentPartition >= partitionSize) {
                 // not last partition, and current partition is not full
                 currentPartition = 0;
                 boundaries.add(String.valueOf(id));
@@ -103,6 +105,5 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
         }
         return boundaries;
     }
-
 
 }

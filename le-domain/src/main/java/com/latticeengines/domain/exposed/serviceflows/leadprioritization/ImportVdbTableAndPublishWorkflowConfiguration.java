@@ -14,8 +14,8 @@ public class ImportVdbTableAndPublishWorkflowConfiguration extends BaseLPWorkflo
         private ImportVdbTableStepConfiguration importVdbTableConfiguration = new ImportVdbTableStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("importVdbTableAndPublishWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("importVdbTableAndPublishWorkflow",
+                    customerSpace, configuration.getClass().getSimpleName());
             importVdbTableConfiguration.setCustomerSpace(customerSpace);
             return this;
         }

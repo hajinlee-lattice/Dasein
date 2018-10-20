@@ -31,53 +31,52 @@ import cascading.flow.stream.element.ElementStage;
 import cascading.flow.stream.element.InputSource;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
-public class JoinBoundaryMapperInStage extends ElementStage<Void, Tuple2<Tuple, Tuple[]>> implements InputSource {
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class JoinBoundaryMapperInStage extends ElementStage<Void, Tuple2<Tuple, Tuple[]>>
+        implements InputSource {
 
-	public JoinBoundaryMapperInStage(FlowProcess flowProcess, FlowElement flowElement) {
-		super(flowProcess, flowElement);
-	}
+    public JoinBoundaryMapperInStage(FlowProcess flowProcess, FlowElement flowElement) {
+        super(flowProcess, flowElement);
+    }
 
-	@Override
-	public void receive(Duct previous, int ordinal, Void v) {
-		throw new UnsupportedOperationException( "use run() instead" );
-	}
+    @Override
+    public void receive(Duct previous, int ordinal, Void v) {
+        throw new UnsupportedOperationException("use run() instead");
+    }
 
-	@Override
-	public void run(Object input) throws Throwable {
+    @Override
+    public void run(Object input) throws Throwable {
 
-		Iterator<Tuple2<Tuple, Tuple[]>> joinInputIterator;
-		try {
-			joinInputIterator = (Iterator<Tuple2<Tuple, Tuple[]>>)input;
-		}
-		catch(ClassCastException cce) {
-			throw new RuntimeException("JoinBoundaryInStage requires Iterator<Tuple2<Tuple, Tuple[]>", cce);
-		}
+        Iterator<Tuple2<Tuple, Tuple[]>> joinInputIterator;
+        try {
+            joinInputIterator = (Iterator<Tuple2<Tuple, Tuple[]>>) input;
+        } catch (ClassCastException cce) {
+            throw new RuntimeException(
+                    "JoinBoundaryInStage requires Iterator<Tuple2<Tuple, Tuple[]>", cce);
+        }
 
-		next.start(this);
+        next.start(this);
 
-		while (joinInputIterator.hasNext()) {
+        while (joinInputIterator.hasNext()) {
 
-			Tuple2<Tuple, Tuple[]> joinListTuple;
+            Tuple2<Tuple, Tuple[]> joinListTuple;
 
-			try {
-				joinListTuple = joinInputIterator.next();
-				flowProcess.increment( StepCounters.Tuples_Read, 1 );
-				flowProcess.increment( SliceCounters.Tuples_Read, 1 );
-			}
-			catch( CascadingException exception ) {
-				handleException( exception, null );
-				continue;
-			}
-			catch( Throwable throwable ) {
-				handleException( new DuctException( "internal error", throwable ), null );
-				continue;
-			}
+            try {
+                joinListTuple = joinInputIterator.next();
+                flowProcess.increment(StepCounters.Tuples_Read, 1);
+                flowProcess.increment(SliceCounters.Tuples_Read, 1);
+            } catch (CascadingException exception) {
+                handleException(exception, null);
+                continue;
+            } catch (Throwable throwable) {
+                handleException(new DuctException("internal error", throwable), null);
+                continue;
+            }
 
-			next.receive( this, 0, joinListTuple );
+            next.receive(this, 0, joinListTuple);
 
-		}
+        }
 
-		next.complete(this);
-	}
+        next.complete(this);
+    }
 }

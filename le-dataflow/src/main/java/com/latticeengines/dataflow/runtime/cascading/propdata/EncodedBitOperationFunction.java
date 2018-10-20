@@ -21,7 +21,8 @@ public class EncodedBitOperationFunction extends BaseOperation implements Functi
     private String rightEncCol;
     private Operation op;
 
-    public EncodedBitOperationFunction(String newEncCol, String leftEncCol, String rightEncCol, Operation op) {
+    public EncodedBitOperationFunction(String newEncCol, String leftEncCol, String rightEncCol,
+            Operation op) {
         super(new Fields(newEncCol));
         this.leftEncCol = leftEncCol;
         this.rightEncCol = rightEncCol;
@@ -49,20 +50,20 @@ public class EncodedBitOperationFunction extends BaseOperation implements Functi
             BitSet leftEncBits = BitCodecUtils.strToBits(leftEncStr);
             BitSet rightEncBits = BitCodecUtils.strToBits(rightEncStr);
             switch (op) {
-            case AND:
-                leftEncBits.and(rightEncBits);
-                break;
-            case OR:
-                leftEncBits.or(rightEncBits);
-                break;
-            default:
-                break;
+                case AND:
+                    leftEncBits.and(rightEncBits);
+                    break;
+                case OR:
+                    leftEncBits.or(rightEncBits);
+                    break;
+                default:
+                    break;
             }
             functionCall.getOutputCollector().add(new Tuple(BitCodecUtils.bitsToStr(leftEncBits)));
             return;
         } catch (IOException e) {
-            throw new RuntimeException(
-                    String.format("Fail to finish bit operation on %s and %s", leftEncStr, rightEncStr));
+            throw new RuntimeException(String.format("Fail to finish bit operation on %s and %s",
+                    leftEncStr, rightEncStr));
         }
     }
 

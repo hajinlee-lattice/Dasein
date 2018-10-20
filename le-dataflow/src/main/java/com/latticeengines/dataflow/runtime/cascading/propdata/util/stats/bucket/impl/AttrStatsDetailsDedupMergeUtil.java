@@ -22,10 +22,12 @@ public class AttrStatsDetailsDedupMergeUtil extends AttrStatsDetailsMergeTemplat
                 || secondBucketsObj.getBucketList().size() > 1) {
             if (resultBucketsObj.getType() == BucketType.Boolean //
                     && (resultBucketsObj.getBucketList().size() == 2//
-                            && resultBucketsObj.getBucketList().get(0).getEncodedCountList() != null)) {
+                            && resultBucketsObj.getBucketList().get(0)
+                                    .getEncodedCountList() != null)) {
                 // this is encoded bucket case which can have two buckets
             } else {
-                throw new RuntimeException("Buckets dedup works only when both list have at max 1 items");
+                throw new RuntimeException(
+                        "Buckets dedup works only when both list have at max 1 items");
             }
         }
 
@@ -80,8 +82,8 @@ public class AttrStatsDetailsDedupMergeUtil extends AttrStatsDetailsMergeTemplat
 
     @Override
     protected void setNonNullCount(AttributeStats firstStatsDetails, //
-                                   AttributeStats secondStatsDetails, //
-                                   AttributeStats resultAttributeStatsDetails) {
+            AttributeStats secondStatsDetails, //
+            AttributeStats resultAttributeStatsDetails) {
         long maxCount = Math.max(firstStatsDetails.getNonNullCount(), //
                 secondStatsDetails.getNonNullCount());
         resultAttributeStatsDetails.setNonNullCount(maxCount);

@@ -15,7 +15,7 @@ public class PipelineToPipelineStepsId implements Serializable {
 
     @ManyToOne
     private Pipeline pipeline;
-    
+
     @ManyToOne
     private PipelineStep pipelineStep;
 
@@ -34,35 +34,36 @@ public class PipelineToPipelineStepsId implements Serializable {
     public void setPipelineStep(PipelineStep pipelineStep) {
         this.pipelineStep = pipelineStep;
     }
-    
+
     @Override
     public int hashCode() {
         if (pipeline == null) {
             return 0;
         }
-        
+
         if (pipelineStep == null) {
             return 0;
         }
-        return new HashCodeBuilder().append(pipeline.hashCode()).append(pipelineStep.hashCode()).toHashCode();
+        return new HashCodeBuilder().append(pipeline.hashCode()).append(pipelineStep.hashCode())
+                .toHashCode();
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof PipelineToPipelineStepsId)) {
             return false;
         }
-        
+
         if (this == o) {
             return true;
         }
-        
+
         PipelineToPipelineStepsId p = (PipelineToPipelineStepsId) o;
-        
+
         return new EqualsBuilder() //
                 .append(p.getPipeline().getName(), this.getPipeline().getName()) //
                 .append(p.getPipelineStep().getName(), this.getPipelineStep().getName()) //
                 .isEquals();
     }
-    
+
 }

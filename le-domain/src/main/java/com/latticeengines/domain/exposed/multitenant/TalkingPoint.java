@@ -33,52 +33,43 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     public static final String TALKING_POINT_NAME_PREFIX = "TP";
     public static final String TALKING_POINT_NAME_FORMAT = "%s_%s";
-
-    public TalkingPoint() {
-        setName(generateNameStr());
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
-
     @JsonProperty("play")
     @ManyToOne
     @JoinColumn(name = "PLAY_ID", nullable = false)
     private Play play;
-
     @JsonProperty("title")
     @Column(name = "TITLE", nullable = true)
     private String title;
-
     @JsonProperty("content")
     @Column(name = "CONTENT", nullable = true)
     @Type(type = "text")
     private String content;
-
     @JsonProperty("offset")
     @Column(name = "OFFSET", nullable = true)
     private int offset;
-
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
-
     @JsonProperty("updated")
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
-
     @JsonProperty("talkingpoint_attributes")
     @Transient
     private Set<AttributeLookup> tpAttributes;
+
+    public TalkingPoint() {
+        setName(generateNameStr());
+    }
 
     public Long getPid() {
         return pid;
@@ -149,10 +140,15 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     }
 
     public String generateNameStr() {
-        return String.format(TALKING_POINT_NAME_FORMAT, TALKING_POINT_NAME_PREFIX, UUID.randomUUID().toString());
+        return String.format(TALKING_POINT_NAME_FORMAT, TALKING_POINT_NAME_PREFIX,
+                UUID.randomUUID().toString());
     }
 
-    public Set<AttributeLookup> getTPAttributes() { return this.tpAttributes; }
+    public Set<AttributeLookup> getTPAttributes() {
+        return this.tpAttributes;
+    }
 
-    public void setTPAttributes(Set<AttributeLookup> attributes) { this.tpAttributes = attributes; }
+    public void setTPAttributes(Set<AttributeLookup> attributes) {
+        this.tpAttributes = attributes;
+    }
 }

@@ -36,7 +36,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigura
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
-public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class CrossSellImportMatchAndModelWorkflowConfiguration
+        extends BaseCDLWorkflowConfiguration {
 
     @Override
     public Collection<String> getSwpkgNames() {
@@ -197,8 +198,10 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 

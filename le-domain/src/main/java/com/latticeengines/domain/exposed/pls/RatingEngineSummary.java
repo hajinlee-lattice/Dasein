@@ -14,74 +14,53 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RatingEngineSummary {
 
-    public RatingEngineSummary() {
-    }
-
     @JsonProperty("id")
     private String id;
-
     @JsonProperty("displayName")
     private String displayName;
-
     @JsonProperty("note")
     private String note;
-
     @JsonProperty("type")
     private RatingEngineType type;
-
     @JsonProperty("status")
     private RatingEngineStatus status = RatingEngineStatus.INACTIVE;
-
     @JsonProperty("segmentDisplayName")
     private String segmentDisplayName;
-
     @JsonProperty("segmentName")
     private String segmentName;
-
     @JsonProperty("created")
     private Date created;
-
     @JsonProperty("updated")
     private Date updated;
-
     @JsonProperty("lastRefreshedDate")
     private Date lastRefreshedDate;
-
     @JsonProperty("createdBy")
     private String createdBy;
-
     @JsonProperty("accountsInSegment")
     private Long accountsInSegment;
-
     @JsonProperty("contactsInSegment")
     private Long contactsInSegment;
-
     @JsonProperty("coverage")
     private Map<String, Long> coverage;
-
     @JsonProperty("latestIterationId")
     private String latestIterationId;
-
     @JsonProperty("scoringIterationId")
     private String scoringIterationId;
-
     @JsonProperty("publishedIterationId")
     private String publishedIterationId;
-
     @JsonProperty("activeModelId")
     private String activeModelId;
-
     @JsonProperty("bucketMetadata")
     private List<BucketMetadata> bucketMetadata;
-
     @JsonProperty("advancedRatingConfig")
     private AdvancedRatingConfig advancedRatingConfig;
-
     @JsonProperty("isPublished")
     private boolean isPublished;
-
     @JsonProperty("deleted")
     private Boolean deleted;
+
+    public RatingEngineSummary() {
+    }
 
     public String getId() {
         return this.id;
@@ -91,60 +70,60 @@ public class RatingEngineSummary {
         this.id = id;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
     public String getDisplayName() {
         return this.displayName;
     }
 
-    public void setCreated(Date time) {
-        this.created = time;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public Date getCreated() {
         return this.created;
     }
 
-    public void setUpdated(Date time) {
-        this.updated = time;
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     public Date getUpdated() {
         return this.updated;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setUpdated(Date time) {
+        this.updated = time;
     }
 
     public String getNote() {
         return this.note;
     }
 
-    public void setType(RatingEngineType type) {
-        this.type = type;
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public RatingEngineType getType() {
         return this.type;
     }
 
-    public void setStatus(RatingEngineStatus status) {
-        this.status = status;
+    public void setType(RatingEngineType type) {
+        this.type = type;
     }
 
     public RatingEngineStatus getStatus() {
         return this.status;
     }
 
-    public void setSegmentDisplayName(String segmentDisplayName) {
-        this.segmentDisplayName = segmentDisplayName;
+    public void setStatus(RatingEngineStatus status) {
+        this.status = status;
     }
 
     public String getSegmentDisplayName() {
         return this.segmentDisplayName;
+    }
+
+    public void setSegmentDisplayName(String segmentDisplayName) {
+        this.segmentDisplayName = segmentDisplayName;
     }
 
     public String getSegmentName() {
@@ -155,20 +134,20 @@ public class RatingEngineSummary {
         this.segmentName = segmentName;
     }
 
-    public void setCreatedBy(String user) {
-        this.createdBy = user;
-    }
-
     public String getCreatedBy() {
         return this.createdBy;
     }
 
-    public void setLastRefreshedDate(Date date) {
-        this.lastRefreshedDate = date;
+    public void setCreatedBy(String user) {
+        this.createdBy = user;
     }
 
     public Date getLastRefreshedDate() {
         return this.lastRefreshedDate;
+    }
+
+    public void setLastRefreshedDate(Date date) {
+        this.lastRefreshedDate = date;
     }
 
     public Long getAccountsInSegment() {

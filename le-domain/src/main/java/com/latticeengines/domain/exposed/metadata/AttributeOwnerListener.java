@@ -16,10 +16,10 @@ public class AttributeOwnerListener {
             attributeOwner.setAttributes(Arrays.asList(attributesAsString.split(",")));
         }
     }
-    
+
     @PrePersist
     public void tablePrePersist(AttributeOwner attributeOwner) {
         attributeOwner.setAttributesAsStr(StringUtils.join(attributeOwner.getAttributes(), ","));
     }
-    
+
 }

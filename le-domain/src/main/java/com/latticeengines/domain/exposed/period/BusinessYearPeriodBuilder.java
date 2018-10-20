@@ -6,7 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
-public class BusinessYearPeriodBuilder extends BusinessCalendarBasedPeriodBuilder implements PeriodBuilder {
+public class BusinessYearPeriodBuilder extends BusinessCalendarBasedPeriodBuilder
+        implements PeriodBuilder {
 
     private static final long serialVersionUID = 2840113949282037628L;
 
@@ -24,7 +25,8 @@ public class BusinessYearPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
     @Override
     public int toPeriodId(String date) {
         LocalDate evalDate = LocalDate.parse(date);
-        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(evalDate.getYear());
+        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(
+                evalDate.getYear());
         int businessYear = getBusinessYear(evalDate, busiYearDateRange);
         return businessYear - startYear;
     }
@@ -41,6 +43,5 @@ public class BusinessYearPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
         // First day of next business year - 1
         return getDateRangeOfBusinessYear(nextBusiYear).getLeft().minusDays(1);
     }
-
 
 }

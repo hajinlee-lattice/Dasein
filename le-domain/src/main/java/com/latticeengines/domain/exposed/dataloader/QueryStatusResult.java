@@ -29,20 +29,20 @@ public class QueryStatusResult {
     }
 
     @JsonProperty("Status")
-    public int getStatus(){
+    public int getStatus() {
         return this.status;
     }
 
-    public void setStatus(int status){
+    public void setStatus(int status) {
         this.status = status;
     }
 
     @JsonProperty("Progress")
-    public int getProgress(){
+    public int getProgress() {
         return this.progress;
     }
 
-    public void setProgress(int progress){
+    public void setProgress(int progress) {
         this.progress = progress;
     }
 

@@ -10,7 +10,8 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = RTSBulkScoreWorkflowConfiguration.class, name = "RTSBulkScoreWorkflowConfiguration"),
+@JsonSubTypes({
+        @Type(value = RTSBulkScoreWorkflowConfiguration.class, name = "RTSBulkScoreWorkflowConfiguration"),
         @Type(value = ScoreWorkflowConfiguration.class, name = "ScoreWorkflowConfiguration"), })
 public class BaseScoringWorkflowConfiguration extends WorkflowConfiguration {
 

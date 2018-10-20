@@ -3,11 +3,11 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,16 +19,15 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchStatistics {
 
+    private static final String durationFormat = "HH:mm:ss.SSS";
+    private static final PeriodFormatter periodFormatter = new PeriodFormatterBuilder()
+            .appendHours().appendLiteral(":").appendMinutes().appendLiteral(":").appendSeconds()
+            .appendLiteral(".").appendMillis3Digit().toFormatter();
     private static Logger log = LoggerFactory.getLogger(MatchStatistics.class);
-
     private Integer rowsRequested;
     private Integer rowsMatched;
     private Long timeElapsedInMsec;
     private List<Integer> columnMatchCount;
-
-    private static final String durationFormat = "HH:mm:ss.SSS";
-    private static final PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendHours().appendLiteral(":")
-            .appendMinutes().appendLiteral(":").appendSeconds().appendLiteral(".").appendMillis3Digit().toFormatter();
 
     @MetricField(name = "RowsRequested", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsRequested")
@@ -74,13 +73,15 @@ public class MatchStatistics {
 
     @JsonProperty("TimeElapsed")
     private String getReadableTimeElapsed() {
-        return timeElapsedInMsec == null ? null : DurationFormatUtils.formatDuration(timeElapsedInMsec, durationFormat);
+        return timeElapsedInMsec == null ? null
+                : DurationFormatUtils.formatDuration(timeElapsedInMsec, durationFormat);
     }
 
     @JsonProperty("TimeElapsed")
     private void setReadableTimeElapsed(String timeElapsedInMsec) {
         try {
-            this.timeElapsedInMsec = Period.parse(timeElapsedInMsec, periodFormatter).toStandardDuration().getMillis();
+            this.timeElapsedInMsec = Period.parse(timeElapsedInMsec, periodFormatter)
+                    .toStandardDuration().getMillis();
         } catch (Exception e) {
             log.error("Cannot parse string " + timeElapsedInMsec + " into a java duration. "
                     + "It has to be in the format of " + durationFormat, e);

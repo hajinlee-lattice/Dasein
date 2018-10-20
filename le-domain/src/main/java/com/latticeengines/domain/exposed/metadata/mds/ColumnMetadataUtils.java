@@ -13,8 +13,9 @@ public final class ColumnMetadataUtils {
     // TODO: not completed before review, will keep adding overwriting methods
     static ColumnMetadata overwrite(ColumnMetadata overwriter, ColumnMetadata overwritee) {
         if (!overwriter.getAttrName().equals(overwritee.getAttrName())) {
-            throw new IllegalArgumentException(String.format("Cannot use the metadata of %s to overwrite %s",
-                    overwriter.getAttrName(), overwritee.getAttrName()));
+            throw new IllegalArgumentException(
+                    String.format("Cannot use the metadata of %s to overwrite %s",
+                            overwriter.getAttrName(), overwritee.getAttrName()));
         }
         if (StringUtils.isNotBlank(overwriter.getDisplayName())) {
             overwritee.setDisplayName(overwriter.getDisplayName());
@@ -97,7 +98,8 @@ public final class ColumnMetadataUtils {
     }
 
     private static Map<ColumnSelection.Predefined, Boolean> overwritingGroups(
-            Map<ColumnSelection.Predefined, Boolean> overwriter, Map<ColumnSelection.Predefined, Boolean> overwritee) {
+            Map<ColumnSelection.Predefined, Boolean> overwriter,
+            Map<ColumnSelection.Predefined, Boolean> overwritee) {
         if (MapUtils.isNotEmpty(overwritee)) {
             overwritee.putAll(overwriter);
         } else {

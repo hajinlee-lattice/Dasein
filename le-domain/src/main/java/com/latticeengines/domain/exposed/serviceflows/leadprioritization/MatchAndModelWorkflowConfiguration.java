@@ -57,6 +57,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportBucketToolStepConfiguration export = new ExportBucketToolStepConfiguration();
         private ImportExportS3StepConfiguration modelExportToS3 = new ImportExportS3StepConfiguration();
+
         public Builder microServiceHostPort(String microServiceHostPort) {
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
@@ -150,8 +151,8 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
                 List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
-            modelWorkflowBuilder.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName,
-                    transformationGroup.getName());
+            modelWorkflowBuilder.addProvenanceProperty(
+                    ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
             return this;
         }
 
@@ -209,7 +210,8 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public Builder treatPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
-            matchDataCloudWorkflowBuilder.treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
+            matchDataCloudWorkflowBuilder
+                    .treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             rtsBulkScoreWorkflowBuilder.treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
@@ -242,13 +244,16 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used. If selectionVersion is empty, will use current version.
-         * 
+         *
          * @param predefinedColumnSelection
          * @return
          */
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
-            rtsBulkScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
+            rtsBulkScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 
@@ -341,8 +346,8 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public MatchAndModelWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("modelAndEmailWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("modelAndEmailWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             export.setUsingDisplayName(Boolean.FALSE);
             computeLift.setScoreField(InterfaceName.Event.name());
             computeLift.setSaveBucketMetadata(Boolean.TRUE);

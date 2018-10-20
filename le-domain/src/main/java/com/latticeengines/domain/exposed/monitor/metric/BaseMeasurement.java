@@ -9,7 +9,8 @@ import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 
-public abstract class BaseMeasurement<F extends Fact, D extends Dimension> implements Measurement<F, D> {
+public abstract class BaseMeasurement<F extends Fact, D extends Dimension>
+        implements Measurement<F, D> {
     public abstract D getDimension();
 
     public abstract F getFact();

@@ -107,7 +107,7 @@ public class Session {
     public void setAccessLevel(String accessLevel) {
         this.accessLevel = accessLevel;
     }
-    
+
     @JsonProperty("AuthenticationRoute")
     public String getAuthenticationRoute() {
         return authenticationRoute;

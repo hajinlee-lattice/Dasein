@@ -21,8 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-
-
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "SourceColumn")

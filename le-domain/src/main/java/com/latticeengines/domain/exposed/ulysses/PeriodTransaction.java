@@ -11,23 +11,19 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PeriodTransaction {
 
-    public PeriodTransaction() {
-    }
-
     @JsonProperty("PeriodId")
     private Integer periodId;
-
     @JsonProperty("ProductId")
     private String productId;
-
     @JsonProperty("TotalAmount")
     private Double totalAmount;
-
     @JsonProperty("TotalQuantity")
     private Double totalQuantity;
-
     @JsonProperty("TransactionCount")
     private Double transactionCount;
+
+    public PeriodTransaction() {
+    }
 
     public Integer getPeriodId() {
         return this.periodId;

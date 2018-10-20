@@ -11,6 +11,29 @@ import com.latticeengines.domain.exposed.camille.VersionedDocument;
  * either the CustomerSpaceService or Service scope.
  */
 public class BootstrapState extends VersionedDocument {
+    /**
+     * The state of this bootstrap configuration.
+     */
+    public State state;
+    /**
+     * The desired version of configuration for this service. Equals the
+     * installedVersion if the previous operation succeeded. Otherwise equals
+     * the desired configuration version.
+     */
+    public int desiredVersion;
+    /**
+     * The installed version of configuration for this service. If no
+     * configuration has been installed, this equals -1.
+     */
+    public int installedVersion;
+    /**
+     * A detailed error message if the state == ERROR. Otherwise this is null.
+     */
+    public String errorMessage;
+
+    public BootstrapState() {
+    }
+
     public static BootstrapState createInitialState() {
         BootstrapState toReturn = new BootstrapState();
         toReturn.state = State.INITIAL;
@@ -29,7 +52,8 @@ public class BootstrapState extends VersionedDocument {
         return toReturn;
     }
 
-    public static BootstrapState constructErrorState(int desiredVersion, int installedVersion, String errorMessage) {
+    public static BootstrapState constructErrorState(int desiredVersion, int installedVersion,
+            String errorMessage) {
         BootstrapState toReturn = new BootstrapState();
         toReturn.state = State.ERROR;
         toReturn.desiredVersion = desiredVersion;
@@ -65,13 +89,27 @@ public class BootstrapState extends VersionedDocument {
         return toReturn;
     }
 
-    public BootstrapState() {
+    @Override
+    public int hashCode() {
+        // Don't include base class version field - no nice way to do this.
+        return HashCodeBuilder.reflectionHashCode(17, 37, this, false);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // Don't include base class version field - no nice way to do this.
+        return EqualsBuilder.reflectionEquals(this, obj, false, getClass());
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
     public enum State {
         /**
-         * Bootstrap has never been run. The tenant was migrated from an earlier version.
-         * None of component level configuration is known.
+         * Bootstrap has never been run. The tenant was migrated from an earlier
+         * version. None of component level configuration is known.
          */
         MIGRATED,
 
@@ -100,44 +138,4 @@ public class BootstrapState extends VersionedDocument {
          */
         ERROR
     }
-
-    @Override
-    public int hashCode() {
-        // Don't include base class version field - no nice way to do this.
-        return HashCodeBuilder.reflectionHashCode(17, 37, this, false);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        // Don't include base class version field - no nice way to do this.
-        return EqualsBuilder.reflectionEquals(this, obj, false, getClass());
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
-    /**
-     * The state of this bootstrap configuration.
-     */
-    public State state;
-
-    /**
-     * The desired version of configuration for this service. Equals the
-     * installedVersion if the previous operation succeeded. Otherwise equals
-     * the desired configuration version.
-     */
-    public int desiredVersion;
-
-    /**
-     * The installed version of configuration for this service. If no
-     * configuration has been installed, this equals -1.
-     */
-    public int installedVersion;
-
-    /**
-     * A detailed error message if the state == ERROR. Otherwise this is null.
-     */
-    public String errorMessage;
 }

@@ -28,13 +28,13 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 /**
- * 
+ *
  * @startuml
  *
  */
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE_PROPERTY_DEF")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PipelinePropertyDef implements HasName, HasPid {
 
     @Id
@@ -46,7 +46,7 @@ public class PipelinePropertyDef implements HasName, HasPid {
 
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @ManyToOne
     @JoinColumn(name = "FK_PIPELINE_STEP_ID", nullable = false)
     @JsonIgnore
@@ -57,9 +57,10 @@ public class PipelinePropertyDef implements HasName, HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SELECT)
     private List<PipelinePropertyValue> pipelinePropertyValues = new ArrayList<>();
-    
-    public PipelinePropertyDef() {}
-    
+
+    public PipelinePropertyDef() {
+    }
+
     public PipelinePropertyDef(String name) {
         setName(name);
     }
@@ -68,7 +69,7 @@ public class PipelinePropertyDef implements HasName, HasPid {
     public String getName() {
         return name;
     }
-    
+
     @Override
     public void setName(String name) {
         this.name = name;
@@ -99,7 +100,7 @@ public class PipelinePropertyDef implements HasName, HasPid {
     public void setPipelinePropertyValues(List<PipelinePropertyValue> pipelinePropertyValues) {
         this.pipelinePropertyValues = pipelinePropertyValues;
     }
-    
+
     public void addPipelinePropertyValue(PipelinePropertyValue pipelinePropertyValue) {
         pipelinePropertyValues.add(pipelinePropertyValue);
         pipelinePropertyValue.setPipelinePropertyDef(this);

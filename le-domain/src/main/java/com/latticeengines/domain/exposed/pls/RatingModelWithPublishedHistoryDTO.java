@@ -6,6 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RatingModelWithPublishedHistoryDTO extends RatingModelDTO {
 
+    @JsonProperty("publishedMetadata")
+    private List<BucketMetadata> publishedMetadata;
+    @JsonProperty("publishedTimestamp")
+    private Long publishedTimestamp;
+    @JsonProperty("publishedBy")
+    private String publishedBy;
+
     public RatingModelWithPublishedHistoryDTO() {
     }
 
@@ -16,15 +23,6 @@ public class RatingModelWithPublishedHistoryDTO extends RatingModelDTO {
         this.publishedMetadata = publishedMetadata;
         this.publishedBy = publishedBy;
     }
-
-    @JsonProperty("publishedMetadata")
-    private List<BucketMetadata> publishedMetadata;
-
-    @JsonProperty("publishedTimestamp")
-    private Long publishedTimestamp;
-
-    @JsonProperty("publishedBy")
-    private String publishedBy;
 
     public List<BucketMetadata> getPublishedMetadata() {
         return publishedMetadata;

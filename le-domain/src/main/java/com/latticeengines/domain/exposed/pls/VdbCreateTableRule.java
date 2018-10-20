@@ -1,18 +1,12 @@
 package com.latticeengines.domain.exposed.pls;
 
 public enum VdbCreateTableRule {
-    UPDATE("Update"),
-    CREATE("Create"),
-    CREATE_NEW("CreateNew");
+    UPDATE("Update"), CREATE("Create"), CREATE_NEW("CreateNew");
 
     private String createRule;
 
     VdbCreateTableRule(String createRule) {
         this.createRule = createRule;
-    }
-
-    public String getCreateRule() {
-        return createRule;
     }
 
     public static VdbCreateTableRule getCreateRule(String createRule) {
@@ -24,5 +18,9 @@ public enum VdbCreateTableRule {
             }
         }
         return result;
+    }
+
+    public String getCreateRule() {
+        return createRule;
     }
 }

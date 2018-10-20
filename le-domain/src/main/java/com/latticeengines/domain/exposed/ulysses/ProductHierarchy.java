@@ -11,20 +11,17 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ProductHierarchy {
 
-    public ProductHierarchy() {
-    }
-
     @JsonProperty("ProductId")
     private String productId;
-
     @JsonProperty("ProductLine")
     private String productLine;
-
     @JsonProperty("ProductFamily")
     private String productFamily;
-
     @JsonProperty("ProductCategory")
     private String productCategory;
+
+    public ProductHierarchy() {
+    }
 
     public String getProductId() {
         return this.productId;

@@ -18,13 +18,21 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "LeadScoringCommandId")
 public class ModelCommandId implements HasPid, Serializable {
 
+    private static final long serialVersionUID = 1L;
     private Long commandId;
-
     private Timestamp createTime;
-
     private String createdBy;
 
-    private static final long serialVersionUID = 1L;
+    ModelCommandId() {
+        super();
+    }
+
+    @VisibleForTesting
+    public ModelCommandId(Timestamp createTime, String createdBy) {
+        super();
+        this.createTime = createTime;
+        this.createdBy = createdBy;
+    }
 
     @Id
     @Basic(optional = false)
@@ -55,17 +63,6 @@ public class ModelCommandId implements HasPid, Serializable {
     }
 
     public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    ModelCommandId() {
-        super();
-    }
-
-    @VisibleForTesting
-    public ModelCommandId(Timestamp createTime, String createdBy) {
-        super();
-        this.createTime = createTime;
         this.createdBy = createdBy;
     }
 

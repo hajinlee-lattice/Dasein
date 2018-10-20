@@ -11,7 +11,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.Dele
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.OperationExecuteConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = BaseDataFlowReportStepConfiguration.class, name = "BaseDataFlowReportStepConfiguration"),
+@JsonSubTypes({
+        @Type(value = BaseDataFlowReportStepConfiguration.class, name = "BaseDataFlowReportStepConfiguration"),
         @Type(value = DeleteFileUploadStepConfiguration.class, name = "DeleteFileUploadStepConfiguration"),
         @Type(value = ImportDataFeedTaskConfiguration.class, name = "ImportDataFeedTaskConfiguration"),
         @Type(value = OperationExecuteConfiguration.class, name = "OperationExecuteConfiguration"), })

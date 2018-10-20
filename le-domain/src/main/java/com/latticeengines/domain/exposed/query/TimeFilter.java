@@ -34,6 +34,25 @@ public class TimeFilter implements Serializable {
     @JsonProperty("Period")
     private String period;
 
+    public TimeFilter() {
+    }
+
+    public TimeFilter(ComparisonType relation, List<Object> values) {
+        this.relation = relation;
+        this.values = values;
+    }
+
+    public TimeFilter(ComparisonType relation, String period, List<Object> values) {
+        this(null, relation, period, values);
+    }
+
+    public TimeFilter(Lookup lhs, ComparisonType relation, String period, List<Object> values) {
+        this.lhs = lhs;
+        this.relation = relation;
+        this.period = period;
+        this.values = values;
+    }
+
     public static TimeFilter ever() {
         return ever(PeriodStrategy.Template.Month.name());
     }
@@ -93,25 +112,6 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
-    public TimeFilter() {
-    }
-
-    public TimeFilter(ComparisonType relation, List<Object> values) {
-        this.relation = relation;
-        this.values = values;
-    }
-
-    public TimeFilter(ComparisonType relation, String period, List<Object> values) {
-        this(null, relation, period, values);
-    }
-
-    public TimeFilter(Lookup lhs, ComparisonType relation, String period, List<Object> values) {
-        this.lhs = lhs;
-        this.relation = relation;
-        this.period = period;
-        this.values = values;
-    }
-
     public ComparisonType getRelation() {
         return relation;
     }
@@ -158,7 +158,8 @@ public class TimeFilter implements Serializable {
 
         @Override
         public boolean equals(Object object) {
-            return !(object == null || !(object instanceof Period)) && EqualsBuilder.reflectionEquals(this, object);
+            return !(object == null || !(object instanceof Period))
+                    && EqualsBuilder.reflectionEquals(this, object);
         }
 
         @Override

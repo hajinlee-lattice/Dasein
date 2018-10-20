@@ -9,7 +9,8 @@ public abstract class Namespace {
         return new Namespace1<>(coord1);
     }
 
-    public static <N1 extends Serializable, N2 extends Serializable> Namespace2<N1, N2> as(N1 coord1, N2 coord2) {
+    public static <N1 extends Serializable, N2 extends Serializable> Namespace2<N1, N2> as(
+            N1 coord1, N2 coord2) {
         return new Namespace2<>(coord1, coord2);
     }
 

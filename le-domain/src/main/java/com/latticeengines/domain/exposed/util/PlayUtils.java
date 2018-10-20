@@ -27,7 +27,8 @@ public class PlayUtils {
         }
     }
 
-    public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch, Play play) {
+    public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch,
+            Play play) {
         if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
             // TODO - enable it once UI has fix for PLS-6769
             // throw new LedpException(LedpCode.LEDP_18156, new String[] {
@@ -42,9 +43,10 @@ public class PlayUtils {
             playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
         }
 
-        if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No destination system selected for the launch for play: " + play.getName() });
+        if (playLaunch.getDestinationOrgId() == null
+                || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "No destination system selected for the launch for play: " + play.getName() });
         }
     }
 

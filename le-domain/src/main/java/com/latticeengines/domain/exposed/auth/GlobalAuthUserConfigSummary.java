@@ -9,7 +9,8 @@ public class GlobalAuthUserConfigSummary {
 
     private String tenantDeploymentId, ssoEnabled, forceSsoLogin;
 
-    public GlobalAuthUserConfigSummary(String tenantDeploymentId, String ssoEnabled, String forceSsoLogin) {
+    public GlobalAuthUserConfigSummary(String tenantDeploymentId, String ssoEnabled,
+            String forceSsoLogin) {
         this.tenantDeploymentId = tenantDeploymentId;
         this.ssoEnabled = ssoEnabled;
         this.forceSsoLogin = forceSsoLogin;

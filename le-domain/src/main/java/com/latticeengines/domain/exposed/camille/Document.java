@@ -14,7 +14,7 @@ public class Document implements Serializable {
     public Document(String data) {
         setData(data);
     }
-    
+
     public Document(String data, int version) {
         setData(data);
         setVersion(version);
@@ -37,7 +37,8 @@ public class Document implements Serializable {
 
     public void setVersion(int version) {
         if (version < -1) {
-            throw new IllegalArgumentException("Version must either be -1 (unspecified), or greater or equal to 0");
+            throw new IllegalArgumentException(
+                    "Version must either be -1 (unspecified), or greater or equal to 0");
         }
         this.version = version;
     }

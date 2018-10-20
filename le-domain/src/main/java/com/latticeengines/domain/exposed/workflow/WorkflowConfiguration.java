@@ -21,7 +21,8 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.BasePDWo
 import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflowConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
-@JsonSubTypes({ @Type(value = BaseCDLWorkflowConfiguration.class, name = "BaseCDLWorkflowConfiguration"),
+@JsonSubTypes({
+        @Type(value = BaseCDLWorkflowConfiguration.class, name = "BaseCDLWorkflowConfiguration"),
         @Type(value = BaseDataCloudWorkflowConfiguration.class, name = "BaseDataCloudWorkflowConfiguration"),
         @Type(value = BaseLPWorkflowConfiguration.class, name = "BaseLPWorkflowConfiguration"),
         @Type(value = BaseModelingWorkflowConfiguration.class, name = "BaseModelingWorkflowConfiguration"),
@@ -89,7 +90,8 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         return subWorkflowConfigRegistry;
     }
 
-    public void setContainerConfiguration(String workflowName, CustomerSpace customerSpace, String payloadName) {
+    public void setContainerConfiguration(String workflowName, CustomerSpace customerSpace,
+            String payloadName) {
         this.workflowName = workflowName;
         setCustomerSpace(customerSpace);
         setName(payloadName);

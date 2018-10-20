@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 public class Contact implements HasId<String>, HasPid, Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -5828315692148383419L;
     private Long pid;
@@ -31,10 +31,10 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     private String firstName;
     private String lastName;
     private String titles;
-    private String email; 
-    private String phone; 
-    private String jobLevel; 
-    private String jobType; 
+    private String email;
+    private String phone;
+    private String jobLevel;
+    private String jobType;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,7 +63,6 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     public void setId(String id) {
         this.id = id;
     }
-
 
     @JsonProperty("FirstName")
     @Column(name = "FirstName", nullable = true)
@@ -101,7 +100,7 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     @JsonProperty("Titles")
     @Column(name = "Titles", nullable = true)
     public String getTitles() {
-        return titles; 
+        return titles;
     }
 
     @JsonProperty("Titles")
@@ -112,7 +111,7 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     @JsonProperty("Phone")
     @Column(name = "Phone", nullable = true)
     public String getPhone() {
-        return phone; 
+        return phone;
     }
 
     @JsonProperty("Phone")
@@ -123,7 +122,7 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     @JsonProperty("JobLevel")
     @Column(name = "JobLevel", nullable = true)
     public String getJobLevel() {
-        return jobLevel; 
+        return jobLevel;
     }
 
     @JsonProperty("JobLevel")
@@ -134,7 +133,7 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     @JsonProperty("JobType")
     @Column(name = "JobType", nullable = true)
     public String getJobType() {
-        return jobType; 
+        return jobType;
     }
 
     @JsonProperty("JobType")
@@ -145,7 +144,7 @@ public class Contact implements HasId<String>, HasPid, Serializable {
     @JsonProperty("CompanyID")
     @Column(name = "CompanyID", nullable = true)
     public Long getCompanyId() {
-        return companyId; 
+        return companyId;
     }
 
     @JsonProperty("CompanyID")

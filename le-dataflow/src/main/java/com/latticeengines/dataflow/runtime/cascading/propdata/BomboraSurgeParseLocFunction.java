@@ -34,9 +34,9 @@ public class BomboraSurgeParseLocFunction extends BaseOperation implements Funct
     private int stateLoc;
     private int cityLoc;
 
-    public BomboraSurgeParseLocFunction(Fields fieldDeclaration, Map<String, List<NameLocation>> metroLocMap,
-            String metroAreaField, String domainOriginField,
-            String countryField, String stateField, String cityField) {
+    public BomboraSurgeParseLocFunction(Fields fieldDeclaration,
+            Map<String, List<NameLocation>> metroLocMap, String metroAreaField,
+            String domainOriginField, String countryField, String stateField, String cityField) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.metroLocMap = metroLocMap;
@@ -84,7 +84,7 @@ public class BomboraSurgeParseLocFunction extends BaseOperation implements Funct
         }
         return positionMap;
     }
-    
+
     private String standardizeBomboraMetroArea(String metroArea) {
         if (StringUtils.isBlank(metroArea)) {
             return null;
@@ -95,10 +95,8 @@ public class BomboraSurgeParseLocFunction extends BaseOperation implements Funct
     }
 
     /**
-     * Sample metro codes:
-     * Tampa / St.Pete / Sarasota , FL     --- 3 cities share same state
-     * Tallahassee, FL / Thomasville, GA
-     * Askim
+     * Sample metro codes: Tampa / St.Pete / Sarasota , FL --- 3 cities share
+     * same state Tallahassee, FL / Thomasville, GA Askim
      */
     private List<NameLocation> extractLocFromBomboraMetro(String metroArea, String country) {
         List<NameLocation> locations = new ArrayList<>();
@@ -123,7 +121,8 @@ public class BomboraSurgeParseLocFunction extends BaseOperation implements Funct
             NameLocation location = new NameLocation();
             location.setCountry(country);
             // Remove Chinese invalid province
-            if (!(country != null && state != null && country.equalsIgnoreCase("China") && state.contains("CN-"))) {
+            if (!(country != null && state != null && country.equalsIgnoreCase("China")
+                    && state.contains("CN-"))) {
                 location.setState(state);
             }
             location.setCity(city);

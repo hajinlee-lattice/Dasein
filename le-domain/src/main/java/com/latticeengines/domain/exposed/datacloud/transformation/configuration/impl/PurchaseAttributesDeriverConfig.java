@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class PurchaseAttributesDeriverConfig extends TransformerConfig {

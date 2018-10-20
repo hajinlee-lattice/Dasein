@@ -22,26 +22,28 @@ import org.apache.hadoop.conf.Configuration;
 
 public class FlinkConfigConverter {
 
-	public static Configuration toHadoopConfig(org.apache.flink.configuration.Configuration flinkConfig) {
-		if(flinkConfig == null) {
-			return null;
-		}
-		Configuration hadoopConfig = new Configuration();
-		for(String key : flinkConfig.keySet()) {
-			hadoopConfig.set(key, flinkConfig.getString(key, null));
-		}
-		return hadoopConfig;
-	}
+    public static Configuration toHadoopConfig(
+            org.apache.flink.configuration.Configuration flinkConfig) {
+        if (flinkConfig == null) {
+            return null;
+        }
+        Configuration hadoopConfig = new Configuration();
+        for (String key : flinkConfig.keySet()) {
+            hadoopConfig.set(key, flinkConfig.getString(key, null));
+        }
+        return hadoopConfig;
+    }
 
-	public static org.apache.flink.configuration.Configuration toFlinkConfig(Configuration hadoopConfig) {
-		if(hadoopConfig == null) {
-			return null;
-		}
-		org.apache.flink.configuration.Configuration flinkConfig = new org.apache.flink.configuration.Configuration();
-		for(Map.Entry<String, String> e : hadoopConfig) {
-			flinkConfig.setString(e.getKey(), e.getValue());
-		}
-		return flinkConfig;
-	}
+    public static org.apache.flink.configuration.Configuration toFlinkConfig(
+            Configuration hadoopConfig) {
+        if (hadoopConfig == null) {
+            return null;
+        }
+        org.apache.flink.configuration.Configuration flinkConfig = new org.apache.flink.configuration.Configuration();
+        for (Map.Entry<String, String> e : hadoopConfig) {
+            flinkConfig.setString(e.getKey(), e.getValue());
+        }
+        return flinkConfig;
+    }
 
 }

@@ -14,22 +14,19 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BooleanBucket extends BucketAlgorithm {
-    private static final long serialVersionUID = -6093490491153221140L;
-
     public static final String DEFAULT_TRUE = "Yes";
     public static final String DEFAULT_FALSE = "No";
+    private static final long serialVersionUID = -6093490491153221140L;
+    @JsonProperty("t")
+    private String trueLabel;
+    @JsonProperty("f")
+    private String falseLabel;
 
     @Override
     @JsonIgnore
     public String getAlgorithm() {
         return BOOLEAN;
     }
-
-    @JsonProperty("t")
-    private String trueLabel;
-
-    @JsonProperty("f")
-    private String falseLabel;
 
     public String getTrueLabel() {
         return trueLabel;
@@ -59,7 +56,7 @@ public class BooleanBucket extends BucketAlgorithm {
 
     @Override
     @JsonIgnore
-    public List<String> generateLabelsInternal () {
+    public List<String> generateLabelsInternal() {
         return Arrays.asList(null, getTrueLabelWithDefault(), getFalseLabelWithDefault());
     }
 

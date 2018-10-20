@@ -20,7 +20,8 @@ public class Path implements Serializable {
 
     public Path(String rawPath) throws IllegalArgumentException {
         if (!rawPath.startsWith("/")) {
-            throw new IllegalArgumentException("Path " + rawPath + " is invalid.  Paths must start with a /.");
+            throw new IllegalArgumentException(
+                    "Path " + rawPath + " is invalid.  Paths must start with a /.");
         }
 
         if (!rawPath.equals("/") && !rawPath.matches("^(/[\\w\\-.]+)+$")) {
@@ -39,7 +40,8 @@ public class Path implements Serializable {
     public Path(List<String> parts) throws IllegalArgumentException {
         for (String part : parts) {
             if (!part.matches("^[\\w\\-.]+$")) {
-                throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
+                throw new IllegalArgumentException(
+                        "Provided path array part " + part + " is invalid.");
             }
         }
 
@@ -49,7 +51,8 @@ public class Path implements Serializable {
     public Path(String... parts) throws IllegalArgumentException {
         for (String part : parts) {
             if (!part.matches("^[\\w\\-.]+$")) {
-                throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
+                throw new IllegalArgumentException(
+                        "Provided path array part " + part + " is invalid.");
             }
         }
 
@@ -126,7 +129,7 @@ public class Path implements Serializable {
      * Returns local path relative to the specified prefix. So for example, if
      * the path is /a/b/c/d, and the prefix is /a/b, this will return the path
      * /c/d.
-     * 
+     *
      * @throws IllegalArgumentException
      *             if the path does not start with the specified prefix.
      */
@@ -136,7 +139,8 @@ public class Path implements Serializable {
         }
 
         if (!startsWith(prefix)) {
-            throw new IllegalArgumentException("Path " + toString() + " does not start with the prefix " + prefix);
+            throw new IllegalArgumentException(
+                    "Path " + toString() + " does not start with the prefix " + prefix);
         }
 
         return new Path(toString().substring(prefix.toString().length()));

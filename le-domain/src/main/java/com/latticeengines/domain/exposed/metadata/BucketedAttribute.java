@@ -26,7 +26,8 @@ public class BucketedAttribute implements Serializable {
     private int numBits;
 
     // for jackson
-    protected BucketedAttribute() {}
+    protected BucketedAttribute() {
+    }
 
     public BucketedAttribute(String nominalAttr, List<String> buckets, int lowestBit, int numBits) {
         this.nominalAttr = nominalAttr;

@@ -96,7 +96,6 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-
         public Builder transformationGroup(TransformationGroup transformationGroup,
                 List<TransformDefinition> stdTransformDefns) {
             generateRatingWorfklow.transformationGroup(transformationGroup, stdTransformDefns);
@@ -116,8 +115,8 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             generateRatingWorfklow.fetchOnly(true);
             generateRatingWorfklow.useAccountFeature(true);
 
-            configuration.setContainerConfiguration("processRatingWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processRatingWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
 
             configuration.add(processRatingStepConfiguration);
             configuration.add(combineStatisticsConfiguration);

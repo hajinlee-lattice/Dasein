@@ -33,59 +33,63 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class CoGroupBufferReduceStreamGraph extends NodeStreamGraph {
 
-	private CoGroupBufferInGate sourceStage;
-	private CollectorOutput sinkStage;
+    private CoGroupBufferInGate sourceStage;
+    private CollectorOutput sinkStage;
 
-	public CoGroupBufferReduceStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, CoGroup coGroup) {
+    public CoGroupBufferReduceStreamGraph(FlinkFlowProcess flowProcess, FlowNode node,
+            CoGroup coGroup) {
 
-		super(flowProcess, node);
+        super(flowProcess, node);
 
-		buildGraph(coGroup, flowProcess);
+        buildGraph(coGroup, flowProcess);
 
-		setTraps();
-		setScopes();
+        setTraps();
+        setScopes();
 
-		printGraph( node.getID(), "cogroup", flowProcess.getCurrentSliceNum() );
-		bind();
-	}
+        printGraph(node.getID(), "cogroup", flowProcess.getCurrentSliceNum());
+        bind();
+    }
 
-	public void setTupleCollector(Collector<Tuple> tupleCollector) {
-		this.sinkStage.setTupleCollector(tupleCollector);
-	}
+    public void setTupleCollector(Collector<Tuple> tupleCollector) {
+        this.sinkStage.setTupleCollector(tupleCollector);
+    }
 
-	public CoGroupBufferInGate getGroupSource() {
-		return this.sourceStage;
-	}
+    public CoGroupBufferInGate getGroupSource() {
+        return this.sourceStage;
+    }
 
-	private void buildGraph( CoGroup coGroup, FlowProcess flowProcess ) {
+    private void buildGraph(CoGroup coGroup, FlowProcess flowProcess) {
 
-		this.sourceStage = new CoGroupBufferInGate(flowProcess, coGroup, IORole.source);
-		addHead( sourceStage );
-		handleDuct( coGroup, sourceStage );
-	}
+        this.sourceStage = new CoGroupBufferInGate(flowProcess, coGroup, IORole.source);
+        addHead(sourceStage);
+        handleDuct(coGroup, sourceStage);
+    }
 
-	@Override
-	protected Duct createBoundaryStage( Boundary boundary, IORole role ) {
+    @Override
+    protected Duct createBoundaryStage(Boundary boundary, IORole role) {
 
-		if(role == IORole.sink) {
-			this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
-			return (BoundaryOutStage)this.sinkStage;
-		}
+        if (role == IORole.sink) {
+            this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
+            return (BoundaryOutStage) this.sinkStage;
+        }
 
-		throw new IllegalArgumentException("Boundary may only be used as sink in CoGroupBufferReduceStreamGraph");
-	}
+        throw new IllegalArgumentException(
+                "Boundary may only be used as sink in CoGroupBufferReduceStreamGraph");
+    }
 
-	@Override
-	protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a CoGroup gate in a CoGroupBufferReduceStreamGraph");
-	}
+    @Override
+    protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a CoGroup gate in a CoGroupBufferReduceStreamGraph");
+    }
 
-	@Override
-	protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a GroupBy gate in a CoGroupBufferReduceStreamGraph");
-	}
+    @Override
+    protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a GroupBy gate in a CoGroupBufferReduceStreamGraph");
+    }
 
 }

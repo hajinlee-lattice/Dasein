@@ -12,7 +12,7 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = 1L;
@@ -25,7 +25,8 @@ public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
     private int isPriDomArgIdx = -1;
 
     // output all input fields
-    public FillBlankDomainBuffer(Fields fieldDeclaration, String domainField, String isPriDomField) {
+    public FillBlankDomainBuffer(Fields fieldDeclaration, String domainField,
+            String isPriDomField) {
         super(fieldDeclaration);
         this.domainField = domainField;
         this.isPriDomField = isPriDomField;

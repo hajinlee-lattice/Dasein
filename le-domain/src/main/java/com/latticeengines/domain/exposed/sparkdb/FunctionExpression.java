@@ -12,8 +12,9 @@ public class FunctionExpression implements Serializable {
     private Attribute targetAttribute;
     private Function function;
     private boolean isNew = true;
-    
-    public FunctionExpression(String functionName, boolean isNew, Attribute targetAttribute, Attribute... sourceAttributes) {
+
+    public FunctionExpression(String functionName, boolean isNew, Attribute targetAttribute,
+            Attribute... sourceAttributes) {
         try {
             Class<?> functionClass = Class.forName(functionName);
             this.setFunction((Function) functionClass.newInstance());
@@ -23,12 +24,13 @@ public class FunctionExpression implements Serializable {
         this.isNew = isNew;
         this.sourceAttributes = sourceAttributes;
         this.setTargetAttribute(targetAttribute);
-        
+
     }
 
     public Attribute[] getSourceAttributes() {
         return sourceAttributes;
     }
+
     public void setSourceAttributes(Attribute[] sourceAttributes) {
         this.sourceAttributes = sourceAttributes;
     }

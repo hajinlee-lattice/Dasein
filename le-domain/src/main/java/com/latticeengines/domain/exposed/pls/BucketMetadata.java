@@ -89,6 +89,14 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @Transient
     private String modelSummaryId;
 
+    public BucketMetadata() {
+    }
+
+    public BucketMetadata(BucketName bucketName, int numleads) {
+        this.bucketName = bucketName;
+        this.numLeads = numleads;
+    }
+
     @Override
     public Long getPid() {
         return pid;
@@ -111,6 +119,10 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         return bucketName.toValue();
     }
 
+    public void setBucketName(String bucketName) {
+        this.bucketName = BucketName.fromValue(bucketName);
+    }
+
     @JsonIgnore
     public BucketName getBucket() {
         return bucketName;
@@ -118,10 +130,6 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
 
     public void setBucket(BucketName bucketName) {
         this.bucketName = bucketName;
-    }
-
-    public void setBucketName(String bucketName) {
-        this.bucketName = BucketName.fromValue(bucketName);
     }
 
     @Deprecated // should only use right bound (lower bound)
@@ -205,14 +213,6 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         return JsonUtils.serialize(this);
     }
 
-    public BucketMetadata() {
-    }
-
-    public BucketMetadata(BucketName bucketName, int numleads) {
-        this.bucketName = bucketName;
-        this.numLeads = numleads;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -222,10 +222,12 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         } else if (obj instanceof BucketMetadata) {
             BucketMetadata bucketMetadata = (BucketMetadata) obj;
             return this.getModelSummary().getId().equals(bucketMetadata.getModelSummary().getId())
-                    && this.getRatingEngine().getId().equals(bucketMetadata.getRatingEngine().getId())
+                    && this.getRatingEngine().getId()
+                            .equals(bucketMetadata.getRatingEngine().getId())
                     && this.getBucketName().equals(bucketMetadata.getBucketName())
                     && this.getRightBoundScore() == bucketMetadata.getRightBoundScore()
-                    && this.getLift() == bucketMetadata.getLift() && this.getNumLeads() == bucketMetadata.getNumLeads();
+                    && this.getLift() == bucketMetadata.getLift()
+                    && this.getNumLeads() == bucketMetadata.getNumLeads();
         }
         return false;
     }

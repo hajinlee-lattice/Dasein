@@ -8,10 +8,9 @@ import io.swagger.annotations.ApiModel;
 @ApiModel("Represents type of the prediction by an AI model")
 public enum PredictionType {
 
-	PROPENSITY("Propensity"), //
-	EXPECTED_VALUE("ExpectedValue");
+    PROPENSITY("Propensity"), //
+    EXPECTED_VALUE("ExpectedValue");
 
-    private String modelType;
     private static Map<String, PredictionType> map = new HashMap<>();
 
     static {
@@ -20,16 +19,18 @@ public enum PredictionType {
         }
     }
 
+    private String modelType;
+
     PredictionType(String modelType) {
         this.modelType = modelType;
     }
 
-    public String getModelType() {
-        return modelType;
-    }
-
     public static PredictionType getByModelType(String modelType) {
         return map.get(modelType);
+    }
+
+    public String getModelType() {
+        return modelType;
     }
 
 }

@@ -12,7 +12,8 @@ public class AttributeListener {
     public void tablePostLoad(Attribute attribute) {
         String enumValuesAsStr = attribute.getCleanedUpEnumValuesAsString();
         if (enumValuesAsStr != null) {
-            attribute.setCleanedUpEnumValues(Arrays.asList(StringUtils.split(enumValuesAsStr, ",")));
+            attribute
+                    .setCleanedUpEnumValues(Arrays.asList(StringUtils.split(enumValuesAsStr, ",")));
         }
     }
 

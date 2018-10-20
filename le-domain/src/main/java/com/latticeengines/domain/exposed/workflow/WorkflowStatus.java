@@ -5,15 +5,15 @@ import java.util.EnumSet;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.BatchStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class WorkflowStatus {
 
-    public static final EnumSet<BatchStatus> TERMINAL_BATCH_STATUS = EnumSet.of(BatchStatus.ABANDONED,
-            BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
+    public static final EnumSet<BatchStatus> TERMINAL_BATCH_STATUS = EnumSet.of(
+            BatchStatus.ABANDONED, BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
 
     private BatchStatus status;
     private Date startTime;

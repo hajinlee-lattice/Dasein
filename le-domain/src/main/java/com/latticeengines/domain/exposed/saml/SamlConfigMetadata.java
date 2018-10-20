@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SamlConfigMetadata {
 
     private String entityId;
-    
+
     private String singleSignOnService;
 
     public String getEntityId() {

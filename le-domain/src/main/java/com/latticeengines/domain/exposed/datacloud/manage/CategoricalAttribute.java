@@ -15,7 +15,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "CategoricalAttribute", indexes = { @Index(name = "IX_PARENT_ID", columnList = "ParentID")})
+@Table(name = "CategoricalAttribute", indexes = {
+        @Index(name = "IX_PARENT_ID", columnList = "ParentID") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CategoricalAttribute implements HasPid {
 

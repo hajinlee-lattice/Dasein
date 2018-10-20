@@ -2,12 +2,11 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
 public class MatchCdlAccountConfiguration extends BaseCDLDataFlowStepConfiguration {
 
+    private String matchInputTableName;
+    private String matchAccountIdColumn;
     public MatchCdlAccountConfiguration() {
         setBeanName("matchCdlAccountFlow");
     }
-
-    private String matchInputTableName;
-    private String matchAccountIdColumn;
 
     public String getMatchInputTableName() {
         return matchInputTableName;

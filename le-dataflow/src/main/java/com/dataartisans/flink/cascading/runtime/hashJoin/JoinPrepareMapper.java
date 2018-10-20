@@ -24,42 +24,41 @@ import cascading.tuple.Tuple;
 
 public class JoinPrepareMapper implements MapFunction<Tuple, Tuple2<Tuple, Tuple[]>> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4204915813975728133L;
-	final private Tuple2<Tuple, Tuple[]> out;
-	private final int initialPos;
-	final private Fields schema;
-	final private Fields keyFields;
-	final private Tuple empty = new Tuple();
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4204915813975728133L;
+    final private Tuple2<Tuple, Tuple[]> out;
+    private final int initialPos;
+    final private Fields schema;
+    final private Fields keyFields;
+    final private Tuple empty = new Tuple();
 
-	public JoinPrepareMapper(int numJoinInputs, Fields schema, Fields keyFields) {
-		this(numJoinInputs, 0, schema, keyFields);
-	}
+    public JoinPrepareMapper(int numJoinInputs, Fields schema, Fields keyFields) {
+        this(numJoinInputs, 0, schema, keyFields);
+    }
 
-	public JoinPrepareMapper(int numJoinInputs, int initialPos, Fields schema, Fields keyFields) {
-		this.schema = schema;
-		this.keyFields = keyFields;
-		this.initialPos = initialPos;
+    public JoinPrepareMapper(int numJoinInputs, int initialPos, Fields schema, Fields keyFields) {
+        this.schema = schema;
+        this.keyFields = keyFields;
+        this.initialPos = initialPos;
 
-		Tuple[] tupleList = new Tuple[numJoinInputs];
-		for(int i=0; i<numJoinInputs-1; i++) {
-			tupleList[i] = new Tuple();
-		}
-		out = new Tuple2<>(null, tupleList);
-	}
+        Tuple[] tupleList = new Tuple[numJoinInputs];
+        for (int i = 0; i < numJoinInputs - 1; i++) {
+            tupleList[i] = new Tuple();
+        }
+        out = new Tuple2<>(null, tupleList);
+    }
 
-	@Override
-	public Tuple2<Tuple, Tuple[]> map(Tuple tuple) throws Exception {
-		if(keyFields == null) {
-			out.f0 = empty;
-		}
-		else {
-			out.f0 = tuple.get(schema, keyFields);
-		}
-		out.f1[initialPos] = tuple;
-		return out;
-	}
+    @Override
+    public Tuple2<Tuple, Tuple[]> map(Tuple tuple) throws Exception {
+        if (keyFields == null) {
+            out.f0 = empty;
+        } else {
+            out.f0 = tuple.get(schema, keyFields);
+        }
+        out.f1[initialPos] = tuple;
+        return out;
+    }
 
 }

@@ -18,7 +18,8 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.P
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = BaseWrapperStepConfiguration.class, name = "BaseWrapperStepConfiguration"),
+@JsonSubTypes({
+        @Type(value = BaseWrapperStepConfiguration.class, name = "BaseWrapperStepConfiguration"),
         @Type(value = CombineStatisticsConfiguration.class, name = "CombineStatisticsConfiguration"),
         @Type(value = ImportVdbTableStepConfiguration.class, name = "ImportVdbTableStepConfiguration"),
         @Type(value = IngestionStepConfiguration.class, name = "IngestionStepConfiguration"),

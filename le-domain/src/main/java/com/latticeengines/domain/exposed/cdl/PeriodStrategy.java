@@ -14,13 +14,13 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PeriodStrategy implements Serializable {
 
-    private static final long serialVersionUID = 4453849238385668063L;
-    public static PeriodStrategy CalendarWeek, CalendarMonth, CalendarQuarter, CalendarYear;
     public static final ImmutableList<PeriodStrategy> NATURAL_PERIODS = ImmutableList.of( //
             new PeriodStrategy(Template.Week), //
             new PeriodStrategy(Template.Month), //
             new PeriodStrategy(Template.Quarter), //
             new PeriodStrategy(Template.Year));
+    private static final long serialVersionUID = 4453849238385668063L;
+    public static PeriodStrategy CalendarWeek, CalendarMonth, CalendarQuarter, CalendarYear;
 
     static {
         CalendarWeek = new PeriodStrategy(Template.Week);
@@ -29,9 +29,18 @@ public class PeriodStrategy implements Serializable {
         CalendarYear = new PeriodStrategy(Template.Year);
     }
 
+    @JsonProperty("template")
+    private Template template;
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("start_time")
+    private String startTimeStr;
+    @JsonProperty("business_calendar")
+    private BusinessCalendar businessCalendar;
+
     // for jackson
     @SuppressWarnings("unused")
-	private PeriodStrategy() {
+    private PeriodStrategy() {
     }
 
     public PeriodStrategy(Template template) {
@@ -44,18 +53,6 @@ public class PeriodStrategy implements Serializable {
         this.setName(template.name());
         this.setBusinessCalendar(calendar);
     }
-
-    @JsonProperty("template")
-    private Template template;
-
-    @JsonProperty("name")
-    private String name;
-
-    @JsonProperty("start_time")
-    private String startTimeStr;
-
-    @JsonProperty("business_calendar")
-    private BusinessCalendar businessCalendar;
 
     public Template getTemplate() {
         return template;
@@ -88,7 +85,6 @@ public class PeriodStrategy implements Serializable {
     public void setBusinessCalendar(BusinessCalendar businessCalendar) {
         this.businessCalendar = businessCalendar;
     }
-
 
     public enum Template {
         Date, Day, Week, Month, Quarter, Year

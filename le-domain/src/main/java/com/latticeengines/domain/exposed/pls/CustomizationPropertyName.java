@@ -12,14 +12,6 @@ public enum CustomizationPropertyName {
         this.type = type;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Class<?> getType() {
-        return type;
-    }
-
     public static CustomizationPropertyName fromName(String propertyNameString) {
         for (CustomizationPropertyName propertyName : CustomizationPropertyName.values()) {
             if (propertyName.getName().equals(propertyNameString)) {
@@ -27,5 +19,13 @@ public enum CustomizationPropertyName {
             }
         }
         return null;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Class<?> getType() {
+        return type;
     }
 }

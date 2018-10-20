@@ -3,24 +3,24 @@ package com.latticeengines.domain.exposed.camille.scopes;
 public class TenantScope extends ConfigurationScope {
     private String contractId;
     private String tenantId;
-    
+
     public TenantScope(String contractId, String tenantId) {
         this.contractId = contractId;
         this.tenantId = tenantId;
     }
-    
+
     public String getContractId() {
         return contractId;
     }
-    
+
     public void setContractId(String contractId) {
         this.contractId = contractId;
     }
-    
+
     public String getTenantId() {
         return tenantId;
     }
-    
+
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
@@ -61,6 +61,5 @@ public class TenantScope extends ConfigurationScope {
     public Type getType() {
         return Type.TENANT;
     }
-    
-    
+
 }

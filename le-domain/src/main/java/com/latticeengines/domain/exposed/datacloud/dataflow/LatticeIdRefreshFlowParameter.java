@@ -48,5 +48,4 @@ public class LatticeIdRefreshFlowParameter extends TransformationFlowParameters 
         this.entitySrcIdx = entitySrcIdx;
     }
 
-
 }

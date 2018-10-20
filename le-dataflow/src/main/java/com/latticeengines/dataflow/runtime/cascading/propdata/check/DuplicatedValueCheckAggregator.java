@@ -13,19 +13,14 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedValueCheckAggregator.Context>
+public class DuplicatedValueCheckAggregator
+        extends BaseAggregator<DuplicatedValueCheckAggregator.Context>
         implements Aggregator<DuplicatedValueCheckAggregator.Context> {
 
     private static final long serialVersionUID = 7863554582861435361L;
 
     private List<String> checkField;
     private Boolean withStatusFlag;
-
-    public static class Context extends BaseAggregator.Context {
-        String value = null;
-        String code = null;
-        long count = 0;
-    }
 
     public DuplicatedValueCheckAggregator(List<String> keyField, Boolean withStatusFlag) {
         super(generateFieldDeclaration());
@@ -40,8 +35,7 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
                 DataCloudConstants.CHK_ATTR_GROUP_ID, //
                 DataCloudConstants.CHK_ATTR_CHK_FIELD, //
                 DataCloudConstants.CHK_ATTR_CHK_VALUE, //
-                DataCloudConstants.CHK_ATTR_CHK_MSG
-        );
+                DataCloudConstants.CHK_ATTR_CHK_MSG);
     }
 
     @Override
@@ -58,12 +52,13 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
         Context context = new Context();
         boolean returnVal = true;
         Object grpObjVal = "";
-        for(int i = 0; i < checkField.size(); i++) {
+        for (int i = 0; i < checkField.size(); i++) {
             if (i == 0 && (grpObjVal != "")) {
                 grpObjVal = String.valueOf(group.getObject(checkField.get(i)));
             } else {
                 if (grpObjVal != "") {
-                    grpObjVal = grpObjVal + "," + String.valueOf(group.getObject(checkField.get(i)));
+                    grpObjVal = grpObjVal + ","
+                            + String.valueOf(group.getObject(checkField.get(i)));
                 }
                 if (grpObjVal == "") {
                     grpObjVal = String.valueOf(group.getObject(checkField.get(i)));
@@ -119,5 +114,11 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
 
     protected Tuple dummyTuple(Context context) {
         return null;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String value = null;
+        String code = null;
+        long count = 0;
     }
 }

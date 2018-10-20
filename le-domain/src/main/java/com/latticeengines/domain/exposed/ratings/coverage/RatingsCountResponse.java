@@ -43,7 +43,8 @@ public class RatingsCountResponse {
         return ratingEngineModelIdCoverageMap;
     }
 
-    public void setRatingEngineModelIdCoverageMap(Map<String, CoverageInfo> ratingEngineModelIdCoverageMap) {
+    public void setRatingEngineModelIdCoverageMap(
+            Map<String, CoverageInfo> ratingEngineModelIdCoverageMap) {
         this.ratingEngineModelIdCoverageMap = ratingEngineModelIdCoverageMap;
     }
 
@@ -51,7 +52,8 @@ public class RatingsCountResponse {
         return segmentIdModelRulesCoverageMap;
     }
 
-    public void setSegmentIdModelRulesCoverageMap(Map<String, CoverageInfo> segmentIdModelRulesCoverageMap) {
+    public void setSegmentIdModelRulesCoverageMap(
+            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap) {
         this.segmentIdModelRulesCoverageMap = segmentIdModelRulesCoverageMap;
     }
 
@@ -59,7 +61,8 @@ public class RatingsCountResponse {
         return segmentIdAndSingleRulesCoverageMap;
     }
 
-    public void setSegmentIdAndSingleRulesCoverageMap(Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap) {
+    public void setSegmentIdAndSingleRulesCoverageMap(
+            Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap) {
         this.segmentIdAndSingleRulesCoverageMap = segmentIdAndSingleRulesCoverageMap;
     }
 
@@ -67,7 +70,8 @@ public class RatingsCountResponse {
         return ratingIdLookupColumnPairsCoverageMap;
     }
 
-    public void setRatingIdLookupColumnPairsCoverageMap(Map<String, CoverageInfo> ratingIdLookupColumnPairsCoverageMap) {
+    public void setRatingIdLookupColumnPairsCoverageMap(
+            Map<String, CoverageInfo> ratingIdLookupColumnPairsCoverageMap) {
         this.ratingIdLookupColumnPairsCoverageMap = ratingIdLookupColumnPairsCoverageMap;
     }
 

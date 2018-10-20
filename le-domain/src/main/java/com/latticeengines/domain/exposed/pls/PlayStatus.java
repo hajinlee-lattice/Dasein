@@ -10,8 +10,6 @@ public enum PlayStatus {
 
     ACTIVE(0), //
     INACTIVE(1);
-    
-    private int stautsId;
 
     private static Map<Integer, PlayStatus> statusMap = new HashMap<>();
     private static Map<PlayStatus, Collection<PlayStatus>> transitionMap = new HashMap<>();
@@ -24,8 +22,17 @@ public enum PlayStatus {
         transitionMap.put(INACTIVE, Stream.of(ACTIVE).collect(Collectors.toSet()));
     }
 
+    private int stautsId;
+
     private PlayStatus(int statusId) {
         this.stautsId = statusId;
+    }
+
+    public static boolean canTransit(PlayStatus srcState, PlayStatus dstState) {
+        if (transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState)) {
+            return true;
+        }
+        return false;
     }
 
     public int getStatusId() {
@@ -34,12 +41,5 @@ public enum PlayStatus {
 
     public PlayStatus getPlayStatus(Integer statusId) {
         return statusMap.get(statusId);
-    }
-
-    public static boolean canTransit(PlayStatus srcState, PlayStatus dstState) {
-        if (transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState)) {
-            return true;
-        }
-        return false;
     }
 }

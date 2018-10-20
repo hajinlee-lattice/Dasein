@@ -26,16 +26,15 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
     }
 
     public static class Builder {
+        PrepareMatchDataConfiguration prepareMatchDataConfiguration = new PrepareMatchDataConfiguration();
         private MatchDataCloudWorkflowConfiguration configuration = new MatchDataCloudWorkflowConfiguration();
-
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private BulkMatchWorkflowConfiguration.Builder bulkMatchWorkflowConfigurationBuilder = new BulkMatchWorkflowConfiguration.Builder();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
-        PrepareMatchDataConfiguration prepareMatchDataConfiguration = new PrepareMatchDataConfiguration();
 
         public MatchDataCloudWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("matchDataCloudWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("matchDataCloudWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(match);
             configuration.add(prepareMatchDataConfiguration);
             configuration.add(bulkMatchWorkflowConfigurationBuilder.build());
@@ -84,7 +83,8 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
             return this;

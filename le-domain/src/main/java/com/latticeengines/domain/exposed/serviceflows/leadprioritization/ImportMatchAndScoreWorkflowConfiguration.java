@@ -117,8 +117,10 @@ public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConf
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            scoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
+                String selectionVersion) {
+            scoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection,
+                    selectionVersion);
             return this;
         }
 
@@ -173,7 +175,8 @@ public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConf
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            scoreWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            scoreWorkflowConfigurationBuilder
+                    .sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
@@ -183,8 +186,8 @@ public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConf
         }
 
         public ImportMatchAndScoreWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("importMatchAndScoreWorkflow", configuration.getCustomerSpace(),
-                    configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("importMatchAndScoreWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(importDataConfiguration);
             configuration.add(registerReport);
             configuration.add(scoreWorkflowConfigurationBuilder.build());

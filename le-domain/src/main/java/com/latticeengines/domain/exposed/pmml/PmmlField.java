@@ -7,7 +7,7 @@ public class PmmlField {
 
     public MiningField miningField;
     public DataField dataField;
-    
+
     public PmmlField(MiningField miningField, DataField dataField) {
         this.miningField = miningField;
         this.dataField = dataField;

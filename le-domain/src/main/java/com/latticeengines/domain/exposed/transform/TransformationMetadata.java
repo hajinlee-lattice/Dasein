@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Tag;
 
-
 public class TransformationMetadata implements Serializable {
 
     private static final long serialVersionUID = 6227273033756664706L;
@@ -106,72 +105,72 @@ public class TransformationMetadata implements Serializable {
         setPropertyValue("ApprovedUsage", getStringValuesFromEnums(approvedUsages));
     }
 
-    public void setApprovedUsage(List<String> approvedUsage) {
-        setPropertyValue("ApprovedUsage", getStringValuesFromList(approvedUsage));
-    }
-
     public List<String> getApprovedUsage() {
         return getListFromStringValues(getPropertyValue("ApprovedUsage"));
+    }
+
+    public void setApprovedUsage(List<String> approvedUsage) {
+        setPropertyValue("ApprovedUsage", getStringValuesFromList(approvedUsage));
     }
 
     public void setStatisticalType(String statisticalType) {
         setPropertyValue("StatisticalType", statisticalType);
     }
 
-    public void setStatisticalType(StatisticalType statisticalType) {
-        setPropertyValue("StatisticalType", statisticalType.getName());
-    }
-
     public String getStatisticalType() {
         return getPropertyValue("StatisticalType");
+    }
+
+    public void setStatisticalType(StatisticalType statisticalType) {
+        setPropertyValue("StatisticalType", statisticalType.getName());
     }
 
     public void setFundamentalType(String fundamentalType) {
         setPropertyValue("FundamentalType", fundamentalType);
     }
 
-    public void setFundamentalType(FundamentalType fundamentalType) {
-        setPropertyValue("FundamentalType", fundamentalType.getName());
-    }
-
     public String getFundamentalType() {
         return getPropertyValue("FundamentalType");
     }
 
-    public void setDataQuality(String dataQuality) {
-        setPropertyValue("DataQuality", dataQuality);
+    public void setFundamentalType(FundamentalType fundamentalType) {
+        setPropertyValue("FundamentalType", fundamentalType.getName());
     }
 
     public String getDataQuality() {
         return getPropertyValue("DataQuality");
     }
 
-    public void setDataSource(String dataSource) {
-        setPropertyValue("DataSource", dataSource);
+    public void setDataQuality(String dataQuality) {
+        setPropertyValue("DataQuality", dataQuality);
     }
 
-    public void setDataSource(List<String> dataSource) {
-        setPropertyValue("DataSource", getStringValuesFromList(dataSource));
+    public void setDataSource(String dataSource) {
+        setPropertyValue("DataSource", dataSource);
     }
 
     public List<String> getDataSource() {
         return getListFromStringValues(getPropertyValue("DataSource"));
     }
 
-    public void setDisplayDiscretizationStrategy(String displayDiscretizationStrategy) {
-        setPropertyValue("DisplayDiscretizationStrategy", displayDiscretizationStrategy);
+    public void setDataSource(List<String> dataSource) {
+        setPropertyValue("DataSource", getStringValuesFromList(dataSource));
     }
 
     public String getDisplayDiscretizationStrategy() {
         return getPropertyValue("DisplayDiscretizationStrategy");
     }
 
-    public void setDescription(String description) {
-        setPropertyValue("Description", description);
+    public void setDisplayDiscretizationStrategy(String displayDiscretizationStrategy) {
+        setPropertyValue("DisplayDiscretizationStrategy", displayDiscretizationStrategy);
     }
 
     public String getDescription() {
         return getPropertyValue("Description");
+    }
+
+    public void setDescription(String description) {
+        setPropertyValue("Description", description);
     }
 
     public void setTags(String tags) {
@@ -182,56 +181,58 @@ public class TransformationMetadata implements Serializable {
         setPropertyValue("Tags", getStringValuesFromEnums(tags));
     }
 
-    public void setTags(List<String> tags) {
-        setTags(getStringValuesFromList(tags));
-    }
-
     public List<String> getTags() {
         return getListFromStringValues(getPropertyValue("Tags"));
     }
 
-    public void setPhysicalName(String physicalName) {
-        setPropertyValue("PhysicalName", physicalName);
+    public void setTags(List<String> tags) {
+        setTags(getStringValuesFromList(tags));
     }
 
     public String getPhysicalName() {
         return getPropertyValue("PhysicalName");
     }
 
+    public void setPhysicalName(String physicalName) {
+        setPropertyValue("PhysicalName", physicalName);
+    }
+
     public void setCategory(String category) {
         setPropertyValue("Category", category);
+    }
+
+    public String getCategory() {
+        return getPropertyValue("Category") != null ? getPropertyValue("Category").toString()
+                : null;
     }
 
     public void setCategory(Category category) {
         setPropertyValue("Category", category.getName());
     }
 
-    public String getCategory() {
-        return getPropertyValue("Category") != null ? getPropertyValue("Category").toString() : null;
+    public String getDataType() {
+        return getPropertyValue("DataType") != null ? getPropertyValue("DataType").toString()
+                : null;
     }
 
     public void setDataType(String dataType) {
         setPropertyValue("DataType", dataType);
     }
 
-    public String getDataType() {
-        return getPropertyValue("DataType") != null ? getPropertyValue("DataType").toString() : null;
+    public String getRTSModuleName() {
+        return getPropertyValue("RTSModuleName");
     }
 
     public void setRTSModuleName(String rtsModuleName) {
         setPropertyValue("RTSModuleName", rtsModuleName);
     }
 
-    public String getRTSModuleName() {
-        return getPropertyValue("RTSModuleName");
+    public String getRTSArguments() {
+        return getPropertyValue("RTSArguments");
     }
 
     public void setRTSArguments(String rtsArguments) {
         setPropertyValue("RTSArguments", rtsArguments);
-    }
-
-    public String getRTSArguments() {
-        return getPropertyValue("RTSArguments");
     }
 
     public Boolean getRTSAttribute() {
@@ -242,24 +243,24 @@ public class TransformationMetadata implements Serializable {
         return rts;
     }
 
-    public void setRTSAttribute(Boolean rts) {
-        setPropertyValue("RTSAttribute", rts.toString());
-    }
-
     public void setRTSAttribute(String rts) {
         setPropertyValue("RTSAttribute", rts);
+    }
+
+    public void setRTSAttribute(Boolean rts) {
+        setPropertyValue("RTSAttribute", rts.toString());
     }
 
     public List<String> getAllowedDisplayNames() {
         return getListFromStringValues(getPropertyValue("AllowedDisplayNames"));
     }
 
-    public void setAllowedDisplayNames(List<String> allowedDisplayNames) {
-        setAllowedDisplayNames(getStringValuesFromList(allowedDisplayNames));
-    }
-
     public void setAllowedDisplayNames(String allowedDisplayNamesString) {
         setPropertyValue("AllowedDisplayNames", allowedDisplayNamesString);
+    }
+
+    public void setAllowedDisplayNames(List<String> allowedDisplayNames) {
+        setAllowedDisplayNames(getStringValuesFromList(allowedDisplayNames));
     }
 
     @Override

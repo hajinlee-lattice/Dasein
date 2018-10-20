@@ -31,8 +31,9 @@ public class NumericProfileSampleBuffer extends BaseOperation implements Buffer 
 
     private Map<String, Integer> namePositionMap;
 
-    public NumericProfileSampleBuffer(Fields fieldDeclaration, List<String> numAttrs, Map<String, Class<?>> clsMap,
-            Map<String, List<String>> numAttrsToDecode, Map<String, BitCodeBook> codeBookMap) {
+    public NumericProfileSampleBuffer(Fields fieldDeclaration, List<String> numAttrs,
+            Map<String, Class<?>> clsMap, Map<String, List<String>> numAttrsToDecode,
+            Map<String, BitCodeBook> codeBookMap) {
         super(fieldDeclaration);
         this.numAttrs = numAttrs;
         this.clsMap = clsMap;
@@ -62,7 +63,8 @@ public class NumericProfileSampleBuffer extends BaseOperation implements Buffer 
             }
             for (Map.Entry<String, List<String>> ent : numAttrsToDecode.entrySet()) {
                 String encVal = arguments.getString(ent.getKey());
-                Map<String, Object> decVals = codeBookMap.get(ent.getKey()).decode(encVal, ent.getValue());
+                Map<String, Object> decVals = codeBookMap.get(ent.getKey()).decode(encVal,
+                        ent.getValue());
                 for (Map.Entry<String, Object> decVal : decVals.entrySet()) {
                     processNumVal(decVal.getKey(), decVal.getValue());
                 }

@@ -31,70 +31,52 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class MatchInput implements Fact, Dimension {
 
     public static final String DEFAULT_DATACLOUD_VERSION = "1.0.0";
-
+    // legacy configuration to be removed
+    @JsonIgnore
+    private static final String predefinedVersion = "1.0";
     @JsonProperty("Tenant")
     private Tenant tenant;
-
     @JsonProperty("Fields")
     private List<String> fields;
-
     @JsonProperty("Data")
     private List<List<Object>> data;
-
     @JsonIgnore
     private int numRows;
-
     @JsonProperty("DecisionGraph")
     private String decisionGraph;
-
     @JsonProperty("LogLevel")
     private String logLevel;
-
     @JsonProperty("RootOperationUid")
     private String rootOperationUid;
-
     @JsonIgnore
     private String matchEngine;
-
     // optional, but better to provide. if not, will be resolved from the fields
     @JsonProperty("KeyMap")
     private Map<MatchKey, List<String>> keyMap;
-
     @JsonProperty("LookupId")
     private String lookupId;
-
     // =========================
     // BEGIN: column selections
     // =========================
     // only one of these is needed, custom selection has higher priority
     @JsonProperty("PredefinedSelection")
     private Predefined predefinedSelection;
-
     @JsonProperty("CustomSelection")
     private ColumnSelection customSelection;
-
     @JsonProperty("UnionSelection")
     private UnionSelection unionSelection;
-
     @JsonIgnore
     private List<ColumnMetadata> metadatas;
-    @JsonIgnore
-    private List<String> metadataFields;
 
     // =========================
     // END: column selections
     // =========================
-
+    @JsonIgnore
+    private List<String> metadataFields;
     @JsonProperty("TimeOut")
     private Long timeout;
-
     @JsonProperty("RequestSource")
     private MatchRequestSource requestSource = MatchRequestSource.SCORING;
-
-    // legacy configuration to be removed
-    @JsonIgnore
-    private static final String predefinedVersion = "1.0";
-
     @JsonProperty("DataCloudVersion")
     private String dataCloudVersion = DEFAULT_DATACLOUD_VERSION;
 
@@ -197,8 +179,16 @@ public class MatchInput implements Fact, Dimension {
         return useDnBCache;
     }
 
+    public void setUseDnBCache(boolean useDnBCache) {
+        this.useDnBCache = useDnBCache;
+    }
+
     public boolean isLogDnBBulkResult() {
         return logDnBBulkResult;
+    }
+
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
     }
 
     public Long getTimeout() {
@@ -489,20 +479,12 @@ public class MatchInput implements Fact, Dimension {
         this.realTimeThreadPoolSize = realTimeThreadPoolSize;
     }
 
-    public void setUseDnBCache(boolean useDnBCache) {
-        this.useDnBCache = useDnBCache;
-    }
-
-    public void setUseRemoteDnB(Boolean useRemoteDnB) {
-        this.useRemoteDnB = useRemoteDnB;
-    }
-
     public Boolean getUseRemoteDnB() {
         return useRemoteDnB;
     }
 
-    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
-        this.logDnBBulkResult = logDnBBulkResult;
+    public void setUseRemoteDnB(Boolean useRemoteDnB) {
+        this.useRemoteDnB = useRemoteDnB;
     }
 
     public boolean isMatchDebugEnabled() {

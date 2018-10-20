@@ -34,7 +34,8 @@ public class DiscreteProfileGroupingBuffer extends BaseOperation implements Buff
     private Map<String, Integer> namePositionMap;
 
     public DiscreteProfileGroupingBuffer(Fields fieldDeclaration, List<String> numAttrs,
-            Map<String, List<String>> numAttrsToDecode, Map<String, BitCodeBook> codeBookMap, int maxDisVals) {
+            Map<String, List<String>> numAttrsToDecode, Map<String, BitCodeBook> codeBookMap,
+            int maxDisVals) {
         super(fieldDeclaration);
         this.maxDisVals = maxDisVals;
         this.numAttrs = numAttrs;
@@ -59,14 +60,16 @@ public class DiscreteProfileGroupingBuffer extends BaseOperation implements Buff
         outputResult(bufferCall, intDict, longDict);
     }
 
-    private void processData(TupleEntry arguments, Map<String, Set<Integer>> intDict, Map<String, Set<Long>> longDict) {
+    private void processData(TupleEntry arguments, Map<String, Set<Integer>> intDict,
+            Map<String, Set<Long>> longDict) {
         for (String attr : numAttrs) {
             Object val = arguments.getObject(attr);
             processNumVal(attr, val, intDict, longDict);
         }
         for (Map.Entry<String, List<String>> ent : numAttrsToDecode.entrySet()) {
             String encVal = arguments.getString(ent.getKey());
-            Map<String, Object> decVals = codeBookMap.get(ent.getKey()).decode(encVal, ent.getValue());
+            Map<String, Object> decVals = codeBookMap.get(ent.getKey()).decode(encVal,
+                    ent.getValue());
             for (Map.Entry<String, Object> decVal : decVals.entrySet()) {
                 processNumVal(decVal.getKey(), decVal.getValue(), intDict, longDict);
             }
@@ -95,7 +98,8 @@ public class DiscreteProfileGroupingBuffer extends BaseOperation implements Buff
         intDict.get(attr).add((Integer) val);
         if (intDict.get(attr).size() > maxDisVals) {
             intDict.get(attr).clear();
-            intDict.get(attr).add(null);    // this attribute is not discrete attribute
+            intDict.get(attr).add(null); // this attribute is not discrete
+                                         // attribute
         }
     }
 
@@ -109,7 +113,8 @@ public class DiscreteProfileGroupingBuffer extends BaseOperation implements Buff
         longDict.get(attr).add((Long) val);
         if (longDict.get(attr).size() > maxDisVals) {
             longDict.get(attr).clear();
-            longDict.get(attr).add(null);    // this attribute is not discrete attribute
+            longDict.get(attr).add(null); // this attribute is not discrete
+                                          // attribute
         }
     }
 

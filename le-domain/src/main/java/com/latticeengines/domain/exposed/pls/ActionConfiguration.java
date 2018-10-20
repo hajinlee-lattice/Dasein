@@ -15,9 +15,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
         @Type(value = CleanupActionConfiguration.class, name = "cleanupActionConfiguration") })
 public abstract class ActionConfiguration {
 
-    public abstract String serialize();
-
     private Boolean hiddenFromUI = false;
+
+    public abstract String serialize();
 
     public Boolean isHiddenFromUI() {
         return hiddenFromUI;

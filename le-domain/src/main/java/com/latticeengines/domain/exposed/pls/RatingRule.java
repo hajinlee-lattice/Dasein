@@ -21,49 +21,13 @@ public class RatingRule {
     @JsonProperty("defaultBucketName")
     private String defaultBucketName = DEFAULT_BUCKET_NAME;
 
+    public RatingRule() {
+    }
+
     public static RatingRule constructDefaultRule() {
         RatingRule ratingRule = new RatingRule();
         ratingRule.setBucketToRuleMap(generateDefaultBuckets());
         return ratingRule;
-    }
-
-    public RatingRule() {
-    }
-
-    public void setBucketToRuleMap(TreeMap<String, Map<String, Restriction>> bucketToRuleMap) {
-        this.bucketToRuleMap = bucketToRuleMap;
-    }
-
-    public TreeMap<String, Map<String, Restriction>> getBucketToRuleMap() {
-        return this.bucketToRuleMap;
-    }
-
-    @JsonIgnore
-    public void setRuleForBucket(RatingBucketName bucket, Restriction accountRestriction, Restriction contactRestriction) {
-        if (accountRestriction == null && contactRestriction == null) {
-            return;
-        }
-        Map<String, Restriction> rules = new HashMap<>();
-        if (accountRestriction != null) {
-            rules.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, accountRestriction);
-        }
-        if (contactRestriction != null) {
-            rules.put(FrontEndQueryConstants.CONTACT_RESTRICTION, contactRestriction);
-        }
-        bucketToRuleMap.put(bucket.getName(), rules);
-    }
-
-    @JsonIgnore
-    public Map<String, Restriction> getRuleForBucket(RatingBucketName bucket) {
-        return bucketToRuleMap.get(bucket.getName());
-    }
-
-    public void setDefaultBucketName(String defaultBucketName) {
-        this.defaultBucketName = defaultBucketName;
-    }
-
-    public String getDefaultBucketName() {
-        return this.defaultBucketName;
     }
 
     @VisibleForTesting
@@ -83,6 +47,43 @@ public class RatingRule {
         map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, null);
         map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, null);
         return map;
+    }
+
+    public TreeMap<String, Map<String, Restriction>> getBucketToRuleMap() {
+        return this.bucketToRuleMap;
+    }
+
+    public void setBucketToRuleMap(TreeMap<String, Map<String, Restriction>> bucketToRuleMap) {
+        this.bucketToRuleMap = bucketToRuleMap;
+    }
+
+    @JsonIgnore
+    public void setRuleForBucket(RatingBucketName bucket, Restriction accountRestriction,
+            Restriction contactRestriction) {
+        if (accountRestriction == null && contactRestriction == null) {
+            return;
+        }
+        Map<String, Restriction> rules = new HashMap<>();
+        if (accountRestriction != null) {
+            rules.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, accountRestriction);
+        }
+        if (contactRestriction != null) {
+            rules.put(FrontEndQueryConstants.CONTACT_RESTRICTION, contactRestriction);
+        }
+        bucketToRuleMap.put(bucket.getName(), rules);
+    }
+
+    @JsonIgnore
+    public Map<String, Restriction> getRuleForBucket(RatingBucketName bucket) {
+        return bucketToRuleMap.get(bucket.getName());
+    }
+
+    public String getDefaultBucketName() {
+        return this.defaultBucketName;
+    }
+
+    public void setDefaultBucketName(String defaultBucketName) {
+        this.defaultBucketName = defaultBucketName;
     }
 
     @Override

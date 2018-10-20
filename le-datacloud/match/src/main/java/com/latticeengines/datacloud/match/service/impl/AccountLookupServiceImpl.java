@@ -5,10 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
@@ -24,22 +25,21 @@ import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 
-
 @Component("accountLookupService")
 public class AccountLookupServiceImpl implements AccountLookupService {
 
-	private  static final Logger log = LoggerFactory.getLogger(AccountLookupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountLookupServiceImpl.class);
 
     private Map<String, AccountLookupEntryMgr> lookupMgrs;
     private Map<String, LatticeAccountMgr> accountMgrs;
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     private FabricDataService dataService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     public AccountLookupServiceImpl() {
@@ -51,7 +51,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
     public List<String> batchLookupIds(AccountLookupRequest request) {
         String version = request.getVersion();
         AccountLookupEntryMgr lookupMgr = getLookupMgr(version);
-        List<AccountLookupEntry> lookupEntries =  lookupMgr.batchFindByKey(request.getIds());
+        List<AccountLookupEntry> lookupEntries = lookupMgr.batchFindByKey(request.getIds());
 
         List<String> accountIds = new ArrayList<>();
         for (AccountLookupEntry entry : lookupEntries) {
@@ -70,7 +70,8 @@ public class AccountLookupServiceImpl implements AccountLookupService {
     }
 
     @Override
-    public List<LatticeAccount> batchFetchAccounts(List<String> accountIds, String dataCloudVersion) {
+    public List<LatticeAccount> batchFetchAccounts(List<String> accountIds,
+            String dataCloudVersion) {
         LatticeAccountMgr accountMgr = getAccountMgr(dataCloudVersion);
         return accountMgr.batchFindByKey(accountIds);
     }
@@ -84,15 +85,18 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         }
         String accountId = lookupEntry.getLatticeAccountId();
         if (StringUtils.isEmpty(accountId)) {
-            throw new RuntimeException("Must provide LatticeAccountId in the lookup entity to be updated.");
+            throw new RuntimeException(
+                    "Must provide LatticeAccountId in the lookup entity to be updated.");
         }
-        AccountLookupEntry lookupEntryInDynamo =  lookupMgr.findByKey(lookupId);
+        AccountLookupEntry lookupEntryInDynamo = lookupMgr.findByKey(lookupId);
         if (lookupEntryInDynamo != null) {
             lookupMgr.update(lookupEntry);
-            log.info("Updated lookup from " + lookupId + " to " + lookupEntry.getLatticeAccountId());
+            log.info(
+                    "Updated lookup from " + lookupId + " to " + lookupEntry.getLatticeAccountId());
         } else {
             lookupMgr.create(lookupEntry);
-            log.info("Created lookup from " + lookupId + " to " + lookupEntry.getLatticeAccountId());
+            log.info(
+                    "Created lookup from " + lookupId + " to " + lookupEntry.getLatticeAccountId());
         }
     }
 
@@ -110,7 +114,8 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         if (lookupMgr == null) {
             DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(version);
             if (dataCloudVersion == null) {
-                throw new IllegalArgumentException("Cannot find the specified data cloud version " + version);
+                throw new IllegalArgumentException(
+                        "Cannot find the specified data cloud version " + version);
             }
             String signature = dataCloudVersion.getDynamoTableSignatureLookup();
             String fullVersion = version;
@@ -140,7 +145,8 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         if (accountMgr == null) {
             DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(version);
             if (dataCloudVersion == null) {
-                throw new IllegalArgumentException("Cannot find the specified data cloud version " + version);
+                throw new IllegalArgumentException(
+                        "Cannot find the specified data cloud version " + version);
             }
             String signature = dataCloudVersion.getDynamoTableSignature();
             String fullVersion = version;

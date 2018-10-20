@@ -18,26 +18,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "algo")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = CategoricalBucket.class, name = CATEGORICAL),
+@JsonSubTypes({ @JsonSubTypes.Type(value = CategoricalBucket.class, name = CATEGORICAL),
         @JsonSubTypes.Type(value = IntervalBucket.class, name = INTEVAL),
         @JsonSubTypes.Type(value = CategorizedIntervalBucket.class, name = CATEGORIZED_INTERVAL),
         @JsonSubTypes.Type(value = BooleanBucket.class, name = BOOLEAN),
-        @JsonSubTypes.Type(value = DiscreteBucket.class, name = DISCRETE)
-})
+        @JsonSubTypes.Type(value = DiscreteBucket.class, name = DISCRETE) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class BucketAlgorithm implements Serializable {
-
-    private static final long serialVersionUID = 2884141005714768547L;
 
     public static final String CATEGORICAL = "Categorical";
     public static final String INTEVAL = "Interval";
     public static final String BOOLEAN = "Boolean";
     public static final String DISCRETE = "Discrete";
-
     public static final String CATEGORIZED_INTERVAL = "CatInterval";
-
+    private static final long serialVersionUID = 2884141005714768547L;
     private List<String> generatedLabels;
 
     @JsonProperty("algo")

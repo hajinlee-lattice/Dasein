@@ -8,7 +8,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepCon
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = CreateCdlEventTableConfiguration.class, name = "CreateCdlEventTableConfiguration"),
+@JsonSubTypes({
+        @Type(value = CreateCdlEventTableConfiguration.class, name = "CreateCdlEventTableConfiguration"),
         @Type(value = CreateCdlEventTableFilterConfiguration.class, name = "CreateCdlEventTableFilterConfiguration"),
         @Type(value = CreateCdlTargetTableFilterConfiguration.class, name = "CreateCdlTargetTableFilterConfiguration"),
         @Type(value = MatchCdlAccountConfiguration.class, name = "MatchCdlAccountConfiguration"),
@@ -16,8 +17,7 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
         @Type(value = MatchCdlSplitConfiguration.class, name = "MatchCdlSplitConfiguration"),
         @Type(value = RedshiftPublishStepConfiguration.class, name = "RedshiftPublishStepConfiguration"),
         @Type(value = ScoreAggregateFlowConfiguration.class, name = "ScoreAggregateFlowConfiguration"),
-        @Type(value = OrphanRecordExportConfiguration.class, name = "OrphanRecordExportConfiguration"),
-})
+        @Type(value = OrphanRecordExportConfiguration.class, name = "OrphanRecordExportConfiguration"), })
 public class BaseCDLDataFlowStepConfiguration extends DataFlowStepConfiguration {
 
     @Override

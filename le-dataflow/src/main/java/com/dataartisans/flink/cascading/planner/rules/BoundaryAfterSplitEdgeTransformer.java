@@ -30,34 +30,27 @@ import cascading.pipe.Boundary;
 /**
  * Injects a Boundary after each outgoing edge of a splitting boundary.
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
-public class BoundaryAfterSplitEdgeTransformer extends RuleInsertionTransformer
-{
-	public BoundaryAfterSplitEdgeTransformer() {
-		super(
-				BalanceAssembly,
-				new SplitElementMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.AfterEachEdge
-		);
-	}
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class BoundaryAfterSplitEdgeTransformer extends RuleInsertionTransformer {
+    public BoundaryAfterSplitEdgeTransformer() {
+        super(BalanceAssembly, new SplitElementMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.AfterEachEdge);
+    }
 
-	public static class SplitElementMatcher extends RuleExpression
-	{
-		public SplitElementMatcher()
-		{
-			super( new SplitElementGraph() );
-		}
-	}
+    public static class SplitElementMatcher extends RuleExpression {
+        public SplitElementMatcher() {
+            super(new SplitElementGraph());
+        }
+    }
 
-	public static class SplitElementGraph extends ExpressionGraph {
+    public static class SplitElementGraph extends ExpressionGraph {
 
-		public SplitElementGraph() {
+        public SplitElementGraph() {
 
-			super(SearchOrder.ReverseTopological,
-					new TypeExpression(ElementCapture.Primary, true, Boundary.class, TypeExpression.Topo.Split));
+            super(SearchOrder.ReverseTopological, new TypeExpression(ElementCapture.Primary, true,
+                    Boundary.class, TypeExpression.Topo.Split));
 
-		}
-	}
+        }
+    }
 
 }

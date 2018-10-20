@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "ATTRIBUTE_CUSTOMIZATION_PROPERTY", //
         indexes = { @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE", //
-                columnList = "FK_TENANT_ID,ATTRIBUTE_NAME,USE_CASE")}, //
+                columnList = "FK_TENANT_ID,ATTRIBUTE_NAME,USE_CASE") }, //
         uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME",
                 "USE_CASE", "CATEGORY_NAME", "PROPERTY_NAME" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")

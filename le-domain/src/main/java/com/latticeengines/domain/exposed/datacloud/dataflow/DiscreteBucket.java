@@ -13,15 +13,14 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiscreteBucket extends BucketAlgorithm {
     private static final long serialVersionUID = -4196020293536783489L;
+    @JsonProperty("values")
+    private List<Number> values;
 
     @Override
     @JsonIgnore
     public String getAlgorithm() {
         return DISCRETE;
     }
-
-    @JsonProperty("values")
-    private List<Number> values;
 
     public List<Number> getValues() {
         return values;

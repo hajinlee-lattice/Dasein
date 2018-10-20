@@ -17,53 +17,37 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 public class ModelingParameters {
 
     @JsonProperty
+    public Map<String, String> runTimeParams;
+    @JsonProperty
     private String filename;
-
     @JsonProperty
     private String name;
-
     @JsonProperty
     private String displayName;
-
     @JsonProperty
     private String description;
-
     @JsonProperty
     private String userId;
-
     @JsonProperty
     private DedupType deduplicationType = DedupType.MULTIPLELEADSPERDOMAIN;
-
     @JsonProperty
     private boolean excludePropDataColumns; // LDC or no LDC
-
     @JsonProperty
     private boolean excludeCDLAttributes;
-
     @JsonProperty
     private boolean excludeCustomFileAttributes;
-
     @JsonProperty
     private boolean excludePublicDomains = false;
-
     @JsonProperty
     private TransformationGroup transformationGroup;
-
     @JsonProperty
     private String predefinedSelectionName;
-
     @JsonProperty
     private String selectedVersion;
-
     @JsonProperty
     private String moduleName;
-
     @JsonProperty
     private String pivotFileName;
-
-    @JsonProperty
-    public Map<String, String> runTimeParams;
-
     @JsonProperty
     private String dataCloudVersion;
 

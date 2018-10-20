@@ -51,7 +51,8 @@ public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
         private RunAttributeLevelSummaryDataFlowsConfiguration attrLevelSummaryDataFlows = new RunAttributeLevelSummaryDataFlowsConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            fitModel.setContainerConfiguration("fitModelWorkflow", customerSpace, fitModel.getClass().getName());
+            fitModel.setContainerConfiguration("fitModelWorkflow", customerSpace,
+                    fitModel.getClass().getName());
             microservice.setCustomerSpace(customerSpace);
             return this;
         }
@@ -139,7 +140,8 @@ public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
 
         public Builder directoryToScore(String directoryToScore) {
             score.setSourceDir(directoryToScore);
-            runScoreTableDataFlow.setAccountMasterNameAndPath(new String[] { "AccountMaster", directoryToScore });
+            runScoreTableDataFlow.setAccountMasterNameAndPath(
+                    new String[] { "AccountMaster", directoryToScore });
             return this;
         }
 

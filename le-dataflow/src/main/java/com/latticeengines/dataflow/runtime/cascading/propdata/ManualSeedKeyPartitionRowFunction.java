@@ -1,5 +1,15 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PrepareDunsRedirectManualMatchConfig;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -7,18 +17,10 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PrepareDunsRedirectManualMatchConfig;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
- * Generate one or multiple intermediate rows for each valid key partition that contains the required
- * information to populate DunsRedirectBook.
+ * Generate one or multiple intermediate rows for each valid key partition that
+ * contains the required information to populate DunsRedirectBook.
  */
 @SuppressWarnings("rawtypes")
 public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements Function {
@@ -34,8 +36,8 @@ public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements 
     private final int stateFieldIdx;
     private final int cityFieldIdx;
 
-    public ManualSeedKeyPartitionRowFunction(
-            @NotNull Fields fieldDeclaration, @NotNull PrepareDunsRedirectManualMatchConfig config) {
+    public ManualSeedKeyPartitionRowFunction(@NotNull Fields fieldDeclaration,
+            @NotNull PrepareDunsRedirectManualMatchConfig config) {
         super(fieldDeclaration);
         // fieldName => idx in Fields
         Map<String, Integer> idxMap = getIndexMap();
@@ -69,11 +71,13 @@ public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements 
         // only for small company
         if (EMP_SIZE_SMALL.equals(employeeSize)) {
             // name, country, state
-            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country) && StringUtils.isNotBlank(state)) {
+            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)
+                    && StringUtils.isNotBlank(state)) {
                 functionCall.getOutputCollector().add(getResult(arguments, country, state, null));
             }
             // name, country, city
-            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country) && StringUtils.isNotBlank(city)) {
+            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)
+                    && StringUtils.isNotBlank(city)) {
                 functionCall.getOutputCollector().add(getResult(arguments, country, null, city));
             }
         }
@@ -106,8 +110,7 @@ public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements 
         final Fields fields = getFieldDeclaration();
         // setup map from fieldName to index in declaration array
         // because set by index is more efficient than by fieldName
-        return IntStream
-                .range(0, fields.size())
+        return IntStream.range(0, fields.size())
                 .mapToObj(idx -> Pair.of(idx, (String) fields.get(idx)))
                 .collect(Collectors.toMap(Pair::getValue, Pair::getKey));
     }

@@ -3,21 +3,21 @@ package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 import java.io.Serializable;
 
 public class ModelCommandParameterKey implements Serializable {
- 
+
     private static final long serialVersionUID = 1L;
     private ModelCommand modelCommand;
     private String key;
-    
+
     public ModelCommand getModelCommand() {
         return modelCommand;
-    }
-    
-    public String getKey() {
-        return key;
     }
 
     public void setModelCommand(ModelCommand modelCommand) {
         this.modelCommand = modelCommand;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public void setKey(String key) {
@@ -53,6 +53,6 @@ public class ModelCommandParameterKey implements Serializable {
         } else if (!modelCommand.equals(other.modelCommand))
             return false;
         return true;
-    }       
+    }
 
 }

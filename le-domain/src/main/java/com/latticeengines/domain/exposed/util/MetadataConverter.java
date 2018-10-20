@@ -56,12 +56,13 @@ public class MetadataConverter {
             Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s", path), e);
+            throw new RuntimeException(
+                    String.format("Failed to parse metadata for avro file located at %s", path), e);
         }
     }
 
-    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String avroPath, String avscPath,
-            String primaryKeyName, String lastModifiedKeyName) {
+    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String avroPath,
+            String avscPath, String primaryKeyName, String lastModifiedKeyName) {
         try {
             @SuppressWarnings("deprecation")
             Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, avscPath));
@@ -70,12 +71,13 @@ public class MetadataConverter {
             return table;
         } catch (Exception e) {
             throw new RuntimeException(String.format(
-                    "Failed to parse metadata for avro file located at %s, using avsc at %s", avroPath, avscPath), e);
+                    "Failed to parse metadata for avro file located at %s, using avsc at %s",
+                    avroPath, avscPath), e);
         }
     }
 
-    private static List<Extract> convertToExtracts(Configuration configuration, String avroPath, boolean skipCount)
-            throws Exception {
+    private static List<Extract> convertToExtracts(Configuration configuration, String avroPath,
+            boolean skipCount) throws Exception {
         boolean isDirectory = false;
         if (HdfsUtils.isDirectory(configuration, avroPath)) {
             if (avroPath.endsWith("/")) {
@@ -89,7 +91,8 @@ public class MetadataConverter {
         for (String match : matches) {
             Extract extract = new Extract();
             try (FileSystem fs = FileSystem.newInstance(configuration)) {
-                extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
+                extract.setExtractionTimestamp(
+                        fs.getFileStatus(new Path(match)).getModificationTime());
             }
             extract.setName("extract");
             if (!skipCount) {
@@ -131,7 +134,8 @@ public class MetadataConverter {
                 Attribute primaryKeyAttr = table.getAttribute(primaryKeyName);
                 if (primaryKeyAttr == null) {
                     throw new RuntimeException(
-                            String.format("Could not locate primary key field %s in avro schema", primaryKeyName));
+                            String.format("Could not locate primary key field %s in avro schema",
+                                    primaryKeyName));
                 }
                 PrimaryKey primaryKey = new PrimaryKey();
                 primaryKey.setName(primaryKeyName);
@@ -143,8 +147,9 @@ public class MetadataConverter {
             if (lastModifiedKeyName != null) {
                 Attribute lastModifiedAttr = table.getAttribute(lastModifiedKeyName);
                 if (lastModifiedAttr == null) {
-                    throw new RuntimeException(String
-                            .format("Could not locate last modified key field %s in avro schema", lastModifiedKeyName));
+                    throw new RuntimeException(String.format(
+                            "Could not locate last modified key field %s in avro schema",
+                            lastModifiedKeyName));
                 }
 
                 LastModifiedKey lastModifiedKey = new LastModifiedKey();
@@ -157,14 +162,16 @@ public class MetadataConverter {
             table.setTableType(TableType.DATATABLE);
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to read avro schema from %s", schema.getName()), e);
+            throw new RuntimeException(
+                    String.format("Failed to read avro schema from %s", schema.getName()), e);
         }
     }
 
     public static Schema getAvroSchema(Configuration configuration, Table table) {
 
         if (table.getExtracts().size() == 0) {
-            throw new RuntimeException(String.format("Table %s does not have any extracts", table.getName()));
+            throw new RuntimeException(
+                    String.format("Table %s does not have any extracts", table.getName()));
         }
 
         return getAvroSchema(configuration, table.getExtracts().get(0));
@@ -213,7 +220,8 @@ public class MetadataConverter {
                 attribute.setCleanedUpEnumValues(enumValues);
             }
             if (StringUtils.isNotBlank(field.getProp("groups"))) {
-                List<ColumnSelection.Predefined> groups = Arrays.stream(field.getProp("groups").split(","))
+                List<ColumnSelection.Predefined> groups = Arrays
+                        .stream(field.getProp("groups").split(","))
                         .map(ColumnSelection.Predefined::fromName).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(groups)) {
                     attribute.setGroupsViaList(groups);
@@ -223,7 +231,8 @@ public class MetadataConverter {
 
             return attribute;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to read avro field %s", field.name()), e);
+            throw new RuntimeException(String.format("Failed to read avro field %s", field.name()),
+                    e);
         }
     }
 
@@ -275,7 +284,8 @@ public class MetadataConverter {
             }
             if (!foundNull || foundType == null) {
                 throw new RuntimeException(String.format(
-                        "Avro union type must contain a null and a supported type but is %s", schema.getType()));
+                        "Avro union type must contain a null and a supported type but is %s",
+                        schema.getType()));
             }
             type = getType(foundType);
         } else {

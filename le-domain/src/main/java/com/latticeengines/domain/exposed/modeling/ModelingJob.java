@@ -82,7 +82,12 @@ public class ModelingJob extends Job {
 
         ModelingJob modelingJob = (ModelingJob) obj;
 
-        return new EqualsBuilder().append(pid, modelingJob.getPid()).append(id, modelingJob.getId()).append(client, modelingJob.getClient()).append(appMasterProperties, modelingJob.getAppMasterPropertiesObject()).append(containerProperties, modelingJob.getContainerPropertiesObject()).append(model, modelingJob.getModel()).append(parentPid, modelingJob.getParentPid()).append(childIds, modelingJob.getChildIdList()).isEquals();
+        return new EqualsBuilder().append(pid, modelingJob.getPid()).append(id, modelingJob.getId())
+                .append(client, modelingJob.getClient())
+                .append(appMasterProperties, modelingJob.getAppMasterPropertiesObject())
+                .append(containerProperties, modelingJob.getContainerPropertiesObject())
+                .append(model, modelingJob.getModel()).append(parentPid, modelingJob.getParentPid())
+                .append(childIds, modelingJob.getChildIdList()).isEquals();
     }
 
 }

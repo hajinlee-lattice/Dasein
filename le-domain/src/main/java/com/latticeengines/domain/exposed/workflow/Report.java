@@ -34,7 +34,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "REPORT", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+@Table(name = "REPORT", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAuditingFields {
@@ -119,16 +120,16 @@ public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAudit
     }
 
     @Override
+    public Tenant getTenant() {
+        return this.tenant;
+    }
+
+    @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-    }
-
-    @Override
-    public Tenant getTenant() {
-        return this.tenant;
     }
 
     @Override
@@ -167,13 +168,13 @@ public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAudit
     }
 
     @Override
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public Long getTenantId() {
+        return tenantId;
     }
 
     @Override
-    public Long getTenantId() {
-        return tenantId;
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override

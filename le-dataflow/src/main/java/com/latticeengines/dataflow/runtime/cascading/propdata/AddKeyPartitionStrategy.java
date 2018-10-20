@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import cascading.tuple.TupleEntry;
+import java.util.Map;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddFieldStrategyBase;
@@ -8,22 +9,27 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 
-import java.util.Map;
+import cascading.tuple.TupleEntry;
 
 /**
- * Add KeyPartition column whose value is based on the combination of non-null {@link MatchKey} in the tuple entry
+ * Add KeyPartition column whose value is based on the combination of non-null
+ * {@link MatchKey} in the tuple entry
  */
 public class AddKeyPartitionStrategy extends AddFieldStrategyBase {
 
-	private static final long serialVersionUID = -288839367295707093L;
-	private final Map<MatchKey, String> matchKeyColumnNameMap;
+    private static final long serialVersionUID = -288839367295707093L;
+    private final Map<MatchKey, String> matchKeyColumnNameMap;
 
     /**
      * Constructor to pass in the map from {@link MatchKey} to the column name
-     * @param columnName key partition column name
-     * @param matchKeyColumnNameMap value is the associated column name
+     *
+     * @param columnName
+     *            key partition column name
+     * @param matchKeyColumnNameMap
+     *            value is the associated column name
      */
-    public AddKeyPartitionStrategy(@NotNull String columnName, @NotNull Map<MatchKey, String> matchKeyColumnNameMap) {
+    public AddKeyPartitionStrategy(@NotNull String columnName,
+            @NotNull Map<MatchKey, String> matchKeyColumnNameMap) {
         super(columnName, String.class);
         Preconditions.checkNotNull(columnName);
         Preconditions.checkNotNull(matchKeyColumnNameMap);

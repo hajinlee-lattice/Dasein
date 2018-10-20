@@ -19,7 +19,8 @@ public class BusinessCalendarValidation {
 
     // for jackson
     @SuppressWarnings("unused")
-	private BusinessCalendarValidation(){}
+    private BusinessCalendarValidation() {
+    }
 
     public String getNote() {
         return note;

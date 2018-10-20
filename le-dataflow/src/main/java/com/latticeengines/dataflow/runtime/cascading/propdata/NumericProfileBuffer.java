@@ -45,7 +45,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private double[] dValsRounded;
 
     public NumericProfileBuffer(Fields fieldDecl, String keyAttr, Map<String, Class<?>> classes,
-            Map<String, String> decStrs, boolean equalSized, int buckets, int minBucketSize, boolean sorted) {
+            Map<String, String> decStrs, boolean equalSized, int buckets, int minBucketSize,
+            boolean sorted) {
         super(fieldDecl);
         this.keyAttr = keyAttr;
         this.classes = classes;
@@ -117,7 +118,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
-        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), JsonUtils.serialize(bucket));
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                JsonUtils.serialize(bucket));
         return result;
     }
 
@@ -330,8 +332,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
                 dVals[i] = ((Double) vals.get(i)).doubleValue();
             }
         } else {
-            throw new UnsupportedOperationException(
-                    String.format("type %s is not supported in numeric profiling", cls.getSimpleName()));
+            throw new UnsupportedOperationException(String
+                    .format("type %s is not supported in numeric profiling", cls.getSimpleName()));
         }
 
     }
@@ -362,8 +364,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         } else if (cls.equals(Double.class)) {
             return (Number) Double.valueOf(x);
         } else {
-            throw new UnsupportedOperationException(
-                    String.format("type %s type is not supported in numeric profiling", cls.getSimpleName()));
+            throw new UnsupportedOperationException(String.format(
+                    "type %s type is not supported in numeric profiling", cls.getSimpleName()));
         }
     }
 
@@ -374,7 +376,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
 
     private double formatDouble(double x, int digits) {
         double base = Math.pow(10, (double) digits);
-        return (BigDecimal.valueOf(Math.round(x * base)).divide(BigDecimal.valueOf(base))).doubleValue();
+        return (BigDecimal.valueOf(Math.round(x * base)).divide(BigDecimal.valueOf(base)))
+                .doubleValue();
     }
 
     private double roundTo(double x, int sigDigits) {

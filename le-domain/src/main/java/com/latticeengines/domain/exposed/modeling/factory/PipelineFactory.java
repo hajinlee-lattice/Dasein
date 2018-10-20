@@ -17,9 +17,8 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class PipelineFactory extends ModelFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(PipelineFactory.class);
-
     public static final String PIPELINE_NAME_KEY = "pipeline.name";
+    private static final Logger log = LoggerFactory.getLogger(PipelineFactory.class);
 
     public static void configPipeline(Algorithm algo, Map<String, String> runTimeParams) {
 
@@ -34,7 +33,7 @@ public class PipelineFactory extends ModelFactory {
     }
 
     private static void configPipeline(Algorithm algo, Pipeline pipeline) {
-       
+
         if (StringUtils.isNotEmpty(pipeline.getPipelineScript())) {
             algo.setPipelineScript(pipeline.getPipelineScript());
         }

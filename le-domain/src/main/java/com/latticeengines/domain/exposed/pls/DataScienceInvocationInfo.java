@@ -51,18 +51,29 @@ public class DataScienceInvocationInfo {
         storageProtocol = "HDFS";
     }
 
+    public String getCustomerSpace() {
+        return customerSpace;
+    }
 
-    public String getCustomerSpace(){return customerSpace;}
+    public void setCustomerSpace(String customerSpace) {
+        this.customerSpace = customerSpace;
+    }
 
-    public void setCustomerSpace(String customerSpace){this.customerSpace = customerSpace;}
+    public String getCustomer() {
+        return customer;
+    }
 
-    public String getCustomer(){return customer;}
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
 
-    public void setCustomer(String customer){this.customer = customer;}
+    public String getStorageProtocol() {
+        return storageProtocol;
+    }
 
-    public String getStorageProtocol(){return storageProtocol;}
-
-    public void setStorageProtocol(String storageProtocol){this.storageProtocol = storageProtocol;}
+    public void setStorageProtocol(String storageProtocol) {
+        this.storageProtocol = storageProtocol;
+    }
 
     public String getUserId() {
         return userId;
@@ -72,21 +83,37 @@ public class DataScienceInvocationInfo {
         this.userId = userId;
     }
 
-    public String getModelId() { return modelId; }
+    public String getModelId() {
+        return modelId;
+    }
 
-    public void setModelId(String modelId) {this.modelId = modelId;}
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
 
-    public String getModelDirectory(){return modelDirectory;}
+    public String getModelDirectory() {
+        return modelDirectory;
+    }
 
-    public void setModelDirectory(String modelDirectory){this.modelDirectory = modelDirectory;}
+    public void setModelDirectory(String modelDirectory) {
+        this.modelDirectory = modelDirectory;
+    }
 
-    public  String getExtractsDirectory(){return extractsDirectory;}
+    public String getExtractsDirectory() {
+        return extractsDirectory;
+    }
 
-    public void setExtractsDirectory(String extractsDirectory){this.extractsDirectory = extractsDirectory;}
+    public void setExtractsDirectory(String extractsDirectory) {
+        this.extractsDirectory = extractsDirectory;
+    }
 
-    public String getMetadataFile(){return metadataFile;}
+    public String getMetadataFile() {
+        return metadataFile;
+    }
 
-    public void setMetadataFile(String metadataFile){this.metadataFile = metadataFile;}
+    public void setMetadataFile(String metadataFile) {
+        this.metadataFile = metadataFile;
+    }
 
     public Map<String, String> getFileTypeMap() {
         return fileTypeMap;
@@ -96,34 +123,27 @@ public class DataScienceInvocationInfo {
         this.fileTypeMap = fileTypeMap;
     }
 
-    public String getHdfsWebURL()
-    {
+    public String getHdfsWebURL() {
         return hdfsWebURL;
     }
 
-    public void setHdfsWebURL(String hdfsWebURL)
-    {
+    public void setHdfsWebURL(String hdfsWebURL) {
         this.hdfsWebURL = hdfsWebURL;
     }
 
-    public String getModelLookupID()
-    {
+    public String getModelLookupID() {
         return modelLookupID;
     }
 
-    public void setModelLookupID(String modelLookupID)
-    {
+    public void setModelLookupID(String modelLookupID) {
         this.modelLookupID = modelLookupID;
     }
 
-    public String getModelApplicationID()
-    {
+    public String getModelApplicationID() {
         return modelApplicationID;
     }
 
-    public void setModelApplicationID(String modelApplicationID)
-    {
+    public void setModelApplicationID(String modelApplicationID) {
         this.modelApplicationID = modelApplicationID;
     }
 }
-

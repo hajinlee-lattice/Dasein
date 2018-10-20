@@ -26,8 +26,9 @@ public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements
     // PeriodStrategy name -> PeriodBuilder
     private Map<String, PeriodBuilder> periodBuilders;
 
-    public ConsolidateAddPeriodColumnFunction(Fields fieldDeclaration, List<PeriodStrategy> periodStrategies,
-            String trxDateColumn, String periodNameField, String periodIdField) {
+    public ConsolidateAddPeriodColumnFunction(Fields fieldDeclaration,
+            List<PeriodStrategy> periodStrategies, String trxDateColumn, String periodNameField,
+            String periodIdField) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.trxDateColumn = trxDateColumn;

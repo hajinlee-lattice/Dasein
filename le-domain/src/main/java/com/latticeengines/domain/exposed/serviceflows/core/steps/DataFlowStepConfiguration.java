@@ -19,7 +19,8 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.Ba
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.BaseScoringDataFlowStepConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = BaseCDLDataFlowStepConfiguration.class, name = "BaseCDLDataFlowStepConfiguration"),
+@JsonSubTypes({
+        @Type(value = BaseCDLDataFlowStepConfiguration.class, name = "BaseCDLDataFlowStepConfiguration"),
         @Type(value = BaseCoreDataFlowStepConfiguration.class, name = "BaseCoreDataFlowStepConfiguration"),
         @Type(value = BaseLPDataFlowStepConfiguration.class, name = "BaseLPDataFlowStepConfiguration"),
         @Type(value = BaseModelingDataFlowStepConfiguration.class, name = "BaseModelingDataFlowStepConfiguration"),

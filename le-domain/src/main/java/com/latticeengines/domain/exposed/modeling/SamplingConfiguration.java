@@ -15,23 +15,20 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class SamplingConfiguration {
 
+    public static final String TRAINING_SET_PREFIX = "TrainingSet";
+    public static final String TRAINING_ALL_PREFIX = "allTraining";
+    public static final String TESTING_SET_PREFIX = "allTest";
     private List<SamplingElement> samplingElements = new ArrayList<SamplingElement>();
     @NotNull
     private String customer;
+
+    /* parallel */
     @NotNull
     private String table;
     private int trainingPercentage = 80;
     private int testPercentage = 20;
-
-    /* parallel */
-
     private int samplingRate = 100;
     private int trainingSetCount = 1;
-
-    public static final String TRAINING_SET_PREFIX = "TrainingSet";
-    public static final String TRAINING_ALL_PREFIX = "allTraining";
-    public static final String TESTING_SET_PREFIX = "allTest";
-
     private Map<String, String> properties = new HashMap<String, String>();
     private SamplingType samplingType = SamplingType.DEFAULT_SAMPLING;
     private List<SamplingElement> trainingElements = new ArrayList<SamplingElement>();
@@ -157,13 +154,13 @@ public class SamplingConfiguration {
     }
 
     @JsonProperty("training_set_count")
-    public void setTrainingSetCount(int trainingSetCount) {
-        this.trainingSetCount = trainingSetCount;
+    public int getTrainingSetCount() {
+        return trainingSetCount;
     }
 
     @JsonProperty("training_set_count")
-    public int getTrainingSetCount() {
-        return trainingSetCount;
+    public void setTrainingSetCount(int trainingSetCount) {
+        this.trainingSetCount = trainingSetCount;
     }
 
     private void checkNumberRange(int number) {
@@ -206,15 +203,15 @@ public class SamplingConfiguration {
     public void setHdfsDirPath(String hdfsDirPath) {
         this.hdfsDirPath = hdfsDirPath;
     }
-    
-    @JsonProperty(value = "random_seed", required = false)
-    public void setRandomSeed(Long randomSeed) {
-        this.randomSeed = randomSeed;
-    }
-    
+
     @JsonProperty(value = "random_seed", required = false)
     public Long getRandomSeed() {
         return randomSeed;
+    }
+
+    @JsonProperty(value = "random_seed", required = false)
+    public void setRandomSeed(Long randomSeed) {
+        this.randomSeed = randomSeed;
     }
 
 }

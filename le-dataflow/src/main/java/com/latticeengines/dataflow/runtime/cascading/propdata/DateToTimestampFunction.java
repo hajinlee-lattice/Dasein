@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-
 import java.text.SimpleDateFormat;
 
 import cascading.operation.Function;
@@ -9,12 +8,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class DateToTimestampFunction extends CleanupFunction implements Function
-{
+public class DateToTimestampFunction extends CleanupFunction implements Function {
 
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final long serialVersionUID = -1502335567861893433L;
     private String dateField;
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public DateToTimestampFunction(String dateField) {
         super(new Fields(dateField), true);

@@ -26,8 +26,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Access(AccessType.FIELD)
 @Table(name = "DnBMatchCommand", indexes = { //
         @Index(name = "IX_RID", columnList = "RootOperationUID"), //
-        @Index(name = "IX_BID", columnList = "BatchID")
-})
+        @Index(name = "IX_BID", columnList = "BatchID") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DnBMatchCommand implements HasPid, Serializable {
 
@@ -53,7 +52,7 @@ public class DnBMatchCommand implements HasPid, Serializable {
 
     @JsonProperty("DnBCode")
     @Enumerated(EnumType.STRING)
-    @Column(name = "DnBCode", nullable = false ,length = 20)
+    @Column(name = "DnBCode", nullable = false, length = 20)
     private DnBReturnCode dnbCode;
 
     @JsonProperty("Message")

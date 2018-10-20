@@ -23,44 +23,46 @@ import org.apache.flink.configuration.Configuration;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-public class TupleAppendOuterJoiner extends RichJoinFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
+public class TupleAppendOuterJoiner
+        extends RichJoinFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2370359996861626761L;
-	private int tupleListPos;
-	private int tupleListSize;
-	private Fields inputFields;
-	private Fields keyFields;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 2370359996861626761L;
+    private int tupleListPos;
+    private int tupleListSize;
+    private Fields inputFields;
+    private Fields keyFields;
 
-	private transient Tuple2<Tuple, Tuple[]> outT;
+    private transient Tuple2<Tuple, Tuple[]> outT;
 
-	public TupleAppendOuterJoiner(int tupleListPos, int tupleListSize, Fields inputFields, Fields keyFields) {
-		this.tupleListPos = tupleListPos;
-		this.tupleListSize = tupleListSize;
-		this.inputFields = inputFields;
-		this.keyFields = keyFields;
-	}
+    public TupleAppendOuterJoiner(int tupleListPos, int tupleListSize, Fields inputFields,
+            Fields keyFields) {
+        this.tupleListPos = tupleListPos;
+        this.tupleListSize = tupleListSize;
+        this.inputFields = inputFields;
+        this.keyFields = keyFields;
+    }
 
-	@Override
-	public void open(Configuration config) {
-		this.outT = new Tuple2<>(null, new Tuple[tupleListSize]);
-	}
+    @Override
+    public void open(Configuration config) {
+        this.outT = new Tuple2<>(null, new Tuple[tupleListSize]);
+    }
 
-	@Override
-	public Tuple2<Tuple, Tuple[]> join(Tuple2<Tuple, Tuple[]> leftT, Tuple rightT) throws Exception {
-		if(leftT == null) {
-			outT.f0 = rightT.get(inputFields, keyFields);
-			outT.f1[tupleListPos] = rightT;
+    @Override
+    public Tuple2<Tuple, Tuple[]> join(Tuple2<Tuple, Tuple[]> leftT, Tuple rightT)
+            throws Exception {
+        if (leftT == null) {
+            outT.f0 = rightT.get(inputFields, keyFields);
+            outT.f1[tupleListPos] = rightT;
 
-			return outT;
-		}
-		else {
-			leftT.f1[tupleListPos] = rightT;
+            return outT;
+        } else {
+            leftT.f1[tupleListPos] = rightT;
 
-			return leftT;
-		}
-	}
+            return leftT;
+        }
+    }
 
 }

@@ -14,7 +14,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProc
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = BaseProcessEntityStepConfiguration.class, name = "BaseProcessEntityStepConfiguration"),
+@JsonSubTypes({
+        @Type(value = BaseProcessEntityStepConfiguration.class, name = "BaseProcessEntityStepConfiguration"),
         @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"), })
 public class BaseWrapperStepConfiguration extends BaseStepConfiguration {
 

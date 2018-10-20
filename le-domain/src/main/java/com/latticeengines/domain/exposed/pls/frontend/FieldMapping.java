@@ -22,28 +22,28 @@ public class FieldMapping {
     @JsonProperty
     private boolean mappedToLatticeField;
 
-    public void setUserField(String userField) {
-        this.userField = userField;
-    }
-
     public String getUserField() {
         return this.userField;
     }
 
-    public void setMappedField(String mappedField) {
-        this.mappedField = mappedField;
+    public void setUserField(String userField) {
+        this.userField = userField;
     }
 
     public String getMappedField() {
         return this.mappedField;
     }
 
-    public void setFieldType(UserDefinedType fieldType) {
-        this.fieldType = fieldType;
+    public void setMappedField(String mappedField) {
+        this.mappedField = mappedField;
     }
 
     public UserDefinedType getFieldType() {
         return this.fieldType;
+    }
+
+    public void setFieldType(UserDefinedType fieldType) {
+        this.fieldType = fieldType;
     }
 
     public CDLExternalSystemType getCdlExternalSystemType() {
@@ -54,15 +54,15 @@ public class FieldMapping {
         this.cdlExternalSystemType = cdlExternalSystemType;
     }
 
+    public boolean isMappedToLatticeField() {
+        return this.mappedToLatticeField;
+    }
+
     public void setMappedToLatticeField(boolean mappedToLatticeField) {
         this.mappedToLatticeField = mappedToLatticeField;
     }
 
-    public boolean isMappedToLatticeField() {
-        return this.mappedToLatticeField;
-    }
-    
-    public String toString(){
+    public String toString() {
         return JsonUtils.serialize(this);
     }
 }

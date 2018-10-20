@@ -23,39 +23,39 @@ import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GroupByClosure extends JoinerClosure {
 
-	protected Iterator values;
+    protected Iterator values;
 
-	public GroupByClosure(FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields) {
-		super(flowProcess, groupingFields, valueFields);
-	}
+    public GroupByClosure(FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields) {
+        super(flowProcess, groupingFields, valueFields);
+    }
 
-	public void reset( Iterator<Tuple> values ) {
-		this.values = values;
-	}
+    public void reset(Iterator<Tuple> values) {
+        this.values = values;
+    }
 
-	@Override
-	public int size() {
-		return 1;
-	}
+    @Override
+    public int size() {
+        return 1;
+    }
 
-	@Override
-	public Iterator<Tuple> getIterator(int pos) {
-		if(pos != 0) {
-			throw new IllegalArgumentException("Invalid grouping position: " + pos);
-		}
-		return this.values;
-	}
+    @Override
+    public Iterator<Tuple> getIterator(int pos) {
+        if (pos != 0) {
+            throw new IllegalArgumentException("Invalid grouping position: " + pos);
+        }
+        return this.values;
+    }
 
-	@Override
-	public boolean isEmpty(int pos) {
-		return values != null;
-	}
+    @Override
+    public boolean isEmpty(int pos) {
+        return values != null;
+    }
 
-	@Override
-	public Tuple getGroupTuple(Tuple keysTuple) {
-		return keysTuple;
-	}
+    @Override
+    public Tuple getGroupTuple(Tuple keysTuple) {
+        return keysTuple;
+    }
 }

@@ -5,6 +5,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class FieldSchema {
+    // Where the data for this field can be found.
+    public FieldSource source;
+    // The storage type and interpretation of the data in this field.
+    public FieldType type;
+    // What purpose this field has in the model.
+    public FieldInterpretation interpretation;
+
     public FieldSchema(FieldSource source, FieldType type, FieldInterpretation interpretation) {
         this.source = source;
         this.type = type;
@@ -14,15 +21,6 @@ public class FieldSchema {
     // Serialization constructor.
     public FieldSchema() {
     }
-
-    // Where the data for this field can be found.
-    public FieldSource source;
-
-    // The storage type and interpretation of the data in this field.
-    public FieldType type;
-
-    // What purpose this field has in the model.
-    public FieldInterpretation interpretation;
 
     @Override
     public int hashCode() {

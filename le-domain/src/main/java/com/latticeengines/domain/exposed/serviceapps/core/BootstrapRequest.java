@@ -13,10 +13,8 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "Application")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = CDLBootstrapRequest.class, name = CDL),
-        @JsonSubTypes.Type(value = LPBootstrapRequest.class, name = LP)
-})
+@JsonSubTypes({ @JsonSubTypes.Type(value = CDLBootstrapRequest.class, name = CDL),
+        @JsonSubTypes.Type(value = LPBootstrapRequest.class, name = LP) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)

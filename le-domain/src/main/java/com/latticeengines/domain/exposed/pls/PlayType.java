@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "PLAY_TYPE")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
-        @ParamDef(name = "tenantFilterId", type = "java.lang.Long")})
+        @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
     @Id
@@ -58,7 +58,7 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
     @Column(name = "DESCRIPTION", length = 8192, nullable = true)
     private String description;
 
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -88,7 +88,8 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
     public PlayType() {
     }
 
-    public PlayType(Tenant tenant, String displayName, String description, String createdBy, String updatedBy) {
+    public PlayType(Tenant tenant, String displayName, String description, String createdBy,
+            String updatedBy) {
         this.tenant = tenant;
         this.tenantId = tenant.getPid();
         this.displayName = displayName;
@@ -96,6 +97,14 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
         this.id = generateId();
+    }
+
+    public static String generateId() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static String getIdForBIS(String type) {
+        return StringUtils.isNotEmpty(type) && type.equals("List") ? "ADefault" : type;
     }
 
     public Long getPid() {
@@ -179,17 +188,11 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
         this.createdBy = createdBy;
     }
 
-    public String getUpdatedBy() { return updatedBy; }
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
-    }
-
-    public static String generateId() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String getIdForBIS(String type) {
-        return StringUtils.isNotEmpty(type) && type.equals("List") ? "ADefault" : type;
     }
 }

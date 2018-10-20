@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 
-import com.latticeengines.dellebi.util.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileType;
+import com.latticeengines.dellebi.util.LoggingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 @Component("localFileFlowService")
 public class LocalFileFlowServiceImpl extends BaseFileFlowService {
 
-    static final Logger log = LoggerFactory.getLogger(LocalFileFlowServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LocalFileFlowServiceImpl.class);
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
@@ -84,13 +84,15 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 context.setProperty(DellEbiFlowService.LOG_ENTRY, dellEbiExecutionLog);
                 context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
-                context.setProperty(DellEbiFlowService.FILE_SOURCE, DellEbiFlowService.FILE_SOURCE_LOCAL);
+                context.setProperty(DellEbiFlowService.FILE_SOURCE,
+                        DellEbiFlowService.FILE_SOURCE_LOCAL);
 
-                LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish Downloading job!",
-                        dellEbiExecutionLog.getStartDate().getTime());
+                LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog,
+                        "Finish Downloading job!", dellEbiExecutionLog.getStartDate().getTime());
             } catch (Exception ex) {
-            	int retryCount = dellEbiExecutionLog.getRetryCount() + 1;
-                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage(), retryCount);
+                int retryCount = dellEbiExecutionLog.getRetryCount() + 1;
+                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage(),
+                        retryCount);
             }
         }
     }

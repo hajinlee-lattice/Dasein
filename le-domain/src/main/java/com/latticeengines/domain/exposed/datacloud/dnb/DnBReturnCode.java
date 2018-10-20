@@ -10,7 +10,8 @@ public enum DnBReturnCode {
     RATE_LIMITING("Request rejected by rate limiting service"), //
     TIMEOUT("HTTP timeout"), //
     EXPIRED_TOKEN("Token is expired but failed to refresh"), //
-    EXCEED_LIMIT_OR_UNAUTHORIZED("Exceeded concurrent/hourly/weekly limit or unauthorized to call API"), //
+    EXCEED_LIMIT_OR_UNAUTHORIZED(
+            "Exceeded concurrent/hourly/weekly limit or unauthorized to call API"), //
     BAD_REQUEST("HTTP bad request"), //
     BAD_RESPONSE("HTTP bad response"), //
     BAD_STATUS("Fail to check batch request status"), //
@@ -20,6 +21,7 @@ public enum DnBReturnCode {
     UNKNOWN("Unknown Status");
 
     String message;
+
     DnBReturnCode(String str) {
         this.message = str;
     }

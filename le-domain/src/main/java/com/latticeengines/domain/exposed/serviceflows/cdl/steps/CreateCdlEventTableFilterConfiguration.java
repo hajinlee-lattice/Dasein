@@ -16,36 +16,36 @@ public class CreateCdlEventTableFilterConfiguration extends BaseCDLDataFlowStepC
         setBeanName("createCdlEventTableFilterFlow");
     }
 
-    public void setTrainFilterTableName(String trainFilterTableName) {
-        this.trainFilterTableName = trainFilterTableName;
-    }
-
-    public void setEventFilterTableName(String eventFilterTableName) {
-        this.eventFilterTableName = eventFilterTableName;
-    }
-
     public String getTrainFilterTableName() {
         return trainFilterTableName;
+    }
+
+    public void setTrainFilterTableName(String trainFilterTableName) {
+        this.trainFilterTableName = trainFilterTableName;
     }
 
     public String getEventFilterTableName() {
         return eventFilterTableName;
     }
 
-    public void setTrainQuery(EventFrontEndQuery trainQuery) {
-        this.trainQuery = trainQuery;
+    public void setEventFilterTableName(String eventFilterTableName) {
+        this.eventFilterTableName = eventFilterTableName;
     }
 
     public EventFrontEndQuery getTrainQuery() {
         return trainQuery;
     }
 
-    public void setEventQuery(EventFrontEndQuery eventQuery) {
-        this.eventQuery = eventQuery;
+    public void setTrainQuery(EventFrontEndQuery trainQuery) {
+        this.trainQuery = trainQuery;
     }
 
     public EventFrontEndQuery getEventQuery() {
         return eventQuery;
+    }
+
+    public void setEventQuery(EventFrontEndQuery eventQuery) {
+        this.eventQuery = eventQuery;
     }
 
     public boolean isExpectedValue() {

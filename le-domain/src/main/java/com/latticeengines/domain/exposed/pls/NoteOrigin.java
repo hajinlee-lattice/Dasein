@@ -6,6 +6,8 @@ public enum NoteOrigin {
     REMODEL("REMODEL"), //
     MODELCREATED("MODEL CREATED");
 
+    private String origin;
+
     private NoteOrigin(String origin) {
         this.setOrigin(origin);
     }
@@ -17,6 +19,4 @@ public enum NoteOrigin {
     public void setOrigin(String origin) {
         this.origin = origin;
     }
-
-    private String origin;
 }

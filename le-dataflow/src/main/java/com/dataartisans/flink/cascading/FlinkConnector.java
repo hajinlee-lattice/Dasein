@@ -39,104 +39,110 @@ import cascading.flow.planner.rule.transformer.ApplyDebugLevelTransformer;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
 import cascading.scheme.Scheme;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class FlinkConnector extends FlowConnector {
 
-	List<String> classPath = new ArrayList<String>();
+    List<String> classPath = new ArrayList<String>();
 
-	private ExecutionEnvironment env;
+    private ExecutionEnvironment env;
 
-	public FlinkConnector() {
-		this(new Properties());
-	}
+    public FlinkConnector() {
+        this(new Properties());
+    }
 
-	public FlinkConnector(Map<Object, Object> properties) {
-		this(ExecutionEnvironment.getExecutionEnvironment(), properties);
-	}
+    public FlinkConnector(Map<Object, Object> properties) {
+        this(ExecutionEnvironment.getExecutionEnvironment(), properties);
+    }
 
-	public FlinkConnector(ExecutionEnvironment env, Map<Object, Object> properties) {
-		super(properties);
-		this.env = env;
-	}
+    public FlinkConnector(ExecutionEnvironment env, Map<Object, Object> properties) {
+        super(properties);
+        this.env = env;
+    }
 
-	@Override
-	protected Class<? extends Scheme> getDefaultIntermediateSchemeClass() {
-		return null; // not required for Flink
-	}
+    @Override
+    protected Class<? extends Scheme> getDefaultIntermediateSchemeClass() {
+        return null; // not required for Flink
+    }
 
-	@Override
-	protected FlowPlanner createFlowPlanner() {
-		return new FlinkPlanner(env, classPath);
-	}
+    @Override
+    protected FlowPlanner createFlowPlanner() {
+        return new FlinkPlanner(env, classPath);
+    }
 
-	@Override
-	protected RuleRegistrySet createDefaultRuleRegistrySet() {
+    @Override
+    protected RuleRegistrySet createDefaultRuleRegistrySet() {
 
-		return new RuleRegistrySet(new FlinkDagRuleRegistry());
-	}
+        return new RuleRegistrySet(new FlinkDagRuleRegistry());
+    }
 
-	@Override
-	public Flow connect(FlowDef flowDef) {
-		classPath.addAll(flowDef.getClassPath());
-		return super.connect(flowDef);
-	}
+    @Override
+    public Flow connect(FlowDef flowDef) {
+        classPath.addAll(flowDef.getClassPath());
+        return super.connect(flowDef);
+    }
 
-	public static class FlinkDagRuleRegistry extends RuleRegistry {
+    public static class FlinkDagRuleRegistry extends RuleRegistry {
 
-		public FlinkDagRuleRegistry() {
+        public FlinkDagRuleRegistry() {
 
-			// enableDebugLogging(); //DP-6438
+            // enableDebugLogging(); //DP-6438
 
-			// PreBalance
-			addRule( new LoneGroupAssert() );
-			addRule( new MissingGroupAssert() );
-			addRule( new BufferAfterEveryAssert() );
-			addRule( new EveryAfterBufferAssert() );
-			addRule( new SplitBeforeEveryAssert() );
+            // PreBalance
+            addRule(new LoneGroupAssert());
+            addRule(new MissingGroupAssert());
+            addRule(new BufferAfterEveryAssert());
+            addRule(new EveryAfterBufferAssert());
+            addRule(new SplitBeforeEveryAssert());
 
-			// Balance
+            // Balance
 
-			// inject boundaries after source taps
-			addRule( new BoundaryAfterSourceTapTransformer() );
-			// inject boundaries before sink taps
-			addRule( new BoundaryBeforeSinkTapTransformer() );
-			// inject boundaries before and after merges
-			addRule( new BoundaryBeforeMergeTransformer() );
-			addRule( new BoundaryAfterMergeTransformer() );
-			// inject boundaries after each split node
-			addRule( new BoundaryAfterSplitNodeTransformer() );
-			addRule( new BoundaryAfterSplitEdgeTransformer() );
-			// inject boundaries before co groups
-			addRule( new BoundaryBeforeCoGroupTransformer() );
-			// inject boundaries before group bys
-			addRule( new BoundaryBeforeGroupByTransformer() );
-			// inject boundaries before and after hash joins
-			addRule( new BoundaryBeforeHashJoinTransformer() );
+            // inject boundaries after source taps
+            addRule(new BoundaryAfterSourceTapTransformer());
+            // inject boundaries before sink taps
+            addRule(new BoundaryBeforeSinkTapTransformer());
+            // inject boundaries before and after merges
+            addRule(new BoundaryBeforeMergeTransformer());
+            addRule(new BoundaryAfterMergeTransformer());
+            // inject boundaries after each split node
+            addRule(new BoundaryAfterSplitNodeTransformer());
+            addRule(new BoundaryAfterSplitEdgeTransformer());
+            // inject boundaries before co groups
+            addRule(new BoundaryBeforeCoGroupTransformer());
+            // inject boundaries before group bys
+            addRule(new BoundaryBeforeGroupByTransformer());
+            // inject boundaries before and after hash joins
+            addRule(new BoundaryBeforeHashJoinTransformer());
 
-			// remove duplicate boundaries
-			addRule( new DoubleBoundaryRemovalTransformer() );
+            // remove duplicate boundaries
+            addRule(new DoubleBoundaryRemovalTransformer());
 
-			// PreResolve
-			addRule( new RemoveNoOpPipeTransformer() );
-			addRule( new ApplyAssertionLevelTransformer() );
-			addRule( new ApplyDebugLevelTransformer() );
+            // PreResolve
+            addRule(new RemoveNoOpPipeTransformer());
+            addRule(new ApplyAssertionLevelTransformer());
+            addRule(new ApplyDebugLevelTransformer());
 
-			// PostResolve
+            // PostResolve
 
-			// PartitionSteps
-			addRule( new WholeGraphStepPartitioner() );
+            // PartitionSteps
+            addRule(new WholeGraphStepPartitioner());
 
-			// PostSteps
+            // PostSteps
 
-			// PartitionNodes
+            // PartitionNodes
 
-			addRule( new TopDownSplitBoundariesNodePartitioner() ); // split from source to multiple sinks
-			addRule( new BottomUpBoundariesNodePartitioner() ); // streamed paths re-partitioned w/ StreamedOnly
+            addRule(new TopDownSplitBoundariesNodePartitioner()); // split from
+                                                                  // source to
+                                                                  // multiple
+                                                                  // sinks
+            addRule(new BottomUpBoundariesNodePartitioner()); // streamed paths
+                                                              // re-partitioned
+                                                              // w/ StreamedOnly
 
-			// Element Factories
-			this.addElementFactory(BoundaryElementFactory.BOUNDARY_FACTORY, new BoundaryElementFactory());
-		}
+            // Element Factories
+            this.addElementFactory(BoundaryElementFactory.BOUNDARY_FACTORY,
+                    new BoundaryElementFactory());
+        }
 
-	}
+    }
 
 }

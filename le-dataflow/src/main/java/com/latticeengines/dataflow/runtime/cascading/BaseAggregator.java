@@ -14,14 +14,12 @@ import cascading.tuple.TupleEntry;
 public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         extends BaseOperation<T> implements Aggregator<T> {
     private static final long serialVersionUID = 1L;
-
-    public static class Context
-    {
-        boolean dummyGroup = false;
-        public TupleEntry groupTuple;
-    }
-
     protected Map<String, Integer> namePositionMap;
+
+    public BaseAggregator(Fields fieldDeclaration) {
+        super(fieldDeclaration);
+        this.namePositionMap = getPositionMap(fieldDeclaration);
+    }
 
     protected Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
         Map<String, Integer> positionMap = new HashMap<>();
@@ -33,49 +31,38 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         return positionMap;
     }
 
-    public BaseAggregator(Fields fieldDeclaration) {
-        super(fieldDeclaration);
-        this.namePositionMap = getPositionMap(fieldDeclaration);
-    }
-
     @SuppressWarnings("rawtypes")
     @Override
-    public void start( FlowProcess flowProcess,
-                       AggregatorCall<T> aggregatorCall )
-    {
+    public void start(FlowProcess flowProcess, AggregatorCall<T> aggregatorCall) {
         TupleEntry group = aggregatorCall.getGroup();
         T context = initializeContext(aggregatorCall.getGroup());
         context.dummyGroup = isDummyGroup(group);
         context.groupTuple = new TupleEntry(group);
-        aggregatorCall.setContext( context );
+        aggregatorCall.setContext(context);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void aggregate(FlowProcess flowProcess,
-                          AggregatorCall<T> aggregatorCall )
-    {
+    public void aggregate(FlowProcess flowProcess, AggregatorCall<T> aggregatorCall) {
         T context = aggregatorCall.getContext();
         if (!context.dummyGroup) {
             TupleEntry arguments = aggregatorCall.getArguments();
             context = updateContext(context, arguments);
-            aggregatorCall.setContext( context );
+            aggregatorCall.setContext(context);
         }
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void complete(FlowProcess flowProcess,
-                         AggregatorCall<T> aggregatorCall )
-    {
+    public void complete(FlowProcess flowProcess, AggregatorCall<T> aggregatorCall) {
         T context = aggregatorCall.getContext();
         if (!context.dummyGroup) {
             Tuple result = finalizeContext(context);
             if (result != null) {
-                aggregatorCall.getOutputCollector().add( result );
+                aggregatorCall.getOutputCollector().add(result);
             }
         } else {
-            aggregatorCall.getOutputCollector().add( dummyTuple(context) );
+            aggregatorCall.getOutputCollector().add(dummyTuple(context));
         }
     }
 
@@ -110,6 +97,11 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
             }
         }
         return result;
+    }
+
+    public static class Context {
+        public TupleEntry groupTuple;
+        boolean dummyGroup = false;
     }
 
 }

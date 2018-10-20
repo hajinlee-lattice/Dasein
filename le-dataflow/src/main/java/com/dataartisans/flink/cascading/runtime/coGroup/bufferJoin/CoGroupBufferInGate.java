@@ -32,135 +32,130 @@ import cascading.pipe.joiner.BufferJoin;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class CoGroupBufferInGate extends GroupingSpliceGate implements InputSource {
 
-	private CoGroupBufferClosure closure;
+    private final boolean isBufferJoin;
+    private CoGroupBufferClosure closure;
 
-	private final boolean isBufferJoin;
+    public CoGroupBufferInGate(FlowProcess flowProcess, CoGroup splice, IORole ioRole) {
+        super(flowProcess, splice, ioRole);
 
-	public CoGroupBufferInGate(FlowProcess flowProcess, CoGroup splice, IORole ioRole) {
-		super(flowProcess, splice, ioRole);
+        this.isBufferJoin = splice.getJoiner() instanceof BufferJoin;
+    }
 
-		this.isBufferJoin = splice.getJoiner() instanceof BufferJoin;
-	}
+    @Override
+    public void bind(StreamGraph streamGraph) {
+        if (role != IORole.sink) {
+            next = getNextFor(streamGraph);
+        }
+    }
 
-	@Override
-	public void bind( StreamGraph streamGraph )
-	{
-		if( role != IORole.sink ) {
-			next = getNextFor(streamGraph);
-		}
-	}
+    @Override
+    public void prepare() {
+        if (role != IORole.source) {
+            throw new UnsupportedOperationException(
+                    "Non-source group by not supported in CoGroupBufferInGate");
+        }
 
+        if (role != IORole.sink) {
+            closure = new CoGroupBufferClosure(flowProcess, this.getSplice().getNumSelfJoins(),
+                    keyFields, valuesFields);
+        }
 
-	@Override
-	public void prepare()
-	{
-		if( role != IORole.source ) {
-			throw new UnsupportedOperationException("Non-source group by not supported in CoGroupBufferInGate");
-		}
+        if (grouping != null && splice.getJoinDeclaredFields() != null
+                && splice.getJoinDeclaredFields().isNone()) {
+            grouping.joinerClosure = closure;
+        }
+    }
 
-		if( role != IORole.sink ) {
-			closure = new CoGroupBufferClosure(flowProcess, this.getSplice().getNumSelfJoins(), keyFields, valuesFields);
-		}
+    @Override
+    public void start(Duct previous) {
+        if (next != null) {
+            super.start(previous);
+        }
+    }
 
-		if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() ) {
-			grouping.joinerClosure = closure;
-		}
-	}
+    public void receive(Duct previous, int ordinal, TupleEntry incomingEntry) {
+        throw new UnsupportedOperationException("Receive not implemented for CoGroupBufferInGate.");
+    }
 
-	@Override
-	public void start( Duct previous )
-	{
-		if( next != null ) {
-			super.start(previous);
-		}
-	}
+    @Override
+    public void run(Object input) {
 
-	public void receive( Duct previous, int ordinal, TupleEntry incomingEntry ) {
-		throw new UnsupportedOperationException("Receive not implemented for CoGroupBufferInGate.");
-	}
+        KeyPeekingIterator iterator;
+        try {
+            iterator = new KeyPeekingIterator((Iterator<Tuple3<Tuple, Integer, Tuple>>) input);
+        } catch (ClassCastException cce) {
+            throw new RuntimeException(
+                    "CoGroupBufferInGate requires Iterator<Tuple3<Tuple, Integer, Tuple>", cce);
+        }
 
-	@Override
-	public void run(Object input) {
+        Tuple key = iterator.peekNextKey();
+        closure.reset(iterator);
 
-		KeyPeekingIterator iterator;
-		try {
-			iterator = new KeyPeekingIterator((Iterator<Tuple3<Tuple, Integer, Tuple>>)input);
-		}
-		catch(ClassCastException cce) {
-			throw new RuntimeException("CoGroupBufferInGate requires Iterator<Tuple3<Tuple, Integer, Tuple>", cce);
-		}
+        // Buffer is using JoinerClosure directly
+        if (!isBufferJoin) {
+            tupleEntryIterator.reset(splice.getJoiner().getIterator(closure));
+        }
 
-		Tuple key = iterator.peekNextKey();
-		closure.reset(iterator);
+        keyEntry.setTuple(this.closure.getGroupTuple(key));
 
-		// Buffer is using JoinerClosure directly
-		if( !isBufferJoin ) {
-			tupleEntryIterator.reset(splice.getJoiner().getIterator(closure));
-		}
+        next.receive(this, 0, grouping);
+    }
 
-		keyEntry.setTuple( this.closure.getGroupTuple(key) );
+    @Override
+    public void complete(Duct previous) {
+        if (next != null) {
+            super.complete(previous);
+        }
+    }
 
-		next.receive( this, 0, grouping );
-	}
+    private static class KeyPeekingIterator implements Iterator<Tuple3<Tuple, Integer, Tuple>> {
 
-	@Override
-	public void complete( Duct previous )
-	{
-		if( next != null ) {
-			super.complete(previous);
-		}
-	}
+        private final Iterator<Tuple3<Tuple, Integer, Tuple>> values;
 
-	private static class KeyPeekingIterator implements Iterator<Tuple3<Tuple, Integer, Tuple>> {
+        private Tuple3<Tuple, Integer, Tuple> peekedValue;
+        private Tuple peekedKey;
 
-		private final Iterator<Tuple3<Tuple, Integer, Tuple>> values;
+        public KeyPeekingIterator(Iterator<Tuple3<Tuple, Integer, Tuple>> values) {
+            this.values = values;
+        }
 
-		private Tuple3<Tuple, Integer, Tuple> peekedValue;
-		private Tuple peekedKey;
+        public Tuple peekNextKey() {
+            if (peekedValue == null && values.hasNext()) {
+                peekedValue = values.next();
+                peekedKey = peekedValue.f0;
+            }
+            if (peekedKey != null) {
+                return peekedKey;
+            } else {
+                throw new NoSuchElementException();
+            }
+        }
 
-		public KeyPeekingIterator(Iterator<Tuple3<Tuple, Integer, Tuple>> values) {
-			this.values = values;
-		}
+        @Override
+        public boolean hasNext() {
+            return peekedValue != null || values.hasNext();
+        }
 
-		public Tuple peekNextKey() {
-			if(peekedValue == null && values.hasNext()) {
-				peekedValue = values.next();
-				peekedKey = peekedValue.f0;
-			}
-			if(peekedKey != null) {
-				return peekedKey;
-			}
-			else {
-				throw new NoSuchElementException();
-			}
-		}
+        @Override
+        public Tuple3<Tuple, Integer, Tuple> next() {
 
-		@Override
-		public boolean hasNext() {
-			return peekedValue != null || values.hasNext();
-		}
+            if (peekedValue != null) {
+                Tuple3<Tuple, Integer, Tuple> v = peekedValue;
+                peekedValue = null;
+                peekedKey = null;
+                return v;
+            } else {
+                return values.next();
+            }
+        }
 
-		@Override
-		public Tuple3<Tuple, Integer, Tuple> next() {
-
-			if(peekedValue != null) {
-				Tuple3<Tuple, Integer, Tuple> v = peekedValue;
-				peekedValue = null;
-				peekedKey = null;
-				return v;
-			}
-			else {
-				return values.next();
-			}
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
 
 }

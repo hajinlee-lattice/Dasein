@@ -47,7 +47,8 @@ public class VertexCreationRequest {
         return outgoingEdgesToVertices;
     }
 
-    public void setOutgoingEdgesToVertices(Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices) {
+    public void setOutgoingEdgesToVertices(
+            Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices) {
         this.outgoingEdgesToVertices = outgoingEdgesToVertices;
     }
 

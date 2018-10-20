@@ -9,10 +9,6 @@ public enum JobSourceType {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static JobSourceType valueOf(int value) {
         JobSourceType result = null;
         for (JobSourceType type : JobSourceType.values()) {
@@ -22,5 +18,9 @@ public enum JobSourceType {
             }
         }
         return result;
+    }
+
+    public int getValue() {
+        return value;
     }
 }

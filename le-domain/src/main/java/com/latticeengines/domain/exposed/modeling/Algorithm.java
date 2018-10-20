@@ -13,16 +13,12 @@ import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAl
 import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = LogisticRegressionAlgorithm.class, name = "logisticRegressionAlgorithm"),
-    @JsonSubTypes.Type(value = DecisionTreeAlgorithm.class, name = "decisionTreeAlgorithm"),
-    @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "randomForestAlgorithm"),
-    @JsonSubTypes.Type(value = PMMLAlgorithm.class, name = "pmmlAlgorithm")
-})
+        @JsonSubTypes.Type(value = LogisticRegressionAlgorithm.class, name = "logisticRegressionAlgorithm"),
+        @JsonSubTypes.Type(value = DecisionTreeAlgorithm.class, name = "decisionTreeAlgorithm"),
+        @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "randomForestAlgorithm"),
+        @JsonSubTypes.Type(value = PMMLAlgorithm.class, name = "pmmlAlgorithm") })
 @Embeddable
 public interface Algorithm extends HasName, HasPid {
 
@@ -30,7 +26,7 @@ public interface Algorithm extends HasName, HasPid {
     String getName();
 
     String getScript();
-    
+
     void setScript(String script);
 
     String getContainerProperties();
@@ -38,52 +34,51 @@ public interface Algorithm extends HasName, HasPid {
     void setContainerProperties(String containerProperties);
 
     String getAlgorithmProperties();
-    
+
     void setAlgorithmProperties(String algorithmProperties);
-    
+
     Properties getAlgorithmProps();
+
+    void setAlgorithmProps(Properties props);
 
     Properties getContainerProps();
 
     int getPriority();
-    
+
     void setPriority(int priority);
-    
+
     String getSampleName();
-    
+
     void setSampleName(String sampleName);
 
     ModelDefinition getModelDefinition();
-    
+
     void setModelDefinition(ModelDefinition modelDefinition);
 
     String getPipelineScript();
-    
+
     void setPipelineScript(String pipelineScript);
-    
+
     String getPipelineLibScript();
-    
+
     void setPipelineLibScript(String pipelineLibScript);
 
     String getMapperSize();
 
     void setMapperSize(String mapperSize);
-    
-    void setPipelineProperties(String pipelineProperties);
-    
+
     String getPipelineProperties();
-    
+
+    void setPipelineProperties(String pipelineProperties);
+
     Properties getPipelineProps();
-    
-    void setPipelineDriver(String pipelineDriver);
-    
+
     String getPipelineDriver();
-    
+
+    void setPipelineDriver(String pipelineDriver);
+
     void resetAlgorithmProperties();
-    
+
     boolean hasDataDiagnostics();
 
-    void setAlgorithmProps(Properties props);
-
-    
 }

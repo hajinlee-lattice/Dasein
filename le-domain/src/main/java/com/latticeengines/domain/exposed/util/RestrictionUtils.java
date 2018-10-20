@@ -30,10 +30,11 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class RestrictionUtils {
 
-    public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
-            "HasPurchased");
+    public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(
+            BusinessEntity.PurchaseHistory, "HasPurchased");
 
-    public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction, boolean translatePriorOnly) {
+    public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction,
+            boolean translatePriorOnly) {
         Restriction restriction;
         Bucket bkt = bucketRestriction.getBkt();
         if (bkt == null) {
@@ -65,20 +66,23 @@ public class RestrictionUtils {
     }
 
     public static Restriction convertConcreteRestriction(ConcreteRestriction concreteRestriction) {
-        if (Arrays.asList(ComparisonType.GTE_AND_LTE, ComparisonType.GT_AND_LTE, ComparisonType.GTE_AND_LT,
-                ComparisonType.GT_AND_LT).contains(concreteRestriction.getRelation())) {
+        if (Arrays
+                .asList(ComparisonType.GTE_AND_LTE, ComparisonType.GT_AND_LTE,
+                        ComparisonType.GTE_AND_LT, ComparisonType.GT_AND_LT)
+                .contains(concreteRestriction.getRelation())) {
             RangeLookup rangeLookup = (RangeLookup) concreteRestriction.getRhs();
             return convertBinaryValueComparison( //
-                    concreteRestriction.getLhs(), concreteRestriction.getRelation(), rangeLookup.getMin(),
-                    rangeLookup.getMax());
+                    concreteRestriction.getLhs(), concreteRestriction.getRelation(),
+                    rangeLookup.getMin(), rangeLookup.getMax());
         } else {
             return concreteRestriction;
         }
     }
 
-    private static Restriction convertTxnBucket(Bucket.Transaction transaction, boolean translatePriorOnly) {
-        if (transaction.getTimeFilter() != null &&
-            translatePriorOnly && ComparisonType.PRIOR_ONLY.equals(transaction.getTimeFilter().getRelation())) {
+    private static Restriction convertTxnBucket(Bucket.Transaction transaction,
+            boolean translatePriorOnly) {
+        if (transaction.getTimeFilter() != null && translatePriorOnly
+                && ComparisonType.PRIOR_ONLY.equals(transaction.getTimeFilter().getRelation())) {
             return convertPriorOnlyTxnBucket(transaction);
         } else {
             TransactionRestriction transactionRestriction = new TransactionRestriction();
@@ -93,8 +97,8 @@ public class RestrictionUtils {
                     agg = unitFilterInTxn.getAggregationType();
                 }
                 AggregationFilter unitFilter = new AggregationFilter(AggregationSelector.UNIT, agg, //
-                                                                     unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues(),
-                                                                     unitFilterInTxn.isIncludeNotPurchased());
+                        unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues(),
+                        unitFilterInTxn.isIncludeNotPurchased());
                 transactionRestriction.setUnitFilter(unitFilter);
             }
 
@@ -104,9 +108,10 @@ public class RestrictionUtils {
                 if (spentFilterInTxn.getAggregationType() != null) {
                     agg = spentFilterInTxn.getAggregationType();
                 }
-                AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT, agg, //
-                                                                      spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues(),
-                                                                      spentFilterInTxn.isIncludeNotPurchased());
+                AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT,
+                        agg, //
+                        spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues(),
+                        spentFilterInTxn.isIncludeNotPurchased());
                 transactionRestriction.setSpentFilter(spentFilter);
             }
             return transactionRestriction;
@@ -117,7 +122,9 @@ public class RestrictionUtils {
         boolean negate = Boolean.TRUE.equals(transaction.getNegate());
         String period = transaction.getTimeFilter().getPeriod();
         if (transaction.getTimeFilter().getValues().size() != 1) {
-            throw new RuntimeException("Prior only time filter should only have one value, but found " + transaction.getTimeFilter().getValues());
+            throw new RuntimeException(
+                    "Prior only time filter should only have one value, but found "
+                            + transaction.getTimeFilter().getValues());
         }
         int val = Integer.valueOf(String.valueOf(transaction.getTimeFilter().getValues().get(0)));
         TimeFilter ever = TimeFilter.ever();
@@ -125,13 +132,19 @@ public class RestrictionUtils {
         TimeFilter current = TimeFilter.inCurrent(period);
         Bucket.Transaction everTxn, withinTxn, currentTxn;
         if (negate) {
-            everTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
-            withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
-            currentTxn = new Bucket.Transaction(transaction.getProductId(), current, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+            everTxn = new Bucket.Transaction(transaction.getProductId(), ever,
+                    transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+            withinTxn = new Bucket.Transaction(transaction.getProductId(), within,
+                    transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+            currentTxn = new Bucket.Transaction(transaction.getProductId(), current,
+                    transaction.getSpentFilter(), transaction.getUnitFilter(), false);
         } else {
-            everTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
-            withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
-            currentTxn = new Bucket.Transaction(transaction.getProductId(), current, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+            everTxn = new Bucket.Transaction(transaction.getProductId(), ever,
+                    transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+            withinTxn = new Bucket.Transaction(transaction.getProductId(), within,
+                    transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+            currentTxn = new Bucket.Transaction(transaction.getProductId(), current,
+                    transaction.getSpentFilter(), transaction.getUnitFilter(), true);
         }
         Restriction everRst = convertTxnBucket(everTxn, false);
         Restriction withinRst = convertTxnBucket(withinTxn, false);
@@ -145,24 +158,29 @@ public class RestrictionUtils {
         return builder.build();
     }
 
-    private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr, ComparisonType comparator,
-            List<Object> values) {
+    private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr,
+            ComparisonType comparator, List<Object> values) {
         String fullAttrName = attr.getAttribute();
         String metricAttr = ActivityMetricsUtils.getDepivotedAttrNameFromFullName(fullAttrName);
         String bundleId = ActivityMetricsUtils.getProductIdFromFullName(fullAttrName);
-        AttributeLookup metricAttrLookup = new AttributeLookup(BusinessEntity.DepivotedPurchaseHistory, metricAttr);
-        Restriction metricRestriction = convertValueComparisons(metricAttrLookup, comparator, values);
+        AttributeLookup metricAttrLookup = new AttributeLookup(
+                BusinessEntity.DepivotedPurchaseHistory, metricAttr);
+        Restriction metricRestriction = convertValueComparisons(metricAttrLookup, comparator,
+                values);
         Restriction bundleIdRestriction = Restriction.builder() //
                 .let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()) //
                 .eq(bundleId).build();
-        Restriction restriction = Restriction.builder().and(bundleIdRestriction, metricRestriction).build();
+        Restriction restriction = Restriction.builder().and(bundleIdRestriction, metricRestriction)
+                .build();
 
         NullMetricsImputation imputation = ActivityMetricsUtils.getNullImputation(fullAttrName);
         // only handles zero imputation now
-        boolean needImputeNulls = NullMetricsImputation.ZERO.equals(imputation) && containsZero(comparator, values);
+        boolean needImputeNulls = NullMetricsImputation.ZERO.equals(imputation)
+                && containsZero(comparator, values);
         if (needImputeNulls) {
             Restriction isNullRestriction = Restriction.builder() //
-                    .let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).isNull().build();
+                    .let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name())
+                    .isNull().build();
             restriction = Restriction.builder().or(restriction, isNullRestriction).build();
         }
 
@@ -173,113 +191,118 @@ public class RestrictionUtils {
             List<Object> values) {
         Restriction restriction = null;
         switch (comparisonType) {
-        case IS_NULL:
-            restriction = new ConcreteRestriction(false, attr, IS_NULL, null);
-            break;
-        case IS_NOT_NULL:
-            restriction = new ConcreteRestriction(false, attr, IS_NOT_NULL, null);
-            break;
-        case EQUAL:
-        case NOT_EQUAL:
-        case GREATER_THAN:
-        case GREATER_OR_EQUAL:
-        case LESS_THAN:
-        case LESS_OR_EQUAL:
-            validateSingleValue(values);
-            restriction = convertUnitaryValueComparison(attr, comparisonType, values.get(0));
-            break;
-        case GTE_AND_LTE:
-        case GT_AND_LTE:
-        case GTE_AND_LT:
-        case GT_AND_LT:
-            validateInRangeValues(values);
-            restriction = convertBinaryValueComparison(attr, comparisonType, values.get(0), values.get(1));
-            break;
-        case IN_COLLECTION:
-            restriction = Restriction.builder().let(attr).inCollection(values).build();
-            break;
-        case NOT_IN_COLLECTION:
-            restriction = Restriction.builder().let(attr).notInCollection(values).build();
-            break;
-        case CONTAINS:
-            restriction = Restriction.builder().let(attr).contains(values.get(0)).build();
-            break;
-        case NOT_CONTAINS:
-            restriction = Restriction.builder().let(attr).notcontains(values.get(0)).build();
-            break;
-        case STARTS_WITH:
-            restriction = Restriction.builder().let(attr).not().startsWith(values.get(0)).build();
-            break;
-        case ENDS_WITH:
-            restriction = Restriction.builder().let(attr).not().endsWith(values.get(0)).build();
-            break;
-        default:
-            throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
+            case IS_NULL:
+                restriction = new ConcreteRestriction(false, attr, IS_NULL, null);
+                break;
+            case IS_NOT_NULL:
+                restriction = new ConcreteRestriction(false, attr, IS_NOT_NULL, null);
+                break;
+            case EQUAL:
+            case NOT_EQUAL:
+            case GREATER_THAN:
+            case GREATER_OR_EQUAL:
+            case LESS_THAN:
+            case LESS_OR_EQUAL:
+                validateSingleValue(values);
+                restriction = convertUnitaryValueComparison(attr, comparisonType, values.get(0));
+                break;
+            case GTE_AND_LTE:
+            case GT_AND_LTE:
+            case GTE_AND_LT:
+            case GT_AND_LT:
+                validateInRangeValues(values);
+                restriction = convertBinaryValueComparison(attr, comparisonType, values.get(0),
+                        values.get(1));
+                break;
+            case IN_COLLECTION:
+                restriction = Restriction.builder().let(attr).inCollection(values).build();
+                break;
+            case NOT_IN_COLLECTION:
+                restriction = Restriction.builder().let(attr).notInCollection(values).build();
+                break;
+            case CONTAINS:
+                restriction = Restriction.builder().let(attr).contains(values.get(0)).build();
+                break;
+            case NOT_CONTAINS:
+                restriction = Restriction.builder().let(attr).notcontains(values.get(0)).build();
+                break;
+            case STARTS_WITH:
+                restriction = Restriction.builder().let(attr).not().startsWith(values.get(0))
+                        .build();
+                break;
+            case ENDS_WITH:
+                restriction = Restriction.builder().let(attr).not().endsWith(values.get(0)).build();
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "comparator " + comparisonType + " is not supported yet");
         }
         return restriction;
     }
 
-    private static Restriction convertUnitaryValueComparison(Lookup attr, ComparisonType comparisonType, Object value) {
+    private static Restriction convertUnitaryValueComparison(Lookup attr,
+            ComparisonType comparisonType, Object value) {
         Restriction restriction = null;
         switch (comparisonType) {
-        case EQUAL:
-            restriction = Restriction.builder().let(attr).eq(value).build();
-            break;
-        case NOT_EQUAL:
-            restriction = Restriction.builder().let(attr).neq(value).build();
-            break;
-        case GREATER_THAN:
-            restriction = Restriction.builder().let(attr).gt(value).build();
-            break;
-        case GREATER_OR_EQUAL:
-            restriction = Restriction.builder().let(attr).gte(value).build();
-            break;
-        case LESS_THAN:
-            restriction = Restriction.builder().let(attr).lt(value).build();
-            break;
-        case LESS_OR_EQUAL:
-            restriction = Restriction.builder().let(attr).lte(value).build();
-            break;
-        default:
-            throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
+            case EQUAL:
+                restriction = Restriction.builder().let(attr).eq(value).build();
+                break;
+            case NOT_EQUAL:
+                restriction = Restriction.builder().let(attr).neq(value).build();
+                break;
+            case GREATER_THAN:
+                restriction = Restriction.builder().let(attr).gt(value).build();
+                break;
+            case GREATER_OR_EQUAL:
+                restriction = Restriction.builder().let(attr).gte(value).build();
+                break;
+            case LESS_THAN:
+                restriction = Restriction.builder().let(attr).lt(value).build();
+                break;
+            case LESS_OR_EQUAL:
+                restriction = Restriction.builder().let(attr).lte(value).build();
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "comparator " + comparisonType + " is not supported yet");
         }
         return restriction;
     }
 
-    private static Restriction convertBinaryValueComparison(Lookup attr, ComparisonType comparisonType, Object min,
-            Object max) {
+    private static Restriction convertBinaryValueComparison(Lookup attr,
+            ComparisonType comparisonType, Object min, Object max) {
         Restriction restriction;
         switch (comparisonType) {
-        case GTE_AND_LTE:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gte(min).build(),
-                            Restriction.builder().let(attr).lte(max).build())
-                    .build();
-            break;
-        case GT_AND_LTE:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gt(min).build(),
-                            Restriction.builder().let(attr).lte(max).build())
-                    .build();
-            break;
-        case GTE_AND_LT:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gte(min).build(),
-                            Restriction.builder().let(attr).lt(max).build())
-                    .build();
-            break;
-        case GT_AND_LT:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gt(min).build(),
-                            Restriction.builder().let(attr).lt(max).build())
-                    .build();
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown operator " + comparisonType);
+            case GTE_AND_LTE:
+                restriction = Restriction.builder()
+                        .and( //
+                                Restriction.builder().let(attr).gte(min).build(),
+                                Restriction.builder().let(attr).lte(max).build())
+                        .build();
+                break;
+            case GT_AND_LTE:
+                restriction = Restriction.builder()
+                        .and( //
+                                Restriction.builder().let(attr).gt(min).build(),
+                                Restriction.builder().let(attr).lte(max).build())
+                        .build();
+                break;
+            case GTE_AND_LT:
+                restriction = Restriction.builder()
+                        .and( //
+                                Restriction.builder().let(attr).gte(min).build(),
+                                Restriction.builder().let(attr).lt(max).build())
+                        .build();
+                break;
+            case GT_AND_LT:
+                restriction = Restriction.builder()
+                        .and( //
+                                Restriction.builder().let(attr).gt(min).build(),
+                                Restriction.builder().let(attr).lt(max).build())
+                        .build();
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown operator " + comparisonType);
         }
         return restriction;
     }
@@ -318,20 +341,20 @@ public class RestrictionUtils {
         } else {
             Double val = toDouble(vals.get(0));
             switch (comparator) {
-            case GREATER_OR_EQUAL:
-                containsZero = val <= 0;
-                break;
-            case GREATER_THAN:
-                containsZero = val < 0;
-                break;
-            case LESS_OR_EQUAL:
-                containsZero = val >= 0;
-                break;
-            case LESS_THAN:
-                containsZero = val > 0;
-                break;
-            default:
-                break;
+                case GREATER_OR_EQUAL:
+                    containsZero = val <= 0;
+                    break;
+                case GREATER_THAN:
+                    containsZero = val < 0;
+                    break;
+                case LESS_OR_EQUAL:
+                    containsZero = val >= 0;
+                    break;
+                case LESS_THAN:
+                    containsZero = val > 0;
+                    break;
+                default:
+                    break;
             }
         }
         return containsZero;

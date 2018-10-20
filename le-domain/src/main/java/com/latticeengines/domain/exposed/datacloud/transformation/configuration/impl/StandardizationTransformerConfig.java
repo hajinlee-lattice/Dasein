@@ -5,7 +5,8 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 
 public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("Sequence")
-    private StandardizationStrategy[] sequence;     // Put operations in sequence array sequentially
+    private StandardizationStrategy[] sequence; // Put operations in sequence
+                                                // array sequentially
 
     @JsonProperty("DomainFields")
     private String[] domainFields; // for strategy DOMAIN: standardize domain
@@ -84,7 +85,9 @@ public class StandardizationTransformerConfig extends TransformerConfig {
                                                  // CONSOLIDATE_INDUSTRY
 
     @JsonProperty("ConsolidateIndustryStrategy")
-    private ConsolidateIndustryStrategy consolidateIndustryStrategy;    // for strategy CONSOLIDATE_INDUSTRY
+    private ConsolidateIndustryStrategy consolidateIndustryStrategy; // for
+                                                                     // strategy
+                                                                     // CONSOLIDATE_INDUSTRY
 
     @JsonProperty("IndustryField")
     private String industryField; // for strategy CONSOLIDATE_INDUSTRY
@@ -103,7 +106,9 @@ public class StandardizationTransformerConfig extends TransformerConfig {
                                                  // CONSOLIDATE_RANGE
 
     @JsonProperty("ConsolidateRangeStrategies")
-    private ConsolidateRangeStrategy[] consolidateRangeStrategies; // for strategy CONSOLIDATE_RANGE
+    private ConsolidateRangeStrategy[] consolidateRangeStrategies; // for
+                                                                   // strategy
+                                                                   // CONSOLIDATE_RANGE
 
     @JsonProperty("RangeInputFields")
     private String[] rangeInputFields; // for strategy CONSOLIDATE_RANGE
@@ -148,47 +153,6 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("SyncSchemaProp")
     private boolean syncSchemaProp; // If true, target schema will retain all
                                     // the properties from base schema
-
-    public enum StandardizationStrategy {
-        ADD_ID, //
-        DOMAIN, //
-        DUNS, //
-        COUNTRY, //
-        STATE, //
-        STRING, //
-        CONVERT_TYPE, //
-        DEDUP, //
-        FILTER, //
-        UPLOAD_TIMESTAMP, //
-        MARKER, //
-        RENAME, //
-        RETAIN, //
-        DISCARD, //
-        ADD_FIELD, //
-        VALID_DOMAIN, //
-        CONSOLIDATE_INDUSTRY, //
-        CONSOLIDATE_RANGE, //
-        COPY, //
-        CHECKSUM, //
-        UPDATE, //
-        SAMPLE, //
-    }
-
-    public enum FieldType {
-        STRING, INT, LONG, BOOLEAN, FLOAT, DOUBLE
-    }
-    
-    public enum ConsolidateIndustryStrategy {
-        MAP_INDUSTRY, PARSE_NAICS
-    }
-
-    public enum ConsolidateRangeStrategy {
-        MAP_RANGE, MAP_VALUE
-    }
-
-    public enum IDStrategy {
-        ROWID, UUID
-    }
 
     public String[] getDomainFields() {
         return domainFields;
@@ -378,7 +342,8 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         return consolidateIndustryStrategy;
     }
 
-    public void setConsolidateIndustryStrategy(ConsolidateIndustryStrategy consolidateIndustryStrategy) {
+    public void setConsolidateIndustryStrategy(
+            ConsolidateIndustryStrategy consolidateIndustryStrategy) {
         this.consolidateIndustryStrategy = consolidateIndustryStrategy;
     }
 
@@ -426,7 +391,8 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         return consolidateRangeStrategies;
     }
 
-    public void setConsolidateRangeStrategies(ConsolidateRangeStrategy[] consolidateRangeStrategies) {
+    public void setConsolidateRangeStrategies(
+            ConsolidateRangeStrategy[] consolidateRangeStrategies) {
         this.consolidateRangeStrategies = consolidateRangeStrategies;
     }
 
@@ -534,5 +500,45 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.syncSchemaProp = syncSchemaProp;
     }
 
+    public enum StandardizationStrategy {
+        ADD_ID, //
+        DOMAIN, //
+        DUNS, //
+        COUNTRY, //
+        STATE, //
+        STRING, //
+        CONVERT_TYPE, //
+        DEDUP, //
+        FILTER, //
+        UPLOAD_TIMESTAMP, //
+        MARKER, //
+        RENAME, //
+        RETAIN, //
+        DISCARD, //
+        ADD_FIELD, //
+        VALID_DOMAIN, //
+        CONSOLIDATE_INDUSTRY, //
+        CONSOLIDATE_RANGE, //
+        COPY, //
+        CHECKSUM, //
+        UPDATE, //
+        SAMPLE, //
+    }
+
+    public enum FieldType {
+        STRING, INT, LONG, BOOLEAN, FLOAT, DOUBLE
+    }
+
+    public enum ConsolidateIndustryStrategy {
+        MAP_INDUSTRY, PARSE_NAICS
+    }
+
+    public enum ConsolidateRangeStrategy {
+        MAP_RANGE, MAP_VALUE
+    }
+
+    public enum IDStrategy {
+        ROWID, UUID
+    }
 
 }

@@ -22,12 +22,12 @@ public class RatingEngineNote extends Note {
     @JsonIgnore
     private RatingEngine ratingEngine;
 
-    public void setRatingEngine(RatingEngine ratingEngine) {
-        this.ratingEngine = ratingEngine;
-    }
-
     public RatingEngine getRatingEngine() {
         return this.ratingEngine;
+    }
+
+    public void setRatingEngine(RatingEngine ratingEngine) {
+        this.ratingEngine = ratingEngine;
     }
 
 }

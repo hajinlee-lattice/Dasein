@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-@JsonSubTypes({ @JsonSubTypes.Type(value = IterativeStepConfig.ConvergeOnCount.class, name = "ConvergeOnCount"), })
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = IterativeStepConfig.ConvergeOnCount.class, name = "ConvergeOnCount"), })
 public class IterativeStepConfig {
 
     public static final String ITERATE_STRATEGY = "IterateStrategy";

@@ -19,19 +19,22 @@ public class RemoteLedpException extends LedpException {
         this.httpStatus = httpStatus;
     }
 
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code, Throwable t) {
+    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,
+            Throwable t) {
         super(code, t);
         this.remoteStackTrace = remoteStackTrace;
         this.httpStatus = httpStatus;
     }
 
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code, String msg) {
+    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,
+            String msg) {
         super(code, msg, null);
         this.remoteStackTrace = remoteStackTrace;
         this.httpStatus = httpStatus;
     }
 
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code, String msg, Throwable t) {
+    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,
+            String msg, Throwable t) {
         super(code, msg, t);
         this.remoteStackTrace = remoteStackTrace;
         this.httpStatus = httpStatus;
@@ -56,7 +59,8 @@ public class RemoteLedpException extends LedpException {
     @Override
     public ErrorDetails getErrorDetails() {
         ErrorDetails details = super.getErrorDetails();
-        details.setStackTrace(details.getStackTrace() + "\nCaused remotely by...\n" + remoteStackTrace);
+        details.setStackTrace(
+                details.getStackTrace() + "\nCaused remotely by...\n" + remoteStackTrace);
         return details;
     }
 

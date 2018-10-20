@@ -15,13 +15,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 /**
- * 
+ *
  * @startuml
  *
  */
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE_PROPERTY_VALUE")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PipelinePropertyValue implements HasPid {
 
     @Id
@@ -33,22 +33,23 @@ public class PipelinePropertyValue implements HasPid {
 
     @Column(name = "VALUE", nullable = false)
     private String value;
-    
+
     @ManyToOne
     @JoinColumn(name = "FK_PIPELINE_PROPDEF_ID", nullable = false)
     @JsonIgnore
     private PipelinePropertyDef pipelinePropertyDef;
-    
-    public PipelinePropertyValue() {}
-    
+
+    public PipelinePropertyValue() {
+    }
+
     public PipelinePropertyValue(String value) {
         setValue(value);
     }
-    
+
     public String getValue() {
         return value;
     }
-    
+
     public void setValue(String value) {
         this.value = value;
     }

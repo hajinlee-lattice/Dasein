@@ -4,18 +4,19 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.latticeengines.common.exposed.util.HashUtils;
 
 public class Product implements Serializable {
-	private static final long serialVersionUID = 3364226218384157226L;
-	
-	private static final String UNKNOWN_PRODUCT_INTERNAL_ID = "c4ca1e5e-1018-4619-9f6b-bb23b7578b6a";
+    private static final long serialVersionUID = 3364226218384157226L;
+
+    private static final String UNKNOWN_PRODUCT_INTERNAL_ID = "c4ca1e5e-1018-4619-9f6b-bb23b7578b6a";
+    public static final String UNKNOWN_PRODUCT_ID = HashUtils
+            .getCleanedString(HashUtils.getShortHash(UNKNOWN_PRODUCT_INTERNAL_ID));
     private static final String PRODUCT_ID = "Id";
     private static final String PRODUCT_NAME = "ProductName";
     private static final String PRODUCT_DESCRIPTION = "Description";
     private static final String PRODUCT_TYPE = "ProductType";
-//    private static final String PRODUCT_STATUS = "ProductStatus";
+    // private static final String PRODUCT_STATUS = "ProductStatus";
     private static final String PRODUCT_BUNDLE = "ProductBundle";
     private static final String PRODUCT_LINE = "ProductLine";
     private static final String PRODUCT_FAMILY = "ProductFamily";
@@ -24,7 +25,6 @@ public class Product implements Serializable {
     private static final String PRODUCT_LINE_ID = "ProductLineId";
     private static final String PRODUCT_FAMILY_ID = "ProductFamilyId";
     private static final String PRODUCT_CATEGORY_ID = "ProductCategoryId";
-
     private String id;
     private String name;
     private String description;
@@ -39,14 +39,12 @@ public class Product implements Serializable {
     private String familyId;
     private String categoryId;
 
-    public static final String UNKNOWN_PRODUCT_ID =
-            HashUtils.getCleanedString(HashUtils.getShortHash(UNKNOWN_PRODUCT_INTERNAL_ID));
+    public Product() {
+    }
 
-    public Product() {}
-
-    public Product(String id, String name, String description, String type,
-                   String bundle, String line, String family, String category,
-                   String bundleId, String lineId, String familyId, String categoryId, String status) {
+    public Product(String id, String name, String description, String type, String bundle,
+            String line, String family, String category, String bundleId, String lineId,
+            String familyId, String categoryId, String status) {
         this.id = id;
         this.name = name;
         this.description = description;

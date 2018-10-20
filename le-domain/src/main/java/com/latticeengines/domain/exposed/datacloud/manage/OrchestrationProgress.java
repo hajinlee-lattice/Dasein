@@ -40,7 +40,7 @@ public class OrchestrationProgress implements HasPid, Serializable {
 
     private static final long serialVersionUID = 4924847774951669528L;
     private static final int STAGE_STR_LEN = 1000;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
@@ -135,7 +135,8 @@ public class OrchestrationProgress implements HasPid, Serializable {
     public void setCurrentStage(DataCloudEngineStage currentStage) {
         this.currentStage = currentStage;
         this.currentStageStr = currentStage == null ? null
-                : currentStage.toString().substring(0, Math.min(STAGE_STR_LEN, currentStage.toString().length()));
+                : currentStage.toString().substring(0,
+                        Math.min(STAGE_STR_LEN, currentStage.toString().length()));
     }
 
     @JsonIgnore

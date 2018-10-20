@@ -34,7 +34,7 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
 
     /**
      * Constructor.
-     * 
+     *
      * @param clazz
      */
     public GenericEnumUserType(Class<E> clazz) {
@@ -52,8 +52,8 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
 
         // enumClassName
         if (!parameters.containsKey(PROPERTY_NAME_ENUM_CLASS_NAME)) {
-            throw new HibernateException(" #100000001 : The property '" + PROPERTY_NAME_ENUM_CLASS_NAME
-                    + "' not found!");
+            throw new HibernateException(" #100000001 : The property '"
+                    + PROPERTY_NAME_ENUM_CLASS_NAME + "' not found!");
         }
         String enumClassName = parameters.getProperty(PROPERTY_NAME_ENUM_CLASS_NAME);
 
@@ -61,14 +61,14 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
             enumClass = Class.forName(enumClassName).asSubclass(Enum.class);
 
         } catch (ClassNotFoundException cfne) {
-            throw new HibernateException("Enum class given by property '" + PROPERTY_NAME_ENUM_CLASS_NAME
-                    + "' not found", cfne);
+            throw new HibernateException("Enum class given by property '"
+                    + PROPERTY_NAME_ENUM_CLASS_NAME + "' not found", cfne);
         }
 
         // identifierMethod
         if (!parameters.containsKey(PROPERTY_NAME_IDENTIFIER_METHOD)) {
-            throw new HibernateException(" #100000002 : The property '" + PROPERTY_NAME_IDENTIFIER_METHOD
-                    + "' not found!");
+            throw new HibernateException(" #100000002 : The property '"
+                    + PROPERTY_NAME_IDENTIFIER_METHOD + "' not found!");
         }
         String identifierMethodName = parameters.getProperty(PROPERTY_NAME_IDENTIFIER_METHOD,
                 DEFAULT_IDENTIFIER_METHOD_NAME);
@@ -77,13 +77,13 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
             identifierMethod = enumClass.getMethod(identifierMethodName, new Class[0]);
             identifierType = identifierMethod.getReturnType();
         } catch (Exception e) {
-            throw new HibernateException("Failed to obtain identifier method named '" + identifierMethodName
-                    + "' in class '" + enumClass.getName() + "' given by property '" + PROPERTY_NAME_IDENTIFIER_METHOD
-                    + "'", e);
+            throw new HibernateException("Failed to obtain identifier method named '"
+                    + identifierMethodName + "' in class '" + enumClass.getName()
+                    + "' given by property '" + PROPERTY_NAME_IDENTIFIER_METHOD + "'", e);
         }
 
-        type = (AbstractSingleColumnStandardBasicType<? extends Object>) new TypeResolver().heuristicType(
-                identifierType.getName(), parameters);
+        type = (AbstractSingleColumnStandardBasicType<? extends Object>) new TypeResolver()
+                .heuristicType(identifierType.getName(), parameters);
 
         if (type == null)
             throw new HibernateException("Unsupported identifier type " + identifierType.getName());
@@ -92,17 +92,19 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
 
         // valueOfMethod
         if (!parameters.containsKey(PROPERTY_NAME_VALUE_OF_METHOD)) {
-            throw new HibernateException(" #100000003 : The property '" + PROPERTY_NAME_VALUE_OF_METHOD
-                    + "' not found!");
+            throw new HibernateException(" #100000003 : The property '"
+                    + PROPERTY_NAME_VALUE_OF_METHOD + "' not found!");
         }
-        String valueOfMethodName = parameters.getProperty("valueOfMethod", DEFAULT_VALUE_OF_METHOD_NAME);
+        String valueOfMethodName = parameters.getProperty("valueOfMethod",
+                DEFAULT_VALUE_OF_METHOD_NAME);
 
         try {
             valueOfMethod = enumClass.getMethod(valueOfMethodName, new Class[] { identifierType });
         } catch (Exception e) {
             throw new HibernateException("Failed to obtain a method named '" + valueOfMethodName
-                    + "', which accepts an argument of type '" + identifierType + "' in class '" + enumClass.getName()
-                    + "' for property '" + PROPERTY_NAME_VALUE_OF_METHOD + "'", e);
+                    + "', which accepts an argument of type '" + identifierType + "' in class '"
+                    + enumClass.getName() + "' for property '" + PROPERTY_NAME_VALUE_OF_METHOD
+                    + "'", e);
         }
     }
 
@@ -152,7 +154,8 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+    public Object nullSafeGet(ResultSet rs, String[] names,
+            SharedSessionContractImplementor session, Object owner)
             throws HibernateException, SQLException {
 
         Object identifier = type.get(rs, names[0], session);
@@ -164,15 +167,15 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
             return valueOfMethod.invoke(enumClass, new Object[] { identifier });
 
         } catch (Exception e) {
-            throw new HibernateException("Exception while invoking valueOf method '" + valueOfMethod.getName()
-                    + "' of enumeration class '" + enumClass + "'", e);
+            throw new HibernateException("Exception while invoking valueOf method '"
+                    + valueOfMethod.getName() + "' of enumeration class '" + enumClass + "'", e);
         }
 
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
-            throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index,
+            SharedSessionContractImplementor session) throws HibernateException, SQLException {
 
         try {
             if (value == null) {
@@ -184,8 +187,8 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
 
             }
         } catch (Exception e) {
-            throw new HibernateException("Exception while invoking identifierMethod '" + identifierMethod.getName()
-                    + "' of enumeration class '" + enumClass + "'", e);
+            throw new HibernateException("Exception while invoking identifierMethod '"
+                    + identifierMethod.getName() + "' of enumeration class '" + enumClass + "'", e);
         }
 
     }

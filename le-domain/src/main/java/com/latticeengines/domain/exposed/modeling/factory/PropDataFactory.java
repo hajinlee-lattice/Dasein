@@ -9,9 +9,8 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 
 public class PropDataFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(PropDataFactory.class);
-
     public static final String PROPDATA_NAME_KEY = "propdata.name";
+    private static final Logger log = LoggerFactory.getLogger(PropDataFactory.class);
 
     public static void configPropData(SelectedConfig config, ModelingParameters parameters) {
         log.info("Check and Config PropData.");

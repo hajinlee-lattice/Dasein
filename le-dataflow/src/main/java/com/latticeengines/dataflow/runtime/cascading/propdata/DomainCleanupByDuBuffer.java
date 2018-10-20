@@ -20,24 +20,22 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
 
+    public static final String DU_PRIMARY_DOMAIN = "DUPrimaryDomain";
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(DomainCleanupByDuBuffer.class);
-    public static final String DU_PRIMARY_DOMAIN = "DUPrimaryDomain";
-
+    protected Map<String, Integer> namePositionMap;
     private String duField;
     private String dunsField;
     private String domainField;
     private String alexaRankField;
-    protected Map<String, Integer> namePositionMap;
-
     private int duArgIdx = -1;
     private int dunsArgIdx = -1;
     private int domainArgIdx = -1;
     private int alexaRankArgIdx = -1;
 
     // output (DU, PrimaryDomain)
-    public DomainCleanupByDuBuffer(Fields fieldDeclaration, String duField, String dunsField, String domainField,
-            String alexaRankField) {
+    public DomainCleanupByDuBuffer(Fields fieldDeclaration, String duField, String dunsField,
+            String domainField, String alexaRankField) {
         super(fieldDeclaration);
         this.duField = duField;
         this.dunsField = dunsField;
@@ -133,14 +131,16 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
         }
         if (numTuples >= 100000) {
             if (primaryDomain == null) {
-                log.warn("The group of DU=" + du + " has " + numTuples + " tuples. No primary domain.");
+                log.warn("The group of DU=" + du + " has " + numTuples
+                        + " tuples. No primary domain.");
             } else {
-                log.warn("Found a primary domain for the group of DU=" + du + " after scanning " + numTuples
-                        + " tuples.");
+                log.warn("Found a primary domain for the group of DU=" + du + " after scanning "
+                        + numTuples + " tuples.");
             }
         }
 
-        return primaryDomain == null ? (maxAlexaRankDomain == null ? mostUsedDomain : maxAlexaRankDomain)
+        return primaryDomain == null
+                ? (maxAlexaRankDomain == null ? mostUsedDomain : maxAlexaRankDomain)
                 : primaryDomain;
     }
 

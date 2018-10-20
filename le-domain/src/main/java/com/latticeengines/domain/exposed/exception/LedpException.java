@@ -24,10 +24,6 @@ public class LedpException extends RuntimeException {
         this.code = code;
     }
 
-    public LedpCode getCode() {
-        return code;
-    }
-
     public LedpException(LedpCode code, String msg, Throwable t) {
         super(code.name() + ": " + msg, t);
         this.code = code;
@@ -51,6 +47,10 @@ public class LedpException extends RuntimeException {
     public static String buildMessageWithCode(LedpCode code, String[] params) {
         String msg = buildMessage(code, params);
         return code.name() + ": " + msg;
+    }
+
+    public LedpCode getCode() {
+        return code;
     }
 
     public ErrorDetails getErrorDetails() {

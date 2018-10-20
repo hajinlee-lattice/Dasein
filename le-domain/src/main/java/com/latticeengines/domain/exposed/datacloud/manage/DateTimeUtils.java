@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 
 public class DateTimeUtils {
 
-    private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     private static final String DATE_TZ_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final String DATE_TX_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static final SimpleDateFormat formatterTZ = new SimpleDateFormat(DATE_TZ_FORMAT);
     private static final SimpleDateFormat formatterTX = new SimpleDateFormat(DATE_TX_FORMAT);
+    private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     static {
@@ -33,7 +33,7 @@ public class DateTimeUtils {
             return formatter.parse(dateStr);
         } catch (Exception e) {
             log.error("Failed to parse timestamp [" + dateStr + "]", e);
-            return  null;
+            return null;
         }
     }
 

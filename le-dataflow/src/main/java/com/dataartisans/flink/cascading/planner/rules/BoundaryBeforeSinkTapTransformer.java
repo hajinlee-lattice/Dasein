@@ -33,46 +33,33 @@ import cascading.pipe.Boundary;
 import cascading.tap.Tap;
 
 /**
- * Injects a Boundary before a sink tap in order to split of the sink tap as a separate node.
+ * Injects a Boundary before a sink tap in order to split of the sink tap as a
+ * separate node.
  */
-public class BoundaryBeforeSinkTapTransformer extends RuleInsertionTransformer
-{
-	public BoundaryBeforeSinkTapTransformer() {
-		super(
-				BalanceAssembly,
-				new SinkTapMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.Before
-		);
-	}
+public class BoundaryBeforeSinkTapTransformer extends RuleInsertionTransformer {
+    public BoundaryBeforeSinkTapTransformer() {
+        super(BalanceAssembly, new SinkTapMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.Before);
+    }
 
-	public static class SinkTapMatcher extends RuleExpression
-	{
-		public SinkTapMatcher()
-		{
-			super( new SinkTapGraph() );
-		}
-	}
+    public static class SinkTapMatcher extends RuleExpression {
+        public SinkTapMatcher() {
+            super(new SinkTapGraph());
+        }
+    }
 
-	public static class SinkTapGraph extends ExpressionGraph {
+    public static class SinkTapGraph extends ExpressionGraph {
 
-		public SinkTapGraph() {
+        public SinkTapGraph() {
 
-			super(SearchOrder.ReverseTopological);
+            super(SearchOrder.ReverseTopological);
 
-			arc(
-					not(
-							OrElementExpression.or(
-									new FlowElementExpression(Extent.class),
-									new FlowElementExpression(Boundary.class)
-							)
-						),
-					ScopeExpression.ANY,
-					new FlowElementExpression(ElementCapture.Primary, Tap.class)
+            arc(not(OrElementExpression.or(new FlowElementExpression(Extent.class),
+                    new FlowElementExpression(Boundary.class))), ScopeExpression.ANY,
+                    new FlowElementExpression(ElementCapture.Primary, Tap.class)
 
-				);
-		}
-	}
-
+            );
+        }
+    }
 
 }

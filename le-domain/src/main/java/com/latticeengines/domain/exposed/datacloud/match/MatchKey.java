@@ -11,7 +11,8 @@ public enum MatchKey {
     Zipcode, //
     PhoneNumber, //
     DUNS, //
-    LookupId, // for CDL lookup, can be AccountId or one of the external lookup ids
+    LookupId, // for CDL lookup, can be AccountId or one of the external lookup
+              // ids
     LatticeAccountID; // internal id for quicker lookup in curated AccountMaster
 
 }

@@ -22,7 +22,6 @@ public class TenantConfiguration {
     @JsonIgnore
     private List<LatticeProduct> products;
 
-
     public FeatureFlagValueMap getFeatureFlagValueMap() {
         return featureFlagValueMap;
     }
@@ -55,7 +54,8 @@ public class TenantConfiguration {
         if (products == null) {
             this.products = null;
         } else {
-            this.products = products.stream().map(LatticeProduct::fromName).collect(Collectors.toList());
+            this.products = products.stream().map(LatticeProduct::fromName)
+                    .collect(Collectors.toList());
         }
     }
 

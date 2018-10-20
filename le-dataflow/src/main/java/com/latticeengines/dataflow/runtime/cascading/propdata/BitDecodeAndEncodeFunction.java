@@ -35,8 +35,8 @@ public class BitDecodeAndEncodeFunction extends BaseOperation implements Functio
     private Map<Integer, Integer> decBitPosToEncBitPos = new HashMap<>();
     private List<String> decodeFields;
 
-    public BitDecodeAndEncodeFunction(String newEncodedColumn, String encodedColumn, List<String> decodedFields,
-            BitCodeBook decodeBook, BitCodeBook encodeBook) {
+    public BitDecodeAndEncodeFunction(String newEncodedColumn, String encodedColumn,
+            List<String> decodedFields, BitCodeBook decodeBook, BitCodeBook encodeBook) {
         super(new Fields(newEncodedColumn));
         if (decodeBook.getDecodeStrategy() == null) {
             throw new IllegalArgumentException("Cannot find decode strategy in the decode book.");
@@ -47,8 +47,10 @@ public class BitDecodeAndEncodeFunction extends BaseOperation implements Functio
         this.newEncodedColumn = newEncodedColumn;
         this.decodeFields = decodedFields;
 
-        decodeBitPositions = decodeBook.assignBitPosAndUpdateIdxMap(this.decodeFields, decodeBitPosIdx);
-        encodeBitPositions = encodeBook.assignBitPosAndUpdateIdxMap(this.decodeFields, encodeBitPosIdx);
+        decodeBitPositions = decodeBook.assignBitPosAndUpdateIdxMap(this.decodeFields,
+                decodeBitPosIdx);
+        encodeBitPositions = encodeBook.assignBitPosAndUpdateIdxMap(this.decodeFields,
+                encodeBitPosIdx);
 
         int bitUnit = findBitUnit();
         for (String decodeField : decodeFields) {
@@ -91,26 +93,29 @@ public class BitDecodeAndEncodeFunction extends BaseOperation implements Functio
         }
 
         try {
-            int[] trueBitsArray = ArrayUtils.toPrimitive(trueBitsToEnc.toArray(new Integer[trueBitsToEnc.size()]));
+            int[] trueBitsArray = ArrayUtils
+                    .toPrimitive(trueBitsToEnc.toArray(new Integer[trueBitsToEnc.size()]));
             String value = BitCodecUtils.encode(trueBitsArray);
             return new Tuple(value);
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Fail to encode %s to %s", encodedColumn, newEncodedColumn), e);
+            throw new RuntimeException(
+                    String.format("Fail to encode %s to %s", encodedColumn, newEncodedColumn), e);
         }
     }
 
     private int findBitUnit() {
         Integer bitUnit = null;
         switch (decodeBook.getDecodeStrategy()) {
-        case BOOLEAN_YESNO:
-            bitUnit = 1;
-            break;
-        default:
-            bitUnit = decodeBook.getBitUnit();
-            break;
+            case BOOLEAN_YESNO:
+                bitUnit = 1;
+                break;
+            default:
+                bitUnit = decodeBook.getBitUnit();
+                break;
         }
         if (bitUnit == null) {
-            throw new RuntimeException("Fail to find bit unit for decode strategy " + decodeBook.getDecodeStrategy());
+            throw new RuntimeException(
+                    "Fail to find bit unit for decode strategy " + decodeBook.getDecodeStrategy());
         }
         return bitUnit;
     }

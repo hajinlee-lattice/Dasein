@@ -23,34 +23,34 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
 @Table(name = "METADATA_ARTIFACT", //
-    uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "PATH" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "PATH" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Artifact implements HasName, HasPid, HasTenantId {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @JsonProperty("path")
     @Column(name = "PATH", nullable = false, length = 766)
     private String path;
-    
+
     @JsonProperty("type")
     @Column(name = "TYPE", nullable = false)
     private ArtifactType artifactType;
-    
+
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-    
+
     @ManyToOne
     @JoinColumn(name = "FK_MODULE_ID", nullable = false)
     private Module module;
@@ -92,13 +92,13 @@ public class Artifact implements HasName, HasPid, HasTenantId {
     }
 
     @Override
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public Long getTenantId() {
+        return tenantId;
     }
 
     @Override
-    public Long getTenantId() {
-        return tenantId;
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Module getModule() {

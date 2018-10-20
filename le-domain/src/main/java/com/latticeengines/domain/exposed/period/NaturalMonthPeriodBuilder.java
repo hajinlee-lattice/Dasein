@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
 
-public class NaturalMonthPeriodBuilder extends StartTimeBasedPeriodBuilder implements PeriodBuilder {
+public class NaturalMonthPeriodBuilder extends StartTimeBasedPeriodBuilder
+        implements PeriodBuilder {
 
     private static final long serialVersionUID = -8736107964245177059L;
 
@@ -14,6 +15,10 @@ public class NaturalMonthPeriodBuilder extends StartTimeBasedPeriodBuilder imple
 
     public NaturalMonthPeriodBuilder(String startDate) {
         super(startDate);
+    }
+
+    private static int getMonth(LocalDate cal) {
+        return cal.get(ChronoField.MONTH_OF_YEAR);
     }
 
     @Override
@@ -37,15 +42,11 @@ public class NaturalMonthPeriodBuilder extends StartTimeBasedPeriodBuilder imple
         return months;
     }
 
-    private static int getMonth(LocalDate cal) {
-        return cal.get(ChronoField.MONTH_OF_YEAR);
-    }
-
     private int getPeriodYear(int period) {
         int month = startDate.get(ChronoField.MONTH_OF_YEAR) + period;
         if (month > 0) {
             return startDate.get(ChronoField.YEAR) + ((month - 1) / 12);
-        } else  {
+        } else {
             return startDate.get(ChronoField.YEAR) + (month / 12) - 1;
         }
     }
@@ -54,7 +55,7 @@ public class NaturalMonthPeriodBuilder extends StartTimeBasedPeriodBuilder imple
         int month = startDate.get(ChronoField.MONTH_OF_YEAR) + period;
         if (month > 0) {
             return (month - 1) % 12 + 1;
-        } else  {
+        } else {
             return month % 12 + 12;
         }
     }

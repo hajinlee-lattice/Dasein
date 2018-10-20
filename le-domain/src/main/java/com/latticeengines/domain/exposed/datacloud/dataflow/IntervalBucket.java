@@ -13,15 +13,14 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntervalBucket extends BucketAlgorithm {
     private static final long serialVersionUID = 5591535115795170400L;
+    @JsonProperty("bnds")
+    private List<Number> boundaries;
 
     @Override
     @JsonIgnore
     public String getAlgorithm() {
         return INTEVAL;
     }
-
-    @JsonProperty("bnds")
-    private List<Number> boundaries;
 
     public List<Number> getBoundaries() {
         return boundaries;
@@ -41,7 +40,8 @@ public class IntervalBucket extends BucketAlgorithm {
             for (int i = 0; i < boundaries.size() - 1; i++) {
                 Number lowerBound = boundaries.get(i);
                 Number upperBound = boundaries.get(i + 1);
-                middleLabels.add(String.format("%s - %s", formatBoundary(lowerBound), formatBoundary(upperBound)));
+                middleLabels.add(String.format("%s - %s", formatBoundary(lowerBound),
+                        formatBoundary(upperBound)));
             }
         }
         Number lastBoundary = boundaries.get(boundaries.size() - 1);
@@ -59,15 +59,16 @@ public class IntervalBucket extends BucketAlgorithm {
         long longValue;
         if (number instanceof Long || number instanceof Integer) {
             longValue = Long.valueOf(number.toString());
-        } else if (Double.valueOf(number.toString()) == Double.valueOf(number.toString()).intValue()) {
+        } else if (Double.valueOf(number.toString()) == Double.valueOf(number.toString())
+                .intValue()) {
             // convert to integer
             longValue = Double.valueOf(number.toString()).intValue();
             number = longValue;
         } else if (number instanceof Double || number instanceof Float) {
             return number.toString();
         } else {
-            throw new IllegalArgumentException(
-                    "Does not know how to format boundary " + number + " of type " + number.getClass().getSimpleName());
+            throw new IllegalArgumentException("Does not know how to format boundary " + number
+                    + " of type " + number.getClass().getSimpleName());
         }
         String formatted = number.toString();
         if (longValue != 0 && longValue % 1000 == 0) {

@@ -16,12 +16,6 @@ public class AmManChecksAggregator extends BaseAggregator<AmManChecksAggregator.
     private static final long serialVersionUID = 8197555095806683562L;
     private String checkField;
     private String checkCode;
-    public static class Context extends BaseAggregator.Context {
-        String value = null;
-        String checkField = null;
-        String checkCode = null;
-        long count = 0;
-    }
 
     public AmManChecksAggregator(String checkCode, String checkField) {
         super(new Fields(DataCloudConstants.CHK_ATTR_CHK_MSG));
@@ -65,12 +59,19 @@ public class AmManChecksAggregator extends BaseAggregator<AmManChecksAggregator.
         Tuple result = Tuple.size(1);
         String aggregatedMsg = "";
         if (context.count > 0) {
-            aggregatedMsg = String.valueOf(context.count) + " Rows/groups violates " + context.checkCode
-                    + " check on fields " + context.checkField;
+            aggregatedMsg = String.valueOf(context.count) + " Rows/groups violates "
+                    + context.checkCode + " check on fields " + context.checkField;
             // check message
             result.set(0, aggregatedMsg);
             return result;
         }
         return null;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String value = null;
+        String checkField = null;
+        String checkCode = null;
+        long count = 0;
     }
 }

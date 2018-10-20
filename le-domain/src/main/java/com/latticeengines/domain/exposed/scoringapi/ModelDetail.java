@@ -26,7 +26,8 @@ public class ModelDetail {
         super();
     }
 
-    public ModelDetail(Model model, ModelSummaryStatus status, Fields fields, String lastModifiedTimestamp) {
+    public ModelDetail(Model model, ModelSummaryStatus status, Fields fields,
+            String lastModifiedTimestamp) {
         this();
         this.model = model;
         this.status = status;

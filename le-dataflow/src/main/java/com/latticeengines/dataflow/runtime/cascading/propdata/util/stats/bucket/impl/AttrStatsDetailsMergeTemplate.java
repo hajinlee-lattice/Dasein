@@ -15,15 +15,16 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 
-public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsMergeTool, Serializable {
+public abstract class AttrStatsDetailsMergeTemplate
+        implements AttrStatsDetailsMergeTool, Serializable {
 
     private static final long serialVersionUID = -8516799137018006941L;
 
-    protected abstract void combineIndividualBuckets(Buckets resultBucketsObj, Buckets secondBucketsObj)
-            throws IOException;
+    protected abstract void combineIndividualBuckets(Buckets resultBucketsObj,
+            Buckets secondBucketsObj) throws IOException;
 
-    public AttributeStats merge(AttributeStats firstStatsDetails,
-                                AttributeStats secondStatsDetails, boolean printTop) {
+    public AttributeStats merge(AttributeStats firstStatsDetails, AttributeStats secondStatsDetails,
+            boolean printTop) {
         if (firstStatsDetails == null || secondStatsDetails == null) {
             if (firstStatsDetails != null) {
                 return firstStatsDetails;
@@ -51,8 +52,8 @@ public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsM
     }
 
     protected void setNonNullCount(AttributeStats firstStatsDetails, //
-                                   AttributeStats secondStatsDetails, //
-                                   AttributeStats resultAttributeStatsDetails) {
+            AttributeStats secondStatsDetails, //
+            AttributeStats resultAttributeStatsDetails) {
         resultAttributeStatsDetails.setNonNullCount(firstStatsDetails.getNonNullCount() //
                 + secondStatsDetails.getNonNullCount());
     }

@@ -28,10 +28,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@javax.persistence.Table(name = "EAI_IMPORT_JOB_DETAIL",
-        indexes = { @Index(name = "IX_COLLECTION_IDENTIFIER", columnList = "COLLECTION_IDENTIFIER"),
-                    @Index(name = "IX_SEQUENCE_ID", columnList = "SEQUENCE_ID")},
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "COLLECTION_IDENTIFIER", "SEQUENCE_ID" }) })
+@javax.persistence.Table(name = "EAI_IMPORT_JOB_DETAIL", indexes = {
+        @Index(name = "IX_COLLECTION_IDENTIFIER", columnList = "COLLECTION_IDENTIFIER"),
+        @Index(name = "IX_SEQUENCE_ID", columnList = "SEQUENCE_ID") }, uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "COLLECTION_IDENTIFIER", "SEQUENCE_ID" }) })
 public class EaiImportJobDetail implements HasPid, Serializable {
 
     private static final long serialVersionUID = -1299972365295269629L;
@@ -76,7 +76,6 @@ public class EaiImportJobDetail implements HasPid, Serializable {
     @Column(name = "TARGET_PATH", length = 2048)
     @JsonProperty("target_path")
     private String targetPath;
-
 
     @Column(name = "DETAILS", nullable = false)
     @Lob
@@ -173,12 +172,6 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
-    public void setPRDetail(String records) {
-        setListDetailFromString("ProcessedRecordsList", records.toString());
-    }
-
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getPRDetail() {
         return (List<String>) details.get("ProcessedRecordsList");
@@ -186,14 +179,14 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
-    public void setPathDetail(String pathList) {
-        setListDetailFromString("ExtractPathList", pathList);
+    public void setPRDetail(String records) {
+        setListDetailFromString("ProcessedRecordsList", records.toString());
     }
 
     @Transient
     @JsonIgnore
-    public void setPathDetail(List<String> pathList) {
-        setDetailValue("ExtractPathList", pathList);
+    public void setPathDetail(String pathList) {
+        setListDetailFromString("ExtractPathList", pathList);
     }
 
     @Transient
@@ -205,26 +198,34 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
+    public void setPathDetail(List<String> pathList) {
+        setDetailValue("ExtractPathList", pathList);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getTemplateName() {
+        return getDetailValue("TemplateName") != null ? getDetailValue("TemplateName").toString()
+                : null;
+    }
+
+    @Transient
+    @JsonIgnore
     public void setTemplateName(String templateName) {
         setDetailValue("TemplateName", templateName);
     }
 
     @Transient
     @JsonIgnore
-    public String getTemplateName() {
-        return getDetailValue("TemplateName") != null ? getDetailValue("TemplateName").toString() : null;
+    public String getImportFileName() {
+        return getDetailValue("ImportFileName") != null
+                ? getDetailValue("ImportFileName").toString() : null;
     }
 
     @Transient
     @JsonIgnore
     public void setImportFileName(String importFileName) {
         setDetailValue("ImportFileName", importFileName);
-    }
-
-    @Transient
-    @JsonIgnore
-    public String getImportFileName() {
-        return getDetailValue("ImportFileName") != null ? getDetailValue("ImportFileName").toString() : null;
     }
 
     @Transient
@@ -239,15 +240,23 @@ public class EaiImportJobDetail implements HasPid, Serializable {
         return details.get(key);
     }
 
-
-    @Transient
-    @JsonIgnore
-    public void setReportURL(String url) { setDetailValue("ReportURL", url); }
-
     @Transient
     @JsonIgnore
     public String getReportURL() {
         return getDetailValue("ReportURL") != null ? getDetailValue("ReportURL").toString() : null;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setReportURL(String url) {
+        setDetailValue("ReportURL", url);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getQueryHandle() {
+        return getDetailValue("QueryHandle") != null ? getDetailValue("QueryHandle").toString()
+                : null;
     }
 
     @Transient
@@ -258,8 +267,9 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
-    public String getQueryHandle() {
-        return getDetailValue("QueryHandle") != null ? getDetailValue("QueryHandle").toString() : null;
+    public Long getTotalRows() {
+        return getDetailValue("TotalRows") != null
+                ? Long.parseLong(getDetailValue("TotalRows").toString()) : null;
     }
 
     @Transient
@@ -270,8 +280,9 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
-    public Long getTotalRows() {
-        return getDetailValue("TotalRows") != null ? Long.parseLong(getDetailValue("TotalRows").toString()) : null;
+    public Long getIgnoredRows() {
+        return getDetailValue("IgnoredRows") != null
+                ? Long.parseLong(getDetailValue("IgnoredRows").toString()) : null;
     }
 
     @Transient
@@ -282,20 +293,15 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
-    public Long getIgnoredRows() {
-        return getDetailValue("IgnoredRows") != null ? Long.parseLong(getDetailValue("IgnoredRows").toString()) : null;
+    public Long getDedupedRows() {
+        return getDetailValue("DedupedRows") != null
+                ? Long.parseLong(getDetailValue("DedupedRows").toString()) : null;
     }
 
     @Transient
     @JsonIgnore
     public void setDedupedRows(Long dedupedRows) {
         setDetailValue("DedupedRows", dedupedRows);
-    }
-
-    @Transient
-    @JsonIgnore
-    public Long getDedupedRows() {
-        return getDetailValue("DedupedRows") != null ? Long.parseLong(getDetailValue("DedupedRows").toString()) : null;
     }
 
     @Transient

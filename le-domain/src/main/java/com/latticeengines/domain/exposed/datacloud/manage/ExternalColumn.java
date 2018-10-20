@@ -339,7 +339,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     }
 
     @SuppressWarnings("deprecation")
-	@Override
+    @Override
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setColumnId(getExternalColumnID());
@@ -355,7 +355,8 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
         metadata.setMatchDestination(getMatchDestination());
-        if (getExternalColumnID().startsWith("TechIndicator") && Category.TECHNOLOGY_PROFILE.equals(getCategory())) {
+        if (getExternalColumnID().startsWith("TechIndicator")
+                && Category.TECHNOLOGY_PROFILE.equals(getCategory())) {
             metadata.setIsPremium(Boolean.TRUE);
         }
 

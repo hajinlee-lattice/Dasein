@@ -11,12 +11,16 @@ public class ProspectingModelingConfig implements AdvancedModelingConfig {
     @Override
     public void copyConfig(AdvancedModelingConfig config) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
-    public String getDataCloudVersion() { return dataCloudVersion; }
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
 
-    public void setDataCloudVersion(String dataCloudVersion) { this.dataCloudVersion = dataCloudVersion; }
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
 
 }

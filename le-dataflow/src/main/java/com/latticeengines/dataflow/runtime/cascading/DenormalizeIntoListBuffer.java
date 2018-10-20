@@ -11,7 +11,7 @@ import cascading.tuple.TupleEntry;
 public class DenormalizeIntoListBuffer extends BaseGroupbyBuffer {
 
     private static final long serialVersionUID = -8650598882742440958L;
-    
+
     private String listFeatureName;
 
     public DenormalizeIntoListBuffer(Fields fieldDeclaration, String listFeatureName) {
@@ -24,7 +24,7 @@ public class DenormalizeIntoListBuffer extends BaseGroupbyBuffer {
     protected Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
         List<Tuple> list = new ArrayList<>();
         while (argumentsInGroup.hasNext()) {
-            
+
             TupleEntry entry = argumentsInGroup.next();
 
             int i = 0;

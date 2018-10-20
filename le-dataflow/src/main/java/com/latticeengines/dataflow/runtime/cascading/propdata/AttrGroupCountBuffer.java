@@ -18,7 +18,6 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
 
-
     private static final int MaxAttrs = 1024;
     private static final int MaxColSize = 4096;
     private static final int MaxAttrCountSize = 32;
@@ -28,7 +27,6 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = -570985038993978462L;
     private static final Logger log = LoggerFactory.getLogger(AttrGroupCountBuffer.class);
-
 
     protected Map<String, Integer> namePositionMap;
 
@@ -40,14 +38,13 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
     private Map<Comparable, Integer> attrIdMap;
     private boolean[] validAttrIds;
 
-
-    public AttrGroupCountBuffer(String[] attrs, Integer[] attrIds, Fields fieldDeclaration, String version,
-                                String versionField, String[] attrField, String totalField) {
+    public AttrGroupCountBuffer(String[] attrs, Integer[] attrIds, Fields fieldDeclaration,
+            String version, String versionField, String[] attrField, String totalField) {
         super(fieldDeclaration);
         this.version = version;
         this.namePositionMap = getPositionMap(fieldDeclaration);
 
-        this.versionLoc =  namePositionMap.get(versionField);
+        this.versionLoc = namePositionMap.get(versionField);
         this.attrLoc = new Integer[attrField.length];
         for (int i = 0; i < attrField.length; i++) {
             this.attrLoc[i] = namePositionMap.get(attrField[i]);
@@ -58,13 +55,13 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
         validAttrIds = new boolean[MaxAttrs];
 
         for (int i = 0; i < attrs.length; i++) {
-             Integer attrId = attrIds[i];
-             if (attrId >= MaxAttrs) {
-                 log.info("Skip attribute " + attrs[i] + " for invalid id " + attrId);
-                 continue;
-             }
-             attrIdMap.put(attrs[i], attrId);
-             validAttrIds[attrId] = true;
+            Integer attrId = attrIds[i];
+            if (attrId >= MaxAttrs) {
+                log.info("Skip attribute " + attrs[i] + " for invalid id " + attrId);
+                continue;
+            }
+            attrIdMap.put(attrs[i], attrId);
+            validAttrIds[attrId] = true;
         }
     }
 
@@ -107,7 +104,7 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
             builder.append(Delimiter);
             if (builder.length() > (MaxColSize - MaxAttrCountSize)) {
                 curAttrCol++;
-                if (curAttrCol >=  attrLoc.length) {
+                if (curAttrCol >= attrLoc.length) {
                     log.info("Number of attributes exceeds the max buffer size");
                     break;
                 }

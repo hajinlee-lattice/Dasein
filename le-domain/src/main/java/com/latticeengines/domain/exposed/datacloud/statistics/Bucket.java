@@ -21,8 +21,8 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-@ApiModel("Represents of a bucket. Use Cmp and Vals fields for a normal bucket or Txn field for a transaction bucket. " +
-        "If none is provided, consider as \"equals to the label\"")
+@ApiModel("Represents of a bucket. Use Cmp and Vals fields for a normal bucket or Txn field for a transaction bucket. "
+        + "If none is provided, consider as \"equals to the label\"")
 public class Bucket implements Serializable {
 
     private static final long serialVersionUID = -8550825595883518157L;
@@ -54,6 +54,32 @@ public class Bucket implements Serializable {
     @JsonProperty("Chg")
     private Change change;
 
+    public Bucket() {
+    }
+
+    public Bucket(Bucket bucket) {
+        // used for deep copy during stats calculation
+        this();
+        this.label = bucket.label;
+        if (bucket.count != null) {
+            this.count = bucket.count;
+        }
+        this.id = bucket.id;
+        if (bucket.encodedCountList != null) {
+            this.encodedCountList = new Long[bucket.encodedCountList.length];
+            int idx = 0;
+            for (Long cnt : bucket.encodedCountList) {
+                this.encodedCountList[idx++] = cnt;
+            }
+        }
+        if (bucket.lift != null) {
+            this.lift = bucket.lift;
+        }
+
+        this.comparisonType = bucket.getComparisonType();
+        this.values = bucket.getValues();
+    }
+
     public static Bucket nullBkt() {
         return new Bucket();
     }
@@ -68,7 +94,8 @@ public class Bucket implements Serializable {
         return rangeBkt(min, max, true, false);
     }
 
-    public static Bucket rangeBkt(Object min, Object max, boolean minInclusive, boolean maxInclusive) {
+    public static Bucket rangeBkt(Object min, Object max, boolean minInclusive,
+            boolean maxInclusive) {
         Bucket bucket = new Bucket();
         List<Object> vals;
         ComparisonType comparator;
@@ -135,7 +162,8 @@ public class Bucket implements Serializable {
         return bucket;
     }
 
-    public static Bucket chgBkt(Change.Direction direction, Change.ComparisonType comparator, List<Object> values) {
+    public static Bucket chgBkt(Change.Direction direction, Change.ComparisonType comparator,
+            List<Object> values) {
         Bucket bucket = new Bucket();
         Change change = new Change();
         change.setDirection(direction);
@@ -143,32 +171,6 @@ public class Bucket implements Serializable {
         change.setAbsVals(values);
         bucket.setChange(change);
         return bucket;
-    }
-
-    public Bucket() {
-    }
-
-    public Bucket(Bucket bucket) {
-        // used for deep copy during stats calculation
-        this();
-        this.label = bucket.label;
-        if (bucket.count != null) {
-            this.count = bucket.count;
-        }
-        this.id = bucket.id;
-        if (bucket.encodedCountList != null) {
-            this.encodedCountList = new Long[bucket.encodedCountList.length];
-            int idx = 0;
-            for (Long cnt : bucket.encodedCountList) {
-                this.encodedCountList[idx++] = cnt;
-            }
-        }
-        if (bucket.lift != null) {
-            this.lift = bucket.lift;
-        }
-
-        this.comparisonType = bucket.getComparisonType();
-        this.values = bucket.getValues();
     }
 
     public String getLabel() {
@@ -271,7 +273,8 @@ public class Bucket implements Serializable {
 
         // for jackson
         @SuppressWarnings("unused")
-		private Transaction() {}
+        private Transaction() {
+        }
 
         public Transaction(String productId, TimeFilter timeFilter, AggregationFilter spentFilter,
                 AggregationFilter unitFilter, Boolean negate) {

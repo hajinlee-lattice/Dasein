@@ -26,6 +26,21 @@ public class Warning {
         this.description = buildDescription(code, params);
     }
 
+    public static String buildDescription(WarningCode code, String[] params) {
+        String description = code.getDescription();
+
+        for (int i = 0; i < params.length; i++) {
+            String param = params[i];
+            if (param != null) {
+                // we need to escape $ from param otherwise it interfere with
+                // replace logic
+                param = param.replace("$", "\\$");
+            }
+            description = description.replaceAll("\\{" + i + "\\}", param);
+        }
+        return description;
+    }
+
     public String getWarning() {
         return warning;
     }
@@ -44,21 +59,6 @@ public class Warning {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public static String buildDescription(WarningCode code, String[] params) {
-        String description = code.getDescription();
-
-        for (int i = 0; i < params.length; i++) {
-            String param = params[i];
-            if (param != null) {
-                // we need to escape $ from param otherwise it interfere with
-                // replace logic
-                param = param.replace("$", "\\$");
-            }
-            description = description.replaceAll("\\{" + i + "\\}", param);
-        }
-        return description;
     }
 
     public WarningCode getCode() {

@@ -173,16 +173,16 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.tenantId = tenantId;
     }
 
+    public Tenant getTenant() {
+        return tenant;
+    }
+
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-    }
-
-    public Tenant getTenant() {
-        return tenant;
     }
 
     @Override
@@ -207,12 +207,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         return executions;
     }
 
-    public void addExeuction(DataFeedExecution exec) {
-        executions.add(exec);
-    }
-
     public void setExecutions(List<DataFeedExecution> executions) {
         this.executions = executions;
+    }
+
+    public void addExeuction(DataFeedExecution exec) {
+        executions.add(exec);
     }
 
     public Long getActiveExecutionId() {
@@ -225,6 +225,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public List<DataFeedTask> getTasks() {
         return tasks;
+    }
+
+    public void setTasks(List<DataFeedTask> taskList) {
+        for (DataFeedTask task : taskList) {
+            addTask(task);
+        }
     }
 
     public DataFeedTask getTask(String entity, String src, String feedType) {
@@ -256,12 +262,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             }
         }
         tasks.add(task);
-    }
-
-    public void setTasks(List<DataFeedTask> taskList) {
-        for (DataFeedTask task : taskList) {
-            addTask(task);
-        }
     }
 
     public Status getStatus() {
@@ -394,18 +394,8 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         ProcessAnalyzing("processAnalyzing"), //
         Deleting("deleting");
 
-        private final String name;
-        private static Map<String, Status> nameMap;
-
         public static final EnumSet<Status> RUNNING_STATUS = EnumSet.of(ProcessAnalyzing, Deleting);
-
-        public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
-            return Collections.emptySet();
-        }
-
-        public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
-            return Collections.emptySet();
-        }
+        private static Map<String, Status> nameMap;
 
         static {
             nameMap = new HashMap<>();
@@ -414,17 +404,10 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             }
         }
 
+        private final String name;
+
         Status(String name) {
             this.name = name;
-        }
-
-        @JsonValue
-        public String getName() {
-            return StringUtils.capitalize(super.name());
-        }
-
-        public String toString() {
-            return this.name;
         }
 
         public static Status fromName(String name) {
@@ -434,8 +417,26 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             if (nameMap.containsKey(name)) {
                 return nameMap.get(name);
             } else {
-                throw new IllegalArgumentException("Cannot find a data feed status with name " + name);
+                throw new IllegalArgumentException(
+                        "Cannot find a data feed status with name " + name);
             }
+        }
+
+        public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
+            return Collections.emptySet();
+        }
+
+        public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
+            return Collections.emptySet();
+        }
+
+        @JsonValue
+        public String getName() {
+            return StringUtils.capitalize(super.name());
+        }
+
+        public String toString() {
+            return this.name;
         }
     }
 

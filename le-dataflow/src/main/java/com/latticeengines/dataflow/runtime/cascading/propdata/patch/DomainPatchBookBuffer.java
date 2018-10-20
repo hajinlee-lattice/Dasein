@@ -42,7 +42,8 @@ public class DomainPatchBookBuffer extends BaseOperation implements Buffer {
     // whether domainsToRemove and domainsToAdd have been initialized
     private boolean patchDomainsInit;
 
-    public DomainPatchBookBuffer(Fields fieldDeclaration, String domainSource, String patchDomainField) {
+    public DomainPatchBookBuffer(Fields fieldDeclaration, String domainSource,
+            String patchDomainField) {
         super(fieldDeclaration);
         Map<String, Integer> namePositionMap = getPositionMap(fieldDeclaration);
         this.domainSource = domainSource;
@@ -92,7 +93,8 @@ public class DomainPatchBookBuffer extends BaseOperation implements Buffer {
                 continue;
             }
             Map map = JsonUtils.deserialize(patchDomainStr, Map.class);
-            Map<String, List<String>> patchDomains = JsonUtils.convertMapWithListValue(map, String.class, String.class);
+            Map<String, List<String>> patchDomains = JsonUtils.convertMapWithListValue(map,
+                    String.class, String.class);
             // No domain to cleanup for this duns
             if (CollectionUtils.isNotEmpty(patchDomains.get(DomainPatchBookAggregator.CLEANUP))) {
                 domainsToRemove.addAll(patchDomains.get(DomainPatchBookAggregator.CLEANUP));
@@ -161,12 +163,12 @@ public class DomainPatchBookBuffer extends BaseOperation implements Buffer {
     private void updateTuple(TupleEntry tuple, Boolean isPriLoc, Boolean isPriDom, String domain,
             String domainSource) {
         if (isPriLoc != null) { // if null, keep original value
-            tuple.getTuple().set(isPriLocIdx,
-                    Boolean.TRUE.equals(isPriLoc) ? DataCloudConstants.ATTR_VAL_Y : DataCloudConstants.ATTR_VAL_N);
+            tuple.getTuple().set(isPriLocIdx, Boolean.TRUE.equals(isPriLoc)
+                    ? DataCloudConstants.ATTR_VAL_Y : DataCloudConstants.ATTR_VAL_N);
         }
         if (isPriDom != null) { // if null, keep original value
-            tuple.getTuple().set(isPriDomIdx,
-                    Boolean.TRUE.equals(isPriDom) ? DataCloudConstants.ATTR_VAL_Y : DataCloudConstants.ATTR_VAL_N);
+            tuple.getTuple().set(isPriDomIdx, Boolean.TRUE.equals(isPriDom)
+                    ? DataCloudConstants.ATTR_VAL_Y : DataCloudConstants.ATTR_VAL_N);
         }
         tuple.getTuple().set(domSrcIdx, domainSource);
         tuple.getTuple().set(domIdx, domain);

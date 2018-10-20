@@ -14,13 +14,25 @@ public enum JobType {
     SFDC_IMPORT(1, "Salesforce Import"), //
     QUOTA_FLOW(2, "Quota Flow");
 
+    private static Map<String, JobType> typeMap = new HashMap<>();
+
+    static {
+        for (JobType type : values()) {
+            typeMap.put(type.getType(), type);
+        }
+    }
+
+    private int typeId;
+    private String type;
+
     private JobType(int typeId, String type) {
         this.typeId = typeId;
         this.type = type;
     }
 
-    private int typeId;
-    private String type;
+    public static JobType getByType(String type) {
+        return typeMap.get(type);
+    }
 
     public int getTypeId() {
         return typeId;
@@ -30,21 +42,9 @@ public enum JobType {
         return type;
     }
 
-    private static Map<String, JobType> typeMap = new HashMap<>();
-
-    static {
-        for (JobType type : values()) {
-            typeMap.put(type.getType(), type);
-        }
-    }
-
     @JsonValue
     public String getName() {
         return StringUtils.capitalize(super.name().toLowerCase());
-    }
-
-    public static JobType getByType(String type) {
-        return typeMap.get(type);
     }
 
 }

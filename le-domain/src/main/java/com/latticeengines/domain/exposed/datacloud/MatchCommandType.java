@@ -9,6 +9,8 @@ public enum MatchCommandType {
         this.commandName = commandName;
     }
 
-    public String getCommandName() { return this.commandName; }
+    public String getCommandName() {
+        return this.commandName;
+    }
 
 }

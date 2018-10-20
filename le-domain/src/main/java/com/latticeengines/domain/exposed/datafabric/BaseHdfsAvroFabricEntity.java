@@ -11,7 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public abstract class BaseHdfsAvroFabricEntity<T> extends BaseFabricEntity<T> implements FabricEntity<T> {
+public abstract class BaseHdfsAvroFabricEntity<T> extends BaseFabricEntity<T>
+        implements FabricEntity<T> {
 
     private static final String PARTITION_KEY = "PartitionKey";
     private static final String SORT_KEY = "SortKey";
@@ -65,11 +66,13 @@ public abstract class BaseHdfsAvroFabricEntity<T> extends BaseFabricEntity<T> im
     }
 
     public abstract String getPartitionKeyInHdfsRecord();
+
     public abstract String getSortKeyInHdfsRecord();
 
     @Override
     public GenericRecord toFabricAvroRecord(String recordType) {
-        Schema schema = new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
+        Schema schema = new Schema.Parser()
+                .parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(PARTITION_KEY, getPartitionKey());
         builder.set(SORT_KEY, getSortKey());
@@ -89,7 +92,8 @@ public abstract class BaseHdfsAvroFabricEntity<T> extends BaseFabricEntity<T> im
         setSortKey(record.get(SORT_KEY).toString());
         if (record.get(ATTRIBUTES) != null) {
             String serializedAttributes = record.get(ATTRIBUTES).toString();
-            Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes, Map.class);
+            Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes,
+                    Map.class);
             setAttributes(mapAttributes);
         }
         return (T) this;
@@ -124,8 +128,9 @@ public abstract class BaseHdfsAvroFabricEntity<T> extends BaseFabricEntity<T> im
 
     protected void setFabricyPartitionKey(GenericRecord record) {
         String pkField = getPartitionKeyInHdfsRecord();
-        if (StringUtils.isBlank(pkField)){
-            throw new IllegalArgumentException("Must specify primary key field in hdfs avro record.");
+        if (StringUtils.isBlank(pkField)) {
+            throw new IllegalArgumentException(
+                    "Must specify primary key field in hdfs avro record.");
         }
         Object pkObj = record.get(pkField);
         if (pkObj instanceof Utf8 || pkObj instanceof String) {

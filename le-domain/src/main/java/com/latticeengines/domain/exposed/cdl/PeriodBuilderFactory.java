@@ -23,7 +23,8 @@ public final class PeriodBuilderFactory {
             case Year:
                 return buildYearPeriod(strategy);
             default:
-                throw new UnsupportedOperationException("Unknown strategy template " + strategy.getTemplate());
+                throw new UnsupportedOperationException(
+                        "Unknown strategy template " + strategy.getTemplate());
         }
     }
 

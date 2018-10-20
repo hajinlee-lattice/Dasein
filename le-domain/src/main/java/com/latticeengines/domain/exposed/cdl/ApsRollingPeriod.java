@@ -13,7 +13,6 @@ public enum ApsRollingPeriod {
     BUSINESS_QUARTER("Business Quarter"), //
     BUSINESS_YEAR("Business Year");
 
-    private String name;
     private static Map<String, ApsRollingPeriod> lookup = new HashMap<>();
     private static List<String> names;
 
@@ -27,6 +26,8 @@ public enum ApsRollingPeriod {
             names.add(period.getName());
         }
     }
+
+    private String name;
 
     ApsRollingPeriod(String name) {
         this.name = name;

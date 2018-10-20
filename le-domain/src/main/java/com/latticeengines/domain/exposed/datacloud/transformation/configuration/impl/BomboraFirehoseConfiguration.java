@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.InputSourceConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 
-public class BomboraFirehoseConfiguration extends BasicTransformationConfiguration implements TransformationConfiguration {
+public class BomboraFirehoseConfiguration extends BasicTransformationConfiguration
+        implements TransformationConfiguration {
     private String version;
     private String sourceName;
     private Map<String, String> sourceConfigurations;
@@ -23,8 +24,18 @@ public class BomboraFirehoseConfiguration extends BasicTransformationConfigurati
     }
 
     @Override
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    @Override
     public Map<String, String> getSourceConfigurations() {
         return sourceConfigurations;
+    }
+
+    @Override
+    public void setSourceConfigurations(Map<String, String> sourceConfigurations) {
+        this.sourceConfigurations = sourceConfigurations;
     }
 
     @Override
@@ -43,6 +54,11 @@ public class BomboraFirehoseConfiguration extends BasicTransformationConfigurati
     }
 
     @Override
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    @Override
     public String getServiceBeanName() {
         return serviceBeanName;
     }
@@ -57,18 +73,8 @@ public class BomboraFirehoseConfiguration extends BasicTransformationConfigurati
     }
 
     @Override
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    @Override
-    public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
-    }
-
-    @Override
-    public void setSourceConfigurations(Map<String, String> sourceConfigurations) {
-        this.sourceConfigurations = sourceConfigurations;
+    public void setSourceColumns(List<SourceColumn> sourceColumns) {
+        this.sourceColumns = sourceColumns;
     }
 
     public String getInputFirehoseVersion() {
@@ -87,11 +93,6 @@ public class BomboraFirehoseConfiguration extends BasicTransformationConfigurati
     @Override
     public void setRootOperationId(String rootOperationId) {
         this.rootOperationId = rootOperationId;
-    }
-
-    @Override
-    public void setSourceColumns(List<SourceColumn> sourceColumns) {
-        this.sourceColumns = sourceColumns;
     }
 
 }

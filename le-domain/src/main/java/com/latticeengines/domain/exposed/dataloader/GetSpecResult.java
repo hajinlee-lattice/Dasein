@@ -10,20 +10,20 @@ public class GetSpecResult {
     private String specDetails;
 
     @JsonProperty("ErrorMessage")
-    public String getErrorMessage(){
+    public String getErrorMessage() {
         return this.errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage){
+    public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
     @JsonProperty("Success")
-    public String getSuccess(){
+    public String getSuccess() {
         return this.success;
     }
 
-    public void setSuccess(String success){
+    public void setSuccess(String success) {
         this.success = success;
     }
 

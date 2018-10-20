@@ -8,7 +8,9 @@ public class DynamoDestination extends PublicationDestination {
     private String version;
 
     @JsonProperty("DestinationType")
-    protected String getDestinationType() { return this.getClass().getSimpleName(); }
+    protected String getDestinationType() {
+        return this.getClass().getSimpleName();
+    }
 
     public String getVersion() {
         return version;

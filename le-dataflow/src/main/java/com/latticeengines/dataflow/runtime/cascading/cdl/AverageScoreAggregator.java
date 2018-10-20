@@ -13,7 +13,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-
 public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregator.Context>
         implements Aggregator<AverageScoreAggregator.Context> {
 
@@ -24,13 +23,8 @@ public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregato
     private String modelGuidField;
     private Map<String, String> scoreFieldMap;
 
-    public static class Context extends BaseAggregator.Context {
-        String modelGuid;
-        double sum = 0.0;
-        long count = 0;
-    }
-
-    public AverageScoreAggregator(String modelGuidField, Map<String, String> scoreFieldMap, String avgField) {
+    public AverageScoreAggregator(String modelGuidField, Map<String, String> scoreFieldMap,
+            String avgField) {
         super(new Fields(modelGuidField, avgField));
         this.modelGuidField = modelGuidField;
         this.scoreFieldMap = scoreFieldMap;
@@ -85,5 +79,11 @@ public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregato
         result.set(1, avg);
         log.info("Output tuple:" + result.toString());
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        String modelGuid;
+        double sum = 0.0;
+        long count = 0;
     }
 }

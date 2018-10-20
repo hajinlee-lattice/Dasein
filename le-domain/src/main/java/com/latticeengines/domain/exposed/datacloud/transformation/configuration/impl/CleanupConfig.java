@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CleanupConfig extends TransformerConfig {
 
-
     @JsonProperty("operation_type")
     private CleanupOperationType operationType;
 

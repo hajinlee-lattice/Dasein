@@ -15,7 +15,8 @@ public class WorkflowConfigurationUtils {
     public static WorkflowConfiguration getDefaultWorkflowConfiguration(
             Class<? extends WorkflowConfiguration> workflowConfigClass) {
         Class<?> builderClass = Arrays.stream(workflowConfigClass.getDeclaredClasses())
-                .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
+                .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst()
+                .orElse(null);
         try {
             Object builder = builderClass.newInstance();
             Method build = builderClass.getMethod("build", new Class<?>[] {});

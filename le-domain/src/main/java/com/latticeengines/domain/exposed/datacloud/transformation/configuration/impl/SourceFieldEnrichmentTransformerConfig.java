@@ -8,7 +8,7 @@ public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
 
     @JsonProperty("FromFields")
     private List<String> fromFields;
-    
+
     @JsonProperty("ToFields")
     private List<String> toFields;
 
@@ -27,5 +27,5 @@ public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
     public void setToFields(List<String> toFields) {
         this.toFields = toFields;
     }
-    
+
 }

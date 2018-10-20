@@ -13,10 +13,6 @@ public enum IntentScore {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static IntentScore fromInteger(int value) {
         for (IntentScore score : values()) {
             if (score.getValue() == value) {
@@ -24,5 +20,9 @@ public enum IntentScore {
             }
         }
         throw new RuntimeException(String.format("No such IntentScore with value %s", value));
+    }
+
+    public int getValue() {
+        return value;
     }
 }

@@ -29,16 +29,11 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 public class ModelSummaryParser {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelSummaryParser.class);
-
     public static final String NAME = "Name";
-
     public static final String MODEL_SUMMARY_PREDICTORS = "Predictors";
-
     public static final String MODEL_SUMMARY_SEGMENTATIONS = "Segmentations";
-
     public static final String DEFAULT_PREDICTOR_NAME = "DefaultPredictorName";
-
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryParser.class);
     private static final String PREDICTOR_DISPLAY_NAME = "DisplayName";
 
     private static final String DEFAULT_PREDICTOR_DISPLAY_NAME = "DefaultDisplayName";
@@ -151,10 +146,11 @@ public class ModelSummaryParser {
                     eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
             summary.setTrainingTableName(JsonUtils
                     .getOrDefault(eventTableProvenance.get("TrainingTableName"), String.class, ""));
-            summary.setTargetTableName(
-                    JsonUtils.getOrDefault(eventTableProvenance.get("TargetTableName"), String.class, ""));
+            summary.setTargetTableName(JsonUtils
+                    .getOrDefault(eventTableProvenance.get("TargetTableName"), String.class, ""));
             summary.setPivotArtifactPath(JsonUtils.getOrDefault(
-                    eventTableProvenance.get(ProvenancePropertyName.PivotFilePath.getName()), String.class, null));
+                    eventTableProvenance.get(ProvenancePropertyName.PivotFilePath.getName()),
+                    String.class, null));
             summary.setModuleName(JsonUtils.getOrDefault(eventTableProvenance.get("Module_Name"),
                     String.class, ""));
 
@@ -171,8 +167,11 @@ public class ModelSummaryParser {
             configuration.setString(ProvenancePropertyName.TrainingFilePath, JsonUtils.getOrDefault(
                     eventTableProvenance.get("Training_File_Path"), String.class, ""));
             if (eventTableProvenance.get(ProvenancePropertyName.PmmlFilePath.getName()) != null) {
-                configuration.setString(ProvenancePropertyName.PmmlFilePath, JsonUtils.getOrDefault(
-                        eventTableProvenance.get(ProvenancePropertyName.PmmlFilePath.getName()), String.class, ""));
+                configuration.setString(ProvenancePropertyName.PmmlFilePath,
+                        JsonUtils.getOrDefault(
+                                eventTableProvenance
+                                        .get(ProvenancePropertyName.PmmlFilePath.getName()),
+                                String.class, ""));
             }
             configuration.setString(ProvenancePropertyName.TransformationGroupName,
                     JsonUtils.getOrDefault(eventTableProvenance.get("Transformation_Group_Name"),
@@ -377,4 +376,3 @@ public class ModelSummaryParser {
                 && summaryJson.has("BottomSample") && summaryJson.has("EventTableProvenance"));
     }
 }
-

@@ -75,22 +75,22 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     @JsonProperty("ValidDomainCheckField")
     private String validDomainCheckField;
-    
+
     @JsonProperty("AddConsolidatedIndustryField")
     private String addConsolidatedIndustryField;
-    
+
     @JsonProperty("ConsolidateIndustryStrategy")
     private ConsolidateIndustryStrategy consolidateIndustryStrategy;
-    
+
     @JsonProperty("IndustryField")
     private String industryField;
-    
+
     @JsonProperty("NaicsField")
     private String naicsField;
-    
+
     @JsonProperty("IndustryMapFileName")
     private String industryMapFileName;
-    
+
     @JsonProperty("NaicsMapFileName")
     private String naicsMapFileName;
 
@@ -336,7 +336,8 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         return consolidateIndustryStrategy;
     }
 
-    public void setConsolidateIndustryStrategy(ConsolidateIndustryStrategy consolidateIndustryStrategy) {
+    public void setConsolidateIndustryStrategy(
+            ConsolidateIndustryStrategy consolidateIndustryStrategy) {
         this.consolidateIndustryStrategy = consolidateIndustryStrategy;
     }
 
@@ -384,7 +385,8 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         return consolidateRangeStrategies;
     }
 
-    public void setConsolidateRangeStrategies(ConsolidateRangeStrategy[] consolidateRangeStrategies) {
+    public void setConsolidateRangeStrategies(
+            ConsolidateRangeStrategy[] consolidateRangeStrategies) {
         this.consolidateRangeStrategies = consolidateRangeStrategies;
     }
 

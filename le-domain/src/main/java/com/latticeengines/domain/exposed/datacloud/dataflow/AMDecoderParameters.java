@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
-
-import java.util.Map;
 
 public class AMDecoderParameters extends TransformationFlowParameters {
     @JsonProperty("DecodeFields")

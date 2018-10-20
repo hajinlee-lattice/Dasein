@@ -68,7 +68,8 @@ public class AMStatsDimensionExpandWithHQDunsBuffer extends BaseOperation implem
             if (resultExpandedTuple == null) {
                 resultExpandedTuple = expandedTuple;
             } else {
-                resultExpandedTuple = dimensionUtil.merge(resultExpandedTuple, expandedTuple, fieldLength);
+                resultExpandedTuple = dimensionUtil.merge(resultExpandedTuple, expandedTuple,
+                        fieldLength);
             }
         }
 

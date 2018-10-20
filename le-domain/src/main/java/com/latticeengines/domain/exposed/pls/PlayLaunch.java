@@ -60,125 +60,106 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true") })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
-public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields, SoftDeletable {
+public class PlayLaunch
+        implements HasPid, HasId<String>, HasTenantId, HasAuditingFields, SoftDeletable {
 
     public static final int PID_INIT_VALUE = 1_000_000; // 1M
     private static final String PLAY_LAUNCH_NAME_PREFIX = "launch";
     private static final String PLAY_LAUNCH_NAME_FORMAT = "%s__%s";
-
-    public PlayLaunch() {
-    }
-
     @Id
     @Basic(optional = false)
     @TableGenerator(name = "PlayLaunch_SEQ_GEN", table = "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName = "SEQUENCE_VAL", pkColumnValue = "PlayLaunch_SEQUENCE", initialValue = PID_INIT_VALUE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "PlayLaunch_SEQ_GEN")
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-
     @JsonProperty("launchId")
     @Column(name = "LAUNCH_ID", unique = true, nullable = false)
     private String launchId;
-
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
-
     @JsonProperty("updated")
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
-
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
-
     @JsonProperty("updatedBy")
     @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
-
     @JsonProperty("launchState")
     @Column(name = "STATE", nullable = false)
     @Enumerated(EnumType.STRING)
     private LaunchState launchState;
-
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Play play;
-
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
-
     @JsonProperty("applicationId")
     @Column(name = "APPLICATION_ID", nullable = true)
     private String applicationId;
-
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-
     @JsonProperty("launchCompletionPercent")
     @Column(name = "LAUNCH_COMPLETION_PERCENT")
     private double launchCompletionPercent;
-
     @JsonProperty("accountsSelected")
     @Column(name = "ACCOUNTS_SELECTED")
     private Long accountsSelected;
-
     @JsonProperty("contactsLaunched")
     @Column(name = "CONTACTS_LAUNCHED")
     private Long contactsLaunched;
-
     @JsonProperty("accountsLaunched")
     @Column(name = "ACCOUNTS_LAUNCHED")
     private Long accountsLaunched;
-
     @JsonProperty("accountsSuppressed")
     @Column(name = "ACCOUNTS_SUPPRESSED")
     private Long accountsSuppressed;
-
     @JsonProperty("accountsErrored")
     @Column(name = "ACCOUNTS_ERRORED")
     private Long accountsErrored;
-
     @JsonProperty("excludeItemsWithoutSalesforceId")
     @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
-
     @JsonProperty("topNCount")
     @Column(name = "TOP_N_COUNT", nullable = true)
     private Long topNCount;
-
     @JsonProperty("bucketsToLaunch")
     @Column(name = "BUCKETS_TO_LAUNCH")
     @Type(type = "text")
     private String bucketsToLaunch;
-
     @JsonProperty("table_name")
     @Column(name = "TABLE_NAME", nullable = true)
     private String tableName;
-
     @JsonProperty("destinationOrgId")
     @Column(name = "DESTINATION_ORG_ID", nullable = true)
     private String destinationOrgId;
-
     @JsonProperty("destinationSysType")
     @Column(name = "DESTINATION_SYS_TYPE", nullable = true)
     @Enumerated(EnumType.STRING)
     private CDLExternalSystemType destinationSysType;
-
     @JsonProperty("destinationAccountId")
     @Column(name = "DESTINATION_ACC_ID", nullable = true)
     private String destinationAccountId;
-
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
+
+    public PlayLaunch() {
+    }
+
+    public static String generateLaunchId() {
+        return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX,
+                UUID.randomUUID().toString());
+    }
 
     @Override
     public Long getPid() {
@@ -256,12 +237,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.play = play;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
     public String getApplicationId() {
         return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     @JsonIgnore
@@ -279,14 +260,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     @Override
     @JsonIgnore
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public Long getTenantId() {
+        return this.tenantId;
     }
 
     @Override
     @JsonIgnore
-    public Long getTenantId() {
-        return this.tenantId;
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public double getLaunchCompletionPercent() {
@@ -348,7 +329,8 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public Set<RatingBucketName> getBucketsToLaunch() {
         if (StringUtils.isNotBlank(this.bucketsToLaunch)) {
             List<?> attrListIntermediate = JsonUtils.deserialize(this.bucketsToLaunch, List.class);
-            return new TreeSet<>(JsonUtils.convertList(attrListIntermediate, RatingBucketName.class));
+            return new TreeSet<>(
+                    JsonUtils.convertList(attrListIntermediate, RatingBucketName.class));
         }
 
         return new TreeSet<>();
@@ -411,9 +393,5 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
-    }
-
-    public static String generateLaunchId() {
-        return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
 }

@@ -180,7 +180,8 @@ public class VdbMetadataField implements Cloneable {
         result = prime * result + ((tags == null) ? 0 : tags.hashCode());
         result = prime * result + ((fundamentalType == null) ? 0 : fundamentalType.hashCode());
         result = prime * result + ((description == null) ? 0 : description.hashCode());
-        result = prime * result + ((displayDiscretization == null) ? 0 : displayDiscretization.hashCode());
+        result = prime * result
+                + ((displayDiscretization == null) ? 0 : displayDiscretization.hashCode());
         result = prime * result + ((statisticalType == null) ? 0 : statisticalType.hashCode());
         return result;
     }
@@ -196,7 +197,7 @@ public class VdbMetadataField implements Cloneable {
         if (getClass() != obj.getClass())
             return false;
 
-        VdbMetadataField other = (VdbMetadataField)obj;
+        VdbMetadataField other = (VdbMetadataField) obj;
         if (!equals(getColumnName(), other.getColumnName())) {
             return false;
         }
@@ -242,8 +243,7 @@ public class VdbMetadataField implements Cloneable {
     }
 
     @Override
-    public Object clone()
-    {
+    public Object clone() {
         VdbMetadataField field = new VdbMetadataField();
         field.setColumnName(getColumnName());
         field.setSource(getSource());

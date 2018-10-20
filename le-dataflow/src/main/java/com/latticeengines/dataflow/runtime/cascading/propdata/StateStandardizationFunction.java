@@ -23,7 +23,8 @@ public class StateStandardizationFunction extends BaseOperation implements Funct
     private String stateField;
     private int stateLoc;
 
-    public StateStandardizationFunction(Fields fieldDeclaration, String standardCountryField, String stateField) {
+    public StateStandardizationFunction(Fields fieldDeclaration, String standardCountryField,
+            String stateField) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.standardCountryField = standardCountryField;

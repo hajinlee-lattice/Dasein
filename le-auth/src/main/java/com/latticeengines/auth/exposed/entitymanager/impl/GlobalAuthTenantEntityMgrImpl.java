@@ -2,7 +2,8 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +16,10 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 
 @Component("globalAuthTenantEntityMgr")
-public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTenant> implements
-        GlobalAuthTenantEntityMgr {
+public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTenant>
+        implements GlobalAuthTenantEntityMgr {
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantDao gaTenantDao;
 
     @Override
@@ -47,13 +48,13 @@ public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthTenant gaTenant) {
-    		gaTenantDao.create(gaTenant);
+        gaTenantDao.create(gaTenant);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthTenant gaTenant) {
-    		gaTenantDao.delete(gaTenant);
+        gaTenantDao.delete(gaTenant);
     }
 
     @Override

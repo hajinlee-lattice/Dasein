@@ -55,12 +55,12 @@ public class SubQuery {
         return projections;
     }
 
-    public void setSubQueryExpression(Object subQueryExpression) {
-        this.subQueryExpression = subQueryExpression;
-    }
-
     public Object getSubQueryExpression() {
         return this.subQueryExpression;
+    }
+
+    public void setSubQueryExpression(Object subQueryExpression) {
+        this.subQueryExpression = subQueryExpression;
     }
 
     public SubQuery withProjection(String attribute) {

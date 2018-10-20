@@ -8,16 +8,16 @@ public class ScoringRequestConfigSummary {
 
     protected String configId;
     protected String modelUuid;
-    
+
     public ScoringRequestConfigSummary() {
-        
+
     }
-    
+
     public ScoringRequestConfigSummary(String configId, String modelUuid) {
         this.configId = configId;
         this.modelUuid = modelUuid;
     }
-    
+
     @JsonProperty("configId")
     public String getConfigId() {
         return configId;

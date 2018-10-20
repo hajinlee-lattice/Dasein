@@ -27,7 +27,8 @@ public class AttributeUtils {
         copyPropertiesFromAttribute(source, dest, true);
     }
 
-    public static void copyPropertiesFromAttribute(Attribute source, Attribute dest, boolean includeEmptySourceValues) {
+    public static void copyPropertiesFromAttribute(Attribute source, Attribute dest,
+            boolean includeEmptySourceValues) {
         PropertyDescriptor[] descriptors = getPropertyDescriptors();
 
         for (PropertyDescriptor descriptor : descriptors) {
@@ -58,7 +59,8 @@ public class AttributeUtils {
         HashSet<String> diffFields = new HashSet<>();
         PropertyDescriptor[] descriptors = getPropertyDescriptors();
         for (PropertyDescriptor descriptor : descriptors) {
-            if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null && !isPropertyBag(descriptor)) {
+            if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null
+                    && !isPropertyBag(descriptor)) {
                 Object targetValue = getValue(target, descriptor);
                 Object baseValue = getValue(base, descriptor);
                 boolean targetValueEmpty = targetValue == null
@@ -73,7 +75,7 @@ public class AttributeUtils {
                     } else {
                         boolean equal;
                         if (targetValue instanceof String) {
-                            equal = StringUtils.equals((String)targetValue, (String)baseValue);
+                            equal = StringUtils.equals((String) targetValue, (String) baseValue);
                         } else {
                             equal = EqualsBuilder.reflectionEquals(targetValue, baseValue);
                         }
@@ -103,13 +105,16 @@ public class AttributeUtils {
                             || (sourceValue instanceof List && ((List<?>) sourceValue).size() == 0)
                             || (sourceValue instanceof Set && ((Set<?>) sourceValue).size() == 0);
                     if (includeEmptySourceValues || !sourceEmpty) {
-                        String key = StringUtils.substringAfter(descriptor.getWriteMethod().getName(), "set");
+                        String key = StringUtils
+                                .substringAfter(descriptor.getWriteMethod().getName(), "set");
                         String metadataValue = String.valueOf(sourceValue);
                         String avroValue = fm.getPropertyValue(key);
 
-                        if (avroValue != null && metadataValue != null && !avroValue.equals(metadataValue.toString())) {
-                            log.warn(String.format("Property collision for field %s in Attribute %s. " //
-                                    + "Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table", //
+                        if (avroValue != null && metadataValue != null
+                                && !avroValue.equals(metadataValue.toString())) {
+                            log.warn(String.format(
+                                    "Property collision for field %s in Attribute %s. " //
+                                            + "Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table", //
                                     key, source.getName(), avroValue, metadataValue));
                         }
                         fm.setPropertyValue(key, metadataValue);
@@ -117,7 +122,8 @@ public class AttributeUtils {
                         // from source.", descriptor.getName(),
                         // sourceValue));
                     } else {
-                        log.debug(String.format("Ignoring property %s because it is null/empty on source",
+                        log.debug(String.format(
+                                "Ignoring property %s because it is null/empty on source",
                                 descriptor.getName()));
                     }
                 }
@@ -129,7 +135,8 @@ public class AttributeUtils {
         return descriptor.getWriteMethod().isAnnotationPresent(AttributePropertyBag.class);
     }
 
-    public static void setPropertyFromString(Attribute attribute, String propertyName, String propertyValue) {
+    public static void setPropertyFromString(Attribute attribute, String propertyName,
+            String propertyValue) {
         try {
             Class<?> attrClass = Class.forName(Attribute.class.getName());
             String methodName = "set" + propertyName;
@@ -147,17 +154,20 @@ public class AttributeUtils {
                     // attribute.getName(), propertyValue));
                     m.invoke(attribute, propertyValue);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.warn(String.format("Failed to set property %s on attribute %s", propertyName,
-                            attribute.getName()));
+                    log.warn(String.format("Failed to set property %s on attribute %s",
+                            propertyName, attribute.getName()));
                 }
             }
         } catch (Exception e) {
-            log.error(String.format("Failed to set properties on attribute %s", attribute.getName()), e);
+            log.error(
+                    String.format("Failed to set properties on attribute %s", attribute.getName()),
+                    e);
         }
 
     }
 
-    public static void setPropertiesFromStrings(Attribute attribute, Map<String, String> properties) {
+    public static void setPropertiesFromStrings(Attribute attribute,
+            Map<String, String> properties) {
         try {
             Class<?> attrClass = Class.forName(Attribute.class.getName());
             Map<String, Method> methodMap = new HashMap<>();
@@ -183,13 +193,15 @@ public class AttributeUtils {
                         // attribute.getName(), properties.get(propertyName)));
                         m.invoke(attribute, properties.get(propertyName));
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        log.warn(String.format("Failed to set property %s on attribute %s", propertyName,
-                                attribute.getName()));
+                        log.warn(String.format("Failed to set property %s on attribute %s",
+                                propertyName, attribute.getName()));
                     }
                 }
             }
         } catch (Exception e) {
-            log.error(String.format("Failed to set properties on attribute %s", attribute.getName()), e);
+            log.error(
+                    String.format("Failed to set properties on attribute %s", attribute.getName()),
+                    e);
         }
     }
 

@@ -26,7 +26,8 @@ public class FieldMetadata {
     private Schema listElementSchema;
 
     public FieldMetadata(FieldMetadata fm) {
-        this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties(), null);
+        this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties(),
+                null);
     }
 
     public FieldMetadata(String fieldName, Class<?> javaType) {
@@ -42,13 +43,15 @@ public class FieldMetadata {
         this(AvroUtils.getAvroType(javaType), javaType, fieldName, null, avroSchema);
         properties.putAll(properties);
     }
-    
-    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField) {
+
+    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName,
+            Schema.Field avroField) {
         this(avroType, javaType, fieldName, avroField, null);
     }
 
     @SuppressWarnings("deprecation")
-    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField, Schema listElementSchema) {
+    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName,
+            Schema.Field avroField, Schema listElementSchema) {
         this.avroType = avroType;
         this.javaType = javaType;
         this.fieldName = fieldName;
@@ -60,8 +63,8 @@ public class FieldMetadata {
         }
     }
 
-    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField,
-            Map<String, String> properties, Schema avroSchema) {
+    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName,
+            Schema.Field avroField, Map<String, String> properties, Schema avroSchema) {
         this(avroType, javaType, fieldName, avroField, avroSchema);
         if (properties != null) {
             this.properties.putAll(properties);
@@ -150,7 +153,8 @@ public class FieldMetadata {
         while (iter.hasNext()) {
             FieldMetadata metadata = iter.next();
             if (metadata.getTableName() != null) {
-                Pair<String, String> pair = new ImmutablePair<>(metadata.getFieldName(), metadata.getTableName());
+                Pair<String, String> pair = new ImmutablePair<>(metadata.getFieldName(),
+                        metadata.getTableName());
                 if (set.contains(pair)) {
                     iter.remove();
                 }

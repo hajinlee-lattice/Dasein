@@ -39,9 +39,10 @@ public class OrbCacheSeedRebuildBuffer extends BaseOperation implements Buffer {
     }
 
     public OrbCacheSeedRebuildBuffer(Fields fieldDeclaration, String companyFileDomainField,
-            String companyFileWebDomainsField, String domainFileDomainField, String domainFileHasEmailField,
-            String orbCacheSeedDomainField, String orbCacheSeedPrimaryDomainField,
-            String orbCacheSeedIsSecondaryDomainField, String orbCacheSeedDomainHasEmailField) {
+            String companyFileWebDomainsField, String domainFileDomainField,
+            String domainFileHasEmailField, String orbCacheSeedDomainField,
+            String orbCacheSeedPrimaryDomainField, String orbCacheSeedIsSecondaryDomainField,
+            String orbCacheSeedDomainHasEmailField) {
         this(fieldDeclaration);
         this.companyFileDomainField = companyFileDomainField;
         this.companyFileWebDomainsField = companyFileWebDomainsField;
@@ -49,7 +50,8 @@ public class OrbCacheSeedRebuildBuffer extends BaseOperation implements Buffer {
         this.domainFileHasEmailField = domainFileHasEmailField;
         this.orbCacheSeedDomainLoc = namePositionMap.get(orbCacheSeedDomainField);
         this.orbCacheSeedPrimaryDomainLoc = namePositionMap.get(orbCacheSeedPrimaryDomainField);
-        this.orbCacheSeedIsSecondaryDomainLoc = namePositionMap.get(orbCacheSeedIsSecondaryDomainField);
+        this.orbCacheSeedIsSecondaryDomainLoc = namePositionMap
+                .get(orbCacheSeedIsSecondaryDomainField);
         this.orbCacheSeedDomainHasEmailLoc = namePositionMap.get(orbCacheSeedDomainHasEmailField);
     }
 
@@ -63,10 +65,12 @@ public class OrbCacheSeedRebuildBuffer extends BaseOperation implements Buffer {
         setupTupleForArgument(bufferCall, arguments, group);
     }
 
-    private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup, TupleEntry group) {
+    private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup,
+            TupleEntry group) {
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
-            if (primaryDomain == null && StringUtils.isNotEmpty(arguments.getString(companyFileDomainField))) {
+            if (primaryDomain == null
+                    && StringUtils.isNotEmpty(arguments.getString(companyFileDomainField))) {
                 primaryDomain = arguments.getString(companyFileDomainField);
                 domainHasEmailMap.put(primaryDomain, null);
             }

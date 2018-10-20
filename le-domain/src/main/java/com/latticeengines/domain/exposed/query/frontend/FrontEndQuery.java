@@ -65,6 +65,27 @@ public class FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.DISTINCT)
     private boolean distinct = false;
 
+    public static FrontEndQuery fromSegment(MetadataSegment segment) {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction accountRestriction = null;
+        if (segment.getAccountRestriction() != null) {
+            accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        } else if (segment.getAccountFrontEndRestriction() != null) {
+            accountRestriction = segment.getAccountFrontEndRestriction();
+        }
+        frontEndQuery.setAccountRestriction(accountRestriction);
+
+        FrontEndRestriction contactRestriction = null;
+        if (segment.getContactRestriction() != null) {
+            contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+        } else if (segment.getContactFrontEndRestriction() != null) {
+            contactRestriction = segment.getContactFrontEndRestriction();
+        }
+        frontEndQuery.setContactRestriction(contactRestriction);
+
+        return frontEndQuery;
+    }
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -174,27 +195,6 @@ public class FrontEndQuery {
                 .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
                 .collect(Collectors.toList());
         lookups.addAll(moreLookups);
-    }
-
-    public static FrontEndQuery fromSegment(MetadataSegment segment) {
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        FrontEndRestriction accountRestriction = null;
-        if (segment.getAccountRestriction() != null) {
-            accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
-        } else if (segment.getAccountFrontEndRestriction() != null) {
-            accountRestriction = segment.getAccountFrontEndRestriction();
-        }
-        frontEndQuery.setAccountRestriction(accountRestriction);
-
-        FrontEndRestriction contactRestriction = null;
-        if (segment.getContactRestriction() != null) {
-            contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
-        } else if (segment.getContactFrontEndRestriction() != null) {
-            contactRestriction = segment.getContactFrontEndRestriction();
-        }
-        frontEndQuery.setContactRestriction(contactRestriction);
-
-        return frontEndQuery;
     }
 
     @Override

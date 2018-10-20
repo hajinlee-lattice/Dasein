@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
-@JsonSubTypes.Type(value = TimestampExtractFilter.class) })
+        @JsonSubTypes.Type(value = TimestampExtractFilter.class) })
 public abstract class ExtractFilter {
     public abstract boolean allows(Extract extract);
 }

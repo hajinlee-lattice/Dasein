@@ -164,13 +164,13 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     public Table() {
     }
 
+    public Table(TableType tableType) {
+        setTableTypeCode(tableType.getCode());
+    }
+
     @PostConstruct
     public void postConstruct() {
         setTableTypeCode(TableType.DATATABLE.getCode());
-    }
-    
-    public Table(TableType tableType) {
-        setTableTypeCode(tableType.getCode());
     }
 
     @Override
@@ -232,7 +232,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (name == null) {
             return null;
         }
-        return attributes.stream().filter(attr -> name.equals(attr.getName())).findFirst().orElse(null);
+        return attributes.stream().filter(attr -> name.equals(attr.getName())).findFirst()
+                .orElse(null);
     }
 
     @JsonIgnore
@@ -240,8 +241,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (interfaceName == null) {
             return null;
         }
-        return attributes.stream().filter(attr -> interfaceName.equals(attr.getInterfaceName())).findFirst()
-                .orElse(null);
+        return attributes.stream().filter(attr -> interfaceName.equals(attr.getInterfaceName()))
+                .findFirst().orElse(null);
     }
 
     @JsonIgnore
@@ -281,7 +282,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (displayName == null) {
             return null;
         }
-        return attributes.stream().filter(attr -> displayName.equals(attr.getDisplayName())).findFirst().orElse(null);
+        return attributes.stream().filter(attr -> displayName.equals(attr.getDisplayName()))
+                .findFirst().orElse(null);
     }
 
     @JsonIgnore
@@ -357,6 +359,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
@@ -365,13 +372,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
     }
 
-    @JsonIgnore
-    public Tenant getTenant() {
-        return tenant;
-    }
-
     public List<Extract> getExtracts() {
         return extracts;
+    }
+
+    public void setExtracts(List<Extract> extracts) {
+        this.extracts = extracts;
     }
 
     @JsonIgnore
@@ -379,10 +385,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         extracts.add(extract);
         extract.setTable(this);
         extract.setTenant(getTenant());
-    }
-
-    public void setExtracts(List<Extract> extracts) {
-        this.extracts = extracts;
     }
 
     public PrimaryKey getPrimaryKey() {
@@ -479,7 +481,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             try {
                 args = mapper.readValue(attr.getRTSArguments(), Map.class);
                 TransformDefinition transform = new TransformDefinition(attr.getRTSModuleName(), //
-                        attr.getName(), FieldType.getFromAvroType(attr.getPhysicalDataType()), args);
+                        attr.getName(), FieldType.getFromAvroType(attr.getPhysicalDataType()),
+                        args);
                 rtsTransforms.add(transform);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -506,11 +509,13 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         for (Attribute attr : getAttributes()) {
             boolean isRequest = requestTargets.contains(attr.getName());
             if (isRequest) {
-                if (attr.getInterfaceName() == null && (attr.getApprovedUsage() == null
-                        || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None"))) {
+                if (attr.getInterfaceName() == null
+                        && (attr.getApprovedUsage() == null || attr.getApprovedUsage().size() == 0
+                                || attr.getApprovedUsage().get(0).equals("None"))) {
                     // Custom field with no approved usage
                     continue;
-                } else if (LogicalDataType.isExcludedFromRealTimeMetadata(attr.getLogicalDataType())) {
+                } else if (LogicalDataType
+                        .isExcludedFromRealTimeMetadata(attr.getLogicalDataType())) {
                     continue;
                 }
             }
@@ -535,57 +540,57 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         FieldInterpretation interpretation;
         if (attr.getInterfaceName() != null) {
             switch (attr.getInterfaceName()) {
-            case Id:
-                interpretation = FieldInterpretation.Id;
-                break;
-            case Event:
-                interpretation = FieldInterpretation.Event;
-                break;
-            case Domain:
-                interpretation = FieldInterpretation.Domain;
-                break;
-            case FirstName:
-                interpretation = FieldInterpretation.FirstName;
-                break;
-            case LastName:
-                interpretation = FieldInterpretation.LastName;
-                break;
-            case Title:
-                interpretation = FieldInterpretation.Title;
-                break;
-            case Email:
-                interpretation = FieldInterpretation.Email;
-                break;
-            case City:
-                interpretation = FieldInterpretation.City;
-                break;
-            case State:
-                interpretation = FieldInterpretation.State;
-                break;
-            case PostalCode:
-                interpretation = FieldInterpretation.PostalCode;
-                break;
-            case Country:
-                interpretation = FieldInterpretation.Country;
-                break;
-            case PhoneNumber:
-                interpretation = FieldInterpretation.PhoneNumber;
-                break;
-            case Website:
-                interpretation = FieldInterpretation.Website;
-                break;
-            case CompanyName:
-                interpretation = FieldInterpretation.CompanyName;
-                break;
-            case Industry:
-                interpretation = FieldInterpretation.Industry;
-                break;
-            case DUNS:
-                interpretation = FieldInterpretation.DUNS;
-                break;
-            default:
-                interpretation = FieldInterpretation.Feature;
-                break;
+                case Id:
+                    interpretation = FieldInterpretation.Id;
+                    break;
+                case Event:
+                    interpretation = FieldInterpretation.Event;
+                    break;
+                case Domain:
+                    interpretation = FieldInterpretation.Domain;
+                    break;
+                case FirstName:
+                    interpretation = FieldInterpretation.FirstName;
+                    break;
+                case LastName:
+                    interpretation = FieldInterpretation.LastName;
+                    break;
+                case Title:
+                    interpretation = FieldInterpretation.Title;
+                    break;
+                case Email:
+                    interpretation = FieldInterpretation.Email;
+                    break;
+                case City:
+                    interpretation = FieldInterpretation.City;
+                    break;
+                case State:
+                    interpretation = FieldInterpretation.State;
+                    break;
+                case PostalCode:
+                    interpretation = FieldInterpretation.PostalCode;
+                    break;
+                case Country:
+                    interpretation = FieldInterpretation.Country;
+                    break;
+                case PhoneNumber:
+                    interpretation = FieldInterpretation.PhoneNumber;
+                    break;
+                case Website:
+                    interpretation = FieldInterpretation.Website;
+                    break;
+                case CompanyName:
+                    interpretation = FieldInterpretation.CompanyName;
+                    break;
+                case Industry:
+                    interpretation = FieldInterpretation.Industry;
+                    break;
+                case DUNS:
+                    interpretation = FieldInterpretation.DUNS;
+                    break;
+                default:
+                    interpretation = FieldInterpretation.Feature;
+                    break;
             }
         } else {
             interpretation = FieldInterpretation.Feature;
@@ -602,8 +607,9 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (log.isDebugEnabled()) {
             log.debug(String.format(
                     "Added field to realtime metadata -- Name:%s ApprovedUsage:%s LogicalDataType:%s FieldSchema:%s",
-                    StringUtils.defaultIfBlank(attr.getName(), ""), StringUtils.join(attr.getApprovedUsage(), ","),
-                    attr.getLogicalDataType(), JsonUtils.serialize(fieldSchema)));
+                    StringUtils.defaultIfBlank(attr.getName(), ""),
+                    StringUtils.join(attr.getApprovedUsage(), ","), attr.getLogicalDataType(),
+                    JsonUtils.serialize(fieldSchema)));
         }
 
         return fieldSchema;
@@ -717,7 +723,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (attributes == null) {
             return null;
         } else {
-            return attributes.stream().map(Attribute::getColumnMetadata).collect(Collectors.toList());
+            return attributes.stream().map(Attribute::getColumnMetadata)
+                    .collect(Collectors.toList());
         }
     }
 }

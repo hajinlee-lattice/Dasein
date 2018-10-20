@@ -24,7 +24,14 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchOutput {
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
+    private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static Logger log = LoggerFactory.getLogger(MatchOutput.class);
+    private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+    static {
+        formatter.setCalendar(calendar);
+    }
 
     private List<String> inputFields;
     private Map<MatchKey, List<String>> keyMap;
@@ -37,20 +44,13 @@ public class MatchOutput {
     private Date finishedAt;
     private String rootOperationUID;
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
-    private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-    private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-
     // for json constructor
     @SuppressWarnings("unused")
-    private MatchOutput() {}
+    private MatchOutput() {
+    }
 
     public MatchOutput(String rootOperationUID) {
         this.rootOperationUID = rootOperationUID;
-    }
-
-    static {
-        formatter.setCalendar(calendar);
     }
 
     @JsonProperty("InputFields")

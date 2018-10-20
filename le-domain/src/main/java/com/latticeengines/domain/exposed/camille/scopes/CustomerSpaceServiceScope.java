@@ -12,12 +12,13 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
     private String serviceName;
     private Map<String, String> properties;
 
-    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName) {
+    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId,
+            String serviceName) {
         this(contractId, tenantId, spaceId, serviceName, new HashMap<String, String>());
     }
 
-    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName,
-            Map<String, String> properties) {
+    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId,
+            String serviceName, Map<String, String> properties) {
         this.contractId = contractId;
         this.tenantId = tenantId;
         this.spaceId = spaceId;
@@ -29,8 +30,10 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName);
     }
 
-    public CustomerSpaceServiceScope(CustomerSpace space, String serviceName, Map<String, String> properties) {
-        this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName, properties);
+    public CustomerSpaceServiceScope(CustomerSpace space, String serviceName,
+            Map<String, String> properties) {
+        this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName,
+                properties);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
-
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.FileInputSourceConfig;
 

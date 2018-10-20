@@ -43,7 +43,8 @@ public class BaseContext {
     public <T> T getRequiredProperty(String propertyName, Class<T> propertyValueClass) {
         T value = getProperty(propertyName, propertyValueClass);
         if (value == null) {
-            throw new RuntimeException(String.format("Required property %s is not specified in context", propertyName));
+            throw new RuntimeException(String
+                    .format("Required property %s is not specified in context", propertyName));
         }
         return value;
     }

@@ -7,11 +7,11 @@ public class LoginValidationResponse {
     private boolean isValidated;
 
     private String userId;
-    
+
     private String firstName;
-    
+
     private String lastName;
-    
+
     private List<String> userRoles;
 
     private Exception authenticationException;

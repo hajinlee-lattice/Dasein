@@ -43,7 +43,8 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
     private final Map<String, BitCodeBook> codeBookMap;
     private final Map<String, List<String>> colsToDecode;
 
-    public BucketEncodeFunction(List<DCEncodedAttr> encodedAttrs, Map<String, BitCodeBook> codeBookMap) {
+    public BucketEncodeFunction(List<DCEncodedAttr> encodedAttrs,
+            Map<String, BitCodeBook> codeBookMap) {
         super(declareFields(encodedAttrs));
         this.encodedAttrs = encodedAttrs;
         this.codeBookMap = codeBookMap;
@@ -51,17 +52,121 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         this.colsToDecode = getColsToDecode(encodedAttrs);
     }
 
+    private static Fields declareFields(List<DCEncodedAttr> encodedAttrs) {
+        List<String> encAttrNames = new ArrayList<>();
+        encodedAttrs.forEach(encAttr -> encAttrNames.add(encAttr.getEncAttr()));
+        return DataFlowUtils.convertToFields(encAttrNames);
+    }
+
+    static int bucket(Object value, BucketAlgorithm algo) {
+        if (value == null) {
+            return 0;
+        }
+        if (algo instanceof BooleanBucket) {
+            return bucketBoolean(value);
+        }
+        if (algo instanceof CategoricalBucket) {
+            return bucketCategorical(value, (CategoricalBucket) algo);
+        }
+        if (algo instanceof IntervalBucket) {
+            return bucketInterval(value, (IntervalBucket) algo);
+        }
+        if (algo instanceof DiscreteBucket) {
+            return bucketDiscrete(value, (DiscreteBucket) algo);
+        }
+        return 0;
+    }
+
+    private static int bucketBoolean(Object value) {
+        String str = value.toString().toLowerCase();
+        if (Arrays.asList("1", "t", "true", "y", "yes").contains(str)) {
+            return 1;
+        } else if (Arrays.asList("0", "f", "false", "n", "no").contains(str)) {
+            return 2;
+        } else {
+            log.warn("Cannot parse value " + value + " to a boolean");
+            return 0;
+        }
+    }
+
+    private static int bucketCategorical(Object value, CategoricalBucket bucket) {
+        List<String> categories = bucket.getCategories();
+        final Map<String, String> reversedMapping = new HashMap<>();
+        Map<String, List<String>> mapping = bucket.getMapping();
+        if (mapping != null && !mapping.isEmpty()) {
+            mapping.forEach((k, v) -> v.forEach(s -> reversedMapping.put(s, k)));
+        }
+        String thisCategory = value.toString().trim();
+        if (StringUtils.isEmpty(thisCategory)) {
+            return 0;
+        }
+        if (!reversedMapping.isEmpty()) {
+            thisCategory = reversedMapping.get(thisCategory);
+        }
+        int idx = categories.indexOf(thisCategory);
+        if (idx < 0) {
+            log.warn("Did not find a category for value " + value + " from "
+                    + StringUtils.join(categories, ", "));
+            return 0;
+        } else {
+            return idx + 1;
+        }
+    }
+
+    private static int bucketInterval(Object value, IntervalBucket bucket) {
+        Number number;
+        if (value instanceof Number) {
+            number = (Number) value;
+        } else {
+            try {
+                number = Double.valueOf(value.toString());
+            } catch (Exception e) {
+                log.error(
+                        "Failed to convert value " + value + " to number for an interval bucket.");
+                return 0;
+            }
+        }
+
+        List<Number> boundaries = bucket.getBoundaries();
+        int interval = 1;
+        for (Number boundary : boundaries) {
+            if (boundary.doubleValue() <= number.doubleValue()) {
+                interval++;
+            } else {
+                break;
+            }
+        }
+        return interval;
+    }
+
+    private static int bucketDiscrete(Object value, DiscreteBucket bucket) {
+        if (value == null) {
+            return 0;
+        }
+        try {
+            int idx = 1;
+            for (Number disVal : bucket.getValues()) {
+                if ((value instanceof Integer && value.equals(disVal.intValue()))
+                        || (value instanceof Long && value.equals(disVal.longValue()))) {
+                    return idx;
+                }
+                idx++;
+            }
+            log.error("Fail to find value " + value.toString() + " in discrete bucket");
+            return 0;
+        } catch (Exception ex) {
+            log.error(
+                    "Fail to compare value " + value.toString() + " with discrete values in bucket",
+                    ex);
+            return 0;
+        }
+    }
+
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         initArgPosMap(arguments);
         functionCall.getOutputCollector().add(generateResult(arguments));
-    }
-
-    private static Fields declareFields(List<DCEncodedAttr> encodedAttrs) {
-        List<String> encAttrNames = new ArrayList<>();
-        encodedAttrs.forEach(encAttr -> encAttrNames.add(encAttr.getEncAttr()));
-        return DataFlowUtils.convertToFields(encAttrNames);
     }
 
     protected Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
@@ -117,7 +222,8 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         }
     }
 
-    private long encode(TupleEntry arguments, DCEncodedAttr encAttr, Map<String, Object> decodedValues) {
+    private long encode(TupleEntry arguments, DCEncodedAttr encAttr,
+            Map<String, Object> decodedValues) {
         long encoded = 0;
         List<DCBucketedAttr> bktAttrs = encAttr.getBktAttrs();
         for (DCBucketedAttr bktAttr : bktAttrs) {
@@ -130,8 +236,9 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
                 // simple field
                 Integer posInArg = argPosMap.get(bktAttr.resolveSourceAttr());
                 if (posInArg == null) {
-                    throw new RuntimeException("Cannot find the source attr " + bktAttr.resolveSourceAttr()
-                            + " for bkt attr " + bktAttr.getNominalAttr());
+                    throw new RuntimeException(
+                            "Cannot find the source attr " + bktAttr.resolveSourceAttr()
+                                    + " for bkt attr " + bktAttr.getNominalAttr());
                 }
                 Object value = arguments.getObject(posInArg);
                 bktIdx = bucket(value, algo);
@@ -156,111 +263,12 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
             BitCodeBook codeBook = codeBookMap.get(entry.getKey());
             Object bitEncoded = originalEncoded.get(entry.getKey());
             if (bitEncoded != null && StringUtils.isNotBlank(bitEncoded.toString())) {
-                Map<String, Object> decoded = codeBook.decode(bitEncoded.toString(), entry.getValue());
+                Map<String, Object> decoded = codeBook.decode(bitEncoded.toString(),
+                        entry.getValue());
                 result.putAll(decoded);
             }
         }
         return result;
-    }
-
-    static int bucket(Object value, BucketAlgorithm algo) {
-        if (value == null) {
-            return 0;
-        }
-        if (algo instanceof BooleanBucket) {
-            return bucketBoolean(value);
-        }
-        if (algo instanceof CategoricalBucket) {
-            return bucketCategorical(value, (CategoricalBucket) algo);
-        }
-        if (algo instanceof IntervalBucket) {
-            return bucketInterval(value, (IntervalBucket) algo);
-        }
-        if (algo instanceof DiscreteBucket) {
-            return bucketDiscrete(value, (DiscreteBucket) algo);
-        }
-        return 0;
-    }
-
-    private static int bucketBoolean(Object value) {
-        String str = value.toString().toLowerCase();
-        if (Arrays.asList("1", "t", "true", "y", "yes").contains(str)) {
-            return 1;
-        } else if (Arrays.asList("0", "f", "false", "n", "no").contains(str)) {
-            return 2;
-        } else {
-            log.warn("Cannot parse value " + value + " to a boolean");
-            return 0;
-        }
-    }
-
-    private static int bucketCategorical(Object value, CategoricalBucket bucket) {
-        List<String> categories = bucket.getCategories();
-        final Map<String, String> reversedMapping = new HashMap<>();
-        Map<String, List<String>> mapping = bucket.getMapping();
-        if (mapping != null && !mapping.isEmpty()) {
-            mapping.forEach((k, v) -> v.forEach(s -> reversedMapping.put(s, k)));
-        }
-        String thisCategory = value.toString().trim();
-        if (StringUtils.isEmpty(thisCategory)) {
-            return 0;
-        }
-        if (!reversedMapping.isEmpty()) {
-            thisCategory = reversedMapping.get(thisCategory);
-        }
-        int idx = categories.indexOf(thisCategory);
-        if (idx < 0) {
-            log.warn("Did not find a category for value " + value + " from " + StringUtils.join(categories, ", "));
-            return 0;
-        } else {
-            return idx + 1;
-        }
-    }
-
-    private static int bucketInterval(Object value, IntervalBucket bucket) {
-        Number number;
-        if (value instanceof Number) {
-            number = (Number) value;
-        } else {
-            try {
-                number = Double.valueOf(value.toString());
-            } catch (Exception e) {
-                log.error("Failed to convert value " + value + " to number for an interval bucket.");
-                return 0;
-            }
-        }
-
-        List<Number> boundaries = bucket.getBoundaries();
-        int interval = 1;
-        for (Number boundary : boundaries) {
-            if (boundary.doubleValue() <= number.doubleValue()) {
-                interval++;
-            } else {
-                break;
-            }
-        }
-        return interval;
-    }
-
-    private static int bucketDiscrete(Object value, DiscreteBucket bucket) {
-        if (value == null) {
-            return 0;
-        }
-        try {
-            int idx = 1;
-            for (Number disVal : bucket.getValues()) {
-                if ((value instanceof Integer && value.equals(disVal.intValue()))
-                        || (value instanceof Long && value.equals(disVal.longValue()))) {
-                    return idx;
-                }
-                idx++;
-            }
-            log.error("Fail to find value " + value.toString() + " in discrete bucket");
-            return 0;
-        } catch (Exception ex) {
-            log.error("Fail to compare value " + value.toString() + " with discrete values in bucket", ex);
-            return 0;
-        }
     }
 
 }

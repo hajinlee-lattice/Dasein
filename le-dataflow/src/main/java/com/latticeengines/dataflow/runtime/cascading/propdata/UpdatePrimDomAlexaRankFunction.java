@@ -23,9 +23,9 @@ public class UpdatePrimDomAlexaRankFunction extends BaseOperation implements Fun
     private String ldcDomainField;
     private String primDomAlexaRankField;
 
-    public UpdatePrimDomAlexaRankFunction(Fields fieldDeclaration, String secDomainField, String primDomainField,
-            String alexaRankField,
-            String ldcDomainField, String primDomAlexaRankField) {
+    public UpdatePrimDomAlexaRankFunction(Fields fieldDeclaration, String secDomainField,
+            String primDomainField, String alexaRankField, String ldcDomainField,
+            String primDomAlexaRankField) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.secDomainField = secDomainField;
@@ -48,8 +48,10 @@ public class UpdatePrimDomAlexaRankFunction extends BaseOperation implements Fun
             result.set(i, arguments.getObject(i));
         }
         if (arguments.getObject(secDomainField) != null) {
-            result.set(this.namePositionMap.get(ldcDomainField), arguments.getObject(primDomainField));
-            result.set(this.namePositionMap.get(alexaRankField), arguments.getObject(primDomAlexaRankField));
+            result.set(this.namePositionMap.get(ldcDomainField),
+                    arguments.getObject(primDomainField));
+            result.set(this.namePositionMap.get(alexaRankField),
+                    arguments.getObject(primDomAlexaRankField));
         }
     }
 

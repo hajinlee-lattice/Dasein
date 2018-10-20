@@ -15,7 +15,7 @@ public class SpSamlLoginRequest {
 
     private Map<String, String> requestParameters;
 
-    @JsonProperty(value="tenantDeploymentId")
+    @JsonProperty(value = "tenantDeploymentId")
     public String getTenantDeploymentId() {
         return tenantDeploymentId;
     }
@@ -24,7 +24,7 @@ public class SpSamlLoginRequest {
         this.tenantDeploymentId = tenantDeploymentId;
     }
 
-    @JsonProperty(value="requestParameters")
+    @JsonProperty(value = "requestParameters")
     public Map<String, String> getRequestParameters() {
         return requestParameters;
     }

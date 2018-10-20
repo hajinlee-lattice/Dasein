@@ -33,41 +33,33 @@ import cascading.tap.Tap;
 /**
  * Injects a Boundary after a splitting node.
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
-public class BoundaryAfterSplitNodeTransformer extends RuleInsertionTransformer
-{
-	public BoundaryAfterSplitNodeTransformer() {
-		super(
-				BalanceAssembly,
-				new SplitElementMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.After
-		);
-	}
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class BoundaryAfterSplitNodeTransformer extends RuleInsertionTransformer {
+    public BoundaryAfterSplitNodeTransformer() {
+        super(BalanceAssembly, new SplitElementMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.After);
+    }
 
-	public static class SplitElementMatcher extends RuleExpression
-	{
-		public SplitElementMatcher()
-		{
-			super( new SplitElementGraph() );
-		}
-	}
+    public static class SplitElementMatcher extends RuleExpression {
+        public SplitElementMatcher() {
+            super(new SplitElementGraph());
+        }
+    }
 
-	public static class SplitElementGraph extends ExpressionGraph {
+    public static class SplitElementGraph extends ExpressionGraph {
 
-		public SplitElementGraph() {
+        public SplitElementGraph() {
 
-			super(SearchOrder.ReverseTopological,
+            super(SearchOrder.ReverseTopological,
 
-					OrElementExpression.or (ElementCapture.Primary,
-							new TypeExpression(Tap.class, TypeExpression.Topo.Split),
-							new TypeExpression(Group.class, TypeExpression.Topo.Split),
-							new TypeExpression(Pipe.class, TypeExpression.Topo.Split)
-					)
+                    OrElementExpression.or(ElementCapture.Primary,
+                            new TypeExpression(Tap.class, TypeExpression.Topo.Split),
+                            new TypeExpression(Group.class, TypeExpression.Topo.Split),
+                            new TypeExpression(Pipe.class, TypeExpression.Topo.Split))
 
-					);
+            );
 
-		}
-	}
+        }
+    }
 
 }

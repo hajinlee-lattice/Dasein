@@ -88,7 +88,8 @@ public class BuiltWithTopAttrBuffer extends BaseOperation implements Buffer {
                 String resultColumn = attrMap.get(tech);
                 Integer loc = namePositionMap.get(resultColumn);
                 String token = tech + "(" + dateFormat.format(new Date(firstDetected)) + ")";
-                if (countContextMap.containsKey(loc) && countContextMap.get(loc).size() < NUM_ATTR) {
+                if (countContextMap.containsKey(loc)
+                        && countContextMap.get(loc).size() < NUM_ATTR) {
                     countContextMap.get(loc).add(token);
                 } else {
                     countContextMap.put(loc, new HashSet<>(Collections.singleton(token)));

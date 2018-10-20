@@ -8,14 +8,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public class SoftwarePackage implements HasName {
-    
+
     private String name;
     private String initializerClassName;
     private String module;
     private String groupId;
     private String artifactId;
     private String classifier = "";
-    
+
     @Override
     @JsonProperty("name")
     public String getName() {
@@ -37,7 +37,7 @@ public class SoftwarePackage implements HasName {
     public void setInitializerClass(String initializerClassName) {
         this.initializerClassName = initializerClassName;
     }
-    
+
     @JsonIgnore
     public String getHdfsPath() {
         return getHdfsPath("jar");
@@ -45,8 +45,8 @@ public class SoftwarePackage implements HasName {
 
     @JsonIgnore
     public String getHdfsPath(String extension) {
-        assert(!StringUtils.isEmpty(module));
-        assert(!StringUtils.isEmpty(artifactId));
+        assert (!StringUtils.isEmpty(module));
+        assert (!StringUtils.isEmpty(artifactId));
         String fileName = String.format("%s-%s.%s", artifactId, classifier, extension);
         if (StringUtils.isEmpty(classifier)) {
             fileName = String.format("%s.%s", artifactId, extension);
@@ -98,5 +98,5 @@ public class SoftwarePackage implements HasName {
     public String toString() {
         return JsonUtils.serialize(this);
     }
-    
+
 }

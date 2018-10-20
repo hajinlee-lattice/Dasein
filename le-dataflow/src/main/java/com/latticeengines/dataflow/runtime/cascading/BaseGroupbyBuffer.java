@@ -18,6 +18,11 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
     private static final long serialVersionUID = -9177444191170437390L;
     protected Map<String, Integer> namePositionMap;
 
+    protected BaseGroupbyBuffer(Fields fieldDeclaration) {
+        super(fieldDeclaration);
+        this.namePositionMap = getPositionMap(fieldDeclaration);
+    }
+
     protected Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
         Map<String, Integer> positionMap = new HashMap<>();
         int pos = 0;
@@ -26,11 +31,6 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
             positionMap.put(fieldName.toLowerCase(), pos++);
         }
         return positionMap;
-    }
-
-    protected BaseGroupbyBuffer(Fields fieldDeclaration) {
-        super(fieldDeclaration);
-        this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
     @SuppressWarnings("unchecked")
@@ -81,6 +81,7 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
         }
     }
 
-    protected abstract Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup);
+    protected abstract Tuple setupTupleForArgument(Tuple result,
+            Iterator<TupleEntry> argumentsInGroup);
 
 }

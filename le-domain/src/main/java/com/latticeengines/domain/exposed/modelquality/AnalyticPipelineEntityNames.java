@@ -33,7 +33,7 @@ public class AnalyticPipelineEntityNames {
 
     @JsonIgnore
     private Integer version;
-    
+
     public AnalyticPipelineEntityNames() {
     }
 
@@ -47,52 +47,52 @@ public class AnalyticPipelineEntityNames {
         this.version = ap.getVersion();
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setPipeline(String pipeline) {
-        this.pipeline = pipeline;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPipeline() {
         return pipeline;
     }
 
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
+    public void setPipeline(String pipeline) {
+        this.pipeline = pipeline;
     }
 
     public String getAlgorithm() {
         return algorithm;
     }
 
-    public void setPropData(String propData) {
-        this.propData = propData;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
     }
 
     public String getPropData() {
         return propData;
     }
 
-    public void setDataFlow(String dataFlow) {
-        this.dataFlow = dataFlow;
+    public void setPropData(String propData) {
+        this.propData = propData;
     }
 
     public String getDataFlow() {
         return dataFlow;
     }
 
-    public void setSampling(String sampling) {
-        this.sampling = sampling;
+    public void setDataFlow(String dataFlow) {
+        this.dataFlow = dataFlow;
     }
 
     public String getSampling() {
         return sampling;
+    }
+
+    public void setSampling(String sampling) {
+        this.sampling = sampling;
     }
 
     public Integer getVersion() {

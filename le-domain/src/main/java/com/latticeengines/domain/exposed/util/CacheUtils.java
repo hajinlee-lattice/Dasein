@@ -12,4 +12,3 @@ public class CacheUtils {
         return String.format("%d|%s|all|%s", System.currentTimeMillis(), op.name(), key);
     }
 }
-

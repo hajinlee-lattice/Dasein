@@ -31,25 +31,19 @@ public class AggregationFilter {
     AggregationFilter() {
     }
 
-    public AggregationFilter(ComparisonType comparisonType,
-                             List<Object> values) {
+    public AggregationFilter(ComparisonType comparisonType, List<Object> values) {
         this.comparisonType = comparisonType;
         this.values = values;
         this.includeNotPurchased = false;
     }
 
-    public AggregationFilter(AggregationSelector selector,
-                             AggregationType aggregationType,
-                             ComparisonType comparisonType,
-                             List<Object> values) {
+    public AggregationFilter(AggregationSelector selector, AggregationType aggregationType,
+            ComparisonType comparisonType, List<Object> values) {
         this(selector, aggregationType, comparisonType, values, false);
     }
 
-    public AggregationFilter(AggregationSelector selector,
-                             AggregationType aggregationType,
-                             ComparisonType comparisonType,
-                             List<Object> values,
-                             boolean includeNotPurchased) {
+    public AggregationFilter(AggregationSelector selector, AggregationType aggregationType,
+            ComparisonType comparisonType, List<Object> values, boolean includeNotPurchased) {
         this.selector = selector;
         this.aggregationType = aggregationType;
         this.comparisonType = comparisonType;

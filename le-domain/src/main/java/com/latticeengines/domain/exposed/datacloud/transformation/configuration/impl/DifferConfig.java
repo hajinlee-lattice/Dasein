@@ -10,7 +10,8 @@ public class DifferConfig extends TransformerConfig {
     private String diffVersion; // By default, use latest version
 
     @JsonProperty("DiffVersionCompared")
-    private String diffVersionCompared; // By default, use second to latest version
+    private String diffVersionCompared; // By default, use second to latest
+                                        // version
 
     @JsonProperty("ExcludeFields")
     private String[] excludeFields;

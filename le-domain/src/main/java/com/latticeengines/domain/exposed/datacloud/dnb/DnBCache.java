@@ -10,13 +10,13 @@ import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 
 public class DnBCache extends MatchCache<DnBCache> {
 
+    public static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final String DUNS = "Duns";
     private static final String CONFIDENCE_CODE = "ConfidenceCode";
     private static final String MATCH_GRADE = "MatchGrade";
     private static final String NAME_LOCATION = "NameLocation";
     private static final String OUT_OF_BUSINESS = "OutOfBusiness";
     private static final String DUNS_IN_AM = "DunsInAM";
-
     private static final String NAME_TOKEN = "_NAME_";
     private static final String COUNTRY_CODE_TOKEN = "_COUNTRYCODE_";
     private static final String STATE_TOKEN = "_STATE_";
@@ -24,9 +24,6 @@ public class DnBCache extends MatchCache<DnBCache> {
     private static final String ZIPCODE_TOKEN = "_ZIPCODE_";
     private static final String PHONE_TOKEN = "_PHONE_";
     private static final String EMAIL_TOKEN = "_EMAIL_";
-
-    public static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
-
     private String duns;
 
     private Integer confidenceCode;
@@ -45,12 +42,8 @@ public class DnBCache extends MatchCache<DnBCache> {
     @DynamoAttribute(TIMESTAMP)
     private Long timestamp;
 
-    @Override
-    public DnBCache getInstance() {
-        return this;
+    public DnBCache() {
     }
-
-    public DnBCache() {}
 
     // For cache lookup and black cache write
     public DnBCache(NameLocation nameLocation) {
@@ -72,8 +65,9 @@ public class DnBCache extends MatchCache<DnBCache> {
     }
 
     // For white cache write
-    public DnBCache(NameLocation nameLocation, String duns, Integer confidenceCode, DnBMatchGrade matchGrade,
-            NameLocation matchedNameLocation, Boolean outOfBusiness, Boolean dunsInAM) {
+    public DnBCache(NameLocation nameLocation, String duns, Integer confidenceCode,
+            DnBMatchGrade matchGrade, NameLocation matchedNameLocation, Boolean outOfBusiness,
+            Boolean dunsInAM) {
         getKeyTokenValues().put(NAME_TOKEN, nameLocation.getName());
         getKeyTokenValues().put(COUNTRY_CODE_TOKEN, nameLocation.getCountryCode());
         getKeyTokenValues().put(STATE_TOKEN, nameLocation.getState());
@@ -102,6 +96,11 @@ public class DnBCache extends MatchCache<DnBCache> {
         setTimestamp(System.currentTimeMillis() / DAY_IN_MILLIS);
     }
 
+    @Override
+    public DnBCache getInstance() {
+        return this;
+    }
+
     public void parseCacheContext() {
         if (getCacheContext() == null) { // Black cache
             whiteCache = false;
@@ -115,13 +114,15 @@ public class DnBCache extends MatchCache<DnBCache> {
                 ? new DnBMatchGrade((String) getCacheContext().get(MATCH_GRADE)) : null;
         if (getCacheContext().get(NAME_LOCATION) != null) {
             ObjectMapper objectMapper = new ObjectMapper();
-            matchedNameLocation = objectMapper.convertValue(getCacheContext().get(NAME_LOCATION), NameLocation.class);
+            matchedNameLocation = objectMapper.convertValue(getCacheContext().get(NAME_LOCATION),
+                    NameLocation.class);
         } else {
             matchedNameLocation = new NameLocation();
         }
         outOfBusiness = getCacheContext().containsKey(OUT_OF_BUSINESS)
                 ? (Boolean) getCacheContext().get(OUT_OF_BUSINESS) : null;
-        dunsInAM = getCacheContext().containsKey(DUNS_IN_AM) ? (Boolean) getCacheContext().get(DUNS_IN_AM) : null;
+        dunsInAM = getCacheContext().containsKey(DUNS_IN_AM)
+                ? (Boolean) getCacheContext().get(DUNS_IN_AM) : null;
         whiteCache = true;
     }
 

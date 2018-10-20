@@ -23,7 +23,7 @@ public enum ComparisonType {
     IN_CURRENT_PERIOD, //
     BETWEEN, //
     PRIOR_ONLY, //
-    FOLLOWING,  //
+    FOLLOWING, //
     WITHIN, //
     BEFORE, // only for exact date
     AFTER, // only for exact date
@@ -37,16 +37,16 @@ public enum ComparisonType {
 
     public boolean filter(String source, String target) {
         switch (this) {
-        case CONTAINS:
-            // currently rely on negate to find complement of contains
-        case NOT_CONTAINS:
-            return source.toLowerCase().contains(target.toLowerCase());
-        case STARTS_WITH:
-            return source.toLowerCase().startsWith(target.toLowerCase());
-        case ENDS_WITH:
-            return source.toLowerCase().endsWith(target.toLowerCase());
-        default:
-            throw new UnsupportedOperationException();
+            case CONTAINS:
+                // currently rely on negate to find complement of contains
+            case NOT_CONTAINS:
+                return source.toLowerCase().contains(target.toLowerCase());
+            case STARTS_WITH:
+                return source.toLowerCase().startsWith(target.toLowerCase());
+            case ENDS_WITH:
+                return source.toLowerCase().endsWith(target.toLowerCase());
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 }

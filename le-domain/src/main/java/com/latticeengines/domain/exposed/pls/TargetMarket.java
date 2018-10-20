@@ -132,13 +132,8 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
 
     @Override
     @JsonIgnore
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-
-        if (tenant != null) {
-            setTenantId(tenant.getPid());
-        }
-
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
@@ -152,8 +147,13 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
 
     @Override
     @JsonIgnore
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+
     }
 
     @Column(name = "ACCOUNT_FILTER", nullable = true)
@@ -296,7 +296,8 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
         return rawDataFlowConfiguration;
     }
 
-    public void setRawDataFlowConfiguration(List<TargetMarketDataFlowOption> rawDataFlowConfiguration) {
+    public void setRawDataFlowConfiguration(
+            List<TargetMarketDataFlowOption> rawDataFlowConfiguration) {
         this.rawDataFlowConfiguration = rawDataFlowConfiguration;
     }
 

@@ -28,35 +28,29 @@ import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.pipe.GroupBy;
 
 /**
- * Injects a Boundary before a CoGroup in order to split of the CoGroup as a separate node
- * and have all predecessors in individual pipes.
+ * Injects a Boundary before a CoGroup in order to split of the CoGroup as a
+ * separate node and have all predecessors in individual pipes.
  */
-public class BoundaryBeforeGroupByTransformer extends RuleInsertionTransformer
-{
-	public BoundaryBeforeGroupByTransformer() {
-		super(
-				BalanceAssembly,
-				new GroupByMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.BeforeEachEdge
-		);
-	}
+public class BoundaryBeforeGroupByTransformer extends RuleInsertionTransformer {
+    public BoundaryBeforeGroupByTransformer() {
+        super(BalanceAssembly, new GroupByMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.BeforeEachEdge);
+    }
 
-	public static class GroupByMatcher extends RuleExpression
-	{
-		public GroupByMatcher()
-		{
-			super( new GroupByGraph() );
-		}
-	}
+    public static class GroupByMatcher extends RuleExpression {
+        public GroupByMatcher() {
+            super(new GroupByGraph());
+        }
+    }
 
-	public static class GroupByGraph extends ExpressionGraph {
+    public static class GroupByGraph extends ExpressionGraph {
 
-		public GroupByGraph() {
+        public GroupByGraph() {
 
-			super(SearchOrder.ReverseTopological, new FlowElementExpression(ElementCapture.Primary, GroupBy.class));
+            super(SearchOrder.ReverseTopological,
+                    new FlowElementExpression(ElementCapture.Primary, GroupBy.class));
 
-		}
-	}
+        }
+    }
 
 }

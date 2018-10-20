@@ -25,8 +25,9 @@ public class TypeBatchConvertFunction extends BaseOperation implements Function 
     private List<String> allFields;
     private boolean failForCastError = false;
 
-    public TypeBatchConvertFunction(Fields fieldDeclaration, Map<String, TypeConvertStrategy> convertTypes,
-            List<String> allFields, boolean failForCastError) {
+    public TypeBatchConvertFunction(Fields fieldDeclaration,
+            Map<String, TypeConvertStrategy> convertTypes, List<String> allFields,
+            boolean failForCastError) {
         super(fieldDeclaration);
         this.convertTypes = convertTypes;
         this.namePositionMap = getPositionMap(fieldDeclaration);
@@ -62,67 +63,72 @@ public class TypeBatchConvertFunction extends BaseOperation implements Function 
             Integer loc = namePositionMap.get(entry.getKey());
             if (loc != null && loc >= 0) {
                 switch (entry.getValue()) {
-                case ANY_TO_STRING:
-                    Object objVal = arguments.getObject(entry.getKey());
-                    String value = TypeConversionUtil.toString(objVal);
-                    result.set(loc, value);
-                    break;
-                case ANY_TO_INT:
-                    objVal = arguments.getObject(entry.getKey());
-                    Integer intVal = null;
-                    try {
-                        intVal = TypeConversionUtil.toInteger(objVal);
-                    } catch (Exception e) {
-                        if (failForCastError) {
-                            throw new RuntimeException(String.format("Fail to cast field %s with value %s to Integer",
-                                    entry.getKey(), TypeConversionUtil.toString(objVal)));
+                    case ANY_TO_STRING:
+                        Object objVal = arguments.getObject(entry.getKey());
+                        String value = TypeConversionUtil.toString(objVal);
+                        result.set(loc, value);
+                        break;
+                    case ANY_TO_INT:
+                        objVal = arguments.getObject(entry.getKey());
+                        Integer intVal = null;
+                        try {
+                            intVal = TypeConversionUtil.toInteger(objVal);
+                        } catch (Exception e) {
+                            if (failForCastError) {
+                                throw new RuntimeException(String.format(
+                                        "Fail to cast field %s with value %s to Integer",
+                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                            }
                         }
-                    }
-                    result.set(loc, intVal);
-                    break;
-                case ANY_TO_LONG:
-                    objVal = arguments.getObject(entry.getKey());
-                    Long longVal = null;
-                    try {
-                        longVal = TypeConversionUtil.toLong(objVal);
-                    } catch (Exception e) {
-                        if (failForCastError) {
-                            throw new RuntimeException(String.format("Fail to cast field %s with value %s to Long",
-                                    entry.getKey(), TypeConversionUtil.toString(objVal)));
+                        result.set(loc, intVal);
+                        break;
+                    case ANY_TO_LONG:
+                        objVal = arguments.getObject(entry.getKey());
+                        Long longVal = null;
+                        try {
+                            longVal = TypeConversionUtil.toLong(objVal);
+                        } catch (Exception e) {
+                            if (failForCastError) {
+                                throw new RuntimeException(String.format(
+                                        "Fail to cast field %s with value %s to Long",
+                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                            }
                         }
-                    }
-                    result.set(loc, longVal);
-                    break;
-                case ANY_TO_DOUBLE:
-                    objVal = arguments.getObject(entry.getKey());
-                    Double doubleVal = null;
-                    try {
-                        doubleVal = TypeConversionUtil.toDouble(objVal);
-                    } catch (Exception e) {
-                        if (failForCastError) {
-                            throw new RuntimeException(String.format("Fail to cast field %s with value %s to Double",
-                                    entry.getKey(), TypeConversionUtil.toString(objVal)));
+                        result.set(loc, longVal);
+                        break;
+                    case ANY_TO_DOUBLE:
+                        objVal = arguments.getObject(entry.getKey());
+                        Double doubleVal = null;
+                        try {
+                            doubleVal = TypeConversionUtil.toDouble(objVal);
+                        } catch (Exception e) {
+                            if (failForCastError) {
+                                throw new RuntimeException(String.format(
+                                        "Fail to cast field %s with value %s to Double",
+                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                            }
                         }
-                    }
-                    result.set(loc, doubleVal);
-                    break;
-                case ANY_TO_BOOLEAN:
-                    objVal = arguments.getObject(entry.getKey());
-                    Boolean booleanVal = null;
-                    try {
-                        booleanVal = TypeConversionUtil.toBoolean(objVal);
-                    } catch (Exception e) {
-                        if (failForCastError) {
-                            throw new RuntimeException(String.format("Fail to cast field %s with value %s to Boolean",
-                                    entry.getKey(), TypeConversionUtil.toString(objVal)));
+                        result.set(loc, doubleVal);
+                        break;
+                    case ANY_TO_BOOLEAN:
+                        objVal = arguments.getObject(entry.getKey());
+                        Boolean booleanVal = null;
+                        try {
+                            booleanVal = TypeConversionUtil.toBoolean(objVal);
+                        } catch (Exception e) {
+                            if (failForCastError) {
+                                throw new RuntimeException(String.format(
+                                        "Fail to cast field %s with value %s to Boolean",
+                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                            }
                         }
-                    }
-                    result.set(loc, booleanVal);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unknown type convert strategy: " + entry.getValue());
+                        result.set(loc, booleanVal);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "Unknown type convert strategy: " + entry.getValue());
                 }
-                }
+            }
         }
         functionCall.getOutputCollector().add(result);
     }

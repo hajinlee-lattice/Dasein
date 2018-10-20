@@ -105,12 +105,12 @@ public class TransformationStepConfig {
         this.baseVersions = baseVersions;
     }
 
-    public void setBaseTemplates(List<String> baseTemplates) {
-        this.baseTemplates = baseTemplates;
-    }
-
     public List<String> getBaseTemplates() {
         return baseTemplates;
+    }
+
+    public void setBaseTemplates(List<String> baseTemplates) {
+        this.baseTemplates = baseTemplates;
     }
 
     public String getTargetSource() {

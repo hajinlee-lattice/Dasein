@@ -9,7 +9,6 @@ public enum CacheType {
     Redis("redis"), //
     Composite("composite");
 
-    private final String cacheType;
     private static Map<String, CacheType> map = new HashMap<>();
 
     static {
@@ -17,6 +16,8 @@ public enum CacheType {
             map.put(c.cacheType, c);
         }
     }
+
+    private final String cacheType;
 
     CacheType(String cacheType) {
         this.cacheType = cacheType;

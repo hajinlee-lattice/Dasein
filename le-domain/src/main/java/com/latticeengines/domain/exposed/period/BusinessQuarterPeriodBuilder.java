@@ -6,7 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
-public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBuilder implements PeriodBuilder {
+public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBuilder
+        implements PeriodBuilder {
 
     private static final long serialVersionUID = -1476479105311208951L;
 
@@ -24,7 +25,8 @@ public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBui
     @Override
     public int toPeriodId(String date) {
         LocalDate evalDate = LocalDate.parse(date);
-        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(evalDate.getYear());
+        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(
+                evalDate.getYear());
         int businessYear = getBusinessYear(evalDate, busiYearDateRange);
         if (businessYear != evalDate.getYear()) {
             busiYearDateRange = getDateRangeOfBusinessYear(businessYear);
@@ -53,7 +55,8 @@ public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBui
         } else {
             int weekOffsetOfNextQuarter = 13 * (quarterOffset + 1);
             // First day of next business quarter - 1
-            return getDateRangeOfBusinessYear(busiYear).getLeft().plusDays(weekOffsetOfNextQuarter * 7).minusDays(1);
+            return getDateRangeOfBusinessYear(busiYear).getLeft()
+                    .plusDays(weekOffsetOfNextQuarter * 7).minusDays(1);
         }
     }
 

@@ -33,45 +33,31 @@ import cascading.pipe.Boundary;
 import cascading.tap.Tap;
 
 /**
- * Injects a Boundary after a source Tap in order to split of the source Tap as a separate node.
+ * Injects a Boundary after a source Tap in order to split of the source Tap as
+ * a separate node.
  */
-public class BoundaryAfterSourceTapTransformer extends RuleInsertionTransformer
-{
-	public BoundaryAfterSourceTapTransformer() {
-		super(
-				BalanceAssembly,
-				new SourceTapMatcher(),
-				BoundaryElementFactory.BOUNDARY_FACTORY,
-				InsertionGraphTransformer.Insertion.After
-		);
-	}
+public class BoundaryAfterSourceTapTransformer extends RuleInsertionTransformer {
+    public BoundaryAfterSourceTapTransformer() {
+        super(BalanceAssembly, new SourceTapMatcher(), BoundaryElementFactory.BOUNDARY_FACTORY,
+                InsertionGraphTransformer.Insertion.After);
+    }
 
-	public static class SourceTapMatcher extends RuleExpression
-	{
-		public SourceTapMatcher()
-		{
-			super( new SourceTapGraph() );
-		}
-	}
+    public static class SourceTapMatcher extends RuleExpression {
+        public SourceTapMatcher() {
+            super(new SourceTapGraph());
+        }
+    }
 
-	public static class SourceTapGraph extends ExpressionGraph {
+    public static class SourceTapGraph extends ExpressionGraph {
 
-		public SourceTapGraph() {
+        public SourceTapGraph() {
 
-			super(SearchOrder.ReverseTopological);
+            super(SearchOrder.ReverseTopological);
 
-			arc(
-					new FlowElementExpression(ElementCapture.Primary, Tap.class),
-					ScopeExpression.ANY,
-					not(
-							OrElementExpression.or(
-									new FlowElementExpression(Extent.class),
-									new FlowElementExpression(Boundary.class)
-							)
-						)
-			);
-		}
-	}
-
+            arc(new FlowElementExpression(ElementCapture.Primary, Tap.class), ScopeExpression.ANY,
+                    not(OrElementExpression.or(new FlowElementExpression(Extent.class),
+                            new FlowElementExpression(Boundary.class))));
+        }
+    }
 
 }

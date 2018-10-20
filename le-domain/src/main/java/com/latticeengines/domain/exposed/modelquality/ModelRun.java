@@ -32,7 +32,8 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
  *
  */
 @Entity
-@Table(name = "MODELQUALITY_MODELRUN", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "MODELQUALITY_MODELRUN", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFields {
 
@@ -52,13 +53,13 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
     @ManyToOne
     @JoinColumn(name = "FK_ANALYTIC_PIPELINE_ID", nullable = false)
     @JsonIgnore
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private AnalyticPipeline analyticPipeline;
 
     @ManyToOne
     @JoinColumn(name = "FK_DATASET_ID", nullable = false)
     @JsonIgnore
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private DataSet dataSet;
 
     @Column(name = "ANALYTIC_TEST_NAME", nullable = true)
@@ -128,20 +129,20 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
         this.dataSet = dataSet;
     }
 
-    public void setAnalyticTestName(String analyticTestName) {
-        this.analyticTestName = analyticTestName;
-    }
-
     public String getAnalyticTestName() {
         return analyticTestName;
     }
 
-    public void setAnalyticTestTag(String analyticTestTag) {
-        this.analyticTestTag = analyticTestTag;
+    public void setAnalyticTestName(String analyticTestName) {
+        this.analyticTestName = analyticTestName;
     }
 
     public String getAnalyticTestTag() {
         return analyticTestTag;
+    }
+
+    public void setAnalyticTestTag(String analyticTestTag) {
+        this.analyticTestTag = analyticTestTag;
     }
 
     public ModelRunStatus getStatus() {

@@ -20,8 +20,8 @@ public class FirmoGraphNewColumnEnrichmentFunction extends BaseOperation impleme
     @SuppressWarnings("unused")
     private String enrichedField;
 
-    public FirmoGraphNewColumnEnrichmentFunction(String leftMatchField, String rightMatchField, String enrichingField,
-            String enrichedField) {
+    public FirmoGraphNewColumnEnrichmentFunction(String leftMatchField, String rightMatchField,
+            String enrichingField, String enrichedField) {
         super(1, new Fields(enrichedField));
         this.leftMatchField = leftMatchField;
         this.rightMatchField = rightMatchField;
@@ -35,7 +35,8 @@ public class FirmoGraphNewColumnEnrichmentFunction extends BaseOperation impleme
         String leftValue = arguments.getString(leftMatchField);
         String rightValue = arguments.getString(rightMatchField);
         Object enrichingValue = arguments.getObject(enrichingField);
-        if (StringUtils.isNotBlank(leftValue) && StringUtils.isNotBlank(rightValue) && leftValue.equals(rightValue)) {
+        if (StringUtils.isNotBlank(leftValue) && StringUtils.isNotBlank(rightValue)
+                && leftValue.equals(rightValue)) {
             functionCall.getOutputCollector().add(new Tuple(enrichingValue));
         } else {
             functionCall.getOutputCollector().add(Tuple.size(1));

@@ -1,27 +1,28 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("rawtypes")
 public class AMDecodeFunction extends BaseOperation implements Function {
-	private static final long serialVersionUID = 8140621590398789609L;
-	private Map<String, BitCodeBook> codeBookMap;
+    private static final long serialVersionUID = 8140621590398789609L;
+    private Map<String, BitCodeBook> codeBookMap;
     private Map<String, Integer> positionMap;
     private Map<String, List<String>> encode2Decode;
 
     public AMDecodeFunction(Fields fieldDeclaration, Map<String, String> codeBookLookup,
-                            Map<String, BitCodeBook> codeBookMap) {
+            Map<String, BitCodeBook> codeBookMap) {
         super(fieldDeclaration);
         this.codeBookMap = codeBookMap;
         this.positionMap = getPositionMap(fieldDeclaration);

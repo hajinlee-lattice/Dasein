@@ -52,11 +52,11 @@ public class ConsolidatePartitionConfig extends TransformerConfig {
         this.timeField = timeField;
     }
 
-    public void setTrxDateField(String trxDateField) {
-        this.trxDateField = trxDateField;
-    }
-
     public String getTrxDateField() {
         return trxDateField;
+    }
+
+    public void setTrxDateField(String trxDateField) {
+        this.trxDateField = trxDateField;
     }
 }

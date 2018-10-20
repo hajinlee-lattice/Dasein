@@ -49,17 +49,17 @@ public abstract class Credential implements HasPid, HasTenant, HasTenantId, HasN
 
     @Override
     @JsonIgnore
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    @Override
-    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return tenant;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     @Override
@@ -76,15 +76,15 @@ public abstract class Credential implements HasPid, HasTenant, HasTenantId, HasN
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
     @JsonProperty
     @Column(name = "NAME", nullable = false)
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

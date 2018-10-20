@@ -142,13 +142,13 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    public Tenant getTenant() {
+        return this.tenant;
     }
 
     @Override
-    public Tenant getTenant() {
-        return this.tenant;
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public String getDescription() {
@@ -160,23 +160,23 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     }
 
     @Override
-    public void setCreated(Date time) {
-        this.created = time;
-    }
-
-    @Override
     public Date getCreated() {
         return this.created;
     }
 
     @Override
-    public void setUpdated(Date time) {
-        this.updated = time;
+    public void setCreated(Date time) {
+        this.created = time;
     }
 
     @Override
     public Date getUpdated() {
         return this.updated;
+    }
+
+    @Override
+    public void setUpdated(Date time) {
+        this.updated = time;
     }
 
     public ActionConfiguration getActionConfiguration() {

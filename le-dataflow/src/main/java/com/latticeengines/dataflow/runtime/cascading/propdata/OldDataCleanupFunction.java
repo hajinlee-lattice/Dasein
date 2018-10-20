@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-
 import java.util.Date;
 
 import cascading.operation.Function;
@@ -9,8 +8,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class OldDataCleanupFunction extends CleanupFunction implements Function
-{
+public class OldDataCleanupFunction extends CleanupFunction implements Function {
     private static final long serialVersionUID = -4470533364538287281L;
     private String timestampField;
     private Date earliest;

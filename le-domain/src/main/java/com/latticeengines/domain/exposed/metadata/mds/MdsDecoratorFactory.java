@@ -14,21 +14,22 @@ public class MdsDecoratorFactory<N extends Namespace> implements DecoratorFactor
     private final MetadataStore<N> metadataStore;
     private final Function<ColumnMetadata, ColumnMetadata> propertyFilter;
 
+    private MdsDecoratorFactory(String decoratorName, MetadataStore<N> metadataStore,
+            Function<ColumnMetadata, ColumnMetadata> propertyFilter) {
+        this.decoratorName = decoratorName;
+        this.metadataStore = metadataStore;
+        this.propertyFilter = propertyFilter;
+    }
+
     public static <N extends Namespace> MdsDecoratorFactory<N> fromMds(String decoratorName,
             MetadataStore<N> metadataStore) {
         return new MdsDecoratorFactory<>(decoratorName, metadataStore, null);
     }
 
     public static <N extends Namespace> MdsDecoratorFactory<N> fromMds(String decoratorName,
-            MetadataStore<N> metadataStore, Function<ColumnMetadata, ColumnMetadata> propertyFilter) {
-        return new MdsDecoratorFactory<>(decoratorName, metadataStore, propertyFilter);
-    }
-
-    private MdsDecoratorFactory(String decoratorName, MetadataStore<N> metadataStore,
+            MetadataStore<N> metadataStore,
             Function<ColumnMetadata, ColumnMetadata> propertyFilter) {
-        this.decoratorName = decoratorName;
-        this.metadataStore = metadataStore;
-        this.propertyFilter = propertyFilter;
+        return new MdsDecoratorFactory<>(decoratorName, metadataStore, propertyFilter);
     }
 
     @Override

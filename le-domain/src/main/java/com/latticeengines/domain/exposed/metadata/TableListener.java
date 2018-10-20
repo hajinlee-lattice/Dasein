@@ -12,17 +12,17 @@ public class TableListener {
         table.setTableTypeCode(table.getTableTypeCode());
         HibernateUtils.inflateDetails(table.getStorageMechanism());
     }
-    
+
     @PrePersist
     public void tablePrePersist(Table table) {
         StorageMechanism storageMechanism = table.getStorageMechanism();
-        
+
         if (storageMechanism == null) {
             StorageMechanism hdfs = new HdfsStorage();
             hdfs.setTableNameInStorage(table.getName());
             table.setStorageMechanism(hdfs);
         }
-        
+
         table.getStorageMechanism().setTable(table);
     }
 }

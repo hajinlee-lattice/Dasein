@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "METADATA_MODULE", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Module implements HasName, HasPid, HasTenantId {
@@ -84,13 +84,13 @@ public class Module implements HasName, HasPid, HasTenantId {
     }
 
     @Override
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public Long getTenantId() {
+        return tenantId;
     }
 
     @Override
-    public Long getTenantId() {
-        return tenantId;
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Tenant getTenant() {

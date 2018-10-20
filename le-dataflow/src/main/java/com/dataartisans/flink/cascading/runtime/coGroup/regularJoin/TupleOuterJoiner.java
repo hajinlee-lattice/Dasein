@@ -25,47 +25,45 @@ import cascading.tuple.Tuple;
 
 public class TupleOuterJoiner extends RichJoinFunction<Tuple, Tuple, Tuple2<Tuple, Tuple[]>> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5037300977289625074L;
-	private int tupleListSize;
-	private Fields inputFieldsLeft;
-	private Fields keyFieldsLeft;
-	private Fields inputFieldsRight;
-	private Fields keyFieldsRight;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5037300977289625074L;
+    private int tupleListSize;
+    private Fields inputFieldsLeft;
+    private Fields keyFieldsLeft;
+    private Fields inputFieldsRight;
+    private Fields keyFieldsRight;
 
-	private transient Tuple2<Tuple, Tuple[]> outT;
+    private transient Tuple2<Tuple, Tuple[]> outT;
 
-	public TupleOuterJoiner(int tupleListSize,
-							Fields inputFieldsLeft, Fields keyFieldsLeft,
-							Fields inputFieldsRight, Fields keyFieldsRight) {
-		this.tupleListSize = tupleListSize;
-		this.inputFieldsLeft = inputFieldsLeft;
-		this.keyFieldsLeft = keyFieldsLeft;
-		this.inputFieldsRight = inputFieldsRight;
-		this.keyFieldsRight = keyFieldsRight;
-	}
+    public TupleOuterJoiner(int tupleListSize, Fields inputFieldsLeft, Fields keyFieldsLeft,
+            Fields inputFieldsRight, Fields keyFieldsRight) {
+        this.tupleListSize = tupleListSize;
+        this.inputFieldsLeft = inputFieldsLeft;
+        this.keyFieldsLeft = keyFieldsLeft;
+        this.inputFieldsRight = inputFieldsRight;
+        this.keyFieldsRight = keyFieldsRight;
+    }
 
-	@Override
-	public void open(Configuration config) {
-		this.outT = new Tuple2<>(null, new Tuple[tupleListSize]);
-	}
+    @Override
+    public void open(Configuration config) {
+        this.outT = new Tuple2<>(null, new Tuple[tupleListSize]);
+    }
 
-	@Override
-	public Tuple2<Tuple, Tuple[]> join(Tuple leftT, Tuple rightT) throws Exception {
+    @Override
+    public Tuple2<Tuple, Tuple[]> join(Tuple leftT, Tuple rightT) throws Exception {
 
-		if(leftT == null) {
-			outT.f0 = rightT.get(inputFieldsRight, keyFieldsRight);
-		}
-		else {
-			outT.f0 = leftT.get(inputFieldsLeft, keyFieldsLeft);
-		}
+        if (leftT == null) {
+            outT.f0 = rightT.get(inputFieldsRight, keyFieldsRight);
+        } else {
+            outT.f0 = leftT.get(inputFieldsLeft, keyFieldsLeft);
+        }
 
-		outT.f1[0] = leftT;
-		outT.f1[1] = rightT;
+        outT.f1[0] = leftT;
+        outT.f1[1] = rightT;
 
-		return outT;
-	}
+        return outT;
+    }
 
 }

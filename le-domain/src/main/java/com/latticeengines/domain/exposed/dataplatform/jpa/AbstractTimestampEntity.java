@@ -24,7 +24,7 @@ public abstract class AbstractTimestampEntity {
 
     @PrePersist
     protected void onCreate() {
-        /*updated = */created = new Date();
+        /* updated = */created = new Date();
     }
 
 }

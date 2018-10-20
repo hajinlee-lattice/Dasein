@@ -15,7 +15,7 @@ public class PMMLAlgorithm extends AlgorithmBase {
         setPipelineScript("/app/dataplatform/scripts/pipeline.py");
         setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
     }
-    
+
     @Override
     public boolean hasDataDiagnostics() {
         return false;

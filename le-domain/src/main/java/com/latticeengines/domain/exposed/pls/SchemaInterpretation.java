@@ -16,25 +16,7 @@ public enum SchemaInterpretation {
     AccountMaster, //
     TransactionRaw, //
     TransactionDailyAggregation, //
-    TransactionPeriodAggregation,
-    DeleteAccountTemplate,
-    DeleteContactTemplate,
-    DeleteTransactionTemplate;
-
-    public void apply(SchemaInterpretationFunctionalInterface function) {
-        InterfaceName name = null;
-        switch (this) {
-        case SalesforceAccount:
-            name = InterfaceName.Website;
-            break;
-        case SalesforceLead:
-            name = InterfaceName.Email;
-            break;
-        default:
-            break;
-        }
-        function.actOnSchemaInterpretation(name);
-    }
+    TransactionPeriodAggregation, DeleteAccountTemplate, DeleteContactTemplate, DeleteTransactionTemplate;
 
     public static SchemaInterpretation getByName(String interpretationName) {
         for (SchemaInterpretation interpretation : values()) {
@@ -42,7 +24,22 @@ public enum SchemaInterpretation {
                 return interpretation;
             }
         }
-        throw new IllegalArgumentException(String.format("There is no interpretation name %s in SchemaInterpretation",
-                interpretationName));
+        throw new IllegalArgumentException(String.format(
+                "There is no interpretation name %s in SchemaInterpretation", interpretationName));
+    }
+
+    public void apply(SchemaInterpretationFunctionalInterface function) {
+        InterfaceName name = null;
+        switch (this) {
+            case SalesforceAccount:
+                name = InterfaceName.Website;
+                break;
+            case SalesforceLead:
+                name = InterfaceName.Email;
+                break;
+            default:
+                break;
+        }
+        function.actOnSchemaInterpretation(name);
     }
 }

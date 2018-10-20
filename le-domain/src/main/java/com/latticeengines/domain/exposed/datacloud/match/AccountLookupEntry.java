@@ -14,20 +14,17 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
         implements FabricEntity<AccountLookupEntry> {
 
+    public static final String UNKNOWN = "NULL";
+    public static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeID";
     private static final String DOMAIN_TOKEN = "_DOMAIN_";
     private static final String DUNS_TOKEN = "_DUNS_";
     private static final String COUNTRY_TOKEN = "_COUNTRY_";
     private static final String STATE_TOKEN = "_STATE_";
     private static final String ZIPCODE_TOKEN = "_ZIPCODE_";
-
-    public static final String UNKNOWN = "NULL";
     private static final String DOMAIN = "domain";
     private static final String DUNS = "duns";
-
     private static final String LATTICE_ACCOUNT_ID = "latticeAccountId";
     private static final String PATCHED = "Patched";
-
-    public static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeID";
     private static final String KEY_HDFS = "Key";
 
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
@@ -50,6 +47,35 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
 
     @JsonProperty(LATTICE_ACCOUNT_ID)
     private String latticeAccountId = UNKNOWN;
+
+    public static String buildId(String domain, String duns) {
+        domain = domain != null ? domain : UNKNOWN;
+        duns = duns != null ? duns : UNKNOWN;
+        return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns;
+    }
+
+    public static String buildIdWithLocation(String domain, String duns, String country,
+            String state, String zipCode) {
+        domain = domain != null ? domain : UNKNOWN;
+        duns = duns != null ? duns : UNKNOWN;
+        country = country != null ? country : UNKNOWN;
+        state = state != null ? state : UNKNOWN;
+        zipCode = zipCode != null ? zipCode : UNKNOWN;
+        return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns + COUNTRY_TOKEN + country + STATE_TOKEN
+                + state + ZIPCODE_TOKEN + zipCode;
+    }
+
+    public static AccountLookupEntry fromKey(String latticeAccountId, String key) {
+        key = key.replace(DOMAIN_TOKEN, "");
+        String[] tokens = key.split(DUNS_TOKEN);
+        String domain = UNKNOWN.equals(tokens[0]) ? null : tokens[0];
+        String duns = UNKNOWN.equals(tokens[1]) ? null : tokens[1];
+        AccountLookupEntry entry = new AccountLookupEntry();
+        entry.setDomain(domain);
+        entry.setDuns(duns);
+        entry.setLatticeAccountId(latticeAccountId);
+        return entry;
+    }
 
     public String getId() {
         return id;
@@ -93,34 +119,6 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
         setTag(PATCHED, patched);
     }
 
-    public static String buildId(String domain, String duns) {
-        domain = domain != null ? domain : UNKNOWN;
-        duns = duns != null ? duns : UNKNOWN;
-        return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns;
-    }
-
-    public static String buildIdWithLocation(String domain, String duns, String country, String state, String zipCode) {
-        domain = domain != null ? domain : UNKNOWN;
-        duns = duns != null ? duns : UNKNOWN;
-        country = country != null ? country : UNKNOWN;
-        state = state != null ? state : UNKNOWN;
-        zipCode = zipCode != null ? zipCode : UNKNOWN;
-        return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns + COUNTRY_TOKEN + country + STATE_TOKEN + state + ZIPCODE_TOKEN
-                + zipCode;
-    }
-
-    public static AccountLookupEntry fromKey(String latticeAccountId, String key) {
-        key = key.replace(DOMAIN_TOKEN, "");
-        String[] tokens = key.split(DUNS_TOKEN);
-        String domain = UNKNOWN.equals(tokens[0]) ? null : tokens[0];
-        String duns = UNKNOWN.equals(tokens[1]) ? null : tokens[1];
-        AccountLookupEntry entry = new AccountLookupEntry();
-        entry.setDomain(domain);
-        entry.setDuns(duns);
-        entry.setLatticeAccountId(latticeAccountId);
-        return entry;
-    }
-
     @Override
     public GenericRecord toFabricAvroRecord(String recordType) {
         // we need to replace special char '.' from recordType otherwise avro
@@ -138,7 +136,8 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
 
     @Override
     public AccountLookupEntry fromFabricAvroRecord(GenericRecord record) {
-        setLatticeAccountId(record.get(LATTICE_ACCOUNT_ID) == null ? null : record.get(LATTICE_ACCOUNT_ID).toString());
+        setLatticeAccountId(record.get(LATTICE_ACCOUNT_ID) == null ? null
+                : record.get(LATTICE_ACCOUNT_ID).toString());
         setDomain(record.get(DOMAIN) == null ? null : record.get(DOMAIN).toString());
         setDuns(record.get(DUNS) == null ? null : record.get(DUNS).toString());
         return this;
@@ -163,7 +162,8 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
         // schema parser will run into exception
         String recordTypeStrForAvroSchema = recordType.replace('.', '_');
 
-        return new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
+        return new Schema.Parser()
+                .parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
     }
 
 }

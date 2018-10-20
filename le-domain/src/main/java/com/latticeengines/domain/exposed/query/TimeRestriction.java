@@ -19,7 +19,8 @@ public class TimeRestriction extends Restriction {
 
     // for jackson
     @SuppressWarnings("unused")
-    private TimeRestriction() {}
+    private TimeRestriction() {
+    }
 
     public TimeFilter getFilter() {
         return filter;

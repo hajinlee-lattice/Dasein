@@ -11,6 +11,9 @@ public class RateLimitDefinition {
     private boolean crossDivision = false;
     private Map<String, List<Quota>> quotas;
 
+    private RateLimitDefinition() {
+    }
+
     public static RateLimitDefinition crossDivisionDefinition() {
         RateLimitDefinition definition = new RateLimitDefinition();
         definition.setCrossDivision(true);
@@ -22,8 +25,6 @@ public class RateLimitDefinition {
         definition.setCrossDivision(false);
         return definition;
     }
-
-    private RateLimitDefinition() {}
 
     public boolean isCrossDivision() {
         return crossDivision;

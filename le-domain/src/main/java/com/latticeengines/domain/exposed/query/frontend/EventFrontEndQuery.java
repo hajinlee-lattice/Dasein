@@ -34,6 +34,14 @@ public class EventFrontEndQuery extends FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.LAGGING_PERIOD_COUNT)
     private int laggingPeriodCount = 1;
 
+    public static EventFrontEndQuery fromFrontEndQuery(FrontEndQuery frontEndQuery) {
+        return JsonUtils.deserialize(JsonUtils.serialize(frontEndQuery), EventFrontEndQuery.class);
+    }
+
+    public static EventFrontEndQuery fromSegment(MetadataSegment metadataSegment) {
+        return fromFrontEndQuery(FrontEndQuery.fromSegment(metadataSegment));
+    }
+
     public FrontEndQuery getSegmentQuery() {
         return segmentQuery;
     }
@@ -88,13 +96,5 @@ public class EventFrontEndQuery extends FrontEndQuery {
 
     public void setTargetProductIds(List<String> targetProductIds) {
         this.targetProductIds = targetProductIds;
-    }
-
-    public static EventFrontEndQuery fromFrontEndQuery(FrontEndQuery frontEndQuery) {
-        return JsonUtils.deserialize(JsonUtils.serialize(frontEndQuery), EventFrontEndQuery.class);
-    }
-
-    public static EventFrontEndQuery fromSegment(MetadataSegment metadataSegment) {
-        return fromFrontEndQuery(FrontEndQuery.fromSegment(metadataSegment));
     }
 }

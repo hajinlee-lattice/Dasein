@@ -21,27 +21,19 @@ import cascading.tuple.TupleEntry;
 public class StatsRollupAggregator extends BaseAggregator<StatsRollupAggregator.Context>
         implements Aggregator<StatsRollupAggregator.Context> {
 
-    private static final long serialVersionUID = 1176540918011684429L;
     public static final String ALL = "__ALL__";
-
-    public static class Context extends BaseAggregator.Context {
-        Map<Integer, Long> bktCounts = new HashMap<>();
-        long count = 0L;
-        Tuple result = new Tuple();
-    }
-
+    private static final long serialVersionUID = 1176540918011684429L;
     private final String cntField;
     private final String bktsField;
     private final List<String> grpByFields;
-
     private Integer cntArgPos;
     private Integer bktsArgPos;
     private boolean needRollup;
     private boolean dedup; // when dedup, pick first instead of add up
-
     // grpFields + (rollupDims == __ALL__) + cntField + bktsField
     // if rollup is null, means simply merge bkt cnts
-    public StatsRollupAggregator(List<String> grpByFields, String rollupDim, String cntField, String bktsField, boolean dedup) {
+    public StatsRollupAggregator(List<String> grpByFields, String rollupDim, String cntField,
+            String bktsField, boolean dedup) {
         super(generateFieldDeclaration(grpByFields, rollupDim, cntField, bktsField));
         this.grpByFields = grpByFields;
         this.cntField = cntField;
@@ -50,7 +42,8 @@ public class StatsRollupAggregator extends BaseAggregator<StatsRollupAggregator.
         this.dedup = dedup;
     }
 
-    private static Fields generateFieldDeclaration(List<String> grpByFields, String rollupDim, String cntField, String bktsField) {
+    private static Fields generateFieldDeclaration(List<String> grpByFields, String rollupDim,
+            String cntField, String bktsField) {
         List<String> fields = new ArrayList<>(grpByFields);
         if (StringUtils.isNotBlank(rollupDim)) {
             fields.add(DIM_PREFIX + rollupDim);
@@ -91,7 +84,8 @@ public class StatsRollupAggregator extends BaseAggregator<StatsRollupAggregator.
                 long cnt = (long) arguments.getObject(cntArgPos);
                 context.count += cnt;
             } else {
-                context.count = 1L; // when dedup, all records with same dedup id only count as 1
+                context.count = 1L; // when dedup, all records with same dedup
+                                    // id only count as 1
             }
         }
         return context;
@@ -116,6 +110,12 @@ public class StatsRollupAggregator extends BaseAggregator<StatsRollupAggregator.
             cntArgPos = pos[0];
             bktsArgPos = pos[1];
         }
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Map<Integer, Long> bktCounts = new HashMap<>();
+        long count = 0L;
+        Tuple result = new Tuple();
     }
 
 }

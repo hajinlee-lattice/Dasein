@@ -18,7 +18,7 @@ public class CompanyProfileRequest {
             + "'Email' field and for non-lead type model specify either 'Website' " //
             + "or 'Domain' fields. If these fields are not specified then specify " //
             + "both 'CompanyName' and 'State' fields", //
-    required = true)
+            required = true)
     private Map<String, Object> record = new HashMap<>();
 
     public Map<String, Object> getRecord() {

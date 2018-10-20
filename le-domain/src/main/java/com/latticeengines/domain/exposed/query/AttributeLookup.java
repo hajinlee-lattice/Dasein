@@ -35,6 +35,25 @@ public class AttributeLookup extends Lookup implements Comparable<AttributeLooku
         this.attribute = attrName;
     }
 
+    public static AttributeLookup fromString(String str) {
+        if (StringUtils.isNotBlank(str)) {
+            try {
+                String[] tokens = str.split("\\.");
+                if (tokens.length >= 2) {
+                    BusinessEntity entity = BusinessEntity.valueOf(tokens[0]);
+                    String attrName = str.replace(tokens[0] + ".", "");
+                    return new AttributeLookup(entity, attrName);
+                } else {
+                    return new AttributeLookup(null, str);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot parse [" + str + "] to AttributeLookup");
+            }
+        } else {
+            return null;
+        }
+    }
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -78,38 +97,19 @@ public class AttributeLookup extends Lookup implements Comparable<AttributeLooku
         }
     }
 
-    public static AttributeLookup fromString(String str) {
-        if (StringUtils.isNotBlank(str)) {
-            try {
-                String[] tokens = str.split("\\.");
-                if (tokens.length >= 2) {
-                    BusinessEntity entity = BusinessEntity.valueOf(tokens[0]);
-                    String attrName = str.replace(tokens[0] + ".", "");
-                    return new AttributeLookup(entity, attrName);
-                } else {
-                    return new AttributeLookup(null, str);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot parse [" + str + "] to AttributeLookup");
-            }
-        } else {
-            return null;
-        }
-    }
-
     public static class AttributeLookupSerializer extends JsonSerializer<AttributeLookup> {
         public AttributeLookupSerializer() {
         }
 
         @Override
-        public void serialize(AttributeLookup value, JsonGenerator jgen, SerializerProvider provider)
-                throws IOException {
+        public void serialize(AttributeLookup value, JsonGenerator jgen,
+                SerializerProvider provider) throws IOException {
             jgen.writeFieldName(value.toString());
         }
 
         @Override
-        public void serializeWithType(AttributeLookup value, JsonGenerator gen, SerializerProvider provider,
-                TypeSerializer typeSer) throws IOException {
+        public void serializeWithType(AttributeLookup value, JsonGenerator gen,
+                SerializerProvider provider, TypeSerializer typeSer) throws IOException {
             // typeSer.writeTypePrefixForObject(value, gen);
             typeSer.writeTypePrefix(gen, typeSer.typeId(value, JsonToken.START_OBJECT));
             // call your customized serialize method
@@ -129,7 +129,8 @@ public class AttributeLookup extends Lookup implements Comparable<AttributeLooku
             if (elements.length < 2) {
                 throw new RuntimeException(String.format("Cannot deserialize: %s", key));
             } else {
-                return new AttributeLookup(BusinessEntity.valueOf(elements[0]), key.replace(elements[0] + ".", ""));
+                return new AttributeLookup(BusinessEntity.valueOf(elements[0]),
+                        key.replace(elements[0] + ".", ""));
             }
         }
     }

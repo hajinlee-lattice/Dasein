@@ -23,7 +23,8 @@ public class CompreCntVersionsBusinesChkFunction extends BaseOperation implement
     private String currVersCountField;
     private double threshold;
 
-    public CompreCntVersionsBusinesChkFunction(String prevVersCountField, String currVersCountField, double threshold) {
+    public CompreCntVersionsBusinesChkFunction(String prevVersCountField, String currVersCountField,
+            double threshold) {
         super(generateFieldDeclaration());
         this.prevVersCountField = prevVersCountField;
         this.currVersCountField = currVersCountField;
@@ -45,8 +46,10 @@ public class CompreCntVersionsBusinesChkFunction extends BaseOperation implement
         TupleEntry arguments = functionCall.getArguments();
         Tuple result = Tuple.size(getFieldDeclaration().size());
         try {
-            int prevVersionCount = Integer.parseInt(arguments.getObject(prevVersCountField).toString());
-            int currVersionCount = Integer.parseInt(arguments.getObject(currVersCountField).toString());
+            int prevVersionCount = Integer
+                    .parseInt(arguments.getObject(prevVersCountField).toString());
+            int currVersionCount = Integer
+                    .parseInt(arguments.getObject(currVersCountField).toString());
             double avgOfVersions = (prevVersionCount + currVersionCount) / 2.0;
             int diffCount = (currVersionCount - prevVersionCount);
             double percentDiff = ((diffCount) / avgOfVersions) * 100;
@@ -58,10 +61,9 @@ public class CompreCntVersionsBusinesChkFunction extends BaseOperation implement
                 // check value
                 result.set(4, String.format("%.2f", percentDiff));
                 // check message
-                result.set(5,
-                        CheckCode.ExceededVersionDiffForNumOfBusinesses.getMessage(String.format("%.2f", percentDiff),
-                                prevVersionCount, currVersionCount,
-                                String.format("%.2f", (Math.abs(percentDiff) - threshold))));
+                result.set(5, CheckCode.ExceededVersionDiffForNumOfBusinesses.getMessage(
+                        String.format("%.2f", percentDiff), prevVersionCount, currVersionCount,
+                        String.format("%.2f", (Math.abs(percentDiff) - threshold))));
                 functionCall.getOutputCollector().add(result);
             }
         } catch (Exception e) {

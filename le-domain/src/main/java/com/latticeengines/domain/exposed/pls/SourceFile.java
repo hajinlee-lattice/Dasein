@@ -38,10 +38,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @Entity
-@javax.persistence.Table(name = "SOURCE_FILE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
-        "TENANT_ID" }) })
+@javax.persistence.Table(name = "SOURCE_FILE", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields, HasApplicationId {
+public class SourceFile
+        implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields, HasApplicationId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -126,13 +127,18 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     }
 
     @Override
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
     @Override
-    public Long getTenantId() {
-        return tenantId;
+    public Tenant getTenant() {
+        return tenant;
     }
 
     @Override
@@ -141,11 +147,6 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-    }
-
-    @Override
-    public Tenant getTenant() {
-        return tenant;
     }
 
     @Override
@@ -158,12 +159,12 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         this.pid = pid;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public String getPath() {
         return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

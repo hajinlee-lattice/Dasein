@@ -89,7 +89,8 @@ public class ModelCommand implements HasPid, Serializable {
 
     @VisibleForTesting
     public ModelCommand(Long commandId, String contractExternalId, String deploymentExternalId,
-            ModelCommandStatus commandStatus, List<ModelCommandParameter> commandParameters, String modelId, String eventTable) {
+            ModelCommandStatus commandStatus, List<ModelCommandParameter> commandParameters,
+            String modelId, String eventTable) {
         super();
         this.commandId = commandId;
         this.deploymentExternalId = deploymentExternalId;

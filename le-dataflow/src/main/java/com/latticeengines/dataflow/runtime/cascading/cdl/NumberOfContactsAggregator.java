@@ -1,23 +1,16 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
+import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
+
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
-
 public class NumberOfContactsAggregator extends BaseAggregator<NumberOfContactsAggregator.Context>
         implements Aggregator<NumberOfContactsAggregator.Context> {
 
     private String contactIdField;
-
-    public static class Context extends BaseAggregator.Context {
-        Integer numberOfContacts = 0;
-    }
 
     public NumberOfContactsAggregator(String numberOfContactsField, String contactIdField) {
         super(new Fields(numberOfContactsField));
@@ -37,7 +30,8 @@ public class NumberOfContactsAggregator extends BaseAggregator<NumberOfContactsA
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
         String contactId = arguments.getString(contactIdField);
-        // Skip counting rows where the Contact ID is null because that means that the Account
+        // Skip counting rows where the Contact ID is null because that means
+        // that the Account
         // had no Contacts after a Left Join.
         if (contactId != null) {
             context.numberOfContacts++;
@@ -50,5 +44,9 @@ public class NumberOfContactsAggregator extends BaseAggregator<NumberOfContactsA
         Tuple result = Tuple.size(1);
         result.set(0, context.numberOfContacts);
         return result;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        Integer numberOfContacts = 0;
     }
 }

@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "WORKFLOW_JOB_UPDATE", //
-       indexes = @Index(name = "IX_WORKFLOW_PID", columnList = "WORKFLOW_PID"))
+        indexes = @Index(name = "IX_WORKFLOW_PID", columnList = "WORKFLOW_PID"))
 public class WorkflowJobUpdate implements HasPid {
 
     @Id

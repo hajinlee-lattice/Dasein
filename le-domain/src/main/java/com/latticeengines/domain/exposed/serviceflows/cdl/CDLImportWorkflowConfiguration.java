@@ -52,10 +52,10 @@ public class CDLImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration
             config.setCustomerSpace(configuration.getCustomerSpace());
             config.setInternalResourceHostPort(configuration.getInternalResourceHostPort());
             config.setMicroServiceHostPort(configuration.getMicroServiceHostPort());
-            config.getImportConfigs().values()
-                    .forEach(x -> x.setMicroServiceHostPort(configuration.getMicroServiceHostPort()));
-            config.getImportConfigs().values()
-                    .forEach(x -> x.setInternalResourceHostPort(configuration.getInternalResourceHostPort()));
+            config.getImportConfigs().values().forEach(
+                    x -> x.setMicroServiceHostPort(configuration.getMicroServiceHostPort()));
+            config.getImportConfigs().values().forEach(x -> x
+                    .setInternalResourceHostPort(configuration.getInternalResourceHostPort()));
             configuration.add(config);
             return configuration;
         }

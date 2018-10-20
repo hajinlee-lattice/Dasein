@@ -24,50 +24,49 @@ import cascading.flow.stream.graph.StreamGraph;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class SingleOutBoundaryStage extends ElementStage<TupleEntry, Void> {
 
-	private Tuple nextTuple;
+    private Tuple nextTuple;
 
-	public SingleOutBoundaryStage(FlowProcess flowProcess, FlowElement flowElement) {
-		super(flowProcess, flowElement);
-		this.nextTuple = null;
-	}
+    public SingleOutBoundaryStage(FlowProcess flowProcess, FlowElement flowElement) {
+        super(flowProcess, flowElement);
+        this.nextTuple = null;
+    }
 
-	@Override
-	public void receive(Duct prev, int ordinal, TupleEntry entry) {
-		
-		if(this.nextTuple == null) {
-			this.nextTuple = entry.getTuple();
-		}
-		else {
-			throw new RuntimeException("Previous tuple was not fetched!");
-		}
-	}
+    @Override
+    public void receive(Duct prev, int ordinal, TupleEntry entry) {
 
-	public boolean hasNextTuple() {
-		return nextTuple != null;
-	}
+        if (this.nextTuple == null) {
+            this.nextTuple = entry.getTuple();
+        } else {
+            throw new RuntimeException("Previous tuple was not fetched!");
+        }
+    }
 
-	public Tuple fetchNextTuple() {
-		Tuple nextTuple = this.nextTuple;
-		this.nextTuple = null;
-		return nextTuple;
-	}
+    public boolean hasNextTuple() {
+        return nextTuple != null;
+    }
 
-	@Override
-	public void bind( StreamGraph streamGraph ) {
-		// don't do anything
-	}
+    public Tuple fetchNextTuple() {
+        Tuple nextTuple = this.nextTuple;
+        this.nextTuple = null;
+        return nextTuple;
+    }
 
-	@Override
-	public void start( Duct previous ) {
-		// don't do anything
-	}
+    @Override
+    public void bind(StreamGraph streamGraph) {
+        // don't do anything
+    }
 
-	@Override
-	public void complete(Duct previous) {
-		// don't do anything
-	}
+    @Override
+    public void start(Duct previous) {
+        // don't do anything
+    }
+
+    @Override
+    public void complete(Duct previous) {
+        // don't do anything
+    }
 
 }

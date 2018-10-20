@@ -114,14 +114,20 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
     public void copyConfig(AdvancedModelingConfig config) {
         CustomEventModelingConfig advancedConfInRetrievedAIModel = this;
         CustomEventModelingConfig advancedConfInAIModel = (CustomEventModelingConfig) config;
-        advancedConfInRetrievedAIModel.setCustomEventModelingType(advancedConfInAIModel.getCustomEventModelingType());
+        advancedConfInRetrievedAIModel
+                .setCustomEventModelingType(advancedConfInAIModel.getCustomEventModelingType());
         advancedConfInRetrievedAIModel.setSourceFileName(advancedConfInAIModel.getSourceFileName());
-        advancedConfInRetrievedAIModel.setSourceFileDisplayName(advancedConfInAIModel.getSourceFileDisplayName());
+        advancedConfInRetrievedAIModel
+                .setSourceFileDisplayName(advancedConfInAIModel.getSourceFileDisplayName());
         advancedConfInRetrievedAIModel.setDataStores(advancedConfInAIModel.getDataStores());
-        advancedConfInRetrievedAIModel.setDeduplicationType(advancedConfInAIModel.getDeduplicationType());
-        advancedConfInRetrievedAIModel.setExcludePublicDomains(advancedConfInAIModel.isExcludePublicDomains());
-        advancedConfInRetrievedAIModel.setTransformationGroup(advancedConfInAIModel.getTransformationGroup());
-        advancedConfInRetrievedAIModel.setDataCloudVersion(advancedConfInAIModel.getDataCloudVersion());
+        advancedConfInRetrievedAIModel
+                .setDeduplicationType(advancedConfInAIModel.getDeduplicationType());
+        advancedConfInRetrievedAIModel
+                .setExcludePublicDomains(advancedConfInAIModel.isExcludePublicDomains());
+        advancedConfInRetrievedAIModel
+                .setTransformationGroup(advancedConfInAIModel.getTransformationGroup());
+        advancedConfInRetrievedAIModel
+                .setDataCloudVersion(advancedConfInAIModel.getDataCloudVersion());
     }
 
     public static CustomEventModelingConfig getAdvancedModelingConfig(AIModel aiModel) {

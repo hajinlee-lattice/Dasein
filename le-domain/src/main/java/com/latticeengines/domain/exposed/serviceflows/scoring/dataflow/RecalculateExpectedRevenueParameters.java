@@ -34,36 +34,44 @@ public class RecalculateExpectedRevenueParameters extends DataFlowParameters {
         return inputTableName;
     }
 
-    public String getExpectedRevenueFieldName() {
-        return expectedRevenueFieldName;
-    }
-
-    public String getPercentileFieldName() {
-        return percentileFieldName;
-    }
-
-    public String getPredictedRevenuePercentileFieldName() {
-        return predictedRevenuePercentileFieldName;
-    }
-
-    public Map<String, String> getOriginalScoreFieldMap() {
-        return originalScoreFieldMap;
-    }
-
-    public String getModelGuidField() {
-        return modelGuidField;
-    }
-
     public void setInputTableName(String inputTableName) {
         this.inputTableName = inputTableName;
+    }
+
+    public String getExpectedRevenueFieldName() {
+        return expectedRevenueFieldName;
     }
 
     public void setExpectedRevenueFieldName(String expectedRevenueFieldName) {
         this.expectedRevenueFieldName = expectedRevenueFieldName;
     }
 
+    public String getPercentileFieldName() {
+        return percentileFieldName;
+    }
+
+    public void setPercentileFieldName(String percentileFieldName) {
+        this.percentileFieldName = percentileFieldName;
+    }
+
+    public String getPredictedRevenuePercentileFieldName() {
+        return predictedRevenuePercentileFieldName;
+    }
+
+    public void setPredictedRevenuePercentileFieldName(String predictedRevenuePercentileFieldName) {
+        this.predictedRevenuePercentileFieldName = predictedRevenuePercentileFieldName;
+    }
+
+    public Map<String, String> getOriginalScoreFieldMap() {
+        return originalScoreFieldMap;
+    }
+
     public void setOriginalScoreFieldMap(Map<String, String> originalScoreFieldMap) {
         this.originalScoreFieldMap = originalScoreFieldMap;
+    }
+
+    public String getModelGuidField() {
+        return modelGuidField;
     }
 
     public void setModelGuidField(String modelGuidField) {
@@ -76,13 +84,5 @@ public class RecalculateExpectedRevenueParameters extends DataFlowParameters {
 
     public void setFitFunctionParametersMap(Map<String, String> fitFunctionParametersMap) {
         this.fitFunctionParametersMap = fitFunctionParametersMap;
-    }
-
-    public void setPercentileFieldName(String percentileFieldName) {
-        this.percentileFieldName = percentileFieldName;
-    }
-
-    public void setPredictedRevenuePercentileFieldName(String predictedRevenuePercentileFieldName) {
-        this.predictedRevenuePercentileFieldName = predictedRevenuePercentileFieldName;
     }
 }

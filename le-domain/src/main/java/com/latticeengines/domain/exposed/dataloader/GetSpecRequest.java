@@ -8,7 +8,7 @@ public class GetSpecRequest {
 
     private String specName;
 
-    public GetSpecRequest(String tenantName, String specName){
+    public GetSpecRequest(String tenantName, String specName) {
         this.tenantName = tenantName;
         this.specName = specName;
     }

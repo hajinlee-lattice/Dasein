@@ -5,5 +5,5 @@ public enum InsightSourceType {
     INTERNAL, //
     EXTERNAL, //
     BOTH
-    
+
 }

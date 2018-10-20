@@ -29,67 +29,66 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryChainIterator;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class HashJoinGate extends SpliceGate<Tuple2<Tuple, Tuple[]>, TupleEntry> {
 
-	private JoinClosure closure;
-	private Joiner joiner;
+    private JoinClosure closure;
+    private Joiner joiner;
 
-	private TupleEntryChainIterator entryIterator;
+    private TupleEntryChainIterator entryIterator;
 
-	protected HashJoinGate(FlowProcess flowProcess, Splice splice) {
-		super(flowProcess, splice);
-	}
+    protected HashJoinGate(FlowProcess flowProcess, Splice splice) {
+        super(flowProcess, splice);
+    }
 
-	@Override
-	public void prepare() {
+    @Override
+    public void prepare() {
 
-		int numJoinInputs = this.splice.isSelfJoin() ? this.splice.getNumSelfJoins() + 1 : this.splice.getPrevious().length;
+        int numJoinInputs = this.splice.isSelfJoin() ? this.splice.getNumSelfJoins() + 1
+                : this.splice.getPrevious().length;
 
-		Fields[] keyFields = new Fields[numJoinInputs];
-		Fields[] valueFields = new Fields[numJoinInputs];
+        Fields[] keyFields = new Fields[numJoinInputs];
+        Fields[] valueFields = new Fields[numJoinInputs];
 
-		Scope outgoingScope = outgoingScopes.get( 0 );
+        Scope outgoingScope = outgoingScopes.get(0);
 
-		if(!this.splice.isSelfJoin()) {
-			for(int i=0; i < numJoinInputs; i++) {
-				Scope incomingScope = incomingScopes.get( i );
-				int ordinal = incomingScope.getOrdinal();
+        if (!this.splice.isSelfJoin()) {
+            for (int i = 0; i < numJoinInputs; i++) {
+                Scope incomingScope = incomingScopes.get(i);
+                int ordinal = incomingScope.getOrdinal();
 
-				keyFields[ordinal] = outgoingScope.getKeySelectors().get(incomingScope.getName());
-				valueFields[ordinal] = incomingScope.getIncomingSpliceFields();
-			}
-		}
-		else {
-			Scope incomingScope = incomingScopes.get(0);
+                keyFields[ordinal] = outgoingScope.getKeySelectors().get(incomingScope.getName());
+                valueFields[ordinal] = incomingScope.getIncomingSpliceFields();
+            }
+        } else {
+            Scope incomingScope = incomingScopes.get(0);
 
-			keyFields[0] = outgoingScope.getKeySelectors().get(incomingScope.getName());
-			valueFields[0] = incomingScope.getIncomingSpliceFields();
+            keyFields[0] = outgoingScope.getKeySelectors().get(incomingScope.getName());
+            valueFields[0] = incomingScope.getIncomingSpliceFields();
 
-			for (int i = 1; i < numJoinInputs; i++) {
-				keyFields[i] = keyFields[0];
-				valueFields[i] = valueFields[0];
-			}
-		}
+            for (int i = 1; i < numJoinInputs; i++) {
+                keyFields[i] = keyFields[0];
+                valueFields[i] = valueFields[0];
+            }
+        }
 
-		this.closure = new JoinClosure(this.flowProcess, keyFields, valueFields);
-		this.joiner = this.splice.getJoiner();
-		this.entryIterator = new TupleEntryChainIterator(outgoingScope.getOutValuesFields());
+        this.closure = new JoinClosure(this.flowProcess, keyFields, valueFields);
+        this.joiner = this.splice.getJoiner();
+        this.entryIterator = new TupleEntryChainIterator(outgoingScope.getOutValuesFields());
 
-	}
+    }
 
-	@Override
-	public void receive(Duct previous, int ordinal, Tuple2<Tuple, Tuple[]> t) {
+    @Override
+    public void receive(Duct previous, int ordinal, Tuple2<Tuple, Tuple[]> t) {
 
-		closure.reset(t);
+        closure.reset(t);
 
-		entryIterator.reset(joiner.getIterator(closure));
+        entryIterator.reset(joiner.getIterator(closure));
 
-		while(entryIterator.hasNext()) {
-			next.receive(this, 0, entryIterator.next());
-		}
+        while (entryIterator.hasNext()) {
+            next.receive(this, 0, entryIterator.next());
+        }
 
-	}
-
+    }
 
 }

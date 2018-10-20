@@ -16,10 +16,6 @@ public class PeriodConvertorConfig extends TransformerConfig {
     @JsonProperty("PeriodStrategies")
     private List<PeriodStrategy> periodStrategies;
 
-    public void setTrxDateField(String trxDateField) {
-        this.trxDateField = trxDateField;
-    }
-
     public String getPeriodField() {
         return periodField;
     }
@@ -30,6 +26,10 @@ public class PeriodConvertorConfig extends TransformerConfig {
 
     public String getTrxDateField() {
         return trxDateField;
+    }
+
+    public void setTrxDateField(String trxDateField) {
+        this.trxDateField = trxDateField;
     }
 
     public List<PeriodStrategy> getPeriodStrategies() {

@@ -9,7 +9,7 @@ public class Namespace0 extends Namespace {
     public static final Namespace0 NS = new Namespace0();
 
     public Serializable[] coords() {
-        return new Serializable[]{};
+        return new Serializable[] {};
     }
 
     @Override

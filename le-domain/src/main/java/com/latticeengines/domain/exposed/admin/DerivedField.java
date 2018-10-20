@@ -12,25 +12,47 @@ public class DerivedField {
     private List<Parameter> parameters;
 
     @JsonProperty("Expression")
-    public String getExpression() { return expression; }
+    public String getExpression() {
+        return expression;
+    }
+
     @JsonProperty("Expression")
-    public void setExpression(String expression) { this.expression = expression; }
+    public void setExpression(String expression) {
+        this.expression = expression;
+    }
+
     @JsonProperty("Parameters")
-    public List<Parameter> getParameters() { return parameters; }
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
     @JsonProperty("Parameters")
-    public void setParameters(List<Parameter> parameters) { this.parameters = parameters; }
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
+    }
 
     private static class Parameter {
         public String component;
         public String nodePath;
 
         @JsonProperty("Component")
-        public String getComponent() { return component; }
+        public String getComponent() {
+            return component;
+        }
+
         @JsonProperty("Component")
-        public void setComponent(String component) { this.component = component; }
+        public void setComponent(String component) {
+            this.component = component;
+        }
+
         @JsonProperty("NodePath")
-        public String getNodePath() { return nodePath; }
+        public String getNodePath() {
+            return nodePath;
+        }
+
         @JsonProperty("NodePath")
-        public void setNodePath(String nodePath) { this.nodePath = nodePath; }
+        public void setNodePath(String nodePath) {
+            this.nodePath = nodePath;
+        }
     }
 }

@@ -70,6 +70,8 @@ import reactor.core.scheduler.Schedulers;
 @SuppressWarnings("deprecation")
 public class StatsCubeUtils {
 
+    static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s",
+            NamedPeriod.HASEVER.getName(), "Purchased");
     private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);
     private static final List<String> TOP_FIRMOGRAPHIC_ATTRS = Lists.reverse(Arrays.asList( //
             DataCloudConstants.ATTR_LDC_INDUSTRY, //
@@ -80,9 +82,6 @@ public class StatsCubeUtils {
             DataCloudConstants.ATTR_COUNTRY, //
             DataCloudConstants.ATTR_CITY, //
             DataCloudConstants.ATTR_STATE));
-
-    static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
-
     private static final ConcurrentMap<BusinessEntity, Set<String>> SYSTEM_ATTRS = new ConcurrentHashMap<>();
     private static final Scheduler SORTER = Schedulers.newParallel("attr-sorter");
 
@@ -109,7 +108,8 @@ public class StatsCubeUtils {
         stats.setNonNullCount(attrCount);
 
         if (record.get(STATS_ATTR_ALGO) != null) {
-            String bktSerialized = record.get(STATS_ATTR_BKTS) == null ? "" : record.get(STATS_ATTR_BKTS).toString();
+            String bktSerialized = record.get(STATS_ATTR_BKTS) == null ? ""
+                    : record.get(STATS_ATTR_BKTS).toString();
             Map<Integer, Long> bktCounts = new HashMap<>();
             if (StringUtils.isNotBlank(bktSerialized)) {
                 String[] tokens = bktSerialized.split("\\|");
@@ -121,7 +121,8 @@ public class StatsCubeUtils {
                 }
             }
             String bktAlgoSerialized = record.get(STATS_ATTR_ALGO).toString();
-            BucketAlgorithm algorithm = JsonUtils.deserialize(bktAlgoSerialized, BucketAlgorithm.class);
+            BucketAlgorithm algorithm = JsonUtils.deserialize(bktAlgoSerialized,
+                    BucketAlgorithm.class);
             Buckets buckets = parseBuckets(algorithm, bktCounts);
 
             stats.setBuckets(buckets);
@@ -140,7 +141,8 @@ public class StatsCubeUtils {
                 bktCounts.put(bktId, 0L);
             }
         }
-        bktCounts.forEach((bktId, bktCnt) -> updateBucket(bucketList.get(bktId - 1), algorithm, bktId, bktCnt));
+        bktCounts.forEach((bktId, bktCnt) -> updateBucket(bucketList.get(bktId - 1), algorithm,
+                bktId, bktCnt));
         if (bucketList.isEmpty()) {
             return null;
         } else {
@@ -163,7 +165,8 @@ public class StatsCubeUtils {
         return bucketList;
     }
 
-    private static Bucket updateBucket(Bucket bucket, BucketAlgorithm algorithm, int bktId, long bktCnt) {
+    private static Bucket updateBucket(Bucket bucket, BucketAlgorithm algorithm, int bktId,
+            long bktCnt) {
         bucket.setCount(bktCnt);
 
         if (algorithm instanceof BooleanBucket) {
@@ -185,13 +188,13 @@ public class StatsCubeUtils {
     private static void updateBooleanBucket(Bucket bucket, BooleanBucket algo, int bktId) {
         String val = null;
         switch (bktId) {
-        case 1:
-            val = algo.getTrueLabelWithDefault();
-            break;
-        case 2:
-            val = algo.getFalseLabelWithDefault();
-            break;
-        default:
+            case 1:
+                val = algo.getTrueLabelWithDefault();
+                break;
+            case 2:
+                val = algo.getFalseLabelWithDefault();
+                break;
+            default:
         }
         bucket.setLabel(val);
         bucket.setValues(Collections.singletonList(val));
@@ -239,8 +242,8 @@ public class StatsCubeUtils {
         Buckets buckets = attrStats.getBuckets();
         if (buckets != null && BucketType.Enum.equals(buckets.getType())
                 && CollectionUtils.isNotEmpty(buckets.getBucketList())) {
-            List<Bucket> bucketList = buckets.getBucketList().stream().sorted(Comparator.comparing(Bucket::getLabel))
-                    .collect(Collectors.toList());
+            List<Bucket> bucketList = buckets.getBucketList().stream()
+                    .sorted(Comparator.comparing(Bucket::getLabel)).collect(Collectors.toList());
             buckets.setBucketList(bucketList);
         }
     }
@@ -257,7 +260,8 @@ public class StatsCubeUtils {
         }
     }
 
-    public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
+    public static AttributeStats convertPurchaseHistoryStats(String attrName,
+            AttributeStats attrStats) {
         if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
             return convertHasPurchasedStats(attrName, attrStats);
         }
@@ -269,7 +273,8 @@ public class StatsCubeUtils {
         return attrStats;
     }
 
-    private static AttributeStats convertHasPurchasedStats(String attrName, AttributeStats attrStats) {
+    private static AttributeStats convertHasPurchasedStats(String attrName,
+            AttributeStats attrStats) {
         String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
 
         Buckets buckets = attrStats.getBuckets();
@@ -290,15 +295,16 @@ public class StatsCubeUtils {
     }
 
     private static Bucket convertTxnBucketForHasPurchased(String productId, Bucket bucket) {
-        Bucket.Transaction transaction = new Bucket.Transaction(productId, TimeFilter.ever(), null, null,
-                "No".equalsIgnoreCase(bucket.getLabel()));
+        Bucket.Transaction transaction = new Bucket.Transaction(productId, TimeFilter.ever(), null,
+                null, "No".equalsIgnoreCase(bucket.getLabel()));
         bucket.setComparisonType(null);
         bucket.setValues(null);
         bucket.setTransaction(transaction);
         return bucket;
     }
 
-    private static AttributeStats convertSpendChangeStats(String attrName, AttributeStats attrStats) {
+    private static AttributeStats convertSpendChangeStats(String attrName,
+            AttributeStats attrStats) {
         Buckets buckets = attrStats.getBuckets();
         buckets.setType(BucketType.PercentChange);
         List<Bucket> bucketList = new ArrayList<>();
@@ -323,55 +329,56 @@ public class StatsCubeUtils {
         Bucket.Change chg = new Bucket.Change();
         List<Object> absVals = new ArrayList<>();
         switch (bucket.getComparisonType()) {
-        case LESS_THAN:
-            Double val = valObjToDouble(bucket.getValues().get(0));
-            if (val <= 0) {
-                chg.setDirection(Bucket.Change.Direction.DEC);
-                chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
-            } else {
-                chg.setDirection(Bucket.Change.Direction.INC);
-                chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
-            }
-            absVals.add(Math.abs(val));
-            break;
-        case GREATER_OR_EQUAL:
-            val = valObjToDouble(bucket.getValues().get(0));
-            if (val < 0) {
-                chg.setDirection(Bucket.Change.Direction.DEC);
-                chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
-            } else {
-                chg.setDirection(Bucket.Change.Direction.INC);
-                chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
-            }
-            absVals.add(Math.abs(val));
-            break;
-        case EQUAL:
-            val = valObjToDouble(bucket.getValues().get(0));
-            if (val < 0) {
-                chg.setDirection(Bucket.Change.Direction.DEC);
-            } else {
-                chg.setDirection(Bucket.Change.Direction.INC);
-            }
-            chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
-            absVals.add(Math.abs(val));
-            absVals.add(Math.abs(val));
-            break;
-        case GTE_AND_LT:
-            Double val1 = valObjToDouble(bucket.getValues().get(0));
-            Double val2 = valObjToDouble(bucket.getValues().get(1));
-            if (val2 > 0) {
-                chg.setDirection(Bucket.Change.Direction.INC);
-                absVals.add(Math.abs(val1));
-                absVals.add(Math.abs(val2));
-            } else {
-                chg.setDirection(Bucket.Change.Direction.DEC);
-                absVals.add(Math.abs(val2));
-                absVals.add(Math.abs(val1));
-            }
-            chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown comparison type in bucket: " + bucket.getComparisonType());
+            case LESS_THAN:
+                Double val = valObjToDouble(bucket.getValues().get(0));
+                if (val <= 0) {
+                    chg.setDirection(Bucket.Change.Direction.DEC);
+                    chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
+                } else {
+                    chg.setDirection(Bucket.Change.Direction.INC);
+                    chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
+                }
+                absVals.add(Math.abs(val));
+                break;
+            case GREATER_OR_EQUAL:
+                val = valObjToDouble(bucket.getValues().get(0));
+                if (val < 0) {
+                    chg.setDirection(Bucket.Change.Direction.DEC);
+                    chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
+                } else {
+                    chg.setDirection(Bucket.Change.Direction.INC);
+                    chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
+                }
+                absVals.add(Math.abs(val));
+                break;
+            case EQUAL:
+                val = valObjToDouble(bucket.getValues().get(0));
+                if (val < 0) {
+                    chg.setDirection(Bucket.Change.Direction.DEC);
+                } else {
+                    chg.setDirection(Bucket.Change.Direction.INC);
+                }
+                chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
+                absVals.add(Math.abs(val));
+                absVals.add(Math.abs(val));
+                break;
+            case GTE_AND_LT:
+                Double val1 = valObjToDouble(bucket.getValues().get(0));
+                Double val2 = valObjToDouble(bucket.getValues().get(1));
+                if (val2 > 0) {
+                    chg.setDirection(Bucket.Change.Direction.INC);
+                    absVals.add(Math.abs(val1));
+                    absVals.add(Math.abs(val2));
+                } else {
+                    chg.setDirection(Bucket.Change.Direction.DEC);
+                    absVals.add(Math.abs(val2));
+                    absVals.add(Math.abs(val1));
+                }
+                chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "Unknown comparison type in bucket: " + bucket.getComparisonType());
         }
 
         chg.setAbsVals(absVals);
@@ -388,50 +395,53 @@ public class StatsCubeUtils {
         Bucket.Change chg = bucket.getChange();
         List<Object> vals = new ArrayList<>();
         switch (chg.getDirection()) {
-        case INC:
-            switch (chg.getComparisonType()) {
-            case AT_LEAST:
-                vals.add(valObjToDouble(chg.getAbsVals().get(0)));
-                bucket.setComparisonType(ComparisonType.GREATER_OR_EQUAL);
+            case INC:
+                switch (chg.getComparisonType()) {
+                    case AT_LEAST:
+                        vals.add(valObjToDouble(chg.getAbsVals().get(0)));
+                        bucket.setComparisonType(ComparisonType.GREATER_OR_EQUAL);
+                        break;
+                    case AS_MUCH_AS:
+                        vals.add(0.0D);
+                        vals.add(valObjToDouble(chg.getAbsVals().get(0)));
+                        bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                        break;
+                    case BETWEEN:
+                        vals.add(valObjToDouble(chg.getAbsVals().get(0)));
+                        vals.add(valObjToDouble(chg.getAbsVals().get(1)));
+                        bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "Unknown comparison type in Bucket.Change: "
+                                        + chg.getComparisonType());
+                }
                 break;
-            case AS_MUCH_AS:
-                vals.add(0.0D);
-                vals.add(valObjToDouble(chg.getAbsVals().get(0)));
-                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
-                break;
-            case BETWEEN:
-                vals.add(valObjToDouble(chg.getAbsVals().get(0)));
-                vals.add(valObjToDouble(chg.getAbsVals().get(1)));
-                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+            case DEC:
+                switch (chg.getComparisonType()) {
+                    case AT_LEAST:
+                        vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
+                        bucket.setComparisonType(ComparisonType.LESS_OR_EQUAL);
+                        break;
+                    case AS_MUCH_AS:
+                        vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
+                        vals.add(0.0D);
+                        bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                        break;
+                    case BETWEEN:
+                        vals.add(valObjToDouble(chg.getAbsVals().get(1), true));
+                        vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
+                        bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "Unknown comparison type in Bucket.Change: "
+                                        + chg.getComparisonType());
+                }
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        "Unknown comparison type in Bucket.Change: " + chg.getComparisonType());
-            }
-            break;
-        case DEC:
-            switch (chg.getComparisonType()) {
-            case AT_LEAST:
-                vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
-                bucket.setComparisonType(ComparisonType.LESS_OR_EQUAL);
-                break;
-            case AS_MUCH_AS:
-                vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
-                vals.add(0.0D);
-                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
-                break;
-            case BETWEEN:
-                vals.add(valObjToDouble(chg.getAbsVals().get(1), true));
-                vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
-                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        "Unknown comparison type in Bucket.Change: " + chg.getComparisonType());
-            }
-            break;
-        default:
-            throw new UnsupportedOperationException("Unsupported direction in Bucket.Change: " + chg.getDirection());
+                        "Unsupported direction in Bucket.Change: " + chg.getDirection());
         }
         bucket.setValues(vals);
         bucket.setChange(null);
@@ -482,7 +492,8 @@ public class StatsCubeUtils {
     }
 
     @Deprecated
-    public static void processPurchaseHistoryCategory(TopNTree topNTree, Map<String, String> productMap) {
+    public static void processPurchaseHistoryCategory(TopNTree topNTree,
+            Map<String, String> productMap) {
         if (MapUtils.isEmpty(productMap) || !topNTree.hasCategory(Category.PRODUCT_SPEND)) {
             return;
         }
@@ -505,7 +516,8 @@ public class StatsCubeUtils {
             cube.getStatistics().forEach((attrName, attrStats) -> {
                 Buckets buckets = attrStats.getBuckets();
                 if (buckets != null && CollectionUtils.isNotEmpty(buckets.getBucketList())) {
-                    Comparator<Bucket> comparator = getBktComparator(entity, buckets.getType(), attrName);
+                    Comparator<Bucket> comparator = getBktComparator(entity, buckets.getType(),
+                            attrName);
                     if (comparator != null) {
                         buckets.getBucketList().sort(comparator);
                     }
@@ -514,13 +526,14 @@ public class StatsCubeUtils {
         }
     }
 
-    private static Comparator<Bucket> getBktComparator(BusinessEntity entity, BucketType bucketType, String attrName) {
+    private static Comparator<Bucket> getBktComparator(BusinessEntity entity, BucketType bucketType,
+            String attrName) {
         switch (entity) {
-        case Rating:
-        case PurchaseHistory:
-            return null;
-        default:
-            return defaultBktComparator(bucketType, attrName);
+            case Rating:
+            case PurchaseHistory:
+                return null;
+            default:
+                return defaultBktComparator(bucketType, attrName);
         }
     }
 
@@ -528,15 +541,17 @@ public class StatsCubeUtils {
         // reverse id ordering for intent
         if (attrName.startsWith("BmbrSurge_") && attrName.endsWith("_Intent")) {
             return Comparator.comparing(Bucket::getId).reversed();
-        } else if (BucketType.Enum.equals(bucketType)) { // only resort enum buckets
+        } else if (BucketType.Enum.equals(bucketType)) { // only resort enum
+                                                         // buckets
             return defaultTopBktComparator();
         } else {
             return null;
         }
     }
 
-    public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap, Map<String, List<ColumnMetadata>> cmMap,
-            boolean includeTopBkt, ColumnSelection.Predefined selectedGroup) {
+    public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap,
+            Map<String, List<ColumnMetadata>> cmMap, boolean includeTopBkt,
+            ColumnSelection.Predefined selectedGroup) {
         TopNTree topNTree = new TopNTree();
         for (Map.Entry<String, StatsCube> cubeEntry : cubeMap.entrySet()) {
             String key = cubeEntry.getKey();
@@ -559,8 +574,8 @@ public class StatsCubeUtils {
         return topNTree;
     }
 
-    private static void addToTopNTree(String key, StatsCube cube, List<ColumnMetadata> cmList, TopNTree topNTree,
-            boolean includeTopBkt) {
+    private static void addToTopNTree(String key, StatsCube cube, List<ColumnMetadata> cmList,
+            TopNTree topNTree, boolean includeTopBkt) {
         BusinessEntity entity = BusinessEntity.valueOf(key);
         Map<String, ColumnMetadata> cmMap = new HashMap<>();
         cmList.forEach(cm -> cmMap.put(cm.getAttrName(), cm));
@@ -587,7 +602,8 @@ public class StatsCubeUtils {
                 categoryTopNTree.putSubcategory(subCategory, new ArrayList<>());
             }
             // update the corresponding map entry
-            List<TopAttribute> topAttributes = topNTree.getCategory(category).getSubcategory(subCategory);
+            List<TopAttribute> topAttributes = topNTree.getCategory(category)
+                    .getSubcategory(subCategory);
             topAttributes.add(toTopAttr(category, entity, name, statsInCube, includeTopBkt));
         }
         if (includeTopBkt) {
@@ -602,7 +618,8 @@ public class StatsCubeUtils {
     private static TopAttribute toTopAttr(Category category, BusinessEntity entity, String attrName,
             AttributeStats attributeStats, boolean includeTopBkt) {
         AttributeLookup attributeLookup = new AttributeLookup(entity, attrName);
-        TopAttribute topAttribute = new TopAttribute(attributeLookup, attributeStats.getNonNullCount());
+        TopAttribute topAttribute = new TopAttribute(attributeLookup,
+                attributeStats.getNonNullCount());
         if (includeTopBkt && attributeStats.getBuckets() != null) {
             Comparator<Bucket> comparator = getTopBktComparatorForCategory(category);
             Bucket topBkt = getTopBkt(attributeStats, comparator);
@@ -626,16 +643,16 @@ public class StatsCubeUtils {
 
     private static Comparator<Bucket> getTopBktComparatorForCategory(Category category) {
         switch (category) {
-        case INTENT:
-            return intentTopBktComparator();
-        case WEBSITE_PROFILE:
-        case TECHNOLOGY_PROFILE:
-            return techTopBktComparator();
-        case RATING:
-            return ratingTopBktComparator();
-        case PRODUCT_SPEND:
-        default:
-            return defaultTopBktComparator();
+            case INTENT:
+                return intentTopBktComparator();
+            case WEBSITE_PROFILE:
+            case TECHNOLOGY_PROFILE:
+                return techTopBktComparator();
+            case RATING:
+                return ratingTopBktComparator();
+            case PRODUCT_SPEND:
+            default:
+                return defaultTopBktComparator();
         }
     }
 
@@ -666,10 +683,12 @@ public class StatsCubeUtils {
     }
 
     private static boolean isBooleanBkt(Bucket bkt) {
-        return bkt != null && ("yes".equalsIgnoreCase(bkt.getLabel()) || "no".equalsIgnoreCase(bkt.getLabel()));
+        return bkt != null && ("yes".equalsIgnoreCase(bkt.getLabel())
+                || "no".equalsIgnoreCase(bkt.getLabel()));
     }
 
-    public static Flux<ColumnMetadata> sortByCategory(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {
+    public static Flux<ColumnMetadata> sortByCategory(Flux<ColumnMetadata> cmFlux,
+            StatsCube statsCube) {
         if (MapUtils.isEmpty(statsCube.getStatistics())) {
             return cmFlux;
         }
@@ -700,7 +719,8 @@ public class StatsCubeUtils {
             return Flux.fromIterable(topAttrMap.keySet()) //
                     .parallel().runOn(SORTER) //
                     .concatMap(category -> {
-                        List<Pair<TopAttribute, ColumnMetadata>> pairs = new ArrayList<>(topAttrMap.get(category));
+                        List<Pair<TopAttribute, ColumnMetadata>> pairs = new ArrayList<>(
+                                topAttrMap.get(category));
                         Comparator<Pair<TopAttribute, ColumnMetadata>> comparator = getAttrComparatorForCategory(
                                 category);
                         pairs.sort(comparator);
@@ -715,24 +735,26 @@ public class StatsCubeUtils {
         }
     }
 
-    private static Comparator<Pair<TopAttribute, ColumnMetadata>> getAttrComparatorForCategory(Category category) {
-        return (o1, o2) -> getTopAttrComparatorForCategory(category).compare(o1.getLeft(), o2.getLeft());
+    private static Comparator<Pair<TopAttribute, ColumnMetadata>> getAttrComparatorForCategory(
+            Category category) {
+        return (o1, o2) -> getTopAttrComparatorForCategory(category).compare(o1.getLeft(),
+                o2.getLeft());
     }
 
     private static Comparator<TopAttribute> getTopAttrComparatorForCategory(Category category) {
         switch (category) {
-        case FIRMOGRAPHICS:
-            return firmographicTopAttrComparator();
-        case INTENT:
-            return intentTopAttrComparator();
-        case WEBSITE_PROFILE:
-        case TECHNOLOGY_PROFILE:
-            return techTopAttrComparator();
-        case RATING:
-            return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());
-        case PRODUCT_SPEND:
-        default:
-            return defaultTopAttrComparator();
+            case FIRMOGRAPHICS:
+                return firmographicTopAttrComparator();
+            case INTENT:
+                return intentTopAttrComparator();
+            case WEBSITE_PROFILE:
+            case TECHNOLOGY_PROFILE:
+                return techTopAttrComparator();
+            case RATING:
+                return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());
+            case PRODUCT_SPEND:
+            default:
+                return defaultTopAttrComparator();
         }
     }
 
@@ -797,8 +819,8 @@ public class StatsCubeUtils {
         };
     }
 
-    private static Comparator<TopAttribute> ratingTopAttrComparator(Comparator<TopAttribute> ratingCmp,
-            Comparator<TopAttribute> otherCmp) {
+    private static Comparator<TopAttribute> ratingTopAttrComparator(
+            Comparator<TopAttribute> ratingCmp, Comparator<TopAttribute> otherCmp) {
         return (o1, o2) -> {
             String attr1 = o1.getAttribute();
             String attr2 = o2.getAttribute();
@@ -822,10 +844,12 @@ public class StatsCubeUtils {
 
     public static Map<String, StatsCube> toStatsCubes(Statistics statistics) {
         Map<BusinessEntity, Map<String, AttributeStats>> statsMap = new HashMap<>();
-        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories().entrySet()) {
+        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories()
+                .entrySet()) {
             CategoryStatistics catStats = catStatsEntry.getValue();
             for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
-                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
+                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes()
+                        .entrySet()) {
                     BusinessEntity entity = entry.getKey().getEntity();
                     if (!statsMap.containsKey(entity)) {
                         statsMap.put(entity, new HashMap<>());

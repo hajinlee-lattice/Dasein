@@ -47,7 +47,8 @@ public class TimeFilterTranslator {
             return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
         } else {
             vals = Arrays.asList(range.getLeft(), range.getRight());
-            return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(), vals);
+            return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(),
+                    vals);
         }
     }
 
@@ -69,7 +70,8 @@ public class TimeFilterTranslator {
             case IN_CURRENT_PERIOD:
                 return translateInCurrent(timeFilter.getPeriod());
             default:
-                throw new UnsupportedOperationException("TimeFilter Operator " + operator + " is not supported.");
+                throw new UnsupportedOperationException(
+                        "TimeFilter Operator " + operator + " is not supported.");
         }
     }
 
@@ -80,7 +82,8 @@ public class TimeFilterTranslator {
             case BETWEEN:
             case BETWEEN_DATE:
                 verifyDoubleVals(operator, vals);
-                List<String> dates = vals.stream().map(this::castToDate).collect(Collectors.toList());
+                List<String> dates = vals.stream().map(this::castToDate)
+                        .collect(Collectors.toList());
                 return Pair.of(dates.get(0), dates.get(1));
             case BEFORE:
                 verifySingleVal(operator, vals);
@@ -89,7 +92,8 @@ public class TimeFilterTranslator {
                 verifySingleVal(operator, vals);
                 return Pair.of(castToDate(vals.get(0)), null);
             default:
-                throw new UnsupportedOperationException("Operator " + operator + " is not supported for date queries.");
+                throw new UnsupportedOperationException(
+                        "Operator " + operator + " is not supported for date queries.");
         }
     }
 
@@ -101,7 +105,8 @@ public class TimeFilterTranslator {
         int targetPeriod = currentPeriodId - offset;
 
         PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, currentPeriodId - 1);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod,
+                currentPeriodId - 1);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);
@@ -163,7 +168,8 @@ public class TimeFilterTranslator {
     private void verifySingleVal(ComparisonType operator, List<Object> vals) {
         if (CollectionUtils.isEmpty(vals) || vals.size() != 1) {
             throw new IllegalArgumentException(operator + //
-                    " operator is only compatible with single value, but " + vals + " was provided.");
+                    " operator is only compatible with single value, but " + vals
+                    + " was provided.");
         }
     }
 
@@ -192,7 +198,8 @@ public class TimeFilterTranslator {
             try {
                 integer = Integer.valueOf(String.valueOf(val));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Cannot cast value " + val + " to an Integer.", e);
+                throw new IllegalArgumentException("Cannot cast value " + val + " to an Integer.",
+                        e);
             }
         }
         return integer;
@@ -210,7 +217,8 @@ public class TimeFilterTranslator {
         int currentPeriodId = currentPeriodIds.get(period);
 
         PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(currentPeriodId, currentPeriodId);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(currentPeriodId,
+                currentPeriodId);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);

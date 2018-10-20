@@ -27,7 +27,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalTenant")
-public class GlobalAuthTenant extends BaseGlobalAuthObject implements HasName, HasId<String>, HasPid {
+public class GlobalAuthTenant extends BaseGlobalAuthObject
+        implements HasName, HasId<String>, HasPid {
 
     @JsonProperty("deployment_id")
     @Column(name = "Deployment_ID", nullable = true, unique = true)
@@ -44,7 +45,8 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject implements HasName, H
     @Column(name = "GlobalTenant_ID", nullable = false, unique = true)
     private Long pid;
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "globalAuthTenant")
+    @OneToMany(cascade = {
+            CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "globalAuthTenant")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthUserTenantRight> gaUserTenantRights;
 

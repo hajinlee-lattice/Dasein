@@ -57,28 +57,28 @@ public class CheckAndMapDatatypeFunction extends BaseOperation implements Functi
             return null;
         }
         switch (avroType) {
-        case DOUBLE:
-            if (!(value instanceof Double)) {
-                return Double.valueOf(value.toString());
-            }
-        case FLOAT:
-            if (!(value instanceof Float)) {
-                return Float.valueOf(value.toString());
-            }
-        case INT:
-            if (!(value instanceof Integer)) {
-                return Integer.valueOf(value.toString());
-            }
-        case LONG:
-            if (!(value instanceof Long)) {
-                return Long.valueOf(value.toString());
-            }
-        case BOOLEAN:
-            if (!(value instanceof Boolean)) {
-                return Boolean.valueOf(value.toString());
-            }
-        default:
-            break;
+            case DOUBLE:
+                if (!(value instanceof Double)) {
+                    return Double.valueOf(value.toString());
+                }
+            case FLOAT:
+                if (!(value instanceof Float)) {
+                    return Float.valueOf(value.toString());
+                }
+            case INT:
+                if (!(value instanceof Integer)) {
+                    return Integer.valueOf(value.toString());
+                }
+            case LONG:
+                if (!(value instanceof Long)) {
+                    return Long.valueOf(value.toString());
+                }
+            case BOOLEAN:
+                if (!(value instanceof Boolean)) {
+                    return Boolean.valueOf(value.toString());
+                }
+            default:
+                break;
         }
         return value;
     }

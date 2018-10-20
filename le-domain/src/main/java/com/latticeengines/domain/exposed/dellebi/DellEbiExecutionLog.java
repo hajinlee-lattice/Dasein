@@ -97,13 +97,12 @@ public class DellEbiExecutionLog implements HasPid, Serializable {
         this.error = error;
     }
 
-	public int getRetryCount() {
-		return retryCount;
-	}
+    public int getRetryCount() {
+        return retryCount;
+    }
 
-	public void setRetryCount(int retryCount) {
-		this.retryCount = retryCount;
-	}
-
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
 
 }

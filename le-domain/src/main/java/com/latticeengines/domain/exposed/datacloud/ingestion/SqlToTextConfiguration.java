@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.ingestion;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 
-public class SqlToTextConfiguration extends SqlConfiguration{
+public class SqlToTextConfiguration extends SqlConfiguration {
     private SqoopImporter.Mode sqoopMode;
     private String dbQuery;
     private String splitColumn;

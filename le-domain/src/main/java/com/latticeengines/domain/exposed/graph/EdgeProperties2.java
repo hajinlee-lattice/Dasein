@@ -11,6 +11,26 @@ public class EdgeProperties2 {
     private String behaviorOnDepCheckTraversal;
     private String behaviorOnDeleteOfInVertex;
 
+    public static EdgeProperties2 generateEdgePropertiesFromPropMap(Map<String, String> propMap) {
+        EdgeProperties2 edgeProperties = new EdgeProperties2();
+        if (MapUtils.isNotEmpty(propMap)) {
+            if (StringUtils.isNotBlank(propMap.get(GraphConstants.TENANT_ID_PROP_KEY))) {
+                edgeProperties.setTenantId(propMap.get(GraphConstants.TENANT_ID_PROP_KEY));
+            }
+            if (StringUtils
+                    .isNotBlank(propMap.get(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY))) {
+                edgeProperties.setBehaviorOnDepCheckTraversal(
+                        propMap.get(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY));
+            }
+            if (StringUtils
+                    .isNotBlank(propMap.get(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY))) {
+                edgeProperties.setBehaviorOnDeleteOfInVertex(
+                        propMap.get(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY));
+            }
+        }
+        return edgeProperties;
+    }
+
     public String getTenantId() {
         return tenantId;
     }
@@ -41,28 +61,13 @@ public class EdgeProperties2 {
             propMap.put(GraphConstants.TENANT_ID_PROP_KEY, tenantId);
         }
         if (StringUtils.isNotBlank(behaviorOnDepCheckTraversal)) {
-            propMap.put(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY, behaviorOnDepCheckTraversal);
+            propMap.put(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY,
+                    behaviorOnDepCheckTraversal);
         }
         if (StringUtils.isNotBlank(behaviorOnDeleteOfInVertex)) {
-            propMap.put(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY, behaviorOnDeleteOfInVertex);
+            propMap.put(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY,
+                    behaviorOnDeleteOfInVertex);
         }
         return propMap;
-    }
-
-    public static EdgeProperties2 generateEdgePropertiesFromPropMap(Map<String, String> propMap) {
-        EdgeProperties2 edgeProperties = new EdgeProperties2();
-        if (MapUtils.isNotEmpty(propMap)) {
-            if (StringUtils.isNotBlank(propMap.get(GraphConstants.TENANT_ID_PROP_KEY))) {
-                edgeProperties.setTenantId(propMap.get(GraphConstants.TENANT_ID_PROP_KEY));
-            }
-            if (StringUtils.isNotBlank(propMap.get(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY))) {
-                edgeProperties
-                        .setBehaviorOnDepCheckTraversal(propMap.get(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY));
-            }
-            if (StringUtils.isNotBlank(propMap.get(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY))) {
-                edgeProperties.setBehaviorOnDeleteOfInVertex(propMap.get(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY));
-            }
-        }
-        return edgeProperties;
     }
 }

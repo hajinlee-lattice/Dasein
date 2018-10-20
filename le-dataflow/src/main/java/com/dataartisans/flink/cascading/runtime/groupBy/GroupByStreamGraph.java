@@ -33,59 +33,61 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class GroupByStreamGraph extends NodeStreamGraph {
 
-	private GroupByInGate sourceStage;
-	private CollectorOutput sinkStage;
+    private GroupByInGate sourceStage;
+    private CollectorOutput sinkStage;
 
-	public GroupByStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, GroupBy groupBy) {
+    public GroupByStreamGraph(FlinkFlowProcess flowProcess, FlowNode node, GroupBy groupBy) {
 
-		super(flowProcess, node);
+        super(flowProcess, node);
 
-		buildGraph(groupBy, flowProcess);
+        buildGraph(groupBy, flowProcess);
 
-		setTraps();
-		setScopes();
+        setTraps();
+        setScopes();
 
-		printGraph( node.getID(), "groupby", flowProcess.getCurrentSliceNum() );
-		bind();
-	}
+        printGraph(node.getID(), "groupby", flowProcess.getCurrentSliceNum());
+        bind();
+    }
 
-	public void setTupleCollector(Collector<Tuple> tupleCollector) {
-		this.sinkStage.setTupleCollector(tupleCollector);
-	}
+    public void setTupleCollector(Collector<Tuple> tupleCollector) {
+        this.sinkStage.setTupleCollector(tupleCollector);
+    }
 
-	public GroupByInGate getGroupSource() {
-		return this.sourceStage;
-	}
+    public GroupByInGate getGroupSource() {
+        return this.sourceStage;
+    }
 
-	private void buildGraph( GroupBy groupBy, FlowProcess flowProcess ) {
+    private void buildGraph(GroupBy groupBy, FlowProcess flowProcess) {
 
-		this.sourceStage = new GroupByInGate(flowProcess, groupBy, IORole.source);
-		addHead( sourceStage );
-		handleDuct( groupBy, sourceStage );
-	}
+        this.sourceStage = new GroupByInGate(flowProcess, groupBy, IORole.source);
+        addHead(sourceStage);
+        handleDuct(groupBy, sourceStage);
+    }
 
-	@Override
-	protected Duct createBoundaryStage( Boundary boundary, IORole role ) {
+    @Override
+    protected Duct createBoundaryStage(Boundary boundary, IORole role) {
 
-		if(role == IORole.sink) {
-			this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
-			return (BoundaryOutStage)this.sinkStage;
-		}
+        if (role == IORole.sink) {
+            this.sinkStage = new BoundaryOutStage(this.flowProcess, boundary);
+            return (BoundaryOutStage) this.sinkStage;
+        }
 
-		throw new IllegalArgumentException("Boundary may only be used sink in GroupByStreamGraph");
-	}
+        throw new IllegalArgumentException("Boundary may only be used sink in GroupByStreamGraph");
+    }
 
-	@Override
-	protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a CoGroup gate in a GroupByStreamGraph");
-	}
+    @Override
+    protected Gate createCoGroupGate(CoGroup coGroup, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a CoGroup gate in a GroupByStreamGraph");
+    }
 
-	@Override
-	protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
-		throw new UnsupportedOperationException("Cannot create a GroupBy gate in a GroupByStreamGraph");
-	}
+    @Override
+    protected Gate createGroupByGate(GroupBy groupBy, IORole ioRole) {
+        throw new UnsupportedOperationException(
+                "Cannot create a GroupBy gate in a GroupByStreamGraph");
+    }
 
 }

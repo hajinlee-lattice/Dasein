@@ -13,7 +13,6 @@ public enum LatticeProduct {
     PD("Prospect Discovery"), //
     CG("Customer Growth");
 
-    private String name;
     private static Map<String, LatticeProduct> lookup = new HashMap<>();
     private static List<String> names;
 
@@ -27,6 +26,8 @@ public enum LatticeProduct {
             names.add(product.getName());
         }
     }
+
+    private String name;
 
     LatticeProduct(String name) {
         this.name = name;

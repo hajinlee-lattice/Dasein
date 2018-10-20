@@ -4,8 +4,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.dao.MatchCommandDao;
@@ -23,10 +23,12 @@ public class MatchCommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<M
 
     @Override
     public void deleteCommand(MatchCommand command) {
-        // This is needed as part of Hibernate and JPA integration for backward compatibility
-		// Refer to section 5.4 and 5.7 in https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
-		Session currSession = getSessionFactory().getCurrentSession();
-		currSession.delete(currSession.contains(command) ? command: currSession.merge(command));
+        // This is needed as part of Hibernate and JPA integration for backward
+        // compatibility
+        // Refer to section 5.4 and 5.7 in
+        // https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
+        Session currSession = getSessionFactory().getCurrentSession();
+        currSession.delete(currSession.contains(command) ? command : currSession.merge(command));
     }
 
     @Override
@@ -34,9 +36,10 @@ public class MatchCommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<M
     public List<MatchCommand> findOutDatedCommands(int retentionDays) {
         Session session = getSessionFactory().getCurrentSession();
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, retentionDays*-1);
+        cal.add(Calendar.DAY_OF_YEAR, retentionDays * -1);
         Date outDated = cal.getTime();
-        String queryStr = String.format("from %s where LatestStatusUpdate < :value", getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where LatestStatusUpdate < :value",
+                getEntityClass().getSimpleName());
         Query<MatchCommand> query = session.createQuery(queryStr);
         query.setParameter("value", outDated.toString());
         List<MatchCommand> results = query.list();

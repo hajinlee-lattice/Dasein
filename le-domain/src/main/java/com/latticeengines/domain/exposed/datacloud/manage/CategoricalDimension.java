@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "CategoricalDimension", //
-        indexes = { @Index(name = "IX_SOURCE_DIMENSION", columnList = "Source,Dimension")}, //
+        indexes = { @Index(name = "IX_SOURCE_DIMENSION", columnList = "Source,Dimension") }, //
         uniqueConstraints = { @UniqueConstraint(columnNames = { "Source", "Dimension" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CategoricalDimension implements HasPid {

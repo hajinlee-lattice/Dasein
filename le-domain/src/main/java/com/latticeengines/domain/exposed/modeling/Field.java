@@ -14,10 +14,10 @@ public class Field implements HasName {
     private String columnName;
     private int sqlType;
     private List<String> typeInfo;
-    
+
     public Field() {
     }
-    
+
     public Field(String name, String type) {
         this.name = name;
         this.typeInfo = Arrays.asList(type, "null");

@@ -34,8 +34,8 @@ public class BomboraWeeklyAggBuffer extends BaseOperation implements Buffer {
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public BomboraWeeklyAggBuffer(Fields fieldDeclaration, String contentSourcesField, String contentSourcesAggField,
-            String uniqueUsersField, String uniqueUsersAggField) {
+    public BomboraWeeklyAggBuffer(Fields fieldDeclaration, String contentSourcesField,
+            String contentSourcesAggField, String uniqueUsersField, String uniqueUsersAggField) {
         this(fieldDeclaration);
         this.contentSourcesAggField = contentSourcesAggField;
         this.uniqueUsersAggField = uniqueUsersAggField;

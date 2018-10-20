@@ -39,6 +39,12 @@ public class TargetMarketReportMap implements HasPid {
         return pid;
     }
 
+    @Override
+    @JsonIgnore
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
     @JsonIgnore
     @JoinColumn(name = "TARGET_MARKET_ID", nullable = false)
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
@@ -50,12 +56,6 @@ public class TargetMarketReportMap implements HasPid {
     @JsonIgnore
     public void setTargetMarket(TargetMarket targetMarket) {
         this.targetMarket = targetMarket;
-    }
-
-    @Override
-    @JsonIgnore
-    public void setPid(Long pid) {
-        this.pid = pid;
     }
 
     @JoinColumn(name = "REPORT_ID", nullable = false)

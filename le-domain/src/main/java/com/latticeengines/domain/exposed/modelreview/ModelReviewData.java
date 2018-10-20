@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 public class ModelReviewData {
 
     @JsonProperty
@@ -29,7 +28,8 @@ public class ModelReviewData {
         return ruleNameToColumnRuleResults;
     }
 
-    public void setRuleNameToColumnRuleResults(Map<String, ColumnRuleResult> ruleNameToColumnRuleResults) {
+    public void setRuleNameToColumnRuleResults(
+            Map<String, ColumnRuleResult> ruleNameToColumnRuleResults) {
         this.ruleNameToColumnRuleResults = ruleNameToColumnRuleResults;
     }
 

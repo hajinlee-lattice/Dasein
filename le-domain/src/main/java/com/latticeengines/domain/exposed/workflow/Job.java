@@ -18,8 +18,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 
 public class Job implements HasId<Long>, HasName {
 
-    public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED, JobStatus.CANCELLED,
-            JobStatus.FAILED, JobStatus.SKIPPED);
+    public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED,
+            JobStatus.CANCELLED, JobStatus.FAILED, JobStatus.SKIPPED);
 
     private Long pid;
     private Long id;
@@ -229,13 +229,13 @@ public class Job implements HasId<Long>, HasName {
     }
 
     @JsonProperty("note")
-    public void setNote(String note) {
-        this.note = note;
+    public String getNote() {
+        return this.note;
     }
 
     @JsonProperty("note")
-    public String getNote() {
-        return this.note;
+    public void setNote(String note) {
+        this.note = note;
     }
 
     @JsonProperty("subJobs")

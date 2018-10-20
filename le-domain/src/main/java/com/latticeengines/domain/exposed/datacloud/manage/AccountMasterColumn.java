@@ -128,15 +128,15 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         return amColumnId;
     }
 
+    @JsonProperty("AMColumnID")
+    public void setAmColumnId(String amColumnId) {
+        this.amColumnId = amColumnId;
+    }
+
     @Transient
     @Override
     public String getColumnId() {
         return amColumnId;
-    }
-
-    @JsonProperty("AMColumnID")
-    public void setAmColumnId(String amColumnId) {
-        this.amColumnId = amColumnId;
     }
 
     @JsonIgnore
@@ -361,7 +361,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @SuppressWarnings("deprecation")
-	@Override
+    @Override
     public ColumnMetadata toColumnMetadata() {
         List<ApprovedUsage> approvedUsages = getApprovedUsageList();
 
@@ -417,6 +417,19 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         return metadata;
     }
 
+    @JsonIgnore
+    private Map<ColumnSelection.Predefined, Boolean> getPredefinedGroups() {
+        if (StringUtils.isNotBlank(getGroups())) {
+            Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
+            Arrays.stream(getGroups().split(",")) //
+                    .map(ColumnSelection.Predefined::fromName).filter(Objects::nonNull) //
+                    .forEach(g -> map.put(g, true));
+            return map;
+        } else {
+            return null;
+        }
+    }
+
     // remove this internal class once codescience has started using JavaType
     // instead of SQLServer data types
     static class JavaToSQLServerDataTypeConverter {
@@ -439,45 +452,32 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
             if (javaClass != null) {
                 switch (javaClass.toLowerCase()) {
-                case STRING:
-                    dataType = SQL_STRING;
-                    break;
-                case FLOAT:
-                    dataType = SQL_FLOAT;
-                    break;
-                case DOUBLE:
-                    dataType = SQL_DECIMAL;
-                    break;
-                case BOOLEAN:
-                    dataType = SQL_BIT;
-                    break;
-                case INTEGER:
-                    dataType = SQL_INT;
-                    break;
-                case LONG:
-                    dataType = SQL_BIGINT;
-                    break;
-                default:
-                    dataType = javaClass;
+                    case STRING:
+                        dataType = SQL_STRING;
+                        break;
+                    case FLOAT:
+                        dataType = SQL_FLOAT;
+                        break;
+                    case DOUBLE:
+                        dataType = SQL_DECIMAL;
+                        break;
+                    case BOOLEAN:
+                        dataType = SQL_BIT;
+                        break;
+                    case INTEGER:
+                        dataType = SQL_INT;
+                        break;
+                    case LONG:
+                        dataType = SQL_BIGINT;
+                        break;
+                    default:
+                        dataType = javaClass;
                 }
             }
 
             return dataType;
         }
 
-    }
-
-    @JsonIgnore
-    private Map<ColumnSelection.Predefined, Boolean> getPredefinedGroups() {
-        if (StringUtils.isNotBlank(getGroups())) {
-            Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
-            Arrays.stream(getGroups().split(",")) //
-                    .map(ColumnSelection.Predefined::fromName).filter(Objects::nonNull) //
-                    .forEach(g -> map.put(g, true));
-            return map;
-        } else {
-            return null;
-        }
     }
 
 }

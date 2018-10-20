@@ -8,7 +8,6 @@ public enum CDLObjectTypes {
     Model("Model"), // i.e. RatingEngine
     Play("Play"); //
 
-    private String objectType;
     private static Map<String, CDLObjectTypes> map = new HashMap<>();
 
     static {
@@ -17,15 +16,17 @@ public enum CDLObjectTypes {
         }
     }
 
+    private String objectType;
+
     CDLObjectTypes(String objectType) {
         this.objectType = objectType;
     }
 
-    public String getObjectType() {
-        return objectType;
-    }
-
     public static CDLObjectTypes getObjectTypeEnum(String objectType) {
         return map.get(objectType);
+    }
+
+    public String getObjectType() {
+        return objectType;
     }
 }

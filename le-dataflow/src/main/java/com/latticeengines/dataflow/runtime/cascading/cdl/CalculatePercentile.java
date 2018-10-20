@@ -13,19 +13,15 @@ import cascading.tuple.TupleEntryCollector;
 
 @SuppressWarnings("rawtypes")
 public class CalculatePercentile extends BaseOperation implements Buffer {
-	private static final long serialVersionUID = -7641395420638947868L;
-	private int minPct;
+    private static final long serialVersionUID = -7641395420638947868L;
+    private int minPct;
     private int maxPct;
     private String countFieldName;
     private int scoreFieldPos;
     private String rawScoreFieldName;
 
-    public CalculatePercentile(Fields fieldDescription,
-                               int minPct,
-                               int maxPct,
-                               String scoreFieldName,
-                               String countFieldName,
-                               String rawScoreFieldName) {
+    public CalculatePercentile(Fields fieldDescription, int minPct, int maxPct,
+            String scoreFieldName, String countFieldName, String rawScoreFieldName) {
         super(fieldDescription);
 
         this.minPct = minPct;
@@ -45,7 +41,8 @@ public class CalculatePercentile extends BaseOperation implements Buffer {
         TupleEntryCollector collector = bufferCall.getOutputCollector();
         Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
 
-        SimplePercentileCalculator percentileCalculator = new SimplePercentileCalculator(minPct, maxPct);
+        SimplePercentileCalculator percentileCalculator = new SimplePercentileCalculator(minPct,
+                maxPct);
 
         int currentPos = 0;
 

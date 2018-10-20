@@ -10,9 +10,17 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 // Contains all the information necessary to construct score elements that
 // are derived from the probability.
 public class ScoreDerivation implements Serializable {
-	private static final long serialVersionUID = 1315253030388148287L;
+    private static final long serialVersionUID = 1315253030388148287L;
+    // The PMML predicted field to look use as the predicted probability.
+    // Required only if the PMML model has multiple predicted fields.
+    public String target;
+    // The average probability of the model.
+    // This is necessary for calculating lift.
+    public double averageProbability;
+    public List<BucketRange> percentiles;
+    public List<BucketRange> buckets;
 
-	public ScoreDerivation(String target, double averageProbability, List<BucketRange> percentiles,
+    public ScoreDerivation(String target, double averageProbability, List<BucketRange> percentiles,
             List<BucketRange> buckets) {
         this.target = target;
         this.averageProbability = averageProbability;
@@ -23,18 +31,6 @@ public class ScoreDerivation implements Serializable {
     // Serialization constructor.
     public ScoreDerivation() {
     }
-
-    // The PMML predicted field to look use as the predicted probability.
-    // Required only if the PMML model has multiple predicted fields.
-    public String target;
-
-    // The average probability of the model.
-    // This is necessary for calculating lift.
-    public double averageProbability;
-
-    public List<BucketRange> percentiles;
-
-    public List<BucketRange> buckets;
 
     @Override
     public int hashCode() {

@@ -22,7 +22,8 @@ public class MappingFunction extends BaseOperation implements Function {
     private Integer srcFieldId;
     private Map<Serializable, Serializable> valueMap;
 
-    public MappingFunction(String sourceField, String targetField, Map<Serializable, Serializable> valueMap) {
+    public MappingFunction(String sourceField, String targetField,
+            Map<Serializable, Serializable> valueMap) {
         super(1, new Fields(targetField));
         this.sourceField = sourceField;
         this.valueMap = valueMap;

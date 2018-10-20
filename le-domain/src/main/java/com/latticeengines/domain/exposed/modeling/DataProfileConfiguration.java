@@ -17,14 +17,14 @@ public class DataProfileConfiguration {
     private List<String> excludeColumnList = new ArrayList<String>();
     private List<String> includeColumnList = new ArrayList<String>();
     private List<String> targets = new ArrayList<String>();
-    
+
     private boolean parallelEnabled;
-    
+
     @JsonProperty("customer")
     public String getCustomer() {
         return customer;
     }
-    
+
     @JsonProperty("customer")
     public void setCustomer(String customer) {
         this.customer = customer;
@@ -124,5 +124,5 @@ public class DataProfileConfiguration {
     public void setParallelEnabled(boolean parallelEnabled) {
         this.parallelEnabled = parallelEnabled;
     }
-    
+
 }
