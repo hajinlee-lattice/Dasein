@@ -1,5 +1,8 @@
 package com.latticeengines.aws.emr.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +33,8 @@ import com.amazonaws.services.elasticmapreduce.model.ListInstancesRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsResult;
+import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 
@@ -55,10 +60,20 @@ public class EMRServiceImpl implements EMRService {
     }
 
     @Override
+    public String getClusterId() {
+        return getClusterId(clusterName);
+    }
+
+    @Override
     public String getMasterIp(String clusterName) {
-        AmazonElasticMapReduce emr = getEmr();
-        String masterIp = null;
         String clusterId = getClusterId(clusterName);
+        return getMasterIpByClusterId(clusterId);
+    }
+
+    @Override
+    public String getMasterIpByClusterId(String clusterId) {
+        String masterIp = null;
+        AmazonElasticMapReduce emr = getEmr();
         if (StringUtils.isNotBlank(clusterId)) {
             DescribeClusterResult cluster = emr
                     .describeCluster(new DescribeClusterRequest().withClusterId(clusterId));
@@ -70,12 +85,21 @@ public class EMRServiceImpl implements EMRService {
                 String instancePrivateDNS = instance.getPrivateDnsName();
                 if (masterDNS.equals(instancePublicDNS) || masterDNS.equals(instancePrivateDNS)) {
                     masterIp = instance.getPrivateIpAddress();
-                    log.info("The private IP of master node in the cluster named " + clusterName + " is "
-                            + masterIp);
                 }
             }
         }
         return masterIp;
+    }
+
+    @Override
+    public boolean isActive(String clusterId) {
+        DescribeClusterResult cluster = describeCluster(clusterId);
+        boolean active = false;
+        if (cluster != null) {
+            ClusterState state = ClusterState.fromValue(cluster.getCluster().getStatus().getState());
+            active = Arrays.asList(ClusterState.RUNNING, ClusterState.WAITING).contains(state);
+        }
+        return active;
     }
 
     @Override
@@ -86,6 +110,19 @@ public class EMRServiceImpl implements EMRService {
     @Override
     public String getSqoopHostPort() {
         return "http://" + getMasterIp() + ":8081";
+    }
+
+    @Override
+    public String getLogBucket(String clusterId) {
+        DescribeClusterResult cluster = describeCluster(clusterId);
+        if (cluster != null) {
+            String logUri = cluster.getCluster().getLogUri();
+            String bucket = logUri.split("://")[1];
+            bucket = bucket.split("/")[0];
+            return bucket;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -125,7 +162,8 @@ public class EMRServiceImpl implements EMRService {
         }
     }
 
-    private String getClusterId(String clusterName) {
+    @Override
+    public String getClusterId(String clusterName) {
         AmazonElasticMapReduce emr = getEmr();
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
         ListClustersResult clustersResult = retryTemplate.execute(context -> {
@@ -142,7 +180,8 @@ public class EMRServiceImpl implements EMRService {
         return null;
     }
 
-    private AmazonElasticMapReduce getEmr() {
+    @VisibleForTesting
+    AmazonElasticMapReduce getEmr() {
         if (emrClient == null) {
             synchronized (this) {
                 if (emrClient == null) {
@@ -156,19 +195,19 @@ public class EMRServiceImpl implements EMRService {
         return emrClient;
     }
 
-    private String getClusterId(AmazonElasticMapReduce emr, String clusterName) {
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
-        ListClustersResult clustersResult = retryTemplate.execute(context -> {
-            ListClustersRequest request = new ListClustersRequest().withClusterStates(ClusterState.RUNNING,
-                    ClusterState.WAITING);
-            return emr.listClusters(request);
-        });
-        for (ClusterSummary summary : clustersResult.getClusters()) {
-            if (summary.getName().endsWith(clusterName)) {
-                return summary.getId();
-            }
+    private DescribeClusterResult describeCluster(String clusterId) {
+        AmazonElasticMapReduce emr = getEmr();
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
+                Collections.singleton(NoSuchEntityException.class));
+        DescribeClusterResult cluster;
+        try {
+            cluster = retryTemplate.execute(context -> //
+                    emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
+        } catch (NoSuchEntityException e) {
+            log.warn("No cluster with id " + clusterId, e);
+            return null;
         }
-        return null;
+        return cluster;
     }
 
 }

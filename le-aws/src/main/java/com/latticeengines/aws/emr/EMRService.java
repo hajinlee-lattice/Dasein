@@ -6,7 +6,17 @@ public interface EMRService {
 
     String getMasterIp();
 
+    String getClusterId();
+
     String getMasterIp(String clusterName);
+
+    String getMasterIpByClusterId(String clusterId);
+
+    boolean isActive(String clusterId);
+
+    String getClusterId(String clusterName);
+
+    String getLogBucket(String clusterId);
 
     String getWebHdfsUrl();
 

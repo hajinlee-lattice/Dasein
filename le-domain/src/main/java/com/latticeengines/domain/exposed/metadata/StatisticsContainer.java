@@ -47,7 +47,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @SuppressWarnings("deprecation")
 @Entity
 @javax.persistence.Table(name = "METADATA_STATISTICS", //
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
+        uniqueConstraints = { @UniqueConstraint(name = "TENANT_NAME", columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ //
         @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -63,18 +63,18 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", unique = true, nullable = false)
+    @Column(name = "NAME", nullable = false)
     @JsonProperty("Name")
     private String name;
 
     // TODO: to remove after M18
-    @Column(name = "DATA", nullable = true)
+    @Column(name = "DATA")
     @Lob
     @JsonIgnore
     private byte[] data;
 
     // TODO: change nullable to false after M18
-    @Column(name = "CUBES_DATA", nullable = true)
+    @Column(name = "CUBES_DATA")
     @Lob
     @JsonIgnore
     private byte[] cubesData;

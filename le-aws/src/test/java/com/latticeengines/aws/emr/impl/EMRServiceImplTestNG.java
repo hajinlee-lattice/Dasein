@@ -42,6 +42,9 @@ public class EMRServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void testExtractConfiguration() {
         String masterIp = emrService.getMasterIp(clusterName);
         Assert.assertTrue(StringUtils.isNotBlank(masterIp));
+
+        String clusterId = emrService.getClusterId(clusterName);
+        Assert.assertNotNull(clusterId);
     }
 
     @Test(groups = "manual", enabled = false)
