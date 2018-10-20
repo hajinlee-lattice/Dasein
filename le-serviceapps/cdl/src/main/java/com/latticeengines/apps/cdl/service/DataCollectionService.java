@@ -62,11 +62,14 @@ public interface DataCollectionService {
 
     Map<TableRoleInCollection, Map<DataCollection.Version, List<Table>>> getTableRoleMap(String customerSpace, String collectionName);
 
-    List<DataCollectionArtifact> getArtifacts(String customerSpace, DataCollection.Version version);
+    List<DataCollectionArtifact> getArtifacts(String customerSpace, DataCollectionArtifact.Status status,
+                                              DataCollection.Version version);
 
     DataCollectionArtifact getArtifact(String customerSpace, String name, DataCollection.Version version);
 
     DataCollectionArtifact createArtifact(String customerSpace, String name, String url, DataCollection.Version version);
+
+    DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact);
 
     DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version);
 }

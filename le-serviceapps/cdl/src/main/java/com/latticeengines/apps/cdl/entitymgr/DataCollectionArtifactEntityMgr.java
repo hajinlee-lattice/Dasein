@@ -10,7 +10,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public interface DataCollectionArtifactEntityMgr extends BaseEntityMgrRepository<DataCollectionArtifact, Long> {
     List<DataCollectionArtifact> findByTenantAndVersion(Tenant tenant, DataCollection.Version version);
 
+    List<DataCollectionArtifact> findByTenantAndStatusAndVersion(Tenant tenant, DataCollectionArtifact.Status status,
+                                                                 DataCollection.Version version);
+
     DataCollectionArtifact findByTenantAndNameAndVersion(Tenant tenant, String name, DataCollection.Version version);
-
-
 }

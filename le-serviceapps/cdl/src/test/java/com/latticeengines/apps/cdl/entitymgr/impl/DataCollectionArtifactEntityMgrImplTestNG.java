@@ -47,6 +47,7 @@ public class DataCollectionArtifactEntityMgrImplTestNG extends CDLFunctionalTest
         artifact1.setName(artifactName1);
         artifact1.setUrl("https://s3.amazon.com/artifact1/Blue");
         artifact1.setVersion(testVersion);
+        artifact1.setStatus(DataCollectionArtifact.Status.GENERATING);
         dataCollectionArtifactEntityMgr.create(artifact1);
         Thread.sleep(500L);
 
@@ -57,6 +58,7 @@ public class DataCollectionArtifactEntityMgrImplTestNG extends CDLFunctionalTest
         artifact2.setName(artifactName2);
         artifact2.setUrl("https://s3.amazon.com/artifact2/Blue");
         artifact2.setVersion(testVersion);
+        artifact2.setStatus(DataCollectionArtifact.Status.NOT_SET);
         dataCollectionArtifactEntityMgr.create(artifact2);
         Thread.sleep(500L);
 
@@ -71,6 +73,7 @@ public class DataCollectionArtifactEntityMgrImplTestNG extends CDLFunctionalTest
         String newArtifactUrl = "https://s3.amazon.com/artifact1000/Blue";
         artifact1.setName(newArtifactName);
         artifact1.setUrl(newArtifactUrl);
+        artifact1.setStatus(DataCollectionArtifact.Status.READY);
         dataCollectionArtifactEntityMgr.createOrUpdate(artifact1);
         Thread.sleep(500L);
 

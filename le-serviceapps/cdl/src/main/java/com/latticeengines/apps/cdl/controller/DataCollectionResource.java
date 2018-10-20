@@ -292,9 +292,10 @@ public class DataCollectionResource {
 
     @GetMapping(value = "/artifact")
     public List<DataCollectionArtifact> getArtifacts(@PathVariable String customerSpace,
+            @RequestParam(value = "status", required = false) DataCollectionArtifact.Status status,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getArtifacts(customerSpace, version);
+        return dataCollectionService.getArtifacts(customerSpace, status, version);
     }
 
     @GetMapping(value = "/artifact/{name}")

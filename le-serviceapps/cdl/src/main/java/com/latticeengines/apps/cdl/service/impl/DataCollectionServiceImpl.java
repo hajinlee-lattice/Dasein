@@ -507,13 +507,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public List<DataCollectionArtifact> getArtifacts(String customerSpace, Version version) {
+    public List<DataCollectionArtifact> getArtifacts(String customerSpace, DataCollectionArtifact.Status status,
+                                                     Version version) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (version == null) {
             version = dataCollectionEntityMgr.findActiveVersion();
         }
 
-        return dataCollectionArtifactEntityMgr.findByTenantAndVersion(tenant, version);
+        if (status != null) {
+            return dataCollectionArtifactEntityMgr.findByTenantAndStatusAndVersion(tenant, status, version);
+        } else {
+            return dataCollectionArtifactEntityMgr.findByTenantAndVersion(tenant, version);
+        }
     }
 
     @Override
@@ -541,7 +546,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         artifact.setDataCollection(getDefaultCollection(customerSpace));
         artifact.setVersion(version);
         artifact.setCreateTime(System.currentTimeMillis());
+        artifact.setStatus(DataCollectionArtifact.Status.NOT_SET);
         dataCollectionArtifactEntityMgr.create(artifact);
+        return artifact;
+    }
+
+    @Override
+    public DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact) {
+        dataCollectionArtifactEntityMgr.update(artifact);
         return artifact;
     }
 

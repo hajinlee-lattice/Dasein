@@ -19,9 +19,9 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
     private DataCollectionService dataCollectionService;
 
     private DataCollection.Version version = DataCollection.Version.Green;
-    private String name1 = "artiface1";
+    private String name1 = "artifact1";
     private String url1 = "https://s3.amazon.com/artifact1/Green";
-    private String name2 = "artiface2";
+    private String name2 = "artifact2";
     private String url2 = "https://s3.amazon.com/artifact2/Green";
 
     private DataCollectionArtifact artifact1;
@@ -46,8 +46,10 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(artifact1);
         Assert.assertEquals(artifact1.getName(), name1);
         Assert.assertEquals(artifact1.getVersion(), version);
+        Assert.assertEquals(artifact1.getStatus(), DataCollectionArtifact.Status.NOT_SET);
         Assert.assertNotNull(artifact2);
         Assert.assertEquals(artifact2.getUrl(), url2);
+        Assert.assertEquals(artifact2.getStatus(), DataCollectionArtifact.Status.NOT_SET);
     }
 
     @Test(groups = "functional", priority = 1)
@@ -57,18 +59,51 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(artifact.getName(), name1);
         Assert.assertEquals(artifact.getUrl(), url1);
         Assert.assertEquals(artifact.getVersion(), version);
+        Assert.assertEquals(artifact.getStatus(), DataCollectionArtifact.Status.NOT_SET);
     }
 
     @Test(groups = "functional", priority = 2)
-    public void testFindManyArtifacts() {
-        List<DataCollectionArtifact> artifacts = dataCollectionService.getArtifacts(mainCustomerSpace, version);
+    public void testFindManyArtifactsNoStatus() {
+        List<DataCollectionArtifact> artifacts = dataCollectionService.getArtifacts(mainCustomerSpace, null, version);
         Assert.assertNotNull(artifacts);
         Assert.assertEquals(artifacts.size(), 2);
         Assert.assertEquals(artifacts.get(0).getName(), name1);
         Assert.assertEquals(artifacts.get(1).getUrl(), url2);
+        Assert.assertEquals(artifacts.get(1).getStatus(), DataCollectionArtifact.Status.NOT_SET);
     }
 
     @Test(groups = "functional", priority = 3)
+    public void testUpdateArtifact() {
+        artifact1.setStatus(DataCollectionArtifact.Status.GENERATING);
+        DataCollectionArtifact artifact = dataCollectionService.updateArtifact(mainCustomerSpace, artifact1);
+        Assert.assertEquals(artifact.getName() , artifact1.getName());
+        Assert.assertEquals(artifact.getStatus(), artifact1.getStatus());
+        Assert.assertEquals(artifact.getUrl(), artifact1.getUrl());
+
+        artifact = dataCollectionService.getArtifact(mainCustomerSpace, name1, version);
+        Assert.assertEquals(artifact.getStatus(), DataCollectionArtifact.Status.GENERATING);
+    }
+
+    @Test(groups = "functional", priority = 4)
+    public void testFindManyArtifactsWithStatus() {
+        DataCollectionArtifact.Status status = DataCollectionArtifact.Status.NOT_SET;
+        List<DataCollectionArtifact> artifacts = dataCollectionService.getArtifacts(mainCustomerSpace, status, version);
+        Assert.assertNotNull(artifacts);
+        Assert.assertEquals(artifacts.size(), 1);
+        Assert.assertEquals(artifacts.get(0).getName(), name2);
+        Assert.assertEquals(artifacts.get(0).getUrl(), url2);
+        Assert.assertEquals(artifacts.get(0).getStatus(), DataCollectionArtifact.Status.NOT_SET);
+
+        status = DataCollectionArtifact.Status.GENERATING;
+        artifacts = dataCollectionService.getArtifacts(mainCustomerSpace, status, version);
+        Assert.assertNotNull(artifacts);
+        Assert.assertEquals(artifacts.size(), 1);
+        Assert.assertEquals(artifacts.get(0).getName(), name1);
+        Assert.assertEquals(artifacts.get(0).getUrl(), url1);
+        Assert.assertEquals(artifacts.get(0).getStatus(), DataCollectionArtifact.Status.GENERATING);
+    }
+
+    @Test(groups = "functional", priority = 5)
     public void testDeleteArtifact() {
         DataCollectionArtifact artifact = dataCollectionService.createArtifact(mainCustomerSpace,
                 "test", "https://url.com", version);

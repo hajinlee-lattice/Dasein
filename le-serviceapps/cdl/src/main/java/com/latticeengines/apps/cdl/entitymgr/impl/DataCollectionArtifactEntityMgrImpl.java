@@ -36,6 +36,14 @@ public class DataCollectionArtifactEntityMgrImpl extends BaseEntityMgrRepository
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<DataCollectionArtifact> findByTenantAndStatusAndVersion(Tenant tenant,
+                                                                        DataCollectionArtifact.Status status,
+                                                                        DataCollection.Version version) {
+        return repository.findByTenantAndStatusAndVersion(tenant, status, version);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataCollectionArtifact findByTenantAndNameAndVersion(Tenant tenant, String name, DataCollection.Version version) {
         return repository.findByTenantAndNameAndVersion(tenant, name, version);
     }
