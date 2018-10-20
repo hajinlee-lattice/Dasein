@@ -16,7 +16,6 @@ printf "%s\n" "${WSHOME:?You must set WSHOME}"
 UNAME=`uname`
 
 . $WSHOME/le-dev/scripts/setupzk.sh
-. $WSHOME/le-dev/scripts/setuphdfs.sh
 
 # delete existing ddl files
 printf "%s\n" "Removing ddl_*.sql files from WSHOME: ${WSHOME}"

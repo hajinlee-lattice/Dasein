@@ -2,21 +2,26 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
@@ -40,14 +45,17 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-    @Autowired
-    private Configuration yarnConfiguration;
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${datacloud.collection.s3bucket}")
+    private String s3Bucket;
 
     @PostConstruct
     private void postConstruct() {
@@ -96,10 +104,38 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
             throw new IllegalStateException(
                     "There is not enrichment stats version for data cloud version " + dataCloudVersion);
         }
-        String sourceName = "AccountMasterEnrichmentStats";
-        String snapshotDir = hdfsPathBuilder.constructSnapshotDir(sourceName, statsVersion).toString();
-        Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
+        Iterator<GenericRecord> recordIterator = getEnrichStatsRecords(statsVersion);
         return StatsCubeUtils.parseAvro(recordIterator);
+    }
+
+    private Iterator<GenericRecord> getEnrichStatsRecords(String statsVersion) {
+        String snapshotDir = getEnrichStatsSnapshotDir(statsVersion);
+        List<S3ObjectSummary> summaries = s3Service.listObjects(s3Bucket, snapshotDir);
+        List<GenericRecord> records = new ArrayList<>();
+        summaries.forEach(summary -> {
+            String key = summary.getKey();
+            if (key.endsWith(".avro")) {
+                InputStream is = s3Service.readObjectAsStream(s3Bucket, key);
+                try {
+                    List<GenericRecord> recordsInAvro = AvroUtils.readFromInputStream(is);
+                    records.addAll(recordsInAvro);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to read avro " + key, e);
+                }
+            }
+        });
+        return records.iterator();
+    }
+
+    private String getEnrichStatsSnapshotDir(String statsVersion) {
+        String sourceName = "AccountMasterEnrichmentStats";
+        // for now use the same path as hdfs
+        // but remove the first /
+        String path = hdfsPathBuilder.constructSnapshotDir(sourceName, statsVersion).toString();
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return path;
     }
 
     @SuppressWarnings("unchecked")

@@ -51,7 +51,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment")
-    public void testStatsCube() throws IOException {
+    public void testStatsCube() {
 
         String url = getRestAPIHostPort() + "/pls/latticeinsights/stats/cube";
 
@@ -62,7 +62,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment")
-    public void testStatsTopnAll() throws IOException {
+    public void testStatsTopnAll() {
 
         String url = getRestAPIHostPort() + "/pls/latticeinsights/stats/topn";
 
