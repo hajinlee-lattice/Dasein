@@ -19,7 +19,7 @@ public interface RatingCoverageService {
 
     RatingsCountResponse getCoverageInfo(String customeSpace, RatingsCountRequest request);
 
-    RatingModelsCoverageResponse getRatingsCoverageForSegment(String customerSpace, String segmentName,
+    RatingModelsCoverageResponse getRatingCoveragesForSegment(String customerSpace, String segmentName,
             RatingModelsCoverageRequest ratingCoverageRequest);
 
 }

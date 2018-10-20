@@ -780,6 +780,7 @@ public class TestPlayCreationHelper {
     }
 
     public MetadataSegment createPlayTargetSegment() {
+        log.info("creating playTargetSegment");
         Restriction dynRest = createBucketRestriction(2, ComparisonType.EQUAL,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
@@ -798,7 +799,6 @@ public class TestPlayCreationHelper {
         Restriction dynRest = createBucketRestriction(3, ComparisonType.LESS_THAN,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
-        this.playTargetSegment = createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
-        return playTargetSegment;
+        return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
     }
 }

@@ -13,9 +13,9 @@ public class RatingModelsCoverageRequest {
 
     private boolean restrictNotNullSalesforceId;
 
-    private boolean loadContactsCoverage;
+    private boolean loadContactsCount;
 
-    private boolean loadContactsBucketCoverage;
+    private boolean loadContactsCountByBucket;
 
     public List<String> getRatingModelIds() {
         return ratingModelIds;
@@ -33,20 +33,21 @@ public class RatingModelsCoverageRequest {
         this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
     }
 
-    public boolean isLoadContactsCoverage() {
-        return loadContactsCoverage;
+    public boolean isLoadContactsCount() {
+        return loadContactsCount;
     }
 
-    public void setLoadContactsCoverage(boolean loadContactsCoverage) {
-        this.loadContactsCoverage = loadContactsCoverage;
+    public void setLoadContactsCount(boolean loadContactsCount) {
+        this.loadContactsCount = loadContactsCount;
     }
 
-    public boolean isLoadContactsBucketCoverage() {
-        return loadContactsBucketCoverage;
+    public boolean isLoadContactsCountByBucket() {
+        return loadContactsCountByBucket;
     }
 
-    public void setLoadContactsBucketCoverage(boolean loadContactsBucketCoverage) {
-        this.loadContactsBucketCoverage = loadContactsBucketCoverage;
+    public void setLoadContactsCountByBucket(boolean loadContactsCountByBucket) {
+        this.loadContactsCountByBucket = loadContactsCountByBucket;
     }
+
 
 }

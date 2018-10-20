@@ -15,6 +15,9 @@ public class RatingBucketCoverage {
     @JsonProperty("count")
     private Long count;
 
+    @JsonProperty("contactCount")
+    private Long contactCount;
+
     public String getBucket() {
         return bucket;
     }
@@ -29,6 +32,14 @@ public class RatingBucketCoverage {
 
     public void setCount(Long count) {
         this.count = count;
+    }
+
+    public Long getContactCount() {
+        return contactCount;
+    }
+
+    public void setContactCount(Long contactCount) {
+        this.contactCount = contactCount;
     }
 
     @Override

@@ -30,9 +30,19 @@ public class CoverageResource {
     @Inject
     private RatingCoverageService ratingCoverageService;
 
+    /**
+     * @param customerSpace
+     * @param ratingModelSegmentIds
+     *
+     * This method is deprecated as it is causing confusion while doing multiple things.
+     * Instead we are creating new api's for each of the usecase. Which will allow us to track api usages as well.
+     *
+     * @return
+     */
     @PostMapping("/facade")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
+    @Deprecated
     public RatingsCountResponse getRatingEngineCoverageInfo(@PathVariable String customerSpace,
             @RequestBody RatingsCountRequest ratingModelSegmentIds) {
         return ratingCoverageService.getCoverageInfo(customerSpace, ratingModelSegmentIds);
@@ -43,6 +53,6 @@ public class CoverageResource {
     @ApiOperation(value = "Get Segments CoverageInfo for List of Rating Model Ids")
     public RatingModelsCoverageResponse getRatingEngineCoverageCountForSegment(@PathVariable String customerSpace,
             @PathVariable String segmentName, @RequestBody RatingModelsCoverageRequest ratingCoverageRequest) {
-        return ratingCoverageService.getRatingsCoverageForSegment(customerSpace, segmentName, ratingCoverageRequest);
+        return ratingCoverageService.getRatingCoveragesForSegment(customerSpace, segmentName, ratingCoverageRequest);
     }
 }

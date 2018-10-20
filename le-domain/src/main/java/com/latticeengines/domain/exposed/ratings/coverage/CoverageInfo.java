@@ -24,6 +24,12 @@ public class CoverageInfo {
     @JsonProperty("contactCount")
     private Long contactCount;
 
+    @JsonProperty("unscoredAccountCount")
+    private Long unscoredAccountCount;
+
+    @JsonProperty("unscoredContactCount")
+    private Long unscoredContactCount;
+
     @JsonProperty("bucketCoverageCounts")
     private List<RatingBucketCoverage> bucketCoverageCounts;
 
@@ -85,6 +91,22 @@ public class CoverageInfo {
 
     public void setContactCount(Long contactCount) {
         this.contactCount = contactCount;
+    }
+
+    public Long getUnscoredAccountCount() {
+        return unscoredAccountCount;
+    }
+
+    public void setUnscoredAccountCount(Long unscoredAccountCount) {
+        this.unscoredAccountCount = unscoredAccountCount;
+    }
+
+    public Long getUnscoredContactCount() {
+        return unscoredContactCount;
+    }
+
+    public void setUnscoredContactCount(Long unscoredContactCount) {
+        this.unscoredContactCount = unscoredContactCount;
     }
 
     public List<RatingBucketCoverage> getBucketCoverageCounts() {
