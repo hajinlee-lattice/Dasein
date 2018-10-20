@@ -1,7 +1,8 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.ams;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.am.AccountMasterBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -18,12 +19,9 @@ public class AMSeedCleanup extends AccountMasterBase<AMSeedMarkerConfig> {
     public Node construct(TransformationFlowParameters parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
 
-        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_INCORRECT_DATA,
-                FLAG_DROP_LESS_POPULAR_DOMAIN);
-
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0 && " + FLAG_DROP_INCORRECT_DATA + " == 0", fieldList);
-
-        node = node.discard(fieldList);
+        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY);
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0", fieldList)//
+                .discard(fieldList);
         return node;
     }
 

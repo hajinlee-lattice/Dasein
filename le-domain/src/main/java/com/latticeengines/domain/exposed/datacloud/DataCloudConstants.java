@@ -49,6 +49,7 @@ public final class DataCloudConstants {
     public static final String ATTR_ALEXA_RANK = "AlexaRank";
     public static final String ATTR_ALEXA_DOMAIN = "URL";
     public static final String ATTR_LAST_UPLOAD_DATE = "LE_Last_Upload_Date";
+    public static final String ATTR_BUILD_LOGS = "LDC_BuildLogs";
 
     public static final String AMS_ATTR_DOMAIN = "Domain";
     public static final String AMS_ATTR_DUNS = "DUNS";

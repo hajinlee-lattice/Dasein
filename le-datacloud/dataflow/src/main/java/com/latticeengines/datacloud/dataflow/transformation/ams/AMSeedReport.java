@@ -1,7 +1,8 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.ams;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.am.AccountMasterBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -18,14 +19,9 @@ public class AMSeedReport extends AccountMasterBase<AMSeedMarkerConfig> {
     public Node construct(TransformationFlowParameters parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
 
-        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_SMALL_BUSINESS, FLAG_DROP_INCORRECT_DATA,
-                FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_ORPHAN_ENTRY);
-
-        node = node.retain(fieldList);
-
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 1 || " + FLAG_DROP_SMALL_BUSINESS + " == 1 || "
-                + FLAG_DROP_INCORRECT_DATA + " == 1 || " + FLAG_DROP_ORPHAN_ENTRY + " == 1 || "
-                + FLAG_DROP_LESS_POPULAR_DOMAIN + " != null ", fieldList);
+        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY);
+        node = node.retain(fieldList)//
+                .filter(FLAG_DROP_OOB_ENTRY + " == 1", fieldList);
 
         return node;
     }

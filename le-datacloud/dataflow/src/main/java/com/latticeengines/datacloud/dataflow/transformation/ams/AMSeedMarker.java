@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.ams;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.am.AccountMasterBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -44,31 +45,35 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
 
         // one of them do many things
         Node oobMkrd = markOOBEntries(am).renamePipe("oobMkrd");
-        Node orphanMrkd = markOrphanRecordWithDomain(am).renamePipe("orphanMrkd");
-        Node badDataMrkd = markRecordsWithIncorrectIndustryRevenueEmployeeData(am).renamePipe("badDataMrkd");
-        Node smBusiMrkd = markOrphanRecordsForSmallBusiness(am).renamePipe("smBusiMrkd");
+        // Node orphanMrkd =
+        // markOrphanRecordWithDomain(am).renamePipe("orphanMrkd");
+        // Node badDataMrkd =
+        // markRecordsWithIncorrectIndustryRevenueEmployeeData(am).renamePipe("badDataMrkd");
+        // Node smBusiMrkd =
+        // markOrphanRecordsForSmallBusiness(am).renamePipe("smBusiMrkd");
         Node alexaMrkd = markLessPopularDomainsForDUNS(am, alexa).renamePipe("alexaMrkd");
 
         List<String> allFields = am.getFieldNames();
         allFields.add(ALEXA_RANK_AMSEED);
         allFields.add(FLAG_DROP_OOB_ENTRY);
-        allFields.add(FLAG_DROP_SMALL_BUSINESS);
-        allFields.add(FLAG_DROP_INCORRECT_DATA);
-        allFields.add(FLAG_DROP_LESS_POPULAR_DOMAIN);
-        allFields.add(FLAG_DROP_ORPHAN_ENTRY);
+        // allFields.add(FLAG_DROP_SMALL_BUSINESS);
+        // allFields.add(FLAG_DROP_INCORRECT_DATA);
+        // allFields.add(FLAG_DROP_LESS_POPULAR_DOMAIN);
+        // allFields.add(FLAG_DROP_ORPHAN_ENTRY);
         FieldList finalFields = new FieldList(allFields);
 
         FieldList idField = new FieldList(LATTICE_ID);
         am = am.discard(LE_IS_PRIMARY_DOMAIN);
 
         return am.coGroup(idField, //
-                Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd), //
-                Arrays.asList(idField, idField, idField, idField, idField), //
+                Arrays.asList(oobMkrd, alexaMrkd), //
+                Arrays.asList(idField, idField), //
                 JoinType.INNER).retain(finalFields);
 
     }
 
     // (LID, FLAG_DROP_SMALL_BUSINESS)
+    @SuppressWarnings("unused")
     private Node markOrphanRecordsForSmallBusiness(Node node) {
         // split by emp range
         Node orphanRecordWithDomainNode = node//
