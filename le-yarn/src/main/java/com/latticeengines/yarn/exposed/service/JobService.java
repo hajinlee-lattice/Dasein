@@ -52,4 +52,6 @@ public interface JobService {
 
     ApplicationId submitYarnJob(CommandYarnClient yarnClient, String yarnClientName, Properties appMasterProperties,
             Properties containerProperties);
+
+    String getEmrClusterId();
 }

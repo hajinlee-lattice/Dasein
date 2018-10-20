@@ -1,5 +1,31 @@
 package com.latticeengines.workflow.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionException;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -17,29 +43,6 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionException;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Service("jobCacheService")
 public class JobCacheServiceImpl implements JobCacheService {
@@ -49,8 +52,11 @@ public class JobCacheServiceImpl implements JobCacheService {
     private static final int NUM_THREADS = 8;
     private static final int LOG_NUM_IDS_LIMIT = 20;
 
-    @Value("${hadoop.yarn.timeline-service.webapp.address}")
-    private String timelineServiceUrl;
+    @Value("${common.internal.app.url}")
+    private String internalAppUrl;
+
+    @Value("${common.microservice.url}")
+    private String microserviceUrl;
 
     @Value("${workflow.jobs.cache.jobExpireTimeInMillis:30000}")
     private int runningJobExpireTimeInMillis; // expire time for job cache entries
@@ -418,7 +424,7 @@ public class JobCacheServiceImpl implements JobCacheService {
         // set tenant for report retrieval
         try {
             MultiTenantContext.setTenant(workflowJob.getTenant());
-            Job job = WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl,
+            Job job = WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(),
                     workflowJob, includeDeatils);
             if (workflowJob.getTenant() != null) {
                 job.setTenantId(workflowJob.getTenant().getId());
@@ -428,6 +434,14 @@ public class JobCacheServiceImpl implements JobCacheService {
         } finally {
             // restore the value before
             MultiTenantContext.setTenant(prevTenant);
+        }
+    }
+
+    private String getLpUrl() {
+        if (StringUtils.isBlank(internalAppUrl)) {
+            return microserviceUrl;
+        } else {
+            return internalAppUrl;
         }
     }
 

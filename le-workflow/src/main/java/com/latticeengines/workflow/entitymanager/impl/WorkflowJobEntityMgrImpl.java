@@ -196,6 +196,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateApplicationIdAndEmrClusterId(WorkflowJob workflowJob) {
+        workflowJobDao.updateApplicationIdAndEmrClusterId(workflowJob);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public WorkflowJob deleteByApplicationId(String applicationId) {
         return workflowJobDao.deleteByApplicationId(applicationId);
     }

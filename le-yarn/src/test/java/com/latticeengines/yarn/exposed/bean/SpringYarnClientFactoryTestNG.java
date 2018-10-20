@@ -11,6 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.Test;
 
@@ -26,7 +27,7 @@ public class SpringYarnClientFactoryTestNG extends AbstractTestNGSpringContextTe
     @Test(groups = "manual")
     public void testYarnClient() {
         String emrCluster = "devcluster_20181019";
-        YarnClient yarnClient = emrEnvService.getSpringYarnClient(emrCluster);
+        CommandYarnClient yarnClient = (CommandYarnClient) emrEnvService.getSpringYarnClient(emrCluster);
         List<ApplicationReport> apps = yarnClient.listApplications();
         Assert.assertTrue(CollectionUtils.isNotEmpty(apps));
     }

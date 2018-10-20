@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClientFactoryBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -98,13 +99,13 @@ public class EMREnvServiceImpl implements EMREnvService {
     }
 
     @Override
-    public org.springframework.yarn.client.YarnClient getSpringYarnClient(String emrCluster) {
+    public CommandYarnClient getSpringYarnClient(String emrCluster) {
         YarnConfiguration yarnConfiguration = getYarnConfiguration(emrCluster);
         YarnClientFactoryBean factoryBean = (YarnClientFactoryBean) appCtx.getBean("&sprintYarnClient");
         factoryBean.setConfiguration(yarnConfiguration);
         factoryBean.setAppName(emrCluster);
         try {
-            return factoryBean.getObject();
+            return (CommandYarnClient) factoryBean.getObject();
         } catch (Exception e) {
             throw new RuntimeException("Failed to create spring yarn client", e);
         }

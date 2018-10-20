@@ -35,6 +35,14 @@ CREATE PROCEDURE `CreateDataCollectionArtifactTable`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateWorkflowJobTable`()
+  BEGIN
+    ALTER TABLE `WORKFLOW_JOB` ADD `EMR_CLUSTER_ID` varchar(20) AFTER `APPLICATION_ID`;
+  END;
+//
+DELIMITER;
+
+
 CREATE PROCEDURE `CreateDropBoxTable`()
   BEGIN
   END;
@@ -42,3 +50,4 @@ CREATE PROCEDURE `CreateDropBoxTable`()
 DELIMITER;
 
 CALL `CreateDataCollectionArtifactTable`();
+CALL `UpdateWorkflowJobTable`();

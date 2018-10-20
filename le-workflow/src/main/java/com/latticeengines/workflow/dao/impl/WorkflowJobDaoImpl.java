@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -346,4 +346,21 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
+
+    @Override
+    public void updateApplicationIdAndEmrClusterId(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("update %s workflowjob " //
+                        + "set workflowjob.applicationId=:applicationId "
+                        + "workflowjob.emrClusterId=:emrClusterId "
+                        + "where workflowjob.pid=:pid",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.setParameter("emrClusterId", workflowJob.getEmrClusterId());
+        query.setParameter("pid", workflowJob.getPid());
+        query.executeUpdate();
+    }
+
 }

@@ -4,6 +4,7 @@ import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.yarn.client.CommandYarnClient;
 
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
@@ -48,7 +49,7 @@ public class ServiceflowsCoreEmrEnvServiceImpl implements EMREnvService {
     }
 
     @Override
-    public org.springframework.yarn.client.YarnClient getSpringYarnClient(String emrCluster) {
+    public CommandYarnClient getSpringYarnClient(String emrCluster) {
         return null;
     }
 

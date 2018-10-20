@@ -66,6 +66,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "USER_ID")
     private String userId;
 
+    @Column(name = "EMR_CLUSTER_ID", length = 20)
+    private String emrClusterId;
+
     @Column(name = "INPUT_CONTEXT", length = 4000)
     private String inputContextString;
 
@@ -146,6 +149,14 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public void setWorkflowId(Long workflowId) {
         this.workflowId = workflowId;
+    }
+
+    public String getEmrClusterId() {
+        return emrClusterId;
+    }
+
+    public void setEmrClusterId(String emrClusterId) {
+        this.emrClusterId = emrClusterId;
     }
 
     @Transient

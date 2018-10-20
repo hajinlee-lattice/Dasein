@@ -1,5 +1,29 @@
 package com.latticeengines.workflow.service.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.mockito.Mockito;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.service.ReportService;
@@ -14,29 +38,6 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.retry.support.RetryTemplate;
-import org.testng.Assert;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @ContextConfiguration(locations = {"classpath:test-workflow-context.xml"})
 public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
@@ -61,8 +62,8 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
     private RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate(
             MAX_WAIT_ATTEMPTS, WAIT_INTERVALS, MULTIPLIER, Collections.singletonMap(Exception.class, true));
 
-    @Value("${hadoop.yarn.timeline-service.webapp.address}")
-    private String timelineServiceUrl;
+    @Value("${common.microservice.url}")
+    private String microserviceUrl;
 
     @BeforeClass(groups = "functional")
     public void setUpShared() throws Exception {
@@ -271,7 +272,7 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
         try {
             String resultStr = mapper.writeValueAsString(result);
             Job job = WorkflowJobUtils.assembleJob(
-                    reportService, leJobExecutionRetriever, timelineServiceUrl, expectedJob, includeDetails);
+                    reportService, leJobExecutionRetriever, microserviceUrl, expectedJob, includeDetails);
             if (result.getOutputs() != null) {
                 // remove yarn log link path for easier checks
                 result.getOutputs().remove(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH);

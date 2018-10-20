@@ -19,12 +19,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
-import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -34,8 +35,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
-import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
+import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
@@ -74,6 +75,18 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Inject
     private JobNameService jobNameService;
 
+    @Inject
+    private EMRService emrService;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${hadoop.yarn.timeline-service.webapp.address}")
+    private String ambariTimelineServiceAddress;
+
+    @Value("${hadoop.yarn.resourcemanager.webapp.address}")
+    private String ambariRMAddress;
+
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
 
@@ -94,7 +107,12 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             jobEntityMgr.create(job);
 
             workflowJob.setApplicationId(appId.toString());
-            workflowJobEntityMgr.updateApplicationId(workflowJob);
+            if (Boolean.TRUE.equals(useEmr)) {
+                workflowJob.setEmrClusterId(jobService.getEmrClusterId());
+                workflowJobEntityMgr.updateApplicationIdAndEmrClusterId(workflowJob);
+            } else {
+                workflowJobEntityMgr.updateApplicationId(workflowJob);
+            }
 
             jobCacheService.evict(workflowJob.getTenant());
 
@@ -300,6 +318,69 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setContainerPropertiesObject(containerProperties);
 
         return job;
+    }
+
+    @Override
+    public String getLogUrlByWorkflowPid(Long workflowPid) {
+        if (workflowPid == null) {
+            throw new IllegalArgumentException("Cannot use null workflow pid");
+        }
+
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+        if (workflowJob == null) {
+            throw new IllegalArgumentException("Cannot find a workflow with pid " + workflowPid);
+        }
+
+        String appId = workflowJob.getApplicationId();
+        if (StringUtils.isNotBlank(appId)) {
+            String url;
+            String emrClusterId = workflowJob.getEmrClusterId();
+            if (StringUtils.isNotBlank(emrClusterId)) {
+                boolean clusterIsActvie = emrService.isActive(emrClusterId);
+                if (clusterIsActvie) {
+                    // if active, go to job history page or rm page
+                    String masterIp = emrService.getMasterIpByClusterId(emrClusterId);
+                    JobStatus status = JobStatus.fromString(workflowJob.getStatus());
+                    url = status.isTerminated() ? appHistoryUrl(masterIp, appId) : appMasterUrl(masterIp, appId);
+                } else {
+                    // for inactive emr, try to give s3 address
+                    String bucket = emrService.getLogBucket(emrClusterId);
+                    if (StringUtils.isNotBlank(bucket)) {
+                        url = s3LogUrl(bucket, emrClusterId, appId);
+                    } else {
+                        throw new IllegalStateException("Cannot find log bucket for emr cluster " + emrClusterId);
+                    }
+                }
+            } else {
+                JobStatus status = JobStatus.fromString(workflowJob.getStatus());
+                url = status.isTerminated() ? ambariAppHistoryUrl(appId) : ambariAppMasterUrl(appId);
+            }
+            return url;
+        } else {
+            throw new IllegalStateException("Workflow with pid " + workflowPid + " does not have an app id, " //
+                    + "therefore cannot find the log link.");
+        }
+    }
+
+    private String ambariAppHistoryUrl(String appId) {
+        return String.format("%s/app/%s", ambariTimelineServiceAddress, appId);
+    }
+
+    private String ambariAppMasterUrl(String appId) {
+        return String.format("http://%s/cluster/app/%s", ambariRMAddress, appId);
+    }
+
+    private String appHistoryUrl(String masterIp, String appId) {
+        return String.format("http://%s:8188/applicationhistory/app/%s", masterIp, appId);
+    }
+
+    private String appMasterUrl(String masterIp, String appId) {
+        return String.format("http://%s:8088/cluster/app/%s", masterIp, appId);
+    }
+
+    private String s3LogUrl(String bucket, String clusterId, String appId) {
+        return "https://s3.console.aws.amazon.com/s3/buckets/" //
+                + bucket + "/" + clusterId + "/containers/" + appId + "/";
     }
 
 }

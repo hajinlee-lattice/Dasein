@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -45,6 +44,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.MapReduceCustomizationService;
 import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
@@ -322,4 +322,15 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         JobCounters jobCounters = JsonUtils.deserialize(response, JobCounters.class);
         return jobCounters.getCounters();
     }
+
+
+    @Override
+    public String getEmrClusterId() {
+        if (Boolean.TRUE.equals(useEmr)) {
+            return null;
+        } else {
+            return emrService.getClusterId();
+        }
+    }
+
 }

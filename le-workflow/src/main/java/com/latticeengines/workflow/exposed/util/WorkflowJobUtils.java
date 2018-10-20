@@ -1,5 +1,24 @@
 package com.latticeengines.workflow.exposed.util;
 
+import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.LOG_REDIRECT_LINK;
+import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.REDIRECT_RESOURCE;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
+
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -12,27 +31,11 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class WorkflowJobUtils {
     private static final String CUSTOMER_SPACE = "CustomerSpace";
 
     public static Job assembleJob(ReportService reportService, LEJobExecutionRetriever leJobExecutionRetriever,
-                            String timelineServiceUrl, WorkflowJob workflowJob, Boolean includeDetails) {
+                            String lpUrl, WorkflowJob workflowJob, Boolean includeDetails) {
         Job job = new Job();
         job.setPid(workflowJob.getPid());
         job.setId(workflowJob.getWorkflowId());
@@ -54,8 +57,8 @@ public class WorkflowJobUtils {
         }
 
         if (job.getOutputs() != null && job.getApplicationId() != null) {
-            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
-                    String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));
+            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH, //
+                    logRedirectLink(lpUrl, job.getPid()));
         }
 
         JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
@@ -94,6 +97,10 @@ public class WorkflowJobUtils {
         }
 
         return job;
+    }
+
+    private static String logRedirectLink(String lpUrl, long workflowPid) {
+        return lpUrl + "/lp/" + REDIRECT_RESOURCE + LOG_REDIRECT_LINK + String.valueOf(workflowPid);
     }
 
     public static Job removeJobDetails(Job job) {

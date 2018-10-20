@@ -299,6 +299,11 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
     }
 
+    public String getLogLinkByWorkflowPid(long workflowPid) {
+        String url = constructUrl("/log-link/pid/{pid}", workflowPid);
+        return get("get log link", url, String.class);
+    }
+
     private void checkCustomerSpace(String customerSpace) {
         if (StringUtils.isBlank(customerSpace)) {
             throw new RuntimeException(CUSTOMER_SPACE_ERROR);

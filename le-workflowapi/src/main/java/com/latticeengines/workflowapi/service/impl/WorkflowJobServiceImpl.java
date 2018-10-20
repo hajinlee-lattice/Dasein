@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
-    private String timelineServiceUrl;
+    private String atimelineServiceUrl;
 
     @Value("${workflow.jobs.disableCache:false}")
     private Boolean disableCache;
+
+    @Value("${common.internal.app.url}")
+    private String internalAppUrl;
+
+    @Value("${common.microservice.url}")
+    private String microserviceUrl;
 
     @Inject
     private JobCacheService jobCacheService;
@@ -140,7 +147,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return null;
         }
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob,
+        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
                 includeDetails);
     }
 
@@ -170,7 +177,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob,
+        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
                 includeDetails);
     }
 
@@ -183,7 +190,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob,
+        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
                 includeDetails);
     }
 
@@ -195,7 +202,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
         List<Job> jobs = workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
-                leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails)).collect(Collectors.toList());
+                leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
         jobs.forEach(this::removeTenantInfo);
         return jobs;
     }
@@ -260,7 +267,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
-                leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails)).collect(Collectors.toList());
+                leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
     }
 
     @Override
@@ -296,7 +303,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJobs = checkLastUpdateTime(workflowJobs);
 
         return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
-                leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails)).collect(Collectors.toList());
+                leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
     }
 
     @Override
@@ -408,12 +415,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime) {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         workflowJobs.removeIf(Objects::isNull);
-        workflowJobs = workflowJobs.stream()
-                .filter(workflowJob -> {
-                    return workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
-                        && workflowJob.getStartTimeInMillis() >= startTime
-                        && workflowJob.getStartTimeInMillis() <= endTime;
-                }).collect(Collectors.toList());
+        workflowJobs = workflowJobs.stream().filter(workflowJob -> //
+        workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
+                && workflowJob.getStartTimeInMillis() >= startTime
+                && workflowJob.getStartTimeInMillis() <= endTime) //
+                .collect(Collectors.toList());
         List<Long> workflowIds = workflowJobs.stream().map(WorkflowJob::getWorkflowId).collect(Collectors.toList());
         workflowJobs.forEach(workflowJob -> {
             if (workflowJob.getApplicationId() != null) {
@@ -427,6 +433,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         jobCacheService.evictByWorkflowIds(workflowIds);
 
         return workflowJobs;
+    }
+
+    private String getLpUrl() {
+        if (StringUtils.isBlank(internalAppUrl)) {
+            return microserviceUrl;
+        } else {
+            return internalAppUrl;
+        }
     }
 
     private List<WorkflowJob> checkExecutionId(List<WorkflowJob> workflowJobs) {

@@ -9,6 +9,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -137,6 +138,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         schemaInterpretation = SchemaInterpretation.SalesforceLead;
 
         log.info("Test environment setup finished.");
+
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(firstTenant));
     }
 
     public String getScoringApiInternalUrl() {

@@ -12,4 +12,6 @@ public interface WorkflowContainerService {
     String submitAwsWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid);
 
     JobStatus getJobStatus(String applicationId);
+
+    String getLogUrlByWorkflowPid(Long workflowPid);
 }

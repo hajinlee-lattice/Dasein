@@ -6,10 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,9 +28,14 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
@@ -49,6 +50,9 @@ public class WorkflowResource {
 
     @Inject
     private WorkflowJobService workflowJobService;
+
+    @Inject
+    private WorkflowContainerService workflowContainerService;
 
     @PostMapping(value = "/job/{workflowId}/stop", headers = "Accept=application/json")
     @ApiOperation(value = "Stop an executing workflow")
@@ -222,5 +226,11 @@ public class WorkflowResource {
     public List<WorkflowJob> deleteWorkflowJobs(@RequestParam String customerSpace, @RequestParam String type,
                                                 @RequestParam Long startTime, @RequestParam Long endTime) {
         return workflowJobService.deleteWorkflowJobs(customerSpace, type, startTime, endTime);
+    }
+
+    @GetMapping("/log-link/pid/{workflowPid}")
+    @ApiOperation("Get log url for a workflow by pid.")
+    public String getLogLinkByWorkflowPid(@PathVariable long workflowPid) {
+        return workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
     }
 }

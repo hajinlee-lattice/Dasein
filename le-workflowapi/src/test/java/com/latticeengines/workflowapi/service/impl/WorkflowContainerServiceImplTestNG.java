@@ -1,12 +1,14 @@
 package com.latticeengines.workflowapi.service.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -20,11 +22,14 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(WorkflowContainerServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private WorkflowContainerService workflowContainerService;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Inject
+    private EMRService emrService;
 
     private WorkflowJob workflowJob;
 
@@ -54,4 +59,12 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
         Assert.assertNull(workflowContainerService.submitAwsWorkflow(workflowConfig, 9999L));
     }
+
+    @Test(groups = "mannual")
+    public void testGetWorkflowLogLink() {
+        long workflowPid = 2L;
+        String url = workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
+        System.out.println(url);
+    }
+
 }
