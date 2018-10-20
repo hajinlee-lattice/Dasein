@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.filetosrc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,31 +15,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.IngestionNames;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.IngestedFileToSourceTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class DnBFileToSourceServiceTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(DnBFileToSourceServiceTestNG.class);
+public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(DnBFileToSourceTestNG.class);
 
-    GeneralSource source = new GeneralSource("DnBCacheSeedRaw");
+    private GeneralSource source = new GeneralSource("DnBCacheSeedRaw");
 
     @Autowired
-    IngestionSource baseSource;
+    private IngestionSource baseSource;
 
-    ObjectMapper om = new ObjectMapper();
-
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         baseSource.setIngestionName(IngestionNames.DNB_CASHESEED);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_052.OUT.gz", baseSourceVersion);
@@ -53,51 +49,37 @@ public class DnBFileToSourceServiceTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            configuration.setName("DnBFileToSource");
-            configuration.setVersion(targetVersion);
+        configuration.setName("DnBFileToSource");
+        configuration.setVersion(targetVersion);
 
-            // -----------
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add("IngestionSource");
-            step1.setBaseSources(baseSources);
-            step1.setTransformer("ingestedFileToSourceTransformer");
-            step1.setTargetSource(source.getSourceName());
-            String confParamStr1 = getIngestedFileToSourceTransformerConfig();
-            step1.setConfiguration(confParamStr1);
+        // -----------
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<String>();
+        baseSources.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(IngestedFileToSourceTransformer.TRANSFORMER_NAME);
+        step1.setTargetSource(source.getSourceName());
+        String confParamStr1 = getIngestedFileToSourceTransformerConfig();
+        step1.setConfiguration(confParamStr1);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step1);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
+    private String getIngestedFileToSourceTransformerConfig() {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
         conf.setIngestionName(IngestionNames.DNB_CASHESEED);
         conf.setFileNameOrExtension(".OUT");
@@ -106,7 +88,7 @@ public class DnBFileToSourceServiceTestNG
         conf.setDelimiter("|");
         conf.setQualifier(null);
         conf.setCharset("ISO-8859-1");
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
     @Override

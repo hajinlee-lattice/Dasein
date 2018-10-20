@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.filetosrc;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,31 +12,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.IngestionNames;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.IngestedFileToSourceTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
-public class HGDataFileToSourceServiceTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(OrbFileToSourceServiceTestNG.class);
+public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(OrbFileToSourceTestNG.class);
 
-    GeneralSource source = new GeneralSource("HGSeedRaw");
+    private GeneralSource source = new GeneralSource("HGSeedRaw");
 
     @Autowired
-    IngestionSource baseSource;
-
-    String targetSourceName = "HGSeedRaw";
-
-    ObjectMapper om = new ObjectMapper();
+    private IngestionSource baseSource;
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
@@ -50,64 +44,43 @@ public class HGDataFileToSourceServiceTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            configuration.setName("HGDataFileToSource");
-            configuration.setVersion(targetVersion);
+        configuration.setName("HGDataFileToSource");
+        configuration.setVersion(targetVersion);
 
-            // -----------
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add("IngestionSource");
-            step1.setBaseSources(baseSources);
-            step1.setTransformer("ingestedFileToSourceTransformer");
-            step1.setTargetSource(targetSourceName);
-            String confParamStr1 = getIngestedFileToSourceTransformerConfig();
-            step1.setConfiguration(confParamStr1);
+        // -----------
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<String>();
+        baseSources.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(IngestedFileToSourceTransformer.TRANSFORMER_NAME);
+        step1.setTargetSource(source.getSourceName());
+        String confParamStr1 = getIngestedFileToSourceTransformerConfig();
+        step1.setConfiguration(confParamStr1);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step1);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
+        return configuration;
     }
 
-    private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
+    private String getIngestedFileToSourceTransformerConfig() {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
         conf.setIngestionName(IngestionNames.HGDATA);
         conf.setFileNameOrExtension("7330 Lattice Engines.csv");
         conf.setCompressedFileNameOrExtension("Lattice_Engines_2017-02-14.zip");
         conf.setCompressType(CompressType.ZIP);
-        return om.writeValueAsString(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-        return hdfsPathBuilder.constructTransformationSourceDir(source, targetVersion).toString();
+        return JsonUtils.serialize(conf);
     }
 
     @Override

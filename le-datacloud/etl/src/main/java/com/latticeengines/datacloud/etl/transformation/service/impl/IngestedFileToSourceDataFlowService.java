@@ -53,16 +53,19 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
         String ingestionDir = hdfsPathBuilder.constructIngestionDir(parameters.getIngestionName(), baseVersion)
                 .toString();
         log.info("Ingestion Directory: " + ingestionDir);
-        
+
         try {
-            boolean foundFiles = false;
             String searchDir = ingestionDir;
             List<String> files = null;
             Path uncompressedDir = new Path(ingestionDir, EngineConstants.UNCOMPRESSED);
-            if (StringUtils.isNotEmpty(parameters.getCompressedFileNameOrExtension())
-                    && !HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
-                log.info("Uncompressed dir " + uncompressedDir.toString() + " does not exist. Create one.");
+            // If files are compressed, need to uncompress first
+            if (StringUtils.isNotEmpty(parameters.getCompressedFileNameOrExtension())) {
+                if (HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
+                    HdfsUtils.rmdir(yarnConfiguration, uncompressedDir.toString());
+                    log.info("Uncompressed dir " + uncompressedDir.toString() + " already exists. Delete first.");
+                }
                 HdfsUtils.mkdir(yarnConfiguration, uncompressedDir.toString());
+                log.info("Uncompressed dir " + uncompressedDir.toString() + " created");
                 searchDir = uncompressedDir.toString();
                 log.info("Searching compressed files with name/extension as "
                         + parameters.getCompressedFileNameOrExtension() + " in directory " + ingestionDir);
@@ -70,51 +73,23 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
                         true, false);
                 log.info("Found " + compressedFiles.size() + " compressed files.");
                 uncompress(compressedFiles, uncompressedDir, parameters.getCompressType());
-            } else if (StringUtils.isNotEmpty(parameters.getCompressedFileNameOrExtension())
-                    && HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
-                log.info("Uncompressed dir " + uncompressedDir.toString() + " already exists.");
-                searchDir = uncompressedDir.toString();
-                log.info("Searching if target files with name/extension " + parameters.getFileNameOrExtension()
-                        + " exist in dir " + searchDir);
-                files = scanDir(searchDir, parameters.getFileNameOrExtension(), true, true);
-                if (!CollectionUtils.isEmpty(files)) {
-                    log.info("Target files exist already.");
-                    foundFiles = true;
-                }
-                if (!foundFiles) {
-                    log.info("Target files do not exist. Remove " + uncompressedDir.toString()
-                            + " and create a new one.");
-                    HdfsUtils.rmdir(yarnConfiguration, uncompressedDir.toString());
-                    HdfsUtils.mkdir(yarnConfiguration, uncompressedDir.toString());
-                    log.info("Searching compressed files with name/extension as "
-                            + parameters.getCompressedFileNameOrExtension() + " in directory " + ingestionDir);
-                    List<String> compressedFiles = scanDir(ingestionDir, parameters.getCompressedFileNameOrExtension(),
-                            true, false);
-                    log.info("Found " + compressedFiles.size() + " compressed files.");
-                    uncompress(compressedFiles, uncompressedDir, parameters.getCompressType());
-                }
             }
-            if (!foundFiles) {
-                log.info("Searching if target files with name/extension " + parameters.getFileNameOrExtension()
-                        + " exist in dir " + searchDir);
-                files = scanDir(searchDir, parameters.getFileNameOrExtension(), true, true);
-                if (!CollectionUtils.isEmpty(files)) {
-                    foundFiles = true;
-                }
+            log.info("Searching if target files with name/extension " + parameters.getFileNameOrExtension()
+                    + " exist in dir " + searchDir);
+            files = scanDir(searchDir, parameters.getFileNameOrExtension(), true, false);
+            if (CollectionUtils.isEmpty(files)) {
+                throw new RuntimeException("Fail to find target files with name/extension "
+                        + parameters.getFileNameOrExtension() + " exist in dir " + searchDir);
             }
-            if (foundFiles) {
-                log.info("Found target files.");
-                Path path = new Path(files.get(0));
-                String searchWildCard = new Path(path.getParent(), "*" + parameters.getFileNameOrExtension())
-                        .toString();
-                log.info("SearchWildCard: " + searchWildCard);
-                convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
+            log.info("Found " + files.size() + " target files.");
+            Path path = new Path(files.get(0));
+            String searchWildCard = new Path(path.getParent(), "*" + parameters.getFileNameOrExtension()).toString();
+            log.info("SearchWildCard: " + searchWildCard);
+            convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
+            if (HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
                 HdfsUtils.rmdir(yarnConfiguration, uncompressedDir.toString());
-            } else {
-                log.error("Fail to find any target files!");
             }
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
         }
     }

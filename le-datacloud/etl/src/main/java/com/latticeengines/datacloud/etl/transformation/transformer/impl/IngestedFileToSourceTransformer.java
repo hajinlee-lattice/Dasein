@@ -17,13 +17,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("ingestedFileToSourceTransformer")
+@Component(IngestedFileToSourceTransformer.TRANSFORMER_NAME)
 public class IngestedFileToSourceTransformer
         extends AbstractDataflowTransformer<IngestedFileToSourceTransformerConfig, IngestedFileToSourceParameters> {
 
     private static final Logger log = LoggerFactory.getLogger(IngestedFileToSourceTransformer.class);
 
-    private static String transfomerName = "ingestedFileToSourceTransformer";
+    public static final String TRANSFORMER_NAME = "ingestedFileToSourceTransformer";
 
     @Autowired
     private IngestedFileToSourceDataFlowService dataFlowService;
@@ -35,7 +35,7 @@ public class IngestedFileToSourceTransformer
 
     @Override
     public String getName() {
-        return transfomerName;
+        return TRANSFORMER_NAME;
     }
 
     @Override
