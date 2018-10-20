@@ -68,7 +68,7 @@ public class EMRScalingRunnable implements Runnable {
 
     @Override
     public void run() {
-        log.info("Start processing scaling of emr cluster " + emrCluster);
+        log.info("Start processing emr cluster " + emrCluster);
 
         try {
             RetryTemplate retry = RetryUtils.getRetryTemplate(5);
@@ -87,7 +87,7 @@ public class EMRScalingRunnable implements Runnable {
             scaleDown();
         }
 
-        log.info("Finished processing scaling of emr cluster " + emrCluster);
+        log.info("Finished processing emr cluster " + emrCluster);
     }
 
     private boolean needToScaleUp() {

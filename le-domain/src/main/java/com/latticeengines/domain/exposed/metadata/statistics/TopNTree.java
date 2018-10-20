@@ -33,12 +33,8 @@ public class TopNTree {
     }
 
     public void setCategories(Map<Category, CategoryTopNTree> categories) {
-        if (categories instanceof TreeMap) {
-            this.categories = categories;
-        } else {
-            this.categories = new TreeMap<>(Comparator.comparing(Category::getOrder));
-            this.categories.putAll(categories);
-        }
+        this.categories = new TreeMap<>(Comparator.comparing(Category::getOrder));
+        this.categories.putAll(categories);
     }
 
     public boolean hasCategory(Category category) {

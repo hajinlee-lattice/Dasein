@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -59,11 +58,6 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
 
-    @PostConstruct
-    private void postConstruct() {
-        initCache();
-    }
-
     @Override
     public boolean accept(String version) {
         return MatchUtils.isValidForAccountMasterBasedMatch(version);
@@ -81,12 +75,30 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
 
     @Override
     public StatsCube getStatsCube(String dataCloudVersion) {
-        return statsCache.get(dataCloudVersion).getLeft();
+        return getStatsCache().get(dataCloudVersion).getLeft();
     }
 
     @Override
     public TopNTree getTopNTree(String dataCloudVersion) {
-        return statsCache.get(dataCloudVersion).getRight();
+        return getStatsCache().get(dataCloudVersion).getRight();
+    }
+
+    @SuppressWarnings("unchecked")
+    private WatcherCache<String, Pair<StatsCube, TopNTree>> getStatsCache() {
+        if (statsCache == null) {
+            synchronized (this) {
+                if (statsCache == null) {
+                    statsCache = WatcherCache.builder() //
+                            .name("AMStatsCache") //
+                            .watch(AMRelease.name()) //
+                            .maximum(10) //
+                            .load(dataCloudVersion -> readStatsPairFromHdfs((String) dataCloudVersion)) //
+                            .initKeys(new String[] { versionEntityMgr.currentApprovedVersionAsString() }) //
+                            .build();
+                }
+            }
+        }
+        return statsCache;
     }
 
     private Pair<StatsCube, TopNTree> readStatsPairFromHdfs(String dataCloudVersion) {
@@ -141,17 +153,6 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
             path = path.substring(1);
         }
         return path;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void initCache() {
-        statsCache = WatcherCache.builder() //
-                .name("AMStatsCache") //
-                .watch(AMRelease.name()) //
-                .maximum(10) //
-                .load(dataCloudVersion -> readStatsPairFromHdfs((String) dataCloudVersion)) //
-                .initKeys(new String[] { versionEntityMgr.currentApprovedVersionAsString() }) //
-                .build();
     }
 
 }

@@ -50,7 +50,8 @@ public class StatsCubeUtilsUnitTestNG {
         Assert.assertEquals(cube.getCount(), new Long(maxCount));
 
         cube.getStatistics().forEach((attrName, attrStats) -> //
-        Assert.assertTrue(attrStats.getNonNullCount() <= maxCount, attrName + JsonUtils.pprint(attrStats)));
+        Assert.assertTrue(attrStats.getNonNullCount() <= maxCount, //
+                attrName + JsonUtils.pprint(attrStats)));
     }
 
     @Test(groups = "unit")
@@ -115,7 +116,8 @@ public class StatsCubeUtilsUnitTestNG {
             cmMap.put(entity.name(), cms);
         }
 
-        TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
+        TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, //
+                ColumnSelection.Predefined.Segment);
         verifyCategoryOrder(topNTree);
         verifyDateAttrInTopN(topNTree, cmMap);
     }
