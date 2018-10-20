@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -24,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
@@ -115,9 +117,12 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         summaries.forEach(summary -> {
             String key = summary.getKey();
             if (key.endsWith(".avro")) {
-                InputStream is = s3Service.readObjectAsStream(s3Bucket, key);
+                RetryTemplate retry = RetryUtils.getRetryTemplate(5);
                 try {
-                    List<GenericRecord> recordsInAvro = AvroUtils.readFromInputStream(is);
+                    List<GenericRecord> recordsInAvro = retry.execute(context -> {
+                        InputStream is = s3Service.readObjectAsStream(s3Bucket, key);
+                        return AvroUtils.readFromInputStream(is);
+                    });
                     records.addAll(recordsInAvro);
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to read avro " + key, e);
