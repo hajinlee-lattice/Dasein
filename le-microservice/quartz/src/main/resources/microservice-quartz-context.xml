@@ -6,6 +6,7 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:microservice-context.xml" />
+    <import resource="classpath:microservice-security-context.xml"/>
     <import resource="classpath:quartz-context.xml" />
 
     <context:component-scan

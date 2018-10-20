@@ -16,6 +16,7 @@
     </bean>
 
     <import resource="classpath:microservice-context.xml"/>
+    <import resource="classpath:microservice-security-context.xml"/>
     <import resource="classpath:serviceapps-cdl-context.xml"/>
     <context:component-scan base-package="com.latticeengines.apps.cdl.provision, com.latticeengines.apps.core.controller, com.latticeengines.apps.cdl.controller, com.latticeengines.microservice.cdl" />
 
