@@ -28,6 +28,7 @@ public class ColumnMetadataProxyTestNG extends AbstractTestNGSpringContextTests 
             .generateColumnMetadataList(INTERNAL_ATTR_COUNT, EXTERNAL_ATTR_COUNT);
 
     private TestColumnMetadataProxy testProxy;
+
     @Inject
     private TestColumnMetadataProxyTag testProxyTag;
 
@@ -36,6 +37,8 @@ public class ColumnMetadataProxyTestNG extends AbstractTestNGSpringContextTests 
         // casting from tag to test proxy
         testProxy = (TestColumnMetadataProxy) testProxyTag;
         testProxy = Mockito.spy(testProxy);
+        Mockito.when(testProxy.get(Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenAnswer((invocation) -> TestDataGenerator.generateTopNTree(TEST_COLUMNS));
         Mockito.when(testProxy.getKryo(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenAnswer((invocation) -> TestDataGenerator.generateTopNTree(TEST_COLUMNS));
         Mockito.when(testProxy.columnSelection(ColumnSelection.Predefined.Enrichment)).thenReturn(TEST_COLUMNS);
@@ -110,6 +113,11 @@ public class ColumnMetadataProxyTestNG extends AbstractTestNGSpringContextTests 
     static class TestColumnMetadataProxy extends ColumnMetadataProxy implements TestColumnMetadataProxyTag {
         @Override
         protected <T> T getKryo(String method, String url, Class<T> returnValueClazz) {
+            return null;
+        }
+
+        @Override
+        protected <T> T get(String method, String url, Class<T> returnValueClazz) {
             return null;
         }
 
