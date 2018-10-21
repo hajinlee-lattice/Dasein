@@ -51,15 +51,13 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         }
     }
 
-    @Test(groups = { "deployment" }, enabled = true)
+    @Test(groups = { "deployment" })
     public void testGetTopNTree() {
         TopNTree topnTree = columnMetadataProxy.getTopNTree();
-        amCats.forEach(c -> {
-            Assert.assertTrue(topnTree.getCategories().containsKey(c));
-        });
+        amCats.forEach(c -> Assert.assertTrue(topnTree.getCategories().containsKey(c)));
     }
 
-    @Test(groups = { "deployment" }, enabled = true)
+    @Test(groups = { "deployment" })
     public void testGetTopCube() {
         AccountMasterFactQuery query = createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL);
         AccountMasterCube cube = amStatsProxy.getCube(query, true);

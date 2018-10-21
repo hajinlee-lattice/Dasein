@@ -179,7 +179,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     /**
      * Retrieve {@link TopNTree} and filter out all the attributes that can be
      * internal enriched if the flag is set
-     * 
+     *
      * @param excludeInternalEnrichment
      *            flag to filter out internal attributes
      * @return
@@ -198,7 +198,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         case STATS_CUBE:
             return getKryo("get AM status cube", constructUrl("/statscube"), StatsCube.class);
         case TOPN_TREE:
-            return getKryo("get AM top n tree", constructUrl("/topn"), TopNTree.class);
+            return get("get AM top n tree", constructUrl("/topn"), TopNTree.class);
         case TOPN_TREE_EXCLUDE_INTERNAL:
             return filterEnrichment(true);
         default:
