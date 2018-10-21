@@ -124,10 +124,12 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
 
         var launchSummaries = vm.launches.launchSummaries;
-        for(var i = 0; i < launchSummaries.length; i++) {
-            if (launchSummaries[i].launchState == 'Launching') {
-                vm.launching = true;
-                break;
+        if(launchSummaries && launchSummaries.length) {
+            for(var i = 0; i < launchSummaries.length; i++) {
+                if (launchSummaries[i].launchState == 'Launching') {
+                    vm.launching = true;
+                    break;
+                }
             }
         }
 

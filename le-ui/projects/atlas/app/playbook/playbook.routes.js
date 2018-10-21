@@ -643,7 +643,7 @@ angular
                 },
                 WizardControlsOptions: function() {
                     return { 
-                        backState: 'home.playbook', 
+                        backState: '', 
                         nextState: 'home.playbook' 
                     };
                 },
@@ -787,7 +787,7 @@ angular
                             nextFn: function(nextState) {
                                 $state.go(nextState); // we don't want to auto save anymore, but go to the next step (it'll be saved in the store)
                             },
-                            progressDisabled: true 
+                            progressDisabled: true,
                         },{
                             label: 'Suppressions', // Targets
                             state: 'crmselection.targets', 
@@ -804,17 +804,13 @@ angular
                             },
                             progressDisabled: true
                         }
-                        //{ label: 'CRM System', state: 'rating.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true }.
-                        // { label: 'Targets', state: 'rating.crmselection.targets', progressDisabled: true },
-                        // { label: 'Insights', state: 'rating.crmselection.targets.insights', progressDisabled: true},
-                        // { label: 'Preview', state: 'rating.crmselection.targets.insights.preview', progressDisabled: true },
-                        // { label: 'Launch', state: 'rating.crmselection.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch, progressDisabled: true }
                     ];
                 },
                 WizardControlsOptions: function() {
                     return { 
-                        backState: 'home.playbook', 
-                        nextState: 'home.playbook' 
+                        backState: '', // '' takes you to lastFrom // 'home.playbook', 
+                        nextState: 'home.playbook',
+                        preventUnload: true
                     };
                 },
                 WizardHeaderTitle: function($stateParams) { 

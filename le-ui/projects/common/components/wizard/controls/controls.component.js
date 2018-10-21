@@ -1,9 +1,13 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, $transitions, $rootScope,
-    ResourceUtility, WizardProgressItems, WizardProgressContext, WizardControlsOptions, WizardValidationStore/*, ImportWizardService, ImportWizardStore*/
+    $state, $stateParams, $scope, $timeout, $transitions, $rootScope, $window, 
+    ResourceUtility, WizardProgressItems, WizardProgressContext, WizardControlsOptions, WizardValidationStore, StateHistory
+    // ImportWizardService, ImportWizardStore
 ) {
-    var vm = this;
+    var vm = this,
+        ImportWizardControls = this,
+        preventUnload = WizardControlsOptions.preventUnload;
+
 
     angular.extend(vm, {
         itemMap: {},
@@ -34,6 +38,40 @@ angular.module('common.wizard.controls', [])
         vm.nextDisabled = false;
     });
 
+    if(preventUnload) {
+        /**
+         * leaving this here because it's interesting
+         */
+        // if($window.performance) {
+        //     console.log('$window.performance', $window.performance.navigation.type, {
+        //         TYPE_RELOAD: $window.performance.navigation.TYPE_RELOAD, 
+        //         TYPE_NAVIGATE: $window.performance.navigation.TYPE_NAVIGATE, 
+        //         TYPE_BACK_FORWARD: $window.performance.navigation.TYPE_BACK_FORWARD
+        //     });
+        // }
+        
+        /**
+         * if there is no last from we assume the user has manually reloaded the page
+         * so we give them a chance to no reload and if they proceed anyway we take
+         * them back to the play list
+         */
+        if(!StateHistory.lastFrom().name) {
+            $state.go('home');
+        } else {
+            $window.onbeforeunload = function(event) {
+                var warning = 'Changes you made may not be saved. Are you sure?'; // this is just the default messaging which can't be changed in chrome anyway
+                event.returnValue = warning;
+                return warning;
+            };
+        }
+    }
+
+    $scope.$on("$destroy", function(){
+        $window.onbeforeunload = null;
+    });
+
+    this.historyStore = this.historyStore || {};
+
     vm.init = function() {
         vm.rootState = vm.next + '.';
         vm.setButtons();
@@ -51,6 +89,30 @@ angular.module('common.wizard.controls', [])
             vm.itemMap[key] = item;
         });
         vm.item = vm.itemMap[vm.toState.name];
+
+        ImportWizardControls.setHistoryStore($state.current.name);
+    }
+
+    this.setHistoryStore = function(path) {
+        var prevState = vm.prev,
+            prevParams = null;
+        if(StateHistory.lastFrom() && StateHistory.lastFrom().name && !vm.prev) {
+            var prevState = StateHistory.lastFrom(),
+                prevParams = StateHistory.lastFromParams();
+        }
+        ImportWizardControls.historyStore[path] = {
+            prev: {
+                state: prevState, 
+                params: prevParams
+            }
+        };
+    }
+
+    this.getHistoryStore = function(path) {
+        if(path) {
+            return ImportWizardControls.historyStore[path];
+        }
+        return ImportWizardControls.historyStore;
     }
 
     vm.click = function(isPrev) {
@@ -66,7 +128,15 @@ angular.module('common.wizard.controls', [])
             } else {
                 vm.go(vm.prev, isPrev);
             }
-
+        } else if (isPrev && !vm.prev) {
+            var storedState = ImportWizardControls.getHistoryStore($state.current.name);
+            if(storedState && storedState.prev && storedState.prev.state) {
+                $state.go(storedState.prev.state, storedState.prev.params);
+            } else {
+                //window.history.back();
+                //$state.go($uiRouter.globals.$current.parent.navigable);
+                $state.go('home');
+            }
         } else if (!isPrev && !vm.next) {
             if (WizardControlsOptions.nextState) {
                 var params = WizardControlsOptions.nextStateParams
