@@ -123,10 +123,10 @@ public class EMRScalingRunnable implements Runnable {
         } else {
             int availableMB = metrics.availableMB;
             int availableVCores = metrics.availableVirtualCores;
-            if (availableMB <= MAX_AVAIL_MEM_MB) {
+            if (availableMB < MAX_AVAIL_MEM_MB) {
                 log.debug(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
                 scale = false;
-            } else if (availableVCores <= MAX_AVAIL_VCORES) {
+            } else if (availableVCores < MAX_AVAIL_VCORES) {
                 log.debug(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
                 scale = false;
             } else {
