@@ -189,9 +189,9 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
             { 10L, "m.com", "DUNS03", "Name03", "Country03", null, "Y", "Y", "0", ">10,000", 100, 100000000L,
                     "DUNS03" }, //
             // Compare original LE_IS_PRIMARY_DOMAIN flag
-            { 11L, "f.com", "DUNS04", "Name04", "Country04", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L,
+            { 11L, "f.com", "DUNS04", "Name04", "Country04", null, "N", "Y", "0", ">10,000", 100, 100000000L,
                     "DUNS04" }, //
-            { 12L, "g.com", "DUNS04", "Name04", "Country04", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+            { 12L, "g.com", "DUNS04", "Name04", "Country04", null, "Y", "Y", "0", ">10,000", 100, 100000000L,
                     "DUNS04" }, //
             // Domain-only entries
             { 13L, "h.com", null, "NameNull", "CountryNull", "Orb", "N", "Y", "0", ">10,000", 100, 100000000L, null }, //
@@ -201,7 +201,7 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
             { 16L, null, "DUNS06", "Name06", "Country06", null, "Y", "Y", "0", ">10,000", 100, 100000000L, "DUNS05" }, //
 
             /* Test markOOBEntries */
-            // LatticeID = 12 will be removed
+            // LatticeID = 112 will be removed
             { 112L, null, "46", "Name46", "Country46", "DnB", "N", "Y", "1", ">10,000", 100, 100000000L, "46" }, //
             { 113L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, 100000000L, "47" }, //
     };
@@ -229,51 +229,53 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
         log.info("Start to verify records one by one.");
 
         // LatticeID, Domain, DUNS, Name, Country, DomainSource, LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_LOCATION, OUT_OF_BUSINESS_INDICATOR, 
-        // LE_EMPLOYEE_RANGE, LE_NUMBER_OF_LOCATIONS, SALES_VOLUME_US_DOLLARS, LE_PRIMARY_DUNS
+        // LE_EMPLOYEE_RANGE, LE_NUMBER_OF_LOCATIONS, SALES_VOLUME_US_DOLLARS,
+        // LE_PRIMARY_DUNS, LE_OperationLogs
         Object[][] expectedData = {
                 /* Test markLessPopularDomainsForDUNS */
                 // Compare golden domain source
                 { 1L, "a.com", "DUNS01", "Name01", "Country01", "DnB", "N", "Y", "0", ">10,000", 100, 100, 100000000L,
-                        "DUNS01" },
+                        "DUNS01", null },
                 { 2L, "b.com", "DUNS01", "Name01", "Country01", "DnB", "N", "Y", "0", ">10,000", 100, 10, 100000000L,
-                        "DUNS01" },
+                        "DUNS01", null },
                 { 3L, "c.com", "DUNS01", "Name01", "Country01", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS01" },
+                        "DUNS01", "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=DomainSource=Orb]" },
                 // Compare alexa rank
                 { 4L, "a.com", "DUNS02", "Name02", "Country02", "DnB", "N", "Y", "0", ">10,000", 100, 100, 100000000L,
-                        "DUNS02" },
+                        "DUNS02", null },
                 { 5L, "b.com", "DUNS02", "Name02", "Country02", "DnB", "Y", "Y", "0", ">10,000", 100, 10, 100000000L,
-                        "DUNS02" },
+                        "DUNS02", "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Lowest AlexaRank=10]" },
                 { 6L, "c.com", "DUNS02", "Name02", "Country02", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS02" },
+                        "DUNS02", null },
                 // Compare domain source priority
                 { 7L, "j.com", "DUNS03", "Name03", "Country03", "RTS", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS03" },
+                        "DUNS03", null },
                 { 8L, "k.com", "DUNS03", "Name03", "Country03", "HG", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS03" },
+                        "DUNS03", "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=DomainSource=HG]" },
                 { 9L, "l.com", "DUNS03", "Name03", "Country03", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS03" },
+                        "DUNS03", null },
                 { 10L, "m.com", "DUNS03", "Name03", "Country03", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS03" },
+                        "DUNS03", null },
                 // Compare original LE_IS_PRIMARY_DOMAIN flag
-                { 11L, "f.com", "DUNS04", "Name04", "Country04", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS04" },
-                { 12L, "g.com", "DUNS04", "Name04", "Country04", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS04" },
+                { 11L, "f.com", "DUNS04", "Name04", "Country04", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS04", null },
+                { 12L, "g.com", "DUNS04", "Name04", "Country04", null, "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS04",
+                        "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Original LE_IS_PRIMARY_DOMAIN=Y]" },
                 // Domain-only entries
                 { 13L, "h.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        null },
+                        null, "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Only one domain]" },
                 { 14L, "i.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        null },
+                        null, "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Only one domain]" },
                 // DUNS-only entries
                 { 15L, null, "DUNS05", "Name05", "Country05", "Orb", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS04" },
+                        "DUNS04", null },
                 { 16L, null, "DUNS06", "Name06", "Country06", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "DUNS05" },
+                        "DUNS05", null },
 
                 /* Test markOOBEntries */
                 { 113L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L,
-                        "47" },
+                        "47", null },
 
         };
 
@@ -292,6 +294,7 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
                 "AlexaRank", //
                 "SALES_VOLUME_US_DOLLARS", //
                 "LE_PRIMARY_DUNS", //
+                "LE_OperationLogs", //
         };
 
         Map<Long, Map<String, Object>> latticeIdToData = new HashMap<>();

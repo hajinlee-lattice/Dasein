@@ -7,9 +7,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.util.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.collect.Lists;
+import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -42,10 +47,12 @@ import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
+import com.latticeengines.dataflow.runtime.cascading.AppendOptLogFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddRandomIntFunction;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -254,6 +261,45 @@ public class Node {
     @SuppressWarnings("rawtypes")
     public Node groupByAndAggregate(FieldList groupByFieldList, Aggregator aggregator,
             List<FieldMetadata> fieldMetadatas) {
+        return new Node(
+                builder.register(
+                        new GroupByAndAggOperation(opInput(identifier), groupByFieldList, aggregator, fieldMetadatas)),
+                builder);
+    }
+
+    /**
+     * USE CASE: Group by and aggregate. Able to track dataflow operation logs
+     * if withOptLog = true and in output there will be an additional field
+     * LE_OperationLogs
+     * 
+     * ATTENTION: If withOptLog = true, in Aggregator constructor, should call
+     * BaseAggregator(fieldDeclaration, withOptLog) to pass in withOptLog as
+     * true too.
+     * 
+     * @param groupByFieldList:
+     *            fields to group by
+     * @param aggregator
+     * @param fieldMetadatas:
+     *            field metadatas for output
+     * @param withOptLog:
+     *            whether to append field LE_OperationLogs in output fields
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndAggregate(@NotNull FieldList groupByFieldList, @NotNull Aggregator aggregator,
+            @NotNull List<FieldMetadata> fieldMetadatas, boolean withOptLog) {
+        Preconditions.checkNotNull(groupByFieldList);
+        Preconditions.checkNotNull(aggregator);
+        Preconditions.checkState(CollectionUtils.isNotEmpty(fieldMetadatas));
+
+        if (withOptLog) {
+            if (this.getSchema(OperationLogUtils.DEFAULT_FIELD_NAME) == null //
+                    && !fieldMetadatas.stream()
+                            .anyMatch(fm -> OperationLogUtils.DEFAULT_FIELD_NAME.equals(fm.getFieldName()))) {
+                fieldMetadatas.add(new FieldMetadata(OperationLogUtils.DEFAULT_FIELD_NAME, String.class));
+            }
+        }
+
         return new Node(
                 builder.register(
                         new GroupByAndAggOperation(opInput(identifier), groupByFieldList, aggregator, fieldMetadatas)),
@@ -535,6 +581,46 @@ public class Node {
     public Node count(String outputFieldName) {
         Node node = addColumnWithFixedValue(outputFieldName, 1, Integer.class);
         return node.multiTierAggregate(AggregationType.SUM_LONG, outputFieldName);
+    }
+
+    /**
+     * Append pre-defined log message to LE_OperationLog field.
+     * 
+     * If LE_OperationLog does not exist yet, create it
+     * 
+     * @param log:
+     *            pre-defined log message
+     * @return
+     */
+    public Node appendOptLog(@NotEmptyString String log) {
+        Preconditions.checkArgument(StringUtils.isNotEmpty(log), "Log should be non-empty string");
+        Node node = this;
+        if (this.getSchema(OperationLogUtils.DEFAULT_FIELD_NAME) == null) {
+            node = node.addColumnWithFixedValue(OperationLogUtils.DEFAULT_FIELD_NAME, null, String.class);
+        }
+        AppendOptLogFunction func = new AppendOptLogFunction(new Fields(node.getFieldNamesArray()), log, null);
+        return node.apply(func, new FieldList(node.getFieldNames()), node.getSchema(),
+                new FieldList(node.getFieldNames()), Fields.REPLACE);
+    }
+
+    /**
+     * Copy log from fromField and append to LE_OperationLog field.
+     * 
+     * If LE_OperationLog does not exist yet, create it
+     * 
+     * @param fromField
+     * @return
+     */
+    public Node appendOptLogFromField(@NotEmptyString String fromField) {
+        Preconditions.checkArgument(StringUtils.isNotEmpty(fromField), "Log should be non-empty string");
+        Preconditions.checkNotNull(this.getSchema(fromField), "Cannot find field metadata for " + fromField);
+        Node node = this;
+        if (this.getSchema(OperationLogUtils.DEFAULT_FIELD_NAME) == null) {
+            node = node.addColumnWithFixedValue(OperationLogUtils.DEFAULT_FIELD_NAME, null, String.class);
+        }
+        AppendOptLogFunction func = new AppendOptLogFunction(new Fields(node.getFieldNamesArray()), null, fromField);
+        return node.apply(func, new FieldList(node.getFieldNames()), node.getSchema(),
+                new FieldList(node.getFieldNames()), Fields.REPLACE);
     }
 
     private Node multiTierAggregate(AggregationType type, String targetFieldName) {

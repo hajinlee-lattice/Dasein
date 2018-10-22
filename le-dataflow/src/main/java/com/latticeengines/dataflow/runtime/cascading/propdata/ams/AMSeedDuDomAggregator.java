@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.ams;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;

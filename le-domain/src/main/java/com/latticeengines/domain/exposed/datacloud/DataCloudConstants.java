@@ -49,7 +49,6 @@ public final class DataCloudConstants {
     public static final String ATTR_ALEXA_RANK = "AlexaRank";
     public static final String ATTR_ALEXA_DOMAIN = "URL";
     public static final String ATTR_LAST_UPLOAD_DATE = "LE_Last_Upload_Date";
-    public static final String ATTR_BUILD_LOGS = "LDC_BuildLogs";
 
     public static final String AMS_ATTR_DOMAIN = "Domain";
     public static final String AMS_ATTR_DUNS = "DUNS";
@@ -124,8 +123,19 @@ public final class DataCloudConstants {
 
     public static final String TRANSACTION_STANDARDIZER = "transactionStandardizer";
 
+    /***********************************
+     * Transformer names for AM rebuild
+     ***********************************/
+    public static final String TRANSFORMER_AMSEED_MARKER = "AMSeedMarkerTransformer";
+
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 
     public static final String ATTR_VAL_Y = "Y";
     public static final String ATTR_VAL_N = "N";
+    public static final String ATTR_VAL_YES = "Yes";
+    public static final String ATTR_VAL_NO = "No";
+    public static final String ATTR_VAL_1 = "1";
+    public static final String ATTR_VAL_0 = "0";
+    public static final String ATTR_VAL_TRUE = "True";
+    public static final String ATTR_VAL_FALSE = "False";
 }

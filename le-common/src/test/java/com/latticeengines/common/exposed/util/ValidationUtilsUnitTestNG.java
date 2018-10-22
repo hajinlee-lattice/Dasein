@@ -1,13 +1,14 @@
 package com.latticeengines.common.exposed.util;
 
-import com.latticeengines.common.exposed.validator.BeanValidationService;
-import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.validator.BeanValidationService;
+import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
 
 public class ValidationUtilsUnitTestNG {
 
@@ -45,6 +46,7 @@ public class ValidationUtilsUnitTestNG {
                 { new TestObj(null), "Object with null value", false, IllegalArgumentException.class },
                 { new TestObj(""), "Object with empty string", false, IllegalArgumentException.class },
                 // valid objects
+                { new TestObj("   "), "Object with valid string", true, null },
                 { new TestObj("Lattice"), "Object with valid string", true, null },
                 { new TestObj("Lattice Engines"), "Object with valid string", true, null },
         };

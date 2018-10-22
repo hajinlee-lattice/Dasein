@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.util.RuleBasedComparator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 import cascading.operation.Aggregator;
@@ -60,14 +61,14 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferNotEmptyString(
+        res = RuleBasedComparator.preferNonBlankString(
                 arguments.getString(DataCloudConstants.AMS_ATTR_DUNS), context.duns);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = RuleBasedComparator.preferNotEmptyString(
+        res = RuleBasedComparator.preferNonBlankString(
                 arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duDuns);
         if (res > 0) {
             return update(context, arguments);
@@ -84,7 +85,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         }
         res = RuleBasedComparator.preferEqualStrings(
                 arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
-                arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duns, context.duDuns);
+                arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duns, context.duDuns, false, true);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
@@ -92,7 +93,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         }
         res = RuleBasedComparator.preferEqualStrings(
                 arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
-                arguments.getString(DataCloudConstants.ATTR_GU_DUNS), context.duns, context.guDuns);
+                arguments.getString(DataCloudConstants.ATTR_GU_DUNS), context.duns, context.guDuns, false, true);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
@@ -114,7 +115,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         }
         res = RuleBasedComparator.preferExpectedString(
                 arguments.getString(DataCloudConstants.AMS_ATTR_COUNTRY), context.country,
-                LocationUtils.USA);
+                LocationUtils.USA, false);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {

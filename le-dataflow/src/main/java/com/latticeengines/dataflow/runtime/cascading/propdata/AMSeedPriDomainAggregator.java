@@ -6,6 +6,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.util.RuleBasedComparator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 import cascading.operation.Aggregator;

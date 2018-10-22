@@ -3,6 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
@@ -15,10 +17,22 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         extends BaseOperation<T> implements Aggregator<T> {
     private static final long serialVersionUID = 1L;
     protected Map<String, Integer> namePositionMap;
+    protected boolean withOptLog = false;
+    protected int logFieldIdx;
 
     public BaseAggregator(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
+    }
+
+    public BaseAggregator(Fields fieldDeclaration, boolean withOptLog) {
+        super(withOptLog ? fieldDeclaration.append(new Fields(OperationLogUtils.DEFAULT_FIELD_NAME))
+                : fieldDeclaration);
+        this.namePositionMap = getPositionMap(this.fieldDeclaration);
+        this.withOptLog = withOptLog;
+        if (withOptLog) {
+            logFieldIdx = namePositionMap.get(OperationLogUtils.DEFAULT_FIELD_NAME);
+        }
     }
 
     protected Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
