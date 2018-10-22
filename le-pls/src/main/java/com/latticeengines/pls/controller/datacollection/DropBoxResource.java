@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
@@ -82,8 +83,7 @@ public class DropBoxResource {
 
         if (dropBoxSummary.getAccessKeyId() == null) {
             GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
-            request.setAccessMode(dropBoxSummary.getAccessMode());
-            request.setExistingUser(dropBoxSummary.getLatticeUser());
+            request.setAccessMode(DropBoxAccessMode.LatticeUser);
             log.info(String.format("Grant access via request %s for tenant %s.", request.toString(), customerSpace));
             GrantDropBoxAccessResponse response = dropBoxProxy.grantAccess(customerSpace, request);
             sendEmailToAdmins(dropBoxSummary, response);
