@@ -68,7 +68,7 @@ public class EMRScalingRunnable implements Runnable {
 
     @Override
     public void run() {
-        log.info("Start processing emr cluster " + emrCluster);
+        log.debug("Start processing emr cluster " + emrCluster);
 
         try {
             RetryTemplate retry = RetryUtils.getRetryTemplate(5);
@@ -87,7 +87,7 @@ public class EMRScalingRunnable implements Runnable {
             scaleDown();
         }
 
-        log.info("Finished processing emr cluster " + emrCluster);
+        log.debug("Finished processing emr cluster " + emrCluster);
     }
 
     private boolean needToScaleUp() {
@@ -105,7 +105,7 @@ public class EMRScalingRunnable implements Runnable {
             log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
             scale = true;
         } else {
-            log.info(noScaleLogPrefix + "have enough available mb " + availableMB //
+            log.debug(noScaleLogPrefix + "have enough available mb " + availableMB //
                     + " and vcores " + availableVCores);
             scale = false;
         }
@@ -124,10 +124,10 @@ public class EMRScalingRunnable implements Runnable {
             int availableMB = metrics.availableMB;
             int availableVCores = metrics.availableVirtualCores;
             if (availableMB <= MAX_AVAIL_MEM_MB) {
-                log.info(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
+                log.debug(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
                 scale = false;
             } else if (availableVCores <= MAX_AVAIL_VCORES) {
-                log.info(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
+                log.debug(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
                 scale = false;
             } else {
                 log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
@@ -179,6 +179,7 @@ public class EMRScalingRunnable implements Runnable {
         return retry.execute(context -> {
             try {
                 try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+                    yarnClient.start();
                     List<ApplicationReport> apps = yarnClient.getApplications(PENDING_APP_STATES);
                     Pair<Integer, Integer> reqs = Pair.of(0, 0);
                     if (CollectionUtils.isNotEmpty(apps)) {
