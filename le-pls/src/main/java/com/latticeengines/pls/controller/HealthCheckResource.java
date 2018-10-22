@@ -30,6 +30,9 @@ public class HealthCheckResource {
     @Inject
     private VersionManager versionManager;
 
+    @Value("${aws.emr.cluster}")
+    private String clusterName;
+
     @Value("${pls.current.stack:}")
     private String currentStack;
 
@@ -58,6 +61,7 @@ public class HealthCheckResource {
         response.put("CurrentStack", currentStack);
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
         response.put("SvnRevision", versionManager.getCurrentSvnRevision());
+        response.put("EMRCluster", clusterName);
         return response;
     }
 }
