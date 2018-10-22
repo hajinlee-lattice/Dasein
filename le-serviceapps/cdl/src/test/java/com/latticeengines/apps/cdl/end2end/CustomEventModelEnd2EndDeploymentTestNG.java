@@ -43,7 +43,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
+    private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLM1537559519785";
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -112,7 +112,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         testType = CustomEventModelingType.CDL;
         bootstrap(testType);
         runCustomEventModel(testType);
-        runCustomEventRemodel(testType);
+        // runCustomEventRemodel(testType);
     }
 
     private void runCustomEventModel(CustomEventModelingType type) {
