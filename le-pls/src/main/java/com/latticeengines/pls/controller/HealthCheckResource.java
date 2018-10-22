@@ -61,7 +61,7 @@ public class HealthCheckResource {
         response.put("CurrentStack", currentStack);
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
         response.put("SvnRevision", versionManager.getCurrentSvnRevision());
-        response.put("EMRCluster", clusterName);
+        response.put("HadoopCluster", clusterName);
         return response;
     }
 }
