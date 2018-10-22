@@ -8,7 +8,6 @@ import java.util.Map;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -20,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
-@Component
 public class ProductUtilsUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(ProductUtilsUnitTestNG.class);
     private YarnConfiguration yarnConfiguration;
@@ -206,9 +204,9 @@ public class ProductUtilsUnitTestNG {
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku2"));
         Assert.assertTrue(productMap.keySet().contains("Analytic__Bundle #1"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Detergent category #1"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance category #2"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance family #2"));
+        Assert.assertTrue(productMap.keySet().contains("Spending__Detergent category #1__Detergent category #1____"));
+        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
+        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance family #2__Appliance category #2__Appliance family #2__"));
 
         productMap = ProductUtils.getProductMapByCompositeId(loadedProductList, ProductStatus.Active.name());
         Assert.assertEquals(productMap.size(), 7);
@@ -221,8 +219,8 @@ public class ProductUtilsUnitTestNG {
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku2"));
         Assert.assertTrue(productMap.keySet().contains("Analytic__Bundle #1"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance category #2"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance family #2"));
+        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
+        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance family #2__Appliance category #2__Appliance family #2__"));
         Assert.assertFalse(productMap.keySet().contains("Spending__Detergent category #1"));
 
         productMap = ProductUtils.getProductMapByCompositeId(loadedProductList, ProductStatus.Obsolete.name());
