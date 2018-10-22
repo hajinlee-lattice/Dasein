@@ -8,7 +8,8 @@ export default class CellTools extends Component {
   }
 
   render() {
-    return <li className="le-cell-tools">{this.props.children}</li>;
+    let cellClasses = `le-cell-tools ${this.props.classes ? this.props.classes : ''}`;
+    return <li className={cellClasses}>{this.props.children}</li>;
   }
 }
 

@@ -33,8 +33,9 @@
       & > .le-table-cell > .le-cell-tools > *{
         color: $pearl-white;
       }
-      & > .le-table-cell > .le-cell-tools > .borders-over > div{
+      & > .le-table-cell > .le-cell-tools > .templates-controlls > .border-over {
         border: 1px solid $pearl-white;
+        color: $pearl-white;
       }
     }
     // .le-table-row-no-select{

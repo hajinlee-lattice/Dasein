@@ -28,7 +28,6 @@ $font-size: 12px;
   height: 100%;
   padding: 0.5em;
 
-  
   .le-table-row {
     @include display-grid;
     @include columns-grid;
@@ -46,7 +45,7 @@ $font-size: 12px;
       pointer-events: none;
     }
   }
-  .le-table-body{
+  .le-table-body {
     background: none;
     min-height: 0px;
   }
@@ -64,10 +63,10 @@ $font-size: 12px;
     background-color: $blue-text;
   }
 
-  .le-table-body:hover{
+  .le-table-body:hover {
     background: none;
   }
-  .le-table-row-no-select{
+  .le-table-row-no-select {
     background-color: $pearl-white;
     color: $black;
     opacity: 1;
@@ -159,6 +158,9 @@ $font-size: 12px;
     }
     .le-cell-tools {
       display: flex;
+      flex: 1;
+      width: 100%;
+      flex-wrap: nowrap;
     }
   }
 

@@ -21,35 +21,35 @@ export const getData = api => {
         object: "Account",
         location: "s3://lattice-engines.com/home/customer/adobe/accounts",
         edited: "n/a",
-        actions: true
+        templateCreated: false
       },
       {
         name: "Test456 Contacts",
         object: "Contacts",
         location: "path/to/the/file",
         edited: "n/a",
-        actions: true
+        templateCreated: true
       },
       {
         name: "Test123",
         object: "Products Purchases",
         location: "path/to/the/file",
         edited: "n/a",
-        actions: true
+        templateCreated: false
       },
       {
         name: "Test123",
         object: "Product Bundles",
         location: "path/to/the/file",
         edited: "n/a",
-        actions: true
+        templateCreated: false
       },
       {
         name: "Test123",
         object: "Product Hierarchy",
         location: "path/to/the/file",
         edited: "n/a",
-        actions: true
+        templateCreated: false
       }
     ];
   } else {

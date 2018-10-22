@@ -1,5 +1,8 @@
 import React, { Component } from "../../../../common/react-vendor";
 import Aux from "../../../../common/widgets/hoc/_Aux";
+import { getAngularState } from "../react/states";
+import { getData } from "../../../../common/widgets/table/table-utils";
+
 import LeGridList from "../../../../common/widgets/table/table";
 import LeGridRow from "../../../../common/widgets/table/table-row";
 import LeGridCell from "../../../../common/widgets/table/table-cell";
@@ -8,15 +11,19 @@ import CellTools from "../../../../common/widgets/table/cell-tools";
 import LeTableHeader from "../../../../common/widgets/table/table-header";
 import LeTableBody from "../../../../common/widgets/table/table-body";
 
-import { getData } from "../../../../common/widgets/table/table-utils";
-import LeLink from "../../../../common/widgets/link/le-link";
-import { getAngularState } from "../react/states";
+import './templates-row-controlles.scss';
+
+import TemplatesRowControlles, {
+  CREATE_TEMPLATE,
+  EDIT_TEMPLATE,
+  IMPORT_DATA
+} from "./templates-row-controlles";
 import "./templates.scss";
 
 export default class GridContainer extends Component {
   constructor(props) {
     super(props);
-    this.createTemplateHandler = this.createTemplateHandler.bind(this);
+    this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
     this.state = {
       forceReload: false,
       showEmpty: false,
@@ -25,9 +32,9 @@ export default class GridContainer extends Component {
     };
   }
 
-  createTemplateHandler(type) {
+  createTemplate(response) {
     let entity = "";
-    switch (type) {
+    switch (response.type) {
       case "Account": {
         entity = "accounts";
         break;
@@ -51,6 +58,19 @@ export default class GridContainer extends Component {
     }
     let goTo = `home.import.entry.${entity}`;
     getAngularState().go(goTo);
+  }
+
+  actionCallbackHandler(response) {
+    switch (response.action) {
+      case CREATE_TEMPLATE:
+        this.createTemplate(response);
+        break;
+
+      case EDIT_TEMPLATE:
+        break;
+      case IMPORT_DATA:
+        break;
+    }
   }
   getHeader() {}
   getRows() {
@@ -91,17 +111,11 @@ export default class GridContainer extends Component {
             </LeGridCell>
 
             <LeGridCell colName="actions" colSpan="3">
-              <CellTools>
-                <LeLink
-                  config={{
-                    label: "Create Template",
-                    classes: "borders-over le-blu-link",
-                    name: ""
-                  }}
-                  callback={() => {
-                    this.createTemplateHandler(row.object);
-                  }}
-                />
+              <CellTools classes="templates-controlls">
+              <TemplatesRowControlles
+                rowData={row}
+                callback={this.actionCallbackHandler}
+              />
               </CellTools>
             </LeGridCell>
           </LeGridRow>

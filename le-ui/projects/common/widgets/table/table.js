@@ -42,7 +42,7 @@ export default class LeGridList extends Component {
 }
 
 LeGridList.propTypes = {
-  name: PropTypes.name,
+  name: PropTypes.string,
   showEmpty: PropTypes.bool,
   showLoading: PropTypes.bool
 };
