@@ -18,16 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.AMLookupRebuild;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedPriActFix;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.datacloud.etl.transformation.service.impl.TransformationServiceImplTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedSecondDomainCleanupConfig;
@@ -36,24 +32,22 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 
-public class AMLookupRebuildPipelineTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AMLookupRebuildPipelineTestNG.class);
 
     private static final String LATTICEID = "LatticeID";
     private static final String KEY = "Key";
 
     @Autowired
-    AccountMasterLookup source;
+    private AccountMasterLookup source;
 
     private String ams = "AccountMasterSeed";
     private String orbSecDom = "OrbCacheSeedSecondaryDomain";
     private String targetSeedName = "AccountMasterSeedCleaned";
     private String targetSourceName = "AccountMasterLookup";
-
-    ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "pipeline1")
     public void testTransformation() {
@@ -68,81 +62,67 @@ public class AMLookupRebuildPipelineTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            configuration.setName("AccountMasterLookupRebuild");
-            configuration.setVersion(targetVersion);
+        configuration.setName("AccountMasterLookupRebuild");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(ams);
-            baseSources.add(orbSecDom);
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(AMSeedSecondDomainCleanup.TRANSFORMER_NAME);
-            String confParamStr1 = getCleanupTransformerConfig();
-            step1.setConfiguration(confParamStr1);
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<String>();
+        baseSources.add(ams);
+        baseSources.add(orbSecDom);
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(AMSeedSecondDomainCleanup.TRANSFORMER_NAME);
+        String confParamStr1 = getCleanupTransformerConfig();
+        step1.setConfiguration(confParamStr1);
 
-            // -----------
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
-            step2.setTransformer(AMSeedPriActFix.TRANSFORMER_NAME);
-            step2.setConfiguration("{}");
-            step2.setTargetSource(targetSeedName);
+        // -----------
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.add(0);
+        step2.setInputSteps(inputSteps);
+        step2.setTransformer(AMSeedPriActFix.TRANSFORMER_NAME);
+        step2.setConfiguration("{}");
+        step2.setTargetSource(targetSeedName);
 
-            // -----------
-            TransformationStepConfig step3 = new TransformationStepConfig();
-            baseSources = new ArrayList<String>();
-            baseSources.add(targetSeedName);
-            baseSources.add(orbSecDom);
-            step3.setBaseSources(baseSources);
-            step3.setTransformer(AMLookupRebuild.TRANSFORMER_NAME);
-            step3.setTargetSource(targetSourceName);
-            String confParamStr3 = getAMLookupRebuildConfig();
-            step3.setConfiguration(confParamStr3);
+        // -----------
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        baseSources = new ArrayList<String>();
+        baseSources.add(targetSeedName);
+        baseSources.add(orbSecDom);
+        step3.setBaseSources(baseSources);
+        step3.setTransformer(AMLookupRebuild.TRANSFORMER_NAME);
+        step3.setTargetSource(targetSourceName);
+        String confParamStr3 = getAMLookupRebuildConfig();
+        step3.setConfiguration(confParamStr3);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
-            steps.add(step3);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step1);
+        steps.add(step2);
+        steps.add(step3);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getCleanupTransformerConfig() throws JsonProcessingException {
+    private String getCleanupTransformerConfig() {
         AMSeedSecondDomainCleanupConfig conf = new AMSeedSecondDomainCleanupConfig();
         conf.setDomainField("Domain");
         conf.setSecondDomainField("SecondaryDomain");
         conf.setDunsField("DUNS");
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getAMLookupRebuildConfig() throws JsonProcessingException {
+    private String getAMLookupRebuildConfig() {
         AccountMasterLookupRebuildConfig conf = new AccountMasterLookupRebuildConfig();
         conf.setCountryField("Country");
         conf.setDomainField("Domain");
@@ -155,14 +135,7 @@ public class AMLookupRebuildPipelineTestNG
         conf.setLatticeIdField("LatticeID");
         conf.setStateField("State");
         conf.setZipCodeField("ZipCode");
-        return om.writeValueAsString(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return JsonUtils.serialize(conf);
     }
 
     private void prepareAMSeed() {
