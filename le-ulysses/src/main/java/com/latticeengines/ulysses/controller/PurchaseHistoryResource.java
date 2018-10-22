@@ -1,7 +1,6 @@
 package com.latticeengines.ulysses.controller;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -94,8 +93,7 @@ public class PurchaseHistoryResource {
                 BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
                 LocalDate startDate;
                 if (businessCalendar == null) {
-                    // Use Natural calendar since no Business calender has been
-                    // defined
+                    // Use Natural calendar since no Business calender has been defined
                     startDate = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
                 } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
                     startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
@@ -104,8 +102,8 @@ public class PurchaseHistoryResource {
                     startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
                             DEFAULT_START_YEAR);
                 }
-                return new FrontEndResponse<>(Collections.singletonList(purchaseHistoryDanteFormatter.format(crmAccountId,
-                        startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
+                return new FrontEndResponse<>(Collections.singletonList(purchaseHistoryDanteFormatter.format(
+                        crmAccountId, startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
             }
         } catch (LedpException le) {
             log.error("Failed to populate purchase history for account: " + crmAccountId, le);
@@ -143,15 +141,19 @@ public class PurchaseHistoryResource {
 
             BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
             LocalDate startDate;
-            if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+            if (businessCalendar == null) {
+                // Use Natural calendar since no Business calender has been defined
+                startDate = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
+            } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
                 startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
                         DEFAULT_START_YEAR);
             } else {
                 startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
                         DEFAULT_START_YEAR);
             }
-            return new FrontEndResponse<>(Collections.singletonList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment,
-                    startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
+            return new FrontEndResponse<>(
+                    Collections.singletonList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment, startDate,
+                            JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
         } catch (LedpException le) {
             log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, le);
             return new FrontEndResponse<>(le.getErrorDetails());
