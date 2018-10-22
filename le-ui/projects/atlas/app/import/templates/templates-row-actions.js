@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from "../../../../common/react-vendor";
-// import "./templates-row-controlles.scss";
 import LeLink from "../../../../common/widgets/link/le-link";
 import Aux from "../../../../common/widgets/hoc/_Aux";
 

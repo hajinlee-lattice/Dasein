@@ -11,13 +11,12 @@ import CellTools from "../../../../common/widgets/table/cell-tools";
 import LeTableHeader from "../../../../common/widgets/table/table-header";
 import LeTableBody from "../../../../common/widgets/table/table-body";
 
-import './templates-row-controlles.scss';
 
-import TemplatesRowControlles, {
+import TemplatesRowActions, {
   CREATE_TEMPLATE,
   EDIT_TEMPLATE,
   IMPORT_DATA
-} from "./templates-row-controlles";
+} from "./templates-row-actions";
 import "./templates.scss";
 
 export default class GridContainer extends Component {
@@ -112,7 +111,7 @@ export default class GridContainer extends Component {
 
             <LeGridCell colName="actions" colSpan="3">
               <CellTools classes="templates-controlls">
-              <TemplatesRowControlles
+              <TemplatesRowActions
                 rowData={row}
                 callback={this.actionCallbackHandler}
               />
