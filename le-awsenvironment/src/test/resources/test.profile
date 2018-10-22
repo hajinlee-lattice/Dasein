@@ -1,1 +1,0 @@
-INSIDE_TOMCAT=abc.com
