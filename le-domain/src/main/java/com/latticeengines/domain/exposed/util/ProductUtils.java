@@ -32,20 +32,21 @@ public class ProductUtils {
     private static final Logger log = LoggerFactory.getLogger(ProductUtils.class);
     private static String FILE_NAME = "Products.avro";
 
-    public static String getCompositeId(String type, String id, String name, String bundle) {
+    public static String getCompositeId(String type, String id, String name, String bundle,
+                                        String category, String family, String line) {
         if (StringUtils.isBlank(type)) {
             return null;
         } else {
             try {
                 switch (ProductType.valueOf(type)) {
                     case Bundle:
-                        return type + "__" + id + "__" + bundle;
+                        return StringUtils.join(new String[] { type, id, bundle }, "__");
                     case Hierarchy:
-                        return type + "__" + id;
+                        return StringUtils.join(new String[] { type, id }, "__");
                     case Analytic:
-                        return type + "__" + name;
+                        return StringUtils.join(new String[] { type, name }, "__");
                     case Spending:
-                        return type + "__" + name;
+                        return StringUtils.join(new String[] { type, name, category, family, line }, "__");
                     case Raw:
                     default:
                         return null;
@@ -218,7 +219,8 @@ public class ProductUtils {
 
         productList.forEach(product -> {
             String compositeId = getCompositeId(product.getProductType(), product.getProductId(),
-                    product.getProductName(), product.getProductBundle());
+                    product.getProductName(), product.getProductBundle(),
+                    product.getProductCategory(), product.getProductFamily(), product.getProductLine());
             productMap.put(compositeId, product);
         });
 

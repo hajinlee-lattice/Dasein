@@ -44,8 +44,8 @@ public class MergeProductFunctionalTestNG {
                     null, null, null, "c3", null, null, null, null, null),
             new Product("1", null, null, null,
                     null, "l1", "f1", "c1", null, null, null, null, null),
-            new Product("3", null, null, null,
-                    null, null, null, "c3", null, null, null, null, null),
+            new Product("4", null, null, null,
+                    null, "l1", "f2", "c2", null, null, null, null, null),
             new Product("3", null, null, null,
                     null, null, null, "c3", null, null, null, null, null));
 
@@ -69,9 +69,9 @@ public class MergeProductFunctionalTestNG {
 
     private final List<Product> invalidHierarchySameSkusDifferentLines = Arrays.asList(
             new Product("1", null, null, null,
-                    null, "l1", null, "c1", null, null, null, null, null),
+                    null, "l1", "f1", "c1", null, null, null, null, null),
             new Product("1", null, null, null,
-                    null, "l2", null, "c1", null, null, null, null, null));
+                    null, "l2", "f1", "c1", null, null, null, null, null));
 
     private final List<Product> invalidHierarchySameSkusDifferentFamilies = Arrays.asList(
             new Product("1", null, null, null,
@@ -183,7 +183,7 @@ public class MergeProductFunctionalTestNG {
     public void testMergeHierarchyProducts() {
         List<Product> result = new ArrayList<>();
         int nInvalids = step.mergeProducts(hierarchyProducts, currentProductList, result, report);
-        Assert.assertEquals(result.size(), 9);
+        Assert.assertEquals(result.size(), 11);
         result.forEach(product -> {
             Assert.assertEquals(product.getProductStatus(), ProductStatus.Active.name());
             Assert.assertTrue(product.getProductType().equals(ProductType.Spending.name()) ||
@@ -201,6 +201,7 @@ public class MergeProductFunctionalTestNG {
         spendingProduct = getProductById(result, product.getProductCategoryId());
         Assert.assertNotNull(spendingProduct);
         Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+
         product = getProductById(result, "2");
         Assert.assertNotNull(product);
         Assert.assertEquals(product.getProductType(), ProductType.Hierarchy.name());
@@ -211,6 +212,7 @@ public class MergeProductFunctionalTestNG {
         spendingProduct = getProductById(result, product.getProductCategoryId());
         Assert.assertNotNull(spendingProduct);
         Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+
         product = getProductById(result, "3");
         Assert.assertNotNull(product);
         Assert.assertEquals(product.getProductType(), ProductType.Hierarchy.name());
@@ -220,16 +222,29 @@ public class MergeProductFunctionalTestNG {
         Assert.assertNotNull(spendingProduct);
         Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
 
+        product = getProductById(result, "4");
+        Assert.assertNotNull(product);
+        Assert.assertEquals(product.getProductType(), ProductType.Hierarchy.name());
+        spendingProduct = getProductById(result, product.getProductLineId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+        spendingProduct = getProductById(result, product.getProductFamilyId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+        spendingProduct = getProductById(result, product.getProductCategoryId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+
         step.updateMergeReport(hierarchyProducts.size(), nInvalids, result.size(), step.countProducts(result));
         Assert.assertEquals(report.get("Merged_NumInputProducts"), hierarchyProducts.size());
         Assert.assertEquals(report.get("Merged_NumInvalidProducts"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 9);
-        Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 11);
+        Assert.assertEquals(report.get("Merged_NumProductIds"), 4);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 4);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
+        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 7);
         Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 0);
     }
 
@@ -269,26 +284,26 @@ public class MergeProductFunctionalTestNG {
         step.updateMergeReport(hierarchyProducts.size(), nInvalids, result.size(), step.countProducts(result));
         Assert.assertEquals(report.get("Merged_NumInputProducts"), hierarchyProducts.size());
         Assert.assertEquals(report.get("Merged_NumInvalidProducts"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 9);
-        Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 11);
+        Assert.assertEquals(report.get("Merged_NumProductIds"), 4);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
+        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 7);
         Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 0);
 
         result2.clear();
         nInvalids = step.mergeProducts(hierarchyProducts, result, result2, report);
-        Assert.assertEquals(result2.size(), 9);
+        Assert.assertEquals(result2.size(), 11);
         step.updateMergeReport(hierarchyProducts.size(), nInvalids, result2.size(), step.countProducts(result2));
         Assert.assertEquals(report.get("Merged_NumInputProducts"), hierarchyProducts.size());
         Assert.assertEquals(report.get("Merged_NumInvalidProducts"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 9);
-        Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 11);
+        Assert.assertEquals(report.get("Merged_NumProductIds"), 4);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
+        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 7);
         Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 0);
     }
 
@@ -376,13 +391,13 @@ public class MergeProductFunctionalTestNG {
         step.updateMergeReport(hierarchyProducts.size(), nInvalids, result.size(), step.countProducts(result));
         Assert.assertEquals(report.get("Merged_NumInputProducts"), hierarchyProducts.size());
         Assert.assertEquals(report.get("Merged_NumInvalidProducts"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 9);
-        Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 11);
+        Assert.assertEquals(report.get("Merged_NumProductIds"), 4);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 4);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
+        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 7);
         Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 0);
 
         List<Product> copyOfGroup = copyProductList(hierarchyProducts);
@@ -391,7 +406,7 @@ public class MergeProductFunctionalTestNG {
         copyOfGroup.get(1).setProductCategory("c4");
         List<Product> result2 = new ArrayList<>();
         nInvalids = step.mergeProducts(copyOfGroup, result, result2, report);
-        Assert.assertEquals(result2.size(), 10);
+        Assert.assertEquals(result2.size(), 13);
 
         int nActive = 0;
         int nObsolete = 0;
@@ -432,20 +447,30 @@ public class MergeProductFunctionalTestNG {
 
         List<Product> c2Products = getProductByCategory(result2, "c2");
         Assert.assertNotNull(c2Products);
-        Assert.assertEquals(c2Products.size(), 1);
-        Assert.assertEquals(c2Products.get(0).getProductStatus(), ProductStatus.Obsolete.name());
+        Assert.assertEquals(c2Products.size(), 4);
+        nActive = nObsolete = 0;
+        for (Product p : c2Products) {
+            if (p.getProductStatus().equals(ProductStatus.Active.name())) {
+                nActive ++;
+            }
+            if (p.getProductStatus().equals(ProductStatus.Obsolete.name())) {
+                nObsolete ++;
+            }
+        }
+        Assert.assertEquals(nActive, 4);
+        Assert.assertEquals(nObsolete, 0);
 
         step.updateMergeReport(hierarchyProducts.size(), nInvalids, result2.size(), step.countProducts(result2));
         Assert.assertEquals(report.get("Merged_NumInputProducts"), hierarchyProducts.size());
         Assert.assertEquals(report.get("Merged_NumInvalidProducts"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 10);
-        Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 13);
+        Assert.assertEquals(report.get("Merged_NumProductIds"), 4);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 3);
-        Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 4);
+        Assert.assertEquals(report.get("Merged_NumProductCategories"), 4);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
-        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
-        Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 1);
+        Assert.assertEquals(report.get("Merged_NumProductSpendings"), 9);
+        Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 0);
     }
 
     @Test(groups = "functional")
@@ -453,6 +478,7 @@ public class MergeProductFunctionalTestNG {
         List<Product> result = new ArrayList<>();
         try {
             step.mergeProducts(invalidHierarchyHavingLineButNoFamily, currentProductList, result, report);
+            Assert.fail("Should not reach.");
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
@@ -463,6 +489,7 @@ public class MergeProductFunctionalTestNG {
         List<Product> result = new ArrayList<>();
         try {
             step.mergeProducts(invalidHierarchySameSkusDifferentCategories, currentProductList, result, report);
+            Assert.fail("Should not reach.");
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
@@ -473,6 +500,7 @@ public class MergeProductFunctionalTestNG {
         List<Product> result = new ArrayList<>();
         try {
             step.mergeProducts(invalidHierarchySameSkusDifferentFamilies, currentProductList, result, report);
+            Assert.fail("Should not reach.");
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
@@ -483,6 +511,7 @@ public class MergeProductFunctionalTestNG {
         List<Product> result = new ArrayList<>();
         try {
             step.mergeProducts(invalidHierarchySameSkusDifferentLines, currentProductList, result, report);
+            Assert.fail("Should not reach.");
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
@@ -493,6 +522,7 @@ public class MergeProductFunctionalTestNG {
         List<Product> result = new ArrayList<>();
         try {
             step.mergeProducts(productGroup5, currentProductList, result, report);
+            Assert.fail("Should not reach.");
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
