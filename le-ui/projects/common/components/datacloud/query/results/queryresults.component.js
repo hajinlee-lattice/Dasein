@@ -529,9 +529,14 @@ angular.module('common.datacloud.query.results', [
             });
             sections.selected += parseInt(count.count);
         }
+
         sections.suppressed = parseInt(sections.total - sections.selected);
 
         sections.launched = (vm.topNCount && opts.suppressed ? vm.topNCount : (sections.selected > sections.suppressed ? sections.selected - sections.suppressed : sections.selected));
+
+        if(vm.topNClicked) {
+            sections.suppressed = Math.max(sections.total - vm.topNCount, sections.suppressed) || 0;
+        }
 
         sections.contacts = vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 

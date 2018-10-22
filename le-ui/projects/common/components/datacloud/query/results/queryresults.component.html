@@ -46,7 +46,7 @@
                 type="checkbox"
                 ng-model="topNCount"
                 id="topNCount"
-                ng-change="topNCount && vm.updateTopNCount()" 
+                ng-change="topNCount && vm.updateTopNCount(); vm.topNClicked = !vm.topNClicked" 
                 ng-click="vm.makeRecommendationCounts({suppressed: topNCount})" />
             <label for="topNCount">Limit to only </label>
             <input 
