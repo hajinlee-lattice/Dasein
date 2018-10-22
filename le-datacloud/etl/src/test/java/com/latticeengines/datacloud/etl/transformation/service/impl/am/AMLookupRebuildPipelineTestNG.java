@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.am;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -23,14 +24,18 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.AMLookupRebuild;
-import com.latticeengines.datacloud.dataflow.transformation.AMSeedPriActFix;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
+import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedPriActFix;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.TransformationServiceImplTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedSecondDomainCleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 
 
 public class AMLookupRebuildPipelineTestNG
@@ -162,20 +167,25 @@ public class AMLookupRebuildPipelineTestNG
 
     private void prepareAMSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of("LatticeID", Long.class));
-        columns.add(Pair.of("Domain", String.class));
-        columns.add(Pair.of("State", String.class));
-        columns.add(Pair.of("ZipCode", String.class));
-        columns.add(Pair.of("Country", String.class));
-        columns.add(Pair.of("DUNS", String.class));
-        columns.add(Pair.of("LE_IS_PRIMARY_LOCATION", String.class));
-        columns.add(Pair.of("LE_IS_PRIMARY_DOMAIN", String.class));
-        columns.add(Pair.of("LE_PRIMARY_DUNS", String.class));
-        columns.add(Pair.of("GLOBAL_ULTIMATE_DUNS_NUMBER", String.class));
-        columns.add(Pair.of("EMPLOYEES_HERE", Integer.class));
-        columns.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
-        columns.add(Pair.of("IsPrimaryAccount", String.class));
+        columns.add(Pair.of(DataCloudConstants.LATTIC_ID, Long.class));
+        columns.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
+        columns.add(Pair.of(DataCloudConstants.AMS_ATTR_STATE, String.class));
+        columns.add(Pair.of(DataCloudConstants.AMS_ATTR_ZIP, String.class));
+        columns.add(Pair.of(DataCloudConstants.AMS_ATTR_COUNTRY, String.class));
+        columns.add(Pair.of(DataCloudConstants.AMS_ATTR_DUNS, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_LOCATION, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_DU_DUNS, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_GU_DUNS, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_EMPLOYEE_HERE, Integer.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_SALES_VOL_US, Long.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT, String.class));
 
+        // LatticeID, Domain, State, ZipCode, Country, DUNS,
+        // LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_DOMAIN, LE_PRIMARY_DUNS,
+        // GLOBAL_ULTIMATE_DUNS_NUMBER
+        // LE_Is_Primary_Location, EMPLOYEES_HERE, SALES_VOLUME_US_DOLLARS,
+        // IsPrimaryAccount
         Object[][] data = new Object[][] {
                 // all kinds of keys
                 { 1L, "dom1.com", null, null, null, "DUNS1", "Y", "Y", null, "DUNS1", 10000, 10000L, null },
@@ -468,8 +478,75 @@ public class AMLookupRebuildPipelineTestNG
     }
 
     private void verifyAMSeedCleaned(Iterator<GenericRecord> records) {
+        // LatticeID, OperationCodes in LE_OperationLog
+        Object[][] expectedData = new Object[][] { //
+                { 1L, OperationCode.IS_PRIMARY_LOC }, //
+                { 2L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY }, //
+                { 3L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ZIP }, //
+                { 4L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ST }, //
+                { 5L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ZIP,
+                        OperationCode.IS_PRIMARY_ST }, //
+                { 11L, OperationCode.IS_PRIMARY_LOC }, //
+                { 12L, null }, //
+                { 21L, OperationCode.IS_PRIMARY_LOC }, //
+                { 22L, OperationCode.IS_PRIMARY_LOC }, //
+                { 31L, OperationCode.IS_PRIMARY_LOC }, //
+                { 33L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_DOMAIN }, //
+                { 34L, null }, //
+                { 35L, null }, //
+                { 36L, OperationCode.IS_PRIMARY_LOC }, //
+                { 37L, OperationCode.IS_PRIMARY_LOC }, //
+                { 38L, null }, //
+                { 39L, OperationCode.IS_PRIMARY_LOC }, //
+                { 40L, null }, //
+                { 41L, null }, //
+                { 42L, null }, //
+                { 43L, OperationCode.IS_PRIMARY_LOC }, //
+                { 44L, null }, //
+                { 45L, null }, //
+                { 46L, OperationCode.IS_PRIMARY_LOC }, //
+                { 47L, null }, //
+                { 48L, OperationCode.IS_PRIMARY_LOC }, //
+                { 49L, null }, //
+                { 50L, null }, //
+                { 51L, OperationCode.IS_PRIMARY_LOC }, //
+                { 52L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY }, //
+                { 53L, OperationCode.IS_PRIMARY_CTRY }, //
+                { 54L, null }, //
+                { 55L, null }, //
+                { 56L, OperationCode.IS_PRIMARY_LOC }, //
+                { 100L, null }, //
+                { 101L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ZIP,
+                        OperationCode.IS_PRIMARY_ST, OperationCode.IS_PRIMARY_DOMAIN }, //
+                { 1000L, OperationCode.IS_PRIMARY_LOC, OperationCode.NOT_PRIMARY_DOMAIN }, //
+                { 1001L, OperationCode.IS_PRIMARY_LOC, OperationCode.NOT_PRIMARY_DOMAIN }, //
+                { 1002L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_DOMAIN }, //
+                { 1003L, OperationCode.IS_PRIMARY_LOC }, //
+                { 1004L, OperationCode.IS_PRIMARY_LOC }, //
+                { 1005L, OperationCode.IS_PRIMARY_LOC }, //
+                { 1006L, OperationCode.IS_PRIMARY_LOC }, //
+                { 1007L, OperationCode.IS_PRIMARY_LOC }, //
+                { 1008L, OperationCode.IS_PRIMARY_LOC }, //
+        };
+        Map<Long, Object[]> expectedOptLogs = new HashMap<>();
+        for (Object[] data : expectedData) {
+            expectedOptLogs.put((Long) data[0], data);
+        }
         while (records.hasNext()) {
-            log.info(records.next().toString());
+            GenericRecord record = records.next();
+            log.info(record.toString());
+            Object[] expectedOptLog = expectedOptLogs.get(record.get(DataCloudConstants.LATTIC_ID));
+            Assert.assertNotNull(expectedOptLog);
+            if (record.get(OperationLogUtils.DEFAULT_FIELD_NAME) == null) {
+                Assert.assertNull(expectedOptLog[1]);
+            } else {
+                String optLog = record.get(OperationLogUtils.DEFAULT_FIELD_NAME).toString();
+                IntStream.range(1, expectedOptLog.length) //
+                        .parallel() //
+                        .mapToObj(i -> (OperationCode) expectedOptLog[i]) //
+                        .forEach(code -> Assert.assertTrue(optLog.contains(code.name())));
+            }
+
         }
     }
 

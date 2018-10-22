@@ -127,6 +127,7 @@ public final class DataCloudConstants {
      * Transformer names for AM rebuild
      ***********************************/
     public static final String TRANSFORMER_AMSEED_MARKER = "AMSeedMarkerTransformer";
+    public static final String TRANSFORMER_AMSEED_PRIACT_FIX = "AMSeedPriActFixTransformer";
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 

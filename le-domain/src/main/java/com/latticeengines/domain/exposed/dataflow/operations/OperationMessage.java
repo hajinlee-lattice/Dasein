@@ -8,11 +8,30 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
  * to DataCloud
  */
 public class OperationMessage {
-    /*
-     * AccountMasterSeed primary domain selection
-     */
+    // Commonly shared message
+    public static final String HAS_DUNS = "Has Duns";
+    public static final String HAS_DU_DUNS = "Has DuDuns";
+    public static final String IS_DU_DUNS = "DU account with Duns=DUDuns";
+    public static final String IS_GU_DUNS = "GU account with Duns=GUDuns";
+    public static final String RANDOM = "Random selection";
+
+    // AccountMasterSeed primary domain selection
     public static final String ONLY_ONE_DOMAIN = "Only one domain";
-    public static final String DOMAIN_SRC = "DomainSource=";
-    public static final String LOW_ALEXA_RANK = "Lowest AlexaRank=";
-    public static final String ORI_PRIDOM_FLAG = "Original " + DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN + "=";
+    public static final String DOMAIN_SRC = "DomainSource=%s";
+    public static final String LOW_ALEXA_RANK = "Lower AlexaRank=%d";
+    public static final String ORI_PRIDOM_FLAG = "Original " + DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN + "=%s";
+
+    // AccountMasterSeed filter FLAG_DROP_OOB_ENTRY == 0
+    public static final String NON_OOB = "Non-OOB";
+
+    // Primary account marked by manual seed
+    public static final String PRIMARY_ACCOUNT = "Manual seed primary account";
+    public static final String NON_PRIMARY_ACCOUNT = "Not manual seed primary account";
+
+    // AccountMasterSeed primary location selection
+    public static final String LARGER_VAL_WITH_THRES = "Larger %s=%s(>=threshold %s) && gap=%s(>=%s)";
+    public static final String LARGER_VAL = "Larger %s=%s";
+    public static final String ORI_PRILOC_FLAG = "Original " + DataCloudConstants.ATTR_IS_PRIMARY_LOCATION + "=%s";
+    public static final String USA_ACT = "USA account";
+
 }

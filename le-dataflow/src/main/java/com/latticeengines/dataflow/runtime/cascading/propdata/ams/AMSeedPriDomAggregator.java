@@ -94,7 +94,8 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
             res = RuleBasedComparator.preferExpectedString(arguments.getString(domSrcField), context.domSrc,
                     srcPriority, false);
             if (res > 0) {
-                return update(context, arguments, OperationMessage.DOMAIN_SRC + arguments.getString(domSrcField));
+                return update(context, arguments,
+                        String.format(OperationMessage.DOMAIN_SRC, arguments.getString(domSrcField)));
             } else if (res < 0) {
                 return context;
             }
@@ -103,7 +104,7 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
                 context.alexaRank);
         if (res > 0) {
             return update(context, arguments,
-                    OperationMessage.LOW_ALEXA_RANK + ((Integer) arguments.getObject(alexaRankField)));
+                    String.format(OperationMessage.LOW_ALEXA_RANK, ((Integer) arguments.getObject(alexaRankField))));
         } else if (res < 0) {
             return context;
         }
@@ -111,7 +112,8 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
             res = RuleBasedComparator.preferExpectedString(arguments.getString(domSrcField), context.domSrc,
                     srcPriority, false);
             if (res > 0) {
-                return update(context, arguments, OperationMessage.DOMAIN_SRC + arguments.getString(domSrcField));
+                return update(context, arguments,
+                        String.format(OperationMessage.DOMAIN_SRC, arguments.getString(domSrcField)));
             } else if (res < 0) {
                 return context;
             }
@@ -119,7 +121,8 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
         res = RuleBasedComparator.preferExpectedString(arguments.getString(isPriDomField), context.isPriDom,
                 DataCloudConstants.ATTR_VAL_Y, false);
         if (res > 0) {
-            return update(context, arguments, OperationMessage.ORI_PRIDOM_FLAG + arguments.getString(isPriDomField));
+            return update(context, arguments,
+                    String.format(OperationMessage.ORI_PRIDOM_FLAG, arguments.getString(isPriDomField)));
         } else if (res < 0) {
             return context;
         }

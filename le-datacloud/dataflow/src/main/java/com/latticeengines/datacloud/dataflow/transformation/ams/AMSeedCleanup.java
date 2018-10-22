@@ -8,6 +8,9 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationMessage;
 
 @Component(AMSeedCleanup.DATAFLOW_BEAN_NAME)
 public class AMSeedCleanup extends AccountMasterBase<AMSeedMarkerConfig> {
@@ -20,8 +23,10 @@ public class AMSeedCleanup extends AccountMasterBase<AMSeedMarkerConfig> {
         Node node = addSource(parameters.getBaseTables().get(0));
 
         FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY);
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0", fieldList)//
-                .discard(fieldList);
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0", fieldList) //
+                .discard(fieldList) //
+                .appendOptLog(
+                        OperationLogUtils.buildLog(TRANSFORMER_NAME, OperationCode.FILTER, OperationMessage.NON_OOB));
         return node;
     }
 
