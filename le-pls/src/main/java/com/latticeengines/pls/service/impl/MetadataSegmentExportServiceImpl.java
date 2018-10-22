@@ -171,7 +171,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             String fileName) {
         CustomerSpaceHdfsFileDownloader.FileDownloadBuilder builder = new CustomerSpaceHdfsFileDownloader.FileDownloadBuilder();
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName).setImportFromS3Service(importFromS3Service);
+                .setFileName(fileName).setCustomer(MultiTenantContext.getTenant().getId())
+                .setImportFromS3Service(importFromS3Service);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 
