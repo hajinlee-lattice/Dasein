@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.stereotype.Component;
 
 import cascading.tuple.Fields;
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -16,6 +17,7 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculateExpectedRevenueParameters;
 
+@Component("recalculateExpectedRevenue")
 public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<RecalculateExpectedRevenueParameters> {
     @Override
     public Node construct(RecalculateExpectedRevenueParameters parameters) {

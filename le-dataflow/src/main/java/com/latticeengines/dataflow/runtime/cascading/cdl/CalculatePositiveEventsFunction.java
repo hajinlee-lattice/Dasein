@@ -1,6 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.scoringapi.EVFitFunctionParameters;
+import com.latticeengines.domain.exposed.scoringapi.EVScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
@@ -22,16 +24,22 @@ public class CalculatePositiveEventsFunction extends BaseOperation
     private RawScoreToPercentileMapper rawScoreToPercentileMapper;
     private FittedConversionRateCalculator fittedConversionRateCalculator;
 
-    public CalculatePositiveEventsFunction(String totalPositiveEventsFieldName,
-            String avgScoreFieldName, String totalEventFieldName, String scoreDerivationStr,
-            String fitFunctionParamsStr) {
+    public CalculatePositiveEventsFunction(String totalPositiveEventsFieldName, String avgScoreFieldName,
+            String totalEventFieldName, String scoreDerivationStr, String fitFunctionParamsStr, boolean isEV) {
         super(new Fields(totalPositiveEventsFieldName));
         this.avgScoreFieldName = avgScoreFieldName;
         this.totalEventFieldName = totalEventFieldName;
-        this.rawScoreToPercentileMapper = new RawScoreToPercentileMapper(
-                parseScoreDerivation(scoreDerivationStr));
-        this.fittedConversionRateCalculator = getCalculator(
-                parseFitFunctionParams(fitFunctionParamsStr));
+        ScoreDerivation scoreDerivation;
+        FitFunctionParameters fitFunctionParameters;
+        if (isEV) {
+            scoreDerivation = parseEVScoreDerivation(scoreDerivationStr).getEVScoreDerivation();
+            fitFunctionParameters = parseEVFitFunctionParams(fitFunctionParamsStr).getEVParameters();
+        } else {
+            scoreDerivation = parseScoreDerivation(scoreDerivationStr);
+            fitFunctionParameters = parseFitFunctionParams(fitFunctionParamsStr);
+        }
+        this.rawScoreToPercentileMapper = new RawScoreToPercentileMapper(scoreDerivation);
+        this.fittedConversionRateCalculator = getCalculator(fitFunctionParameters);
     }
 
     @Override
@@ -66,6 +74,14 @@ public class CalculatePositiveEventsFunction extends BaseOperation
 
     private ScoreDerivation parseScoreDerivation(String scoreDerivationStr) {
         return JsonUtils.deserialize(scoreDerivationStr, ScoreDerivation.class);
+    }
+
+    private EVFitFunctionParameters parseEVFitFunctionParams(String fitFunctionParamsStr) {
+        return JsonUtils.deserialize(fitFunctionParamsStr, EVFitFunctionParameters.class);
+    }
+
+    private EVScoreDerivation parseEVScoreDerivation(String scoreDerivationStr) {
+        return JsonUtils.deserialize(scoreDerivationStr, EVScoreDerivation.class);
     }
 
 }

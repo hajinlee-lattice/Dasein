@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConfiguration {
 
+    @JsonProperty("isEV")
+    private boolean isEV;
+
     @JsonProperty("eventColumn")
     private String eventColumn;
 
@@ -20,8 +23,12 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
         setBeanName("pivotScoreAndEvent");
     }
 
-    public String getEventColumn() {
-        return eventColumn;
+    public boolean isEV() {
+        return isEV;
+    }
+
+    public void setEV(boolean isEV) {
+        this.isEV = isEV;
     }
 
     public void setEventColumn(String eventColumn) {

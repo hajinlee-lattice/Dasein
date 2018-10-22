@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -24,7 +26,8 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("calculatePredictedRevenuePercentileDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CalculatePredictedRevenuePercentileDataFlow
-    extends RunDataFlow<CalculatePredictedRevenuePercentileDataFlowConfiguration> {
+        extends RunDataFlow<CalculatePredictedRevenuePercentileDataFlowConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(CalculatePredictedRevenuePercentileDataFlow.class);
 
     private static final String modelGuidField = ScoreResultField.ModelId.displayName;
 
@@ -63,6 +66,16 @@ public class CalculatePredictedRevenuePercentileDataFlow
     private Map<String, String> getScoreFieldsMap() {
         Map<String, String> originalScoreFieldsMap;
         originalScoreFieldsMap = new HashMap<>();
+        String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
+        String modelType = getStringValueFromContext(SCORING_MODEL_TYPE);
+        log.info(String.format("modelGuid = %s, modelType = %s", modelGuid, modelType));
+        originalScoreFieldsMap.put(modelGuid, ScoreResultField.PredictedRevenue.displayName);
+        return originalScoreFieldsMap;
+    }
+
+    private Map<String, String> getScoreFieldsMap2() {
+        Map<String, String> originalScoreFieldsMap;
+        originalScoreFieldsMap = new HashMap<>();
         List<RatingModelContainer> containers = getModelContainers();
         containers.forEach(container -> {
             AIModel aiModel = (AIModel) container.getModel();
@@ -82,10 +95,10 @@ public class CalculatePredictedRevenuePercentileDataFlow
             return Collections.emptyList();
         }
         return allContainers.stream() //
-            .filter(container -> {
-                RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                       || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-            }).collect(Collectors.toList());
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }).collect(Collectors.toList());
     }
 }

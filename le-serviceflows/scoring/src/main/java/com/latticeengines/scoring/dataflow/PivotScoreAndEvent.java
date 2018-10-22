@@ -104,8 +104,9 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
     private Node aggregate(Node inputTable, String scoreField) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(
-                new Aggregation(ScoreResultField.Percentile.displayName, BUCKET_TOTAL_EVENTS, AggregationType.COUNT));
+        String percentileScoreField = isEV ? ScoreResultField.ExpectedRevenuePercentile.displayName
+                : ScoreResultField.Percentile.displayName;
+        aggregations.add(new Aggregation(percentileScoreField, BUCKET_TOTAL_EVENTS, AggregationType.COUNT));
         if (useEvent) {
             inputTable = inputTable.apply(String.format("Boolean.TRUE.equals(%s) ? 1 : 0", InterfaceName.Event.name()),
                     new FieldList(InterfaceName.Event.name()), new FieldMetadata("IsPositiveEvent", Integer.class));
@@ -114,14 +115,12 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             aggregations.add(new Aggregation(scoreField, BUCKET_AVG_SCORE, AggregationType.AVG));
             aggregations.add(new Aggregation(scoreField, BUCKET_SUM, AggregationType.SUM));
         }
-        return inputTable.groupBy(
-                new FieldList(ScoreResultField.Percentile.displayName, ScoreResultField.ModelId.displayName),
-                aggregations);
+        Node aggregatedNode = inputTable
+                .groupBy(new FieldList(percentileScoreField, ScoreResultField.ModelId.displayName), aggregations);
+        return aggregatedNode;
     }
 
-    private Node createLift(Node aggregatedNode, Double avgScore,
-                            String scoreDerivation,
-                            String fitFunctionParams) {
+    private Node createLift(Node aggregatedNode, Double avgScore, String scoreDerivation, String fitFunctionParams) {
         if (useEvent) {
             double modelAvgProbability = avgScore;
             String expression = String.format("%s / %f", "ConversionRate", modelAvgProbability);
@@ -138,46 +137,46 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
                     new FieldList(BUCKET_AVG_SCORE, MODEL_AVG), new FieldMetadata(BUCKET_LIFT, Double.class));
 
             if (!isEV) {
-                aggregatedNode = getTotalPositiveEvents(aggregatedNode, scoreDerivation, fitFunctionParams);
+                aggregatedNode = getTotalPositiveEvents(aggregatedNode, scoreDerivation, fitFunctionParams, isEV);
+                aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
+                        ScoreResultField.Percentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS,
+                        BUCKET_LIFT);
             } else {
                 String expression = String.format("%1$s == 0 ? 0 : (%1$s * %2$s / %3$s)", BUCKET_TOTAL_EVENTS,
                         BUCKET_SUM, MODEL_SUM);
                 aggregatedNode = aggregatedNode.apply(expression,
                         new FieldList(BUCKET_SUM, BUCKET_TOTAL_EVENTS, MODEL_SUM),
                         new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
+                aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
+                        ScoreResultField.ExpectedRevenuePercentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS,
+                        BUCKET_TOTAL_EVENTS, BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
             }
         }
-        aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
-                ScoreResultField.Percentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS,
-                BUCKET_LIFT);
         return aggregatedNode;
     }
 
-    private Node getTotalPositiveEvents(Node aggregatedNode,
-                                        String scoreDerivation,
-                                        String fitFunctionParams) {
+    private Node getTotalPositiveEvents(Node aggregatedNode, String scoreDerivation, String fitFunctionParams,
+            boolean isEV) {
         if (scoreDerivation == null || fitFunctionParams == null) {
             return getTotalPositiveEventsUsingAvgScore(aggregatedNode);
         } else {
-            return getTotalPositiveEventsUsingFitFunction(aggregatedNode, scoreDerivation, fitFunctionParams);
+            return getTotalPositiveEventsUsingFitFunction(aggregatedNode, scoreDerivation, fitFunctionParams, isEV);
         }
     }
 
-    private Node getTotalPositiveEventsUsingFitFunction(Node aggregatedNode,
-                                                        String scoreDerivation,
-                                                        String fitFunctionParams) {
+    private Node getTotalPositiveEventsUsingFitFunction(Node aggregatedNode, String scoreDerivation,
+            String fitFunctionParams, boolean isEV) {
         return aggregatedNode.apply(
-            new CalculatePositiveEventsFunction(BUCKET_TOTAL_POSITIVE_EVENTS,
-                                                BUCKET_AVG_SCORE, BUCKET_TOTAL_EVENTS, scoreDerivation, fitFunctionParams),
-            new FieldList(BUCKET_AVG_SCORE, BUCKET_TOTAL_EVENTS),
-            new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
+                new CalculatePositiveEventsFunction(BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_AVG_SCORE, BUCKET_TOTAL_EVENTS,
+                        scoreDerivation, fitFunctionParams, isEV),
+                new FieldList(BUCKET_AVG_SCORE, BUCKET_TOTAL_EVENTS),
+                new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
     }
 
     private Node getTotalPositiveEventsUsingAvgScore(Node aggregatedNode) {
-        String expression = String.format("%1$s == 0 ? 0 : (%2$s * %1$s)", BUCKET_TOTAL_EVENTS,
-                                          BUCKET_AVG_SCORE);
+        String expression = String.format("%1$s == 0 ? 0 : (%2$s * %1$s)", BUCKET_TOTAL_EVENTS, BUCKET_AVG_SCORE);
         aggregatedNode = aggregatedNode.apply(expression, new FieldList(BUCKET_AVG_SCORE, BUCKET_TOTAL_EVENTS),
-                                              new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
+                new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
         return aggregatedNode;
     }
 

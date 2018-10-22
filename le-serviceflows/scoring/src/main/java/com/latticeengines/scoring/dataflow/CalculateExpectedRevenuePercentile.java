@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -26,10 +29,13 @@ import cascading.tuple.Fields;
 public class CalculateExpectedRevenuePercentile
         extends TypesafeDataFlowBuilder<CalculateExpectedRevenuePercentileParameters> {
 
+    public static final Logger log = LoggerFactory.getLogger(CalculateExpectedRevenuePercentile.class);
+
     private static final String SCORE_COUNT_FIELD_NAME = ScoreResultField.RawScore.displayName + "_count";
 
     @Override
     public Node construct(CalculateExpectedRevenuePercentileParameters parameters) {
+        log.info(String.format("CalculateExpectedRevenuePercentileParameters = %s", JsonUtils.serialize(parameters)));
 
         Node inputTable = addSource(parameters.getInputTableName());
         String percentileFieldName = parameters.getPercentileFieldName();

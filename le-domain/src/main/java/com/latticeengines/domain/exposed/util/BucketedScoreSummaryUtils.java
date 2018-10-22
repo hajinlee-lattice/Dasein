@@ -16,18 +16,21 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 public class BucketedScoreSummaryUtils {
 
     private static final String SCORE = "Score";
+    private static final String EXPECTED_REVENUE_SCORE = "ExpectedRevenuePercentile";
     private static final String TOTAL_EVENTS = "TotalEvents";
     private static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
     private static final int MIN_SCORE = 5;
     private static final int MAX_SCORE = 99;
 
-    public static BucketedScoreSummary generateBucketedScoreSummary(
-            List<GenericRecord> pivotedRecords) {
+    public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords) {
+        return generateBucketedScoreSummary(pivotedRecords, false);
+    }
+
+    public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords, boolean isEV) {
         int cumulativeNumLeads = 0;
         double cumulativeNumConverted = 0;
-        pivotedRecords = combineNullAndMinScoreRecord(pivotedRecords);
-        pivotedRecords
-                .sort(Comparator.comparingDouble(g -> Double.valueOf(g.get(SCORE).toString())));
+        pivotedRecords = combineNullAndMinScoreRecord(pivotedRecords, isEV);
+        pivotedRecords.sort(Comparator.comparingDouble(g -> Double.valueOf(g.get(scoreColumn(isEV)).toString())));
         int idx = pivotedRecords.size() - 1;
         int currentScore = MAX_SCORE;
 
@@ -39,19 +42,21 @@ public class BucketedScoreSummaryUtils {
             }
             GenericRecord pivotedRecord = pivotedRecords.get(idx);
 
-            if (pivotedRecord != null && Double.valueOf(pivotedRecord.get(SCORE).toString())
-                    .intValue() == currentScore) {
+            if (pivotedRecord != null
+                    && Double.valueOf(pivotedRecord.get(scoreColumn(isEV)).toString()).intValue() == currentScore) {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
-                        Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
+                        Double.valueOf(pivotedRecord.get(scoreColumn(isEV)).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()),
-                        cumulativeNumLeads, cumulativeNumConverted);
+                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()), cumulativeNumLeads,
+                        cumulativeNumConverted, isEV, //
+                        isEV ? Double.valueOf(pivotedRecord.get("BucketAverageScore").toString()).doubleValue() : 0,
+                        isEV ? Double.valueOf(pivotedRecord.get("BucketSum").toString()).doubleValue() : 0);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
                 cumulativeNumConverted += (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS);
                 idx--;
             } else {
-                bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0,
-                        cumulativeNumLeads, cumulativeNumConverted);
+                bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
+                        cumulativeNumConverted);
             }
             currentScore--;
         }
@@ -67,24 +72,20 @@ public class BucketedScoreSummaryUtils {
         bucketedScoreSummary.setOverallLift(totalLift);
 
         for (int i = bucketedScoreSummary.getBarLifts().length; i > 0; i--) {
-            int totalLeadsInBar = bucketedScores[i * 3 + 1].getNumLeads()
-                    + bucketedScores[i * 3 + 2].getNumLeads()
+            int totalLeadsInBar = bucketedScores[i * 3 + 1].getNumLeads() + bucketedScores[i * 3 + 2].getNumLeads()
                     + bucketedScores[i * 3 + 3].getNumLeads();
             double totalLeadsConvertedInBar = bucketedScores[i * 3 + 1].getNumConverted()
-                    + bucketedScores[i * 3 + 2].getNumConverted()
-                    + bucketedScores[i * 3 + 3].getNumConverted();
+                    + bucketedScores[i * 3 + 2].getNumConverted() + bucketedScores[i * 3 + 3].getNumConverted();
             if (totalLeadsInBar == 0) {
                 bucketedScoreSummary.getBarLifts()[32 - i] = 0;
             } else {
-                bucketedScoreSummary.getBarLifts()[32
-                        - i] = (totalLeadsConvertedInBar / totalLeadsInBar) / totalLift;
+                bucketedScoreSummary.getBarLifts()[32 - i] = (totalLeadsConvertedInBar / totalLeadsInBar) / totalLift;
             }
         }
         return bucketedScoreSummary;
     }
 
-    private static List<GenericRecord> combineNullAndMinScoreRecord(
-            List<GenericRecord> pivotedRecords) {
+    private static List<GenericRecord> combineNullAndMinScoreRecord(List<GenericRecord> pivotedRecords, boolean isEV) {
 
         Double totalNullEvents = 0.;
         Double totalNullPositiveEvents = 0.;
@@ -93,7 +94,7 @@ public class BucketedScoreSummaryUtils {
         int currentMinScore = MAX_SCORE;
 
         for (GenericRecord record : pivotedRecords) {
-            if (record.get(SCORE) == null) {
+            if (record.get(scoreColumn(isEV)) == null) {
                 Double nullEvents = record.get(TOTAL_EVENTS) == null ? 0.
                         : Double.valueOf(record.get(TOTAL_EVENTS).toString());
                 Double nullPositiveEvents = record.get(TOTAL_POSITIVE_EVENTS) == null ? 0.
@@ -102,7 +103,7 @@ public class BucketedScoreSummaryUtils {
                 totalNullPositiveEvents += nullPositiveEvents;
                 hasNullScoreRecord = true;
             } else {
-                int score = Double.valueOf(record.get(SCORE).toString()).intValue();
+                int score = Double.valueOf(record.get(scoreColumn(isEV)).toString()).intValue();
                 if (score <= currentMinScore) {
                     minScoreRecord = record;
                     currentMinScore = score;
@@ -120,7 +121,7 @@ public class BucketedScoreSummaryUtils {
             minScoreRecord.put(TOTAL_POSITIVE_EVENTS, minTotalPositiveEvents);
         }
 
-        return pivotedRecords.stream().filter(record -> record.get(SCORE) != null)
+        return pivotedRecords.stream().filter(record -> record.get(scoreColumn(isEV)) != null)
                 .collect(Collectors.toList());
     }
 
@@ -135,13 +136,12 @@ public class BucketedScoreSummaryUtils {
                 lowerBonds.add(bucketMetadata.getRightBoundScore());
             }
         }
-        if (CollectionUtils.isEmpty(lowerBonds)
-                || lowerBonds.size() + 1 != bucketMetadataList.size()) {
+        if (CollectionUtils.isEmpty(lowerBonds) || lowerBonds.size() + 1 != bucketMetadataList.size()) {
             throw new RuntimeException("Not enough lower bonds");
         }
         List<BucketedScore> boundaries = new ArrayList<>();
-        boundaries.add(new BucketedScore(0, 0, 0, scoreSummary.getTotalNumLeads(),
-                scoreSummary.getTotalNumConverted()));
+        boundaries
+                .add(new BucketedScore(0, 0, 0, scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted()));
         for (BucketedScore bucketedScore : scoreSummary.getBucketedScores()) {
             if (bucketedScore != null) {
                 if (lowerBonds.contains(bucketedScore.getScore())) {
@@ -151,8 +151,7 @@ public class BucketedScoreSummaryUtils {
         }
         boundaries.add(new BucketedScore(100, 0, 0, 0, 0));
 
-        double overallConversion = scoreSummary.getTotalNumConverted()
-                / scoreSummary.getTotalNumLeads();
+        double overallConversion = scoreSummary.getTotalNumConverted() / scoreSummary.getTotalNumLeads();
         for (int i = 0; i < bucketMetadataList.size(); i++) {
             BucketedScore lowerBond = boundaries.get(i);
             BucketedScore upperBond = boundaries.get(i + 1);
@@ -162,8 +161,7 @@ public class BucketedScoreSummaryUtils {
             if (scoreSummary.getTotalNumConverted() == 0) {
                 lift = 0.0D;
             } else {
-                double totolConverted = lowerBond.getLeftNumConverted()
-                        + lowerBond.getNumConverted();
+                double totolConverted = lowerBond.getLeftNumConverted() + lowerBond.getNumConverted();
                 totolConverted -= upperBond.getLeftNumConverted() + upperBond.getNumConverted();
                 double conversionRate = totolLeads == 0 ? 0 : totolConverted / totolLeads;
                 lift = conversionRate / overallConversion;
@@ -176,8 +174,7 @@ public class BucketedScoreSummaryUtils {
     }
 
     // sort bucket metadata by lower bond score asc
-    public static List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata,
-            boolean ascendingScore) {
+    public static List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata, boolean ascendingScore) {
         if (CollectionUtils.isNotEmpty(bucketMetadata)) {
             bucketMetadata.sort(Comparator.comparingInt(BucketMetadata::getRightBoundScore));
             if (!ascendingScore) {
@@ -187,4 +184,7 @@ public class BucketedScoreSummaryUtils {
         return bucketMetadata;
     }
 
+    private static String scoreColumn(boolean isEV) {
+        return isEV ? EXPECTED_REVENUE_SCORE : SCORE;
+    }
 }

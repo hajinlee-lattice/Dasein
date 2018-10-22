@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -17,14 +19,15 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculateExpectedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("calculateExpectedRevenuePercentileDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CalculateExpectedRevenuePercentileDataFlow extends
-    RunDataFlow<CalculateExpectedRevenuePercentileDataFlowConfiguration> {
+public class CalculateExpectedRevenuePercentileDataFlow
+        extends RunDataFlow<CalculateExpectedRevenuePercentileDataFlowConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(CalculateExpectedRevenuePercentileDataFlow.class);
 
     private static final String modelGuidField = ScoreResultField.ModelId.displayName;
 
@@ -46,7 +49,7 @@ public class CalculateExpectedRevenuePercentileDataFlow extends
     private void preDataFlow() {
         String inputTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
 
-        CalculatePredictedRevenuePercentileParameters params = new CalculatePredictedRevenuePercentileParameters();
+        CalculateExpectedRevenuePercentileParameters params = new CalculateExpectedRevenuePercentileParameters();
         params.setInputTableName(inputTableName);
         params.setPercentileFieldName(ScoreResultField.ExpectedRevenuePercentile.displayName);
         params.setModelGuidField(modelGuidField);
@@ -61,6 +64,16 @@ public class CalculateExpectedRevenuePercentileDataFlow extends
     }
 
     private Map<String, String> getScoreFieldsMap() {
+        Map<String, String> originalScoreFieldsMap;
+        originalScoreFieldsMap = new HashMap<>();
+        String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
+        String modelType = getStringValueFromContext(SCORING_MODEL_TYPE);
+        log.info(String.format("modelGuid = %s, modelType = %s", modelGuid, modelType));
+        originalScoreFieldsMap.put(modelGuid, ScoreResultField.ExpectedRevenue.displayName);
+        return originalScoreFieldsMap;
+    }
+
+    private Map<String, String> getScoreFieldsMap2() {
         Map<String, String> originalScoreFieldsMap;
         originalScoreFieldsMap = new HashMap<>();
         List<RatingModelContainer> containers = getModelContainers();
@@ -82,10 +95,10 @@ public class CalculateExpectedRevenuePercentileDataFlow extends
             return Collections.emptyList();
         }
         return allContainers.stream() //
-            .filter(container -> {
-                RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                       || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-            }).collect(Collectors.toList());
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }).collect(Collectors.toList());
     }
 }

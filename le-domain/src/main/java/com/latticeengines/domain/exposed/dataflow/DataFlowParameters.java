@@ -33,11 +33,14 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.dataflow.DedupEve
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.QuotaFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineFilterTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculateExpectedRevenueParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
@@ -59,6 +62,9 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
         @JsonSubTypes.Type(value = PivotScoreAndEventParameters.class, name = "pivotScoreAndEventParameters"), //
         @JsonSubTypes.Type(value = CdlPivotScoreAndEventParameters.class, name = "cdlPivotScoreAndEventParameters"), //
         @JsonSubTypes.Type(value = RecalculatePercentileScoreParameters.class, name = "recalculatePercentileScoreParameters"), //
+        @JsonSubTypes.Type(value = RecalculateExpectedRevenueParameters.class, name = "recalculateExpectedRevenueParameters"), //
+        @JsonSubTypes.Type(value = CalculatePredictedRevenuePercentileParameters.class, name = "calculatePredictedRevenuePercentileParameters"), //
+        @JsonSubTypes.Type(value = CalculateExpectedRevenuePercentileParameters.class, name = "calculateExpectedRevenuePercentileParameters"), //
         @JsonSubTypes.Type(value = ComputeLiftParameters.class, name = "computeLiftParameters"), //
         @JsonSubTypes.Type(value = MatchCdlAccountParameters.class, name = "matchCdlAccountParameters"), //
         @JsonSubTypes.Type(value = MatchCdlSplitParameters.class, name = "MatchCdlSplitParameters"), //

@@ -12,8 +12,11 @@ import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
 import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
+import com.latticeengines.scoring.workflow.steps.CalculateExpectedRevenuePercentileDataFlow;
+import com.latticeengines.scoring.workflow.steps.CalculatePredictedRevenuePercentileDataFlow;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
+import com.latticeengines.scoring.workflow.steps.RecalculateExpectedRevenueDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -25,8 +28,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("generateAIRatingWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateAIRatingWorkflow
-        extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
+public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
 
     @Inject
     private CreateScoringTargetTable createScoringTargetTable;
@@ -47,6 +49,15 @@ public class GenerateAIRatingWorkflow
     private RecalculatePercentileScoreDataFlow recalculatePercentileScore;
 
     @Inject
+    private RecalculateExpectedRevenueDataFlow recalculateExpectedRevenueDataFlow;
+
+    @Inject
+    private CalculatePredictedRevenuePercentileDataFlow calculatePredictedRevenuePercentileDataFlow;
+
+    @Inject
+    private CalculateExpectedRevenuePercentileDataFlow calculateExpectedRevenuePercentileDataFlow;
+
+    @Inject
     private ScoreAggregateFlow scoreAggregate;
 
     @Inject
@@ -60,17 +71,23 @@ public class GenerateAIRatingWorkflow
         WorkflowBuilder builder = new WorkflowBuilder(name(), config);
         boolean isLPI = CustomEventModelingType.LPI.equals(config.getCustomEventModelingType());
         if (!isLPI) {
-            builder.next(createScoringTargetTable) //
+            builder //
+                    .next(createScoringTargetTable) //
                     .next(createCdlEventTable); //
         }
         builder.next(matchDataCloud) //
                 .next(addStandardAttributes) //
-                .next(scoreEventTable);
+                .next(scoreEventTable); //
         if (!isLPI) {
-            builder.next(recalculatePercentileScore) //
-                    .next(scoreAggregate);
+            builder //
+                    .next(recalculatePercentileScore) //
+                    .next(recalculateExpectedRevenueDataFlow) //
+                    .next(calculatePredictedRevenuePercentileDataFlow) //
+                    .next(calculateExpectedRevenuePercentileDataFlow) //
+                    .next(scoreAggregate); //
         }
-        return builder.next(combineInputTableWithScore) //
+        return builder //
+                .next(combineInputTableWithScore) //
                 .next(pivotScoreAndEvent) //
                 .build();
     }

@@ -21,9 +21,12 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttr
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculateExpectedRevenuePercentileDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculatePredictedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculateExpectedRevenueDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -51,7 +54,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
     }
 
     public static class Builder {
-
+        private boolean isEV = false;
         private GenerateAIRatingWorkflowConfiguration configuration = new GenerateAIRatingWorkflowConfiguration();
 
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
@@ -61,6 +64,9 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private RecalculatePercentileScoreDataFlowConfiguration recalculatePercentile = new RecalculatePercentileScoreDataFlowConfiguration();
+        private RecalculateExpectedRevenueDataFlowConfiguration recalculateExpectedRevenue = new RecalculateExpectedRevenueDataFlowConfiguration();
+        private CalculatePredictedRevenuePercentileDataFlowConfiguration calculatePredictedRevenuePercentile = new CalculatePredictedRevenuePercentileDataFlowConfiguration();
+        private CalculateExpectedRevenuePercentileDataFlowConfiguration calculateExpectedRevenuePercentile = new CalculateExpectedRevenuePercentileDataFlowConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
@@ -74,6 +80,9 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             match.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
             recalculatePercentile.setCustomerSpace(customerSpace);
+            recalculateExpectedRevenue.setCustomerSpace(customerSpace);
+            calculatePredictedRevenuePercentile.setCustomerSpace(customerSpace);
+            calculateExpectedRevenuePercentile.setCustomerSpace(customerSpace);
             scoreAgg.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             computeLift.setCustomerSpace(customerSpace);
@@ -88,6 +97,9 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             match.microServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             recalculatePercentile.setMicroServiceHostPort(microServiceHostPort);
+            recalculateExpectedRevenue.setMicroServiceHostPort(microServiceHostPort);
+            calculatePredictedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
+            calculateExpectedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
             scoreAgg.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
@@ -162,6 +174,12 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder setEV(boolean isEV) {
+            this.isEV = isEV;
+            pivotScoreAndEvent.setEV(isEV);
+            return this;
+        }
+
         public Builder setUseScorederivation(boolean useScorederivation) {
             score.setUseScorederivation(useScorederivation);
             return this;
@@ -174,8 +192,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder inputTableName(String tableName) {
             match.matchInputTableName(tableName);
-            combineInputWithScores
-                    .setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
 
@@ -210,14 +227,22 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             setCdlEventTableConfig();
             setMatchConfig();
             setAddStandardAttributesConfig();
-            configuration.setContainerConfiguration("generateAIRatingWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            if (!isEV) {
+                recalculateExpectedRevenue.setSkipStep(true);
+                calculatePredictedRevenuePercentile.setSkipStep(true);
+                calculateExpectedRevenuePercentile.setSkipStep(true);
+            }
+            configuration.setContainerConfiguration("generateAIRatingWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
             configuration.add(cdlEventTable);
             configuration.add(addStandardAttributes);
             configuration.add(match.build());
             configuration.add(score);
             configuration.add(recalculatePercentile);
+            configuration.add(recalculateExpectedRevenue);
+            configuration.add(calculatePredictedRevenuePercentile);
+            configuration.add(calculateExpectedRevenuePercentile);
             configuration.add(scoreAgg);
             configuration.add(combineInputWithScores);
             configuration.add(computeLift);
@@ -231,8 +256,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         private void setAddStandardAttributesConfig() {
             if (!CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
-                addStandardAttributes.setSourceSchemaInterpretation(
-                        SchemaInterpretation.SalesforceAccount.toString());
+                addStandardAttributes.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
             }
         }
 

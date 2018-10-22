@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -25,12 +28,13 @@ import cascading.tuple.Fields;
 @Component("calculatePredictedRevenuePercentile")
 public class CalculatePredictedRevenuePercentile
         extends TypesafeDataFlowBuilder<CalculatePredictedRevenuePercentileParameters> {
+    public static final Logger log = LoggerFactory.getLogger(CalculatePredictedRevenuePercentile.class);
 
     private static final String SCORE_COUNT_FIELD_NAME = ScoreResultField.RawScore.displayName + "_count";
 
     @Override
     public Node construct(CalculatePredictedRevenuePercentileParameters parameters) {
-
+        log.info(String.format("CalculatePredictedRevenuePercentileParameters = %s", JsonUtils.serialize(parameters)));
         Node inputTable = addSource(parameters.getInputTableName());
         String percentileFieldName = parameters.getPercentileFieldName();
         Node addPercentileColumn = inputTable.addColumnWithFixedValue(percentileFieldName, null, Integer.class);
@@ -87,7 +91,6 @@ public class CalculatePredictedRevenuePercentile
 
     private Node calculatePercentileByFieldName(String modelGuidFieldName, String originalScoreFieldName,
             String percentileFieldName, int minPct, int maxPct, Node node) {
-
         if (ScoreResultField.RawScore.displayName.equals(originalScoreFieldName)) {
             return node;
         }
@@ -106,7 +109,8 @@ public class CalculatePredictedRevenuePercentile
         String scoreCountPipeName = "ModelScoreCount_" + UUID.randomUUID().toString().replace("-", "") + "_";
         String scoreFieldName = ScoreResultField.Percentile.displayName;
         Node score = node.retain(scoreFieldName, modelGuidFieldName).renamePipe(scoreCountPipeName);
-        List<FieldMetadata> scoreCountFms = Arrays.asList(new FieldMetadata(modelGuidFieldName, String.class), //
+        List<FieldMetadata> scoreCountFms = Arrays.asList( //
+                new FieldMetadata(modelGuidFieldName, String.class), //
                 new FieldMetadata(scoreFieldName, String.class), //
                 new FieldMetadata(SCORE_COUNT_FIELD_NAME, Long.class) //
         );

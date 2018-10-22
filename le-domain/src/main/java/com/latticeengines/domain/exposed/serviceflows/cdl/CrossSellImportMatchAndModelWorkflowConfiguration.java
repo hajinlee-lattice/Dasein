@@ -384,6 +384,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration
         public Builder setExpectedValue(boolean expectedValue) {
             cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
+            generateAIRating.setEV(expectedValue);
             return this;
         }
 

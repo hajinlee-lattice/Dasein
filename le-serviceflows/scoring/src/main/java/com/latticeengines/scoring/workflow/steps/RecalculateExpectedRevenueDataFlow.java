@@ -26,7 +26,7 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
-@Component("recalculateExpectedRevenue")
+@Component("recalculateExpectedRevenueDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RecalculateExpectedRevenueDataFlow extends RunDataFlow<RecalculateExpectedRevenueDataFlowConfiguration> {
     @Autowired
@@ -67,7 +67,7 @@ public class RecalculateExpectedRevenueDataFlow extends RunDataFlow<RecalculateE
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();
         for (String modelId : modelIds) {
-            String fitFunctionParameters = scoreArtifactRetriever.getEVFitFunctionParameters(customerSpace, modelId);
+            String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId, true);
             if (fitFunctionParameters != null) {
                 fitFunctionParametersMap.put(modelId, fitFunctionParameters);
             }

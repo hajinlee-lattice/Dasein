@@ -13,17 +13,29 @@ public class BucketedScore implements Serializable {
     private double numConverted;
     private int leftNumLeads;
     private double leftNumConverted;
+    private boolean isEV;
+    private double averageExpectedRevenue;
+    private double expectedRevenue;
 
     public BucketedScore() {
     }
 
     public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads,
             double leftNumConverted) {
+        this(score, numLeads, numConverted, leftNumLeads, leftNumConverted, false, 0, 0);
+    }
+
+    public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads, double leftNumConverted,
+            boolean isEV, double averageExpectedRevenue, double expectedRevenue) {
+        super();
         this.score = score;
         this.numLeads = numLeads;
         this.numConverted = numConverted;
         this.leftNumLeads = leftNumLeads;
         this.leftNumConverted = leftNumConverted;
+        this.isEV = isEV;
+        this.averageExpectedRevenue = averageExpectedRevenue;
+        this.expectedRevenue = expectedRevenue;
     }
 
     @JsonProperty("score")
@@ -69,6 +81,33 @@ public class BucketedScore implements Serializable {
 
     public void setLeftNumConverted(double leftNumConverted) {
         this.leftNumConverted = leftNumConverted;
+    }
+
+    @JsonProperty("is_ev")
+    public boolean isEV() {
+        return isEV;
+    }
+
+    public void setEV(boolean isEV) {
+        this.isEV = isEV;
+    }
+
+    @JsonProperty("avg_expected_revenue")
+    public double getAverageExpectedRevenue() {
+        return averageExpectedRevenue;
+    }
+
+    public void setAverageExpectedRevenue(double averageExpectedRevenue) {
+        this.averageExpectedRevenue = averageExpectedRevenue;
+    }
+
+    @JsonProperty("expected_revenue")
+    public double getExpectedRevenue() {
+        return expectedRevenue;
+    }
+
+    public void setExpectedRevenue(double expectedRevenue) {
+        this.expectedRevenue = expectedRevenue;
     }
 
     @Override

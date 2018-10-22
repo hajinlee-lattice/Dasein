@@ -63,14 +63,18 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
     private boolean multiModel = false;
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
     private Map<String, String> modelGuidToEngineIdMap;
+    private Map<String, Boolean> modelGuidToIsEVFlagMap;
+    private boolean isEV = false;
 
     @Override
     public void onConfigurationInitialized() {
         String scoreTableName = getStringValueFromContext(PIVOT_SCORE_INPUT_TABLE_NAME);
 
+        isEV = configuration.isEV();
         multiModel = isMultiModel();
         modelGuidToBucketMetadataMap = getModelGuidToBucketMetadataMap();
         modelGuidToEngineIdMap = getModelGuidToEngineIdMap();
+        modelGuidToIsEVFlagMap = getModelGuidToIsEVFlagMap();
 
         PivotScoreAndEventParameters dataFlowParams = new PivotScoreAndEventParameters(scoreTableName);
         Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
@@ -89,20 +93,22 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         }
 
         // get score derivation and fit function params for model
-        dataFlowParams.setScoreDerivationMap(getScoreDerivationMap(dataFlowParams.getScoreFieldMap().keySet()));
-        dataFlowParams
-                .setFitFunctionParametersMap(getFitFunctionParametersMap(dataFlowParams.getScoreFieldMap().keySet()));
-
+        dataFlowParams.setScoreDerivationMap(
+                getScoreDerivationMap(dataFlowParams.getScoreFieldMap().keySet(), scoreFieldMap));
+        dataFlowParams.setFitFunctionParametersMap(
+                getFitFunctionParametersMap(dataFlowParams.getScoreFieldMap().keySet(), scoreFieldMap));
         configuration.setDataFlowParams(dataFlowParams);
         configuration.setTargetTableName(scoreTableName + "_pivot");
     }
 
-    private Map<String, String> getScoreDerivationMap(Collection<String> modelIds) {
-        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
+    private Map<String, String> getScoreDerivationMap(Collection<String> modelIds, Map<String, String> scoreFieldMap) {
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
+                yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> scoreDerivationMap = new HashMap<>();
         for (String modelId : modelIds) {
-            String scoreDerivation = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId);
+            String scoreDerivation = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId,
+                    InterfaceName.ExpectedRevenue.name().equals(scoreFieldMap.get(modelId)));
             if (scoreDerivation != null) {
                 scoreDerivationMap.put(modelId, scoreDerivation);
             }
@@ -110,12 +116,15 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         return scoreDerivationMap;
     }
 
-    private Map<String, String> getFitFunctionParametersMap(Collection<String> modelIds) {
-        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
+    private Map<String, String> getFitFunctionParametersMap(Collection<String> modelIds,
+            Map<String, String> scoreFieldMap) {
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
+                yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();
         for (String modelId : modelIds) {
-            String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId);
+            String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId,
+                    InterfaceName.ExpectedRevenue.name().equals(scoreFieldMap.get(modelId)));
             if (fitFunctionParameters != null) {
                 fitFunctionParametersMap.put(modelId, fitFunctionParameters);
             }
@@ -161,7 +170,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = new HashMap<>();
         pivotedRecordsMap.forEach((modelGuid, pivotedRecords) -> {
             BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
-                    .generateBucketedScoreSummary(pivotedRecords);
+                    .generateBucketedScoreSummary(pivotedRecords, modelGuidToIsEVFlagMap.get(modelGuid));
             List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
             BucketedScoreSummaryUtils.computeLift(bucketedScoreSummary, bucketMetadata);
             if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
@@ -214,6 +223,23 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         return modelGuidToEngineIdMap;
     }
 
+    private Map<String, Boolean> getModelGuidToIsEVFlagMap() {
+        Map<String, Boolean> modelGuidToIsEVFlagMap = new HashMap<>();
+        if (multiModel) {
+            List<RatingModelContainer> containers = getModelContainers();
+            containers.forEach(container -> {
+                AIModel aiModel = (AIModel) container.getModel();
+                String modelGuid = aiModel.getModelSummaryId();
+                modelGuidToIsEVFlagMap.put(modelGuid,
+                        PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType()));
+            });
+        } else {
+            String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
+            modelGuidToIsEVFlagMap.put(modelGuid, isEV);
+        }
+        return modelGuidToIsEVFlagMap;
+    }
+
     private Map<String, List<BucketMetadata>> getModelGuidToBucketMetadataMap() {
         Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap = new HashMap<>();
         if (multiModel) {
@@ -258,6 +284,9 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             String scoreField = configuration.getScoreField();
             if (StringUtils.isBlank(scoreField)) {
                 throw new IllegalArgumentException("Must specify score field for pivot event and score.");
+            }
+            if (isEV) {
+                scoreField = InterfaceName.ExpectedRevenue.name();
             }
             scoreFieldsMap = ImmutableMap.of(modelGuid, scoreField);
         }
@@ -330,7 +359,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMapAgg = new HashMap<>();
             if (MapUtils.isNotEmpty(map)) {
                 map.forEach((key, val) -> //
-                        modelGuidToBucketMetadataMapAgg.put(key, JsonUtils.convertList(val, BucketMetadata.class)));
+                modelGuidToBucketMetadataMapAgg.put(key, JsonUtils.convertList(val, BucketMetadata.class)));
             }
             modelGuidToBucketMetadataMapAgg.putAll(modelGuidToBucketMetadataMap);
             putObjectInContext(BUCKET_METADATA_MAP_AGG, modelGuidToBucketMetadataMapAgg);
