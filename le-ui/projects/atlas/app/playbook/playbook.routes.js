@@ -685,7 +685,8 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Campaign Playbook',
-                rating_id: ''
+                rating_id: '',
+                segment_name: ''
             },
             resolve: {
                 // Ratings: function(PlaybookWizardStore) {
