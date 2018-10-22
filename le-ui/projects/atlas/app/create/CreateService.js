@@ -144,7 +144,7 @@ angular
             console.log("addEventListener('abort')", this.responseText, xhr); // adding this so once it's deployed I can see when it triggers for  PLS-7212
         });
 
-        xhr.open('POST', options.url);
+        xhr.open('POST', options.url, false);// the api should be invoked synchronously to avoid triggering PLS-10863
 
         if (BrowserStorageUtility.getTokenDocument()) {
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
