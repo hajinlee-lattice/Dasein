@@ -327,9 +327,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Override
     public String getEmrClusterId() {
         if (Boolean.TRUE.equals(useEmr)) {
-            return null;
-        } else {
             return emrService.getClusterId();
+        } else {
+            return null;
         }
     }
 
