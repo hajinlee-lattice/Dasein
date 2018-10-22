@@ -353,7 +353,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("update %s workflowjob " //
                         + "set workflowjob.applicationId=:applicationId "
-                        + "workflowjob.emrClusterId=:emrClusterId "
+                        + "and workflowjob.emrClusterId=:emrClusterId "
                         + "where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
