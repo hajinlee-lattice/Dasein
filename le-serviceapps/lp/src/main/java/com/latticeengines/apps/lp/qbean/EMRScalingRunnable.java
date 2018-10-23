@@ -218,8 +218,11 @@ public class EMRScalingRunnable implements Runnable {
     private int determineTargetByMb(int req) {
         int avail = metrics.availableMB;
         int total = metrics.totalMB;
-        int newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
-        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_MB)) / UNIT_MB));
+        int target = total;
+        if (req > avail) {
+            int newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
+            target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_MB)) / UNIT_MB));
+        }
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb.");
         return target;
     }
@@ -227,8 +230,11 @@ public class EMRScalingRunnable implements Runnable {
     private int determineTargetByVCores(int req) {
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
-        int newTotal = total - avail + req + MIN_AVAIL_VCORES;
-        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_VCORES)) / UNIT_VCORES));
+        int target = total;
+        if (req > avail) {
+            int newTotal = total - avail + req + MIN_AVAIL_VCORES;
+            target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_VCORES)) / UNIT_VCORES));
+        }
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores.");
         return target;
     }
