@@ -53,10 +53,10 @@ angular.module('lp.ratingsengine.remodel')
         this.remodelAttributes = remodelAttributes;
     }
 
-    this.getAttributes = function(engineId, modelId) {
+    this.getAttributes = function(engineId, modelId, dataStoresArray) {
         var deferred = $q.defer();
 
-        AtlasRemodelService.getAttributes(engineId, modelId).then(function(result) {
+        AtlasRemodelService.getAttributes(engineId, modelId, dataStoresArray).then(function(result) {
             deferred.resolve(result);
         });
 
@@ -152,11 +152,13 @@ angular.module('lp.ratingsengine.remodel')
 }) 
 .service('AtlasRemodelService', function($q, $http) {
 
-    this.getAttributes = function(engineId, modelId){
-        var deferred = $q.defer();
+    this.getAttributes = function(engineId, modelId, dataStoresArray){
+        var deferred = $q.defer(),
+            dataStores = dataStoresArray.join(","),
+            dataStoresParams = dataStores ? '?data_stores=' + dataStores : '';
         $http({
             method: 'GET',
-            url:  '/pls/ratingengines/' + engineId + '/ratingmodels/' + modelId + '/metadata'
+            url:  '/pls/ratingengines/' + engineId + '/ratingmodels/' + modelId + '/metadata' + dataStoresParams
         }).then(
             function onSuccess(response) {
                 var result = response.data;

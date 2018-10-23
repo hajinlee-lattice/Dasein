@@ -7,25 +7,25 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
                 AtlasRemodelStore.init();
             }],
             resolve: {
-                attributes: ['$q', '$stateParams', 'AtlasRemodelStore', function ($q, $stateParams, AtlasRemodelStore) {
-
-                    var deferred = $q.defer(),
-                        engineId = $stateParams.engineId,
-                        modelId = $stateParams.modelId;
-
-                    AtlasRemodelStore.getAttributes(engineId, modelId).then(function(attributes) {
-                        deferred.resolve(attributes);
-                    });
-
-                    return deferred.promise;
-
-                }],
                 configfilters: ['$q', 'RatingsEngineStore', function($q, RatingsEngineStore){
                     var deferred = $q.defer();
                     var copy = angular.copy(RatingsEngineStore.getConfigFilters());
                     deferred.resolve(copy);
                     return deferred.promise;
                    
+                }],
+                attributes: ['$q', '$stateParams', 'AtlasRemodelStore', 'configfilters', function ($q, $stateParams, AtlasRemodelStore, configfilters) {
+                    var deferred = $q.defer(),
+                        engineId = $stateParams.engineId,
+                        modelId = $stateParams.modelId,
+                        dataStoresArray = configfilters.dataStores;
+
+                    AtlasRemodelStore.getAttributes(engineId, modelId, dataStoresArray).then(function(attributes) {
+                        deferred.resolve(attributes);
+                    });
+
+                    return deferred.promise;
+
                 }],
                 associatedRules: ['$q', '$stateParams', 'AtlasRemodelStore', function ($q, $stateParams, AtlasRemodelStore) {
 
