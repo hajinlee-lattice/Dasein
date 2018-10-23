@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkf
 import com.latticeengines.serviceflows.workflow.export.ExportProcessAnalyzeToS3;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
+import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -70,6 +71,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ExportToDynamo exportToDynamo;
 
     @Inject
+    private ImportProcessAnalyzeFromS3 importProcessAnalyzeFromS3;
+    
+    @Inject
     private ExportProcessAnalyzeToS3 exportProcessAnalyzeToS3;
 
     @Inject
@@ -79,6 +83,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(startProcessing) //
+                .next(importProcessAnalyzeFromS3) //
                 .next(processAccountWorkflow) //
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //

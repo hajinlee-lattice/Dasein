@@ -50,7 +50,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
-        private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
+        private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -70,7 +70,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
-            exportToS3.setCustomerSpace(customerSpace);
+            importExportS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -82,7 +82,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             curatedAttributesWorkflowBuilder.microServiceHostPort(microServiceHostPort);
-            exportToS3.setMicroServiceHostPort(microServiceHostPort);
+            importExportS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -98,7 +98,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            exportToS3.setInternalResourceHostPort(internalResourceHostPort);
+            importExportS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -214,7 +214,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(exportToRedshift);
             configuration.add(exportToDynamo);
             configuration.add(awsPythonDataConfiguration);
-            configuration.add(exportToS3);
+            configuration.add(importExportS3);
             return configuration;
         }
     }
