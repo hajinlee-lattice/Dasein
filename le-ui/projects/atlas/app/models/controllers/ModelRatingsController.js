@@ -457,6 +457,7 @@ angular.module('lp.models.ratings', [
         scoringHistory: ScoringHistory,
         math: window.Math,
         currentPage: 1,
+        pageSize: 4,
         header: {
             sort: {
                 label: 'Sort By',
@@ -505,8 +506,6 @@ angular.module('lp.models.ratings', [
         }
 
         // vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
-
-        
 
          // Set value for total leads in set
         // This will need to get changed when we're saving configurations

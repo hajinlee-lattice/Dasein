@@ -22,8 +22,8 @@
                     configuration in vm.scoringHistory | 
                     filter: vm.header.filter.value : true | 
                     orderBy: vm.header.sort.order + vm.header.sort.property |
-                    startFrom: (vm.currentPage - 1) * pagesize |
-                    limitTo: pagesize">
+                    startFrom: (vm.currentPage - 1) * vm.pageSize |
+                    limitTo: vm.pageSize">
 
 		            <div class="chart-header">
 		                <div class="list-data clearfix">
@@ -82,16 +82,14 @@
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->
     <div 
-        class="row" 
-        ng-init="pagesize = 4" 
+        class="row"
         ng-show="max > 1"
         ng-if="vm.cdlIsEnabled">
         <div class="ten columns offset-one">
             <pd-pagination-controls 
                 class="pull-right"
                 current="vm.currentPage" 
-                max="max = (vm.header.filter.filtered | filter: activeIteration).length / pagesize">
-
+                max="max = (vm.header.filter.filtered).length / vm.pageSize">
             </pd-pagination-controls>
         </div>
     </div>
