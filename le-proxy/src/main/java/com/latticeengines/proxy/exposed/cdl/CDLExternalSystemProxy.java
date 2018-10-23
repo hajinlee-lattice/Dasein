@@ -24,8 +24,8 @@ public class CDLExternalSystemProxy extends MicroserviceRestApiProxy implements 
         super("cdl");
     }
 
-    public CDLExternalSystem getCDLExternalSystem(String customerSpace) {
-        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+    public CDLExternalSystem getCDLExternalSystem(String customerSpace, String entity) {
+        String url = constructUrl(URL_PREFIX + "?entity={entity}", shortenCustomerSpace(customerSpace), entity);
         return get("get CDL external system", url, CDLExternalSystem.class);
     }
 
