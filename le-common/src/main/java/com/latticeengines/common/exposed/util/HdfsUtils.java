@@ -49,6 +49,7 @@ public class HdfsUtils {
     private static final Logger log = LoggerFactory.getLogger(HdfsUtils.class);
     private static final int EOF = -1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+    private static final String CSV_INJECTION_CHARACHTERS = "@+-=";
 
     public interface HdfsFileFormat {
         String AVRO_FILE = ".*.avro";
@@ -780,7 +781,7 @@ public class HdfsUtils {
     }
 
     public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
-            InputStream inputStream, String hdfsPath, long totalRows) throws IOException {
+            InputStream inputStream, String hdfsPath, long totalRows) throws IOException, RuntimeException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 return copyLarge(
@@ -793,7 +794,7 @@ public class HdfsUtils {
     }
 
     private static long copyLarge(InputStream input, OutputStream output, long totalRows)
-            throws IOException {
+            throws IOException, RuntimeException {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         boolean stop = false;
         int n = 0;
@@ -808,6 +809,9 @@ public class HdfsUtils {
                     if (!stop && rows > totalRows) {
                         stop = true;
                     }
+                }
+                if (CSV_INJECTION_CHARACHTERS.indexOf(buffer[i]) != -1) {
+                    throw new RuntimeException("CSV cell validations failed: csv injection in the file cell");
                 }
             }
         }

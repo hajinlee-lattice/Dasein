@@ -114,6 +114,8 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { displayName });
+        } catch (RuntimeException e1) {
+            throw new LedpException(LedpCode.LEDP_18208, e1);
         }
     }
 

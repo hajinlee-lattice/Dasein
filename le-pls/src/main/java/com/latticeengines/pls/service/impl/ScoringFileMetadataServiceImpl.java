@@ -87,6 +87,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
             String displayName) {
+        ValidateFileHeaderUtils.checkForFileName(displayName);
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
