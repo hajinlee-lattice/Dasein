@@ -150,9 +150,10 @@ public class ModelingFileUploadResource {
     @RequestMapping(value = "/cdlexternalsystems", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "return a map with all existed external systems.")
-    public ResponseDocument<Map<String, List<String>>> getCDLExternalSystemMap() {
+    public ResponseDocument<Map<String, List<String>>> getCDLExternalSystemMap(
+            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
         CDLExternalSystem externalSystem = cdlExternalSystemProxy
-                .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString());
+                .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity);
         Map<String, List<String>> result = new HashMap<>();
         if (externalSystem == null) {
             for (CDLExternalSystemType type : CDLExternalSystemType.values()) {
