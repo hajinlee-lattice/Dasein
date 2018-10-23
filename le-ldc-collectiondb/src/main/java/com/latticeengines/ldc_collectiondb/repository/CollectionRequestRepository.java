@@ -3,12 +3,19 @@ package com.latticeengines.ldc_collectiondb.repository;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
+
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 
 public interface CollectionRequestRepository extends BaseJpaRepository<CollectionRequest, Long> {
 
     List<CollectionRequest> findByVendorAndDomainIn(String vendor, Collection<String> domains);
+
+    @Query("SELECT req FROM CollectionRequest req WHERE req.pid IN (" //
+            + "SELECT max(pid) FROM CollectionRequest WHERE vendor = ?1 AND domain IN ?2 GROUP BY domain" //
+            + ")")
+    List<CollectionRequest> findLatestByVendorAndDomains(String vendor, Collection<String> domains);
 
     List<CollectionRequest> findByVendorAndPickupWorkerInAndStatusNotIn(String vendor,
             Collection<String> pickupWorkers, Collection<String> statuses);

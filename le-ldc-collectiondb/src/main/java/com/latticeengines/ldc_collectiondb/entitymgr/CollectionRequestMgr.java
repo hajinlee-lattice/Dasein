@@ -12,6 +12,8 @@ public interface CollectionRequestMgr extends BaseEntityMgrRepository<Collection
 
     List<CollectionRequest> getByVendorAndDomains(String vendor, Collection<String> domains);
 
+    List<CollectionRequest> getLastByVendorAndDomains(String vendor, Collection<String> domains);
+
     List<CollectionRequest> getReady(String vendor, int upperLimit);
 
     List<CollectionRequest> getPending(String vendor, List<CollectionWorker> finishedWorkers);
@@ -19,5 +21,7 @@ public interface CollectionRequestMgr extends BaseEntityMgrRepository<Collection
     Timestamp getEarliestTime(String vendor, String status);
 
     List<CollectionRequest> getDelivered(String pickupWorker);
+
+    void saveRequests(List<CollectionRequest> reqs);
 
 }

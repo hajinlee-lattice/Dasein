@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
-import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 
 @Component("domainCollectService")
@@ -54,22 +53,11 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     private static final int MAX_DUMP_SIZE = 40000;
     private static final long MS_IN_MIN = 1000 * 60;
 
-    private static final Set<String> VENDOR_SET = new HashSet<>();
-
     private AtomicLong droppedEnqDomain = new AtomicLong(0);
     private static final int LOG_DROP_NUM = 1000;
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        VENDOR_SET.addAll(Arrays.asList(
-                VendorConfig.VENDOR_ALEXA,
-                VendorConfig.VENDOR_BUILTWITH,
-                VendorConfig.VENDOR_COMPETE,
-                VendorConfig.VENDOR_FEATURE,
-                VendorConfig.VENDOR_HPA_NEW,
-                VendorConfig.VENDOR_ORBI_V2,
-                VendorConfig.VENDOR_SEMRUSH));
     }
 
     @Autowired
@@ -160,28 +148,17 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     private void dumpDomains(String transferId, Collection<String> domains) {
         putDomainsInAccountTransferTable(transferId, domains);
-
-        //check vendor
-        String vendor = transferId.toUpperCase();
-        if (!VENDOR_SET.contains(vendor)) {
-            log.warn("invalid vendor " + vendor + " from transferId " + transferId + //
-                    ", will not dump to RawCollectionRequest");
-            return;
-        }
-
         //add to raw req table
-        String reqId = UUID.randomUUID().toString().toUpperCase();
-        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        List<RawCollectionRequest> reqs = new ArrayList<>();
         for (String domain: domains) {
+            Timestamp ts = new Timestamp(System.currentTimeMillis());
             RawCollectionRequest req = new RawCollectionRequest();
             req.setDomain(domain);
             req.setRequestedTime(ts);
-            req.setOriginalRequestId(reqId);
+            req.setOriginalRequestId(transferId);
             req.setTransferred(false);
-            req.setVendor(vendor);
-
-            rawCollectionRequestMgr.create(req);
         }
+        rawCollectionRequestMgr.saveRequests(reqs);
     }
 
     private void putDomainsInAccountTransferTable(String transferId, Collection<String> domains) {

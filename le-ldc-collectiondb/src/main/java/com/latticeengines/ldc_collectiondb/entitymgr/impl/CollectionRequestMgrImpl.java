@@ -40,6 +40,11 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     }
 
     @Override
+    public List<CollectionRequest> getLastByVendorAndDomains(String vendor, Collection<String> domains) {
+        return readerRepository.findLatestByVendorAndDomains(vendor, domains);
+    }
+
+    @Override
     public List<CollectionRequest> getReady(String vendor, int upperLimit) {
 
         //query
@@ -122,5 +127,10 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
 
         return ts;
 
+    }
+
+    @Override
+    public void saveRequests(List<CollectionRequest> reqs) {
+        repository.saveAll(reqs);
     }
 }

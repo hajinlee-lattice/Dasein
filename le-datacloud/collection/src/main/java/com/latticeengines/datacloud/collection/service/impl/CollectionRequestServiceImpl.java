@@ -5,8 +5,14 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -15,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.PartitionUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
@@ -25,11 +34,16 @@ import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
 @Component
 public class CollectionRequestServiceImpl implements CollectionRequestService {
     private static final Logger log = LoggerFactory.getLogger(CollectionRequestServiceImpl.class);
+    private static final int RAW_REQ_BATCH = 16;
+    private static final int DOMAIN_TRANSFER_BATCH = 500;
 
     @Inject
     private CollectionRequestMgr collectionRequestMgr;
+
     @Inject
     private VendorConfigService vendorConfigService;
+
+    private ExecutorService sqlUploaders = null;
 
     class RawRequestCmp implements Comparator<RawCollectionRequest> {
 
@@ -51,7 +65,25 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
     }
 
-    private BitSet prefilterNonTransferred(List<RawCollectionRequest> nonTransferred) {
+    // sort by domain, ts desc
+    class RawReqCmp implements Comparator<RawCollectionRequest> {
+
+        public int compare(RawCollectionRequest lhs, RawCollectionRequest rhs) {
+            int ret = lhs.getDomain().compareTo(rhs.getDomain());
+            if (ret == 0) {
+                ret = rhs.getRequestedTime().compareTo(lhs.getRequestedTime());
+            }
+            return ret;
+        }
+
+    }
+
+
+    // each bit corresponds to one record in the list of raw reqs.
+    // it denotes where that record should be "filtered"
+    // filter means not to be transferred from raw req table to req table
+    @VisibleForTesting
+    BitSet prefilterNonTransferred(List<RawCollectionRequest> nonTransferred) {
 
         //sort, first by vendor, then by domain, next by time
         nonTransferred.sort(new RawRequestCmp());
@@ -72,13 +104,16 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
                 if (vendorCmpRet > 0 ||
                         (vendorCmpRet == 0 && nextRawReq.getDomain().compareTo(curDomain) > 0)) {
-
+                    // switch vendor or switch domain compared to next item in the sorted list
+                    // move position to next domain or vendor
                     break;
-
                 }
 
             }
 
+            // nextPos is the first item with different domain
+            // mark all from i +1 to nextPos to "true"
+            // meaning only i is "false"
             for (int k = i + 1; k < nextPos; ++k) {
 
                 rawReqFilter.set(k, true);
@@ -108,7 +143,6 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
     }
 
-    private static final int RAW_REQ_BATCH = 16;
     private void filterNonTransferredAgainstCurrent(List<RawCollectionRequest> toAdd, BitSet rawReqFilter) {
 
         //select * from CollectionRequest where VENDOR = vendor and DOMAIN = domain
@@ -235,6 +269,133 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         }
 
+    }
+
+    public Set<String> transferRawRequests(List<RawCollectionRequest> toTransfer) {
+        Set<String> allSkippedDomains = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(toTransfer)) {
+            toTransfer.sort(new RawReqCmp());
+
+            // dedup domains
+            Set<String> domains = new HashSet<>();
+            List<RawCollectionRequest> dedupList = new ArrayList<>();
+            toTransfer.forEach(rawReq -> {
+                if (!domains.contains(rawReq.getDomain())) {
+                    domains.add(rawReq.getDomain());
+                    dedupList.add(rawReq);
+                }
+            });
+
+            List<Callable<Set<String>>> callables = new ArrayList<>();
+            AtomicLong count = new AtomicLong(0);
+            for (String vendor : vendorConfigService.getEnabledVendors()) {
+                Callable<Set<String>> callable = () -> transferRawRequestsForVendor(vendor, dedupList, count);
+                callables.add(callable);
+            }
+            // if skipped by any vendor, it is considered skipped
+            // we might need to revisit this domain later on
+            List<Set<String>> skippedDomainsPerVendor = ThreadPoolUtils //
+                    .runCallablesInParallel(getSqlUploaders(), callables, 60, 5);
+            skippedDomainsPerVendor.forEach(allSkippedDomains::addAll);
+            log.info("CREATE_COLLECTION_REQ=" + count.get());
+        }
+        return allSkippedDomains;
+    }
+
+    // return skipped domains, they may need to be transferred later
+    private Set<String> transferRawRequestsForVendor(String vendor,
+            List<RawCollectionRequest> toTransfer, AtomicLong count) {
+        // split into batches to reduce sql load and memory footprint for collection req table
+        List<List<RawCollectionRequest>> batches = PartitionUtils //
+                .partitionCollectionBySize(toTransfer, DOMAIN_TRANSFER_BATCH);
+        Set<String> skippedDomains = new HashSet<>();
+        batches.forEach(batch -> skippedDomains
+                .addAll(transferOneBatch(vendor, batch, count)));
+        return skippedDomains;
+    }
+
+    private Set<String> transferOneBatch(String vendor, List<RawCollectionRequest> toTransfer, AtomicLong count) {
+        // initialize raw req map
+        Map<String, RawCollectionRequest> rawReqs = new HashMap<>();
+        toTransfer.forEach(rawReq -> rawReqs.put(rawReq.getDomain(), rawReq));
+
+        // initialize last req map
+        Map<String, CollectionRequest> lastReqs = new HashMap<>();
+        List<CollectionRequest> sqlResult = collectionRequestMgr.getLastByVendorAndDomains(vendor,
+                rawReqs.keySet());
+        if (CollectionUtils.isNotEmpty(sqlResult)) {
+            sqlResult.forEach(col -> lastReqs.put(col.getDomain(), col));
+        }
+
+        // check raw req one by one
+        Set<String> skippedDomains = new HashSet<>();
+        List<RawCollectionRequest> transferred = new ArrayList<>();
+        long vendorFreq = 1000L * vendorConfigService.getCollectingFreq(vendor);
+        rawReqs.forEach((domain, rawReq) -> {
+            // for each raw req, check if need to be transferred
+            boolean shouldTransfer;
+            if (lastReqs.containsKey(domain)) {
+                CollectionRequest lastReq = lastReqs.get(domain);
+                shouldTransfer = shouldTransfer(rawReq, lastReq, vendorFreq);
+            } else {
+                shouldTransfer = true;
+            }
+
+            if (shouldTransfer) {
+                transferred.add(rawReq);
+            } else {
+                skippedDomains.add(domain);
+            }
+        });
+
+        // transfer
+        transfer(vendor, transferred);
+        count.addAndGet(CollectionUtils.size(transferred));
+
+        // return skipped
+        return skippedDomains;
+    }
+
+    private boolean shouldTransfer(RawCollectionRequest rawReq, CollectionRequest lastReq,
+            long vendorFreq) {
+        String curStatus = lastReq.getStatus();
+        boolean shouldTransfer;
+        switch (curStatus) {
+            case CollectionRequest.STATUS_COLLECTING:
+            case CollectionRequest.STATUS_READY:
+                shouldTransfer = false;
+                break;
+            case CollectionRequest.STATUS_DELIVERED:
+            case CollectionRequest.STATUS_FAILED:
+                long lastTs = lastReq.getRequestedTime().getTime();
+                long rawTs = rawReq.getRequestedTime().getTime();
+                shouldTransfer = (rawTs - lastTs) > vendorFreq;
+                break;
+            default:
+                shouldTransfer = true;
+                break;
+        }
+        return shouldTransfer;
+    }
+
+    private void transfer(String vendor, List<RawCollectionRequest> rawReqs) {
+        List<CollectionRequest> reqs = new ArrayList<>();
+        rawReqs.forEach(rawReq -> {
+            CollectionRequest colReq = new CollectionRequest();
+            colReq.setVendor(vendor);
+            colReq.setDomain(rawReq.getDomain());
+            colReq.setOriginalRequestId(rawReq.getOriginalRequestId());
+            colReq.setRequestedTime(rawReq.getRequestedTime());
+            colReq.setRetryAttempts(0);
+            colReq.setStatus(CollectionRequest.STATUS_READY);
+            colReq.setPickupTime(null);
+            colReq.setPickupWorker(null);
+            colReq.setDeliveryTime(null);
+            reqs.add(colReq);
+        });
+        collectionRequestMgr.saveRequests(reqs);
+        log.info("Transferred " + CollectionUtils.size(rawReqs) //
+                + " raw requests to requests table for vendor " + vendor);
     }
 
     @Override
@@ -426,6 +587,17 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         return collectionRequestMgr.getReady(vendor, upperLimit);
 
+    }
+
+    private ExecutorService getSqlUploaders() {
+        if (sqlUploaders == null) {
+            synchronized (this) {
+                if (sqlUploaders == null) {
+                    sqlUploaders = ThreadPoolUtils.getFixedSizeThreadPool("raw-req-transfer", 16);
+                }
+            }
+        }
+        return sqlUploaders;
     }
 
 }

@@ -38,6 +38,9 @@ public class VendorConfig {
     @Column(name = "COLLECTING_FREQ", nullable = false)
     private long collectingFreq;
 
+    @Column(name = "COLLECTOR_ENABLED", nullable = false)
+    private boolean collectorEnabled;
+
     @Column(name = "MAX_ACTIVE_TASKS", nullable = false)
     private int maxActiveTasks;
 
@@ -87,6 +90,14 @@ public class VendorConfig {
 
         this.vendor = vendor;
 
+    }
+
+    public boolean isCollectorEnabled() {
+        return collectorEnabled;
+    }
+
+    public void setCollectorEnabled(boolean collectorEnabled) {
+        this.collectorEnabled = collectorEnabled;
     }
 
     public void setDomainField(String domainField) {

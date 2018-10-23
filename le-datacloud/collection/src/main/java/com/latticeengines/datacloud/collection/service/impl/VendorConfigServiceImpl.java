@@ -1,19 +1,21 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 
 @Component
 public class VendorConfigServiceImpl implements VendorConfigService {
@@ -26,10 +28,15 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     @Inject
     private VendorConfigMgr vendorConfigMgr;
 
-    private Map<String, VendorConfig> vendorConfigs;
-    private List<String> vendors;
+    private LoadingCache<String, VendorConfig> vendorConfigCache;
 
-    private boolean ready = false;
+    @PostConstruct
+    public void postConstruct() {
+        vendorConfigCache = Caffeine.newBuilder()
+                .maximumSize(20)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(k -> vendorConfigMgr.getVendorConfig(k));
+    }
 
     private List<VendorConfig> fetchVendorConfigs() {
 
@@ -104,86 +111,60 @@ public class VendorConfigServiceImpl implements VendorConfigService {
         return vendorConfigMgr.findAll();*/
     }
 
-    private void init() {
-        if (ready) {
-
-            return;
-        }
-
-        List<VendorConfig> allConfigs = fetchVendorConfigs();
-
-        Map<String, VendorConfig> tempVendorConfigs = new HashMap<>();
-        List<String> tempVendors = new ArrayList<>(allConfigs.size());
-        for (VendorConfig config: allConfigs) {
-
-            tempVendorConfigs.put(config.getVendor(), config);
-            tempVendors.add(config.getVendor());
-
-        }
-
-        vendors = tempVendors;
-        vendorConfigs = tempVendorConfigs;
-
-        ready = true;
+    @Override
+    public List<String> getVendors() {
+        List<VendorConfig> configs = vendorConfigMgr.findAll();
+        return configs.stream().map(VendorConfig::getVendor).collect(Collectors.toList());
     }
 
     @Override
-    public List<String> getVendors() {
-
-        init();
-
-        return vendors;
-
+    public List<String> getEnabledVendors() {
+        List<VendorConfig> configs = vendorConfigMgr.getEnabledVendors();
+        return configs.stream().map(VendorConfig::getVendor).collect(Collectors.toList());
     }
 
     @Override
     public int getDefCollectionBatch() {
-
         return DEF_COLLECTION_BATCH;
-
     }
 
     @Override
     public int getDefMaxRetries() {
-
         return DEF_MAX_RETRIES;
-
     }
 
     @Override
     public String getDomainField(String vendor) {
-
-        init();
-
-        return vendorConfigs.get(vendor).getDomainField();
-
+        VendorConfig config = getVendorConfigFromCache(vendor);
+        return config == null ? "" : config.getDomainField();
     }
 
     @Override
     public String getDomainCheckField(String vendor) {
-
-        init();
-
-        return vendorConfigs.get(vendor).getDomainCheckField();
-
+        VendorConfig config = getVendorConfigFromCache(vendor);
+        return config == null ? "" : config.getDomainCheckField();
     }
 
     @Override
     public long getCollectingFreq(String vendor) {
-
-        init();
-
-        return vendorConfigs.get(vendor).getCollectingFreq();
-
+        VendorConfig config = getVendorConfigFromCache(vendor);
+        if (config == null) {
+            throw new RuntimeException("Cannot find configuration for vendor " + vendor);
+        }
+        return config.getCollectingFreq();
     }
 
     @Override
     public int getMaxActiveTasks(String vendor) {
+        VendorConfig config = getVendorConfigFromCache(vendor);
+        if (config == null) {
+            throw new RuntimeException("Cannot find configuration for vendor " + vendor);
+        }
+        return config.getMaxActiveTasks();
+    }
 
-        init();
-
-        return vendorConfigs.get(vendor).getMaxActiveTasks();
-
+    private VendorConfig getVendorConfigFromCache(String vendor) {
+        return vendorConfigCache.get(vendor);
     }
 
 }

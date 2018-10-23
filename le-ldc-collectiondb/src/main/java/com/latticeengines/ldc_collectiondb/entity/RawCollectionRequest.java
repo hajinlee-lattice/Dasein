@@ -20,7 +20,7 @@ public class RawCollectionRequest {
     @Column(name = "PID", unique = true, nullable = false)
     private long pid;
 
-    @Column(name = "VENDOR", nullable = false)
+    @Column(name = "VENDOR")
     private String vendor;
 
     @Column(name = "DOMAIN", nullable = false)
