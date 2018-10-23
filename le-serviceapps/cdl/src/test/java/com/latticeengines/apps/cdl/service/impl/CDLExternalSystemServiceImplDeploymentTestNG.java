@@ -39,6 +39,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Inject
     private ExternalSystemMetadataStore externalSystemMetadataStore;
 
+    private static final String ENTITY_ACCOUNT = "Account";
+
     @BeforeClass(groups = "deployment-app")
     public void setup() {
         super.setupTestEnvironment();
@@ -57,11 +59,12 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         crmIds.add("TechIndicator_MGID");
         crmIds.add("TechIndicator_Squid");
         cdlExternalSystem.setCRMIdList(crmIds);
+        cdlExternalSystem.setEntity(BusinessEntity.Account);
         cdlExternalSystem.setMapIds("TechIndicator_CAVSAMAid" + "," + "TechIndicator_Candid");
         cdlExternalSystem.setErpIds("TechIndicator_SysAid");
         cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
 
-        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
+        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
         Assert.assertNotNull(system);
 
         Assert.assertEquals(system.getCRMIdList().size(), 3);
@@ -77,7 +80,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Test(groups = "deployment-app", dependsOnMethods = "testCreateAndGet", enabled = true)
     public void testLookupIdAttrGroup() {
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
-        List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
+        List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account)
+                .collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
 
         cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
@@ -85,24 +89,23 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
 
-
     @Test(groups = "deployment-app", dependsOnMethods = "testCreateAndGet")
     public void testGetMapping() {
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
-        List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
+        List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account)
+                .collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
         List<CDLExternalSystemMapping> crmList = cdlExternalSystemProxy.getExternalSystemByType(mainCustomerSpace,
                 CDLExternalSystemType.CRM);
         Assert.assertEquals(crmList.size(), 3);
 
-        Map<String, List<CDLExternalSystemMapping>> mapping =
-                cdlExternalSystemProxy.getExternalSystemMap(mainCustomerSpace);
+        Map<String, List<CDLExternalSystemMapping>> mapping = cdlExternalSystemProxy
+                .getExternalSystemMap(mainCustomerSpace);
         Assert.assertEquals(mapping.size(), 3);
         List<CDLExternalSystemMapping> mapList = mapping.get(CDLExternalSystemType.ERP.name());
         Assert.assertEquals(mapList.size(), 1);
         Assert.assertEquals(mapList.get(0).getFieldName(), "TechIndicator_SysAid");
     }
-
 
     @Test(groups = "deployment-app", dependsOnMethods = "testGetMapping")
     public void testUpdate() {
@@ -110,7 +113,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
         cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
 
-        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
+        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
         Assert.assertNotNull(system);
 
         Assert.assertEquals(system.getCRMIdList().size(), 0);

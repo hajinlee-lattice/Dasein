@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,34 +42,39 @@ public class CDLExternalSystemResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all CDL external system for a tenant")
-    public CDLExternalSystem getExternalSystem(@PathVariable String customerSpace) {
+    public CDLExternalSystem getExternalSystem(@PathVariable String customerSpace,
+            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return cdlExternalSystemService.getExternalSystem(customerSpace);
+        return cdlExternalSystemService.getExternalSystem(customerSpace, BusinessEntity.getByName(entity));
     }
 
     @RequestMapping(value = "/map", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all CDL external system for a tenant")
-    public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(@PathVariable String customerSpace) {
+    public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(@PathVariable String customerSpace,
+            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return cdlExternalSystemService.getExternalSystemMap(customerSpace);
+        return cdlExternalSystemService.getExternalSystemMap(customerSpace, BusinessEntity.getByName(entity));
     }
 
     @RequestMapping(value = "/type/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all CDL external system for a tenant")
     public List<CDLExternalSystemMapping> getExternalSystemByType(@PathVariable String customerSpace,
-                                                                  @PathVariable CDLExternalSystemType type) {
+            @PathVariable CDLExternalSystemType type,
+            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return cdlExternalSystemService.getExternalSystemByType(customerSpace, type);
+        return cdlExternalSystemService.getExternalSystemByType(customerSpace, type, BusinessEntity.getByName(entity));
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or Update a CDL external system for a tenant")
     public void createOrUpdateCDLExternalSystem(@PathVariable String customerSpace,
-                                                @RequestBody CDLExternalSystem cdlExternalSystem) {
+            @RequestBody CDLExternalSystem cdlExternalSystem,
+            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
+        cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem,
+                BusinessEntity.getByName(entity));
     }
 }

@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 public abstract class DataFeedMetadataService {
@@ -67,7 +68,7 @@ public abstract class DataFeedMetadataService {
     }
 
     public void applyAttributePrefix(CDLExternalSystemService cdlExternalSystemService, String customerSpace,
-                                     Table importTable, Table templateTable) {
+            Table importTable, Table templateTable) {
         if (cdlExternalSystemService == null) {
             throw new IllegalArgumentException("ExternalSystemService cannot be null when set custom prefix!");
         }
@@ -77,7 +78,8 @@ public abstract class DataFeedMetadataService {
         if (templateTable == null || CollectionUtils.isEmpty(templateTable.getAttributes())) {
             throw new IllegalArgumentException("Template table cannot be null or empty!");
         }
-        Set<String> templateAttrs = templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+        Set<String> templateAttrs = templateTable.getAttributes().stream().map(Attribute::getName)
+                .collect(Collectors.toSet());
         Map<String, String> nameMap = new HashMap<>();
         importTable.getAttributes().forEach(attribute -> {
             if (!templateAttrs.contains(attribute.getName())) {
@@ -88,70 +90,75 @@ public abstract class DataFeedMetadataService {
                 nameMap.put(originalName, userAttrName);
             }
         });
-        CDLExternalSystem cdlExternalSystem = cdlExternalSystemService.getExternalSystem(customerSpace);
-        if (cdlExternalSystem != null &&
-                (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())
-                || CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())
-                || CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())
-                || CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList()))) {
-            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())) {
-                List<String> newCRMIdList = new ArrayList<>();
-                cdlExternalSystem.getCRMIdList().forEach(id -> {
-                    if (nameMap.containsKey(id)) {
-                        newCRMIdList.add(nameMap.get(id));
-                    } else {
-                        newCRMIdList.add(id);
-                    }
-                });
-                cdlExternalSystem.setCRMIdList(newCRMIdList);
-            }
-            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())) {
-                List<String> newERPIdList = new ArrayList<>();
-                cdlExternalSystem.getERPIdList().forEach(id -> {
-                    if (nameMap.containsKey(id)) {
-                        newERPIdList.add(nameMap.get(id));
-                    } else {
-                        newERPIdList.add(id);
-                    }
-                });
-                cdlExternalSystem.setERPIdList(newERPIdList);
-            }
-            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())) {
-                List<String> newMAPIdList = new ArrayList<>();
-                cdlExternalSystem.getMAPIdList().forEach(id -> {
-                    if (nameMap.containsKey(id)) {
-                        newMAPIdList.add(nameMap.get(id));
-                    } else {
-                        newMAPIdList.add(id);
-                    }
-                });
-                cdlExternalSystem.setMAPIdList(newMAPIdList);
-            }
-            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList())) {
-                List<String> newOtherIdList = new ArrayList<>();
-                cdlExternalSystem.getOtherIdList().forEach(id -> {
-                    if (nameMap.containsKey(id)) {
-                        newOtherIdList.add(nameMap.get(id));
-                    } else {
-                        newOtherIdList.add(id);
-                    }
-                });
-                cdlExternalSystem.setOtherIdList(newOtherIdList);
-            }
-            List<Pair<String, String>> idMappings = cdlExternalSystem.getIdMappingList();
-            // This set should not be null
-            // There's some backward compatible issue, will delete the error records later
-            if (CollectionUtils.isNotEmpty(idMappings)) {
-                List<Pair<String, String>> userIdMapping = new ArrayList<>();
-                for (Pair<String, String> idMapping : idMappings) {
-                    if (nameMap.containsKey(idMapping.getLeft())) {
-                        userIdMapping.add(Pair.of(nameMap.get(idMapping.getLeft()), idMapping.getRight()));
-                    } else {
-                        userIdMapping.add(idMapping);
-                    }
+        BusinessEntity[] entities = {BusinessEntity.Account, BusinessEntity.Contact};
+        for (BusinessEntity entity : entities) {
+            CDLExternalSystem cdlExternalSystem = cdlExternalSystemService.getExternalSystem(customerSpace,
+                    entity);
+            if (cdlExternalSystem != null && (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())
+                    || CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())
+                    || CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())
+                    || CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList()))) {
+                if (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())) {
+                    List<String> newCRMIdList = new ArrayList<>();
+                    cdlExternalSystem.getCRMIdList().forEach(id -> {
+                        if (nameMap.containsKey(id)) {
+                            newCRMIdList.add(nameMap.get(id));
+                        } else {
+                            newCRMIdList.add(id);
+                        }
+                    });
+                    cdlExternalSystem.setCRMIdList(newCRMIdList);
                 }
-                cdlExternalSystem.setIdMapping(userIdMapping);
-                cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
+                if (CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())) {
+                    List<String> newERPIdList = new ArrayList<>();
+                    cdlExternalSystem.getERPIdList().forEach(id -> {
+                        if (nameMap.containsKey(id)) {
+                            newERPIdList.add(nameMap.get(id));
+                        } else {
+                            newERPIdList.add(id);
+                        }
+                    });
+                    cdlExternalSystem.setERPIdList(newERPIdList);
+                }
+                if (CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())) {
+                    List<String> newMAPIdList = new ArrayList<>();
+                    cdlExternalSystem.getMAPIdList().forEach(id -> {
+                        if (nameMap.containsKey(id)) {
+                            newMAPIdList.add(nameMap.get(id));
+                        } else {
+                            newMAPIdList.add(id);
+                        }
+                    });
+                    cdlExternalSystem.setMAPIdList(newMAPIdList);
+                }
+                if (CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList())) {
+                    List<String> newOtherIdList = new ArrayList<>();
+                    cdlExternalSystem.getOtherIdList().forEach(id -> {
+                        if (nameMap.containsKey(id)) {
+                            newOtherIdList.add(nameMap.get(id));
+                        } else {
+                            newOtherIdList.add(id);
+                        }
+                    });
+                    cdlExternalSystem.setOtherIdList(newOtherIdList);
+                }
+                List<Pair<String, String>> idMappings = cdlExternalSystem.getIdMappingList();
+                // This set should not be null
+                // There's some backward compatible issue, will delete the error
+                // records later
+                if (CollectionUtils.isNotEmpty(idMappings)) {
+                    List<Pair<String, String>> userIdMapping = new ArrayList<>();
+                    for (Pair<String, String> idMapping : idMappings) {
+                        if (nameMap.containsKey(idMapping.getLeft())) {
+                            userIdMapping.add(Pair.of(nameMap.get(idMapping.getLeft()), idMapping.getRight()));
+                        } else {
+                            userIdMapping.add(idMapping);
+                        }
+                    }
+                    cdlExternalSystem.setIdMapping(userIdMapping);
+                    cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem,
+                            entity);
+                }
             }
         }
     }

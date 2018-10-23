@@ -12,9 +12,11 @@ import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("cdlExternalSystemEntityMgr")
-public class CDLExternalSystemEntityMgrImpl extends BaseEntityMgrImpl<CDLExternalSystem> implements CDLExternalSystemEntityMgr {
+public class CDLExternalSystemEntityMgrImpl extends BaseEntityMgrImpl<CDLExternalSystem>
+        implements CDLExternalSystemEntityMgr {
 
     @Autowired
     private CDLExternalSystemDao cdlExternalSystemDao;
@@ -32,12 +34,12 @@ public class CDLExternalSystemEntityMgrImpl extends BaseEntityMgrImpl<CDLExterna
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public CDLExternalSystem findExternalSystem() {
-        List<CDLExternalSystem> allExternalSystem = super.findAll();
-        if (allExternalSystem == null || allExternalSystem.size() == 0) {
+    public CDLExternalSystem findExternalSystem(BusinessEntity entity) {
+        CDLExternalSystem externalSystem = super.findByField("ENTITY", entity.name());
+        if (externalSystem == null) {
             return null;
         } else {
-            return allExternalSystem.get(0);
+            return externalSystem;
         }
     }
 }

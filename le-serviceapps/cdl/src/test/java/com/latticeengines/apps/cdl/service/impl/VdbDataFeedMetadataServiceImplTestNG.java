@@ -72,14 +72,18 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
                 VdbLoadTableConfig.class));
         vdbMetadata1 = new VdbImportConfig();
         vdbMetadata2 = new VdbImportConfig();
-        vdbMetadata1.setVdbLoadTableConfig(JsonUtils.deserialize(
-                IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("metadata/vdb/test1.json"), "UTF-8"),
-                VdbLoadTableConfig.class));
-        vdbMetadata2.setVdbLoadTableConfig(JsonUtils.deserialize(
-                IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("metadata/vdb/test2.json"), "UTF-8"),
-                VdbLoadTableConfig.class));
+        vdbMetadata1
+                .setVdbLoadTableConfig(
+                        JsonUtils.deserialize(
+                                IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                                        .getResourceAsStream("metadata/vdb/test1.json"), "UTF-8"),
+                                VdbLoadTableConfig.class));
+        vdbMetadata2
+                .setVdbLoadTableConfig(
+                        JsonUtils.deserialize(
+                                IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                                        .getResourceAsStream("metadata/vdb/test2.json"), "UTF-8"),
+                                VdbLoadTableConfig.class));
     }
 
     @Test(groups = "functional")
@@ -147,7 +151,8 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.AccountId));
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         vdbDataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, resolvedTable, customerSpace);
-        CDLExternalSystem system = cdlExternalSystemService.getExternalSystem(customerSpace);
+        CDLExternalSystem system = cdlExternalSystemService.getExternalSystem(customerSpace,
+                BusinessEntity.Account);
         Assert.assertNotNull(system);
         Assert.assertEquals(system.getCRMIdList().size(), 2);
     }

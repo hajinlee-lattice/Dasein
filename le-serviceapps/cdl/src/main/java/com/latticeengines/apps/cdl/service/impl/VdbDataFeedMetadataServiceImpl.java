@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
@@ -358,10 +359,11 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             List<Pair<String, String>> idMappings = new ArrayList<>();
             CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
             cdlExternalSystem.setCRMIdList(crmAttrMap.keySet().stream().collect(Collectors.toList()));
+            cdlExternalSystem.setEntity(BusinessEntity.Account);
             crmAttrMap.forEach((attrName, displayName) ->
                     idMappings.add(Pair.of(attrName, StringUtils.isBlank(displayName) ? attrName : displayName)));
             cdlExternalSystem.setIdMapping(idMappings);
-            cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
+            cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem, BusinessEntity.Account);
         }
     }
 

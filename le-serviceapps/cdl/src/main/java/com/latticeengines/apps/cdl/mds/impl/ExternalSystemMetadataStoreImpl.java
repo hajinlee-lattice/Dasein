@@ -37,7 +37,8 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         // only account has external system ids now
         if (BusinessEntity.Account.equals(namespace.getCoord2())) {
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
-            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem();
+            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr
+                    .findExternalSystem(BusinessEntity.Account);
 
             if (externalSystem != null) {
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {

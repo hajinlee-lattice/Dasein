@@ -46,13 +46,14 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
     }
 
     @Override
-    public CDLExternalSystem getExternalSystem(String customerSpace) {
-        return cdlExternalSystemEntityMgr.findExternalSystem();
+    public CDLExternalSystem getExternalSystem(String customerSpace, BusinessEntity entity) {
+        return cdlExternalSystemEntityMgr.findExternalSystem(entity);
     }
 
     @Override
-    public void createOrUpdateExternalSystem(String customerSpace, CDLExternalSystem cdlExternalSystem) {
-        CDLExternalSystem existingSystem = cdlExternalSystemEntityMgr.findExternalSystem();
+    public void createOrUpdateExternalSystem(String customerSpace, CDLExternalSystem cdlExternalSystem,
+            BusinessEntity entity) {
+        CDLExternalSystem existingSystem = cdlExternalSystemEntityMgr.findExternalSystem(entity);
         if (existingSystem == null) {
             cdlExternalSystem.setTenant(MultiTenantContext.getTenant());
             cdlExternalSystemEntityMgr.create(cdlExternalSystem);
@@ -67,10 +68,11 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
     }
 
     @Override
-    public List<CDLExternalSystemMapping> getExternalSystemByType(String customerSpace, CDLExternalSystemType type) {
+    public List<CDLExternalSystemMapping> getExternalSystemByType(String customerSpace, CDLExternalSystemType type,
+            BusinessEntity entity) {
         List<CDLExternalSystemMapping> systems = Collections.emptyList();
 
-        Set<String> ids = getExternalSystemIds(type);
+        Set<String> ids = getExternalSystemIds(type, entity);
         if (CollectionUtils.isNotEmpty(ids)) {
             ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account,
                     dataCollectionService.getActiveVersion(customerSpace));
@@ -78,7 +80,8 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
                 if (cm.isEnabledFor(ColumnSelection.Predefined.LookupId) && ids.contains(cm.getAttrName())) {
                     String attrName = cm.getAttrName();
                     String displayName = cm.getDisplayName();
-                    return Mono.just(new CDLExternalSystemMapping(attrName, CDLExternalSystemMapping.FIELD_TYPE_STRING, displayName));
+                    return Mono.just(new CDLExternalSystemMapping(attrName, CDLExternalSystemMapping.FIELD_TYPE_STRING,
+                            displayName));
                 } else {
                     return Mono.empty();
                 }
@@ -87,47 +90,49 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
         return systems;
     }
 
-    private Set<String> getExternalSystemIds(CDLExternalSystemType type) {
-        CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem();
+    private Set<String> getExternalSystemIds(CDLExternalSystemType type, BusinessEntity entity) {
+        CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(entity);
         if (externalSystem == null) {
             return Collections.emptySet();
         }
         Set<String> ids;
         switch (type) {
-            case CRM:
-                ids = new HashSet<>(externalSystem.getCRMIdList());
-                break;
-            case ERP:
-                ids = new HashSet<>(externalSystem.getERPIdList());
-                break;
-            case MAP:
-                ids = new HashSet<>(externalSystem.getMAPIdList());
-                break;
-            case OTHER:
-                ids = new HashSet<>(externalSystem.getOtherIdList());
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type: " + type.name());
+        case CRM:
+            ids = new HashSet<>(externalSystem.getCRMIdList());
+            break;
+        case ERP:
+            ids = new HashSet<>(externalSystem.getERPIdList());
+            break;
+        case MAP:
+            ids = new HashSet<>(externalSystem.getMAPIdList());
+            break;
+        case OTHER:
+            ids = new HashSet<>(externalSystem.getOtherIdList());
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported type: " + type.name());
         }
         return ids;
     }
 
     @Override
-    public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(String customerSpace) {
+    public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(String customerSpace,
+            BusinessEntity entity) {
         Map<String, List<CDLExternalSystemMapping>> systemMap = new HashMap<>();
-        List<CDLExternalSystemMapping> crm = getExternalSystemByType(customerSpace, CDLExternalSystemType.CRM);
+        List<CDLExternalSystemMapping> crm = getExternalSystemByType(customerSpace, CDLExternalSystemType.CRM, entity);
         if (!CollectionUtils.isEmpty(crm)) {
             systemMap.put(CDLExternalSystemType.CRM.name(), crm);
         }
-        List<CDLExternalSystemMapping> erp = getExternalSystemByType(customerSpace, CDLExternalSystemType.ERP);
+        List<CDLExternalSystemMapping> erp = getExternalSystemByType(customerSpace, CDLExternalSystemType.ERP, entity);
         if (!CollectionUtils.isEmpty(erp)) {
             systemMap.put(CDLExternalSystemType.ERP.name(), erp);
         }
-        List<CDLExternalSystemMapping> map = getExternalSystemByType(customerSpace, CDLExternalSystemType.MAP);
+        List<CDLExternalSystemMapping> map = getExternalSystemByType(customerSpace, CDLExternalSystemType.MAP, entity);
         if (!CollectionUtils.isEmpty(map)) {
             systemMap.put(CDLExternalSystemType.MAP.name(), map);
         }
-        List<CDLExternalSystemMapping> other = getExternalSystemByType(customerSpace, CDLExternalSystemType.OTHER);
+        List<CDLExternalSystemMapping> other = getExternalSystemByType(customerSpace, CDLExternalSystemType.OTHER,
+                entity);
         if (!CollectionUtils.isEmpty(other)) {
             systemMap.put(CDLExternalSystemType.OTHER.name(), other);
         }
@@ -137,7 +142,7 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
     public List<PrimaryField> getCRMPrimaryFields() {
         List<PrimaryField> fields = Collections.emptyList();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        CDLExternalSystem externalSystem = getExternalSystem(customerSpace);
+        CDLExternalSystem externalSystem = getExternalSystem(customerSpace, BusinessEntity.Account);
         Set<String> crmIds = new HashSet<>(externalSystem.getCRMIdList());
         if (CollectionUtils.isNotEmpty(crmIds)) {
             ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account,
@@ -147,7 +152,8 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
                     String attrName = cm.getAttrName();
                     String displayName = cm.getDisplayName();
                     String externalSystemName = cm.getAttrName();
-                    return Mono.just(new PrimaryField(attrName, PrimaryField.FIELD_TYPE_STRING, displayName, externalSystemName));
+                    return Mono.just(new PrimaryField(attrName, PrimaryField.FIELD_TYPE_STRING, displayName,
+                            externalSystemName));
                 } else {
                     return Mono.empty();
                 }

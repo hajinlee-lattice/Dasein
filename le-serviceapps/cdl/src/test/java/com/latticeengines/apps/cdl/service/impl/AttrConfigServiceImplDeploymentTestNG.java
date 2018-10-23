@@ -536,7 +536,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         List<String> crmIds = new ArrayList<>();
         crmIds.add(CRM_ID);
         cdlExternalSystem.setCRMIdList(crmIds);
-        externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystem);
+        cdlExternalSystem.setEntity(BusinessEntity.Account);
+        externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystem,
+                BusinessEntity.Account);
     }
 
 }
