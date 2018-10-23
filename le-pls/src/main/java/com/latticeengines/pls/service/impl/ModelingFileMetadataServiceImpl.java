@@ -348,7 +348,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
             String fileDisplayName, boolean checkHeaderFormat, boolean withCDLHeader) {
 
-        ValidateFileHeaderUtils.checkForFileName(fileDisplayName);
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
