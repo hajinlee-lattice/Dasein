@@ -38,6 +38,7 @@ DELIMITER ;
 CREATE PROCEDURE `UpdateWorkflowJobTable`()
   BEGIN
     ALTER TABLE `WORKFLOW_JOB` ADD `EMR_CLUSTER_ID` varchar(20) AFTER `APPLICATION_ID`;
+    alter table PLS_MultiTenant.CDL_EXTERNAL_SYSTEM add column ENTITY varchar(80) default "Account" not null;
   END;
 //
 DELIMITER;
