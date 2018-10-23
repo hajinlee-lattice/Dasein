@@ -173,7 +173,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName, boolean checkHeaderFormat) {
+    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName,
+            boolean checkHeaderFormat) {
         return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, false);
     }
 
@@ -186,7 +187,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
     }
 
-    private void setCDLExternalSystems(FieldMappingDocument fieldMappingDocument) {
+    private void setCDLExternalSystems(FieldMappingDocument fieldMappingDocument, BusinessEntity entity) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
@@ -228,8 +229,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         if (hasExternalId) {
-            CDLExternalSystem originalSystem = cdlExternalSystemProxy.getCDLExternalSystem(
-                    MultiTenantContext.getCustomerSpace().toString());
+            CDLExternalSystem originalSystem = cdlExternalSystemProxy
+                    .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity.name());
             if (originalSystem == null) {
                 CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
                 cdlExternalSystem.setCRMIdList(crmIds);
@@ -237,6 +238,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 cdlExternalSystem.setERPIdList(erpIds);
                 cdlExternalSystem.setOtherIdList(otherIds);
                 cdlExternalSystem.setIdMapping(idMappings);
+                cdlExternalSystem.setEntity(entity);
                 cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
                         cdlExternalSystem);
             } else {
@@ -245,6 +247,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
                 originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
                 originalSystem.addIdMapping(idMappings);
+                originalSystem.setEntity(originalSystem.getEntity());
                 cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
                         originalSystem);
             }
@@ -270,18 +273,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity,
-                                      Table templateTable) {
+            Table templateTable) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
         }
         // 1.set external system column name
-        if (BusinessEntity.Account.equals(entity)) {
-            setCDLExternalSystems(fieldMappingDocument);
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            setCDLExternalSystems(fieldMappingDocument, entity);
         }
-        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true) : templateTable;
-        Set<String> reservedName = standardTable.getAttributes().stream()
-                .map(Attribute::getName)
+        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true)
+                : templateTable;
+        Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
                 .collect(Collectors.toSet());
         Set<String> mappedFieldName = new HashSet<>();
         Set<String> pendingUserFieldName = new HashSet<>();
@@ -366,8 +369,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
-        Collection<String> reservedWords = new ArrayList<>(Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));
-        Collection<String> reservedBeginings = new ArrayList<>(Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr));
+        Collection<String> reservedWords = new ArrayList<>(
+                Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));
+        Collection<String> reservedBeginings = new ArrayList<>(
+                Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr));
         if (withCDLHeader) {
             reservedWords.addAll(ValidateFileHeaderUtils.CDL_RESERVED_FIELDS);
             reservedBeginings.addAll(ValidateFileHeaderUtils.CDL_RESERVED_PREFIX);
