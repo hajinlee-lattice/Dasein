@@ -62,6 +62,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -598,6 +599,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     .getAdvancedModelingConfig(aiModel).getDataStores();
             if (CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getCustomEventModelingType() == null) {
                 errors.add("No CustomEventModelingType selected");
+            }
+            if (CustomEventModelingConfig.getAdvancedModelingConfig(aiModel)
+                    .getCustomEventModelingType() == CustomEventModelingType.CDL && ratingEngine.getSegment() == null) {
+                errors.add("No Target segment selected for the model");
             }
             if (CollectionUtils.isEmpty(dataStores)) {
                 errors.add("No datastore selected, atleast one attribute set needed for modeling");

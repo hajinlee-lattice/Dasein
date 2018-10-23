@@ -63,20 +63,20 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
-        MetadataSegment persistedSegment = null;
-
-        if (segment.getName() != null) {
+        MetadataSegment persistedSegment;
+        if (StringUtils.isNotBlank(segment.getName())) {
             MetadataSegment existingSegment = findByName(segment.getName());
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateSegment(segment, existingSegment);
                 evictRatingMetadataCache(existingSegment, segment);
+            } else {
+                persistedSegment = segmentEntityMgr.createSegment(segment);
             }
         } else {
-            if (StringUtils.isBlank(segment.getName())) {
-                segment.setName(NamingUtils.timestamp("Segment"));
-            }
+            segment.setName(NamingUtils.timestamp("Segment"));
             persistedSegment = segmentEntityMgr.createSegment(segment);
         }
+
         if (persistedSegment != null) {
             updateSegmentCounts(persistedSegment);
         }
@@ -149,13 +149,12 @@ public class SegmentServiceImpl implements SegmentService {
                         review.put(name, counts);
                     } catch (Exception e) {
                         log.warn("Failed to update counts for segment " + name + //
-                                " in tenant " + MultiTenantContext.getShortTenantId());
+                        " in tenant " + MultiTenantContext.getShortTenantId());
                     }
                 });
             }
             timer.setTimerMessage("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
             return review;
-        } finally {
         }
     }
 
@@ -213,7 +212,8 @@ public class SegmentServiceImpl implements SegmentService {
         return dependencyChecker.getDependencies(customerSpace, segmentName, CDLObjectTypes.Segment.name());
     }
 
-    // Only when a segment displayName got changed, then we need to evict this DataLakeCache
+    // Only when a segment displayName got changed, then we need to evict this
+    // DataLakeCache
     private void evictRatingMetadataCache(MetadataSegment existingSegment, MetadataSegment updatedSegment) {
         if (existingSegment == null || updatedSegment == null) {
             return;

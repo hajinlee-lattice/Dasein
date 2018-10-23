@@ -753,6 +753,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
 
         MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_1);
         segment.setDisplayName("End2End Segment 1");
         segment.setDescription("A test segment for CDL end2end tests.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
@@ -777,6 +778,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
 
         MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_2);
         segment.setDisplayName("End2End Segment 2");
         segment.setDescription("A test segment for CDL end2end tests.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
@@ -801,6 +803,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
 
         MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_3);
         segment.setDisplayName("End2End Segment 3");
         segment.setDescription("A test segment for CDL end2end tests.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
@@ -816,6 +819,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 numberOfContactsBkt);
 
         MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_CURATED_ATTR);
         segment.setDisplayName("End2End Segment Curated Attributes");
         segment.setDescription("A test segment for CDL end2end tests checking the number of contacts.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(numberOfContactsRestriction));
@@ -827,6 +831,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
