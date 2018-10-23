@@ -43,6 +43,16 @@ public class MdsDecoratorFactory<N extends Namespace> implements DecoratorFactor
                 }
                 return flux.collectList().block();
             }
+
+            @Override
+            protected ColumnMetadata preProcess(ColumnMetadata cm) {
+                return metadataStore.preDecorate(cm);
+            }
+
+            @Override
+            protected ColumnMetadata postProcess(ColumnMetadata cm) {
+                return metadataStore.preDecorate(cm);
+            }
         };
     }
 

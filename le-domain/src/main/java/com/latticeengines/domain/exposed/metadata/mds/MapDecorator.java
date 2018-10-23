@@ -56,12 +56,12 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
         return metadata //
                 .doOnSubscribe(s -> blockingLoad()) //
                 .map(cm -> {
+                    cm = preProcess(cm);
                     if (filterMap.containsKey(cm.getAttrName())) {
                         counter.incrementAndGet();
-                        return ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
-                    } else {
-                        return cm;
+                        cm = ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
                     }
+                    return postProcess(cm);
                 }) //
                 .doOnComplete(() -> {
                     if (counter.get() > 0) {
@@ -80,12 +80,12 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
                     if (counter.get() == null) {
                         counter.set(new AtomicLong());
                     }
+                    cm = preProcess(cm);
                     if (filterMap.containsKey(cm.getAttrName())) {
                         counter.get().incrementAndGet();
-                        return ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
-                    } else {
-                        return cm;
+                        cm = ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
                     }
+                    return postProcess(cm);
                 }) //
                 .doOnComplete(() -> {
                     long count = 0;
@@ -117,5 +117,13 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
 
     // should be able to load all synchronously
     protected abstract Collection<ColumnMetadata> loadInternal();
+
+    protected ColumnMetadata preProcess(ColumnMetadata cm) {
+        return cm;
+    }
+
+    protected ColumnMetadata postProcess(ColumnMetadata cm) {
+        return cm;
+    }
 
 }

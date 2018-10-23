@@ -66,6 +66,15 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
         return cms;
     }
 
+    @Override
+    public ColumnMetadata postDecorate(ColumnMetadata cm) {
+        if (StringUtils.isBlank(cm.getDisplayName()) //
+                && cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX + "_")) {
+            cm.disableGroup(ColumnSelection.Predefined.Segment);
+        }
+        return cm;
+    }
+
     private Flux<ColumnMetadata> expandEngine(RatingEngineSummary summary) {
         String segmentDisplayName = summary.getSegmentDisplayName();
         String reDisplayName = summary.getDisplayName();

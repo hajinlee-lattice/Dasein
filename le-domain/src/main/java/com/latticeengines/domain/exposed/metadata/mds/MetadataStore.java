@@ -19,4 +19,13 @@ public interface MetadataStore<N extends Namespace> extends Named {
         return getMetadata(namespace).parallel().runOn(scheduler);
     }
 
+    // for using metadata store as a map decorator
+    default ColumnMetadata preDecorate(ColumnMetadata cm) {
+        return cm;
+    }
+
+    default ColumnMetadata postDecorate(ColumnMetadata cm) {
+        return cm;
+    }
+
 }
