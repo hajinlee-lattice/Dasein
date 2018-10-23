@@ -195,6 +195,11 @@ public class EMRScalingRunnable implements Runnable {
                                 Resource asked = usageReport.getNeededResources();
                                 int mb = reqs.getLeft() + asked.getMemory();
                                 int vcores = reqs.getRight() + asked.getVirtualCores();
+                                if (!isYarnJob(app)) {
+                                    // for non yarn job
+                                    log.info("Job of type " + app.getApplicationType() + " is asking " //
+                                            + mb + " mb and " + vcores + " vcores");
+                                }
                                 reqs = Pair.of(mb, vcores);
                             }
                         }
@@ -205,6 +210,10 @@ public class EMRScalingRunnable implements Runnable {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    private boolean isYarnJob(ApplicationReport app) {
+        return "YARN".equalsIgnoreCase(app.getApplicationType());
     }
 
     private int getTargetTaskNodes(Pair<Integer, Integer> reqs) {
@@ -223,7 +232,8 @@ public class EMRScalingRunnable implements Runnable {
             int newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
             target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_MB)) / UNIT_MB));
         }
-        log.info(emrCluster + " should have " + target + " TASK nodes, according to mb.");
+        log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " +
+                "total=" + total + " avail=" + avail + " req=" + req);
         return target;
     }
 
@@ -235,7 +245,8 @@ public class EMRScalingRunnable implements Runnable {
             int newTotal = total - avail + req + MIN_AVAIL_VCORES;
             target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_VCORES)) / UNIT_VCORES));
         }
-        log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores.");
+        log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: " +
+                "total=" + total + " avail=" + avail + " req=" + req);
         return target;
     }
 
