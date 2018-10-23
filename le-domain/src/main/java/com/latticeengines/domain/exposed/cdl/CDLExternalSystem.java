@@ -9,6 +9,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -79,6 +82,11 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
     @Column(name = "ID_MAPPING", columnDefinition = "'JSON'")
     @Type(type = "json")
     private String idMapping;
+
+    @JsonProperty("entity")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ENTITY", nullable = false)
+    private BusinessEntity entity;
 
     @Override
     public Long getPid() {
@@ -285,6 +293,14 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
             }
             return result;
         }
+    }
+
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 
 }
