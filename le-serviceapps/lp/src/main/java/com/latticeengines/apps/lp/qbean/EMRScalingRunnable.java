@@ -148,6 +148,7 @@ public class EMRScalingRunnable implements Runnable {
         int requested = taskGrp.getRequestedInstanceCount();
         log.info(String.format("%s TASK group, running=%d, requested=%d, target=%d", //
                 emrCluster, running, requested, target));
+        lastScalingUp.set(System.currentTimeMillis());
         return scale(target);
     }
 
@@ -166,7 +167,6 @@ public class EMRScalingRunnable implements Runnable {
     private boolean scale(int target) {
         try {
             emrService.scaleTaskGroup(emrCluster, target);
-            lastScalingUp.set(System.currentTimeMillis());
             return true;
         } catch (Exception e) {
             log.error("Failed to scale " + emrCluster + " to " + target, e);
