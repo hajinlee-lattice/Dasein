@@ -77,13 +77,39 @@ public class CDLServiceImpl implements CDLService {
                                          String source, String entity, String feedType) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the file upload initiator is %s", email));
-        CSVImportConfig metaData = generateImportConfig(customerSpace.toString(), templateFileName, dataFileName,
+        CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, dataFileName,
                 email);
-        String taskId = cdlProxy.createDataFeedTask(customerSpace.toString(), source, entity, feedType, metaData);
+        // temp fix for file upload directly.
+        String subType = "";
+        if (feedType.contains("Bundle")) {
+            subType = "Bundle";
+        } else if (feedType.contains("Hierarchy")) {
+            subType = "Hierarchy";
+        }
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, "", metaData);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
         }
-        return cdlProxy.submitImportJob(customerSpace.toString(), taskId, metaData);
+        return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
+    }
+
+    @Override
+    public String createS3Template(String customerSpace, String templateFileName, String source, String entity,
+                                   String feedType, String subType, String displayName) {
+        String email = MultiTenantContext.getEmailAddress();
+        log.info(String.format("The email of the s3 file upload initiator is %s", email));
+        CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName,
+                metaData);
+        return taskId;
+    }
+
+    @Override
+    public ApplicationId submitS3ImportWithTemplateData(String customerSpace, String taskId, String templateFileName) {
+        String email = MultiTenantContext.getEmailAddress();
+        log.info(String.format("The email of the s3 file upload initiator is %s", email));
+        CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
+        return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
     }
 
     @Override

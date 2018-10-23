@@ -130,7 +130,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Override
     public synchronized String createDataFeedTask(String customerSpaceStr, String feedType, String entity,
-            String source, CDLImportConfig importConfig) {
+            String source, String subType, String templateDisplayName, CDLImportConfig importConfig) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(importConfig);
         if (dlTenantMappingEnabled) {
@@ -187,8 +187,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
+            dataFeedTask.setSubType(subType);
+            if (StringUtils.isNotBlank(templateDisplayName)) {
+                dataFeedTask.setTemplateDisplayName(templateDisplayName);
+            } else {
+                dataFeedTask.setTemplateDisplayName(feedType);
+            }
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-            dropFolderProxy.createTemplateFolder(customerSpace.toString(), entity, feedType);
+            dropFolderProxy.createTemplateFolder(customerSpace.toString(), feedType, "");
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
                 DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
@@ -285,16 +291,16 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (importConfig == null) {
             throw new IllegalArgumentException("S3 Import config cannot be null!");
         }
-        if (importConfig.getEntity() == null || StringUtils.isEmpty(importConfig.getFeedType())) {
-            throw new IllegalArgumentException("Entity & Template name cannot be empty for S3 import!");
+        if (StringUtils.isEmpty(importConfig.getFeedType())) {
+            throw new IllegalArgumentException("Template name cannot be empty for S3 import!");
         }
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
-                importConfig.getFeedType(), importConfig.getEntity().name());
+                importConfig.getFeedType());
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
         }
         String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(),
-                importConfig.getEntity().name(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
+                dataFeedTask.getEntity(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setS3FilePath(newFilePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
         // validate

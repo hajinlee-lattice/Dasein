@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,19 +12,10 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.DropFolderService;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Service("dropFolderService")
 public class DropFolderServiceImpl implements DropFolderService {
     private static final Logger log = LoggerFactory.getLogger(DropFolderServiceImpl.class);
-
-    private static final String[] objectsName = {
-            BusinessEntity.Account.name(),
-            BusinessEntity.Contact.name(),
-            BusinessEntity.Product.name(),
-            BusinessEntity.Transaction.name()
-    };
 
     private static final String PS_SHARE = "PS_SHARE";
 
@@ -42,10 +34,6 @@ public class DropFolderServiceImpl implements DropFolderService {
 
         s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, null, null));
 
-        for (String objectName : objectsName) {
-            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, objectName, null));
-        }
-
         s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, PS_SHARE, null));
     }
 
@@ -55,13 +43,15 @@ public class DropFolderServiceImpl implements DropFolderService {
         String dropBoxPrefix = dropBoxService.getDropBoxPrefix();
 
         s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES, formatPath(objectName), null));
-        String[] folderList = path.split("/");
-        String needCreateFolder = "";
-        for (String folder : folderList) {
-            if (StringUtils.isNotEmpty(folder)) {
-                needCreateFolder += "/" + folder;
-                s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES,
-                        formatPath(objectName), formatPath(needCreateFolder)));
+        if (StringUtils.isNotEmpty(path)) {
+            String[] folderList = path.split("/");
+            String needCreateFolder = "";
+            for (String folder : folderList) {
+                if (StringUtils.isNotEmpty(folder)) {
+                    needCreateFolder += "/" + folder;
+                    s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, TEMPLATES,
+                            formatPath(objectName), formatPath(needCreateFolder)));
+                }
             }
         }
     }

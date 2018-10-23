@@ -54,7 +54,7 @@ public class DataFeedTaskController {
         } else {
             VdbImportConfig vdbImportConfig = new VdbImportConfig();
             vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
-            return createDataFeedTask(customerSpace, source, feedtype, entity, vdbImportConfig);
+            return createDataFeedTask(customerSpace, source, feedtype, entity,"", "", vdbImportConfig);
         }
     }
 
@@ -63,15 +63,17 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
     public ResponseDocument<String> createDataFeedTask(@PathVariable String customerSpace,
-                                                                 @RequestParam(value = "source") String source,
-                                                                 @RequestParam(value = "feedtype") String feedtype,
-                                                                 @RequestParam(value = "entity") String entity,
-                                                                 @RequestBody CDLImportConfig importConfig) {
+                                             @RequestParam(value = "source") String source,
+                                             @RequestParam(value = "feedtype") String feedtype,
+                                             @RequestParam(value = "entity") String entity,
+                                             @RequestParam(value = "subType", required = false) String subType,
+                                             @RequestParam(value = "displayName", required = false) String displayName,
+                                             @RequestBody CDLImportConfig importConfig) {
         try {
             customerSpace = CustomerSpace.parse(customerSpace).toString();
             entity = BusinessEntity.getByName(entity).name();
             String taskId = dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source,
-                    importConfig);
+                    subType, displayName, importConfig);
             return ResponseDocument.successResponse(taskId);
         } catch (Exception e) {
             log.error(String.format("Failed to create data feed task, exception: %s", e.toString()), e);

@@ -61,6 +61,15 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType, entity);
     }
 
+    @RequestMapping(value = "/{source}/{dataFeedType}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task")
+    public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
+                                        @PathVariable String dataFeedType) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType);
+    }
+
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")

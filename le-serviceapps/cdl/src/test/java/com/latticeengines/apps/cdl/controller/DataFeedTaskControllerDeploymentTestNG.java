@@ -34,7 +34,7 @@ public class DataFeedTaskControllerDeploymentTestNG extends CDLDeploymentTestNGB
         VdbImportConfig vdbImportConfig = new VdbImportConfig();
         vdbImportConfig.setVdbLoadTableConfig(testVdbMetadata);
         String taskId = cdlProxy.createDataFeedTask(mainTestTenant.getId(), "VisiDB", "Account", "testQuery",
-                vdbImportConfig);
+                "", "", vdbImportConfig);
         Assert.assertNotNull(taskId);
     }
 }

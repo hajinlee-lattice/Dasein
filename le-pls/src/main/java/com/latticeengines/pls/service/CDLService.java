@@ -17,8 +17,13 @@ public interface CDLService {
     ApplicationId submitCSVImport(String customerSpace, String templateFileName,
             String dataFileName, String source, String entity, String feedType);
 
-    UIAction cleanup(String customerSpace, String sourceFileName,
-            SchemaInterpretation schemaInterpretation, CleanupOperationType cleanupOperationType);
+    String createS3Template(String customerSpace, String templateFileName, String source,
+                            String entity, String feedType, String subType, String displayName);
+
+    ApplicationId submitS3ImportWithTemplateData(String customerSpace, String taskId, String templateFileName);
+
+    UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
+                          CleanupOperationType cleanupOperationType);
 
     ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
             SchemaInterpretation schemaInterpretation);

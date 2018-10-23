@@ -8,9 +8,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
 
-    @JsonProperty("entity")
-    private BusinessEntity entity;
-
     // AKA: TemplateName
     @JsonProperty("feed_type")
     private String feedType;
@@ -20,14 +17,6 @@ public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
 
     @JsonProperty("s3_file_path")
     private String s3FilePath;
-
-    public BusinessEntity getEntity() {
-        return entity;
-    }
-
-    public void setEntity(BusinessEntity entity) {
-        this.entity = entity;
-    }
 
     public String getFeedType() {
         return feedType;

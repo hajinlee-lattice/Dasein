@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
@@ -31,6 +30,8 @@ public class S3ImportJmsConsumer {
     private static final String NAME = "name";
     private static final String OBJECT = "object";
     private static final String KEY = "key";
+
+    private static final String PS_SHARE = "PS_SHARE";
 
     @Inject
     private CDLProxy cdlProxy;
@@ -67,14 +68,17 @@ public class S3ImportJmsConsumer {
                 String bucket = s3Node.get(BUCKET).get(NAME).asText();
                 String key = s3Node.get(OBJECT).get(KEY).asText();
                 String[] parts = key.split("/");
-                if (parts.length < 5 || !key.endsWith(".csv")) {
+                if (parts.length < 4 || !key.endsWith(".csv")) {
                     log.warn("S3 import path is not correct: " + key);
                     return;
                 }
                 String fileName = parts[parts.length - 1];
                 String feedType = parts[parts.length - 2];
-                String entity = parts[parts.length - 3];
-                String dropBoxPrefix = parts[parts.length - 5];
+                if (PS_SHARE.equals(feedType)) {
+                    // skip files in PS_SHARE folder.
+                    return;
+                }
+                String dropBoxPrefix = parts[parts.length - 4];
                 Tenant tenant = dropBoxService.getDropBoxOwner(dropBoxPrefix);
                 if (tenant == null) {
                     log.error("Cannot find DropBox Owner: " + dropBoxPrefix);
@@ -82,16 +86,14 @@ public class S3ImportJmsConsumer {
                 }
                 String tenantId = tenant.getId();
                 tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
-                log.info(String.format("S3 import for %s / %s / %s / %s / %s", bucket, tenantId, entity, feedType,
-                        fileName));
-                submitApplication(tenantId, bucket, entity, feedType, key);
+                log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
+                submitApplication(tenantId, bucket, feedType, key);
             }
         }
     }
 
-    private void submitApplication(String tenantId, String bucket, String entity, String feedType, String key) {
+    private void submitApplication(String tenantId, String bucket, String feedType, String key) {
         S3FileToHdfsConfiguration config = new S3FileToHdfsConfiguration();
-        config.setEntity(BusinessEntity.getByName(entity));
         config.setFeedType(feedType);
         config.setS3Bucket(bucket);
         config.setS3FilePath(key);

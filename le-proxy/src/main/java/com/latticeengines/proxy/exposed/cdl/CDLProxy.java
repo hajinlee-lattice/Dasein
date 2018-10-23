@@ -4,7 +4,9 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import org.apache.commons.lang3.StringUtils;
@@ -85,11 +87,24 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
-            CDLImportConfig metadata) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create"
-                        + "?source={source}&feedtype={feedtype}&entity={entity}",
-                shortenCustomerSpace(customerSpace), source, feedType, entity);
+                                     String subType, String displayName, CDLImportConfig metadata) {
+        String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create"
+                + "?source={source}&feedtype={feedtype}&entity={entity}";
+        List<String> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(source);
+        args.add(feedType);
+        args.add(entity);
+        if (StringUtils.isNotBlank(subType)) {
+            baseUrl += "&subType={subType}";
+            args.add(subType);
+        }
+        if (StringUtils.isNotBlank(displayName)) {
+            baseUrl += "&displayName={displayName}";
+            args.add(displayName);
+        }
+
+        String url = constructUrl(baseUrl, args.toArray());
         ResponseDocument<String> responseDoc = post("createDataFeedTask", url, metadata, ResponseDocument.class);
         if (responseDoc == null) {
             return null;

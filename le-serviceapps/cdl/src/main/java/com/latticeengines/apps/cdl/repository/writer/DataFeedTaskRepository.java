@@ -11,6 +11,8 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
     DataFeedTask findBySourceAndFeedTypeAndEntityAndDataFeed(String source, String datafeedType, String entity,
                                                              DataFeed dataFeed);
 
+    DataFeedTask findBySourceAndFeedTypeAndDataFeed(String source, String datafeedType, DataFeed dataFeed);
+
     List<DataFeedTask> findByEntityAndDataFeed(String entity, DataFeed dataFeed);
 
     DataFeedTask findByUniqueId(String uniqueId);

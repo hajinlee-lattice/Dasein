@@ -14,6 +14,8 @@ public interface DataFeedTaskService {
 
     DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity);
 
+    DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType);
+
     DataFeedTask getDataFeedTask(String customerSpace, Long taskId);
 
     DataFeedTask getDataFeedTask(String customerSpace, String uniqueId);

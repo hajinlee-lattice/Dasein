@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -32,6 +33,7 @@ import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,6 +51,9 @@ public class CDLResource {
 
     @Inject
     private CDLService cdlService;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     @RequestMapping(value = "/consolidateAndProfile", method = RequestMethod.POST)
     @ApiOperation(value = "Start Consolidate And Profile job")
@@ -91,6 +96,76 @@ public class CDLResource {
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit import job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[] {"ImportFile", e.getMessage()});
+        }
+    }
+
+    @RequestMapping(value = "/s3/template", method = RequestMethod.POST)
+    @ApiOperation(value = "Create s3 import template")
+    public ResponseDocument<String> createS3Template(@RequestParam(value = "templateFileName") String templateFileName,
+                @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+                @RequestParam(value = "entity") String entity, //
+                @RequestParam(value = "feedType") String feedType,
+                @RequestParam(value = "importData", required = false, defaultValue = "false") boolean importData,
+                @RequestParam(value = "subType", required = false) String subType,
+                @RequestParam(value = "displayName", required = false) String displayName) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName,
+                    source, entity, feedType, subType, displayName);
+            if (importData) {
+                ApplicationId appId = cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
+                return ResponseDocument.successResponse(appId.toString());
+            } else {
+                return ResponseDocument.successResponse(taskId);
+            }
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to create template for S3 import: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3ImportFile", e.getMessage()});
+        }
+    }
+
+    @RequestMapping(value = "/s3/template/import", method = RequestMethod.POST)
+    @ApiOperation(value = "Start s3 import job")
+    public ResponseDocument<String> importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
+                 @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+                 @RequestParam(value = "entity") String entity, //
+                 @RequestParam(value = "feedType") String feedType,
+                 @RequestParam(value = "subType", required = false) String subType) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
+                    entity);
+            if (dataFeedTask == null) {
+                throw new RuntimeException("Cannot find template for S3 import!");
+            }
+            ApplicationId appId = cdlService.submitS3ImportWithTemplateData(customerSpace.toString(),
+                    dataFeedTask.getUniqueId(), templateFileName);
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3ImportFile", e.getMessage()});
+        }
+    }
+
+    @RequestMapping(value = "/s3/template/displayname", method = RequestMethod.PUT)
+    @ApiOperation(value = "Start s3 import job")
+    public ResponseDocument<String> updateTemplateName(@RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+                                                     @RequestParam(value = "entity") String entity, //
+                                                     @RequestParam(value = "feedType") String feedType,
+                                                     @RequestParam(value = "displayName") String displayName) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
+                    entity);
+            if (dataFeedTask == null) {
+                throw new RuntimeException("Cannot find template for S3 import!");
+            }
+            dataFeedTask.setTemplateDisplayName(displayName);
+            dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
+            return ResponseDocument.successResponse(dataFeedTask.getUniqueId());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3ImportFile", e.getMessage()});
         }
     }
 
