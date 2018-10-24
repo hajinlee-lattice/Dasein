@@ -101,18 +101,29 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private boolean needToScaleUp() {
-        boolean mightScaleUp = reqResource.reqMb > 0 || reqResource.reqVCores > 0;
-        if (!mightScaleUp) {
-            InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
-            int running = taskGrp.getRunningInstanceCount();
-            int requested = taskGrp.getRequestedInstanceCount();
-            if (requested < running) {
-                // during scaling down, check if need to interrupt
-                log.info(emrCluster + " is undergoing scaling down, might need to adjust target size.");
-                mightScaleUp = true;
-            }
+        String scaleLogPrefix = "Need to scale up " + emrCluster + ": ";
+        String noScaleLogPrefix = "No need to scale up " + emrCluster + ": ";
+
+        int availableMB = metrics.availableMB;
+        int availableVCores = metrics.availableVirtualCores;
+
+        boolean scale;
+        if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
+            log.info(scaleLogPrefix + "there are " + reqResource.reqMb + " mb and " //
+                    + reqResource.reqVCores + " pending requests.");
+            scale = true;
+        } else if (availableMB < MIN_AVAIL_MEM_MB) {
+            log.info(scaleLogPrefix + "available mb " + availableMB + " is not enough.");
+            scale = true;
+        } else if (availableVCores < MIN_AVAIL_VCORES) {
+            log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
+            scale = true;
+        } else {
+            log.debug(noScaleLogPrefix + "have enough available mb " + availableMB //
+                    + " and vcores " + availableVCores);
+            scale = false;
         }
-        return mightScaleUp;
+        return scale;
     }
 
     private boolean needToScaleDown() {
@@ -207,11 +218,6 @@ public class EMRScalingRunnable implements Runnable {
                                 Resource asked = usageReport.getNeededResources();
                                 int mb = asked.getMemory();
                                 int vcores = asked.getVirtualCores();
-                                if (!isYarnJob(app)) {
-                                    // for non yarn job
-                                    log.info("Job of type " + app.getApplicationType() + " is asking " //
-                                            + mb + " mb and " + vcores + " vcores");
-                                }
                                 reqResource.reqMb += mb;
                                 reqResource.reqVCores += vcores;
                                 if (now - app.getStartTime() >= HANGING_START_THRESHOLD) {
@@ -228,10 +234,6 @@ public class EMRScalingRunnable implements Runnable {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private boolean isYarnJob(ApplicationReport app) {
-        return "YARN".equalsIgnoreCase(app.getApplicationType());
     }
 
     private int getTargetTaskNodes() {
