@@ -142,13 +142,12 @@ public class EMRScalingRunnable implements Runnable {
     private boolean scaleUp() {
         Pair<Integer, Integer> reqs = getRequestingResources();
         if (reqs.getLeft() > metrics.availableMB || reqs.getRight() > metrics.availableVirtualCores) {
-            // only scale when insufficient memory
-            log.info("Attempt to scale up " + emrCluster);
+            // only scale up when insufficient resource
             int target = getTargetTaskNodes(reqs);
             InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
             int running = taskGrp.getRunningInstanceCount();
             int requested = taskGrp.getRequestedInstanceCount();
-            log.info(String.format("%s TASK group, running=%d, requested=%d, target=%d", //
+            log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
                     emrCluster, running, requested, target));
             lastScalingUp.set(System.currentTimeMillis());
             return scale(target);
@@ -158,15 +157,17 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void scaleDown() {
-        log.info("Attempt to scale down " + emrCluster);
         Pair<Integer, Integer> reqs = getRequestingResources();
-        int target = getTargetTaskNodes(reqs);
-        InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
-        int running = taskGrp.getRunningInstanceCount();
-        int requested = taskGrp.getRequestedInstanceCount();
-        log.info(String.format("%s TASK group, running=%d, requested=%d, target=%d", //
-                emrCluster, running, requested, target));
-        scale(target);
+        if (reqs.getLeft() < metrics.availableMB && reqs.getRight() < metrics.availableVirtualCores) {
+            // scale when there are excessive resource
+            int target = getTargetTaskNodes(reqs);
+            InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
+            int running = taskGrp.getRunningInstanceCount();
+            int requested = taskGrp.getRequestedInstanceCount();
+            log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
+                    emrCluster, running, requested, target));
+            scale(target);
+        }
     }
 
     private boolean scale(int target) {
