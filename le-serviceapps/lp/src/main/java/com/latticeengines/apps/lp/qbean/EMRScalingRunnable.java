@@ -43,7 +43,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MAX_AVAIL_VCORES = 2 * UNIT_VCORES + CORE_VCORES;
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
-    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
+    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(3);
     private static final long SCALE_UP_COOLING_PERIOD = TimeUnit.MINUTES.toMillis(10);
 
     private static final AtomicLong lastScalingUp = new AtomicLong(0);
