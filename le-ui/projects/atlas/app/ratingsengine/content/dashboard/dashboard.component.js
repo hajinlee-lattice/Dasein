@@ -216,6 +216,7 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.initDataModel = function(){
+
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
             if (vm.dashboard.dependencies[type]) {
@@ -274,23 +275,24 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.hasSettingsInfo = true;
                 }
 
+                if(Array.isArray(vm.targetProducts)){
+                    vm.targetProductsIsArray = true;
+                    vm.tooltipContent = angular.copy(vm.targetProducts);
+                    vm.targetProducts = vm.targetProducts.length + ' selected';
+                } else {
+                    vm.targetProductsIsArray = false;
+                    vm.targetProducts = vm.targetProducts.ProductName;
+                }
+
                 vm.modelingStrategy = vm.model.advancedModelingConfig[type].modelingStrategy;
                 vm.configFilters = vm.model.advancedModelingConfig[type].filters;
 
                 if (vm.configFilters && vm.configFilters['SPEND_IN_PERIOD']) {
-                    if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
-                        vm.spendCriteria = 'at least';
-                    } else {
-                        vm.spendCriteria = 'at most';
-                    }
+                    vm.spendCriteria = vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL' ? 'at least' : 'at most';
                 }
 
                 if (vm.configFilters && vm.configFilters['QUANTITY_IN_PERIOD']) {
-                    if (vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
-                        vm.quantityCriteria = 'at least';
-                    } else {
-                        vm.quantityCriteria = 'at most';
-                    }
+                    vm.qualityCriteria = vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL' ? 'at least' : 'at most';
                 }
 
                 if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
