@@ -96,9 +96,9 @@ public class AttrSpecification {
     public static AttrSpecification CDL_CURATED_ACC() {
         return new AttrSpecification("CDL Derived Attributes for Account", //
                 true, // segment
-                false, // export
-                false, // cp
-                false, // tp
+                true, // export
+                true, // cp
+                true, // tp
                 false, // model
                 false, // type
                 false, // display name

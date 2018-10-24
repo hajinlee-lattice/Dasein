@@ -55,9 +55,13 @@ public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore 
 
                 cm.disableGroup(ColumnSelection.Predefined.Segment);
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
-                cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
+                cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 cm.disableGroup(ColumnSelection.Predefined.Model);
+
+                cm.setCanSegment(true);
+                cm.setCanEnrich(true);
+                cm.setCanModel(false);
 
                 cm.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
                 return cm;

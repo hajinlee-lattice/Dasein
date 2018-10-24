@@ -91,7 +91,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     private Set<String> contactStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> conatactSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Contact).stream() //
+    private Set<String> contactSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
     private Set<String> contactExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
@@ -110,7 +110,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             setupTestEnvironment();
             batonService.setFeatureFlag(CustomerSpace.parse(mainTestTenant.getId()), //
                     LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
-            cdlTestDataService.populateMetadata(mainTestTenant.getId(), 4);
+            cdlTestDataService.populateMetadata(mainTestTenant.getId(), 5);
         });
         runnables.add(() -> {
             List<ColumnMetadata> amCols = columnMetadataProxy.getAllColumns();
@@ -151,6 +151,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         testContactAttributes();
         testMyAttributes();
         testProductSpendAttributes();
+        testCuratedAccountAttributes();
     }
 
     @Test(groups = "deployment-app")
@@ -256,7 +257,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     private String getContactAttributesPartition(String attrName) {
         String partiion;
-        if (conatactSystemAttrs.contains(attrName)) {
+        if (contactSystemAttrs.contains(attrName)) {
             partiion = Partition.SYSTEM;
         } else if (contactStandardAttrs.contains(attrName)) {
             partiion = Partition.STD_ATTRS;
@@ -279,6 +280,22 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
                     false, true, //
                     true, true, //
                     false, false, //
+                    false, false);
+            return true;
+        });
+    }
+
+    private void testCuratedAccountAttributes() {
+        final Category cat = Category.CURATED_ACCOUNT_ATTRIBUTES;
+        checkAndVerifyCategory(cat, (config) -> {
+            String attrName = config.getAttrName();
+            Assert.assertNotNull(attrName, JsonUtils.pprint(config));
+            verifyFlags(config, cat, null, //
+                    Active, false, //
+                    false, true, //
+                    false, true, //
+                    true, true, //
+                    false, true, //
                     false, false);
             return true;
         });
