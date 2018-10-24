@@ -96,7 +96,6 @@ public class EMRScalingRunnable implements Runnable {
         }
 
         metrics = new ClusterMetrics();
-        reqResource = new ReqResource();
         log.debug("Finished processing emr cluster " + emrCluster);
     }
 
@@ -177,7 +176,7 @@ public class EMRScalingRunnable implements Runnable {
                 try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
                     yarnClient.start();
                     List<ApplicationReport> apps = yarnClient.getApplications(PENDING_APP_STATES);
-                    ReqResource reqResource = new ReqResource();
+                    reqResource = new ReqResource();
                     if (CollectionUtils.isNotEmpty(apps)) {
                         long now = System.currentTimeMillis();
                         for (ApplicationReport app : apps) {
