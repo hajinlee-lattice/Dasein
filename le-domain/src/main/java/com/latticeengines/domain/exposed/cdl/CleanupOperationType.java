@@ -1,10 +1,13 @@
 package com.latticeengines.domain.exposed.cdl;
 
 public enum CleanupOperationType {
-    ALL("All", false), ALLDATA("AllData", false), BYDATERANGE("ByDateRange", false), BYUPLOAD_ID(
-            "ByUpload_Id",
-            true), BYUPLOAD_ACPD("ByUpload_ACPD", true), BYUPLOAD_MINDATE("ByUpload_MinDate",
-                    true), BYUPLOAD_MINDATEANDACCOUNT("ByUpload_MinDateAndAccount", true);
+    ALL("All", false), //
+    ALLDATA("AllData", false), //
+    BYDATERANGE("ByDateRange", false), //
+    BYUPLOAD_ID("ByUpload_Id", true), //
+    BYUPLOAD_ACPD("ByUpload_ACPD", true), //
+    BYUPLOAD_MINDATE("ByUpload_MinDate", true), //
+    BYUPLOAD_MINDATEANDACCOUNT("ByUpload_MinDateAndAccount", true);
 
     private String operationType;
     private boolean needTransFlow;
