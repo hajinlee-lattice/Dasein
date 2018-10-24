@@ -95,6 +95,8 @@ public class EMRScalingRunnable implements Runnable {
             scaleDown();
         }
 
+        metrics = new ClusterMetrics();
+        reqResource = new ReqResource();
         log.debug("Finished processing emr cluster " + emrCluster);
     }
 
@@ -126,12 +128,11 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private boolean scaleUp() {
-        ReqResource reqs = getRequestingResources();
         // only scale up when insufficient resource
         InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
         int running = taskGrp.getRunningInstanceCount();
         int requested = taskGrp.getRequestedInstanceCount();
-        int target = getTargetTaskNodes(reqs);
+        int target = getTargetTaskNodes();
         log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
                 emrCluster, running, requested, target));
         if (target > requested) {
@@ -141,13 +142,12 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void scaleDown() {
-        ReqResource reqs = getRequestingResources();
-        if (reqs.reqMb < metrics.availableMB && reqs.reqVCores < metrics.availableVirtualCores) {
+        if (reqResource.reqMb < metrics.availableMB && reqResource.reqVCores < metrics.availableVirtualCores) {
             // scale when there are excessive resource
             InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
             int running = taskGrp.getRunningInstanceCount();
             int requested = taskGrp.getRequestedInstanceCount();
-            int target = getTargetTaskNodes(reqs);
+            int target = getTargetTaskNodes();
             log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
                     emrCluster, running, requested, target));
             scale(target);
@@ -211,12 +211,12 @@ public class EMRScalingRunnable implements Runnable {
         return "YARN".equalsIgnoreCase(app.getApplicationType());
     }
 
-    private int getTargetTaskNodes(ReqResource reqs) {
-        int targetByMb = determineTargetByMb(reqs.reqMb - reqs.eagerMb);
-        int targetByVCores = determineTargetByVCores(reqs.reqVCores - reqs.eagerVCores);
+    private int getTargetTaskNodes() {
+        int targetByMb = determineTargetByMb(reqResource.reqMb - reqResource.eagerMb);
+        int targetByVCores = determineTargetByVCores(reqResource.reqVCores - reqResource.eagerVCores);
         int target = Math.max(targetByMb, targetByVCores);
-        if (reqs.eagerMb > 0 || reqs.eagerVCores > 0) {
-            target += determineNewTargetsByReqResource(reqs.eagerMb, reqs.eagerVCores);
+        if (reqResource.eagerMb > 0 || reqResource.eagerVCores > 0) {
+            target += determineNewTargetsByReqResource(reqResource.eagerMb, reqResource.eagerVCores);
         }
         return Math.min(target, MAX_TASK_NODES);
     }
