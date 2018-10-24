@@ -21,6 +21,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -139,9 +140,10 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     private CustomerSpaceHdfsFileDownloader getCustomerSpaceDownloader(String mimeType, String filePath,
             String fileName) {
         CustomerSpaceHdfsFileDownloader.FileDownloadBuilder builder = new CustomerSpaceHdfsFileDownloader.FileDownloadBuilder();
+        String customer = MultiTenantContext.getTenant().getId();
+        customer = customer != null ? customer : new HdfsToS3PathBuilder().getCustomerFromHdfsPath(filePath);
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName).setCustomer(MultiTenantContext.getTenant().getId())
-                .setImportFromS3Service(importFromS3Service);
+                .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 

@@ -173,4 +173,17 @@ public class HdfsToS3PathBuilderUnitTestNG {
                 "s3n://bucket2/tenantId2/atlas/Metadata/Export/file2.csv");
     }
 
+    @Test(groups = "unit")
+    public void getCustomerFromHdfsPath() {
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        Assert.assertEquals(
+                builder.getCustomerFromHdfsPath(
+                        "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export/file2.csv"),
+                "tenantId2.tenantId2.Production");
+        Assert.assertEquals(
+                builder.getCustomerFromHdfsPath(
+                        "/user/s-analytics/customers/tenantId2.tenantId2.Production/data/table2/samples/file2.csv"),
+                "tenantId2.tenantId2.Production");
+    }
+
 }

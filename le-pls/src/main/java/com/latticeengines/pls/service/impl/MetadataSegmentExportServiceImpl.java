@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
@@ -170,9 +171,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private CustomerSpaceHdfsFileDownloader getCustomerSpaceDownloader(String mimeType, String filePath,
             String fileName) {
         CustomerSpaceHdfsFileDownloader.FileDownloadBuilder builder = new CustomerSpaceHdfsFileDownloader.FileDownloadBuilder();
+        String customer = MultiTenantContext.getTenant().getId();
+        customer = customer != null ? customer : new HdfsToS3PathBuilder().getCustomerFromHdfsPath(filePath);
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName).setCustomer(MultiTenantContext.getTenant().getId())
-                .setImportFromS3Service(importFromS3Service);
+                .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 
@@ -183,7 +185,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     @Override
-    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport){
+    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport) {
         metadataSegmentExportEntityMgr.create(metadataSegmentExport);
         return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExport.getExportId());
     }

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.util;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,9 +20,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 import reactor.core.publisher.Flux;
 
@@ -38,6 +41,12 @@ public class FeatureImportanceUtil {
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -57,6 +66,7 @@ public class FeatureImportanceUtil {
                     filePathParts[1], // 2
                     filePathParts[2], // 3
                     modelSummary.getApplicationId().substring("application_".length())); // 4
+            featureImportanceFilePath = getS3Path(customerSpace, featureImportanceFilePath);
             if (!HdfsUtils.fileExists(yarnConfiguration, featureImportanceFilePath)) {
                 log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
                 throw new LedpException(LedpCode.LEDP_10011, new String[] { featureImportanceFilePath });
@@ -87,6 +97,17 @@ public class FeatureImportanceUtil {
             log.error("Unable to populate feature importance due to " + e.getLocalizedMessage());
             return new HashMap<>();
         }
+    }
+
+    private String getS3Path(String customerSpace, String featureImportanceFilePath) throws IOException {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        String s3Path = pathBuilder.exploreS3FilePath(featureImportanceFilePath, podId, space.toString(),
+                space.getTenantId(), s3Bucket);
+        if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
+            featureImportanceFilePath = s3Path;
+        }
+        return featureImportanceFilePath;
     }
 
     private Map<String, Integer> convertDerivedAttrNamesToParentAttrNames(Map<String, Integer> importanceOrdering) {
