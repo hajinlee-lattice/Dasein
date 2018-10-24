@@ -156,7 +156,8 @@ public class EMRScalingRunnable implements Runnable {
             }
             return scale(target);
         } else {
-            return true;
+            // if scaling down, can check if need to adjust
+            return requested < running;
         }
     }
 
