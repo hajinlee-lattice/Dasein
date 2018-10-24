@@ -2,9 +2,11 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BucketedScore implements Serializable {
 
     private static final long serialVersionUID = -6994756387548943771L;
@@ -20,8 +22,7 @@ public class BucketedScore implements Serializable {
     public BucketedScore() {
     }
 
-    public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads,
-            double leftNumConverted) {
+    public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads, double leftNumConverted) {
         this(score, numLeads, numConverted, leftNumLeads, leftNumConverted, false, 0, 0);
     }
 
