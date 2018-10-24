@@ -59,10 +59,13 @@ public class LifecycleValidator extends AttrValidator {
             }
             // check customer value or system value is equal to Inactive
             if (AttrState.Inactive.equals(finalState)) {
-                for (ColumnSelection.Predefined group : ColumnSelection.Predefined.usageProperties) {
-                    Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group.name(), Boolean.class);
-                    if (Boolean.TRUE.equals((finalUsageValue))) {
-                        addWarningMsg(ImpactWarnings.Type.USAGE_ENABLED, group.name(), attrConfig);
+                for (String group : ColumnSelection.Predefined.usageProperties) {
+                    // PLS-10731 Activation Status does not apply in Modeling
+                    if (!ColumnSelection.Predefined.Model.name().equals(group)) {
+                        Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group, Boolean.class);
+                        if (Boolean.TRUE.equals((finalUsageValue))) {
+                            addWarningMsg(ImpactWarnings.Type.USAGE_ENABLED, group, attrConfig);
+                        }
                     }
                 }
             }

@@ -177,7 +177,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                      * disabled and AllowCustomization=FALSE.
                      * 
                      * 'onlyActivateAttrs=false' indicates it is
-                     * Activate/Deactivate page
+                     * Activate/Deactivate page, otherwise it is Usage
+                     * Enable/Disable page
                      */
                     boolean includeCurrentAttr = true;
                     AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
@@ -190,7 +191,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                         log.info("Attr config allowCustomiztion is null " + JsonUtils.serialize(attrConfig));
                     }
                     if (onlyActiveAttrs) {
-                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
+                        // PLS-10731 activation status does not apply to
+                        // Modeling usage
+                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))
+                                && !ColumnSelection.Predefined.Model.name().equals(propertyName)) {
                             includeCurrentAttr = false;
                         }
                     } else {
@@ -237,7 +241,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     log.warn(String.format("Attr %s does not have properties", attrConfig.getAttrName()));
                 }
             }
-            overview.setTotalAttrs(totalAttrs);
+            // the total Attr count only makes sense for activation overview
+            if (!onlyActiveAttrs) {
+                overview.setTotalAttrs(totalAttrs);
+            }
         }
         return overview;
     }

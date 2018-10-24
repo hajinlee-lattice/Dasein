@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.Comparator;
 
 import javax.inject.Inject;
 
@@ -79,11 +79,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImpl.class);
 
-    // The order matters as it maps with the mock up
-    public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
-            ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.Model.getName(),
-            ColumnSelection.Predefined.TalkingPoint.getName(), ColumnSelection.Predefined.CompanyProfile.getName() };
-    private static final List<String> usagePropertyList = Arrays.asList(usageProperties);
+    private static final List<String> usagePropertyList = Arrays.asList(ColumnSelection.Predefined.usageProperties);
     private static final HashMap<String, String> usageToDisplayName = new HashMap<>();
     private static final HashMap<String, String> displayNameToUsage = new HashMap<>();
     private static final String defaultDisplayName = "Default Name";
@@ -164,8 +160,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigUsageOverview usageOverview = new AttrConfigUsageOverview();
         List<AttrConfigSelection> selections = new ArrayList<>();
         usageOverview.setSelections(selections);
-        Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
-                MultiTenantContext.getShortTenantId(), null, Arrays.asList(usageProperties), true);
+        Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy
+                .getAttrConfigOverview(MultiTenantContext.getShortTenantId(), null, usagePropertyList, true);
         log.info("map is " + map);
 
         for (String property : usagePropertyList) {
@@ -180,8 +176,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             TreeMap<String, Long> categories = new TreeMap<String, Long>(new Comparator<String>() {
                 @Override
                 public int compare(String a, String b) {
-                    return Category.fromName(a).getOrder()
-                            .compareTo(Category.fromName(b).getOrder());
+                    return Category.fromName(a).getOrder().compareTo(Category.fromName(b).getOrder());
                 }
             });
             selection.setCategories(categories);
@@ -642,13 +637,17 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                      * disabled and AllowCustomization=FALSE.
                      * 
                      * 'onlyActivateAttrs=false' indicates it is
-                     * Activate/Deactivate page
+                     * Activate/Deactivate page, otherwise it is Usage
+                     * Enable/Disable page
                      */
                     boolean includeCurrentAttr = true;
                     AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
                             .get(ColumnMetadataKey.State);
                     if (applyActivationFilter) {
-                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
+                        // PLS-10731 activation status does not apply to
+                        // Modeling usage
+                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))
+                                && !ColumnSelection.Predefined.Model.name().equals(property)) {
                             includeCurrentAttr = false;
                         }
                     } else {

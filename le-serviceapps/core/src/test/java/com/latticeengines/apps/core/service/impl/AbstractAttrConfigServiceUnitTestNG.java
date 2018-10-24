@@ -45,8 +45,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
     private static Tenant tenant;
     private static int intentLimit = 20;
     private static int technologyLimit = 32;
-    private static final Logger log = LoggerFactory
-            .getLogger(AbstractAttrConfigServiceUnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigServiceUnitTestNG.class);
     @Mock
     private ActivationLimitValidator limitationValidator;
     @Mock
@@ -58,24 +57,22 @@ public class AbstractAttrConfigServiceUnitTestNG {
         tenant = new Tenant("tenantId");
         tenant.setPid(1L);
         MultiTenantContext.setTenant(tenant);
-        doReturn(intentLimit).when(zkConfigService).getMaxPremiumLeadEnrichmentAttributesByLicense(
-                tenant.getId(), DataLicense.BOMBORA.getDataLicense());
+        doReturn(intentLimit).when(zkConfigService).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
+                DataLicense.BOMBORA.getDataLicense());
         MultiTenantContext.setTenant(tenant);
-        doReturn(technologyLimit).when(zkConfigService)
-                .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
-                        DataLicense.HG.getDataLicense());
+        doReturn(technologyLimit).when(zkConfigService).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
+                DataLicense.HG.getDataLicense());
     }
 
     @Test(groups = "unit")
     public void testGetActualValue() {
-        Object actualValue = cdlAttrConfigServiceImpl.getActualValue(
-                generateDisplayNamePropertyAllowedForCustomizationWithNoCustomValue());
+        Object actualValue = cdlAttrConfigServiceImpl
+                .getActualValue(generateDisplayNamePropertyAllowedForCustomizationWithNoCustomValue());
+        Assert.assertEquals(actualValue, displayName1);
+        actualValue = cdlAttrConfigServiceImpl.getActualValue(generateDisplayNamePropertyDisallowedForCustomization());
         Assert.assertEquals(actualValue, displayName1);
         actualValue = cdlAttrConfigServiceImpl
-                .getActualValue(generateDisplayNamePropertyDisallowedForCustomization());
-        Assert.assertEquals(actualValue, displayName1);
-        actualValue = cdlAttrConfigServiceImpl.getActualValue(
-                generateDisplayNamePropertyAllowedForCustomizationWithCustomValue());
+                .getActualValue(generateDisplayNamePropertyAllowedForCustomizationWithCustomValue());
         Assert.assertEquals(actualValue, displayName2);
     }
 
@@ -83,13 +80,11 @@ public class AbstractAttrConfigServiceUnitTestNG {
     @Test(groups = "unit")
     public void testGetAttrConfigOverviewWithSomeActiveAttrs() {
         AttrConfigCategoryOverview overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
-                generatePropertyListWithSomeActive(), Category.INTENT,
-                Arrays.asList(ColumnMetadataKey.State), false);
+                generatePropertyListWithSomeActive(), Category.INTENT, Arrays.asList(ColumnMetadataKey.State), false);
         log.info("overviewWithSomeActive is " + overview);
         // attr9 's State allowCustomization is false. For Activate/Deactivate
         // page, hide attributes that are: Inactive and AllowCustomization=FALSE
-        Assert.assertEquals(
-                overview.getTotalAttrs() - (generatePropertyListWithSomeActive().size() - 3), 0);
+        Assert.assertEquals(overview.getTotalAttrs() - (generatePropertyListWithSomeActive().size() - 3), 0);
         Assert.assertEquals(overview.getLimit() - intentLimit, 0);
         Map<String, Map<?, Long>> propSummary = overview.getPropSummary();
         Assert.assertNotNull(propSummary);
@@ -100,21 +95,19 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(map.get(AttrState.Inactive).longValue() - 3, 0L);
         Assert.assertEquals(map.get(AttrState.Active).longValue() - 3, 0L);
 
-        overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
-                generatePropertyListWithSomeUsedForSegment(), Category.FIRMOGRAPHICS,
-                getPropertyNames(), true);
+        overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generatePropertyListWithSomeUsedForSegment(),
+                Category.FIRMOGRAPHICS, Arrays.asList(ColumnSelection.Predefined.usageProperties), true);
         log.info("overviewWithWithSomeUsedForSegment is " + overview);
-        Assert.assertEquals(overview.getTotalAttrs() - 6, 0);
+        Assert.assertNull(overview.getTotalAttrs());
         Assert.assertNull(overview.getLimit());
         propSummary = overview.getPropSummary();
         Assert.assertNotNull(propSummary);
-        Assert.assertEquals(propSummary.size(), getPropertyNames().size());
+        Assert.assertEquals(propSummary.size(), Arrays.asList(ColumnSelection.Predefined.usageProperties).size());
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Segment.getName()));
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Enrichment.getName()));
-        Assert.assertTrue(
-                propSummary.containsKey(ColumnSelection.Predefined.TalkingPoint.getName()));
-        Assert.assertTrue(
-                propSummary.containsKey(ColumnSelection.Predefined.CompanyProfile.getName()));
+        Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Model.getName()));
+        Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.TalkingPoint.getName()));
+        Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.CompanyProfile.getName()));
         map = propSummary.get(ColumnSelection.Predefined.Segment.getName());
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 3, 0L);
         // For Enable/Disable page, hide hide attributes that are: disabled and
@@ -127,14 +120,19 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
         map = propSummary.get(ColumnSelection.Predefined.CompanyProfile.getName());
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
+        // For model usage, the number is not impacted by the state
+        map = propSummary.get(ColumnSelection.Predefined.Model.getName());
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 5, 0L);
 
-        overview = cdlAttrConfigServiceImpl
-                .getAttrConfigOverview(
-                        AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false,
-                                false, false, false, false),
-                        Category.INTENT, getPropertyNames(), true);
+        overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
+                AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false),
+                Category.INTENT, Arrays.asList(ColumnSelection.Predefined.usageProperties), true);
         log.info("generatePropertyListWithAllInactive is " + overview);
-        Assert.assertEquals(overview.getTotalAttrs(), new Long(0));
+        Assert.assertNull(overview.getTotalAttrs());
+        Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Model.getName()));
+        // For model usage, the number is not impacted by the state
+        map = propSummary.get(ColumnSelection.Predefined.Model.getName());
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 5, 0L);
     }
 
     @Test(groups = "unit")
@@ -153,8 +151,8 @@ public class AbstractAttrConfigServiceUnitTestNG {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40023);
         }
         // system don't render internal attributes
-        List<AttrConfig> renderedConfig = cdlAttrConfigServiceImpl.render(Collections.singletonList(
-                AttrConfigTestUtils.getAccountIdData(Category.ACCOUNT_ATTRIBUTES)), null);
+        List<AttrConfig> renderedConfig = cdlAttrConfigServiceImpl.render(
+                Collections.singletonList(AttrConfigTestUtils.getAccountIdData(Category.ACCOUNT_ATTRIBUTES)), null);
         Assert.assertEquals(renderedConfig.size(), 0);
     }
 
@@ -171,12 +169,12 @@ public class AbstractAttrConfigServiceUnitTestNG {
         // currently, always render 11 entries
         Assert.assertEquals(props.size(), 11);
 
-        AttrConfigProp<String> segmentProp = config
-                .getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(), String.class);
-        AttrConfigProp<String> companyProfileProp = config.getStrongTypedProperty(
-                ColumnSelection.Predefined.CompanyProfile.name(), String.class);
-        AttrConfigProp<String> talkingPointProp = config.getStrongTypedProperty(
-                ColumnSelection.Predefined.TalkingPoint.name(), String.class);
+        AttrConfigProp<String> segmentProp = config.getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(),
+                String.class);
+        AttrConfigProp<String> companyProfileProp = config
+                .getStrongTypedProperty(ColumnSelection.Predefined.CompanyProfile.name(), String.class);
+        AttrConfigProp<String> talkingPointProp = config
+                .getStrongTypedProperty(ColumnSelection.Predefined.TalkingPoint.name(), String.class);
         AttrConfigProp<String> enrichmentProp = config
                 .getStrongTypedProperty(ColumnSelection.Predefined.Enrichment.name(), String.class);
         Assert.assertEquals(segmentProp.isAllowCustomization(), Boolean.FALSE);
@@ -189,8 +187,8 @@ public class AbstractAttrConfigServiceUnitTestNG {
         // transfer null customer config
         renderList = cdlAttrConfigServiceImpl.render(dataList, null);
         Assert.assertEquals(renderList.size(), dataList.size());
-        List<AttrConfig> expectedList = Collections.singletonList(
-                AttrConfigTestUtils.getLDCNonPremiumAttr(Category.FIRMOGRAPHICS, false));
+        List<AttrConfig> expectedList = Collections
+                .singletonList(AttrConfigTestUtils.getLDCNonPremiumAttr(Category.FIRMOGRAPHICS, false));
         log.info("renderList: ");
         for (AttrConfig x : renderList) {
             log.info(JsonUtils.serialize(x));
@@ -235,13 +233,6 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(trimConfig, trimConfig2);
     }
 
-    private List<String> getPropertyNames() {
-        return Arrays.asList(ColumnSelection.Predefined.Segment.getName(),
-                ColumnSelection.Predefined.Enrichment.getName(),
-                ColumnSelection.Predefined.TalkingPoint.getName(),
-                ColumnSelection.Predefined.CompanyProfile.getName());
-    }
-
     private AttrConfigProp<String> generateDisplayNamePropertyAllowedForCustomizationWithNoCustomValue() {
         AttrConfigProp<String> displayNameProp = new AttrConfigProp<String>();
         displayNameProp.setSystemValue(displayName1);
@@ -280,30 +271,20 @@ public class AbstractAttrConfigServiceUnitTestNG {
 
     private List<AttrConfig> generatePropertyListWithSomeUsedForSegment() {
         List<AttrConfig> renderedList = Arrays.asList(
-                AttrConfigTestUtils.getLDCNonPremiumAttr(Category.INTENT, true, true, false, false,
-                        false),
-                AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true, true, false, false,
-                        false), //
-                AttrConfigTestUtils.getLDCInternalAttr(Category.INTENT, true, true, false, false,
-                        false), //
-                AttrConfigTestUtils.getCDLStdAttr(Category.INTENT, true, false, false, false,
-                        false), //
-                AttrConfigTestUtils.getCDLLookIDAttr(Category.INTENT, false, true, false, false,
-                        false), //
-                AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.INTENT, true, false, false,
-                        false, false), //
-                AttrConfigTestUtils.getCDLContactExtensionAttr(Category.INTENT, true, false, false,
-                        false, false), //
-                AttrConfigTestUtils.getCDLDerivedPBAttr(Category.INTENT, true, false, false, false,
-                        false), //
-                AttrConfigTestUtils.getCDLRatingAttr(Category.INTENT, true, false, false, false,
-                        false));
+                AttrConfigTestUtils.getLDCNonPremiumAttr(Category.INTENT, true, true, false, false, false),
+                AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true, true, false, false, false), //
+                AttrConfigTestUtils.getLDCInternalAttr(Category.INTENT, true, true, false, false, false), //
+                AttrConfigTestUtils.getCDLStdAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLLookIDAttr(Category.INTENT, false, true, false, false, false), //
+                AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLContactExtensionAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLDerivedPBAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLRatingAttr(Category.INTENT, true, false, false, false, false));
         return renderedList;
     }
 
     private List<ColumnMetadata> generateMetadataList(Category category) {
-        List<ColumnMetadata> metadataList = Arrays.asList(
-                AttrConfigTestUtils.getLDCNonPremiumData(category),
+        List<ColumnMetadata> metadataList = Arrays.asList(AttrConfigTestUtils.getLDCNonPremiumData(category),
                 AttrConfigTestUtils.getLDCPremiumData(category), //
                 AttrConfigTestUtils.getLDCInternalData(category), //
                 AttrConfigTestUtils.getCDLStdData(category), //

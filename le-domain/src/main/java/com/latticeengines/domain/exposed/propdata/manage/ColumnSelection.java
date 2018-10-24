@@ -136,10 +136,14 @@ public class ColumnSelection {
         TalkingPoint("TalkingPoint"), //
         CompanyProfile("CompanyProfile");
 
-        public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model,
-                DerivedColumns, RTS, ID, Enrichment, Segment, TalkingPoint, CompanyProfile);
-        public static final EnumSet<Predefined> usageProperties = EnumSet.of(Segment, Enrichment,
-                TalkingPoint, CompanyProfile);
+        public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
+                ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.Model.getName(),
+                ColumnSelection.Predefined.TalkingPoint.getName(),
+                ColumnSelection.Predefined.CompanyProfile.getName() };
+
+        public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID,
+                Enrichment, Segment, TalkingPoint, CompanyProfile);
+
         private static Map<String, Predefined> nameMap;
 
         static {
