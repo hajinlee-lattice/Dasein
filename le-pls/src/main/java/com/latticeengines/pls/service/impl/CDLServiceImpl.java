@@ -1,9 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -26,7 +25,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -34,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -57,10 +56,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-
-    private static final List<BusinessEntity> ENTITIES = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
-            BusinessEntity.Transaction, BusinessEntity.Product);
-    private static final String PREFIX = "/dropfolder/templates/";
+    private static final String PREFIX = "/templates/";
     private static final String TEMPLATENAME = "N/A";
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
@@ -252,59 +248,53 @@ public class CDLServiceImpl implements CDLService {
     }
 
     /*
-     * if logic provide 5 display by default, dropfolderResource return 2 folder
-     * names if entity is product
+     * logic provide 5 display by default if drop folder is empty then generate
+     * template according to data feed task
      */
     @Override
     public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
-        for (BusinessEntity entity : ENTITIES) {
-            S3ImportTemplateDisplay display = null;
-            List<String> folderNames = dropFolderProxy.getAllSubFolders(customerSpace, entity.name(), PREFIX);
-            if (CollectionUtils.isEmpty(folderNames)) {
-                log.info("Empty path in s3 folders for tenant %s in %s", customerSpace, entity.name());
-                display = new S3ImportTemplateDisplay();
-                display.setPath(PATHNAME);
-                display.setExist(Boolean.FALSE);
-                display.setObject(constructObject(entity, null));
-                display.setTemplateName(TEMPLATENAME);
-            }
-            else {
-                for (String folderName : folderNames) {
-                    display = new S3ImportTemplateDisplay();
-                    DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName, entity.name());
-                    if (task == null) {
-                        log.info("Empty data feed task for tenant %s in %s with feedtype %s", customerSpace,
-                                entity.name(), folderName);
-                        display.setPath(PATHNAME);
-                        display.setExist(Boolean.FALSE);
-                        display.setObject(constructObject(entity, null));
-                        display.setTemplateName(TEMPLATENAME);
-                    } else {
-                        display.setPath(PREFIX + folderName);
-                        display.setExist(Boolean.TRUE);
-                        display.setLastEditedDate(task.getLastUpdated());
-                        // get from data feed task
-                        display.setTemplateName(task.getTemplateDisplayName());
-                        display.setObject(constructObject(entity, task.getSubType()));
-                    }
-                }
-            }
-            templates.add(display);
+        List<String> folderNames = dropFolderProxy.getAllSubFolders(customerSpace, null, null);
+        S3ImportTemplateDisplay display = null;
+        if (CollectionUtils.isEmpty(folderNames)) {
+            log.info("Empty path in s3 folders for tenant %s in", customerSpace);
         }
+        for (String folderName : folderNames) {
+            display = new S3ImportTemplateDisplay();
+            DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
+            if (task == null) {
+                log.warn("Empty data feed task for tenant %s in %s with feedtype %s", customerSpace, folderName);
+            } else {
+                display.setPath(PREFIX + folderName);
+                display.setExist(Boolean.TRUE);
+                display.setLastEditedDate(task.getLastUpdated());
+                // get from data feed task
+                display.setTemplateName(task.getTemplateDisplayName());
+                EntityType entityType = EntityType.fromEntityAndSubType(BusinessEntity.getByName(task.getEntity()),
+                        task.getSubType());
+                display.setObject(entityType.getDisplayName());
+                display.setFeedType(task.getFeedType());
+                templates.add(display);
+            }
+        }
+        // ensure there exists 5 templates at least in the returned list
+        populateDefaultTemplate(templates);
         return templates;
     }
 
-    private String constructObject(BusinessEntity entity, SubType subType) {
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
-            return entity.name() + "s";
-        } else if (BusinessEntity.Transaction.equals(entity)) {
-            return "Product Purchases";
-        } else if (BusinessEntity.Product.equals(entity) && subType != null) {
-            return entity.name() + " " + (subType.equals(SubType.Bundle) ? subType.name() + "s" : subType.name());
-        } else {
-            return null;
+    private void populateDefaultTemplate(List<S3ImportTemplateDisplay> templates) {
+        Set<String> existingObjects = templates.stream().map(entry -> entry.getObject()).collect(Collectors.toSet());
+        for (String object : EntityType.getNames()) {
+            if (!existingObjects.contains(object)) {
+                S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
+                display.setPath(PATHNAME);
+                display.setExist(Boolean.FALSE);
+                display.setObject(object);
+                display.setTemplateName(TEMPLATENAME);
+                templates.add(display);
+            }
         }
     }
+
 
 }

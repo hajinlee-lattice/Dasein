@@ -20,6 +20,8 @@ public class S3ImportTemplateDisplay {
     private Date lastEditedDate;
     @JsonProperty("Exist")
     private Boolean exist;
+    @JsonProperty("FeedType")
+    private String feedType;
 
     public String getObject() {
         return object;
@@ -59,6 +61,14 @@ public class S3ImportTemplateDisplay {
 
     public void setExist(Boolean exist) {
         this.exist = exist;
+    }
+
+    public String getFeedType() {
+        return feedType;
+    }
+
+    public void setFeedType(String feedType) {
+        this.feedType = feedType;
     }
 
     @Override

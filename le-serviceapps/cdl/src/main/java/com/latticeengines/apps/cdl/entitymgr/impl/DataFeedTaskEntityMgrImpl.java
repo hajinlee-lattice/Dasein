@@ -252,6 +252,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(String source, String dataFeedType, DataFeed datafeed) {
         DataFeedTask dataFeedTask = datafeedTaskRepository.findBySourceAndFeedTypeAndDataFeed(source,
                 dataFeedType, datafeed);
