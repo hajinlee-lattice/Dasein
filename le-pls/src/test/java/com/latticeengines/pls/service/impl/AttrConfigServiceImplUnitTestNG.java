@@ -342,7 +342,7 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(selectionDetail.getTotalAttrs() - 9L, 0);
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 8);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
-                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 0);
+                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 8);
     }
 
     @Test(groups = "unit")
