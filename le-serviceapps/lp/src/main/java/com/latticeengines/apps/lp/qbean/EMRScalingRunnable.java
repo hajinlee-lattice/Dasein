@@ -133,12 +133,16 @@ public class EMRScalingRunnable implements Runnable {
         int running = taskGrp.getRunningInstanceCount();
         int requested = taskGrp.getRequestedInstanceCount();
         int target = getTargetTaskNodes();
-        log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
-                emrCluster, running, requested, target));
-        if (target > requested) {
-            lastScalingUp.set(System.currentTimeMillis());
+        if (target != requested) {
+            log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
+                    emrCluster, running, requested, target));
+            if (target > requested) {
+                lastScalingUp.set(System.currentTimeMillis());
+            }
+            return scale(target);
+        } else {
+            return true;
         }
-        return scale(target);
     }
 
     private void scaleDown() {
@@ -148,9 +152,11 @@ public class EMRScalingRunnable implements Runnable {
             int running = taskGrp.getRunningInstanceCount();
             int requested = taskGrp.getRequestedInstanceCount();
             int target = getTargetTaskNodes();
-            log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
-                    emrCluster, running, requested, target));
-            scale(target);
+            if (requested != target) {
+                log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
+                        emrCluster, running, requested, target));
+                scale(target);
+            }
         }
     }
 
