@@ -42,9 +42,9 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MAX_AVAIL_MEM_MB = 2 * UNIT_MB + CORE_MB;
     private static final int MAX_AVAIL_VCORES = 2 * UNIT_VCORES + CORE_VCORES;
 
-    private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(2);
+    private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
+    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
     private static final long SCALE_UP_COOLING_PERIOD = TimeUnit.MINUTES.toMillis(10);
-    private static final long LONG_WAITING_TIME = TimeUnit.MINUTES.toMillis(2);
 
     private static final AtomicLong lastScalingUp = new AtomicLong(0);
 
@@ -59,6 +59,7 @@ public class EMRScalingRunnable implements Runnable {
     private final EMRService emrService;
     private final EMREnvService emrEnvService;
     private ClusterMetrics metrics = new ClusterMetrics();
+    private ReqResource reqResource = new ReqResource();
 
     EMRScalingRunnable(String emrCluster, EMRService emrService, EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
@@ -78,8 +79,15 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
+        try {
+            reqResource = getRequestingResources();
+        } catch (Exception e) {
+            log.error("Failed to retrieve requesting resource submitted to emr cluster " + emrCluster);
+            return;
+        }
+
         boolean scaled = false;
-        if (needToScaleUp()) {
+        if (metrics.appsPending > 0) {
             scaled = scaleUp();
         }
 
@@ -88,28 +96,6 @@ public class EMRScalingRunnable implements Runnable {
         }
 
         log.debug("Finished processing emr cluster " + emrCluster);
-    }
-
-    private boolean needToScaleUp() {
-        String scaleLogPrefix = "Might need to scale up " + emrCluster + ": ";
-        String noScaleLogPrefix = "no need to scale up " + emrCluster + ": ";
-
-        int availableMB = metrics.availableMB;
-        int availableVCores = metrics.availableVirtualCores;
-
-        boolean scale;
-        if (availableMB < MIN_AVAIL_MEM_MB) {
-            log.info(scaleLogPrefix + "available mb " + availableMB + " is not enough.");
-            scale = true;
-        } else if (availableVCores < MIN_AVAIL_VCORES) {
-            log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
-            scale = true;
-        } else {
-            log.debug(noScaleLogPrefix + "have enough available mb " + availableMB //
-                    + " and vcores " + availableVCores);
-            scale = false;
-        }
-        return scale;
     }
 
     private boolean needToScaleDown() {
@@ -141,19 +127,15 @@ public class EMRScalingRunnable implements Runnable {
 
     private boolean scaleUp() {
         ReqResource reqs = getRequestingResources();
-        if (reqs.reqMb > metrics.availableMB || reqs.reqVCores > metrics.availableVirtualCores) {
-            // only scale up when insufficient resource
-            InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
-            int running = taskGrp.getRunningInstanceCount();
-            int requested = taskGrp.getRequestedInstanceCount();
-            int target = getTargetTaskNodes(reqs, running);
-            log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
-                    emrCluster, running, requested, target));
-            lastScalingUp.set(System.currentTimeMillis());
-            return scale(target);
-        } else {
-            return false;
-        }
+        // only scale up when insufficient resource
+        InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
+        int running = taskGrp.getRunningInstanceCount();
+        int requested = taskGrp.getRequestedInstanceCount();
+        int target = getTargetTaskNodes(reqs);
+        log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
+                emrCluster, running, requested, target));
+        lastScalingUp.set(System.currentTimeMillis());
+        return scale(target);
     }
 
     private void scaleDown() {
@@ -163,7 +145,7 @@ public class EMRScalingRunnable implements Runnable {
             InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
             int running = taskGrp.getRunningInstanceCount();
             int requested = taskGrp.getRequestedInstanceCount();
-            int target = getTargetTaskNodes(reqs, running);
+            int target = getTargetTaskNodes(reqs);
             log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
                     emrCluster, running, requested, target));
             scale(target);
@@ -208,9 +190,9 @@ public class EMRScalingRunnable implements Runnable {
                                 }
                                 reqResource.reqMb += mb;
                                 reqResource.reqVCores += vcores;
-                                if (isWaitingTooLong(app)) {
-                                    reqResource.eagerReqMb += mb;
-                                    reqResource.eagerReqVCores += vcores;
+                                if (now - app.getStartTime() >= HANGING_START_THRESHOLD) {
+                                    reqResource.eagerMb += mb;
+                                    reqResource.eagerVCores += vcores;
                                 }
                             }
                         }
@@ -227,23 +209,12 @@ public class EMRScalingRunnable implements Runnable {
         return "YARN".equalsIgnoreCase(app.getApplicationType());
     }
 
-    private boolean isWaitingTooLong(ApplicationReport app) {
-        String diagnostics = app.getDiagnostics();
-        boolean isWaitingTooLong = false;
-        if (diagnostics.contains("not yet activated") //
-                && System.currentTimeMillis() - app.getStartTime() > LONG_WAITING_TIME) {
-            isWaitingTooLong = true;
-        }
-        return isWaitingTooLong;
-    }
-
-    private int getTargetTaskNodes(ReqResource reqs, int running) {
-        int targetByMb = determineTargetByMb(reqs.reqMb);
-        int targetByVCores = determineTargetByVCores(reqs.reqVCores);
+    private int getTargetTaskNodes(ReqResource reqs) {
+        int targetByMb = determineTargetByMb(reqs.reqMb - reqs.eagerMb);
+        int targetByVCores = determineTargetByVCores(reqs.reqVCores - reqs.eagerVCores);
         int target = Math.max(targetByMb, targetByVCores);
-        if (reqs.eagerReqMb > 0 || reqs.eagerReqVCores > 0) {
-            int newNodes = determineNewTargetsByEagerResource(reqs.eagerReqMb, reqs.eagerReqVCores);
-            target = Math.max(target, running + newNodes);
+        if (reqs.eagerMb > 0 || reqs.eagerVCores > 0) {
+            target += determineNewTargetsByReqResource(reqs.eagerMb, reqs.eagerVCores);
         }
         return Math.min(target, MAX_TASK_NODES);
     }
@@ -268,7 +239,7 @@ public class EMRScalingRunnable implements Runnable {
         return target;
     }
 
-    private int determineNewTargetsByEagerResource(int mb, int vcores) {
+    private int determineNewTargetsByReqResource(int mb, int vcores) {
         int byMb = (int) Math.ceil((1.0 * mb) / UNIT_MB);
         int byVCores = (int) Math.ceil((1.0 * vcores) / UNIT_VCORES);
         int newHosts = Math.max(byMb, byVCores);
@@ -278,12 +249,10 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private static class ReqResource {
-
         int reqMb = 0;
         int reqVCores = 0;
-        int eagerReqMb = 0;
-        int eagerReqVCores = 0;
-
+        int eagerMb = 0;
+        int eagerVCores = 0;
     }
 
 }
