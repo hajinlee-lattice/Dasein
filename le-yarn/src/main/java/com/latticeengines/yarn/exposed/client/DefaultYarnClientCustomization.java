@@ -193,7 +193,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
                 getXmxSetting(appMasterProperties), //
-                "-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCDetails -Xloggc:<LOG_DIR>/gc.log -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=<LOG_DIR>/heapdump.log", //
+                "-XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
