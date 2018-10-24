@@ -52,6 +52,7 @@ public class EMRScalingRunnable implements Runnable {
             Sets.newEnumSet(Arrays.asList(//
                     YarnApplicationState.NEW, //
                     YarnApplicationState.NEW_SAVING, //
+                    YarnApplicationState.SUBMITTED, //
                     YarnApplicationState.ACCEPTED //
             ), YarnApplicationState.class);
 
@@ -87,7 +88,7 @@ public class EMRScalingRunnable implements Runnable {
         }
 
         boolean scaled = false;
-        if (metrics.appsPending > 0) {
+        if (needToScaleUp()) {
             scaled = scaleUp();
         }
 
@@ -97,6 +98,21 @@ public class EMRScalingRunnable implements Runnable {
 
         metrics = new ClusterMetrics();
         log.debug("Finished processing emr cluster " + emrCluster);
+    }
+
+    private boolean needToScaleUp() {
+        boolean mightScaleUp = reqResource.reqMb > 0 || reqResource.reqVCores > 0;
+        if (!mightScaleUp) {
+            InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
+            int running = taskGrp.getRunningInstanceCount();
+            int requested = taskGrp.getRequestedInstanceCount();
+            if (requested < running) {
+                // during scaling down, check if need to interrupt
+                log.info(emrCluster + " is undergoing scaling down, might need to adjust target size.");
+                mightScaleUp = true;
+            }
+        }
+        return mightScaleUp;
     }
 
     private boolean needToScaleDown() {
@@ -201,6 +217,7 @@ public class EMRScalingRunnable implements Runnable {
                                     reqResource.eagerMb += mb;
                                     reqResource.eagerVCores += vcores;
                                 }
+                                reqResource.pendingApps += 1;
                             }
                         }
                     }
@@ -223,6 +240,7 @@ public class EMRScalingRunnable implements Runnable {
         if (reqResource.eagerMb > 0 || reqResource.eagerVCores > 0) {
             target += determineNewTargetsByReqResource(reqResource.eagerMb, reqResource.eagerVCores);
         }
+        log.info("Target=" + target + " Reqs=" + reqResource);
         return Math.min(target, MAX_TASK_NODES);
     }
 
@@ -260,6 +278,12 @@ public class EMRScalingRunnable implements Runnable {
         int reqVCores = 0;
         int eagerMb = 0;
         int eagerVCores = 0;
+        int pendingApps = 0;
+        @Override
+        public String toString() {
+            return String.format("[pendingApps=%d, reqMb=%d, reqVCores=%d, eagerMb=%d, eagerVCores=%d]",
+                    pendingApps, reqMb, reqVCores, eagerMb, eagerVCores);
+        }
     }
 
 }
