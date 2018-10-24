@@ -134,7 +134,9 @@ public class EMRScalingRunnable implements Runnable {
         int target = getTargetTaskNodes(reqs);
         log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
                 emrCluster, running, requested, target));
-        lastScalingUp.set(System.currentTimeMillis());
+        if (target > requested) {
+            lastScalingUp.set(System.currentTimeMillis());
+        }
         return scale(target);
     }
 
