@@ -259,7 +259,7 @@ public class EMRScalingRunnable implements Runnable {
                     reqResource.reqMb += mb;
                     reqResource.reqVCores += vcores;
                     reqResource.maxMb = Math.max(mb, reqResource.maxMb);
-                    reqResource.maxVCores = Math.max(mb, reqResource.maxVCores);
+                    reqResource.maxVCores = Math.max(vcores, reqResource.maxVCores);
                     reqResource.pendingApps += 1;
                 }
             }
