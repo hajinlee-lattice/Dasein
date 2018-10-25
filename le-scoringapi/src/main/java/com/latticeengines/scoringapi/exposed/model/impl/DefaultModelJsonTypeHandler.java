@@ -129,11 +129,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) throws IOException {
-        String[] tokens = hdfsPath.split("/");
-        CustomerSpace space = CustomerSpace.parse(tokens[4]);
-        String customer = space.toString();
-        String tenantId = space.getTenantId();
-        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, customer, tenantId,
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        CustomerSpace space = CustomerSpace.parse(pathBuilder.getCustomerFromHdfsPath(hdfsPath));
+        return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, space.toString(), space.getTenantId(),
                 podId, s3Bucket);
     }
 
