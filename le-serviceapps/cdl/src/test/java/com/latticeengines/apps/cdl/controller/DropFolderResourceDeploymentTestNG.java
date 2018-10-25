@@ -10,12 +10,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
-    private DropFolderProxy dropFolderProxy;
+    private DropBoxProxy dropBoxProxy;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() {
@@ -24,28 +24,28 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment-app")
     public void test() {
-        List<String> subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
+        List<String> subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null);
         int defaultSize = subFolders.size();
         Assert.assertTrue(defaultSize > 0);
 
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
-        dropFolderProxy.createTemplateFolder(mainTestTenant.getName(), BusinessEntity.Account.name(), "template2");
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template3");
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), null);
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
+        dropBoxProxy.createTemplateFolder(mainTestTenant.getName(), BusinessEntity.Account.name(), "template2");
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template3");
+        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), null);
         Assert.assertEquals(subFolders.size(), 3);
 
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1/test2");
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1/test2");
+        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
         Assert.assertEquals(subFolders.size(), 1);
 
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1");
+        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1");
         Assert.assertEquals(subFolders.size(), 1);
 
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, "Account123", "template1");
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, "Account123", "template1");
+        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null);
         Assert.assertEquals(subFolders.size(), defaultSize + 2);
 
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, "Account123", null);
+        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, "Account123", null);
         Assert.assertEquals(subFolders.size(), 1);
     }
 }

@@ -10,7 +10,6 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
-import com.latticeengines.apps.cdl.service.DropFolderService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -46,9 +45,6 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     private DropBoxService dropBoxService;
 
     @Inject
-    private DropFolderService dropFolderService;
-
-    @Inject
     private S3Service s3Service;
 
 
@@ -65,7 +61,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
-        dropFolderService.createTenantDefaultFolder(space.toString());
+        dropBoxService.createTenantDefaultFolder(space.toString());
     }
 
     public void discardTenant(String customerSpace) {

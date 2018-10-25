@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -68,6 +71,22 @@ public class DropBoxResource {
         summary.setBucket(customersBucket);
         summary.setDropBox(dropBox.getDropBox());
         return summary;
+    }
+
+    @PostMapping(value = "/folder/{objectName}")
+    @ApiOperation(value = "Create template folder")
+    public boolean createFolder(@PathVariable String customerSpace, @PathVariable String objectName,
+                                @RequestParam(required = false) String path) {
+        dropBoxService.createFolder(customerSpace, objectName, path);
+        return true;
+    }
+
+    @GetMapping(value = "/folder")
+    @ApiOperation(value = "Get all sub folders")
+    public List<String> getAllSubFolders(@PathVariable String customerSpace,
+                                         @RequestParam(required = false) String objectName,
+                                         @RequestParam(required = false) String path) {
+        return dropBoxService.getDropFolders(customerSpace, objectName, path);
     }
 
 }

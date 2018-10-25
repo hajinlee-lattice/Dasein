@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
@@ -25,5 +27,11 @@ public interface DropBoxService {
     DropBoxSummary getDropBoxSummary();
 
     Tenant getDropBoxOwner(String dropBox);
+
+    void createTenantDefaultFolder(String customerSpace);
+
+    void createFolder(String customerSpace, String objectName, String path);
+
+    List<String> getDropFolders(String customerSpace, String objectName, String path);
 
 }

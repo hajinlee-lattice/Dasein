@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.cdl;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
@@ -11,5 +13,9 @@ public interface DropBoxProxy {
     GrantDropBoxAccessResponse grantAccess(String customerSpace, GrantDropBoxAccessRequest request);
 
     GrantDropBoxAccessResponse refreshAccessKey(String customerSpace);
+
+    boolean createTemplateFolder(String customerSpace, String objectName, String path);
+
+    List<String> getAllSubFolders(String customerSpace, String objectName, String path);
 
 }

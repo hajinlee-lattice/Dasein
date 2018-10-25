@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -37,8 +38,7 @@ import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 @Component("cdlService")
 public class CDLServiceImpl implements CDLService {
@@ -52,7 +52,7 @@ public class CDLServiceImpl implements CDLService {
     private CDLProxy cdlProxy;
 
     @Inject
-    private DropFolderProxy dropFolderProxy;
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -78,9 +78,9 @@ public class CDLServiceImpl implements CDLService {
         // temp fix for file upload directly.
         String subType = "";
         if (feedType.contains("Bundle")) {
-            subType = "Bundle";
+            subType = DataFeedTask.SubType.Bundle.name();
         } else if (feedType.contains("Hierarchy")) {
-            subType = "Hierarchy";
+            subType = DataFeedTask.SubType.Hierarchy.name();
         }
         String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, "", metaData);
         if (StringUtils.isEmpty(taskId)) {
@@ -254,7 +254,7 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
-        List<String> folderNames = dropFolderProxy.getAllSubFolders(customerSpace, null, null);
+        List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null);
         S3ImportTemplateDisplay display = null;
         if (CollectionUtils.isEmpty(folderNames)) {
             log.info("Empty path in s3 folders for tenant %s in", customerSpace);

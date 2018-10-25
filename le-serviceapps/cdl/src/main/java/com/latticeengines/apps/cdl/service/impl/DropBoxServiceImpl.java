@@ -47,6 +47,10 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String ARN_PREFIX = "arn:aws:s3:::";
     // naming convention for S3 bucket policy statement
     private static final String PUT_POLICY_ID = "RequirementsOnPut";
+    // Share folder for PS team
+    private static final String PS_SHARE = "PS_SHARE";
+    // Template prefix
+    private static final String TEMPLATES = "Templates";
 
     @Inject
     private DropBoxEntityMgr entityMgr;
@@ -110,6 +114,71 @@ public class DropBoxServiceImpl implements DropBoxService {
     @Override
     public Tenant getDropBoxOwner(String dropBox) {
         return entityMgr.getDropBoxOwner(dropBox);
+    }
+
+    @Override
+    public void createTenantDefaultFolder(String customerSpace) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null, null));
+
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, null));
+    }
+
+    @Override
+    public void createFolder(String customerSpace, String objectName, String path) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, formatPath(objectName), null));
+        if (StringUtils.isNotEmpty(path)) {
+            String[] folderList = path.split("/");
+            String needCreateFolder = "";
+            for (String folder : folderList) {
+                if (StringUtils.isNotEmpty(folder)) {
+                    needCreateFolder += "/" + folder;
+                    s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix,
+                            formatPath(objectName), formatPath(needCreateFolder)));
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<String> getDropFolders(String customerSpace, String objectName, String path) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+
+        return s3Service.listSubFolders(dropBoxBucket,
+                getFullPath(dropBoxPrefix, formatPath(objectName), formatPath(path)));
+    }
+
+    private String getFullPath(String dropBoxPrefix, String objectName, String path) {
+        String fullPath = dropBoxPrefix + "/" + TEMPLATES;
+
+        if (StringUtils.isNotEmpty(objectName)) {
+            fullPath += "/" + objectName;
+
+            if (StringUtils.isNotEmpty(path)) {
+                fullPath += "/" + path;
+            }
+        }
+
+        return fullPath;
+    }
+
+    private String formatPath(String path) {
+        if (StringUtils.isNotEmpty(path)) {
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+
+        return path;
     }
 
     @Override

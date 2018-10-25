@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -25,14 +27,14 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.pls.service.CDLService;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
-import com.google.common.collect.ImmutableMap;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 import io.swagger.annotations.Api;
@@ -54,6 +56,9 @@ public class CDLResource {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @RequestMapping(value = "/consolidateAndProfile", method = RequestMethod.POST)
     @ApiOperation(value = "Start Consolidate And Profile job")
@@ -101,46 +106,52 @@ public class CDLResource {
 
     @RequestMapping(value = "/s3/template", method = RequestMethod.POST)
     @ApiOperation(value = "Create s3 import template")
-    public ResponseDocument<String> createS3Template(@RequestParam(value = "templateFileName") String templateFileName,
+    public ModelAndView createS3Template(@RequestParam(value = "templateFileName") String templateFileName,
                 @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
                 @RequestParam(value = "entity") String entity, //
-                @RequestParam(value = "feedType") String feedType,
                 @RequestParam(value = "importData", required = false, defaultValue = "false") boolean importData,
                 @RequestParam(value = "subType", required = false) String subType,
-                @RequestParam(value = "displayName", required = false) String displayName) {
+                @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
+            MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName,
-                    source, entity, feedType, subType, displayName);
+                    source, entity, templateDisplay.getFeedType(), subType, templateDisplay.getTemplateName());
             if (importData) {
                 ApplicationId appId = cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
-                return ResponseDocument.successResponse(appId.toString());
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction(
+                        "S3 template created & start import data", View.Notice, Status.Success, appId.toString());
+                return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
             } else {
-                return ResponseDocument.successResponse(taskId);
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("S3 template created",
+                        View.Notice, Status.Success, taskId);
+                return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
             }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to create template for S3 import: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3ImportFile", e.getMessage()});
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3CreateTemplateAndImport", e.getMessage()});
         }
     }
 
     @RequestMapping(value = "/s3/template/import", method = RequestMethod.POST)
     @ApiOperation(value = "Start s3 import job")
-    public ResponseDocument<String> importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
+    public ModelAndView importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
                  @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
-                 @RequestParam(value = "entity") String entity, //
-                 @RequestParam(value = "feedType") String feedType,
-                 @RequestParam(value = "subType", required = false) String subType) {
+                 @RequestParam(value = "subType", required = false) String subType,
+                 @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
-                    entity);
+            MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
+                    templateDisplay.getFeedType());
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find template for S3 import!");
             }
             ApplicationId appId = cdlService.submitS3ImportWithTemplateData(customerSpace.toString(),
                     dataFeedTask.getUniqueId(), templateFileName);
-            return ResponseDocument.successResponse(appId.toString());
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("File import started",
+                    View.Notice, Status.Success, appId.toString());
+            return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3ImportFile", e.getMessage()});
@@ -148,24 +159,22 @@ public class CDLResource {
     }
 
     @RequestMapping(value = "/s3/template/displayname", method = RequestMethod.PUT)
-    @ApiOperation(value = "Start s3 import job")
+    @ApiOperation(value = "Update template display name")
     public ResponseDocument<String> updateTemplateName(@RequestParam(value = "source", required = false, defaultValue = "File") String source, //
-                                                     @RequestParam(value = "entity") String entity, //
-                                                     @RequestParam(value = "feedType") String feedType,
-                                                     @RequestParam(value = "displayName") String displayName) {
+                                                     @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
-                    entity);
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
+                    templateDisplay.getFeedType());
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find template for S3 import!");
             }
-            dataFeedTask.setTemplateDisplayName(displayName);
+            dataFeedTask.setTemplateDisplayName(templateDisplay.getTemplateName());
             dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             return ResponseDocument.successResponse(dataFeedTask.getUniqueId());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] {"S3ImportFile", e.getMessage()});
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"UpdateTemplateName", e.getMessage()});
         }
     }
 

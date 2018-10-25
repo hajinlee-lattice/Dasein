@@ -70,7 +70,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -109,7 +109,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private String hostPort;
 
     @Inject
-    private DropFolderProxy dropFolderProxy;
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
@@ -194,7 +194,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.setTemplateDisplayName(feedType);
             }
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-            dropFolderProxy.createTemplateFolder(customerSpace.toString(), feedType, "");
+            dropBoxProxy.createTemplateFolder(customerSpace.toString(), feedType, "");
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
                 DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());

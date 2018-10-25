@@ -62,7 +62,6 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -129,9 +128,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private DataFeedTask contactDataFeedTask;
 
     private DataFeedTask transactionDataFeedTask;
-
-    @Inject
-    private DropFolderProxy dropFolderProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
