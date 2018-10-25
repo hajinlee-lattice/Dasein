@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -80,7 +81,17 @@ public class RatingQueryTranslator extends QueryTranslator {
                     appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);
                 }
             }
-            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchAttrs());
+            List<AttributeLookup> attrs = new ArrayList<>();
+            for (AttributeLookup attributeLookup: decorator.getFreeTextSearchAttrs()) {
+                if (repository.getColumnMetadata(attributeLookup) != null) {
+                    attrs.add(attributeLookup);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(attrs)) {
+                queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), attrs.toArray(new AttributeLookup[0]));
+            } else {
+                log.warn("None of the free text search attributes exists in attr repo, skip free text search.");
+            }
         }
 
         configurePagination(frontEndQuery);

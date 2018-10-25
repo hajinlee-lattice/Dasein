@@ -46,7 +46,7 @@ public abstract class BaseFrontEndEntityResource {
         return getCount(tenantId, frontEndQuery, getMainEntity());
     }
 
-    protected Long getCount(String tenantId, FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
+    Long getCount(String tenantId, FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
         String servingTableName = dataCollectionProxy.getTableName(tenantId, mainEntity.getServingStore());
         if (StringUtils.isBlank(servingTableName)) {
             log.warn(String.format("%s's serving store %s does not exist, returning 0 count.", mainEntity.name(),
@@ -183,8 +183,6 @@ public abstract class BaseFrontEndEntityResource {
             String consolidatedName = (ldcName != null) ? ldcName : companyName;
             if (consolidatedName != null && !consolidatedName.equals(companyName)) {
                 result.put(InterfaceName.CompanyName.toString(), consolidatedName);
-                //TODO: YSong-M23 temp log, to be removed
-                log.info("Overwriting company name to " + consolidatedName);
             }
         }
     }
