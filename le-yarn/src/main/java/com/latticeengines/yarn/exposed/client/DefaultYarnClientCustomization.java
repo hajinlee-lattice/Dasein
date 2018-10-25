@@ -165,8 +165,8 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         // memory utilization. If we still run into an
         // OOM error, then that means the requested memory is really less than
         // what can be handled.
-        String xmx = minAllocationInMb > 1536 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
-        String xms = minAllocationInMb > 1536 ? String.format("-Xms%dm", minAllocationInMb - 512) : "-Xms1024m";
+        String xmx = minAllocationInMb > 1536 ? String.format("-Xmx%dm", minAllocationInMb - 1024) : "-Xmx1024m";
+        String xms = minAllocationInMb > 1536 ? String.format("-Xms%dm", minAllocationInMb - 1024) : "-Xms1024m";
         return xms + " " + xmx;
     }
 
@@ -193,7 +193,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
                 getXmxSetting(appMasterProperties), //
-                "-XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
+                "-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
