@@ -75,7 +75,8 @@ public class EMRServiceImpl implements EMRService {
         String masterIp = null;
         AmazonElasticMapReduce emr = getEmr();
         if (StringUtils.isNotBlank(clusterId)) {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
+                    Collections.singleton(NoSuchEntityException.class));
             DescribeClusterResult cluster = retryTemplate.execute(context -> //
                     emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
             String masterDNS = cluster.getCluster().getMasterPublicDnsName();
@@ -134,7 +135,8 @@ public class EMRServiceImpl implements EMRService {
             return null;
         }
         AmazonElasticMapReduce emr = getEmr();
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
+                Collections.singleton(NoSuchEntityException.class));
         ListInstanceGroupsResult result = retryTemplate.execute(context -> {
             ListInstanceGroupsRequest listGrpRequest = new ListInstanceGroupsRequest().withClusterId(clusterId);
             return emr.listInstanceGroups(listGrpRequest);
@@ -198,7 +200,7 @@ public class EMRServiceImpl implements EMRService {
 
     private DescribeClusterResult describeCluster(String clusterId) {
         AmazonElasticMapReduce emr = getEmr();
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
                 Collections.singleton(NoSuchEntityException.class));
         DescribeClusterResult cluster;
         try {
