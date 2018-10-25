@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -199,7 +200,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<Pair<String, String>> idMappings = new ArrayList<>();
         boolean hasExternalId = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getCdlExternalSystemType() != null) {
+            if (fieldMapping.getCdlExternalSystemType() != null
+                    && StringUtils.isNotEmpty(fieldMapping.getMappedField())) {
                 String displayName = fieldMapping.getMappedField();
                 if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
                     fieldMapping.setMappedField(fieldMapping.getMappedField() + "_ID");
