@@ -1,21 +1,19 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.io.IOException;
 import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadFileWithoutLimitDeploymentTestNG.class);
 
     private boolean outsizeFlag = true;
     @Value("${cdl.largeimport.account.filename:}")
@@ -25,42 +23,47 @@ public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeployment
     @Value("${cdl.largeimport.transaction.filename:}")
     private String transaction_csv;
 
-    @BeforeClass(groups = { "manual" })
+    @BeforeClass(groups = { "deployment.largeFile" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
-    @Test(groups = "manual")
+    @Test(groups = "deployment.largeFile")
     public void runTest() throws Exception {
         importData(BusinessEntity.Account, outsizeFlag);
-        clearHdfs();
         importData(BusinessEntity.Contact, outsizeFlag);
-        clearHdfs();
         importData(BusinessEntity.Transaction, outsizeFlag);
+        long spendTime = System.currentTimeMillis();
+        processAnalyze();
+        log.info("Execute processAnalyze Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
+                + " second");
     }
 
     private void importData(BusinessEntity importingEntity, boolean outsizeFlag) {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
+        long spendTime = 0L;
         if (importingEntity.equals(BusinessEntity.Account)) {
+            spendTime = System.currentTimeMillis();
             importData(BusinessEntity.Account, account_csv, "Account", false, outsizeFlag);
+            log.info("Import " + account_csv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
+                    + " second");
         }
 
         if (importingEntity.equals(BusinessEntity.Contact)) {
+            spendTime = System.currentTimeMillis();
             importData(BusinessEntity.Contact, contact_csv, "Contact", true, outsizeFlag);
+            log.info("Import " + contact_csv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
+                    + " second");
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {
+            spendTime = System.currentTimeMillis();
             importData(BusinessEntity.Transaction, transaction_csv, "Transaction", true, outsizeFlag);
+            log.info("Import " + transaction_csv + " Execution time: "
+                    + (System.currentTimeMillis() - spendTime) / 1000f + " second");
         }
     }
 
-    private void clearHdfs() throws IOException {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        String dataFeedDir = String.format("%s/%s/DataFeed1",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.FILE.getName());
-        HdfsUtils.rmdir(yarnConfiguration, dataFeedDir);
-    }
 }
