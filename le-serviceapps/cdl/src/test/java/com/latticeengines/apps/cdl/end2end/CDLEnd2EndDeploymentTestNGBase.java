@@ -145,6 +145,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "2";
 
+    private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
+    private static final String LARGE_CSV_VERSION = "1";
+
     static final Long ACCOUNT_1 = 500L;
     static final Long ACCOUNT_2 = 600L;
     static final Long ACCOUNT_3 = 1000L;
@@ -418,9 +421,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void importData(BusinessEntity entity, String s3FileName, String feedType) {
-        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
+        importData(entity, s3FileName, feedType, false, false);
+    }
+
+    void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
+            boolean outsizeFlag) {
+        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
-        SourceFile template = fileUploadProxy.uploadFile(s3FileName, false, s3FileName, entity.name(), csvResource);
+        String outputFileName = s3FileName;
+        if (s3FileName.endsWith(".gz"))
+            outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
+        SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
+                csvResource, outsizeFlag);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
         modifyFieldMappings(entity, fieldMappingDocument);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -509,6 +521,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private InputStream readCSVInputStreamFromS3(String fileName) {
+        return readCSVInputStreamFromS3(fileName, false);
+    }
+
+    private InputStream readCSVInputStreamFromS3(String fileName, boolean outsizeFlag) {
+        if (outsizeFlag)
+            return testArtifactService.readTestArtifactAsStream(LARGE_CSV_DIR, LARGE_CSV_VERSION, fileName);
         return testArtifactService.readTestArtifactAsStream(S3_CSV_DIR, S3_CSV_VERSION, fileName);
     }
 
