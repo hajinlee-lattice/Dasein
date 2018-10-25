@@ -38,8 +38,8 @@ public class PatchResponse {
     private PatchStats stats;
     @JsonProperty("NotPatchedLogs")
     private List<PatchLog> notPatchedLogs;
-    @JsonProperty("LogFilePath")
-    private String logFilePath;
+    @JsonProperty("LogFile")
+    private PatchLogFile logFile;
 
     public PatchValidationResponse getValidationResponse() {
         return validationResponse;
@@ -113,12 +113,12 @@ public class PatchResponse {
         this.notPatchedLogs = notPatchedLogs;
     }
 
-    public String getLogFilePath() {
-        return logFilePath;
+    public PatchLogFile getLogFile() {
+        return logFile;
     }
 
-    public void setLogFilePath(String logFilePath) {
-        this.logFilePath = logFilePath;
+    public void setLogFile(PatchLogFile logFile) {
+        this.logFile = logFile;
     }
 
     /**

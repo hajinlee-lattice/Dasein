@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +18,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.amazonaws.HttpMethod;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -270,6 +275,16 @@ public class S3ServiceImpl implements S3Service {
             log.info("Object " + object + " does not exist in bucket " + bucket);
             return null;
         }
+    }
+
+    @Override
+    public URL generateReadUrl(@NotNull String bucket, @NotNull String key, Date expireAt) {
+        Preconditions.checkNotNull(bucket);
+        Preconditions.checkNotNull(key);
+        Preconditions.checkNotNull(expireAt);
+        key = sanitizePathToKey(key);
+        // only allow read access
+        return s3Client().generatePresignedUrl(bucket, key, expireAt, HttpMethod.GET);
     }
 
     @Override

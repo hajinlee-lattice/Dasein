@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,18 +20,23 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
 import com.latticeengines.datacloud.match.util.PatchBookUtils;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLogFile;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchStatus;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.log4j.Level;
@@ -67,11 +74,24 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class PatchServiceImpl implements PatchService {
 
     private static final String BOOK_SOURCE_PATCHER = "Patcher";
+    private static final String PATCH_LOG_KEY_MODE = "Mode";
+    private static final String PATCH_LOG_KEY_TYPE = "Type";
+    private static final String PATCH_LOG_KEY_DRY_RUN = "DryRun";
+    private static final String PATCH_LOG_KEY_START_AT = "StartedAt";
+    private static final String PATCH_LOG_KEY_UPLOAD_AT = "UploadedAt";
+    private static final String PATCH_LOG_KEY_LOGS = "Logs";
+    private static final int PATCH_LOG_FILE_URL_EXPIRES_IN_DAYS = 7; // should not be greater than 7
 
     private static final Logger log = LoggerFactory.getLogger(PatchServiceImpl.class);
 
     @Value("${datacloud.match.realtime.max.input:1000}")
     private int maxRealTimeInput;
+
+    @Value("${datacloud.patcher.log.s3bucket}")
+    private String patchLogS3Bucket;
+
+    @Value("${datacloud.patcher.log.dir}")
+    private String patchLogDir;
 
     @Inject
     private AccountLookupService accountLookupService;
@@ -93,6 +113,9 @@ public class PatchServiceImpl implements PatchService {
 
     @Inject
     private PatchBookEntityMgr patchBookEntityMgr;
+
+    @Inject
+    private S3Service s3Service;
 
     private String currentVersion;
 
@@ -151,9 +174,40 @@ public class PatchServiceImpl implements PatchService {
     }
 
     @Override
-    public String uploadPatchLog(@NotNull List<PatchLog> patchLogs) {
-        // TODO implement
-        return null;
+    public PatchLogFile uploadPatchLog(
+            @NotNull PatchMode mode, @NotNull PatchBook.Type type, boolean dryRun,
+            @NotNull String dataCloudVersion, @NotNull Date startAt, @NotNull List<PatchLog> patchLogs) {
+        Preconditions.checkNotNull(mode);
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(dataCloudVersion);
+        Preconditions.checkNotNull(startAt);
+        Preconditions.checkNotNull(patchLogs);
+
+        // construct log body
+        Date uploadedAt = new Date();
+        Map<String, Object> logWrapper = new HashMap<>();
+        logWrapper.put(PATCH_LOG_KEY_MODE, mode);
+        logWrapper.put(PATCH_LOG_KEY_TYPE, type);
+        logWrapper.put(PATCH_LOG_KEY_DRY_RUN, dryRun);
+        logWrapper.put(PATCH_LOG_KEY_START_AT, startAt.toString());
+        logWrapper.put(PATCH_LOG_KEY_UPLOAD_AT, uploadedAt.toString());
+        logWrapper.put(PATCH_LOG_KEY_LOGS, patchLogs);
+
+        // serialize log body in memory and upload
+        // NOTE change to local file implementation if memory ever becomes a problem
+        String logStr = JsonUtils.serialize(logWrapper);
+        InputStream is = new ByteArrayInputStream(logStr.getBytes());
+
+        // generate s3 key
+        String key = getPatchLogS3Key(mode, type, dryRun, dataCloudVersion, startAt);
+        // url expires at this date
+        Date urlExpiredAt = DateUtils.addDays(new Date(), PATCH_LOG_FILE_URL_EXPIRES_IN_DAYS);
+        // generate public url for downloading the log file
+        String url = s3Service.generateReadUrl(patchLogS3Bucket, key, urlExpiredAt).toString();
+        // upload in background
+        s3Service.uploadInputStream(patchLogS3Bucket, key, is, false);
+
+        return new PatchLogFile(key, url, uploadedAt, urlExpiredAt);
     }
 
     @Override
@@ -387,6 +441,7 @@ public class PatchServiceImpl implements PatchService {
      * where
      * (a) DUNS != null && DunsGuideBook == null means has match result but no corresponding DunsGuideBook entry
      * (b) entry not in map means no matched DUNS
+     * (c) if entry1 & entry2 has the same matchedDUNS, the DunsGuideBook "instance" will be the same (same java object)
      */
     @VisibleForTesting
     Map<Long, Pair<String, DunsGuideBook>> lookupTargetDunsGuideBooks(
@@ -445,7 +500,7 @@ public class PatchServiceImpl implements PatchService {
                         MatchOutput matchOutput = realTimeMatchService.match(matchInput);
                         List<OutputRecord> records = matchOutput.getResult();
                         Preconditions.checkNotNull(records);
-                        Preconditions.checkArgument(records.size() == tuples.size());
+                        Preconditions.checkArgument(records.size() == currentTuples.size());
                         return records.stream().map(record ->
                                 (record == null || StringUtils.isBlank(record.getMatchedDuns()))
                                 ? null
@@ -462,6 +517,9 @@ public class PatchServiceImpl implements PatchService {
 
     /*
      * Generate MatchInput for a list of input match key, disable DnB cache to get the latest behavior from DnB
+     *
+     * [ Domain, Name, Country, State, City, Zipcode ] fields will be used in match input.
+     * Fields not intended to be used for matching should be null in the input match key tuple
      */
     private MatchInput newMatchInput(@NotNull List<MatchKeyTuple> tuples, @NotNull String dataCloudVersion) {
         Preconditions.checkNotNull(tuples);
@@ -626,9 +684,13 @@ public class PatchServiceImpl implements PatchService {
             patchLog.setMessage(msg);
         } else {
             // will patch this entry
-            String msg = String.format(
-                    "Patched to DUNS = %s for MatchedDUNS = %s, KeyPartition = %s successfully",
-                    patchDuns, matchedDuns, keyPartition);
+            String msg = book.isCleanup()
+                    ? String.format(
+                            "Cleanup DunsGuideBook.Item for MatchedDUNS = %s, KeyPartition = %s successfully",
+                            matchedDuns, keyPartition)
+                    : String.format(
+                            "Patched to DUNS = %s for MatchedDUNS = %s, KeyPartition = %s successfully",
+                            patchDuns, matchedDuns, keyPartition);
             patchLog.setMessage(msg);
         }
 
@@ -637,7 +699,8 @@ public class PatchServiceImpl implements PatchService {
 
     /*
      * Update ALL entries associated with the given list of patch logs. All entries passed in are assumed valid, which
-     * means (1) has matchedDuns, (2) patch DUNS exist in DataCloud
+     * means (1) has matchedDuns, (2) patch DUNS exist in DataCloud (3) if it is cleanup patch, there exists a
+     * DunsGuideBook.Item with corresponding KeyPartition.
      */
     @VisibleForTesting
     void updatePatchedDunsGuideBookEntry(
@@ -668,7 +731,7 @@ public class PatchServiceImpl implements PatchService {
                 })
                 .collect(Collectors.toMap(DunsGuideBook::getId, book -> book));
 
-        List<DunsGuideBook> books = logs.stream().map(patchLog -> {
+        Map<String, DunsGuideBook> books = logs.stream().map(patchLog -> {
             Pair<String, DunsGuideBook> target = targetGuideBooks.get(patchLog.getPatchBookId());
             if (target.getValue() == null) {
                 target = Pair.of(target.getKey(), dunsGuideBookMap.get(target.getKey()));
@@ -679,10 +742,14 @@ public class PatchServiceImpl implements PatchService {
             } else {
                 return upsertDunsGuideBook(target, keyPartition, patchDunsMap.get(patchLog.getPatchBookId()));
             }
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toMap(DunsGuideBook::getId, book -> book, (v1, v2) -> {
+            // should be the same instance, just in case
+            Preconditions.checkArgument(v1 == v2);
+            return v1;
+        }));
 
         // TODO add batching and retry
-        dunsGuideBookService.set(dataCloudVersion, books);
+        dunsGuideBookService.set(dataCloudVersion, new ArrayList<>(books.values()));
 
         // log basic stats
         long cleanupEntryCount = logs
@@ -727,7 +794,8 @@ public class PatchServiceImpl implements PatchService {
     /*
      * Remove DunsGuideBook.Item associated with [matchedDUNS, keyPartition] from the given DunsGuideBook entry.
      *
-     * The corresponding item must exist in the input DunsGuideBook entry
+     * The corresponding item must exist in the input DunsGuideBook entry (unless there are multiple patch book entries
+     * that want to cleanup the same DunsGuideBook.Item)
      */
     private DunsGuideBook cleanupDunsGuideBook(
             @NotNull Pair<String, DunsGuideBook> target, @NotNull String keyPartition) {
@@ -737,10 +805,11 @@ public class PatchServiceImpl implements PatchService {
 
         DunsGuideBook book = target.getValue();
         DunsGuideBook.Item targetItem = getTargetItemByKeyPartition(target, keyPartition);
-        Preconditions.checkNotNull(targetItem);
 
         // remove the exact object
-        book.getItems().removeIf(item -> item == targetItem);
+        if (targetItem != null) {
+            book.getItems().removeIf(item -> item == targetItem);
+        }
 
         return book;
     }
@@ -857,6 +926,20 @@ public class PatchServiceImpl implements PatchService {
             // expire at current version
             patchBookEntityMgr.setExpireAfterVersion(inactiveBookIds, dataCloudVersion);
         }
+    }
+
+    /*
+     * Generate S3 key with given patch info
+     *
+     * Format: <PatchBook.Type>_<DataCloudVersion>_<DryRun>_<StartTime>
+     * E.g., lookup_2.0.13_normal_true_1540412051045
+     */
+    private String getPatchLogS3Key(
+            @NotNull PatchMode mode, @NotNull PatchBook.Type type, boolean dryRun,
+            @NotNull String dataCloudVersion, @NotNull Date startAt) {
+        String filename = String.join("_",
+                type.name(), dataCloudVersion, mode.name(), String.valueOf(dryRun), String.valueOf(startAt.getTime()));
+        return new Path(patchLogDir, filename.toLowerCase()).toS3Key();
     }
 
     @VisibleForTesting

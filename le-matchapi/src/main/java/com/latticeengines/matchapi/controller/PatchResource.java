@@ -121,7 +121,10 @@ public class PatchResource {
                 .collect(Collectors.toList()));
 
         // upload logs
-        response.setLogFilePath(patchService.uploadPatchLog(logs));
+        response.setLogFile(
+                patchService.uploadPatchLog(
+                        response.getMode(), response.getPatchBookType(), response.isDryRun(),
+                        response.getDataCloudVersion(), response.getStartAt(), logs));
 
         // calculate stats
         response.setStats(calculateStats(logs));

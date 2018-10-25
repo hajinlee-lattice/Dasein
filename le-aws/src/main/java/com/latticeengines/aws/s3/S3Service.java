@@ -2,10 +2,13 @@ package com.latticeengines.aws.s3;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface S3Service {
 
@@ -46,4 +49,15 @@ public interface S3Service {
     void deleteBucketPolicy(String bucket);
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
+
+    /**
+     * Generate a read only URL to access the specified key under the input bucket. The URL will expires at
+     * the given date.
+     *
+     * @param bucket specified S3 bucket, should not be {@literal null}
+     * @param key object key, should not be {@literal null}
+     * @param expireAt date where the generated url will expire
+     * @return generated URL that have read access to the specified object
+     */
+    URL generateReadUrl(@NotNull String bucket, @NotNull String key, @NotNull Date expireAt);
 }

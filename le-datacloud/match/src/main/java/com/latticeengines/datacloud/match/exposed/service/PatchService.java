@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -7,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.LookupUpdateRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LookupUpdateResponse;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLogFile;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
 
 public interface PatchService {
@@ -29,8 +31,15 @@ public interface PatchService {
     /**
      * Upload given list of {@link PatchLog} and return the log file path
      *
+     * @param mode patch mode
+     * @param type patch book type
+     * @param dryRun dry run flag
+     * @param dataCloudVersion DataCloudVersion used for patching
+     * @param startAt start time of the patching operation
      * @param patchLogs list of logs to upload
-     * @return file path that contains the uploaded logs
+     * @return log file instance that contains related information
      */
-    String uploadPatchLog(@NotNull List<PatchLog> patchLogs);
+    PatchLogFile uploadPatchLog(
+            @NotNull PatchMode mode, @NotNull PatchBook.Type type, boolean dryRun,
+            @NotNull String dataCloudVersion, @NotNull Date startAt, @NotNull List<PatchLog> patchLogs);
 }
