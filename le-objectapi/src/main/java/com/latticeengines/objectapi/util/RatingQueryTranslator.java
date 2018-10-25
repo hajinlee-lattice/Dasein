@@ -83,7 +83,7 @@ public class RatingQueryTranslator extends QueryTranslator {
             }
             List<AttributeLookup> attrs = new ArrayList<>();
             for (AttributeLookup attributeLookup: decorator.getFreeTextSearchAttrs()) {
-                if (repository.getColumnMetadata(attributeLookup) != null) {
+                if (repository != null && repository.getColumnMetadata(attributeLookup) != null) {
                     attrs.add(attributeLookup);
                 }
             }

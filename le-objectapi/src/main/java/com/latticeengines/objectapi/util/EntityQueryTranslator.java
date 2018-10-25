@@ -60,7 +60,7 @@ public class EntityQueryTranslator extends QueryTranslator {
         if (decorator != null) {
             List<AttributeLookup> attrs = new ArrayList<>();
             for (AttributeLookup attributeLookup: decorator.getFreeTextSearchAttrs()) {
-                if (repository.getColumnMetadata(attributeLookup) != null) {
+                if (repository != null && repository.getColumnMetadata(attributeLookup) != null) {
                     attrs.add(attributeLookup);
                 }
             }
