@@ -16,9 +16,18 @@ public class DatacloudCollectionJob implements QuartzJobBean {
     CollectionDBService collectionDBService;
 
     public Callable<Boolean> getCallable(String jobArguments) {
-        return () -> {
-            collectionDBService.collect();
-            return true;
+
+        return new Callable<Boolean>() {
+
+            @Override
+            public Boolean call() {
+
+                collectionDBService.collect();
+
+                return true;
+
+            }
+
         };
 
     }

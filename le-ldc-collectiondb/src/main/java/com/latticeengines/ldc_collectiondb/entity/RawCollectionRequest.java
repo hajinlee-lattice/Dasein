@@ -20,7 +20,7 @@ public class RawCollectionRequest {
     @Column(name = "PID", unique = true, nullable = false)
     private long pid;
 
-    @Column(name = "VENDOR")
+    @Column(name = "VENDOR", nullable = false)
     private String vendor;
 
     @Column(name = "DOMAIN", nullable = false)
@@ -104,6 +104,20 @@ public class RawCollectionRequest {
     public void setTransferred(boolean transferred) {
 
         this.transferred = transferred;
+
+    }
+
+    public static RawCollectionRequest generate(String vendor, String domain, Timestamp ts, String reqId) {
+
+        RawCollectionRequest req = new RawCollectionRequest();
+
+        req.setVendor(vendor);
+        req.setDomain(domain);
+        req.setRequestedTime(ts);
+        req.setOriginalRequestId(reqId);
+        req.setTransferred(false);
+
+        return req;
 
     }
 }

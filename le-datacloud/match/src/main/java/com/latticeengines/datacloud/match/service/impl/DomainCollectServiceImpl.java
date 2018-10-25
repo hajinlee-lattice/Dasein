@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 
 @Component("domainCollectService")
@@ -148,17 +146,8 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     private void dumpDomains(String transferId, Collection<String> domains) {
         putDomainsInAccountTransferTable(transferId, domains);
-        //add to raw req table
-        List<RawCollectionRequest> reqs = new ArrayList<>();
-        for (String domain: domains) {
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
-            RawCollectionRequest req = new RawCollectionRequest();
-            req.setDomain(domain);
-            req.setRequestedTime(ts);
-            req.setOriginalRequestId(transferId);
-            req.setTransferred(false);
-        }
-        rawCollectionRequestMgr.saveRequests(reqs);
+
+        rawCollectionRequestMgr.saveDomains(domains, transferId);
     }
 
     private void putDomainsInAccountTransferTable(String transferId, Collection<String> domains) {

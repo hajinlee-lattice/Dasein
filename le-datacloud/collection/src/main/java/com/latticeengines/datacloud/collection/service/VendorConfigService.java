@@ -14,8 +14,6 @@ public interface VendorConfigService {
 
     List<String> getVendors();
 
-    List<String> getEnabledVendors();
-
     int getDefCollectionBatch();
 
     int getDefMaxRetries();

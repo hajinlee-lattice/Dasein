@@ -102,7 +102,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
                 lastTriggered = curMillis;
                 log.info("uploading " + domainIdx + "-th domain list.");
 
-                collectionDBService.addNewDomains(domainLists.get(domainIdx), UUID.randomUUID()
+                collectionDBService.addNewDomains(domainLists.get(domainIdx), "builtwith", UUID.randomUUID()
                         .toString().toUpperCase());
 
                 log.info("uploaded " + domainLists.get(domainIdx).size() + " domains in " + domainIdx + "-th list.");
@@ -122,7 +122,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     public void testCollectionDBService() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
-        collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
+        collectionDBService.addNewDomains(domains, "builtwith", UUID.randomUUID().toString().toUpperCase());
 
 
         while (true)

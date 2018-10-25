@@ -17,10 +17,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.PartitionUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
-import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 
 @Component
 public class RawCollectionRequestServiceImpl implements RawCollectionRequestService {
@@ -91,45 +91,10 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     }
 
-    @Override
-    public void addNewDomains(List<String> domains, String reqId) {
-        try (PerformanceTimer timer = new PerformanceTimer("Saved in total " //
-                + CollectionUtils.size(domains) + " raw requests to db.")) {
-
-            final Timestamp ts = new Timestamp(System.currentTimeMillis());
-            int chunkSize = 1000;
-            List<List<String>> domainPartitions = PartitionUtils.partitionCollectionBySize(domains, chunkSize);
-            List<Runnable> uploaders = new ArrayList<>();
-            domainPartitions.forEach(partition -> {
-                Runnable uploader = () -> {
-                    try (PerformanceTimer timer2 = new PerformanceTimer(
-                            "Saved a chunk of " + partition.size() + " raw requests to db.")) {
-                        List<RawCollectionRequest> reqs = partition.stream() //
-                                .map(domain -> toRawRequest(ts, reqId, domain)) //
-                                .collect(Collectors.toList());
-                        rawCollectionRequestMgr.saveRequests(reqs);
-                    }
-                };
-                uploaders.add(uploader);
-            });
-
-            if (CollectionUtils.size(uploaders) == 1) {
-                uploaders.get(0).run();
-            } else {
-                ThreadPoolUtils.runRunnablesInParallel(getUploadWorkers(), uploaders, //
-                        60, 5);
-            }
-
-        }
-    }
-
     public List<RawCollectionRequest> getNonTransferred() {
-        return rawCollectionRequestMgr.getNonTransferred(null);
-    }
 
-    @Override
-    public List<RawCollectionRequest> getTopNonTransferred(int top) {
-        return rawCollectionRequestMgr.getNonTransferred(top);
+        return rawCollectionRequestMgr.getNonTransferred();
+
     }
 
     public void updateTransferredStatus(List<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered) {
@@ -167,23 +132,6 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
         }
 
-    }
-
-    @Override
-    public void updateTransferredStatus(List<RawCollectionRequest> transferred) {
-        transferred.forEach(req -> {
-            req.setTransferred(true);
-            rawCollectionRequestMgr.update(req);
-        });
-    }
-
-    private static RawCollectionRequest toRawRequest(Timestamp timestamp, String reqId, String domain) {
-        RawCollectionRequest req = new RawCollectionRequest();
-        req.setTransferred(false);
-        req.setRequestedTime(timestamp);
-        req.setOriginalRequestId(reqId);
-        req.setDomain(domain);
-        return req;
     }
 
     private static RawCollectionRequest toRawRequest(String vendor, Timestamp timestamp, String reqId, String domain) {

@@ -1,5 +1,8 @@
 package com.latticeengines.ldc_collectiondb.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +22,12 @@ public class VendorConfig {
     public static final String VENDOR_HPA_NEW = "HPA_NEW";
     public static final String VENDOR_ORBI_V2 = "ORBINTELLIGENCEV2";
     public static final String VENDOR_SEMRUSH = "SEMRUSH";
+    public static final Set<String> EFFECTIVE_VENDOR_SET = new HashSet<>();
+
+    static {
+        EFFECTIVE_VENDOR_SET.add(VENDOR_BUILTWITH);
+    }
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,9 +46,6 @@ public class VendorConfig {
 
     @Column(name = "COLLECTING_FREQ", nullable = false)
     private long collectingFreq;
-
-    @Column(name = "COLLECTOR_ENABLED", nullable = false)
-    private boolean collectorEnabled;
 
     @Column(name = "MAX_ACTIVE_TASKS", nullable = false)
     private int maxActiveTasks;
@@ -90,14 +96,6 @@ public class VendorConfig {
 
         this.vendor = vendor;
 
-    }
-
-    public boolean isCollectorEnabled() {
-        return collectorEnabled;
-    }
-
-    public void setCollectorEnabled(boolean collectorEnabled) {
-        this.collectorEnabled = collectorEnabled;
     }
 
     public void setDomainField(String domainField) {
