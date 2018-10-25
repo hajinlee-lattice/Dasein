@@ -75,11 +75,12 @@ public class EMRServiceImpl implements EMRService {
         String masterIp = null;
         AmazonElasticMapReduce emr = getEmr();
         if (StringUtils.isNotBlank(clusterId)) {
-            DescribeClusterResult cluster = emr
-                    .describeCluster(new DescribeClusterRequest().withClusterId(clusterId));
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
+            DescribeClusterResult cluster = retryTemplate.execute(context -> //
+                    emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
             String masterDNS = cluster.getCluster().getMasterPublicDnsName();
-            ListInstancesResult instances = emr
-                    .listInstances(new ListInstancesRequest().withClusterId(clusterId));
+            ListInstancesResult instances = retryTemplate.execute(context -> //
+                    emr.listInstances(new ListInstancesRequest().withClusterId(clusterId)));
             for (Instance instance : instances.getInstances()) {
                 String instancePublicDNS = instance.getPublicDnsName();
                 String instancePrivateDNS = instance.getPrivateDnsName();
