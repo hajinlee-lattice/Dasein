@@ -22,13 +22,21 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         super("pls/models/uploadfile");
     }
 
-    public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName, SchemaInterpretation schemaInterpretation, //
-                                 String entity, Resource fileResource){
+    public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
+            SchemaInterpretation schemaInterpretation, //
+            String entity, Resource fileResource) {
+        return uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, fileResource, false);
+    }
+
+    public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
+            SchemaInterpretation schemaInterpretation, //
+            String entity, Resource fileResource, boolean outsizeFlag) {
         List<Object> args = new ArrayList<>();
         args.add(fileName);
         args.add(csvFileName);
         args.add(compressed);
-        String urlPattern = "/?fileName={fileName}&displayName={csvFileName}&compressed={compressed}";
+        args.add(outsizeFlag);
+        String urlPattern = "/?fileName={fileName}&displayName={csvFileName}&compressed={compressed}&outsizeFlag={outsizeFlag}";
         if (schemaInterpretation != null) {
             urlPattern += "&schemaInterpretation={schemaInterpretation}";
             args.add(schemaInterpretation);
@@ -44,20 +52,26 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         if (resp.isSuccess()) {
             return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), SourceFile.class);
         } else {
-            throw new RuntimeException("Failed to upload file: "+ StringUtils.join(resp.getErrors(), ","));
+            throw new RuntimeException("Failed to upload file: " + StringUtils.join(resp.getErrors(), ","));
         }
     }
 
     public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName, String entity,
-                            Resource fileResource){
+            Resource fileResource) {
+        return uploadFile(fileName, compressed, csvFileName, entity, fileResource, false);
+    }
+
+    public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName, String entity,
+            Resource fileResource, boolean outsizeFlag) {
 
         List<Object> args = new ArrayList<>();
         args.add(fileName);
         args.add(csvFileName);
         args.add(compressed);
         args.add(entity);
-        String urlPattern = "/?fileName={fileName}&displayName={csvFileName}&compressed={compressed}" +
-                "&entity={entity}";
+        args.add(outsizeFlag);
+        String urlPattern = "/?fileName={fileName}&displayName={csvFileName}&compressed={compressed}"
+                + "&entity={entity}&outsizeFlag={outsizeFlag}";
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
         parts.add("file", fileResource);
@@ -65,7 +79,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         if (resp.isSuccess()) {
             return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), SourceFile.class);
         } else {
-            throw new RuntimeException("Failed to upload file: "+ StringUtils.join(resp.getErrors(), ","));
+            throw new RuntimeException("Failed to upload file: " + StringUtils.join(resp.getErrors(), ","));
         }
     }
 
@@ -97,16 +111,15 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         post("save field mapping", url, fieldMappingDocument, Void.class);
     }
 
-    public void saveFieldMappingDocument(String displayName, FieldMappingDocument fieldMappingDocument, String
-            entity, String source, String feedType) {
+    public void saveFieldMappingDocument(String displayName, FieldMappingDocument fieldMappingDocument, String entity,
+            String source, String feedType) {
         String urlPattern = "/fieldmappings?displayName={displayName}&entity={entity}&source={source}&feedType={feedType}";
         String url = constructUrl(urlPattern, displayName, entity, source, feedType);
         post("save field mapping", url, fieldMappingDocument, Void.class);
     }
 
-    public SourceFile uploadDeleteFile(boolean compressed, String csvFileName,
-            String schemaInterpretation, String cleanupOperationType,
-            Resource fileResource) {
+    public SourceFile uploadDeleteFile(boolean compressed, String csvFileName, String schemaInterpretation,
+            String cleanupOperationType, Resource fileResource) {
         List<Object> args = new ArrayList<>();
         args.add(csvFileName);
         args.add(compressed);
