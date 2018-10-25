@@ -1,7 +1,7 @@
 angular.module('common.datacloud.tabs.subheader', [])
 .controller('SubHeaderTabsController', function(
-    $state, $stateParams, $timeout, FeatureFlagService, DataCloudStore, QueryStore, 
-    SegmentService, SegmentStore, HealthService, QueryTreeService, StateHistory
+    $state, $rootScope, $stateParams, $timeout, 
+    FeatureFlagService, DataCloudStore, QueryStore, SegmentService, SegmentStore, HealthService, QueryTreeService, StateHistory
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -111,6 +111,7 @@ angular.module('common.datacloud.tabs.subheader', [])
     vm.clearSegment = function() {
         QueryStore.resetRestrictions();
         QueryStore.setPublicProperty('enableSaveSegmentButton', false);
+        $rootScope.$broadcast('clearSegment');
     }
 
     vm.saveSegment = function() {

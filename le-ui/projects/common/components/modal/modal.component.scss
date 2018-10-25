@@ -176,6 +176,10 @@
       display: none;
   }
 
+  strong {
+    font-weight: bold;
+  }
+
   @keyframes fadeInOpacity {
     0% {
       opacity: 0;

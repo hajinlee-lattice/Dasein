@@ -136,8 +136,8 @@ angular.module('lp.import.calendar', [])
         if(!string) {
             return '';
         }
-        var regex = /\*\*(\S(.*?\S)?)\*\*/gm;
-        var ret = string.replace(regex, '<strong>$1</strong>');
+        var regex = /\*\*(\S(.*?\S)?)\*\*/gm,
+            ret = string.replace(regex, '<strong>$1</strong>');
         return $sce.trustAsHtml(ret);
     }
 
@@ -157,13 +157,22 @@ angular.module('lp.import.calendar', [])
         ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
             if(!result.errorCode) {
                 Modal.warning({
-                    name: 'calendar_Warning',
+                    name: 'calendar_warning',
                     title: "Business Calendar",
                     message: 'The Business Calendar will be updated throughout the tenant.',
                     confirmtext: "Yes, Update"
                 }, vm.modalCallback);
             }
         });
+    }
+
+    vm.saveStandardCalendar = function() {
+        Modal.warning({
+            name: 'standard_calendar_warning',
+            title: "Standard Calendar",
+            message: 'The <strong>Standard</strong> Calendar will be used to build accurate time based analytics through out the tenant.',
+            confirmtext: "Yes, Update"
+        }, vm.modalCallbackStandardCalendar);
     }
 
     var parseCalendar = function(calendar) {
@@ -186,11 +195,34 @@ angular.module('lp.import.calendar', [])
         vm.calendarOptions = options;
     }
 
+    vm.useStandardCalendar = function() {
+        vm.saveStandardCalendar();
+        return false;
+        var mode = 'STARTING_DATE';
+        vm.mode = mode;
+        var date = new Date(),
+            _day = '03',
+            _month = '11',
+            year = date.getFullYear(),
+            day = parseInt(_day),
+            dayText = _day,
+            month = parseInt(_month),
+            monthText = months[month - 1].substring(0,3).toUpperCase(),
+            standardCalendarObj = {
+                mode: mode,
+                startingDate: monthText + '-' + dayText,
+                evaluationYear: year, 
+                longerMonth: '1',
+            };
+        console.log(standardCalendarObj);
+        picker.setDate(monthText + '-' + dayText + '-' + year); // MM/DD/YYYY - second param prevents onSelect callback
+        picker.gotoDate(new Date(year, month - 1));  
+    }
+
     vm.modalCallback = function (args) {
-        console.log('AAAA');
-        var modal = Modal.get('calendar_Warning');
+        var modal = Modal.get('calendar_warning');
         if ('cancel' === args.action) {
-            Modal.modalRemoveFromDOM(modal, {name: 'calendar_Warning'});
+            Modal.modalRemoveFromDOM(modal, {name: 'calendar_warning'});
             // vm.toggleModal();
         } else if ('ok' === args.action) {
             modal.waiting(true);
@@ -199,13 +231,32 @@ angular.module('lp.import.calendar', [])
             } else {
                 vm.saving = true;
                 ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                    Modal.modalRemoveFromDOM(modal, {name: 'calendar_Warning'});
+                    Modal.modalRemoveFromDOM(modal, {name: 'calendar_warning'});
                     $state.go(vm.lastFrom.name);
                 });
             }
         }
     }
 
+    vm.modalCallbackStandardCalendar = function (args) {
+        var modal = Modal.get('standard_calendar_warning');
+        if ('cancel' === args.action) {
+            Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
+            // vm.toggleModal();
+        } else if ('ok' === args.action) {
+            modal.waiting(true);
+            if(debug) {
+                console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
+            } else {
+                vm.saving = true;
+                Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
+                // ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
+                //     Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
+                //     $state.go(vm.lastFrom.name);
+                // });
+            }
+        }
+    }
 
     vm.init = function() {
         //parseCalendar(vm.calendar); // uncomment this to create a non-null state for existing calendars PLS-8479

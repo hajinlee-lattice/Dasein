@@ -55,7 +55,9 @@
                                     ng-disabled="vm.loadingCampaignType"
                                     ng-options="type.id as type.displayName for type in vm.campaignTypes">
                                 <option value="" hidden disabled>---</option>
-                            </select> <span ng-if="vm.loadingCampaignType" class="fa fa-spinner fa-spin fa-fw"></span>
+                            </select>
+                            <span ng-if="vm.loadingCampaignType" class="fa fa-spinner fa-spin fa-fw"></span>
+                            <span ng-show="vm.loadedCampaignType" class="fa fa-check animate-hide"></span>
                         </div>
                     </div>
                 </div>

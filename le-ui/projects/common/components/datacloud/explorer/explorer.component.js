@@ -14,7 +14,7 @@ angular.module('common.datacloud.explorer', [
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, LookupResponse, 
-    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, ConfigureAttributesStore
+    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, ConfigureAttributesStore, Notice
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -1535,7 +1535,10 @@ angular.module('common.datacloud.explorer', [
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
         if (!vm.cube) {
-            return alert('Cube data not yet loaded. \nOne moment please.');
+            Notice.warning({
+                delay: 1500,
+                message: 'Your data is still loading. One moment please.'
+            });
         }
         
         if (!attribute.TopBkt && !vm.inWizard) {

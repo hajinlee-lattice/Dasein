@@ -410,6 +410,10 @@ angular.module('common.datacloud.query.results', [
             : 'home.segment.explorer.builder'
     };
 
+    $rootScope.$on('clearSegment', function(e){
+        vm.clearSearch();
+    });
+
     vm.clearSearch = function() {
         vm.search = '';
         vm.current = 1;

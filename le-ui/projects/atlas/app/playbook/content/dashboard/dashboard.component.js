@@ -1,8 +1,9 @@
 angular.module('lp.playbook.dashboard', [
+    'ngAnimate',
     'mainApp.appCommon.utilities.TimestampIntervalUtility'
 ])
 .controller('PlaybookDashboard', function(
-    $q, $scope, $stateParams, $state, $interval, $rootScope,
+    $q, $scope, $stateParams, $state, $interval, $timeout, $rootScope,
     PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore, CampaignTypes
 ) {
 
@@ -298,6 +299,12 @@ angular.module('lp.playbook.dashboard', [
         vm.loadingCampaignType = true;
         PlaybookWizardStore.savePlay(opts).then(function(play){
             vm.loadingCampaignType = false;
+            vm.loadedCampaignType = true;
+
+            $timeout(function() {
+                vm.loadedCampaignType = false;
+            }, 1000);
+
             vm.campaignType = play.playType.id;
         });
     }
