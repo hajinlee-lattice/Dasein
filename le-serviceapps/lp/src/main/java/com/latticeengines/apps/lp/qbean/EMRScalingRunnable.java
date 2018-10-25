@@ -136,25 +136,19 @@ public class EMRScalingRunnable implements Runnable {
         String noScaleLogPrefix = "No need to scale down " + emrCluster + ": ";
 
         boolean scale;
-        if (System.currentTimeMillis() - lastScalingUp.get() < SCALE_UP_COOLING_PERIOD) {
-            log.info(noScaleLogPrefix + "still in cooling period.");
+        int availableMB = metrics.availableMB;
+        int availableVCores = metrics.availableVirtualCores;
+        if (availableMB < MAX_AVAIL_MEM_MB) {
+            log.debug(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
+            scale = false;
+        } else if (availableVCores < MAX_AVAIL_VCORES) {
+            log.debug(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
             scale = false;
         } else {
-            int availableMB = metrics.availableMB;
-            int availableVCores = metrics.availableVirtualCores;
-            if (availableMB < MAX_AVAIL_MEM_MB) {
-                log.debug(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
-                scale = false;
-            } else if (availableVCores < MAX_AVAIL_VCORES) {
-                log.debug(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
-                scale = false;
-            } else {
-                log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
-                        + availableVCores + " are both too high.");
-                scale = true;
-            }
+            log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
+                    + availableVCores + " are both too high.");
+            scale = true;
         }
-
         return scale;
     }
 
@@ -185,6 +179,10 @@ public class EMRScalingRunnable implements Runnable {
             int requested = taskGrp.getRequestedInstanceCount();
             int target = getTargetTaskNodes();
             if (requested != target) {
+                if (System.currentTimeMillis() - lastScalingUp.get() < SCALE_UP_COOLING_PERIOD) {
+                    target = Math.max(running, target);
+                    log.info(emrCluster + " is still in the cool down period, change target to " + target);
+                }
                 log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
                 scale(target);
