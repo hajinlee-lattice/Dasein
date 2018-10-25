@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
@@ -394,6 +395,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 String taskId = importActionConfiguration.getDataFeedTaskId();
                 if (StringUtils.isEmpty(taskId)) {
                     continue;
+                } else {
+                    DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), taskId);
+                    if (dataFeedTask == null) {
+                        continue;
+                    }
                 }
                 if (importActionConfiguration.getImportCount() == 0) {
                     continue;
