@@ -70,6 +70,16 @@ public class FileUploadServiceImpl implements FileUploadService {
             String entity, //
             String displayName, //
             InputStream inputStream) {
+        return uploadFile(outputFileName, schemaInterpretation, entity, displayName, inputStream, false);
+    }
+
+    @Override
+    public SourceFile uploadFile(String outputFileName, //
+            SchemaInterpretation schemaInterpretation, //
+            String entity, //
+            String displayName, //
+            InputStream inputStream,
+            boolean outsizeFlag) {
         log.info(String.format(
                 "Uploading file (outputFileName=%s, schemaInterpretation=%s, displayName=%s, customer=%s)",
                 outputFileName, schemaInterpretation, displayName, MultiTenantContext.getCustomerSpace()));
@@ -92,7 +102,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
                     outputPath + "/" + outputFileName, maxUploadRows);
             log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
-            if (fileRows > maxUploadRows) {
+            if (!outsizeFlag && fileRows > maxUploadRows) {
                 try {
                     HdfsUtils.rmdir(yarnConfiguration, outputPath + "/" + outputFileName);
                 } catch (Exception e) {
@@ -200,7 +210,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-                                               CleanupOperationType cleanupOperationType) {
+            CleanupOperationType cleanupOperationType) {
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), schemaInterpretation, null);
 
@@ -219,54 +229,56 @@ public class FileUploadServiceImpl implements FileUploadService {
             throw new RuntimeException("Cannot resolve metadata from uploaded file!");
         }
         switch (schemaInterpretation) {
-            case DeleteAccountTemplate:
+        case DeleteAccountTemplate:
+            if (template.getAttribute(InterfaceName.AccountId) == null) {
+                throw new LedpException(LedpCode.LEDP_40007,
+                        new String[] { "Account", InterfaceName.AccountId.name() });
+            }
+            break;
+        case DeleteContactTemplate:
+            if (template.getAttribute(InterfaceName.ContactId) == null) {
+                throw new LedpException(LedpCode.LEDP_40007,
+                        new String[] { "Contact", InterfaceName.ContactId.name() });
+            }
+            break;
+        case DeleteTransactionTemplate:
+            switch (cleanupOperationType) {
+            case BYUPLOAD_ACPD:
                 if (template.getAttribute(InterfaceName.AccountId) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007, new String[] {"Account", InterfaceName.AccountId.name()});
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by ACPD", InterfaceName.AccountId.name() });
                 }
-                break;
-            case DeleteContactTemplate:
                 if (template.getAttribute(InterfaceName.ContactId) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007, new String[] {"Contact", InterfaceName.ContactId.name()});
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by ACPD", InterfaceName.ContactId.name() });
+                }
+                if (template.getAttribute(InterfaceName.ProductId) == null) {
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by ACPD", InterfaceName.ProductId.name() });
+                }
+                if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by ACPD", InterfaceName.TransactionTime.name() });
                 }
                 break;
-            case DeleteTransactionTemplate:
-                switch (cleanupOperationType) {
-                    case BYUPLOAD_ACPD:
-                        if (template.getAttribute(InterfaceName.AccountId) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by ACPD", InterfaceName.AccountId.name()});
-                        }
-                        if (template.getAttribute(InterfaceName.ContactId) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by ACPD", InterfaceName.ContactId.name()});
-                        }
-                        if (template.getAttribute(InterfaceName.ProductId) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by ACPD", InterfaceName.ProductId.name()});
-                        }
-                        if (template.getAttribute(InterfaceName.TransactionTime) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by ACPD", InterfaceName.TransactionTime.name()});
-                        }
-                        break;
-                    case BYUPLOAD_MINDATE:
-                        if (template.getAttribute(InterfaceName.TransactionTime) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by MIN date", InterfaceName.TransactionTime.name()});
-                        }
-                        break;
-                    case BYUPLOAD_MINDATEANDACCOUNT:
-                        if (template.getAttribute(InterfaceName.AccountId) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by MIN date & Account", InterfaceName.AccountId.name()});
-                        }
-                        if (template.getAttribute(InterfaceName.TransactionTime) == null) {
-                            throw new LedpException(LedpCode.LEDP_40007,
-                                    new String[] {"Delete by MIN date & Account", InterfaceName.TransactionTime.name()});
-                        }
-                        break;
+            case BYUPLOAD_MINDATE:
+                if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by MIN date", InterfaceName.TransactionTime.name() });
                 }
                 break;
+            case BYUPLOAD_MINDATEANDACCOUNT:
+                if (template.getAttribute(InterfaceName.AccountId) == null) {
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by MIN date & Account", InterfaceName.AccountId.name() });
+                }
+                if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+                    throw new LedpException(LedpCode.LEDP_40007,
+                            new String[] { "Delete by MIN date & Account", InterfaceName.TransactionTime.name() });
+                }
+                break;
+            }
+            break;
         }
         return sourceFile;
 

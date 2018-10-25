@@ -74,9 +74,10 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "displayName", required = true) String csvFileName, //
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         return ResponseDocument.successResponse(
-                uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true));
+                uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag));
     }
 
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
@@ -87,9 +88,10 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "displayName", required = true) String csvFileName, //
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
             @RequestParam(value = "entity", required = false) String entity, //
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         return uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName, schemaInterpretation,
-                entity, file);
+                entity, file, outsizeFlag);
     }
 
     @RequestMapping(value = "{sourceFileName}/fieldmappings", method = RequestMethod.POST)
@@ -176,7 +178,8 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "displayName") String csvFileName, //
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation, //
             @RequestParam(value = "operationType") CleanupOperationType cleanupOperationType, //
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         if (schemaInterpretation != SchemaInterpretation.DeleteAccountTemplate
                 && schemaInterpretation != SchemaInterpretation.DeleteContactTemplate
                 && schemaInterpretation != SchemaInterpretation.DeleteTransactionTemplate) {
@@ -184,19 +187,19 @@ public class ModelingFileUploadResource {
         }
 
         SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName,
-                schemaInterpretation, "", file, false);
+                schemaInterpretation, "", file, false, outsizeFlag);
 
         return ResponseDocument.successResponse(
                 fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation, cleanupOperationType));
     }
 
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
-            SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat) {
+            SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat, boolean outsizeFlag) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             log.info(String.format("Uploading file %s (csvFileName=%s, compressed=%s)", fileName, csvFileName,
                     compressed));
-            if (file.getSize() >= maxUploadSize) {
+            if (!outsizeFlag && file.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
             }
 
@@ -212,7 +215,7 @@ public class ModelingFileUploadResource {
                 schemaInterpretation = SchemaInterpretation.getByName(entity);
             }
 
-            return fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream);
+            return fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream, outsizeFlag);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
         } finally {

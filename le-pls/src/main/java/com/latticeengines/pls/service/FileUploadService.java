@@ -17,13 +17,18 @@ public interface FileUploadService {
             String displayName, //
             InputStream fileInputStream);
 
-    SourceFile uploadFile(String outputFileName, String displayName,
-            InputStream fileInputStream);
+    SourceFile uploadFile(String outputFileName, //
+            SchemaInterpretation interpretation, //
+            String entity, //
+            String displayName, //
+            InputStream fileInputStream, boolean outsizeFlag);
+
+    SourceFile uploadFile(String outputFileName, String displayName, InputStream fileInputStream);
 
     Table getMetadata(String fileName);
 
     InputStream getImportErrorStream(String sourceFileName);
 
     SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-                                         CleanupOperationType cleanupOperationType);
+            CleanupOperationType cleanupOperationType);
 }
