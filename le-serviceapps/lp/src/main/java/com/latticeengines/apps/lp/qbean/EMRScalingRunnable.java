@@ -46,6 +46,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MAX_AVAIL_VCORES = 2 * UNIT_VCORES + CORE_VCORES;
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
+    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
     private static final long SCALE_UP_COOLING_PERIOD = TimeUnit.MINUTES.toMillis(40);
 
     private static final AtomicLong lastScalingUp = new AtomicLong(0);
@@ -255,7 +256,9 @@ public class EMRScalingRunnable implements Runnable {
                     reqResource.reqVCores += vcores;
                     reqResource.maxMb = Math.max(mb, reqResource.maxMb);
                     reqResource.maxVCores = Math.max(vcores, reqResource.maxVCores);
-                    reqResource.pendingApps += 1;
+                    if (now - app.getStartTime() >= HANGING_START_THRESHOLD) {
+                        reqResource.hangingApps += 1;
+                    }
                 }
             }
         }
@@ -266,7 +269,9 @@ public class EMRScalingRunnable implements Runnable {
         int targetByMb = determineTargetByMb(reqResource.reqMb);
         int targetByVCores = determineTargetByVCores(reqResource.reqVCores);
         int target = Math.max(targetByMb, targetByVCores);
-        if (reqResource.maxMb > 0 || reqResource.maxVCores > 0) {
+        if (reqResource.hangingApps > 0) {
+            target += reqResource.hangingApps;
+        } else if (reqResource.maxMb > 0 || reqResource.maxVCores > 0) {
             int newNodes = determineNewTargetsByMinReq(reqResource.maxMb, reqResource.maxVCores);
             target += newNodes;
         }
@@ -327,11 +332,11 @@ public class EMRScalingRunnable implements Runnable {
         int reqVCores = 0;
         int maxMb = 0;
         int maxVCores = 0;
-        int pendingApps = 0;
+        int hangingApps = 0;
         @Override
         public String toString() {
             return String.format("[pendingApps=%d, reqMb=%d, reqVCores=%d, maxMb=%d, maxVCores=%d]",
-                    pendingApps, reqMb, reqVCores, maxMb, maxVCores);
+                    hangingApps, reqMb, reqVCores, maxMb, maxVCores);
         }
     }
 
