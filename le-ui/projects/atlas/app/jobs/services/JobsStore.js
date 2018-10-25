@@ -46,6 +46,8 @@ angular
     };
     this.inProgressModelJobs = {};
     this.cancelledJobs = {};
+    this.nonWorkflowJobTypes = ['ratingEngineChange', 'segmentChange', 'attributeManagementActivation', 
+                                'attributeManagementDeactivation', 'metadataChange', 'purchaseMetricsChange'];
 
     this.isGetAllJobs = function() {
         return ($state.current.name.includes("home.jobs"));

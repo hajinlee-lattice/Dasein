@@ -9,8 +9,6 @@ angular
         "create_global_target_market": 0,
         "score_training_set": 0
     };
-    var nonWorkflowJobTypes = ['ratingEngineChange', 'segmentChange', 'attributeManagementActivation', 
-                                'attributeManagementDeactivation', 'metadataChange', 'purchaseMetricsChange'];
 
     this.getErrorLog = function(JobReport) {
         var deferred = $q.defer();
@@ -571,66 +569,10 @@ angular
     // }
     function getSubJobs(job) {
         if(job.subJobs != undefined){
-            return rollupSubJobs(job.subJobs);
+            return job.subJobs;
         } else{
             return [];
         }
-    }
-
-    /**
-     * Rollup nonworkflow job types (e.g. Segment Edited, Scoring, etc.)
-     * @param {*} 
-     */
-    function rollupSubJobs (jobs) {
-        var subjobs = angular.copy(jobs);
-        var subjobsByUser = {};
-        var result = [];
-        subjobs.forEach(function(subjob) {
-            if (isNonWorkflowJobType(subjob)) {
-                if (subjobsByUser[subjob.user] != undefined) {
-                    var userJobs = subjobsByUser[subjob.user];
-                    if (userJobs[subjob.jobType] != undefined) {
-                        userJobs[subjob.jobType].push(subjob);
-                    } else {
-                        userJobs[subjob.jobType] = [subjob];
-                    }
-                } else {
-                    var jobType = subjob.jobType;
-                    subjobsByUser[subjob.user] = {};
-                    subjobsByUser[subjob.user][jobType] = [subjob];
-                }
-            } else {
-                result.push(subjob);
-            }
-        });
-        
-        for (var user in subjobsByUser) {
-            for (var subjobType in subjobsByUser[user]) {
-                var userJobs = subjobsByUser[user][subjobType];
-                var job = getLatestJob(userJobs);
-                var toAdd = angular.copy(job);
-                toAdd.name = userJobs.length > 1 ? userJobs.length + ' ' + toAdd.name : toAdd.name;
-                result.push(toAdd);
-            }
-        }
-        return result;
-    }
-
-    function getLatestJob (subjobs) {
-        var latestTimestamp = null;
-        var latestJob = null;
-        subjobs.forEach(function(job) {
-          var currentTimestamp = new Date(job.startTimestamp);
-          if (latestTimestamp == null || currentTimestamp > latestTimestamp) {
-            latestJob = job;
-            latestTimestamp = currentTimestamp;
-          }
-        });
-        return latestJob;
-    }
-
-    function isNonWorkflowJobType (job) {
-        return job.id == null && job.pid == null && nonWorkflowJobTypes.indexOf(job.jobType) >= 0;
     }
 
     function getSteps(job){
