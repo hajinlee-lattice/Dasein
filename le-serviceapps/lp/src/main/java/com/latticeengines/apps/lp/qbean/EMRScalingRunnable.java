@@ -89,9 +89,6 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
-        // to be removed to changed to debug
-        log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource);
-
         boolean scaled = false;
         if (needToScaleUp()) {
             scaled = scaleUp();
@@ -273,6 +270,8 @@ public class EMRScalingRunnable implements Runnable {
             int newNodes = determineNewTargetsByMinReq(reqResource.maxMb, reqResource.maxVCores);
             target += newNodes;
         }
+        // to be removed to changed to debug
+        log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource + " Target=" + target);
         return Math.min(target, MAX_TASK_NODES);
     }
 
