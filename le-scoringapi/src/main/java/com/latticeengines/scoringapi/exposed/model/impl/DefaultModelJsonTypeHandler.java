@@ -120,9 +120,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
             }
-        } catch (
-
-        IOException e) {
+        } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
         return modelEvaluator;
