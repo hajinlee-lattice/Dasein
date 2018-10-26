@@ -5,6 +5,7 @@ import com.latticeengines.datacloud.match.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,9 +14,9 @@ import java.util.List;
 public interface PatchBookValidator {
     /**
      * Validate a list of {@link PatchBook} under specified DataCloud version. Only entries with the given type and
-     * satisfy {@link PatchBookUtils#isEndOfLife(PatchBook)} == FALSE (NOT end of life) will be validated. Other fields
-     * will not be filtered, you should do that before passing in the list of patch books (e.g., pass in only hotFix
-     * entries).
+     * satisfy {@link PatchBookUtils#isEndOfLife(PatchBook, Date)} == FALSE (NOT end of life) will be validated.
+     * Other fields will not be filtered, you should do that before passing in the list of patch books
+     * (e.g., pass in only hotFix entries).
      *
      * @param type target patch book type, should not be {@literal null}
      * @param dataCloudVersion target DataCloud version, should not be {@literal null}
