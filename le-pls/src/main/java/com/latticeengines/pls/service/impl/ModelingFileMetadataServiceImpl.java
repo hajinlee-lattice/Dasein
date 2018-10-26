@@ -352,7 +352,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
             String fileDisplayName, boolean checkHeaderFormat, boolean withCDLHeader) {
-
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
@@ -369,6 +368,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (checkHeaderFormat) {
             ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         }
+        ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
         Collection<String> reservedWords = new ArrayList<>(

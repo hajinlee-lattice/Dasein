@@ -98,6 +98,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
+        ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(displayName, headerFields);
         validateHeadersWithDataCloudAttr(headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);

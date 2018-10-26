@@ -56,7 +56,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-    private static final String PREFIX = "/templates/";
+    private static final String PREFIX = "/Templates/";
     private static final String TEMPLATENAME = "N/A";
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";

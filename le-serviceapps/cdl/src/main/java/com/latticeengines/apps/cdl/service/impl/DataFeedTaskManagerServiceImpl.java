@@ -37,6 +37,7 @@ import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
+import com.latticeengines.apps.cdl.util.ValidateFileHeaderUtils;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
@@ -355,6 +356,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             Set<String> headerFields = parser.getHeaderMap().keySet();
+            ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(importConfig.getS3FileName(),
+                    headerFields);
             for (String header : headerFields) {
                 if (StringUtils.length(header) > MAX_HEADER_LENGTH) {
                     throw new LedpException(LedpCode.LEDP_18188,
