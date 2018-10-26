@@ -66,6 +66,10 @@ public class BucketedScoreSummary implements HasPid {
     @Type(type = "json")
     private BucketedScore[] bucketedScores = new BucketedScore[100];
 
+    @JsonProperty("total_expected_revenue")
+    @Column(name = "TOTAL_EXPECTED_REVENUE", nullable = true)
+    private Double totalExpectedRevenue;
+
     @Override
     public Long getPid() {
         return pid;
@@ -122,6 +126,14 @@ public class BucketedScoreSummary implements HasPid {
 
     public void setModelSummary(ModelSummary modelSummary) {
         this.modelSummary = modelSummary;
+    }
+
+    public Double getTotalExpectedRevenue() {
+        return totalExpectedRevenue;
+    }
+
+    public void setTotalExpectedRevenue(Double totalExpectedRevenue) {
+        this.totalExpectedRevenue = totalExpectedRevenue;
     }
 
     @Override

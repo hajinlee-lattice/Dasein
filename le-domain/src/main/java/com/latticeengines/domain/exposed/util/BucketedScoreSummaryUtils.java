@@ -12,15 +12,27 @@ import com.google.common.collect.Lists;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
 public class BucketedScoreSummaryUtils {
 
-    private static final String SCORE = "Score";
-    private static final String EXPECTED_REVENUE_SCORE = "ExpectedRevenuePercentile";
-    private static final String TOTAL_EVENTS = "TotalEvents";
-    private static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
-    private static final int MIN_SCORE = 5;
-    private static final int MAX_SCORE = 99;
+    public static final String SCORE = "Score";
+    public static final String EXPECTED_REVENUE_SCORE = "ExpectedRevenuePercentile";
+    public static final String TOTAL_EVENTS = "TotalEvents";
+    public static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
+    public static final int MIN_SCORE = 5;
+    public static final int MAX_SCORE = 99;
+
+    public static final String BUCKET_AVG_SCORE = "BucketAverageScore";
+    public static final String BUCKET_SUM = "BucketSum";
+
+    public static final String BUCKET_TOTAL_EVENTS = "TotalEvents";
+    public static final String BUCKET_TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
+    public static final String BUCKET_LIFT = "Lift";
+    public static final String MODEL_GUID = ScoreResultField.ModelId.displayName;
+
+    public static final String MODEL_AVG = "ModelAvg";
+    public static final String MODEL_SUM = "ModelSum";
 
     public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords) {
         return generateBucketedScoreSummary(pivotedRecords, false);
@@ -29,6 +41,7 @@ public class BucketedScoreSummaryUtils {
     public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords, boolean isEV) {
         int cumulativeNumLeads = 0;
         double cumulativeNumConverted = 0;
+        double totalExpectedRevenue = 0;
         pivotedRecords = combineNullAndMinScoreRecord(pivotedRecords, isEV);
         pivotedRecords.sort(Comparator.comparingDouble(g -> Double.valueOf(g.get(scoreColumn(isEV)).toString())));
         int idx = pivotedRecords.size() - 1;
@@ -48,27 +61,38 @@ public class BucketedScoreSummaryUtils {
                         Double.valueOf(pivotedRecord.get(scoreColumn(isEV)).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()), cumulativeNumLeads,
-                        cumulativeNumConverted, isEV, //
-                        isEV ? Double.valueOf(pivotedRecord.get("BucketAverageScore").toString()).doubleValue() : 0,
-                        isEV ? Double.valueOf(pivotedRecord.get("BucketSum").toString()).doubleValue() : 0);
+                        cumulativeNumConverted,
+                        isEV ? Double.valueOf(pivotedRecord.get(BUCKET_AVG_SCORE).toString()).doubleValue() : null,
+                        isEV ? Double.valueOf(pivotedRecord.get(BUCKET_SUM).toString()).doubleValue() : null,
+                        isEV ? totalExpectedRevenue : null);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
                 cumulativeNumConverted += (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS);
+                if (isEV) {
+                    totalExpectedRevenue += Double.valueOf(pivotedRecord.get(BUCKET_SUM).toString()).doubleValue();
+                }
                 idx--;
             } else {
-                bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
-                        cumulativeNumConverted);
+                bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0D, cumulativeNumLeads,
+                        cumulativeNumConverted, //
+                        isEV ? 0D : null, //
+                        isEV ? 0D : null, //
+                        isEV ? totalExpectedRevenue : null);
             }
             currentScore--;
         }
         for (; currentScore > 3; currentScore--) {
-            bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
-                    cumulativeNumConverted);
+            bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0D, cumulativeNumLeads,
+                    cumulativeNumConverted, //
+                    isEV ? 0D : null, //
+                    isEV ? 0D : null, //
+                    isEV ? totalExpectedRevenue : null);
         }
 
         double totalLift = cumulativeNumConverted / cumulativeNumLeads;
 
         bucketedScoreSummary.setTotalNumLeads(cumulativeNumLeads);
         bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);
+        bucketedScoreSummary.setTotalExpectedRevenue(isEV ? totalExpectedRevenue : null);
         bucketedScoreSummary.setOverallLift(totalLift);
 
         for (int i = bucketedScoreSummary.getBarLifts().length; i > 0; i--) {
@@ -126,54 +150,67 @@ public class BucketedScoreSummaryUtils {
     }
 
     public static List<BucketMetadata> computeLift(BucketedScoreSummary scoreSummary,
-            List<BucketMetadata> bucketMetadataList) {
+            List<BucketMetadata> bucketMetadataList, boolean isEV) {
         bucketMetadataList = sortBucketMetadata(bucketMetadataList, true);
-        List<Integer> lowerBonds = null;
+        List<Integer> lowerBounds = null;
         for (BucketMetadata bucketMetadata : bucketMetadataList) {
-            if (lowerBonds == null) {
-                lowerBonds = new ArrayList<>();
+            if (lowerBounds == null) {
+                lowerBounds = new ArrayList<>();
             } else {
-                lowerBonds.add(bucketMetadata.getRightBoundScore());
+                lowerBounds.add(bucketMetadata.getRightBoundScore());
             }
         }
-        if (CollectionUtils.isEmpty(lowerBonds) || lowerBonds.size() + 1 != bucketMetadataList.size()) {
-            throw new RuntimeException("Not enough lower bonds");
+        if (CollectionUtils.isEmpty(lowerBounds) || lowerBounds.size() + 1 != bucketMetadataList.size()) {
+            throw new RuntimeException("Not enough lower bounds");
         }
         List<BucketedScore> boundaries = new ArrayList<>();
-        boundaries
-                .add(new BucketedScore(0, 0, 0, scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted()));
+        boundaries.add(new BucketedScore(0, 0, 0D, //
+                scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted(), isEV ? 0D : null, //
+                isEV ? 0D : null, //
+                isEV ? scoreSummary.getTotalExpectedRevenue() : null));
         for (BucketedScore bucketedScore : scoreSummary.getBucketedScores()) {
             if (bucketedScore != null) {
-                if (lowerBonds.contains(bucketedScore.getScore())) {
+                if (lowerBounds.contains(bucketedScore.getScore())) {
                     boundaries.add(bucketedScore);
                 }
             }
         }
-        boundaries.add(new BucketedScore(100, 0, 0, 0, 0));
+        boundaries.add(new BucketedScore(100, 0, 0D, 0, 0D, //
+                isEV ? 0D : null, //
+                isEV ? 0D : null, //
+                isEV ? 0D : null));
 
         double overallConversion = scoreSummary.getTotalNumConverted() / scoreSummary.getTotalNumLeads();
         for (int i = 0; i < bucketMetadataList.size(); i++) {
-            BucketedScore lowerBond = boundaries.get(i);
-            BucketedScore upperBond = boundaries.get(i + 1);
-            int totolLeads = lowerBond.getLeftNumLeads() + lowerBond.getNumLeads();
-            totolLeads -= upperBond.getLeftNumLeads() + upperBond.getNumLeads();
+            BucketedScore lowerBound = boundaries.get(i);
+            BucketedScore upperBound = boundaries.get(i + 1);
+            int totolLeads = lowerBound.getLeftNumLeads() + lowerBound.getNumLeads();
+            totolLeads -= (upperBound.getLeftNumLeads() + upperBound.getNumLeads());
             double lift;
             if (scoreSummary.getTotalNumConverted() == 0) {
                 lift = 0.0D;
             } else {
-                double totolConverted = lowerBond.getLeftNumConverted() + lowerBond.getNumConverted();
-                totolConverted -= upperBond.getLeftNumConverted() + upperBond.getNumConverted();
+                double totolConverted = lowerBound.getLeftNumConverted() + lowerBound.getNumConverted();
+                totolConverted -= upperBound.getLeftNumConverted() + upperBound.getNumConverted();
                 double conversionRate = totolLeads == 0 ? 0 : totolConverted / totolLeads;
                 lift = conversionRate / overallConversion;
             }
             bucketMetadataList.get(i).setLift(lift);
             bucketMetadataList.get(i).setNumLeads(totolLeads);
+            if (isEV) {
+                double totalBucketExpectedRevenue = lowerBound.getLeftExpectedRevenue()
+                        + lowerBound.getExpectedRevenue();
+                totalBucketExpectedRevenue -= upperBound.getLeftExpectedRevenue() + upperBound.getExpectedRevenue();
+                double averageBucketExpectedRevenue = totalBucketExpectedRevenue / totolLeads;
+                bucketMetadataList.get(i).setTotalExpectedRevenue(totalBucketExpectedRevenue);
+                bucketMetadataList.get(i).setAverageExpectedRevenue(averageBucketExpectedRevenue);
+            }
         }
 
         return Lists.reverse(bucketMetadataList);
     }
 
-    // sort bucket metadata by lower bond score asc
+    // sort bucket metadata by lower bound score asc
     public static List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata, boolean ascendingScore) {
         if (CollectionUtils.isNotEmpty(bucketMetadata)) {
             bucketMetadata.sort(Comparator.comparingInt(BucketMetadata::getRightBoundScore));

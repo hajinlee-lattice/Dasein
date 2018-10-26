@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConfiguration {
 
     @JsonProperty("isEV")

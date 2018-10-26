@@ -1,5 +1,14 @@
 package com.latticeengines.scoring.dataflow;
 
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.BUCKET_AVG_SCORE;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.BUCKET_LIFT;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.BUCKET_SUM;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.BUCKET_TOTAL_EVENTS;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.BUCKET_TOTAL_POSITIVE_EVENTS;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.MODEL_AVG;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.MODEL_GUID;
+import static com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.MODEL_SUM;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,17 +33,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScor
 public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEventParameters> {
 
     private static final Logger log = LoggerFactory.getLogger(PivotScoreAndEvent.class);
-
-    private static final String BUCKET_AVG_SCORE = "BucketAverageScore";
-    private static final String BUCKET_SUM = "BucketSum";
-
-    private static final String BUCKET_TOTAL_EVENTS = "TotalEvents";
-    private static final String BUCKET_TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
-    private static final String BUCKET_LIFT = "Lift";
-    private static final String MODEL_GUID = ScoreResultField.ModelId.displayName;
-
-    public static final String MODEL_AVG = "ModelAvg";
-    private static final String MODEL_SUM = "ModelSum";
 
     private Node total;
     private boolean useEvent;

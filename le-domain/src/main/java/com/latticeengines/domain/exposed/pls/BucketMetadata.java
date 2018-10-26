@@ -85,6 +85,14 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @Column(name = "LAST_MODIFIED_BY_USER")
     private String lastModifiedByUser;
 
+    @JsonProperty("avg_expected_revenue")
+    @Column(name = "AVG_EXPECTED_REVENUE", nullable = true)
+    private Double averageExpectedRevenue;
+
+    @JsonProperty("total_expected_revenue")
+    @Column(name = "TOTAL_EXPECTED_REVENUE", nullable = true)
+    private Double totalExpectedRevenue;
+
     @JsonProperty("model_summary_id")
     @Transient
     private String modelSummaryId;
@@ -208,6 +216,22 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         this.lastModifiedByUser = lastModifiedByUser;
     }
 
+    public Double getAverageExpectedRevenue() {
+        return averageExpectedRevenue;
+    }
+
+    public void setAverageExpectedRevenue(Double averageExpectedRevenue) {
+        this.averageExpectedRevenue = averageExpectedRevenue;
+    }
+
+    public Double getTotalExpectedRevenue() {
+        return totalExpectedRevenue;
+    }
+
+    public void setTotalExpectedRevenue(Double totalExpectedRevenue) {
+        this.totalExpectedRevenue = totalExpectedRevenue;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -222,12 +246,10 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         } else if (obj instanceof BucketMetadata) {
             BucketMetadata bucketMetadata = (BucketMetadata) obj;
             return this.getModelSummary().getId().equals(bucketMetadata.getModelSummary().getId())
-                    && this.getRatingEngine().getId()
-                            .equals(bucketMetadata.getRatingEngine().getId())
+                    && this.getRatingEngine().getId().equals(bucketMetadata.getRatingEngine().getId())
                     && this.getBucketName().equals(bucketMetadata.getBucketName())
                     && this.getRightBoundScore() == bucketMetadata.getRightBoundScore()
-                    && this.getLift() == bucketMetadata.getLift()
-                    && this.getNumLeads() == bucketMetadata.getNumLeads();
+                    && this.getLift() == bucketMetadata.getLift() && this.getNumLeads() == bucketMetadata.getNumLeads();
         }
         return false;
     }

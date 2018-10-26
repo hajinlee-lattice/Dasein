@@ -172,7 +172,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                     .generateBucketedScoreSummary(pivotedRecords, modelGuidToIsEVFlagMap.get(modelGuid));
             List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
-            BucketedScoreSummaryUtils.computeLift(bucketedScoreSummary, bucketMetadata);
+            BucketedScoreSummaryUtils.computeLift(bucketedScoreSummary, bucketMetadata, modelGuidToIsEVFlagMap.get(modelGuid));
             if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
                 log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketedScoreSummary));
@@ -355,6 +355,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         }
 
         if (MapUtils.isNotEmpty(modelGuidToBucketMetadataMap)) {
+            @SuppressWarnings("rawtypes")
             Map<String, List> map = getMapObjectFromContext(BUCKET_METADATA_MAP_AGG, String.class, List.class);
             Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMapAgg = new HashMap<>();
             if (MapUtils.isNotEmpty(map)) {
