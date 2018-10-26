@@ -1,5 +1,3 @@
-console.log("Entry point of atlas app");
-// console.log('Start ------------------------------');
 /********* Styles ****************************/
 import "../common/assets/sass/lattice.scss";
 /************ This scss files should be removed from this path **************/
@@ -8,6 +6,7 @@ import './assets/styles/main.scss';
 /**
  * Common 
  */
+
 import '../common/app/utilities/utilities.index';
 import '../common/app/services/services.index';
 import '../common/app/directives/directives.index';

@@ -1,7 +1,6 @@
 import React, { Component } from "../../../../common/react-vendor";
 import Aux from "../../../../common/widgets/hoc/_Aux";
 import { getAngularState } from "../react/states";
-import { getData } from "../../../../common/widgets/table/table-utils";
 
 import LeGridList from "../../../../common/widgets/table/table";
 import LeGridRow from "../../../../common/widgets/table/table-row";
@@ -11,6 +10,9 @@ import CellTools from "../../../../common/widgets/table/cell-tools";
 import LeTableHeader from "../../../../common/widgets/table/table-header";
 import LeTableBody from "../../../../common/widgets/table/table-body";
 
+import TemplateService from "./templates.service";
+import httpService from "../../../../common/app/http/http-service";
+import {SUCCESS} from '../../../../common/app/http/response';
 
 import TemplatesRowActions, {
   CREATE_TEMPLATE,
@@ -18,6 +20,7 @@ import TemplatesRowActions, {
   IMPORT_DATA
 } from "./templates-row-actions";
 import "./templates.scss";
+import Observer from "../../../../common/app/http/observer";
 
 export default class GridContainer extends Component {
   constructor(props) {
@@ -34,7 +37,7 @@ export default class GridContainer extends Component {
   createTemplate(response) {
     let entity = "";
     switch (response.type) {
-      case "Account": {
+      case "Accounts": {
         entity = "accounts";
         break;
       }
@@ -71,36 +74,57 @@ export default class GridContainer extends Component {
         break;
     }
   }
-  getHeader() {}
+  copyPath(text) {
+    // var text = "Example text to appear on clipboard";
+    window.navigator.clipboard.writeText(text).then(
+      () => {
+        console.log("Async: Copying to clipboard was successful!");
+      },
+      (err) => {
+        console.error("Async: Could not copy text: ", err);
+      }
+    );
+  }
+  getCopyPathUI(rowData) {
+    // if (rowData.Path == "N/A") {
+    //   return null;
+    // } else {
+    return (
+      <li
+        className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
+        title="Copy Link"
+        onClick={() => {
+          this.copyPath(rowData.Path);
+        }}
+      >
+        <i className="fa fa-files-o" />
+      </li>
+    );
+    // }
+  }
+
   getRows() {
     if (this.state.data.length > 0) {
       let rowsUI = this.state.data.map((row, index) => {
         return (
           <LeGridRow index={index} rowData={row}>
-            <LeGridCell colName="name" colSpan="2">
-              <CellContent name="name">
-                <span>{row.name}</span>
+            <LeGridCell colName="TemplateName" colSpan="2">
+              <CellContent name="TemplateName">
+                <span>{row.TemplateName}</span>
               </CellContent>
             </LeGridCell>
 
-            <LeGridCell colName="object" colSpan="2">
-              <CellContent name="object">
-                <span>{row.object}</span>
+            <LeGridCell colName="Object" colSpan="2">
+              <CellContent name="Object">
+                <span>{row.Object}</span>
               </CellContent>
             </LeGridCell>
 
-            <LeGridCell colName="location" colSpan="4">
-              <CellContent name="location">
-                <span>{row.location}</span>
+            <LeGridCell colName="Path" colSpan="4">
+              <CellContent name="Path">
+                <span>{row.Path}</span>
               </CellContent>
-              <CellTools>
-                <li
-                  className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
-                  title="Copy Link"
-                >
-                  <i className="fa fa-files-o" />
-                </li>
-              </CellTools>
+              <CellTools>{this.getCopyPathUI(row)}</CellTools>
             </LeGridCell>
 
             <LeGridCell colName="edited" colSpan="1">
@@ -111,10 +135,10 @@ export default class GridContainer extends Component {
 
             <LeGridCell colName="actions" colSpan="3">
               <CellTools classes="templates-controlls">
-              <TemplatesRowActions
-                rowData={row}
-                callback={this.actionCallbackHandler}
-              />
+                <TemplatesRowActions
+                  rowData={row}
+                  callback={this.actionCallbackHandler}
+                />
               </CellTools>
             </LeGridCell>
           </LeGridRow>
@@ -126,21 +150,42 @@ export default class GridContainer extends Component {
     }
   }
 
+  componentWillUnmount(){
+    httpService.unsubscribeObservable(this.observer);
+  }
+
   componentDidMount() {
     this.setState({
       forceReload: true,
       showEmpty: false,
       showLoading: true
     });
-
-    setTimeout(() => {
+    this.observer = new Observer((response) =>{
+      if(response.status == SUCCESS){
+        this.setState({
+          forceReload: false,
+          showEmpty: (response.data && response.data.length == 0),
+          showLoading: false,
+          data: response.data
+        });
+      } else {
+        this.setState({
+          forceReload: false,
+          showEmpty: true,
+          showLoading: false,
+          data: []
+        });
+      }
+    }, (error) => {
       this.setState({
         forceReload: false,
-        showEmpty: false,
+        showEmpty: true,
         showLoading: false,
-        data: getData("--")
+        data: []
       });
-    }, 2000);
+    });
+    httpService.get('/pls/cdl/s3import/template', this.observer);
+    // TemplateService().getTemplates(this.observer);
   }
   render() {
     return (
@@ -152,20 +197,20 @@ export default class GridContainer extends Component {
           emptymsg={"There is no data"}
         >
           <LeTableHeader>
-            <LeGridCell colName="name" colSpan="2">
-              <CellContent name="name">
+            <LeGridCell colName="TemplateName" colSpan="2">
+              <CellContent name="TemplateName">
                 <span>Name</span>
               </CellContent>
             </LeGridCell>
 
-            <LeGridCell colName="object" colSpan="2">
-              <CellContent name="object">
+            <LeGridCell colName="Object" colSpan="2">
+              <CellContent name="Object">
                 <span>Object</span>
               </CellContent>
             </LeGridCell>
 
-            <LeGridCell colName="location" colSpan="4">
-              <CellContent name="location">
+            <LeGridCell colName="Path" colSpan="4">
+              <CellContent name="Path">
                 <span>Automated Import Location</span>
               </CellContent>
             </LeGridCell>

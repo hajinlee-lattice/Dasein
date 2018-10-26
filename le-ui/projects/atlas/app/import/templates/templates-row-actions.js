@@ -14,7 +14,6 @@ export const response = {
 export default class TemplatesRowControlles extends Component {
   constructor(props) {
     super(props);
-    console.log(props);
   }
 
   getCreateButton() {
@@ -27,7 +26,7 @@ export default class TemplatesRowControlles extends Component {
             name: ""
           }}
           callback={() => {
-            this.props.callback({action: CREATE_TEMPLATE, type:  this.props.rowData.object});
+            this.props.callback({action: CREATE_TEMPLATE, type:  this.props.rowData.Object});
           }}
         />
       );

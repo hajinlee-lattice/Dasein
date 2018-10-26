@@ -1,5 +1,5 @@
 //Initial load of the application
-
+import httpService from '../../common/app/http/http-service';
 var mainApp = angular.module('mainApp', [
     'templates-main',
     //'ngAnimate',
@@ -120,14 +120,29 @@ var mainApp = angular.module('mainApp', [
     }
 
 })
+.factory('LeHTTP', () => {
+    return {
+        initHeader: (headerObj) => {
+            httpService.setUpHeader(headerObj);
+        },
+        unsubscribeObservable: (observer) => {
+            httpService.unsubscribeObservable(observer);
+        },
+        get: (url, observer) => {
+            return httpService.get(url, observer);
+        }
+    };
+})
 // adds Authorization token to $http requests to access API
-.factory('authInterceptor', function ($rootScope, $q, BrowserStorageUtility) {
+.factory('authInterceptor', function ($rootScope, $q, BrowserStorageUtility, LeHTTP) {
     return {
         request: function(config) {
             config.headers = config.headers || {};
 
             if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
                 config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+                LeHTTP.initHeader({Authorization: config.headers.Authorization});
+                
             }
 
             var ClientSession = BrowserStorageUtility.getClientSession();

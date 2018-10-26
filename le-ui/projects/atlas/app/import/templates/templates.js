@@ -10,7 +10,7 @@ import {
 import "./templates.scss";
 import { clean, getRouter } from "../react/components/routing-test";
 import { UIRouter, UIView } from "../../../../common/react-vendor";
-import SummaryContainer from "./summary";
+import SummaryContainer from "./components/summary";
 import { setAngularState } from "../react/states";
 
 class TemplatesComponent extends Component {

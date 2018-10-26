@@ -8,7 +8,6 @@ export const RIGHT = "right";
 export default class LeLink extends Component {
   constructor(props) {
     super(props);
-    console.log('PROPS ==> ', props);
   }
 
   getIcon(position) {

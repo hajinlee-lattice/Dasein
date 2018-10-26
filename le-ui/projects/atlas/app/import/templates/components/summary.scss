@@ -1,0 +1,40 @@
+@import "../../../../../common/widgets/layout/layout.scss";
+@import "../../../../../common/widgets/colors.scss";
+.le-summary-container {
+  min-height: 217px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  overflow: hidden;
+  width: 100%;
+  // max-height: 180px;
+  background-image: url(/assets/images/bkg-blue-fire.jpg);
+  color: $pearl-white;
+  justify-content: space-between;
+  align-items: center;
+  .le-summary-header {
+    margin-top: 0.3em;
+    max-width: 1200px;;
+    & > p,
+    span {
+      color: $pearl-white;
+      padding: 0 .5em;
+    }
+    & > .title {
+      font-size: 20px;
+      margin-top: 1.2em;
+      padding: 0 0.7%;
+    }
+    & > .description {
+     
+      padding: 0 0.7%;
+    }
+  }
+  .boxes-container {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    flex:1;
+    // padding: 0 2.12766%;
+    max-width: 1200px;
+  }
+}
