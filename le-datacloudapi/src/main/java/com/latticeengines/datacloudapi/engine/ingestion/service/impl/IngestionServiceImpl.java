@@ -68,6 +68,9 @@ public class IngestionServiceImpl implements IngestionService {
     @Resource(name = "ingestionSFTPProviderService")
     private IngestionProviderService sftpProviderService;
 
+    @Resource(name = "ingestionBWRawProviderService")
+    private IngestionProviderService bwRawProviderService;
+
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
@@ -168,6 +171,14 @@ public class IngestionServiceImpl implements IngestionService {
             break;
         case API:
             missingFiles = apiProviderService.getMissingFiles(ingestion);
+            for (String file : missingFiles) {
+                IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
+                        PropDataConstants.SCAN_SUBMITTER, file, null);
+                progresses.add(progress);
+            }
+            break;
+        case BW_RAW:
+            missingFiles = bwRawProviderService.getMissingFiles(ingestion);
             for (String file : missingFiles) {
                 IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
                         PropDataConstants.SCAN_SUBMITTER, file, null);

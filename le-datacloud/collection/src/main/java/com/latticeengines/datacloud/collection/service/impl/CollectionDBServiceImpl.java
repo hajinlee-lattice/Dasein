@@ -57,6 +57,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @Service("collectionDBService")
 public class CollectionDBServiceImpl implements CollectionDBService {
@@ -134,7 +135,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     public void addNewDomains(List<String> domains, String reqId) {
 
-        List<String> vendors = vendorConfigService.getVendors();
+        Iterable<String> vendors = VendorConfig.EFFECTIVE_VENDOR_SET;
 
         vendors.forEach(vendor -> addNewDomains(domains, vendor, reqId));
 
