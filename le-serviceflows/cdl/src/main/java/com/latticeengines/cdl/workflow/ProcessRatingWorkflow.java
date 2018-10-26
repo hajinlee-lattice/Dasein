@@ -17,6 +17,7 @@ import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
+import com.latticeengines.serviceflows.workflow.export.ImportGeneratingRatingFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -56,11 +57,15 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
     @Inject
     private ExportToDynamo exportToDynamo;
 
+    @Inject
+    private ImportGeneratingRatingFromS3 importGeneratingRatingFromS3;
+
     @Override
     public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //
+                .next(importGeneratingRatingFromS3) //
                 .next(resetRating); //
         for (int i = 0; i < config.getMaxIteration(); i++) {
             builder = builder.next(startIteration) //

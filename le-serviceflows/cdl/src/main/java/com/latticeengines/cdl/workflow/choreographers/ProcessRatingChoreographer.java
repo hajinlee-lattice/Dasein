@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.serviceflows.workflow.export.ImportGeneratingRatingFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
 import com.latticeengines.workflow.exposed.build.Choreographer;
@@ -50,6 +51,9 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     @Inject
     private CloneInactiveServingStores cloneInactiveServingStores;
+
+    @Inject
+    private ImportGeneratingRatingFromS3 importGeneratingRatingFromS3;
 
     @Inject
     private GenerateAIRatingWorkflow generateAIRatingWorkflow;
@@ -125,7 +129,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                 skip = true;
             } else if (isResetRatingStep(step) || iterationFinished) {
                 skip = true;
-            } else if (isStartIterationStep(step) || isCloneServingStoresStep(step)) {
+            } else if (isStartIterationStep(step) || isCloneServingStoresStep(step)
+                    || isImportGeneratingRatingFromS3(step)) {
                 // always run these steps in rebuild mode
                 skip = false;
             } else {
@@ -212,6 +217,10 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean isCloneServingStoresStep(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().equals(cloneInactiveServingStores.name());
+    }
+
+    private boolean isImportGeneratingRatingFromS3(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equals(importGeneratingRatingFromS3.name());
     }
 
     private boolean isIngestRuleRatingStep(AbstractStep<? extends BaseStepConfiguration> step) {

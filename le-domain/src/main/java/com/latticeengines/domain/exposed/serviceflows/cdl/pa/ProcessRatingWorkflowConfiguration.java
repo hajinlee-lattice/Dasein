@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -41,6 +42,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportToRedshiftStepConfiguration exportDataToRedshiftConfiguration = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
+        private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -50,6 +52,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             exportDataToRedshiftConfiguration.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
+            importExportS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -58,6 +61,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             exportDataToRedshiftConfiguration.setMicroServiceHostPort(microServiceHostPort);
             exportToDynamo.setMicroServiceHostPort(microServiceHostPort);
             generateRatingStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            importExportS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -68,6 +72,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             exportDataToRedshiftConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             generateRatingWorfklow.internalResourceHostPort(internalResourceHostPort);
+            importExportS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -115,8 +120,8 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             generateRatingWorfklow.fetchOnly(true);
             generateRatingWorfklow.useAccountFeature(true);
 
-            configuration.setContainerConfiguration("processRatingWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processRatingWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
 
             configuration.add(processRatingStepConfiguration);
             configuration.add(combineStatisticsConfiguration);
@@ -124,6 +129,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             configuration.add(generateRatingStepConfiguration);
             configuration.add(exportDataToRedshiftConfiguration);
             configuration.add(exportToDynamo);
+            configuration.add(importExportS3);
             return configuration;
         }
     }
