@@ -29,10 +29,10 @@ import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
  */
 public class PatchBookUtils {
 
-    private static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
-    private static final String INVALID_EFFECTIVE_DATE_RANGE_ERROR =
+    public static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
+    public static final String INVALID_EFFECTIVE_DATE_RANGE_ERROR =
             "ExpireAfter date should not be earlier than EffectiveSince date";
-    private static final String UNSUPPORTED_MATCH_KEY = "Unsupported match key combination found for PID : ";
+    public static final String UNSUPPORTED_MATCH_KEY_ERROR = "Unsupported match key combination found for PID : ";
 
     // Key: patch book type, Value: set of supported match key tuple (in serialized format)
     private static final Map<PatchBook.Type, Set<String>> SUPPORTED_MATCH_KEY_MAP = new HashMap<>();
@@ -206,7 +206,7 @@ public class PatchBookUtils {
         for (PatchBook entry : patchBooks) {
             if (!isMatchKeySupported(entry)) {
                 PatchBookValidationError error = new PatchBookValidationError();
-                error.setMessage(UNSUPPORTED_MATCH_KEY + entry.getPid());
+                error.setMessage(UNSUPPORTED_MATCH_KEY_ERROR + entry.getPid());
                 error.setPatchBookIds(Collections.singletonList(entry.getPid()));
                 errorList.add(error);
             }
