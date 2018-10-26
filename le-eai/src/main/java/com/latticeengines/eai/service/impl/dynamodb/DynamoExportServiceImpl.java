@@ -5,11 +5,11 @@ import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CO
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_REPOSITORY;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_SORT_KEY;
-import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX;
 
 import java.io.IOException;
 import java.util.List;
@@ -133,7 +133,7 @@ public class DynamoExportServiceImpl extends ExportService {
 
         props.setProperty(CONFIG_ENDPOINT, ctx.getProperty(CONFIG_ENDPOINT, String.class, ""));
         props.setProperty(CONFIG_AWS_REGION,
-                ctx.getProperty(CONFIG_ENDPOINT, String.class, "us-east-1"));
+                ctx.getProperty(CONFIG_AWS_REGION, String.class, "us-east-1"));
         props.setProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
                 ctx.getProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, String.class, ""));
         props.setProperty(CONFIG_AWS_SECRET_KEY_ENCRYPTED,
