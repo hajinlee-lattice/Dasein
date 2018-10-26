@@ -36,7 +36,7 @@
 
             <div 
                 class="chart-header" 
-                ng-if="(vm.hasRatingsAvailable && vm.section === 'dashboard.ratings') || vm.section != 'dashboard.ratings'">
+                ng-if="vm.section === 'dashboard.ratings'">
                 <div class="list-data pull-left">
                     All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong>
                 </div>
@@ -51,17 +51,16 @@
                 </div>
             </div><!-- End .chart-header -->
 
-            <div 
+            <!-- <div 
                 ng-if="!vm.hasRatingsAvailable && vm.section === 'dashboard.ratings'"
                 class="no-ratings-header">
                 <h2>No Ratings Available for Iteration {{vm.activeIteration.iteration}}</h2>
-            </div><!-- End .no-ratings-header -->
+            </div> --><!-- End .no-ratings-header -->
 
             <div 
                 id="ratingsChart"
                 class="ratings-chart"
-                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}"
-                ng-if="(vm.hasRatingsAvailable && vm.section === 'dashboard.ratings') || vm.section != 'dashboard.ratings'">
+                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
 
                 <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
                 
@@ -157,8 +156,7 @@
 
             <ul 
                 id="bucketTiles" 
-                class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}"
-                ng-if="(vm.hasRatingsAvailable && vm.section === 'dashboard.ratings') || vm.section != 'dashboard.ratings'">
+                class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}">
             	<li ng-repeat="bucket in vm.workingBuckets">
             		<div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{bucket.bucket_name}}</div>
             		<dl>
