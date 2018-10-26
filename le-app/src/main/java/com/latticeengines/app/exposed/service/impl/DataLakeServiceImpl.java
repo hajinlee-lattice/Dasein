@@ -62,10 +62,12 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -203,12 +205,14 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
 
-        String internalAccountId = getInternalAccountIdViaObjectApi(customerSpace, accountId, lookupIdColumn);
+        List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
+                Collections.singletonList(accountId), lookupIdColumn);
+        String internalAccountId = internalAccountIds.size() > 0 ? internalAccountIds.get(0) : null;
 
         DataPage dataPage;
 
         if (StringUtils.isNotBlank(internalAccountId)) {
-            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId, predefined);
+            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountIds, predefined);
 
             if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
                 // if we didn't get any data from matchapi then it may be
@@ -221,10 +225,14 @@ public class DataLakeServiceImpl implements DataLakeService {
                 List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
                         .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
                 try {
-                    dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, true);
+                    FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
+                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, true);
+                    dataPage = entityProxy.getData(customerSpace, query);
                 } catch (Exception ex) {
                     log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
-                    dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, false);
+                    FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
+                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, false);
+                    dataPage = entityProxy.getData(customerSpace, query);
                 }
             }
 
@@ -323,6 +331,35 @@ public class DataLakeServiceImpl implements DataLakeService {
         return null;
     }
 
+    private List<String> getInternalAccountsIdViaObjectApi(String customerSpace,
+            List<String> accountIds, String lookupIdColumn) {
+
+        DataPage entityData;
+        try {
+            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
+                    accountIds, lookupIdColumn, null, true);
+              log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
+            entityData = entityProxy.getData(customerSpace, frontEndQuery);
+        } catch (Exception e) {
+            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
+                    accountIds, lookupIdColumn, null, false);
+            log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
+            entityData = entityProxy.getData(customerSpace, frontEndQuery);
+        }
+
+        return AccountExtensionUtil.extractAccountIds(entityData);
+    }
+
+    private DataPage getAccountByIdViaMatchApi(String customerSpace,
+            List<String> internalAccountIds, ColumnSelection.Predefined predefined) {
+
+        String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace,
+                internalAccountIds, predefined, dataCloudVersion);
+        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+
+        return AccountExtensionUtil.convertToDataPage(matchOutput);
+    }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
         List<List<Object>> data = new ArrayList<>();
@@ -345,31 +382,6 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
-        return convertToDataPage(matchOutput);
-    }
-
-    private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId,
-            ColumnSelection.Predefined predefined) {
-        List<List<Object>> data = new ArrayList<>();
-        List<Object> datum = new ArrayList<>();
-
-        datum.add(internalAccountId);
-        data.add(datum);
-
-        Tenant tenant = new Tenant(customerSpace);
-        MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(tenant);
-        matchInput.setFields(LOOKUP_FIELDS);
-        matchInput.setData(data);
-        matchInput.setKeyMap(KEY_MAP);
-        matchInput.setPredefinedSelection(predefined);
-        String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        matchInput.setUseRemoteDnB(false);
-        matchInput.setDataCloudVersion(dataCloudVersion);
-
-        log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
-        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
-
         return convertToDataPage(matchOutput);
     }
 
@@ -408,53 +420,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         List<Map<String, Object>> dataList = new ArrayList<>();
         dataPage.setData(dataList);
         return dataPage;
-    }
-
-    private String getInternalAccountIdViaObjectApi(String customerSpace, String accountId, String lookupIdColumn) {
-        List<String> attributes = Collections.singletonList(InterfaceName.AccountId.name());
-        DataPage dataPage;
-        try {
-            dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, true);
-        } catch (Exception ex) {
-            log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
-            dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, false);
-        }
-        String internalAccountId = null;
-
-        if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
-            Object internalAccountIdObj = dataPage.getData().get(0).get(InterfaceName.AccountId.name());
-            if (internalAccountIdObj != null) {
-                internalAccountId = internalAccountIdObj.toString();
-            }
-        }
-
-        return internalAccountId;
-    }
-
-    private DataPage getAccountDataViaObjectApi(String customerSpace, String accountId, String lookupIdColumn,
-            List<String> attributes, boolean shouldAddLookupIdClause) {
-
-        Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-                .eq(accountId) //
-                .build();
-
-        if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
-            Restriction sfdcRestriction = Restriction.builder() //
-                    .let(BusinessEntity.Account, lookupIdColumn) //
-                    .eq(accountId) //
-                    .build();
-
-            restriction = Restriction.builder().or(Arrays.asList(restriction, sfdcRestriction)).build();
-        }
-
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[attributes.size()]));
-
-        log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
-        return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
