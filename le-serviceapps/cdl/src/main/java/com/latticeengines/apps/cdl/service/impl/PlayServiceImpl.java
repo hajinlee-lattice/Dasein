@@ -115,7 +115,7 @@ public class PlayServiceImpl implements PlayService {
         } else {
             retrievedPlay = playEntityMgr.getPlayByName(play.getName(), true);
             if (retrievedPlay == null) {
-                shouldCreateNew = true;
+                retrievedPlay = playEntityMgr.createPlay(play);
             }
         }
 
