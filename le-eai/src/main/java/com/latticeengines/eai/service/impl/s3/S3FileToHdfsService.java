@@ -126,7 +126,7 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find the dataFeed task for import!");
             }
-            initJobDetail(jobDetailId, config.getJobIdentifier(), SourceType.FILE);
+            initJobDetail(jobDetailId, config.getJobIdentifier(), SourceType.FILE, config.getS3FileName());
             Table template = dataFeedTask.getImportTemplate();
             log.info(String.format("Modeling metadata for template: %s",
                     JsonUtils.serialize(template.getModelingMetadata())));

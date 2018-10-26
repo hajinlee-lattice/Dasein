@@ -83,7 +83,11 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         progressReporter.apply(progress);
     }
 
-    public void initJobDetail(Long jobDetailId, String jobIdentifier, SourceType sourceType) {
+    protected void initJobDetail(Long jobDetailId, String jobIdentifier, SourceType sourceType) {
+        initJobDetail(jobDetailId, jobIdentifier, sourceType, "");
+    }
+
+    protected void initJobDetail(Long jobDetailId, String jobIdentifier, SourceType sourceType, String fileName) {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
                 .getImportJobDetailById(jobDetailId);
         if (jobDetail == null) {
@@ -93,9 +97,15 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
             jobDetail.setCollectionIdentifier(jobIdentifier);
             jobDetail.setProcessedRecords(0);
             jobDetail.setCollectionTimestamp(new Date());
+            if (StringUtils.isNotEmpty(fileName)) {
+                jobDetail.setImportFileName(fileName);
+            }
             eaiImportJobDetailService.createImportJobDetail(jobDetail);
         } else {
             jobDetail.setStatus(ImportStatus.RUNNING);
+            if (StringUtils.isNotEmpty(fileName)) {
+                jobDetail.setImportFileName(fileName);
+            }
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
         }
     }
