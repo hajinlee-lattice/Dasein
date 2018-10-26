@@ -291,7 +291,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (retrievedRatingEngine == null) {
                 log.warn(String.format("Rating Engine with id %s for tenant %s cannot be found", ratingEngine.getId(),
                         tenant.getId()));
-                ratingEngine.setId(RatingEngine.generateIdStr());
+//                ratingEngine.setId(RatingEngine.generateIdStr());
                 ratingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
             } else { // update an existing one by updating the delta passed from
                 // front end

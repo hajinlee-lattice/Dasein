@@ -199,7 +199,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         log.info("After loading, ratingEngine is " + ratingEngine);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
 
-        RatingModel ratingModel = ratingEngine.getActiveModel();
+        RatingModel ratingModel = ratingEngine.getLatestIteration();
         Assert.assertNotNull(ratingModel);
         Assert.assertTrue(ratingModel instanceof RuleBasedModel);
         Assert.assertEquals(((RuleBasedModel) ratingModel).getRatingRule().getDefaultBucketName(),
@@ -353,21 +353,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 RatingEngine.class);
         Assert.assertNotNull(createdRe);
         re.setId(createdRe.getId());
-        Assert.assertNotNull(createdRe.getActiveModel());
+        Assert.assertNotNull(createdRe.getLatestIteration());
         RatingEngine retrievedRe = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + createdRe.getId(), RatingEngine.class);
 
-        if (retrievedRe.getActiveModel() instanceof RuleBasedModel) {
-            Assert.assertNotNull(retrievedRe.getActiveModel());
-            RuleBasedModel ruModel = (RuleBasedModel) retrievedRe.getActiveModel();
+        if (retrievedRe.getLatestIteration() instanceof RuleBasedModel) {
+            Assert.assertNotNull(retrievedRe.getLatestIteration());
+            RuleBasedModel ruModel = (RuleBasedModel) retrievedRe.getLatestIteration();
             Assert.assertNotNull(ruModel);
             Assert.assertNotNull(ruModel.getSelectedAttributes());
             Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
             if (shouldCreateActionWithRatingEngine1) {
                 assertRatingEngineActivationAction(createdRe);
             }
-        } else if (retrievedRe.getActiveModel() instanceof AIModel) {
-            AIModel aiModel = (AIModel) retrievedRe.getActiveModel();
+        } else if (retrievedRe.getLatestIteration() instanceof AIModel) {
+            AIModel aiModel = (AIModel) retrievedRe.getLatestIteration();
             Assert.assertNotNull(aiModel);
             Assert.assertNotNull(retrievedRe.getAdvancedRatingConfig());
             Assert.assertNotNull(aiModel.getAdvancedModelingConfig());
