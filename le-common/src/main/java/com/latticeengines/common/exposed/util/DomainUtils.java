@@ -33,4 +33,12 @@ public class DomainUtils {
 
         return null;
     }
+
+    public static boolean isEmail(String url) {
+        if (url != null && url.contains("@")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

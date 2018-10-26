@@ -9,11 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -29,7 +24,9 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
@@ -45,8 +42,11 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component
@@ -279,22 +279,35 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         // "ID", "Domain", "Name", "Duns", IsPublicDomain, IsMatched,
         // nameKeyword
         return new Object[][] { //
-                // public domain with null company name and location : will be treated as normal domain
-                { 1, "my@facebook.com", null, null, true, true, "Facebook" }, //
-                // public domain with DUNS (google duns) : will be treated as public domain when matching and match to google entity(as duns provided)
-                { 2, "my@facebook.com", null, "060902413", true, true, "Google" }, //
-                // public domain with Valid Name : will be treated as public domain when matching and match to google entity(as name provided)
-                { 3, "my@facebook.com", "Google", null, true, true, "Google" }, //
-                // public domain with invalid name : will be treated as public domain and no match
-                { 4, "my@facebook.com", "Fake Name", null, true, false, null}, //
-                // non-public domain with name and duns : will match to domain entity
-                { 5, "netapp.com", "NetApp", "802054742", false, true, "Netapp" }, //
-                // non-public domain with different company name : will match domain entity as valid non-public domain
-                { 6, "netapp.com", "Google", null, false, true, "Netapp" }, //
-                // non-public domain with duns not in datacloud : will match domain entity as valid non-public domain
-                { 7, "netapp.com", null, "999999999", false, true, "Netapp" }, //
-                // non-public domain with fake invalid duns : will cleanup duns and match domain entity as valid non-public domain
-                { 8, "netapp.com", null, "Fake Duns", false, true, "Netapp" }
+                // public domain without name and duns : will be
+                // treated as normal domain
+                { 1, "facebook.com", null, null, true, true, "Facebook" }, //
+                // public domain of email format, and without name and duns :
+                // will be treated as public domain and no match
+                { 2, "xxx@facebook.com", null, null, true, false, null }, //
+                // public domain with DUNS (google duns) : will be treated as
+                // public domain when matching and match to google entity(as
+                // duns provided)
+                { 3, "facebook.com", null, "060902413", true, true, "Google" }, //
+                // public domain with Valid Name : will be treated as public
+                // domain when matching and match to google entity(as name
+                // provided)
+                { 4, "facebook.com", "Google", null, true, true, "Google" }, //
+                // public domain with invalid name : will be treated as public
+                // domain and no match
+                { 5, "facebook.com", "Fake Name", null, true, false, null }, //
+                // non-public domain with name and duns : will match to domain
+                // entity
+                { 6, "netapp.com", "NetApp", "802054742", false, true, "Netapp" }, //
+                // non-public domain with different company name : will match
+                // domain entity as valid non-public domain
+                { 7, "netapp.com", "Google", null, false, true, "Netapp" }, //
+                // non-public domain with duns not in datacloud : will match
+                // domain entity as valid non-public domain
+                { 8, "netapp.com", null, "999999999", false, true, "Netapp" }, //
+                // non-public domain with fake invalid duns : will cleanup duns
+                // and match domain entity as valid non-public domain
+                { 9, "netapp.com", null, "Fake Duns", false, true, "Netapp" }
         };
     }
 

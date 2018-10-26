@@ -246,9 +246,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
         parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
         parseRecordForDuns(inputRecord, keyPositionMap, record);
-        if (isPublicDomainCheckRelaxed(record.getParsedNameLocation().getName(), record.getParsedDuns())) {
-            treatPublicDomainAsNormal = true;
-        }
         parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
         parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
         parseRecordForLookupId(inputRecord, keyPositionMap, record);
@@ -271,8 +268,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-            Set<String> domainSet, boolean treadPublicDomainAsNormal, InternalOutputRecord record) {
+            Set<String> domainSet, boolean treatPublicDomainAsNormal, InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
+            boolean relaxPublicDomainCheck = isPublicDomainCheckRelaxed(record.getParsedNameLocation().getName(),
+                    record.getParsedDuns());
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
                 String cleanDomain = null;
@@ -286,12 +285,19 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 }
                 record.setParsedDomain(cleanDomain);
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
-                    record.addErrorMessages("Parsed to a public domain: " + cleanDomain);
-                    record.setPublicDomain(true);
-                    if (treadPublicDomainAsNormal) {
+                    // For match input with domain, but without name and duns,
+                    // and domain is not in email format, public domain is
+                    // treated as normal domain
+                    if (treatPublicDomainAsNormal
+                            || (relaxPublicDomainCheck && !DomainUtils.isEmail(record.getOrigDomain()))) {
                         record.setMatchEvenIsPublicDomain(true);
                         domainSet.add(cleanDomain);
+                        record.addErrorMessages("Parsed to a public domain: " + cleanDomain
+                                + ", but treat it as normal domain in match");
+                    } else {
+                        record.addErrorMessages("Parsed to a public domain: " + cleanDomain);
                     }
+                    record.setPublicDomain(true);
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
                     // update domain set
                     record.setPublicDomain(false);
