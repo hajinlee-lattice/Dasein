@@ -85,6 +85,23 @@ angular.module('lp.import.utils', [])
         return inschema;
     };
 
+    this.remapTypes = function(fieldsMapped, newTypesObj){
+        var userFields = Object.keys(newTypesObj);
+        userFields.forEach(function(userFieldName){
+            updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName]);
+        });
+        console.log(fieldsMapped);
+    };
+
+    function updateUserFieldType(fieldsMapped, userFieldName, newType){
+        fieldsMapped.forEach(function(fieldMapped){
+            if(fieldMapped.userField == userFieldName){
+                fieldMapped.fieldType = newType;
+                return;
+            }
+        });
+    }
+
     function setMapping(entity, savedObj, fieldsMapped){
         var keysMapped = Object.keys(fieldsMapped);
         keysMapped.forEach(function(mapped){

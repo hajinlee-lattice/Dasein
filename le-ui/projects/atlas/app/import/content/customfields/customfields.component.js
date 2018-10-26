@@ -97,6 +97,7 @@ angular.module('lp.import.wizard.customfields', [])
                 item = fieldMapping[userField];
 
             ImportWizardStore.remapType(userField, item.fieldType);
+            ImportWizardStore.userFieldsType[userField] = item.fieldType;
         }
     }
 

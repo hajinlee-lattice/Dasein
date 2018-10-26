@@ -5,6 +5,7 @@ angular.module('lp.import')
     this.init = function() {
         this.csvFileName = null;
         this.fieldDocument = null;
+        this.userFieldsType = {};
         this.unmappedFields = null;
         this.accountIdState = {
             accountDedupeField: null,
@@ -67,6 +68,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Add Custom Fields',
                 nextFn: function(nextState) {
                     // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
+                    this.userFieldsType = {};
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -75,6 +77,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
                     ImportWizardStore.saveDocument(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true); 
                     });
@@ -115,6 +118,7 @@ angular.module('lp.import')
                 state: 'contacts.ids.thirdpartyids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
+                    this.userFieldsType = {};
                     // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
@@ -124,6 +128,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
                     ImportWizardStore.saveDocument(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true); 
                     });

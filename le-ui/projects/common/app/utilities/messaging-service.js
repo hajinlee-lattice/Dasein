@@ -1,13 +1,12 @@
-import { Observable } from "../../network.vendor";
-import Observables from "./observables";
+import { Subject } from "../../network.vendor";
 
 
-let observables;
+let subject;
 
 
 const init = () => {
-  if (!observables) {
-    observables = new Observables();
+  if (!subject) {
+    subject = new Subject();
   }
 };
 
@@ -15,6 +14,20 @@ const init = () => {
  * http service
  */
 const messagingService = {
+
+  unsubscribeObservable: observer =>{
+    observables.removeObservable(observer.getName());
+  },
+  addSubscriber: observer =>{
+    subject.subscribe(observer);
+  },
+  removeSubscriber: observer => {
+    
+  },
+  sendMessage: message => {
+    console.log('SENDING');
+    subject.next(message);
+  }
     
 };
 init();

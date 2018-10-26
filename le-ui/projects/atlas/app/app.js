@@ -1,5 +1,7 @@
 //Initial load of the application
 import httpService from '../../common/app/http/http-service';
+import messagingService from '../../common/app/utilities/messaging-service';
+import {MODAL, BANNER, NOTIFICATION, ERROR, INFO, WARNING} from '../../common/app/utilities/message';
 var mainApp = angular.module('mainApp', [
     'templates-main',
     //'ngAnimate',
@@ -46,7 +48,7 @@ var mainApp = angular.module('mainApp', [
     'lp.configureattributes'
 ])
 .controller('MainController', function (
-    $scope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility
+    $scope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility, LeMessaging, Banner
 ) {
     var previousSession = BrowserStorageUtility.getClientSession();
     var loginDocument = BrowserStorageUtility.getLoginDocument();
@@ -88,7 +90,31 @@ var mainApp = angular.module('mainApp', [
 
     // add details to debug result
     console.log(window.navigator.userAgent);
+    LeMessaging.subscribe({
+        next: (message) => {
+            console.log('RECEIVED');
+            switch(message.getPosition()){
+                case BANNER:
+                    console.log(message.getMessage());
+                    Banner[message.getType()]({title: message.getMessage(), message: message.getFullMessage()});
+                break;
 
+                case MODAL:
+                console.log(message.getMessage());
+                    Modal[message.getType()]({title: message.getMessage(), message: message.getFullMessage()});
+                break;
+
+                case NOTIFICATION:
+                console.log(message.getMessage());
+                    Notice[message.getType()]({
+                        delay: 4000,
+                        title: message.getMessage(), 
+                        message: message.getFullMessage()
+                });
+                break;
+            }
+        }
+    });
     /**
      * detect IE
      * returns version of IE or false, if browser is not Internet Explorer
@@ -119,6 +145,13 @@ var mainApp = angular.module('mainApp', [
       return false;
     }
 
+})
+.factory('LeMessaging', () => {
+    return {
+        subscribe: (observer) => {
+            messagingService.addSubscriber(observer);
+        }
+    };
 })
 .factory('LeHTTP', () => {
     return {
