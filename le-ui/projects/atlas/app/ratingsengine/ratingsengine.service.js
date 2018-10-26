@@ -791,9 +791,6 @@ angular.module('lp.ratingsengine')
     }
 
     this.setTrainingSegment = function(trainingSegment) {
-
-        console.log(trainingSegment);
-
         this.trainingSegment = trainingSegment;
     }
     this.getTrainingSegment = function() {

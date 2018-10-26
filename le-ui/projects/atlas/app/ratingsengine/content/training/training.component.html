@@ -186,11 +186,11 @@
                                 datasource="$ctrl.segments" 
                                 callback-function="$ctrl.segmentCallback(args)"
                                 single-selection="true"
+                                initialvalue="$ctrl.trainingSegment"
                                 id="name"
                                 displayname="display_name"
                                 queryscope="display_name"
                                 ng-model="$ctrl.trainingSegment"
-                                initialvalue="$ctrl.trainingSegment"
                                 showicon="true"></chips>
                         </div>
                     </li>
@@ -205,11 +205,11 @@
                                 datasource="$ctrl.products"
                                 callback-function="$ctrl.productsCallback(args)"
                                 single-selection="false"
+                                initialvalue="$ctrl.trainingProducts"
                                 id="ProductId"
                                 displayname="ProductName"
                                 queryscope="ProductName"
                                 ng-model="$ctrl.trainingProducts"
-                                initialvalue="$ctrl.trainingProducts"
                                 showicon="true"></chips>
                         </div>
                     </li>

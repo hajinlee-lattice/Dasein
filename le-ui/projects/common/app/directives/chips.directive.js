@@ -24,12 +24,13 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.mouseOut = true;
             scope.blur = true;
             scope.showQueryList = false;
-            scope.id = scope.itemId || scope.itemName || scope.name || scope.ProductId;
             scope.displayName = scope.displayname;
             scope.queryItems = scope.datasource;
             scope.queryScope = scope.queryscope;
             scope.isSelectionDone = false;
             scope.showIcon = scope.showicon;
+
+            // console.log(scope);
 
             scope.filterFunction = function(item) {
                 return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
@@ -125,7 +126,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     if (scope.chips[item[scope.id]] === undefined) {
                         scope.chips[item[scope.id]] = item;
                     }
-                    if(scope.singleSelection === true){
+                    if(scope.singleSelection){
                         scope.query = '';
                     }
                     
@@ -134,31 +135,9 @@ angular.module('mainApp.appCommon.directives.chips', [])
                         scope.setListVisibility(false);
                     }
                 }
+
+                // console.log(scope.chips);
             }
-
-            if (scope.initialvalue === undefined) {
-                scope.initialvalue = !!scope.initialvalue;
-            } else {
-
-                if(Array.isArray(scope.initialvalue)){
-                    
-                    let array1 = scope.datasource;
-                    let array2 = scope.initialvalue;
-
-                    var array = array2.map(function(e) {
-                      var f = array1.find(a => a.ProductId == e);
-                      return f;
-                    });
-
-                    scope.chips = array;
-                    scope.callCallback();
-                } else {
-                    scope.chooseItem(scope.initialvalue);
-                }
-
-                scope.initialvalue = true;
-            }
-
             scope.removeItem = function (val) {
                 delete scope.chips[val[scope.id]];
                 scope.callCallback();
@@ -182,6 +161,24 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
             scope.clearQuery = function () {
                 scope.query = '';
+            }
+
+            if (scope.initialvalue != undefined || scope.initialvalue != null) {
+
+                let initialvalues = [];
+                if(Array.isArray(scope.initialvalue)){
+                    initialvalues = scope.initialvalue;
+                } else {
+                    let segmentName = scope.initialvalue.name;
+                    initialvalues.push(segmentName);
+                }
+
+                let array1 = scope.datasource;
+                let array2 = initialvalues;
+                let array = array2.map(function(e) {
+                    let f = array1.find(a => a[scope.id] == e);
+                    scope.chooseItem(f);
+                });
             }
 
         }

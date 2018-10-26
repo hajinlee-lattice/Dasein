@@ -60,6 +60,10 @@ angular.module('lp.ratingsengine.wizard.training', [
                         vm.repeatPurchaseRemodel = true;
                     }
 
+                    vm.trainingSegment = vm.ratingModel.trainingSegment ? vm.ratingModel.trainingSegment : null;
+
+                    vm.trainingProducts = vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts ? vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts : null;
+
                     // Setup form for Cross Sell Models
                     vm.checkboxModel = {
                         spend: vm.filters.SPEND_IN_PERIOD ? true : false,
@@ -75,14 +79,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                     vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : "WITHIN";
                     vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : 2;
-
-                    if(vm.ratingModel.trainingSegment){
-                        vm.trainingSegment = vm.ratingModel.trainingSegment;
-                    }
-
-                    if(vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts){
-                        vm.trainingProducts = vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts;
-                    }
 
                     vm.validateCrossSellForm();
 
