@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,8 @@ public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeployment
     private String contact_csv;
     @Value("${cdl.largeimport.transaction.filename:}")
     private String transaction_csv;
+    @Value("${cdl.largeimport.transaction.filenum:}")
+    private String transaction_filenum;
 
     @BeforeClass(groups = { "deployment.largeFile" })
     public void setup() throws Exception {
@@ -59,9 +63,14 @@ public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeployment
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {
+            List<String> filenames = new ArrayList<String>();
+            int num = Integer.parseInt(transaction_filenum);
+            for (int i = 1; i <= num; i++) {
+                filenames.add(transaction_csv + i + ".csv.gz");
+            }
             spendTime = System.currentTimeMillis();
-            importData(BusinessEntity.Transaction, transaction_csv, "Transaction", true, outsizeFlag);
-            log.info("Import " + transaction_csv + " Execution time: "
+            importData(BusinessEntity.Transaction, filenames, "Transaction", true, outsizeFlag);
+            log.info("Import Transation file Execution time: "
                     + (System.currentTimeMillis() - spendTime) / 1000f + " second");
         }
     }

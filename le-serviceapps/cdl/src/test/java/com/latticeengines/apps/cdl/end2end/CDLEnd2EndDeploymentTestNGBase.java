@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -454,6 +455,47 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+    }
+
+    void importData(BusinessEntity entity, List<String> s3FileName, String feedType, boolean compressed,
+            boolean outsizeFlag) {
+        List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
+        for (String filename : s3FileName) {
+            Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(filename, outsizeFlag), filename);
+            log.info("Streaming S3 file " + filename + " as a template file for " + entity);
+            String outputFileName = filename;
+            if (filename.endsWith(".gz"))
+                outputFileName = filename.substring(0, filename.length() - 3);
+            SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, filename, entity.name(),
+                    csvResource, outsizeFlag);
+            FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(),
+                    entity.name());
+            modifyFieldMappings(entity, fieldMappingDocument);
+            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                if (fieldMapping.getMappedField() == null) {
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
+            }
+
+            if (StringUtils.isBlank(feedType)) {
+                feedType = entity.name() + "Schema";
+            }
+
+            fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
+                    SourceType.FILE.getName(), feedType);
+            log.info("Modified field mapping document is saved, start importing ...");
+            ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template,
+                    template, INITIATOR);
+            applicationIds.add(applicationId);
+        }
+        int count = 0;
+        for (ApplicationId applicationId : applicationIds) {
+            JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
+            Assert.assertEquals(status, JobStatus.COMPLETED);
+            log.info("Importing S3 file " + s3FileName.get(count) + " for " + entity + " is finished.");
+            count++;
+        }
     }
 
     private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
