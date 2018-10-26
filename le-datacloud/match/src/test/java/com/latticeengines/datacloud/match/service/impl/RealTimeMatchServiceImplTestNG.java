@@ -291,8 +291,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { 5, "netapp.com", "NetApp", "802054742", false, true, "Netapp" }, //
                 // non-public domain with different company name : will match domain entity as valid non-public domain
                 { 6, "netapp.com", "Google", null, false, true, "Netapp" }, //
-                // non-public domain with different company duns : will match domain entity as valid non-public domain
-                { 7, "netapp.com", null, "060902413", false, true, "Netapp" }, //
+                // non-public domain with duns not in datacloud : will match domain entity as valid non-public domain
+                { 7, "netapp.com", null, "999999999", false, true, "Netapp" }, //
                 // non-public domain with fake invalid duns : will cleanup duns and match domain entity as valid non-public domain
                 { 8, "netapp.com", null, "Fake Duns", false, true, "Netapp" }
         };
