@@ -1,6 +1,7 @@
 package com.latticeengines.yarn.exposed.client;
 
 import java.io.File;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +22,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.math.IntMath;
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -145,7 +147,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     }
 
     @VisibleForTesting
-    String getXmxSetting(Properties appMasterProperties) {
+    String getXmxSetting(Properties appMasterProperties, boolean byFitting) {
         int minAllocationInMb = yarnConfiguration.getInt("yarn.scheduler.minimum-allocation-mb", -1);
 
         if (appMasterProperties != null) {
@@ -165,9 +167,43 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         // memory utilization. If we still run into an
         // OOM error, then that means the requested memory is really less than
         // what can be handled.
-        String xmx = minAllocationInMb > 1536 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
-        String xms = minAllocationInMb > 1536 ? String.format("-Xms%dm", minAllocationInMb - 512) : "-Xms1024m";
+        String xmx = String.format("-Xmx%dm",
+                byFitting ? calHeapSizeByFitting(minAllocationInMb) : calHeapSizeByFixedPara(minAllocationInMb));
+        String xms = String.format("-Xms%dm",
+                byFitting ? calHeapSizeByFitting(minAllocationInMb) : calHeapSizeByFixedPara(minAllocationInMb));
         return xms + " " + xmx;
+    }
+
+    /**
+     * Old behavior
+     *
+     * @param minAllocationInMb
+     * @return
+     */
+    private int calHeapSizeByFixedPara(int minAllocationInMb) {
+        if (minAllocationInMb < 1536) {
+            return 1024;
+        }
+        return minAllocationInMb - 512;
+    }
+
+    /**
+     * Updated behavior
+     *
+     * mem in (, 1536) -> heap = 1024
+     * mem in [1536, 2048] -> heap = mem - 512
+     * mem in (2048, 4096] -> heap = mem - 1024
+     * mem in (4096, 8192] -> heap = mem - 1536
+     * ... etc
+     *
+     * @param minAllocationInMb
+     * @return
+     */
+    private int calHeapSizeByFitting(int minAllocationInMb) {
+        if (minAllocationInMb < 1536) {
+            return 1024;
+        }
+        return minAllocationInMb - 512 * (IntMath.log2(minAllocationInMb, RoundingMode.CEILING) - 10);
     }
 
     @Override
@@ -192,7 +228,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "-Dlog4j.configuration=file:log4j.properties", //
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
-                getXmxSetting(appMasterProperties), //
+                getXmxSetting(appMasterProperties, true), //
                 "-XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
