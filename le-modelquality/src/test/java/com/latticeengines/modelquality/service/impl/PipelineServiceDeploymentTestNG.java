@@ -24,18 +24,18 @@ public class PipelineServiceDeploymentTestNG extends ModelQualityTestNGBase {
         String stackName = getPrivateFieldValue(pipelineService, "stackName");
         Method method = pipelineService.getClass().getSuperclass().getDeclaredMethod("getActiveStack");
 
-        Object obj = null;
         @SuppressWarnings("unchecked")
         String pipelineJsonPath = String.format(pipelineJson, stackName, //
-                ((Map<String, String>) method.invoke(pipelineService, obj)).get("ArtifactVersion"));
+                ((Map<String, String>) method.invoke(pipelineService)).get("ArtifactVersion"));
 
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, pipelineJsonPath), "pipeline.json not found in path : " + pipelineJsonPath);
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, pipelineJsonPath),
+                "pipeline.json not found in path : " + pipelineJsonPath);
     }
 
-    private String getPrivateFieldValue(Object obj, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+    private String getPrivateFieldValue(Object obj, String fieldName)
+            throws NoSuchFieldException, IllegalAccessException {
         Field f = obj.getClass().getDeclaredField(fieldName); // NoSuchFieldException
         f.setAccessible(true);
-        String value = (String) f.get(obj); // IllegalAccessException
-        return value;
+        return (String) f.get(obj); // IllegalAccessException
     }
 }
