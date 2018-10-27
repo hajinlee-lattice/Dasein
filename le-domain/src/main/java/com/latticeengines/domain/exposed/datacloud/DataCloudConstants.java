@@ -16,6 +16,7 @@ public final class DataCloudConstants {
     public static final String LATTIC_ID = "LatticeID";
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
 
+    // AM attribute names
     public static final String ATTR_CATEGORY = "Category";
     public static final String ATTR_SUB_CATEGORY = "SubCategory";
     public static final String ATTR_COUNTRY = "LDC_Country";
@@ -50,6 +51,8 @@ public final class DataCloudConstants {
     public static final String ATTR_ALEXA_DOMAIN = "URL";
     public static final String ATTR_LAST_UPLOAD_DATE = "LE_Last_Upload_Date";
 
+    // AMSeed attribute names which are different with AM
+    // As for attributes shared between AMSeed and AM, just use ATTR_xxx
     public static final String AMS_ATTR_DOMAIN = "Domain";
     public static final String AMS_ATTR_DUNS = "DUNS";
     public static final String AMS_ATTR_NAME = "Name";
