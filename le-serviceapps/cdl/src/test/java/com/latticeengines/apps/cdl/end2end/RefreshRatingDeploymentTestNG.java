@@ -294,6 +294,17 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Assert.assertNotNull(bucketMetadataHistory);
         Assert.assertEquals(bucketMetadataHistory.size(), 2);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
+        if (engineId.equals(ai1.getId())) {
+            for (List<BucketMetadata> bms: bucketMetadataHistory.values()) {
+                bms.forEach(bm -> {
+                    try {
+                        Assert.assertNotNull(bm.getAverageExpectedRevenue());
+                    } catch (AssertionError e) {
+                        log.warn("No avg exp val", e);
+                    }
+                });
+            }
+        }
     }
 
     private void verifyBucketMetadataByModelGuid(String modelGuid) {

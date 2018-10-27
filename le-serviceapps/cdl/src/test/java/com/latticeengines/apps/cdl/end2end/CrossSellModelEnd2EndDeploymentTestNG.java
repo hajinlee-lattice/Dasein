@@ -129,7 +129,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
         setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
-        setupAndRunRemodel();
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.EXPECTED_VALUE);
 
     }
 
@@ -254,8 +254,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 + " eventCount=" + eventCount;
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
             Assert.assertEquals(targetCount, 22, errorMsg);
-            Assert.assertEquals(trainingCount, 332, errorMsg);
-            Assert.assertEquals(eventCount, 282, errorMsg);
+            Assert.assertEquals(trainingCount, 295, errorMsg);
+            Assert.assertEquals(eventCount, 250, errorMsg);
         } else {
             Assert.assertEquals(targetCount, 554, errorMsg);
             Assert.assertEquals(trainingCount, 3026, errorMsg);

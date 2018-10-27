@@ -134,7 +134,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
     private static final int S3_CHECKPOINTS_VERSION = 20;
-    private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 18;
+    private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 20;
 
     private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";

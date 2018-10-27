@@ -89,7 +89,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
      * This test is part of CD pipeline and Trunk Health
      */
     @Test(groups = { "end2end", "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
-    public void end2endCDLStyleCustomEventReModelTest() throws Exception {
+    public void end2endCDLStyleCustomEventReModelTest() {
         runCustomEventRemodel(testType);
     }
 
