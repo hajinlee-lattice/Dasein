@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +27,7 @@ import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.util.FeatureImportanceUtil;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -284,17 +283,17 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
                 modelSummary);
 
-        Collection<ColumnMetadata> attributes = metadataStoreProxy
-                .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
-                        table.getName())
-                .concatWith(servingStoreProxy.getNewModelingAttrs(customerSpace,
-                        dataCollectionService.getActiveVersion(customerSpace)))
-                .collect(HashMap<String, ColumnMetadata>::new,
-                        // to de-duplicates attributes from two data sources
-                        (returnMap, cm) -> returnMap.put(cm.getCategory().getName() + cm.getAttrName(), cm))
-                .block().values();
+        Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy.getMetadata(MetadataStoreName.Table,
+                CustomerSpace.shortenCustomerSpace(customerSpace), table.getName()).collectMap(this::getKey).block();
 
-        Map<String, List<ColumnMetadata>> toReturn = Flux.fromIterable(attributes)
+        Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
+                .getNewModelingAttrs(customerSpace, dataCollectionService.getActiveVersion(customerSpace))
+                .collectMap(this::getKey,
+                        cm -> iterationAttributes.containsKey(getKey(cm)) ? iterationAttributes.get(getKey(cm)) : cm,
+                        () -> iterationAttributes)
+                .block();
+
+        Map<String, List<ColumnMetadata>> toReturn = Flux.fromIterable(modelingAttributes.values())
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
                 .collect(HashMap<String, List<ColumnMetadata>>::new, (returnMap, cm) -> {
                     if (importanceOrdering.containsKey(cm.getAttrName())) {
@@ -317,6 +316,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
 
         return toReturn;
+    }
+
+    private String getKey(ColumnMetadata cm) {
+        return cm.getCategory().getName() + cm.getAttrName();
     }
 
     private void checkAndRemoveHiddenAttributes(Map<String, List<ColumnMetadata>> toReturn) {

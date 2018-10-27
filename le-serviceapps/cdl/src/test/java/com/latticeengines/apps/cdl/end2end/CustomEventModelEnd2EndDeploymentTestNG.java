@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +42,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1537559519785";
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "JLM1540406334891";
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
     private MetadataSegment testSegment;
@@ -54,7 +53,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private AIModel cdlCEAIModel;
     private AIModel testCERemodel;
     private SourceFile testSourceFile;
-    private final String testSourceFileName = "CustomEventModelE2ETestFile10.csv";
+    private final String testSourceFileName = "CustomEventModelE2ETestFile.csv";
     private CustomEventModelingType testType;
     private final Map<String, Category> refinedAttributes = new HashMap<>();
 
@@ -112,7 +111,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         testType = CustomEventModelingType.CDL;
         bootstrap(testType);
         runCustomEventModel(testType);
-        // runCustomEventRemodel(testType);
+        runCustomEventRemodel(testType);
     }
 
     private void runCustomEventModel(CustomEventModelingType type) {
@@ -183,7 +182,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             ColumnMetadata cm = attrs.get(refinedAttributes.get(refinedAttribute).getName()).stream()
                     .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
             Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
-            Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE);
+            Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE,
+                    "Failed to assert ApprovedUsage of attribute: " + refinedAttribute);
         }
     }
 
@@ -193,8 +193,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             for (ColumnMetadata attr : attrList) {
                 if (attr.getImportanceOrdering() != null) {
                     refinedAttributes.put(attr.getAttrName(), attr.getCategory());
-                    attr.setApprovedUsageList(Arrays.asList(ApprovedUsage.NONE));
+                    attr.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
                     noOfAttributesToRefine--;
+                    log.info("Refined Attr: " + attr.getAttrName());
                 }
                 if (noOfAttributesToRefine == 0) {
                     return attrs;
