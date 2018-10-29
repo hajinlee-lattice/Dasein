@@ -41,17 +41,17 @@ public class ImportGeneratingRatingFromS3 extends BaseImportExportS3<ImportExpor
         ImportExportRequest request = new ImportExportRequest();
         request.tgtPath = pathBuilder.getHdfsAnalyticsModelTableDir(customer, eventTableName);
         request.srcPath = pathBuilder.getS3AnalyticsModelTableDir(s3Bucket, tenantId, eventTableName);
+        request.tableName = eventTableName;
+        request.isSync = true;
         try {
-            if (HdfsUtils.fileExists(distCpConfiguration, request.tgtPath)) {
+            if (!HdfsUtils.fileExists(distCpConfiguration, request.tgtPath)) {
+                requests.add(request);
                 return;
             }
         } catch (Exception ex) {
             log.warn("Failed to add ModelData, error=" + ex.getMessage());
             return;
         }
-        request.tableName = eventTableName;
-        requests.add(request);
-
     }
 
 }

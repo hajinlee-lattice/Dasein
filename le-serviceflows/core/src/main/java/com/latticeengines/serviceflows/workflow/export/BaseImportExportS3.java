@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.configuration.ConfigurationUtils;
 
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -36,6 +36,7 @@ import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class BaseImportExportS3<T extends ImportExportS3StepConfiguration> extends BaseWorkflowStep<T> {
 
@@ -114,8 +115,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     String hdfsPath = pathBuilder.getFullPath(extract.getPath());
                     try {
                         if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
-                            String s3Dir = pathBuilder.convertAtlasTableDir(hdfsPath, podId, tenantId, s3Bucket);
-                            requests.add(new ImportExportRequest(s3Dir, hdfsPath, table.getName()));
+                            String s3Path = pathBuilder.convertAtlasTableDir(hdfsPath, podId, tenantId, s3Bucket);
+                            requests.add(new ImportExportRequest(s3Path, hdfsPath, table.getName(), false, true));
                         }
                     } catch (Exception ex) {
                         throw new RuntimeException("Failed to check Hdfs file=" + hdfsPath, ex);
@@ -130,12 +131,14 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         private String tgtPath;
         private String tableName;
         private boolean hasDataUnit;
+        private boolean isSync;
 
         HdfsS3ImporterExporter(ImportExportRequest request) {
             this.srcPath = request.srcPath;
             this.tgtPath = request.tgtPath;
             this.tableName = request.tableName;
             this.hasDataUnit = request.hasDataUnit;
+            this.isSync = request.isSync;
         }
 
         @Override
@@ -143,8 +146,13 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
             try (PerformanceTimer timer = new PerformanceTimer(
                     "Copying src path=" + srcPath + " to tgt path=" + tgtPath)) {
                 try {
+
                     Configuration hadoopConfiguration = createConfiguration();
-                    HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
+                    if (isSync) {
+                        HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
+                    } else {
+                        globalSyncCopy(hadoopConfiguration);
+                    }
                     if (hasDataUnit && StringUtils.isNotBlank(tableName)) {
                         registerDataUnit();
                     }
@@ -155,6 +163,19 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     log.error(msg, ex);
                     throw new RuntimeException(msg);
                 }
+            }
+        }
+
+        private void globalSyncCopy(Configuration hadoopConfiguration) throws Exception {
+            String lockName = tenantId + "_" + tableName;
+            try {
+                LockManager.registerCrossDivisionLock(lockName);
+                LockManager.acquireWriteLock(lockName, 360, TimeUnit.MINUTES);
+                if (!HdfsUtils.fileExists(distCpConfiguration, tgtPath)) {
+                    HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
+                }
+            } finally {
+                LockManager.releaseWriteLock(lockName);
             }
         }
 
@@ -194,11 +215,14 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
             this.tgtPath = tgtPath;
         }
 
-        public ImportExportRequest(String srcPath, String tgtPath, String tableName) {
+        public ImportExportRequest(String srcPath, String tgtPath, String tableName, boolean hasDataUnit,
+                boolean isSync) {
             super();
             this.srcPath = srcPath;
             this.tgtPath = tgtPath;
             this.tableName = tableName;
+            this.hasDataUnit = hasDataUnit;
+            this.isSync = isSync;
         }
 
         public ImportExportRequest(String srcPath, String tgtPath, String tableName, boolean hasDataUnit) {

@@ -55,21 +55,7 @@ public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS
             log.warn("Can not find the table=" + tableName + " for tenant=" + customer);
             return;
         }
-        List<Extract> extracts = table.getExtracts();
-        if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
-            log.warn("Can not find extracts of the table=" + tableName + " for tenant=" + customer);
-            return;
-        }
-        try {
-            String hdfsDir = pathBuilder.getFullPath(extracts.get(0).getPath());
-            String s3Dir = pathBuilder.convertAtlasTableDir(hdfsDir, podId, tenantId, s3Bucket);
-            if (!HdfsUtils.fileExists(distCpConfiguration, hdfsDir)) {
-                requests.add(new ImportExportRequest(s3Dir, hdfsDir, tableName, false));
-            }
-        } catch (Exception ex) {
-            log.warn("Can not get path for table=" + tableName + " for tenant=" + customer + " error="
-                    + ex.getMessage());
-        }
+        addTableToRequestForImport(table, requests);
     }
 
 }
