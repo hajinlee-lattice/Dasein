@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.JobRequest;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
@@ -141,25 +142,24 @@ public class WorkflowResource {
         }
     }
 
-    @GetMapping(value = "/jobsByPid", headers = "Accept=application/json")
+    @PostMapping(value = "/jobsByPid", headers = "Accept=application/json")
     @ApiOperation(value = "Get list of workflow jobs by given list of workflowPid or job types.")
-    public List<Job> getJobsByPid(@RequestParam(value = "jobId", required = false) List<String> jobIds,
-                                  @RequestParam(value = "type", required = false) List<String> types,
-                                  @RequestParam(value = "includeDetails", required = false) Boolean includeDetails,
-                                  @RequestParam(required = false) String customerSpace) {
-        Optional<List<String>> optionalJobIds = Optional.ofNullable(jobIds);
-        Optional<List<String>> optionalTypes = Optional.ofNullable(types);
-        Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(includeDetails);
+    public List<Job> getJobsByPid(@RequestBody JobRequest request) {
+        Optional<List<String>> optionalJobIds = Optional.ofNullable(request.getJobIds());
+        Optional<List<String>> optionalTypes = Optional.ofNullable(request.getTypes());
+        Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(request.getIncludeDetails());
 
         if (optionalJobIds.isPresent()) {
             List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
-            return workflowJobService.getJobsByWorkflowPids(customerSpace, workflowIds, optionalTypes.orElse(null),
+            return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), workflowIds,
+                    optionalTypes.orElse(null),
                     optionalIncludeDetails.orElse(true), false, -1L);
         } else if (optionalTypes.isPresent()) {
-            return workflowJobService.getJobsByWorkflowPids(customerSpace, null, optionalTypes.get(),
-                    optionalIncludeDetails.orElse(true), false, -1L);
+            return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), null,
+                    optionalTypes.get(), optionalIncludeDetails.orElse(true), false, -1L);
         } else {
-            return workflowJobService.getJobsByCustomerSpace(customerSpace, optionalIncludeDetails.orElse(true));
+            return workflowJobService.getJobsByCustomerSpace(request.getCustomerSpace(),
+                    optionalIncludeDetails.orElse(true));
         }
     }
 

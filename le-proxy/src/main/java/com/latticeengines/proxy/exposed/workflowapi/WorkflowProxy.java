@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.JobRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -212,11 +213,11 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
 
         String baseUrl = "/jobsByPid";
-        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        url += url.contains("?customerSpace=") ? "&" : "?";
-        url += buildQueryString("jobId", jobIds);
-        url = constructUrl(url);
-        return JsonUtils.convertList(get("getJobsByPid", url, List.class), Job.class);
+        JobRequest request = new JobRequest();
+        request.setCustomerSpace(customerSpace);
+        request.setJobIds(jobIds);
+        String url = constructUrl(baseUrl);
+        return JsonUtils.convertList(post("getJobsByPid", url, request, List.class), Job.class);
     }
 
     public List<Job> getWorkflowExecutionsByJobPids(List<String> jobIds, String... params) {
@@ -225,11 +226,14 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
 
         String baseUrl = "/jobsByPid";
-        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        url += url.contains("?customerSpace=") ? "&" : "?";
-        url += buildQueryString("jobId", jobIds);
-        url = constructUrl(url);
-        return JsonUtils.convertList(get("getJobsByPid", url, List.class), Job.class);
+        JobRequest request = new JobRequest();
+        request.setJobIds(jobIds);
+        if (params != null && params.length > 0) {
+            request.setCustomerSpace(shortenCustomerSpace(params[0]));
+        }
+
+        String url = constructUrl(baseUrl);
+        return JsonUtils.convertList(post("getJobsByPid", url, request, List.class), Job.class);
     }
 
     public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, String... params) {

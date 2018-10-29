@@ -196,12 +196,15 @@ public class WorkflowJobServiceImplUnitTestNG {
         workflowJobService.updateStartTimeStampAndForJob(job);
         log.info("job.startDate = " + job.getStartTimestamp());
         Assert.assertTrue(now.isBefore(job.getStartTimestamp().getTime()));
-        Assert.assertTrue(new DateTime(previous25hour)
-                .getHourOfDay() == (new DateTime(job.getStartTimestamp().getTime()).getHourOfDay()));
-        Assert.assertTrue(new DateTime(previous25hour)
-                .getMinuteOfHour() == (new DateTime(job.getStartTimestamp().getTime()).getMinuteOfHour()));
-        Assert.assertTrue(new DateTime(previous25hour)
-                .getSecondOfMinute() == (new DateTime(job.getStartTimestamp().getTime()).getSecondOfMinute()));
+        Assert.assertEquals(
+                new DateTime(job.getStartTimestamp().getTime()).getHourOfDay(),
+                new DateTime(previous25hour).getHourOfDay());
+        Assert.assertEquals(
+                new DateTime(job.getStartTimestamp().getTime()).getMinuteOfHour(),
+                new DateTime(previous25hour).getMinuteOfHour());
+        Assert.assertEquals(
+                new DateTime(job.getStartTimestamp().getTime()).getSecondOfMinute(),
+                new DateTime(previous25hour).getSecondOfMinute());
 
         when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(new DateTime().plusHours(1).toDate().getTime());
         workflowJobService.updateStartTimeStampAndForJob(job);
