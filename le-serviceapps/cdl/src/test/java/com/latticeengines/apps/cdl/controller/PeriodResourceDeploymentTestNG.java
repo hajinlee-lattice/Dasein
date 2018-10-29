@@ -17,7 +17,7 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private BusinessCalendar businessCalendar;
 
-    @BeforeClass(groups = "deployment-app")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
         businessCalendar = createBusinessCalendar();
