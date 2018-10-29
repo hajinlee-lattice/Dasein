@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.SegmentService;
-import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -55,9 +53,6 @@ public class DataCollectionResource {
 
     @Inject
     private SegmentService segmentService;
-
-    @Resource(name = "localCacheService")
-    private CacheService localCacheService;
 
     @GetMapping(value = "")
     @ResponseBody
@@ -305,11 +300,23 @@ public class DataCollectionResource {
         return dataCollectionService.getArtifact(customerSpace, name, version);
     }
 
+    @PutMapping(value = "/artifact")
+    public DataCollectionArtifact updateArtifact(@PathVariable String customerSpace,
+                                                 @RequestBody DataCollectionArtifact artifact) {
+        if (artifact == null) {
+            return null;
+        }
+
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.updateArtifact(customerSpace, artifact);
+    }
+
     @PostMapping(value = "/artifact/version/{version}")
     public DataCollectionArtifact createArtifact(@PathVariable String customerSpace,
             @PathVariable DataCollection.Version version, @RequestBody DataCollectionArtifact artifact) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.createArtifact(customerSpace, artifact.getName(), artifact.getUrl(), version);
+        return dataCollectionService.createArtifact(customerSpace, artifact.getDataCollection().getName(),
+                artifact.getName(), artifact.getUrl(), artifact.getStatus(), version);
     }
 
     @DeleteMapping(value = "/artifact/{name}")

@@ -4,28 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
-public class OrphanTxnExportParameters extends DataFlowParameters {
+public class OrphanTransactionExportParameters extends DataFlowParameters {
 
-    @JsonProperty("account_table")
+    @JsonProperty("AccountTable")
     @SourceTableName
     public String accountTable;
 
-    @JsonProperty("product_table")
+    @JsonProperty("ProductTable")
     @SourceTableName
     public String productTable;
 
-    @JsonProperty("txn_table")
+    @JsonProperty("TransactionTable")
     @SourceTableName
-    public String txnTable;
-
-    public OrphanTxnExportParameters() {
-    }
-
-    public OrphanTxnExportParameters(String accountTable, String productTable, String txnTable) {
-        this.accountTable = accountTable;
-        this.productTable = productTable;
-        this.txnTable = txnTable;
-    }
+    public String transactionTable;
 
     public String getAccountTable() {
         return accountTable;
@@ -43,11 +34,11 @@ public class OrphanTxnExportParameters extends DataFlowParameters {
         this.productTable = productTable;
     }
 
-    public String getTxnTable() {
-        return txnTable;
+    public String getTransactionTable() {
+        return transactionTable;
     }
 
-    public void setTxnTable(String txnTable) {
-        this.txnTable = txnTable;
+    public void setTransactionTable(String transactionTable) {
+        this.transactionTable = transactionTable;
     }
 }

@@ -14,24 +14,23 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTxnExportParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTransactionExportParameters;
 
-@Component(OrphanTxnExportFlow.DATAFLOW_BEAN_NAME)
-public class OrphanTxnExportFlow extends TypesafeDataFlowBuilder<OrphanTxnExportParameters> {
+@Component(OrphanTransactionExportFlow.DATAFLOW_BEAN_NAME)
+public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanTransactionExportParameters> {
 
-    public static final String DATAFLOW_BEAN_NAME = "OrphanTxnExportFlow";
-    private static final Logger log = LoggerFactory.getLogger(OrphanTxnExportFlow.class);
-    public static final String RENAME_PREFIX = "OrphanTxnExport_";
+    public static final String DATAFLOW_BEAN_NAME = "orphanTransactionExportFlow";
+    private static final Logger log = LoggerFactory.getLogger(OrphanTransactionExportFlow.class);
+    public static final String RENAME_PREFIX = "OrphanTransactionExport_";
 
     @Override
-    public Node construct(OrphanTxnExportParameters parameters) {
-        Node srcTxn = addSource(parameters.getTxnTable());
+    public Node construct(OrphanTransactionExportParameters parameters) {
+        Node srcTxn = addSource(parameters.getTransactionTable());
         if (StringUtils.isEmpty(parameters.getAccountTable()) || StringUtils.isEmpty(parameters.getProductTable())) {
             return srcTxn;
         }
         Node srcAccount = addSource(parameters.getAccountTable());
         Node srcProduct = addSource(parameters.getProductTable());
-
 
         List<String> retainFields = srcTxn.getFieldNames();
 

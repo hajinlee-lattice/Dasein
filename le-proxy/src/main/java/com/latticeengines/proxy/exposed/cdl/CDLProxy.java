@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -21,6 +20,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -172,10 +172,10 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return responseDoc.isSuccess();
     }
 
-    public ApplicationId OrphanRecordExport(String customerSpace, MetadataSegmentExport metadataSegmentExport){
+    public ApplicationId OrphanRecordsExport(String customerSpace, OrphanRecordsExportRequest request) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/exportorphanrecord", customerSpace);
-        ResponseDocument responseDoc = post("orphanRecordExport", url, metadataSegmentExport, ResponseDocument.class);
+                "/customerspaces/{customerSpace}/datacollection/datafeed/exportorphanrecords", customerSpace);
+        ResponseDocument responseDoc = post("orphanRecordExport", url, request, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -184,7 +184,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
             throw new RuntimeException(
-                    "Failed to start OrphanRecordExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
+                    "Failed to start OrphanRecordsExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 

@@ -142,7 +142,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             // confusing and should be removed.
             // actionNode.put(ReportConstants.TIME,
             // sdf.format(action.getCreated()));
-            actionNode.put(ReportConstants.USER, action.getActionInitiator());
             actionNode.put(ReportConstants.ACTION, action.getType().getDisplayName());
             systemActionNode.add(actionNode);
         });

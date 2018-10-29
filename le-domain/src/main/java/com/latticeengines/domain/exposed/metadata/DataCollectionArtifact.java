@@ -75,7 +75,7 @@ public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
+    @JsonProperty("DataCollection")
     private DataCollection dataCollection;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)

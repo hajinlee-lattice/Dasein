@@ -1,32 +1,32 @@
 package com.latticeengines.cdl.dataflow;
 
-import com.google.common.collect.ImmutableMap;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTxnExportParameters;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTransactionExportParameters;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-dataflow-context.xml" })
-public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
-    private static final String ACCOUNT_TABLE = "account_table";
-    private static final String PRODUCT_TABLE = "product_table";
-    private static final String TXN_TABLE = "txn_table";
-    private static final String ACCOUNT_DIR = "/tmp/OrphanTxnExportFlowTestNG/account/";
-    private static final String PRODUCT_DIR = "/tmp/OrphanTxnExportFlowTestNG/product/";
-    private static final String TXN_DIR = "/tmp/OrphanTxnExportFlowTestNG/txn/";
+    private static final String ACCOUNT_TABLE = "AccountTable";
+    private static final String PRODUCT_TABLE = "ProductTable";
+    private static final String TRANSACTION_TABLE = "TransactionTable";
+    private static final String ACCOUNT_DIR = "/tmp/OrphanTransactionExportFlowTestNG/account/";
+    private static final String PRODUCT_DIR = "/tmp/OrphanTransactionExportFlowTestNG/product/";
+    private static final String TRANSACTION_DIR = "/tmp/OrphanTransactionExportFlowTestNG/transaction/";
 
-
-    private Object[][] accountData = new Object[][]{
-            //"AccountId", "Name"
+    private Object[][] accountData = new Object[][] {
+            // "AccountId", "Name"
             { "A001", "Husky" },
             { "A002", "Alaskan Malamute" },
             { "A003", "Collie" },
@@ -34,8 +34,8 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
             { "A005", "Labrador Retriever" }
     };
 
-    private Object[][] productData = new Object[][]{
-            //"ProductId", "ProductName"
+    private Object[][] productData = new Object[][] {
+            // "ProductId", "ProductName"
             { "P0001", "test_product_1" },
             { "P0002", "test_product_2" },
             { "P0003", "test_product_3" },
@@ -43,8 +43,8 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
             { "P0005", "test_product_5" }
     };
 
-    private Object[][] transactionData = new Object[][]{
-            //"TransactionId", "AccountId", "ProductId", "TransactionCount"
+    private Object[][] transactionData = new Object[][] {
+            // "TransactionId", "AccountId", "ProductId", "TransactionCount"
             { "T00200", "A001", "P0002", 200L },
             { "T01234", "A005", "P0010", 200L },
             { "T06666", "A010", "P0088", 300L },
@@ -52,15 +52,15 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
             { "T18888", "A006", "P0004", 998L }
     };
 
-    private Object[][] expectedData = new Object[][]{
-            //"AccountId", "ProductId", "TransactionId", "TransactionCount"
+    private Object[][] expectedData = new Object[][] {
+            // "AccountId", "ProductId", "TransactionId", "TransactionCount"
             { "A006", "P0004", "T18888", 998L },
             { "A005", "P0010", "T01234", 200L },
             { "A010", "P0088", "T06666", 300L }
     };
 
-    private Object[][] expectNullCaseData = new Object[][]{
-            //"AccountId", "ProductId", "TransactionId", "TransactionCount"
+    private Object[][] expectNullCaseData = new Object[][] {
+            // "AccountId", "ProductId", "TransactionId", "TransactionCount"
             { "A001", "P0002", "T00200", 200L },
             { "A005", "P0010", "T01234", 200L },
             { "A010", "P0088", "T06666", 300L },
@@ -69,40 +69,29 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
     };
 
     @Test(groups = "functional")
-    public void testOrphanTxnExportFlow(){
-        OrphanTxnExportParameters parameters = prepareInput(accountData,productData,transactionData);
+    public void testOrphanTransactionExportFlow() {
+        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData);
         executeDataFlow(parameters);
         verifyResult(expectedData,3);
     }
 
     @Test(groups = "functional")
-    public void testNullAccountTable(){
-        OrphanTxnExportParameters parameters = prepareInput(null,productData,transactionData);
+    public void testNullAccountTable() {
+        OrphanTransactionExportParameters parameters = prepareInput(null, productData, transactionData);
         executeDataFlow(parameters);
         verifyResult(expectNullCaseData,5);
     }
 
     @Test(groups = "functional")
-    public void testNullProductTable(){
-        OrphanTxnExportParameters parameters = prepareInput(accountData,null,transactionData);
+    public void testNullProductTable() {
+        OrphanTransactionExportParameters parameters = prepareInput(accountData,null, transactionData);
         executeDataFlow(parameters);
         verifyResult(expectNullCaseData,5);
     }
 
-    public OrphanTxnExportParameters prepareInput(Object[][] accountData,Object[][] productData,Object[][] transactionData){
-        OrphanTxnExportParameters parameters = new OrphanTxnExportParameters();
-        if (accountData != null){
-            uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
-            parameters.setAccountTable(ACCOUNT_TABLE);
-        }
-        if (productData != null){
-            uploadAvro(productData, prepareProductData(), PRODUCT_TABLE, PRODUCT_DIR);
-            parameters.setProductTable(PRODUCT_TABLE);
-        }
-        uploadAvro(transactionData, prepareTxnData(), TXN_TABLE, TXN_DIR);
-        parameters.setTxnTable(TXN_TABLE);
-
-        return parameters;
+    @Override
+    protected String getFlowBeanName() {
+        return OrphanTransactionExportFlow.DATAFLOW_BEAN_NAME;
     }
 
     @Override
@@ -110,11 +99,28 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
         return ImmutableMap.of(
                 ACCOUNT_TABLE, ACCOUNT_DIR + ACCOUNT_TABLE + ".avro",
                 PRODUCT_TABLE, PRODUCT_DIR + PRODUCT_TABLE + ".avro",
-                TXN_TABLE, TXN_DIR + TXN_TABLE + ".avro"
-        );
+                TRANSACTION_TABLE, TRANSACTION_DIR + TRANSACTION_TABLE + ".avro");
     }
 
-    public void verifyResult(Object[][] expectedData,int expectNumOfRows){
+    private OrphanTransactionExportParameters prepareInput(Object[][] accountData, Object[][] productData,
+                                                           Object[][] transactionData) {
+        OrphanTransactionExportParameters parameters = new OrphanTransactionExportParameters();
+        if (accountData != null) {
+            uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
+            parameters.setAccountTable(ACCOUNT_TABLE);
+        }
+        if (productData != null){
+            uploadAvro(productData, prepareProductData(), PRODUCT_TABLE, PRODUCT_DIR);
+            parameters.setProductTable(PRODUCT_TABLE);
+        }
+
+        uploadAvro(transactionData, prepareTxnData(), TRANSACTION_TABLE, TRANSACTION_DIR);
+        parameters.setTransactionTable(TRANSACTION_TABLE);
+
+        return parameters;
+    }
+
+    private void verifyResult(Object[][] expectedData, int expectNumOfRows) {
         List<GenericRecord> records = readOutput();
         int rowNum = 0;
         for (GenericRecord record : records) {
@@ -124,17 +130,17 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
             Assert.assertEquals(record.get(3),expectedData[rowNum][3]);
             rowNum ++;
         }
-        Assert.assertEquals(rowNum,expectNumOfRows);
+        Assert.assertEquals(rowNum, expectNumOfRows);
     }
 
-    private List<Pair<String, Class<?>>> prepareAccountData(){
+    private List<Pair<String, Class<?>>> prepareAccountData() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(InterfaceName.AccountId.name(), String.class));
         columns.add(Pair.of(InterfaceName.Name.name(), String.class));
         return columns;
     }
 
-    private List<Pair<String, Class<?>>> prepareProductData(){
+    private List<Pair<String, Class<?>>> prepareProductData() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(InterfaceName.ProductId.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductName.name(), String.class));
@@ -149,10 +155,4 @@ public class OrphanTxnExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
         columns.add(Pair.of(InterfaceName.TransactionCount.name(), Long.class));
         return columns;
     }
-
-    @Override
-    protected String getFlowBeanName() {
-        return OrphanTxnExportFlow.DATAFLOW_BEAN_NAME;
-    }
-
 }

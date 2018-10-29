@@ -44,7 +44,9 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
 
     public static final String NOT_SET = "not set";
+
     private static final long serialVersionUID = 3180682380551859839L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -188,6 +190,36 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         return this.detail.getTransactionCount();
     }
 
+    @JsonProperty("OrphanContactCount")
+    public Long getOrphanContactCount() {
+        return this.detail.getOrphanContactCount();
+    }
+
+    @JsonProperty("OrphanContactCount")
+    public void setOrphanContactCount(Long orphanContactCount) {
+        this.detail.setOrphanContactCount(orphanContactCount);
+    }
+
+    @JsonProperty("OrphanTransactionCount")
+    public Long getOrphanTransactionCount() {
+        return this.detail.getOrphanTransactionCount();
+    }
+
+    @JsonProperty("OrphanTransactionCount")
+    public void setOrphanTransactionCount(Long orphanTransactionCount) {
+        this.detail.setOrphanTransactionCount(orphanTransactionCount);
+    }
+
+    @JsonProperty("UnmatchedAccountCount")
+    public Long getUnmatchedAccountCount() {
+        return this.detail.getUnmatchedAccountCount();
+    }
+
+    @JsonProperty("UnmatchedAccountCount")
+    public void setUnmatchedAccountCount(Long unmatchedAccountCount) {
+        this.detail.setUnmatchedAccountCount(unmatchedAccountCount);
+    }
+
     @JsonProperty("TransactionCount")
     public void setTransactionCount(Long transactionCount) {
         this.detail.setTransactionCount(transactionCount);
@@ -217,20 +249,37 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         private static final long serialVersionUID = -6030795342397598056L;
         @JsonProperty("DateMap")
         Map<String, Long> dateMap;
+
         @JsonProperty("MinTxnDate")
         private Integer minTxnDate = 0;
+
         @JsonProperty("MaxTxnDate")
         private Integer maxTxnDate = 0;
+
         @JsonProperty("EvaluationDate")
         private String evaluationDate = NOT_SET;
+
         @JsonProperty("DataCloudBuildNumber")
         private String dataCloudBuildNumber = NOT_SET;
+
         @JsonProperty("AccountCount")
         private Long accountCount = 0L;
+
         @JsonProperty("ContactCount")
         private Long contactCount = 0L;
+
         @JsonProperty("TransactionCount")
         private Long transactionCount = 0L;
+
+        @JsonProperty("OrphanContactCount")
+        private Long orphanContactCount = 0L;
+
+        @JsonProperty("OrphanTransactionCount")
+        private Long orphanTransactionCount = 0L;
+
+        @JsonProperty("UnmatchedAccountCount")
+        private Long unmatchedAccountCount = 0L;
+
         @JsonProperty("ApsRollingPeriod")
         private String apsRollingPeriod;
 
@@ -288,6 +337,30 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
 
         public void setTransactionCount(Long transactionCount) {
             this.transactionCount = transactionCount;
+        }
+
+        public Long getOrphanContactCount() {
+            return orphanContactCount;
+        }
+
+        public void setOrphanContactCount(Long orphanContactCount) {
+            this.orphanContactCount = orphanContactCount;
+        }
+
+        public Long getOrphanTransactionCount() {
+            return orphanTransactionCount;
+        }
+
+        public void setOrphanTransactionCount(Long orphanTransactionCount) {
+            this.orphanTransactionCount = orphanTransactionCount;
+        }
+
+        public Long getUnmatchedAccountCount() {
+            return unmatchedAccountCount;
+        }
+
+        public void setUnmatchedAccountCount(Long unmatchedAccountCount) {
+            this.unmatchedAccountCount = unmatchedAccountCount;
         }
 
         public String getApsRollingPeriod() {

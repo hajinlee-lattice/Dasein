@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.workflow.OrphanRecordExportWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,11 +29,11 @@ import io.swagger.annotations.ApiParam;
 public class DataFeedController {
 
     private final ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter;
-    private final OrphanRecordExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter;
+    private final OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter;
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
-            OrphanRecordExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter) {
+            OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
     }
@@ -67,15 +67,15 @@ public class DataFeedController {
         return ResponseDocument.successResponse(appId.toString());
     }
 
-    @PostMapping(value = "/exportorphanrecord", headers = "Accept=application/json")
+    @PostMapping(value = "/exportorphanrecords", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke orphanRecordExport workflow. Returns the job id.")
     public ResponseDocument<String> orphanRecordExport(@PathVariable String customerSpace,
-            @RequestBody(required = false) MetadataSegmentExport metadataSegmentExport) {
+                                                       @RequestBody OrphanRecordsExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
-            ApplicationId appId = orphanRecordExportWorkflowSubmitter.submit(customerSpace,
-                    metadataSegmentExport,new WorkflowPidWrapper(-1L));
+            ApplicationId appId = orphanRecordExportWorkflowSubmitter.submit(
+                    customerSpace, request, new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);

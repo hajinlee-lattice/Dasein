@@ -71,13 +71,15 @@ public interface EmailService {
     void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
             String emailAddress, EmailSettings settings);
 
-    void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String type);
+    void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String exportType);
 
     void sendPlsExportSegmentErrorEmail(User user, String exportID, String type);
 
     void sendPlsExportSegmentRunningEmail(User user, String exportID);
 
-    void sendPlsExportOrphanRecordRunningEmail(User user, String exportID, String type);
+    void sendPlsExportOrphanRecordsRunningEmail(User user, String exportID, String requestType);
+
+    void sendPlsExportOrphanRecordsSuccessEmail(User user, String url, String exportID, String type);
 
     void sendCDLProcessAnalyzeCompletionEmail(User user, Tenant tenant, String appPublicUrl);
 

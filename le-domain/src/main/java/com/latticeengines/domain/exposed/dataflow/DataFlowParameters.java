@@ -22,7 +22,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEven
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccountParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlMergeParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlSplitParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTxnExportParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTransactionExportParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanContactExportParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.UnmatchedAccountExportParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
@@ -70,7 +73,9 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
         @JsonSubTypes.Type(value = MatchCdlSplitParameters.class, name = "MatchCdlSplitParameters"), //
         @JsonSubTypes.Type(value = MatchCdlMergeParameters.class, name = "MatchCdlMergeParameters"), //
         @JsonSubTypes.Type(value = PrepareMatchDataParameters.class, name = "PrepareMatchDataParameters"), //
-        @JsonSubTypes.Type(value = OrphanTxnExportParameters.class, name = "OrphanTxnExportParameters"), //
+        @JsonSubTypes.Type(value = OrphanTransactionExportParameters.class, name = "OrphanTransactionExportParameters"), //
+        @JsonSubTypes.Type(value = OrphanContactExportParameters.class, name = "OrphanContactExportParameters"), //
+        @JsonSubTypes.Type(value = UnmatchedAccountExportParameters.class, name = "UnmatchedAccountExportParameters"), //
 })
 public class DataFlowParameters {
 

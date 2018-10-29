@@ -105,6 +105,8 @@ public class EmailTemplateBuilder {
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_SEGMENT_ERROR(
                 "pls_export_segment_error.html"), PLS_EXPORT_SEGMENT_RUNNING(
                 "pls_export_segment_running.html"), //
+        PLS_EXPORT_ORPHAN_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_ORPHAN_RUNNING(
+                "pls_export_segment_running.html"), //
         CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html"), //
         POC_STATE_NOTICE("poc_state_notice.html"), //
         S3_CREDENTIALS("s3_credentials.html"), S3_EMPTY_CREDENTIALS("s3_empty_credentials.html"), //

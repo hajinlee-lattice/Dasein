@@ -1,9 +1,13 @@
 package com.latticeengines.serviceflows.workflow.export;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -12,13 +16,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 @Component("exportData")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -31,62 +32,74 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         log.info("Inside ExportData execute()");
         exportData();
 
-        if (configuration.isExportMergedFile()){
-            if (configuration.getExportFormat().equals(ExportFormat.CSV)){
-                mergeCSVFile();
+        if (configuration.isExportMergedFile()) {
+            if (configuration.getExportFormat().equals(ExportFormat.CSV)) {
+                mergeCSVFiles();
             }
         }
     }
 
-    protected void mergeCSVFile(){
-        String exportTargetPath = configuration.getExportTargetPath();
-        int lastIndexOfSlash = exportTargetPath.lastIndexOf('/');
-        String exportDir = exportTargetPath.substring(0,lastIndexOfSlash+1);
-        String separatedFilePrefix = exportTargetPath.substring(lastIndexOfSlash+1);
-        separatedFilePrefix = separatedFilePrefix.substring(0,separatedFilePrefix.length()-1);
+    protected void mergeCSVFiles() {
+        String mergeToPath = configuration.getExportTargetPath();
+        log.info("MergeTo=" + mergeToPath);
+        putStringValueInContext(MERGED_FILE_NAME, configuration.getMergedFileName());
+        log.info("MergedFileName=" + configuration.getMergedFileName());
+
         try {
-            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration,exportDir,".*.csv$");
-            String localInputDir = "separatedFile";
-            File localDir = new File(localInputDir);
-            if (!localDir.exists()){
-                localDir.mkdir();
-            }
-            for (String filePath:csvFiles){
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration,filePath,localInputDir);
-            }
-
-            String targetCSVFileName = getExportedFilePath(exportTargetPath);
-            targetCSVFileName = targetCSVFileName.substring(targetCSVFileName.lastIndexOf('/')+1);
-
-            File localOutputCSV = new File(localInputDir,targetCSVFileName);
-            boolean hasHeader = Boolean.FALSE;
-            CSVWriter writer = new CSVWriter(new FileWriter(localOutputCSV), CSVWriter.DEFAULT_SEPARATOR,CSVWriter.NO_QUOTE_CHARACTER);
-            for(File fileEntry:localDir.listFiles()){
-                String fileName = fileEntry.getName();
-                if (fileName.endsWith(".csv") && fileName.startsWith(separatedFilePrefix) && fileName.contains("part")){
-                    CSVReader csvReader = new CSVReader(new FileReader(fileEntry));
-                    List<String[]> records = csvReader.readAll();
-                    if (!hasHeader){
-                        writer.writeNext(records.get(0));
-                        hasHeader = Boolean.TRUE;
-                    }
-                    writer.writeAll(records.subList(1,records.size()-1));
-                    csvReader.close();
+            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, mergeToPath,".*.csv$");
+            log.info("HDFS CSV files=" + JsonUtils.serialize(csvFiles));
+            String localCsvFilesPath = "csvFiles";
+            File localCsvDir = new File(localCsvFilesPath);
+            if (!localCsvDir.exists()) {
+                if(!localCsvDir.mkdir()) {
+                    throw new IOException(String.format("Cannot create local path %s", localCsvFilesPath));
                 }
             }
+
+            for (String file : csvFiles) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, file, localCsvFilesPath);
+            }
+
+            File localOutputCSV = new File(localCsvFilesPath, configuration.getMergedFileName());
+            log.info("Local output CSV=" + localOutputCSV.toString());
+
+            CSVWriter writer = new CSVWriter(new FileWriter(localOutputCSV), CSVWriter.DEFAULT_SEPARATOR,
+                    CSVWriter.NO_QUOTE_CHARACTER);
+
+            File[] files = localCsvDir.listFiles(file -> {
+                return file.getName().matches("\\w+_part-\\d+.csv$");
+            });
+
+            if (files == null) {
+                throw new RuntimeException("Cannot list files in dir " + localCsvDir);
+            }
+
+            boolean hasHeader = false;
+            for (File file : files) {
+                log.info("Merging file " + file.getName());
+                CSVReader csvReader = new CSVReader(new FileReader(file));
+                List<String[]> records = csvReader.readAll();
+                if (!hasHeader) {
+                    writer.writeNext(records.get(0));
+                    hasHeader = true;
+                }
+                if (records.size() > 1) {
+                    writer.writeAll(records.subList(1, records.size()));
+                }
+                csvReader.close();
+            }
+            log.info("Finished for loops.");
             writer.flush();
             writer.close();
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration,localOutputCSV.getPath(),exportDir);
-            FileUtils.deleteDirectory(localDir);
-        } catch (IOException e) {
+            log.info("Start copying file from local to hdfs.");
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localOutputCSV.getPath(), mergeToPath);
+            log.info(String.format("Copied merged CSV file from local %s to HDFS %s",
+                    localOutputCSV.getPath(), mergeToPath));
+            FileUtils.deleteDirectory(localCsvDir);
+            log.info("Done merging CSV files.");
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    //Fix it: getExportedFilePath in MetadataSegmentExportServiceImpl
-    protected String getExportedFilePath(String exportTargetPath){
-        String filePath = exportTargetPath.substring(0,exportTargetPath.length()-1) + "_" + configuration.getMergedFileName();
-        return filePath;
     }
 
     protected String getTableName() {

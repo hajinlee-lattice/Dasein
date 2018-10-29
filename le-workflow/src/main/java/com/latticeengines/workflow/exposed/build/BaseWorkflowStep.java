@@ -137,6 +137,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String MERGED_PRODUCT_ID = "MERGED_PRODUCT_ID";
     public static final String MERGED_PRODUCT_BUNDLE = "MERGED_PRODUCT_BUNDLE";
     public static final String MERGED_PRODUCT_HIERARCHY = "MERGED_PRODUCT_HIERARCHY";
+    public static final String MERGED_FILE_NAME = "MERGED_FILE_NAME";
+    public static final String ORPHAN_COUNT = "ORPHAN_COUNT";
 
     protected static final String CUSTOM_EVENT_IMPORT = "CUSTOM_EVENT_IMPORT";
     protected static final String CUSTOM_EVENT_MATCH_ATTRIBUTES = "CUSTOM_EVENT_MATCH_ATTRIBUTES";

@@ -17,7 +17,7 @@ public abstract class ConfigurableFlowBase<T extends TransformerConfig>
 
     @SuppressWarnings("unchecked")
     protected T getTransformerConfig(TransformationFlowParameters parameters) {
-        T config = null;
+        T config;
 
         String confJson = parameters.getConfJson();
         try {

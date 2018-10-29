@@ -6,14 +6,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
@@ -196,6 +197,16 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             restTemplate.put(url, export);
         } catch (Exception e) {
             throw new RuntimeException("sendMetadataSegmentExportEmail: Remote call failure", e);
+        }
+    }
+
+    public void sendOrphanRecordsExportEmail(String result, String tenantId, OrphanRecordsExportRequest export) {
+        try {
+            String url = constructUrl("pls/internal/emails/orphanrecordsexport/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, export);
+        } catch (Exception e) {
+            throw new RuntimeException("sendOrphanRecordsExportEmail: Remote call failure", e);
         }
     }
 

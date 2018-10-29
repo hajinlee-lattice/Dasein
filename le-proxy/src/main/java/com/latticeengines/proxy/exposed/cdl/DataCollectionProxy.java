@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -204,7 +205,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     public void upsertTable(String customerSpace, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
-        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}";
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{targetTableName}?role={role}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
         args.add(tableName);
@@ -219,7 +220,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     public void upsertTables(String customerSpace, List<String> tableNames, TableRoleInCollection role,
             DataCollection.Version version) {
-        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/multi/{tableName}?role={role}";
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/multi/{targetTableName}?role={role}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
         args.add(String.join(",", tableNames));
@@ -234,7 +235,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
-        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}&version={version}";
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{targetTableName}?role={role}&version={version}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
         args.add(tableName);
@@ -346,7 +347,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public CDLDataSpace getCDLDataSpace(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/dataspace",shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/dataspace",
+                shortenCustomerSpace(customerSpace));
         return get("createCDLDataSpace", url, CDLDataSpace.class);
     }
 
@@ -364,6 +366,52 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             }
         }
         return dynamoDataUnits;
+    }
+
+    public List<DataCollectionArtifact> getDataCollectionArtifacts(String customerSpace,
+            DataCollectionArtifact.Status status, DataCollection.Version version) {
+        String url = "/customerspaces/{customerSpace}/datacollection/artifact";
+        List<String> params = new ArrayList<>();
+        if (status != null) {
+            params.add("status=" + status);
+        }
+
+        if (version != null) {
+            params.add("version=" + version);
+        }
+
+        if (CollectionUtils.isNotEmpty(params)) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+
+        url = constructUrl(url, shortenCustomerSpace(customerSpace));
+        List<?> result = get("getDataCollectionArtifacts", url, List.class);
+        return JsonUtils.convertList(result, DataCollectionArtifact.class);
+    }
+
+    public DataCollectionArtifact getDataCollectionArtifact(String customerSpace, String name,
+            DataCollection.Version version) {
+        String url = "/customerspaces/{customerSpace}/datacollection/artifact/{name}";
+        if (version != null) {
+            url += "?version=" + version;
+        }
+
+        url = constructUrl(url, shortenCustomerSpace(customerSpace), name);
+        return get("getDataCollectionArtifact", url, DataCollectionArtifact.class);
+    }
+
+    public DataCollectionArtifact updateDataCollectionArtifact(String customerSpace, DataCollectionArtifact artifact) {
+        String url = "/customerspaces/{customerSpace}/datacollection/artifact";
+        put("updateDataCollectionArtifact", constructUrl(url, shortenCustomerSpace(customerSpace)), artifact);
+        return artifact;
+    }
+
+    public DataCollectionArtifact createDataCollectionArtifact(String customerSpace, DataCollection.Version version,
+                                                               DataCollectionArtifact artifact) {
+        String requestUrl = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/artifact/version/{version}",
+                shortenCustomerSpace(customerSpace), version);
+        return post("createDataCollectionArtifact", requestUrl, artifact, DataCollectionArtifact.class);
     }
 
 }

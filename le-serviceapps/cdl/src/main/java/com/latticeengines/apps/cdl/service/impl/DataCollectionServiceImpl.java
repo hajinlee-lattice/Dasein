@@ -532,21 +532,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollectionArtifact createArtifact(String customerSpace, String name, String url,
+    public DataCollectionArtifact createArtifact(String customerSpace, String collectionName, String artifactName,
+                                                 String url, DataCollectionArtifact.Status status,
                                                  DataCollection.Version version) {
         if (version == null) {
             throw new UnsupportedOperationException("Data collection version cannot be null.");
         }
 
         Tenant tenant = MultiTenantContext.getTenant();
+        DataCollection collection = getDataCollection(customerSpace, collectionName);
         DataCollectionArtifact artifact = new DataCollectionArtifact();
-        artifact.setName(name);
+        artifact.setDataCollection(collection);
+        artifact.setName(artifactName);
         artifact.setUrl(url);
         artifact.setTenant(tenant);
-        artifact.setDataCollection(getDefaultCollection(customerSpace));
+        artifact.setStatus(DataCollectionArtifact.Status.NOT_SET);
         artifact.setVersion(version);
         artifact.setCreateTime(System.currentTimeMillis());
-        artifact.setStatus(DataCollectionArtifact.Status.NOT_SET);
         dataCollectionArtifactEntityMgr.create(artifact);
         return artifact;
     }

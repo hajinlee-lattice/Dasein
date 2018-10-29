@@ -13,12 +13,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -53,6 +55,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -166,10 +169,10 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private DataLakeService dataLakeService;
-    
+
     @Inject
     private WorkflowJobService workflowJobService;
-    
+
     @Inject
     private ScoringRequestConfigService scoringRequestConfigService;
 
@@ -634,6 +637,35 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/emails/orphanrecordsexport/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after orphan records export")
+    public void sendOrphanRecordsExportEmail(@PathVariable("result") String result,
+            @PathVariable("tenantId") String tenantId, @RequestBody OrphanRecordsExportRequest exportRequest,
+            HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        String exportID = exportRequest.getExportId();
+        String exportType = exportRequest.getOrphanRecordsType().getDisplayName();
+
+        if (StringUtils.isNotBlank(exportID)) {
+            for (User user : users) {
+                if (user.getEmail().equals(exportRequest.getCreatedBy())) {
+                    String tenantName = tenantService.findByTenantId(tenantId).getName();
+                    String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
+                    switch (result) {
+                        case "READY":
+                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, url, exportID, exportType);
+                            break;
+                        case "GENERATING":
+                            emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     @RequestMapping(value = "/emails/segmentexport/result/{result}/"
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
@@ -654,12 +686,6 @@ public class InternalResource extends InternalResourceBase {
         case ACCOUNT_AND_CONTACT:
             exportTypeStr = "Account and Contact";
             break;
-        case ORPHAN_TXN:
-            exportTypeStr = "Orphan Transaction";
-            break;
-        case ORPHAN_CONTACT:
-            exportTypeStr = "Orphan Contacts";
-            break;
         }
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
@@ -674,11 +700,7 @@ public class InternalResource extends InternalResourceBase {
                         emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
                         break;
                     case "STARTED":
-                        if (exportTypeStr.contains("Orphan")){
-                            emailService.sendPlsExportOrphanRecordRunningEmail(user,exportID,exportTypeStr);
-                        }else {
-                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
-                        }
+                        emailService.sendPlsExportSegmentRunningEmail(user, exportID);
                         break;
                     }
                 }
@@ -1133,7 +1155,7 @@ public class InternalResource extends InternalResourceBase {
         }
         return false;
     }
-    
+
     @RequestMapping(value = "/jobs/all/" + TENANT_ID_PATH, method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get actions for a tenant")
@@ -1149,7 +1171,7 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }
-    
+
     @RequestMapping(value = "/external-scoring-config-context/{configUuid}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get attributes within a predefined group for a tenant")
