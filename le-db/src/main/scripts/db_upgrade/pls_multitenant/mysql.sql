@@ -21,6 +21,9 @@ CREATE PROCEDURE `UpdatePLSTables`()
   ALTER TABLE `PLS_MultiTenant`.`BUCKET_METADATA` ADD COLUMN `AVG_EXPECTED_REVENUE` DOUBLE PRECISION NULL;
   ALTER TABLE `PLS_MultiTenant`.`BUCKET_METADATA` ADD COLUMN `TOTAL_EXPECTED_REVENUE` DOUBLE PRECISION NULL;
 
+  UPDATE `GlobalAuthentication`.`GlobalUser` SET Email = "ga_dev@lattice-engines.com" where Email = "bnguyen@lattice-engines.com"
+  UPDATE `GlobalAuthentication`.`GlobalAuthentication` set Username = "ga_dev@lattice-engines.com" where Username = "bnguyen@lattice-engines.com"
+
   END;
 //
 DELIMITER;

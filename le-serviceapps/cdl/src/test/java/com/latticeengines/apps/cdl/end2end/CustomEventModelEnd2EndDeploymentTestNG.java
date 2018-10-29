@@ -122,7 +122,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 testRatingEngine.getId(), testRatingEngine));
         verifyBucketMetadataNotGenerated(testRatingEngine);
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
-                testRatingEngine.getId(), testAIModel.getId(), null, "bnguyen@lattice-engines.com");
+                testRatingEngine.getId(), testAIModel.getId(), null, "ga_dev@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);

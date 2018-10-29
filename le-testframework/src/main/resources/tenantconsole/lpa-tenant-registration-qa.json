@@ -189,7 +189,7 @@
         },
         {
           "Node": "SuperAdminEmails",
-          "Data": "[\"bnguyen@lattice-engines.com\"]"
+          "Data": "[\"ga_dev@lattice-engines.com\"]"
         },
         {
           "Node": "ThirdPartyUserEmails",

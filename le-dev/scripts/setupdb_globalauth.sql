@@ -45,7 +45,7 @@ INSERT INTO GlobalUser (
   Created_By,
   Last_Modified_by
 ) VALUES (
-  'bnguyen@lattice-engines.com',
+  'ga_dev@lattice-engines.com',
   'Super',
   'User',
   '000-000-0000',
@@ -108,7 +108,7 @@ INSERT INTO GlobalAuthentication (
   0,
   0
 FROM GlobalUser
-WHERE Email = 'bnguyen@lattice-engines.com';
+WHERE Email = 'ga_dev@lattice-engines.com';
 
 INSERT INTO GlobalUserTenantRight (
   Tenant_ID,
@@ -127,5 +127,5 @@ INSERT INTO GlobalUserTenantRight (
   0,
   0
 FROM GlobalUser u, GlobalTenant t
-WHERE u.Email IN ('bnguyen@lattice-engines.com', 'pls-super-admin-tester@test.lattice-engines.com')
+WHERE u.Email IN ('ga_dev@lattice-engines.com', 'pls-super-admin-tester@test.lattice-engines.com')
 AND t.Deployment_ID IN ('LocalTest.LocalTest.Production', 'LocalTest2.LocalTest2.Production');

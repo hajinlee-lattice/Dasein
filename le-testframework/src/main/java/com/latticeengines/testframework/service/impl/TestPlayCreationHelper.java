@@ -660,7 +660,7 @@ public class TestPlayCreationHelper {
         ratingEngineProxy.updateRatingModel(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(), aiModel);
 
         ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(),
-                getBucketMetadata(createdRatingEngine, modelSummary), "bnguyen@lattice-engines.com");
+                getBucketMetadata(createdRatingEngine, modelSummary), "ga_dev@lattice-engines.com");
         createdRatingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), createdRatingEngine.getId());
 
         RatingEngine toPub = new RatingEngine();

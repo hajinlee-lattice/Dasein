@@ -719,7 +719,7 @@ cdl.rating.service.threadpool.size=5
 cdl.pa.default.max.iteration=2
 cdl.rating.crossell.minimum.events=50
 cdl.play.service.default.types=List,Cross-Sell,Prospecting,Renewal,Upsell
-cdl.play.service.default.types.user=bnguyen@lattice-engines.com
+cdl.play.service.default.types.user=ga_dev@lattice-engines.com
 # ==================================================
 # le-serviceapps/lp/conf/env/devcluster/lp.properties
 # ==================================================

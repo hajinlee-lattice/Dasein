@@ -30,7 +30,7 @@
               /LatticeAdminEmails
                 string_value = '["ysong@lattice-engines.com"]'
               /SuperAdminEmails
-                string_value = '["bnguyen@lattice-engines.com","bross@lattice-engines.com"]'
+                string_value = '["ga_dev@lattice-engines.com","bross@lattice-engines.com"]'
               /ThirdPartyUserEmails
                 string_value = '[]'
               /lock

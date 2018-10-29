@@ -437,7 +437,7 @@ class LPConfigRunner(SessionRunner):
                                   "Nodes": [{"Node": "ExternalAdminEmails", "Data": "[]"},
                                             {"Node": "LatticeAdminEmails", "Data": "[]"},
                                             {"Node": "SuperAdminEmails",
-                                             "Data": "[\"bnguyen@lattice-engines.com\",\"smeng@lattice-engines.com\"]"}]})
+                                             "Data": "[\"ga_dev@lattice-engines.com\",\"smeng@lattice-engines.com\"]"}]})
         ConfigDirectories.append({"RootPath": "/VisiDBTemplate", "Nodes": []})
 
         BardJams = {}

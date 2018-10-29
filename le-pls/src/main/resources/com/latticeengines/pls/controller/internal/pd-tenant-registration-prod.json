@@ -1,4 +1,4 @@
-{
+ga_dev@lattice-engines.com{
   "ConfigDirectories": [
     {
       "RootPath": "/Eai",
@@ -40,7 +40,7 @@
         },
         {
           "Node": "SuperAdminEmails",
-          "Data": "[\"bnguyen@lattice-engines.com\",\"bross@lattice-engines.com\"]"
+          "Data": "[\"ga_dev@lattice-engines.com\",\"bross@lattice-engines.com\"]"
         },
         {
           "Node": "ThirdPartyUserEmails",

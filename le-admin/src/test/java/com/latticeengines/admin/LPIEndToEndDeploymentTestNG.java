@@ -186,7 +186,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         SerializableDocumentDirectory plsConfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
         for (SerializableDocumentDirectory.Node node : plsConfig.getNodes()) {
             if (node.getNode().contains("SuperAdminEmails")) {
-                node.setData("[\"bnguyen@lattice-engines.com\"]");
+                node.setData("[\"ga_dev@lattice-engines.com\"]");
             } else if (node.getNode().contains("LatticeAdminEmails")) {
                 node.setData("[]");
             }
@@ -341,7 +341,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<User> users = userService.getUsers(PLSTenantId);
         Assert.assertFalse(users.isEmpty());
 
-        final String username = "bnguyen@lattice-engines.com";
+        final String username = "ga_dev@lattice-engines.com";
         final String password = "Lattice123!";
 
         UserDocument userDoc = plsComponentDeploymentTestNG.loginAndAttach(username, password, PLSTenantId);
