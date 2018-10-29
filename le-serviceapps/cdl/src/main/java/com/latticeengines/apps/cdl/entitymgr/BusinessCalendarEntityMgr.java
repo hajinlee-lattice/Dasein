@@ -8,4 +8,6 @@ public interface BusinessCalendarEntityMgr extends BaseEntityMgrRepository<Busin
     BusinessCalendar save(BusinessCalendar businessCalendar);
 
     BusinessCalendar find();
+
+    BusinessCalendar delete();
 }

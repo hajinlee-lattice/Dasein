@@ -25,6 +25,7 @@ public class BusinessCalendarEntityMgrTestNG extends CDLFunctionalTestNGBase  {
     @Test(groups = "functional")
     public void testMultiTenantFilter() {
         Assert.assertNull(entityMgr.find());
+        Assert.assertNull(entityMgr.delete());
 
         BusinessCalendar calendar = constructCalendar();
         BusinessCalendar saved = entityMgr.save(calendar);
@@ -37,6 +38,9 @@ public class BusinessCalendarEntityMgrTestNG extends CDLFunctionalTestNGBase  {
         tenant.setPid(-1L);
         MultiTenantContext.setTenant(tenant);
         Assert.assertNull(entityMgr.find());
+
+        MultiTenantContext.setTenant(mainTestTenant);
+        Assert.assertNotNull(entityMgr.delete());
     }
 
     private BusinessCalendar constructCalendar() {

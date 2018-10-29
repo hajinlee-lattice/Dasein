@@ -8,6 +8,8 @@ public interface BusinessCalendarService {
 
     BusinessCalendar save(BusinessCalendar calendar);
 
+    BusinessCalendar delete();
+
     String validate(BusinessCalendar calendar);
 
 }

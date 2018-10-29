@@ -43,6 +43,11 @@ public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return post("validate business calendar", url, businessCalendar, BusinessCalendar.class);
     }
 
+    public void deleteBusinessCalendar(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/calendar", shortenCustomerSpace(customerSpace));
+        delete("delete business calendar", url);
+    }
+
     public String validateBusinessCalendar(String customerSpace, BusinessCalendar businessCalendar) {
         String url = constructUrl(URL_PREFIX + "/calendar/validate", shortenCustomerSpace(customerSpace));
         return post("validate business calendar", url, businessCalendar, String.class);

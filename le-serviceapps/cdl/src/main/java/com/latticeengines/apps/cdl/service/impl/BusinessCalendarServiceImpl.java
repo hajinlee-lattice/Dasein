@@ -28,6 +28,11 @@ public class BusinessCalendarServiceImpl implements BusinessCalendarService {
     }
 
     @Override
+    public BusinessCalendar delete() {
+        return entityMgr.delete();
+    }
+
+    @Override
     public String validate(BusinessCalendar calendar) {
         return BusinessCalendarUtils.validate(calendar);
     }

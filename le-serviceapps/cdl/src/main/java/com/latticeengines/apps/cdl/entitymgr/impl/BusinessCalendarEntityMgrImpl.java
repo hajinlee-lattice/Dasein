@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,8 +18,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 @Component("businessCalendarEntityMgr")
-public class BusinessCalendarEntityMgrImpl extends BaseEntityMgrRepositoryImpl<BusinessCalendar, Long> implements BusinessCalendarEntityMgr {
-
+public class BusinessCalendarEntityMgrImpl extends BaseEntityMgrRepositoryImpl<BusinessCalendar, Long>
+        implements BusinessCalendarEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(BusinessCalendarEntityMgrImpl.class);
 
@@ -59,4 +58,15 @@ public class BusinessCalendarEntityMgrImpl extends BaseEntityMgrRepositoryImpl<B
         return businessCalendar;
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager")
+    public BusinessCalendar delete() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        BusinessCalendar calendar = repository.findByTenant(tenant);
+        if (calendar != null) {
+            super.delete(calendar);
+        }
+
+        return calendar;
+    }
 }
