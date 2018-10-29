@@ -48,10 +48,11 @@ public class DatabaseUtils {
                 if (shouldRetry) {
                     thrown = exception;
                     if (i != retries - 1) {
-                        log.warn(String.format("Sleeping for %d milliseconds and retrying", sleep));
+                        log.warn(String.format("Sleeping for %d milliseconds and retrying operation: %s", sleep, operationName));
                         sleep(sleep);
                     }
                 } else {
+                    log.warn(String.format("Operation: %s failed with %s.", operationName, exception.getMessage()));
                     throw exception;
                 }
             }

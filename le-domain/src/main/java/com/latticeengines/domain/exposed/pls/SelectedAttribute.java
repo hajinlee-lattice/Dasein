@@ -159,4 +159,8 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
                 .isEquals();
     }
 
+    @Override
+    public String toString() {
+        return String.format("Pid: %d, ColumnId: %s, Tenant Id: %d", pid, columnId, tenantPid);
+    }
 }

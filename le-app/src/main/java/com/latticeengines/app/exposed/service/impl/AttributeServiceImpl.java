@@ -15,7 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.Closure;
 import org.apache.commons.collections4.CollectionUtils;
+
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +41,8 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component("selectedAttrService")
 public class AttributeServiceImpl implements AttributeService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
 
@@ -115,6 +120,7 @@ public class AttributeServiceImpl implements AttributeService {
             throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString(), "HG" });
         }
 
+        log.info("Saving enrichment attribute config changes. Additions:{}, Deletions:{}", addAttrList, deleteAttrList);
         DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY, ConstraintViolationException.class,
                 "Ignoring ConstraintViolationException exception and retrying save operation",
                 UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES, new Closure() {
