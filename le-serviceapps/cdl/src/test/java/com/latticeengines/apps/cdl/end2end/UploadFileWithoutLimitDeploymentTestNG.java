@@ -26,6 +26,8 @@ public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeployment
     private String transaction_csv;
     @Value("${cdl.largeimport.transaction.filenum:}")
     private String transaction_filenum;
+    @Value("${cdl.largeimport.contact.filenum:}")
+    private String contact_filenum;
 
     @BeforeClass(groups = { "deployment.largeFile" })
     public void setup() throws Exception {
@@ -56,9 +58,14 @@ public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeployment
         }
 
         if (importingEntity.equals(BusinessEntity.Contact)) {
+            List<String> filenames = new ArrayList<String>();
+            int num = Integer.parseInt(contact_filenum);
+            for (int i = 1; i <= num; i++) {
+                filenames.add(contact_csv + i + ".csv.gz");
+            }
             spendTime = System.currentTimeMillis();
-            importData(BusinessEntity.Contact, contact_csv, "Contact", true, outsizeFlag);
-            log.info("Import " + contact_csv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
+            importData(BusinessEntity.Contact, filenames, "Contact", true, outsizeFlag);
+            log.info("Import Contact file Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
                     + " second");
         }
 
