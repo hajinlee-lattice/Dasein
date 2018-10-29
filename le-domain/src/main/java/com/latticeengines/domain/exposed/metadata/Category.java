@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -133,6 +134,13 @@ public enum Category {
         public void serialize(Category value, JsonGenerator jgen, SerializerProvider provider)
                 throws IOException {
             jgen.writeFieldName(value.getName());
+        }
+    }
+
+    public static class CategoryOrderComparator implements Comparator<Category> {
+        @Override
+        public int compare(Category c1, Category c2) {
+            return c1.order - c2.order;
         }
     }
 }

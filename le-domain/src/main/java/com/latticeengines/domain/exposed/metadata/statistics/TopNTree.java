@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.metadata.statistics;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,7 +24,7 @@ public class TopNTree {
 
     public Map<Category, CategoryTopNTree> getCategories() {
         if (!(this.categories instanceof TreeMap)) {
-            TreeMap<Category, CategoryTopNTree> treeMap = new TreeMap<>(Comparator.comparing(Category::getOrder));
+            TreeMap<Category, CategoryTopNTree> treeMap = new TreeMap<>(new Category.CategoryOrderComparator());
             treeMap.putAll(this.categories);
             this.categories = treeMap;
         }
@@ -33,7 +32,7 @@ public class TopNTree {
     }
 
     public void setCategories(Map<Category, CategoryTopNTree> categories) {
-        this.categories = new TreeMap<>(Comparator.comparing(Category::getOrder));
+        this.categories = new TreeMap<>(new Category.CategoryOrderComparator());
         this.categories.putAll(categories);
     }
 

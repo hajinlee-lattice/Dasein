@@ -198,7 +198,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         case STATS_CUBE:
             return getKryo("get AM status cube", constructUrl("/statscube"), StatsCube.class);
         case TOPN_TREE:
-            return get("get AM top n tree", constructUrl("/topn"), TopNTree.class);
+            return getKryo("get AM top n tree", constructUrl("/topn"), TopNTree.class);
         case TOPN_TREE_EXCLUDE_INTERNAL:
             return filterEnrichment(true);
         default:

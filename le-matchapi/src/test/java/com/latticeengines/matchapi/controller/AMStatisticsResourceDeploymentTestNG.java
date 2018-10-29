@@ -55,6 +55,8 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     public void testGetTopNTree() {
         TopNTree topnTree = columnMetadataProxy.getTopNTree();
         amCats.forEach(c -> Assert.assertTrue(topnTree.getCategories().containsKey(c)));
+        TopNTree topnTreeExcludeInternal = columnMetadataProxy.getTopNTree(true);
+        amCats.forEach(c -> Assert.assertTrue(topnTreeExcludeInternal.getCategories().containsKey(c)));
     }
 
     @Test(groups = { "deployment" })
