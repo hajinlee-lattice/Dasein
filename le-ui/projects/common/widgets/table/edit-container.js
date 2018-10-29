@@ -2,13 +2,17 @@ import React, { Component } from "../../react-vendor";
 import PropTypes from "prop-types";
 import "./table.scss";
 
-export default class CellTools extends Component {
+export default class EditContainer extends Component {
   constructor(props) {
     super(props);
+    this.saveValue = this.saveValue.bind(this);
   }
-
+  saveValue(value){
+    this.props.save(this.props.colName, this.props.row, value);
+    this.props.toogleEdit();
+  }
   render() {
-    if (this.props.editing) {
+    if (!this.props.editing) {
       return null;
     } else {
       const { children } = this.props;
@@ -18,13 +22,14 @@ export default class CellTools extends Component {
           newProps[prop] = this.props[prop];
         }
       });
+      newProps.saveValue = this.saveValue;
       var childrenWithProps = React.Children.map(children, child =>
         React.cloneElement(child, newProps)
       );
       let cellClasses = `le-cell-tools ${
         this.props.classes ? this.props.classes : ""
       }`;
-      return <li className={cellClasses}>{childrenWithProps}</li>;
+      return <div>{childrenWithProps}</div>;
     }
   }
 }

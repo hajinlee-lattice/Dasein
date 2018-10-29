@@ -48,7 +48,7 @@ var mainApp = angular.module('mainApp', [
     'lp.configureattributes'
 ])
 .controller('MainController', function (
-    $scope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility, LeMessaging, Banner
+    $scope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility, LeMessaging, Banner, Notice, Modal, ServiceErrorUtility
 ) {
     var previousSession = BrowserStorageUtility.getClientSession();
     var loginDocument = BrowserStorageUtility.getLoginDocument();
@@ -92,26 +92,30 @@ var mainApp = angular.module('mainApp', [
     console.log(window.navigator.userAgent);
     LeMessaging.subscribe({
         next: (message) => {
-            console.log('RECEIVED');
-            switch(message.getPosition()){
-                case BANNER:
+            console.log('RECEIVED', message);
+            if(message.isErrorUtility()){
+                ServiceErrorUtility.process(message.getResponse()); 
+            }else {
+                switch(message.getPosition()){
+                    case BANNER:
+                        console.log(message.getMessage());
+                        Banner[message.getType()]({title: message.getMessage(), message: message.getFullMessage()});
+                    break;
+
+                    case MODAL:
                     console.log(message.getMessage());
-                    Banner[message.getType()]({title: message.getMessage(), message: message.getFullMessage()});
-                break;
+                        Modal[message.getType()]({title: message.getMessage(), message: message.getFullMessage()});
+                    break;
 
-                case MODAL:
-                console.log(message.getMessage());
-                    Modal[message.getType()]({title: message.getMessage(), message: message.getFullMessage()});
-                break;
-
-                case NOTIFICATION:
-                console.log(message.getMessage());
-                    Notice[message.getType()]({
-                        delay: 4000,
-                        title: message.getMessage(), 
-                        message: message.getFullMessage()
-                });
-                break;
+                    case NOTIFICATION:
+                    console.log(message.getMessage());
+                        Notice[message.getType()]({
+                            delay: 4000,
+                            title: message.getMessage(), 
+                            message: message.getFullMessage()
+                    });
+                    break;
+                }
             }
         }
     });

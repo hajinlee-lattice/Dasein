@@ -7,11 +7,12 @@ export default class CellContent extends Component {
     super(props);
   }
 
-
-
   render() {
-    return <li className="le-table-cell-content">{this.props.children}</li>;
+    if(this.props.editing === true){
+      return null;
+    }
+    else {
+      return <li className="le-table-cell-content">{this.props.children}</li>;
+    }
   }
 }
-
-

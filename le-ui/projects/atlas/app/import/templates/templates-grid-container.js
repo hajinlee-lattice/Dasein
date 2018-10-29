@@ -10,9 +10,10 @@ import CellTools from "../../../../common/widgets/table/cell-tools";
 import LeTableHeader from "../../../../common/widgets/table/table-header";
 import LeTableBody from "../../../../common/widgets/table/table-body";
 
-import TemplateService from "./templates.service";
+import { getData } from "../../../../common/widgets/table/table-utils";
+// import TemplateService from "./templates.service";
 import httpService from "../../../../common/app/http/http-service";
-import {SUCCESS} from '../../../../common/app/http/response';
+import { SUCCESS } from "../../../../common/app/http/response";
 
 import TemplatesRowActions, {
   CREATE_TEMPLATE,
@@ -21,11 +22,25 @@ import TemplatesRowActions, {
 } from "./templates-row-actions";
 import "./templates.scss";
 import Observer from "../../../../common/app/http/observer";
+import EditControl from "./components/edit-contorls";
+import EditorText from "./components/editor-text";
+import EditContainer from "../../../../common/widgets/table/edit-container";
 
+import messageService from '../../../../common/app/utilities/messaging-service';
+import Message, {
+  MODAL,
+  BANNER,
+  NOTIFICATION,
+  ERROR,
+  INFO,
+  WARNING
+} from "../../../../common/app/utilities/message";
 export default class GridContainer extends Component {
   constructor(props) {
     super(props);
     this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
+    this.getCellEditTools = this.getCellEditTools.bind(this);
+    this.saveValue = this.saveValue.bind(this);
     this.state = {
       forceReload: false,
       showEmpty: false,
@@ -80,60 +95,92 @@ export default class GridContainer extends Component {
       () => {
         console.log("Async: Copying to clipboard was successful!");
       },
-      (err) => {
+      err => {
         console.error("Async: Could not copy text: ", err);
       }
     );
   }
+
   getCopyPathUI(rowData) {
     // if (rowData.Path == "N/A") {
     //   return null;
     // } else {
-    return (
-      <li
-        className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
-        title="Copy Link"
-        onClick={() => {
-          this.copyPath(rowData.Path);
-        }}
-      >
-        <i className="fa fa-files-o" />
-      </li>
-    );
+      return (
+        <li
+          className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
+          title="Copy Link"
+          onClick={() => {
+            this.copyPath(rowData.Path);
+          }}
+        >
+          <i className="fa fa-files-o" />
+        </li>
+      );
     // }
   }
 
+  saveValue(colName, rowIndex, value) {
+    let newState = [...this.state.data];
+    newState[rowIndex][colName] = value;
+    this.setState({ data: newState });
+    // console.log(this.state.data);
+    let type = 'success';
+    messageService.sendMessage(
+      new Message(null,NOTIFICATION, type, 'OK', 'OK')
+    );
+  }
+  getCellEditTools(value) {
+    // if (!value || "N/A" == value) {
+    //   return (<div></div>);
+    // } else {
+    return (
+      <CellTools>
+        <EditControl icon="fa fa-pencil-square-o" title="Edit Name"/>
+      </CellTools>
+    );
+    // }
+  }
   getRows() {
     if (this.state.data.length > 0) {
       let rowsUI = this.state.data.map((row, index) => {
         return (
-          <LeGridRow index={index} rowData={row}>
-            <LeGridCell colName="TemplateName" colSpan="2">
-              <CellContent name="TemplateName">
-                <span>{row.TemplateName}</span>
+          <LeGridRow key={index} index={index} rowData={row}>
+            <LeGridCell
+              colName="TemplateName"
+              colSpan="2"
+              row={index}
+              col="0"
+              editable="true"
+            >
+              <CellContent>
+                <span title={row.TemplateName}>{row.TemplateName}</span>
               </CellContent>
+              {this.getCellEditTools(row.TemplateName)}
+              <EditContainer save={this.saveValue}>
+                <EditorText initialValue={row.TemplateName} />
+              </EditContainer>
             </LeGridCell>
 
-            <LeGridCell colName="Object" colSpan="2">
-              <CellContent name="Object">
+            <LeGridCell colName="Object" colSpan="2" row={index} col="1">
+              <CellContent>
                 <span>{row.Object}</span>
               </CellContent>
             </LeGridCell>
 
-            <LeGridCell colName="Path" colSpan="4">
+            <LeGridCell colName="Path" colSpan="4" row={index} col="2">
               <CellContent name="Path">
                 <span>{row.Path}</span>
               </CellContent>
               <CellTools>{this.getCopyPathUI(row)}</CellTools>
             </LeGridCell>
 
-            <LeGridCell colName="edited" colSpan="1">
+            <LeGridCell colName="edited" colSpan="1" row={index} col="3">
               <CellContent name="edited">
                 <span>{row.edited}</span>
               </CellContent>
             </LeGridCell>
 
-            <LeGridCell colName="actions" colSpan="3">
+            <LeGridCell colName="actions" colSpan="3" row={index} col="4">
               <CellTools classes="templates-controlls">
                 <TemplatesRowActions
                   rowData={row}
@@ -150,7 +197,7 @@ export default class GridContainer extends Component {
     }
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     httpService.unsubscribeObservable(this.observer);
   }
 
@@ -160,15 +207,25 @@ export default class GridContainer extends Component {
       showEmpty: false,
       showLoading: true
     });
-    this.observer = new Observer((response) =>{
-      if(response.status == SUCCESS){
-        this.setState({
-          forceReload: false,
-          showEmpty: (response.data && response.data.length == 0),
-          showLoading: false,
-          data: response.data
-        });
-      } else {
+    this.observer = new Observer(
+      response => {
+        if (response.status == SUCCESS) {
+          this.setState({
+            forceReload: false,
+            showEmpty: response.data && response.data.length == 0,
+            showLoading: false,
+            data: response.data
+          });
+        } else {
+          this.setState({
+            forceReload: false,
+            showEmpty: true,
+            showLoading: false,
+            data: []
+          });
+        }
+      },
+      error => {
         this.setState({
           forceReload: false,
           showEmpty: true,
@@ -176,18 +233,12 @@ export default class GridContainer extends Component {
           data: []
         });
       }
-    }, (error) => {
-      this.setState({
-        forceReload: false,
-        showEmpty: true,
-        showLoading: false,
-        data: []
-      });
-    });
-    httpService.get('/pls/cdl/s3import/template', this.observer);
+    );
+    httpService.get("/pls/cdl/s3import/template", this.observer);
     // TemplateService().getTemplates(this.observer);
   }
   render() {
+    console.log("RENDER");
     return (
       <Aux>
         <LeGridList

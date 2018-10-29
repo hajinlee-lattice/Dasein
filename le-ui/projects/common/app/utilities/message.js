@@ -8,12 +8,23 @@ export const WARNING= 'warning';
 
 export default class Message {
 
-    constructor(position, type, message, fullMessage ){
+    constructor(response, position, type, message, fullMessage){
+        this.response = response;
         this.position = position;
         this.type = type;
         this.message = message;
         this.fullMessage = fullMessage;
+        this.errorUtility = true;
+        if(!response || !response.data){
+            this.errorUtility = false;
+        }
+
     }
+
+    getResponse() {
+        return this.response;
+    }
+
     getPosition(){
         return this.position;
     }
@@ -28,6 +39,10 @@ export default class Message {
 
     getFullMessage(){
         return this.fullMessage;
+    }
+
+    isErrorUtility(){
+        return this.errorUtility;
     }
 
 

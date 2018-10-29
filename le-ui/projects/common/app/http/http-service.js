@@ -1,7 +1,9 @@
 import { axios, Observable, Subject } from "../../network.vendor";
+import messageService from '../utilities/messaging-service';
 import Response from "./response";
 import Error from "./error";
 import Observables from "./observables";
+import Message, {MODAL, BANNER, NOTIFICATION, ERROR, INFO, WARNING } from "../utilities/message";
 
 let http;
 
@@ -61,6 +63,7 @@ const httpService = {
             error.message
           );
           console.log("ERRRRRRRRRRR", error);
+          messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
           obs.error(respoError);
           obs.complete();
         });
@@ -80,7 +83,7 @@ const httpService = {
             response.data
           );
           obs.next(resp);
-        //   obs.complete();
+          obs.complete();
         })
         .catch(error => {
           let respoError = new Error(
@@ -88,9 +91,10 @@ const httpService = {
             error.response.statusText,
             error.message
           );
-          console.log("ERRRRRRRRRRR", error);
+          console.log("ERRRRRRRRRRR", error.message);
+          messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
           obs.error(respoError);
-        //   obs.complete();
+          obs.complete();
         });
     }).subscribe(observer);
       observables.addObservable(observer.getName(),observable);

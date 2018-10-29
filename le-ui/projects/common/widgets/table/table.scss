@@ -1,4 +1,5 @@
 @import "../colors.scss";
+@import "../layout//layout.scss";
 
 $columns-gap: 8px;
 $header-height: 50px;
@@ -134,8 +135,12 @@ $font-size: 12px;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    padding-left: $cell-padding;
-    padding-right: $cell-padding;
+    & > div {
+      @extend .le-flex-h-panel;
+      padding-left: 8px;
+      padding-right: 8px;
+      align-items: center;
+    }
 
     &.disabled {
       background-color: $palladium;
@@ -145,9 +150,15 @@ $font-size: 12px;
 
     .le-table-cell-content {
       display: flex;
-      flex: 1;
+      flex: 3;
       align-items: center;
       flex-wrap: nowrap;
+      min-width: 0;
+      & > span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
     .le-table-cell-icon {
       margin-left: 1em;

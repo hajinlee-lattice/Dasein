@@ -6,6 +6,7 @@ export default class LeGridRow extends Component {
     super(props);
   }
 
+  
 
   render() {
     let rowClass = `le-table-row row-${this.props.index} ${this.rowClasses ? this.rowClasses : ''}`;

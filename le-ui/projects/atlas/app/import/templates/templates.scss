@@ -18,12 +18,12 @@
         color: $blue-text;
       }
     }
-    .le-table-cell > .le-cell-tools > .initially-hidden{
-      display: none;
+    .le-table-row > .le-table-cell > div > .le-cell-tools > .initially-hidden{
+       display: none;
     }
     .le-table-row:hover {
 
-      & > .le-table-cell > .le-cell-tools > .initially-hidden{
+      & > .le-table-cell > div> .le-cell-tools > .initially-hidden{
         display: initial;
       }
 
@@ -33,10 +33,25 @@
       & > .le-table-cell > .le-cell-tools > *{
         color: $pearl-white;
       }
-      & > .le-table-cell > .le-cell-tools > .templates-controlls > .border-over {
+      .le-table-cell > .le-cell-tools > .templates-controlls > .border-over {
         border: 1px solid $pearl-white;
         color: $pearl-white;
       }
+
+      & > .le-table-cell > div > .templates-controlls > .borders-over > .wrapper {
+        border: 1px solid $pearl-white;
+        & >  span{
+          // border: 1px solid $pearl-white;
+          color: $pearl-white;
+        }
+      }
+
+      
+      // & .le-table-cell > div > .templates-controlls > .le-link-container > .wrapper > * {
+      //   border: 1px solid $pearl-white;
+      //   color: $pearl-white;
+      // }
+      
     }
     // .le-table-row-no-select{
     //   background-color:  $pearl-white;
