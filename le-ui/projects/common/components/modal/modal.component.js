@@ -53,9 +53,8 @@ angular.module('common.modal', [])
     };
 
     this.getData = function(name){
-        var tmp = this.modals[name].data;
 
-        if (tmp && tmp !== undefined) {
+        if (this.modals[name] && this.modals[name].data !== undefined) {
             return this.modals[name].data ;
         } else {
             return {};

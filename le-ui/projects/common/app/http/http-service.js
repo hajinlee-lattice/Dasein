@@ -48,10 +48,14 @@ const httpService = {
         .then(response => {
           console.log("I am back from API", response);
           let resp = new Response(
+            response,
             response.status,
             response.statusText,
             response.data
           );
+          if(response && response.data && response.data.UIAction){
+            messageService.sendMessage(new Message(response, "", "", "",""));  
+          }
           obs.next(resp);
           obs.complete();
         })

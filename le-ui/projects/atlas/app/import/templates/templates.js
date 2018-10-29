@@ -13,10 +13,15 @@ import { UIRouter, UIView } from "../../../../common/react-vendor";
 import SummaryContainer from "./components/summary";
 import { setAngularState } from "../react/states";
 
+import messageService from '../../../../common/app/utilities/messaging-service';
+import Message from "../../../../common/app/utilities/message";
+import httpService from "../../../../common/app/http/http-service";
+import Observer from "../../../../common/app/http/observer";
+
 class TemplatesComponent extends Component {
   constructor(props) {
     super(props);
-    this.nextButtonConfig = {
+    this.emailCredentialConfig = {
       lable: "Email Automation Credentials",
       classNames: ["button", "gray-button"]
     };
@@ -47,9 +52,11 @@ class TemplatesComponent extends Component {
           </div> */}
             <div className="right">
               <LeButton
-                config={this.nextButtonConfig}
+                config={this.emailCredentialConfig}
                 callback={() => {
-                  // getRouter().stateService.go("hello");
+                  httpService.get('/pls/dropbox', new Observer((response)=>{
+                  }))
+                  
                 }}
               />
             </div>
