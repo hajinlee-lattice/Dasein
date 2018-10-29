@@ -83,7 +83,7 @@ def create_modelrun():
     description = 'A description of my run'
 
     tenant = 'ModelQualityExperiments.ModelQualityExperiments.Production'
-    username = 'bnguyen@lattice-engines.com'
+    username = 'ga_dev@lattice-engines.com'
     password = 'tahoe'
 
     modelRun = ModelRun.getByName(existingModelRunName)

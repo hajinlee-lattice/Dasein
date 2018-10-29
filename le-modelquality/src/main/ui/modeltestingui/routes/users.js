@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
 
  
   // Send post request!
-  var url = "https://admin-qa.lattice.local:8080/modelquality/runmodel/?tenant=ModelQualityExperiments.ModelQualityExperiments.Production&username=bnguyen@lattice-engines.com&password=tahoe&apiHostPort=https://bodcdevtca18.lattice.local:8081"
+  var url = "https://admin-qa.lattice.local:8080/modelquality/runmodel/?tenant=ModelQualityExperiments.ModelQualityExperiments.Production&username=ga_dev@lattice-engines.com&password=tahoe&apiHostPort=https://bodcdevtca18.lattice.local:8081"
   var tenant="ModelQualityExperiments.ModelQualityExperiments.Production"
   var username="pls-super-admin-tester@test.lattice-engines.com"
   var password="admin"
