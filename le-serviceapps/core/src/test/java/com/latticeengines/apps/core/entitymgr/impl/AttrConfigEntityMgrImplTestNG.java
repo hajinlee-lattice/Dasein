@@ -83,6 +83,11 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
             // }
         });
 
+        attrConfigs = attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantName);
+        Assert.assertEquals(response.size(), 2);
+        Assert.assertTrue(attrConfigs.stream().allMatch(attr -> attr.getAttrName().equals(attrConfig2.getAttrName())
+                || attr.getAttrName().equals(attrConfig4.getAttrName())));
+
         attrConfigEntityMgr.deleteByAttrNameStartingWith("Attr");
         Thread.sleep(500); // wait for replication lag
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);

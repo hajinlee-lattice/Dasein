@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -105,9 +106,13 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
     @SuppressWarnings("unchecked")
-    public <T extends Serializable> AttrConfigProp<T> getStrongTypedProperty(String key,
-            Class<T> valClz) {
+    public <T extends Serializable> AttrConfigProp<T> getStrongTypedProperty(String key, Class<T> valClz) {
         if (MapUtils.isNotEmpty(attrProps) && attrProps.containsKey(key)) {
             return (AttrConfigProp<T>) attrProps.get(key);
         }
@@ -192,14 +197,12 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
             typeSafeProp.setAllowCustomization(prop.isAllowCustomization());
             if (prop.getCustomValue() != null) {
                 Object val = prop.getCustomValue();
-                AttrState state = (val instanceof String) ? AttrState.valueOf((String) val)
-                        : (AttrState) val;
+                AttrState state = (val instanceof String) ? AttrState.valueOf((String) val) : (AttrState) val;
                 typeSafeProp.setCustomValue(state);
             }
             if (prop.getSystemValue() != null) {
                 Object val = prop.getSystemValue();
-                AttrState state = (val instanceof String) ? AttrState.valueOf((String) val)
-                        : (AttrState) val;
+                AttrState state = (val instanceof String) ? AttrState.valueOf((String) val) : (AttrState) val;
                 typeSafeProp.setSystemValue(state);
             }
 
@@ -212,14 +215,12 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
             typeSafeProp.setAllowCustomization(prop.isAllowCustomization());
             if (prop.getCustomValue() != null) {
                 Object val = prop.getCustomValue();
-                Category category = (val instanceof String) ? Category.valueOf((String) val)
-                        : (Category) val;
+                Category category = (val instanceof String) ? Category.valueOf((String) val) : (Category) val;
                 typeSafeProp.setCustomValue(category);
             }
             if (prop.getSystemValue() != null) {
                 Object val = prop.getSystemValue();
-                Category category = (val instanceof String) ? Category.valueOf((String) val)
-                        : (Category) val;
+                Category category = (val instanceof String) ? Category.valueOf((String) val) : (Category) val;
                 typeSafeProp.setSystemValue(category);
             }
 
@@ -237,9 +238,8 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
             return false;
         }
         AttrConfig config = (AttrConfig) o;
-        boolean flag1 = StringUtils.equals(attrName, config.getAttrName())
-                && attrType == config.getAttrType() && attrSubType == config.getAttrSubType()
-                && entity == config.getEntity();
+        boolean flag1 = StringUtils.equals(attrName, config.getAttrName()) && attrType == config.getAttrType()
+                && attrSubType == config.getAttrSubType() && entity == config.getEntity();
         if (!flag1) {
             return false;
         }
@@ -254,8 +254,7 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
                 for (Map.Entry<String, AttrConfigProp<?>> entry : attrProps.entrySet()) {
                     String key = entry.getKey();
                     AttrConfigProp<?> val = entry.getValue();
-                    if (!(val == attrProps2.get(key)
-                            || (val != null && val.equals(attrProps2.get(key))))) {
+                    if (!(val == attrProps2.get(key) || (val != null && val.equals(attrProps2.get(key))))) {
                         flag2 = false;
                         break;
                     }

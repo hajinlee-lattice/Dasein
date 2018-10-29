@@ -67,9 +67,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     private AttrValidationService attrValidationService;
 
     @Inject
-    private ActivationLimitValidator limitationValidator;
-
-    @Inject
     private ZKConfigService zkConfigService;
 
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
@@ -497,7 +494,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     /**
      * Input AttrConfig may only have partial AttrProps
      */
-    private List<AttrConfig> renderForEntity(List<AttrConfig> configList, BusinessEntity entity) {
+    @Override
+    public List<AttrConfig> renderForEntity(List<AttrConfig> configList, BusinessEntity entity) {
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
             Set<String> attrNames = configList.stream().map(AttrConfig::getAttrName).collect(Collectors.toSet());
@@ -511,6 +509,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             timer.setTimerMessage(msg);
         }
         return renderedList;
+    }
+
+    @Override
+    public List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId) {
+        log.info("hi " + tenantId);
+        return attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantId);
     }
 
     @SuppressWarnings("unchecked")

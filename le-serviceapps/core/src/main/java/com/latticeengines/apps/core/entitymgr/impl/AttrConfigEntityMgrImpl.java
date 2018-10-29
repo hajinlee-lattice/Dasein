@@ -25,7 +25,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 @Component("attrConfigEntityMgr")
-public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfigEntity> implements AttrConfigEntityMgr {
+public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfigEntity>
+        implements AttrConfigEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigEntityMgrImpl.class);
 
@@ -47,7 +48,7 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
         Map<String, AttrConfigEntity> existingMap = new HashMap<>();
         existing.forEach(config -> existingMap.put(config.getDocument().getAttrName(), config));
         List<AttrConfigEntity> toCreateOrUpdate = new ArrayList<>();
-        for (AttrConfig attrConfig: attrConfigs) {
+        for (AttrConfig attrConfig : attrConfigs) {
             String attrName = attrConfig.getAttrName();
             AttrConfigEntity attrConfigEntity;
             if (existingMap.containsKey(attrName)) {
@@ -64,7 +65,6 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
         List<AttrConfigEntity> saved = repository.saveAll(toCreateOrUpdate);
         return saved.stream().map(AttrConfigEntity::getDocument).collect(Collectors.toList());
     }
-
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -101,6 +101,15 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AttrConfig> findAllByTenantId(String tenantId) {
         List<AttrConfigEntity> attrConfigEntities = repository.findByTenantId(tenantId);
+        return attrConfigEntities.stream() //
+                .map(AttrConfigEntity::getDocument) //
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId) {
+        List<AttrConfigEntity> attrConfigEntities = repository.findAllHaveCustomDisplayNameByTenantId(tenantId);
         return attrConfigEntities.stream() //
                 .map(AttrConfigEntity::getDocument) //
                 .collect(Collectors.toList());

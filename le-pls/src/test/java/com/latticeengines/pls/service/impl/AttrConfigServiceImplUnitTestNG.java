@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -69,7 +68,6 @@ public class AttrConfigServiceImplUnitTestNG {
     private ActionService actionService;
 
     @InjectMocks
-    @Spy
     private AttrConfigServiceImpl attrConfigService;
 
     private static Tenant tenant;

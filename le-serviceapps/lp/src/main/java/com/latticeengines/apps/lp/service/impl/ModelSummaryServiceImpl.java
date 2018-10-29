@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,18 +30,22 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
@@ -49,7 +54,9 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @Component("modelSummaryService")
@@ -64,6 +71,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public static final String ACCOUNT_CATEGORY_ISSUE_FIXED = "AccountCategoryIssueFixed";
     public static final String REVENUE_UI_ISSUE_FIXED = "RevenueUIIssueFixed";
     public static final String NAME = "Name";
+    public static final String DISPLAY_NAME = "DisplayName";
     public static final String LOWER_INCLUSIVE = "LowerInclusive";
     public static final String UPPER_EXCLUSIVE = "UpperExclusive";
     public static final String NO_PREDICTORS_WITH_MORE_THAN_200_DISTINCTVALUES = "NoPredictorsWithMoreThan200DistinctValues";
@@ -103,17 +111,27 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     @Inject
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
-    @Override
-    public void create(ModelSummary summary) { modelSummaryEntityMgr.create(summary); }
+    @Inject
+    private AttrConfigService lpAttrConfigService;
 
     @Override
-    public ModelSummary getModelSummaryByModelId(String modelId) { return modelSummaryEntityMgr.getByModelId(modelId); }
+    public void create(ModelSummary summary) {
+        modelSummaryEntityMgr.create(summary);
+    }
 
     @Override
-    public ModelSummary findValidByModelId(String modelId) { return modelSummaryEntityMgr.findValidByModelId(modelId); }
+    public ModelSummary getModelSummaryByModelId(String modelId) {
+        return modelSummaryEntityMgr.getByModelId(modelId);
+    }
 
     @Override
-    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
+    public ModelSummary findValidByModelId(String modelId) {
+        return modelSummaryEntityMgr.findValidByModelId(modelId);
+    }
+
+    @Override
+    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
+            boolean validOnly) {
         return modelSummaryEntityMgr.findByModelId(modelId, returnRelational, returnDocument, validOnly);
     }
 
@@ -133,10 +151,14 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public void delete(ModelSummary modelSummary) { modelSummaryEntityMgr.delete(modelSummary); }
+    public void delete(ModelSummary modelSummary) {
+        modelSummaryEntityMgr.delete(modelSummary);
+    }
 
     @Override
-    public List<ModelSummary> getAll() { return modelSummaryEntityMgr.getAll(); }
+    public List<ModelSummary> getAll() {
+        return modelSummaryEntityMgr.getAll();
+    }
 
     @Override
     public List<String> getAllModelSummaryIds() {
@@ -144,13 +166,19 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public List<ModelSummary> getAllByTenant(Tenant tenant) { return modelSummaryEntityMgr.getAllByTenant(tenant); }
+    public List<ModelSummary> getAllByTenant(Tenant tenant) {
+        return modelSummaryEntityMgr.getAllByTenant(tenant);
+    }
 
     @Override
-    public List<ModelSummary> findAllValid() { return modelSummaryEntityMgr.findAllValid(); }
+    public List<ModelSummary> findAllValid() {
+        return modelSummaryEntityMgr.findAllValid();
+    }
 
     @Override
-    public List<ModelSummary> findAllActive() { return modelSummaryEntityMgr.findAllActive(); }
+    public List<ModelSummary> findAllActive() {
+        return modelSummaryEntityMgr.findAllActive();
+    }
 
     @Override
     public int findTotalCount(long lastUpdateTime, boolean considerAllStatus) {
@@ -158,7 +186,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum) {
+    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
+            int maximum) {
         return modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
     }
 
@@ -206,7 +235,6 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public boolean hasBucketMetadata(String modelId) {
         return modelSummaryEntityMgr.hasBucketMetadata(modelId);
     }
-
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
@@ -317,10 +345,72 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                         && sourceSchemaInterpretationStr.equals(SchemaInterpretation.SalesforceAccount.toString())) {
                     fixAccountCategory(summary);
                 }
+                fixCustomDisplayNames(summary);
             }
         }
 
         return summary;
+    }
+
+    private void fixCustomDisplayNames(ModelSummary summary) {
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            Map<String, String> nameToDisplayNameMap = findNameToDisplayNameMap();
+            if (MapUtils.isNotEmpty(nameToDisplayNameMap)) {
+                fixPredictorDisplayNameForModel(summary, nameToDisplayNameMap);
+            }
+            String msg = String.format("Fix custom displayNames for %s", summary.getId());
+            timer.setTimerMessage(msg);
+        }
+    }
+
+    private Map<String, String> findNameToDisplayNameMap() {
+        Map<String, String> nameToDisplayNameMap = new HashMap<>();
+        List<AttrConfig> customDisplayNameAttrs = lpAttrConfigService
+                .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
+        if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
+            customDisplayNameAttrs.forEach(attrConfig -> {
+                BusinessEntity entity = attrConfig.getEntity();
+                if (!attrConfigGrps.containsKey(entity)) {
+                    attrConfigGrps.put(entity, new ArrayList<>());
+                }
+                attrConfigGrps.get(entity).add(attrConfig);
+            });
+            Tenant tenant = MultiTenantContext.getTenant();
+            attrConfigGrps.forEach((entity, configList) -> {
+                MultiTenantContext.setTenant(tenant);
+                List<AttrConfig> renderedConfigList = lpAttrConfigService.renderForEntity(configList, entity);
+                renderedConfigList.stream().forEach(config -> {
+                    nameToDisplayNameMap.put(config.getAttrName(),
+                            config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
+                });
+            });
+        }
+        return nameToDisplayNameMap;
+    }
+
+    private void fixPredictorDisplayNameForModel(ModelSummary summary, Map<String, String> nameToDisplayNameMap) {
+        log.info("start to replace edit name for " + summary.getId());
+        log.info("nameToDisplayNameMap: " + nameToDisplayNameMap);
+        ObjectMapper objectMapper = new ObjectMapper();
+        KeyValue keyValue = summary.getDetails();
+        JsonNode details = null;
+        try {
+            details = objectMapper.readTree(keyValue.getPayload());
+        } catch (IOException e) {
+            log.error("Failed to parse model details KeyValue", e);
+        }
+
+        ArrayNode predictorsNodeOrig = (ArrayNode) details.get(PREDICTORS);
+        for (JsonNode predictorNode : predictorsNodeOrig) {
+            String name = predictorNode.get(NAME).asText();
+            if (!nameToDisplayNameMap.containsKey(name)) {
+                continue;
+            }
+            ((ObjectNode) predictorNode).put(DISPLAY_NAME, nameToDisplayNameMap.get(name));
+        }
+        keyValue.setPayload(details.toString());
+        keyValueEntityMgr.update(keyValue);
     }
 
     @SuppressWarnings("deprecation")
@@ -505,7 +595,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         return true;
     }
 
-    private boolean downloadModelSummaryForTenant(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
+    private boolean downloadModelSummaryForTenant(String tenantId,
+            Map<String, String> modelApplicationIdToEventColumn) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
@@ -529,8 +620,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(modelSummaryParser) //
                 .featureImportanceParser(featureImportanceParser) //
-                .modelSummaryIds(modelSummaryIds)
-                .applicationFilters(applicationFilters);
+                .modelSummaryIds(modelSummaryIds).applicationFilters(applicationFilters);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
 
         modelSummaryDownloadFlagEntityMgr.addExcludeFlag(tenantId);
@@ -566,7 +656,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public Map<String, ModelSummary> getEventToModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
+    public Map<String, ModelSummary> getEventToModelSummary(String tenantId,
+            Map<String, String> modelApplicationIdToEventColumn) {
         Map<String, ModelSummary> eventToModelSummary = new HashMap<>();
         Set<String> foundModels = new HashSet<>();
 
@@ -599,7 +690,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                             eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
                             foundModels.add(modelApplicationId);
                         } else {
-                            log.error(String.format("Model summary is not found by application id: %s", modelApplicationId));
+                            log.error(String.format("Model summary is not found by application id: %s",
+                                    modelApplicationId));
                         }
                     }
                 }

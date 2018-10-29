@@ -46,8 +46,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
     private static int intentLimit = 20;
     private static int technologyLimit = 32;
     private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigServiceUnitTestNG.class);
-    @Mock
-    private ActivationLimitValidator limitationValidator;
+
     @Mock
     private ZKConfigService zkConfigService;
 
