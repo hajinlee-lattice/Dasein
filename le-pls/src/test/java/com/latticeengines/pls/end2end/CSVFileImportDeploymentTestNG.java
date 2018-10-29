@@ -184,7 +184,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testFormatDate() throws IOException {
+    public void testFormatDate() throws Exception {
         SourceFile accountFile = fileUploadService.uploadFile(
                 "file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE_FROMATDATE,
@@ -238,10 +238,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(schema.getField(fieldName).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName).getProp("PatternString"), patternString);
 
-        try {
-            List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
-            Assert.assertEquals(records.get(0).get(fieldName).toString(), "1501084800000");
-        } catch (Exception e) { }
+        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
+        Assert.assertEquals(records.get(0).get(fieldName).toString(), "1501084800000");
     }
 
     @Test(groups = "deployment")
