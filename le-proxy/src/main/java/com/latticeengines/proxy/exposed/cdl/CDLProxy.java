@@ -85,16 +85,22 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return ("Success".equals(statusStr));
     }
 
-    @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
                                      String subType, String displayName, CDLImportConfig metadata) {
+        return createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, false, metadata);
+    }
+
+    @SuppressWarnings("unchecked")
+    public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
+                                     String subType, String displayName, boolean sendEmail, CDLImportConfig metadata) {
         String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create"
-                + "?source={source}&feedtype={feedtype}&entity={entity}";
+                + "?source={source}&feedtype={feedtype}&entity={entity}&sendEmail={sendEmail}";
         List<String> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
         args.add(source);
         args.add(feedType);
         args.add(entity);
+        args.add(String.valueOf(sendEmail));
         if (StringUtils.isNotBlank(subType)) {
             baseUrl += "&subType={subType}";
             args.add(subType);

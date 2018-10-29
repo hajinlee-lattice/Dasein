@@ -131,7 +131,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Override
     public synchronized String createDataFeedTask(String customerSpaceStr, String feedType, String entity,
-            String source, String subType, String templateDisplayName, CDLImportConfig importConfig) {
+                                                  String source, String subType, String templateDisplayName,
+                                                  boolean sendEmail, CDLImportConfig importConfig) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(importConfig);
         if (dlTenantMappingEnabled) {
@@ -165,6 +166,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.setImportTemplate(finalTemplate);
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
+                if (sendEmail) {
+                    sendS3TemplateUpdateEmail(customerSpace.toString(), dataFeedTask);
+                }
             }
             dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
                     customerSpace.toString());
@@ -334,6 +338,22 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 emailInfo.setExtraInfoMap(infoMap);
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
                 proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send s3 import email: " + e.getMessage());
+        }
+    }
+
+    private void sendS3TemplateUpdateEmail(String customerSpace, DataFeedTask dataFeedTask) {
+        try {
+            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
+            if (dataFeedTask != null) {
+                AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
+                Map<String, String> infoMap = new HashMap<>();
+                infoMap.put("TemplateName", dataFeedTask.getTemplateDisplayName());
+                emailInfo.setExtraInfoMap(infoMap);
+                String tenantId = CustomerSpace.parse(customerSpace).toString();
+                proxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
             }
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());

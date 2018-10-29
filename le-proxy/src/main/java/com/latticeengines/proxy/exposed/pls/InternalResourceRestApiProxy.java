@@ -375,6 +375,16 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    public void sendS3TemplateUpdateEmail(String tenantId, AdditionalEmailInfo emailInfo) {
+        try {
+            String url = constructUrl("pls/internal/emails/s3template/update", tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, emailInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("sendS3TemplateUpdateEmail: Remote call failure", e);
+        }
+    }
+
     public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
         try {
             String url = constructUrl(

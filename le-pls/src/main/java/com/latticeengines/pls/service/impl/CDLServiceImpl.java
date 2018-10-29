@@ -95,9 +95,8 @@ public class CDLServiceImpl implements CDLService {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
-        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName,
+        return cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, true,
                 metaData);
-        return taskId;
     }
 
     @Override

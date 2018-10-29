@@ -689,7 +689,7 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/emails/s3import/result/{result}/"
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Send out email after scoring")
+    @ApiOperation(value = "Send out email after s3 import")
     public void sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
                                   @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
@@ -706,6 +706,25 @@ public class InternalResource extends InternalResourceBase {
             } else if (user.getEmail().equals(emailInfo.getUserId())) {
                 emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, templateName, fileName,
                         failedMessage, entity);
+            }
+        }
+    }
+
+    @RequestMapping(value = "/emails/s3template/update/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after s3 template update")
+    public void sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
+                                  @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        Tenant tenant = tenantService.findByTenantId(tenantId);
+        String templateName = emailInfo.getExtraInfoMap().get("TemplateName");
+
+        for (User user : users) {
+            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, templateName);
+            } else if (user.getEmail().equals(emailInfo.getUserId())) {
+                emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, templateName);
             }
         }
     }

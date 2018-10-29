@@ -90,4 +90,6 @@ public interface EmailService {
 
     void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
             String fileName, String failedMessage, String type);
+
+    void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, String templateName);
 }

@@ -355,4 +355,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         Assert.assertTrue(logs.get(0).contains("PLS export segment in-progress"));
     }
 
+    @Test(groups = "functional")
+    public void sendS3TemplateUpdateEmail() {
+        emailService.sendS3TemplateUpdateEmail(user, tenant, HOSTPORT, "AccountSchema");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("Sending s3 template update notification"));
+    }
+
 }

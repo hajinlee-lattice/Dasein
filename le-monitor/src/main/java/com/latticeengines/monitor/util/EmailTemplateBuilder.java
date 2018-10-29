@@ -109,7 +109,8 @@ public class EmailTemplateBuilder {
         POC_STATE_NOTICE("poc_state_notice.html"), //
         S3_CREDENTIALS("s3_credentials.html"), S3_EMPTY_CREDENTIALS("s3_empty_credentials.html"), //
         CDL_INGESTION_ERROR("cdl_ingestion_error.html"), CDL_INGESTION_SUCCESS(
-                "cdl_ingestion_success.html"), CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html");
+                "cdl_ingestion_success.html"), CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html"),
+        S3_TEMPLATE_UPDATE("s3_template_update.html");
 
         private final static String templateRoot = "com/latticeengines/monitor/";
         private final String templateFile;
