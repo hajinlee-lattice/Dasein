@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -193,19 +195,27 @@ public class ModelResource {
         String queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, getYarnQueueScheme());
         String tenantId = MultiTenantContext.getTenant().getId();
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
-        importFromS3Service.importTable(tenantId, trainigTable, queueName);
-        String pivotFilePath = modelSummary.getPivotArtifactPath();
-        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
-        if (StringUtils.isNotBlank(pivotFilePath)) {
-            String s3Path = builder.convertAtlasMetadata(pivotFilePath, importFromS3Service.getPodId(), tenantId,
-                    importFromS3Service.getS3Bucket());
-            importFromS3Service.importFile(tenantId, s3Path, pivotFilePath, queueName);
-        }
-        SourceFile sourceFile = sourceFileProxy.findByTableName(tenantId, modelSummary.getTrainingTableName());
-        if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getPath())) {
-            String s3Path = builder.convertAtlasFile(sourceFile.getPath(), importFromS3Service.getPodId(), tenantId,
-                    importFromS3Service.getS3Bucket());
-            importFromS3Service.importFile(tenantId, s3Path, sourceFile.getPath(), queueName);
+        String lockName = tenantId + "_" + trainigTable.getName();
+        try {
+            LockManager.registerCrossDivisionLock(lockName);
+            LockManager.acquireWriteLock(lockName, 360, TimeUnit.MINUTES);
+
+            importFromS3Service.importTable(tenantId, trainigTable, queueName);
+            String pivotFilePath = modelSummary.getPivotArtifactPath();
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+            if (StringUtils.isNotBlank(pivotFilePath)) {
+                String s3Path = builder.convertAtlasMetadata(pivotFilePath, importFromS3Service.getPodId(), tenantId,
+                        importFromS3Service.getS3Bucket());
+                importFromS3Service.importFile(tenantId, s3Path, pivotFilePath, queueName);
+            }
+            SourceFile sourceFile = sourceFileProxy.findByTableName(tenantId, modelSummary.getTrainingTableName());
+            if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getPath())) {
+                String s3Path = builder.convertAtlasFile(sourceFile.getPath(), importFromS3Service.getPodId(), tenantId,
+                        importFromS3Service.getS3Bucket());
+                importFromS3Service.importFile(tenantId, s3Path, sourceFile.getPath(), queueName);
+            }
+        } catch (Exception ex) {
+            LockManager.releaseWriteLock(lockName);
         }
     }
 
