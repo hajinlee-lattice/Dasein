@@ -143,8 +143,7 @@ public class MetadataResolver {
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
-                attributes.add(getAttributeFromFieldName(fieldMapping.getMappedField(), fieldMapping.getUserField(),
-                        fieldMapping.getFieldType()));
+                attributes.add(getAttributeFromFieldName(fieldMapping));
             }
         }
 
@@ -364,30 +363,31 @@ public class MetadataResolver {
         return attrName.replace("_", "").replace(" ", "").toUpperCase();
     }
 
-    private Attribute getAttributeFromFieldName(String attrName, String fieldName, UserDefinedType userDefinedType) {
+    private Attribute getAttributeFromFieldName(FieldMapping fieldMapping) {
         Attribute attribute = new Attribute();
 
         String fieldType;
-        if (userDefinedType == null) {
-            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString().toLowerCase();
+        if (fieldMapping.getFieldType() == null) {
+            fieldType = getFieldTypeFromColumnContent(fieldMapping.getUserField()).getAvroType().toString().toLowerCase();
         } else {
-            fieldType = userDefinedType.getAvroType().toString().toLowerCase();
+            fieldType = fieldMapping.getFieldType().getAvroType().toString().toLowerCase();
         }
         if (cdlResolve) {
-            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(attrName));
+            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
         } else {
-            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldName));
+            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getUserField()));
         }
         attribute.setPhysicalDataType(fieldType);
-        attribute.setDisplayName(fieldName);
+        attribute.setDisplayName(fieldMapping.getUserField());
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         attribute.setCategory(getCategoryBasedOnSchemaType(result.metadata.getInterpretation()));
         attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));
         attribute.setStatisticalType(getStatisticalTypeFromFieldType(fieldType));
         attribute.setNullable(true);
         attribute.setLogicalDataType(
-                userDefinedType == UserDefinedType.DATE ? LogicalDataType.Date : attribute.getLogicalDataType());
+                fieldMapping.getFieldType() == UserDefinedType.DATE ? LogicalDataType.Date : attribute.getLogicalDataType());
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
+        attribute.setPatternString(fieldMapping.getPatternString());
 
         return attribute;
     }

@@ -1,8 +1,5 @@
 package com.latticeengines.pls.end2end;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,10 +8,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -65,6 +62,9 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
 
@@ -79,6 +79,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final String ACCOUNT_SOURCE_FILE = "Account_base.csv";
     private static final String CONTACT_SOURCE_FILE = "Contact_base.csv";
     private static final String TRANSACTION_SOURCE_FILE = "Transaction_base.csv";
+
+    private static final String ACCOUNT_SOURCE_FILE_FROMATDATE = "Account_FormatDate.csv";
 
     private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
@@ -179,6 +181,67 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(system);
         Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
         Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
+    }
+
+    @Test(groups = "deployment")
+    public void testFormatDate() throws IOException {
+        SourceFile accountFile = fileUploadService.uploadFile(
+                "file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE_FROMATDATE,
+                ClassLoader
+                        .getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE_FROMATDATE));
+        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX + "FormatDate";
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE,
+                        feedType);
+
+        String patternString = "dd/MM/yyyy";
+        for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
+            if (mapping.getUserField().equals("TestDate")) {
+                mapping.setFieldType(UserDefinedType.DATE);
+                mapping.setMappedToLatticeField(false);
+                mapping.setPatternString(patternString);
+            }
+        }
+
+        modelingFileMetadataService.resolveMetadata(accountFile.getName(), fieldMappingDocument,
+                ENTITY_ACCOUNT, SOURCE, feedType);
+
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace,
+                accountFile.getName(), accountFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
+
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(),
+                false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+                PathBuilder
+                        .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
+                        .toString(),
+                SourceType.FILE.getName());
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
+        String avroFileName = accountFile.getName().substring(0,
+                accountFile.getName().lastIndexOf("."));
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file -> {
+            if (!file.isDirectory() && file.getPath().toString().contains(avroFileName)
+                    && file.getPath().getName().endsWith("avro")) {
+                return true;
+            }
+            return false;
+        });
+        Assert.assertEquals(avroFiles.size(), 1);
+        String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
+        long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
+        Assert.assertEquals(rowCount, 50);
+        String fieldName = "user_TestDate";
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
+        Assert.assertEquals(schema.getField(fieldName).schema().getTypes().get(0).getType(), Schema.Type.LONG);
+        Assert.assertEquals(schema.getField(fieldName).getProp("PatternString"), patternString);
+
+        try {
+            List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
+            Assert.assertEquals(records.get(0).get(fieldName).toString(), "1501084800000");
+        } catch (Exception e) { }
     }
 
     @Test(groups = "deployment")

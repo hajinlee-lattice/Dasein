@@ -22,6 +22,9 @@ public class FieldMapping {
     @JsonProperty
     private boolean mappedToLatticeField;
 
+    @JsonProperty
+    private String patternString;
+
     public String getUserField() {
         return this.userField;
     }
@@ -60,6 +63,14 @@ public class FieldMapping {
 
     public void setMappedToLatticeField(boolean mappedToLatticeField) {
         this.mappedToLatticeField = mappedToLatticeField;
+    }
+
+    public String getPatternString() {
+        return this.patternString;
+    }
+
+    public void setPatternString(String patternString) {
+        this.patternString = patternString;
     }
 
     public String toString() {

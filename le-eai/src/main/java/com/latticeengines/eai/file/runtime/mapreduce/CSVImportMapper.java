@@ -332,7 +332,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case LONG:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                     LOG.info("Date value from csv: " + fieldCsvValue);
-                    return TimeStampConvertUtils.convertToLong(fieldCsvValue);
+                    return TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getPatternString());
                 } else {
                     return new Long(parseStringToNumber(fieldCsvValue).longValue());
                 }

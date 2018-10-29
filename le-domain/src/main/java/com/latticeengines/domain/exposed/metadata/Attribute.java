@@ -1199,4 +1199,22 @@ public class Attribute
         return metadata;
     }
 
+    @Transient
+    @JsonIgnore
+    public String getPatternString() {
+        Object raw = properties.get("PatternString");
+        if (raw == null) {
+            return null;
+        }
+
+        return raw.toString();
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setPatternString(String patternString) {
+        if (patternString != null) {
+            properties.put("PatternString", patternString);
+        }
+    }
 }
