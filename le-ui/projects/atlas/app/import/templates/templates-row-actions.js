@@ -17,7 +17,7 @@ export default class TemplatesRowControlles extends Component {
   }
 
   getCreateButton() {
-    if (!this.props.rowData.templateCreated) {
+    if (!this.props.rowData.Exist) {
       return (
         <LeLink
           config={{
@@ -36,7 +36,7 @@ export default class TemplatesRowControlles extends Component {
   }
 
   getEditButton() {
-    if (this.props.rowData.templateCreated) {
+    if (this.props.rowData.Exist) {
       return (
         <LeLink
           config={{
@@ -55,7 +55,7 @@ export default class TemplatesRowControlles extends Component {
   }
 
   getImportButton() {
-    if (this.props.rowData.templateCreated) {
+    if (this.props.rowData.Exist) {
       return (
         <LeLink
           config={{

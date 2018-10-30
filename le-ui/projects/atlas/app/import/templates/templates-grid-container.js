@@ -98,21 +98,21 @@ export default class GridContainer extends Component {
   }
 
   getCopyPathUI(rowData) {
-    // if (!rowData.Exist) {
-    //   return null;
-    // } else {
-    return (
-      <li
-        className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
-        title="Copy Link"
-        onClick={() => {
-          this.copyPath(rowData.Path);
-        }}
-      >
-        <i className="fa fa-files-o" />
-      </li>
-    );
-    // }
+    if (!rowData.Exist) {
+      return null;
+    } else {
+      return (
+        <li
+          className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
+          title="Copy Link"
+          onClick={() => {
+            this.copyPath(rowData.Path);
+          }}
+        >
+          <i className="fa fa-files-o" />
+        </li>
+      );
+    }
   }
 
   saveValue(colName, rowIndex, value) {
@@ -128,16 +128,16 @@ export default class GridContainer extends Component {
       // );
     }
   }
-  getCellEditTools(value) {
-    // if (!rowData.Exist) {
-    //   return (<div></div>);
-    // } else {
-    return (
-      <CellTools>
-        <EditControl icon="fa fa-pencil-square-o" title="Edit Name" />
-      </CellTools>
-    );
-    // }
+  getCellEditTools(rowData) {
+    if (!rowData.Exist) {
+      return <div />;
+    } else {
+      return (
+        <CellTools>
+          <EditControl icon="fa fa-pencil-square-o" title="Edit Name" />
+        </CellTools>
+      );
+    }
   }
   getRows() {
     if (this.state.data.length > 0) {
@@ -154,7 +154,7 @@ export default class GridContainer extends Component {
               <CellContent>
                 <span title={row.TemplateName}>{row.TemplateName}</span>
               </CellContent>
-              {this.getCellEditTools(row.TemplateName)}
+              {this.getCellEditTools(row)}
               <EditContainer save={this.saveValue}>
                 <EditorText initialValue={row.TemplateName} />
               </EditContainer>
