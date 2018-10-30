@@ -140,7 +140,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     public void createOrUpdateDataFeedTask(String customerSpace, String source, String feedType, String entity,
             String templateName) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/{targetTableName}",
+                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/{tableName}",
                 shortenCustomerSpace(customerSpace), source, feedType, entity, templateName);
         post("createOrUpdateDataFeedTask", url, null, Void.class);
     }
@@ -183,7 +183,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public List<String> registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextract/{targetTableName}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextract/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
         List<?> res = post("registerExtract", url, extract, List.class);
         return JsonUtils.convertList(res, String.class);
@@ -192,14 +192,14 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     public List<String> registerExtracts(String customerSpace, String taskId, String tableName,
             List<Extract> extracts) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextracts/{targetTableName}",
+                "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextracts/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
         List<?> res = post("registerExtract", url, extracts, List.class);
         return JsonUtils.convertList(res, String.class);
     }
 
     public void addTableToQueue(String customerSpace, String taskId, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue/{targetTableName}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
         put("addTableToQueue", url);
     }
@@ -210,7 +210,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         }
         String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue?";
         StringBuilder builder = new StringBuilder();
-        tables.forEach(tableName -> builder.append(String.format("targetTableName=%s&", tableName)));
+        tables.forEach(tableName -> builder.append(String.format("tableName=%s&", tableName)));
         baseUrl += builder.toString();
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
         put("addTablesToQueue", url);
