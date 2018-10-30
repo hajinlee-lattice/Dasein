@@ -40,8 +40,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "CDL_EXTERNAL_SYSTEM", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "TENANT_ID" }) })
+@Table(name = "CDL_EXTERNAL_SYSTEM", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "ENTITY" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
 
