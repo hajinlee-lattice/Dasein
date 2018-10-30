@@ -41,7 +41,7 @@ export default class TemplatesRowControlles extends Component {
         <LeLink
           config={{
             label: "Edit Template",
-            classes: "borders-over le-blu-link",
+            classes: "borders-over le-blu-link edit-button",
             name: ""
           }}
           callback={() => {
@@ -60,7 +60,7 @@ export default class TemplatesRowControlles extends Component {
         <LeLink
           config={{
             label: "Import Data",
-            classes: "borders-over le-blu-link",
+            classes: "borders-over le-blu-link import-button",
             name: ""
           }}
           callback={() => {

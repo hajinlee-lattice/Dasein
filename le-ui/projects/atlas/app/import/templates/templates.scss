@@ -13,9 +13,13 @@
       background-color: $orange-text;
     }
     .le-table-cell {
-     
       .le-blu-link{
         color: $blue-text;
+        justify-content: center;
+        &.edit-button > .wrapper, &.import-button > .wrapper {
+          width: 100%;
+          text-align: center;
+        }
       }
     }
     .le-table-row > .le-table-cell > div > .le-cell-tools > .initially-hidden{
@@ -37,28 +41,12 @@
         border: 1px solid $pearl-white;
         color: $pearl-white;
       }
-
       & > .le-table-cell > div > .templates-controlls > .borders-over > .wrapper {
         border: 1px solid $pearl-white;
         & >  span{
-          // border: 1px solid $pearl-white;
           color: $pearl-white;
         }
       }
-
-      
-      // & .le-table-cell > div > .templates-controlls > .le-link-container > .wrapper > * {
-      //   border: 1px solid $pearl-white;
-      //   color: $pearl-white;
-      // }
-      
     }
-    // .le-table-row-no-select{
-    //   background-color:  $pearl-white;
-    // }
-    // .le-table-row-no-select:hover {
-    //   background-color:  $pearl-white;
-    //   color: $black;
-    // }
   }
 }
