@@ -44,6 +44,7 @@ import "./templates-main";
 import './app/app';
 import './app/routes';
 import './help.index';
+import './zendesk.index';
 
 export default angular.module("com.le.atlas", ['com.le.common.services',"templates-main", 
 "mainApp"]);
