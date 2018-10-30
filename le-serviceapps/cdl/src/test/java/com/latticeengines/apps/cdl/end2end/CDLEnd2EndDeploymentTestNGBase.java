@@ -639,7 +639,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void saveCheckpoint(String checkpoint) throws IOException {
-        checkpointService.saveCheckPoint(checkpoint);
+        checkpointService.saveCheckPoint(checkpoint, mainCustomerSpace);
     }
 
     private List<Report> retrieveReport(String appId) {

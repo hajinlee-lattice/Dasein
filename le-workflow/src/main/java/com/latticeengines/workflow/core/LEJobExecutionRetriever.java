@@ -6,6 +6,7 @@ import org.springframework.batch.core.repository.dao.JobInstanceDao;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -46,7 +47,7 @@ public class LEJobExecutionRetriever {
         this.stepExecutionDao = stepExecutionDao;
     }
 
-    public void setExecutionContextDao(ExecutionContextDao executionContextDao){
+    public void setExecutionContextDao(ExecutionContextDao executionContextDao) {
         this.executionContextDao = executionContextDao;
     }
 
@@ -68,5 +69,16 @@ public class LEJobExecutionRetriever {
         }
         jobExecution.setJobInstance(jobInstance);
         return jobExecution;
+    }
+
+    public ExecutionContext getExecutionContext(Long executionId) {
+        if (executionId == null) {
+            return null;
+        }
+        JobExecution jobExecution = jobExecutionDao.getJobExecution(executionId);
+        if (jobExecution == null) {
+            return null;
+        }
+        return executionContextDao.getExecutionContext(jobExecution);
     }
 }

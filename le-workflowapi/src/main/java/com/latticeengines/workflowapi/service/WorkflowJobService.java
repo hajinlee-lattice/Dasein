@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.item.ExecutionContext;
+
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -43,6 +46,18 @@ public interface WorkflowJobService {
 
     List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowPids, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);
+
+    JobExecution getJobExecutionByWorkflowId(String customerSpace, Long workflowId);
+
+    JobExecution getJobExecutionByWorkflowPid(String customerSpace, Long workflowPid);
+
+    JobExecution getJobExecutionByApplicationId(String customerSpace, String applicationId);
+
+    ExecutionContext getExecutionContextByWorkflowId(String customerSpace, Long workflowId);
+
+    ExecutionContext getExecutionContextByWorkflowPid(String customerSpace, Long workflowPid);
+
+    ExecutionContext getExecutionContextByApplicationId(String customerSpace, String applicationId);
 
     List<String> getStepNames(String customerSpace, Long workflowPid);
 

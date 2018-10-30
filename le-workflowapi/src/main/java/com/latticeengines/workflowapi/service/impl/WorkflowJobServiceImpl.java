@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -304,6 +305,104 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
                 leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
+    }
+
+    @WithCustomerSpace
+    public JobExecution getJobExecutionByWorkflowId(String customerSpace, Long workflowId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        if (workflowJob == null) {
+            log.warn("Workflow Job Entity Manager could not find workflow with ID: " + workflowId);
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        if (workflowJob == null) {
+            log.warn("checkLastUpdateTime returned empty list for Workflow Job with ID: " + workflowId);
+            return null;
+        }
+        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId, true);
+        return jobExecution;
+    }
+
+    @WithCustomerSpace
+    public JobExecution getJobExecutionByWorkflowPid(String customerSpace, Long workflowPid) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+        if (workflowJob == null) {
+            log.warn("Workflow Job Entity Manager could not find workflow with PID: " + workflowPid);
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        if (workflowJob == null) {
+            log.warn("checkLastUpdateTime returned empty list for Workflow Job with PID: " + workflowPid);
+            return null;
+        }
+        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
+                true);
+        return jobExecution;
+    }
+
+    @WithCustomerSpace
+    public JobExecution getJobExecutionByApplicationId(String customerSpace, String applicationId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            log.warn("Workflow Job Entity Manager could not find workflow with Application ID: " + applicationId);
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        if (workflowJob == null) {
+            log.warn("checkLastUpdateTime returned empty list for Application ID: " + applicationId);
+            return null;
+        }
+        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
+                true);
+        return jobExecution;
+    }
+
+    @WithCustomerSpace
+    public ExecutionContext getExecutionContextByWorkflowId(String customerSpace, Long workflowId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        if (workflowJob == null) {
+            log.warn("Workflow Job Entity Manager could not find workflow with ID: " + workflowId);
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        if (workflowJob == null) {
+            log.warn("checkLastUpdateTime returned empty list for Workflow Job with ID: " + workflowId);
+            return null;
+        }
+        ExecutionContext executionContext = leJobExecutionRetriever.getExecutionContext(workflowId);
+        return executionContext;
+    }
+
+    @WithCustomerSpace
+    public ExecutionContext getExecutionContextByWorkflowPid(String customerSpace, Long workflowPid) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+        if (workflowJob == null) {
+            log.warn("Workflow Job Entity Manager could not find workflow with PID: " + workflowPid);
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        if (workflowJob == null) {
+            log.warn("checkLastUpdateTime returned empty list for Workflow Job with PID: " + workflowPid);
+            return null;
+        }
+        ExecutionContext executionContext = leJobExecutionRetriever.getExecutionContext(workflowJob.getWorkflowId());
+        return executionContext;
+    }
+
+    @WithCustomerSpace
+    public ExecutionContext getExecutionContextByApplicationId(String customerSpace, String applicationId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            log.warn("Workflow Job Entity Manager could not find workflow with Application ID: " + applicationId);
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        if (workflowJob == null) {
+            log.warn("checkLastUpdateTime returned empty list for Application ID: " + applicationId);
+            return null;
+        }
+        ExecutionContext executionContext = leJobExecutionRetriever.getExecutionContext(workflowJob.getWorkflowId());
+        return executionContext;
     }
 
     @Override

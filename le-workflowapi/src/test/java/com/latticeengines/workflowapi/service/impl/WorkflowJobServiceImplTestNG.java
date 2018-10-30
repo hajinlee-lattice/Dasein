@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +24,15 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapExecutionContextDao;
 import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
 import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.batch.core.repository.dao.MapStepExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
+import org.springframework.batch.item.ExecutionContext;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -66,6 +70,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private JobExecutionDao jobExecutionDao;
 
     private StepExecutionDao stepExecutionDao;
+
+    private ExecutionContextDao executionContextDao;
 
     private WorkflowJob workflowJob1;
     private WorkflowJob workflowJob11;
@@ -597,10 +603,68 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(workflowJob2.getParentJobId(), parentJobId);
     }
 
+    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
+    public void testGetJobExecutionAndGetExecutionContext() {
+        JobExecution jobExecution1a = workflowJobService.getJobExecutionByWorkflowId(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10000L));
+        Assert.assertEquals(jobExecution1a.getStartTime().getTime(),  1530327693564L);
+        Assert.assertEquals(jobExecution1a.getLastUpdated().getTime(),  1530327694564L);
+        Assert.assertEquals(jobExecution1a.getJobParameters().getString("jobName"), "application_10000");
+        JobExecution jobExecution1b = workflowJobService.getJobExecutionByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(1L));
+        Assert.assertEquals(jobExecution1b, jobExecution1a);
+        JobExecution jobExecution1c = workflowJobService.getJobExecutionByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "application_10000");
+        Assert.assertEquals(jobExecution1c, jobExecution1a);
+
+        ExecutionContext executionContext1a = workflowJobService.getExecutionContextByWorkflowId(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10000L));
+        Assert.assertEquals(executionContext1a.getString("CDL_ACTIVE_VERSION"), "Blue");
+        Assert.assertEquals(executionContext1a.getString("TRANSFORM_PIPELINE_VERSION"),
+                "2018-10-23_06-26-34_UTC");
+        Assert.assertEquals(executionContext1a.getString("CUSTOMER_SPACE"),
+                "LETest1000000000000.LETest1000000000000.Production");
+        Assert.assertEquals(executionContext1a.getLong("PA_TIMESTAMP"), 1530327696564L);
+        ExecutionContext executionContext1b = workflowJobService.getExecutionContextByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(1L));
+        Assert.assertEquals(executionContext1b, executionContext1a);
+        ExecutionContext executionContext1c = workflowJobService.getExecutionContextByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "application_10000");
+        Assert.assertEquals(executionContext1c, executionContext1a);
+
+        JobExecution jobExecution11a = workflowJobService.getJobExecutionByWorkflowId(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10001L));
+        Assert.assertEquals(jobExecution11a.getStartTime().getTime(),  1530327693564L);
+        Assert.assertEquals(jobExecution11a.getLastUpdated().getTime(),  1530327694564L);
+        Assert.assertEquals(jobExecution11a.getJobParameters().getString("jobName"), "application_10001");
+        JobExecution jobExecution11b = workflowJobService.getJobExecutionByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(11L));
+        Assert.assertEquals(jobExecution11b, jobExecution11a);
+        JobExecution jobExecution11c = workflowJobService.getJobExecutionByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "application_10001");
+        Assert.assertEquals(jobExecution11c, jobExecution11a);
+
+        ExecutionContext executionContext11a = workflowJobService.getExecutionContextByWorkflowId(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10001L));
+        Assert.assertEquals(executionContext11a.getString("CDL_ACTIVE_VERSION"), "Green");
+        Assert.assertEquals(executionContext11a.getString("TRANSFORM_PIPELINE_VERSION"),
+                "2018-10-10_10-10-10_UTC");
+        Assert.assertEquals(executionContext11a.getString("CUSTOMER_SPACE"),
+                "LETest1000000000001.LETest1000000000001.QA");
+        Assert.assertEquals(executionContext11a.getLong("PA_TIMESTAMP"), 1539166210000L);
+        ExecutionContext executionContext11b = workflowJobService.getExecutionContextByWorkflowPid(
+                WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(11L));
+        Assert.assertEquals(executionContext11b, executionContext11a);
+        ExecutionContext executionContext11c = workflowJobService.getExecutionContextByApplicationId(
+                WFAPITEST_CUSTOMERSPACE.toString(), "application_10001");
+        Assert.assertEquals(executionContext11c, executionContext11a);
+    }
+
     private void createWorkflowJobs() {
         jobInstanceDao = new MapJobInstanceDao();
         jobExecutionDao = new MapJobExecutionDao();
         stepExecutionDao = new MapStepExecutionDao();
+        executionContextDao = new MapExecutionContextDao();
 
         Map<String, String> inputContext = new HashMap<>();
         inputContext.put(WorkflowContextConstants.Inputs.JOB_TYPE, "testJob");
@@ -611,7 +675,16 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobParameters jobParameters1 = new JobParameters(parameters1);
         JobInstance jobInstance1 = jobInstanceDao.createJobInstance(applicationId, jobParameters1);
         JobExecution jobExecution1 = new JobExecution(jobInstance1, jobParameters1, null);
+        jobExecution1.setStartTime(new Date(1530327693564L));
+        jobExecution1.setLastUpdated(new Date(1530327694564L));
+        ExecutionContext executionContext1 = new ExecutionContext();
+        executionContext1.putString("CDL_ACTIVE_VERSION", "Blue");
+        executionContext1.putString("TRANSFORM_PIPELINE_VERSION", "2018-10-23_06-26-34_UTC");
+        executionContext1.putString("CUSTOMER_SPACE", "LETest1000000000000.LETest1000000000000.Production");
+        executionContext1.putLong("PA_TIMESTAMP", 1530327696564L);
+        jobExecution1.setExecutionContext(executionContext1);
         jobExecutionDao.saveJobExecution(jobExecution1);
+        executionContextDao.saveExecutionContext(jobExecution1);
         List<StepExecution> steps = new ArrayList<>();
         steps.add(new StepExecution("step1_1", jobExecution1));
         steps.add(new StepExecution("step1_2", jobExecution1));
@@ -641,7 +714,16 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobParameters jobParameters11 = new JobParameters(parameters11);
         JobInstance jobInstance11 = jobInstanceDao.createJobInstance(applicationId, jobParameters11);
         JobExecution jobExecution11 = new JobExecution(jobInstance11, jobParameters11, null);
+        jobExecution11.setStartTime(new Date(1530327693564L));
+        jobExecution11.setLastUpdated(new Date(1530327694564L));
+        ExecutionContext executionContext11 = new ExecutionContext();
+        executionContext11.putString("CDL_ACTIVE_VERSION", "Green");
+        executionContext11.putString("TRANSFORM_PIPELINE_VERSION", "2018-10-10_10-10-10_UTC");
+        executionContext11.putString("CUSTOMER_SPACE", "LETest1000000000001.LETest1000000000001.QA");
+        executionContext11.putLong("PA_TIMESTAMP", 1539166210000L);
+        jobExecution11.setExecutionContext(executionContext11);
         jobExecutionDao.saveJobExecution(jobExecution11);
+        executionContextDao.saveExecutionContext(jobExecution11);
         steps.clear();
         steps.add(new StepExecution("step11_1", jobExecution11));
         steps.add(new StepExecution("step11_2", jobExecution11));
@@ -836,6 +918,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         leJobExecutionRetriever.setJobInstanceDao(jobInstanceDao);
         leJobExecutionRetriever.setJobExecutionDao(jobExecutionDao);
         leJobExecutionRetriever.setStepExecutionDao(stepExecutionDao);
+        leJobExecutionRetriever.setExecutionContextDao(executionContextDao);
         ((WorkflowJobServiceImpl) workflowJobService).setLeJobExecutionRetriever(leJobExecutionRetriever);
     }
 

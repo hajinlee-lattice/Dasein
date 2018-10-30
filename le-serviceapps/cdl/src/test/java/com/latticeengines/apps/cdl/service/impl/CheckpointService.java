@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -73,6 +74,7 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
+import com.latticeengines.workflowapi.service.WorkflowJobService;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -110,6 +112,9 @@ public class CheckpointService {
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private WorkflowJobService workflowJobService;
 
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
@@ -523,6 +528,34 @@ public class CheckpointService {
         saveCheckpointVersion(checkpoint);
     }
 
+    public void saveCheckPoint(String checkpoint, String customerSpace) throws IOException {
+        String rootDir = "checkpoints/" + checkpoint;
+        FileUtils.deleteQuietly(new File(rootDir));
+        FileUtils.forceMkdirParent(new File(rootDir));
+
+        downloadHdfsData(checkpoint);
+
+        DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+        for (DataCollection.Version version : DataCollection.Version.values()) {
+            String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
+            FileUtils.forceMkdir(new File(tablesDir));
+            for (TableRoleInCollection role : TableRoleInCollection.values()) {
+                saveTableIfExists(role, version, checkpoint);
+                if (active.equals(version)) {
+                    saveRedshiftTableIfExists(role, version);
+                    saveDynamoTableIfExists(checkpoint, role, version);
+                }
+            }
+            saveStatsIfExists(version, checkpoint);
+            saveDataCollectionStatus(version, checkpoint);
+        }
+
+        printSaveRedshiftStatements(checkpoint);
+        // Save Workflow Execution Context.
+        saveWorkflowExecutionContext(checkpoint, customerSpace);
+        saveCheckpointVersion(checkpoint);
+    }
+
     private void saveCheckpointVersion(String checkpoint) throws IOException {
         String versionFile = "checkpoints/" + checkpoint + "/_VERSION_";
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
@@ -637,6 +670,32 @@ public class CheckpointService {
     private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role,
             String checkpointVersion) {
         return String.format("cdlend2end_%s_%s_%s", checkpoint, role.name(), checkpointVersion);
+    }
+
+    private void saveWorkflowExecutionContext(String checkpoint, String customerSpace) throws IOException {
+        // Get the workflow ID from the customer space using DataFeed.
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        DataFeedExecution dataFeedExecution = dataFeed.getActiveExecution();
+        Long workflowId = dataFeedExecution.getWorkflowId();
+        ExecutionContext executionContext = workflowJobService.getExecutionContextByWorkflowId(customerSpace,
+                workflowId);
+
+        if (executionContext == null) {
+            log.error("Failed to get execution context");
+        } else {
+            // Strip out keys we don't need to save.  For now, those are the keys that are not all capitals and end
+            // in "Configuration" or "Workflow".  These can be regenerated when the workflow is restarted from the
+            // checkpoint.
+            Set<Map.Entry<String, Object>> executionContextMap = executionContext.entrySet();
+            for (Map.Entry<String, Object> mapEntry : executionContextMap) {
+                if (mapEntry.getKey().endsWith("Configuration") || mapEntry.getKey().endsWith("Workflow")) {
+                    executionContextMap.remove(mapEntry);
+                }
+            }
+            String jsonFile = String.format("checkpoints/%s/workflow_execution_context.json", checkpoint);
+            om.writeValue(new File(jsonFile), executionContextMap);
+            log.info("Save Workflow Execution Context to " + jsonFile);
+        }
     }
 
 }
