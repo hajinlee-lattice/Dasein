@@ -145,7 +145,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         }
         res = RuleBasedComparator.preferExpectedString(
                 arguments.getString(DataCloudConstants.AMS_ATTR_COUNTRY), context.country,
-                LocationUtils.USA, false);
+                LocationUtils.USA, true);
         if (res > 0) {
             return update(context, arguments, OperationMessage.USA_ACT);
         } else if (res < 0) {

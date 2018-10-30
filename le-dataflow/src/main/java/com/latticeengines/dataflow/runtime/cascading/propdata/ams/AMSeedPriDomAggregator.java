@@ -92,7 +92,7 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
         int res;
         for (String srcPriority : goldenDomSrcs) {
             res = RuleBasedComparator.preferExpectedString(arguments.getString(domSrcField), context.domSrc,
-                    srcPriority, false);
+                    srcPriority, true);
             if (res > 0) {
                 return update(context, arguments,
                         String.format(OperationMessage.DOMAIN_SRC, arguments.getString(domSrcField)));
@@ -127,7 +127,7 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
             return context;
         }
         if (context.priDom == null && StringUtils.isNotBlank(arguments.getString(domField))) {
-            return update(context, arguments, OperationMessage.ONLY_ONE_DOMAIN);
+            return update(context, arguments, OperationMessage.RANDOM);
         }
         return context;
     }

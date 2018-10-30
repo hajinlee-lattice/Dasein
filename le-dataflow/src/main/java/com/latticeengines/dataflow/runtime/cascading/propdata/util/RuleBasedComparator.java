@@ -75,20 +75,20 @@ public class RuleBasedComparator {
      * @return
      */
     public static int preferExpectedString(String candidate, String compareTo, @NotNull String expected,
-            boolean caseSensitive) {
+            boolean caseInsensitive) {
         Preconditions.checkNotNull(expected);
-        if (caseSensitive) {
-            if (expected.equals(candidate) && !expected.equals(compareTo)) {
+        if (caseInsensitive) {
+            if (expected.equalsIgnoreCase(candidate) && !expected.equalsIgnoreCase(compareTo)) {
                 return 1;
-            } else if (!expected.equals(candidate) && expected.equals(compareTo)) {
+            } else if (!expected.equalsIgnoreCase(candidate) && expected.equalsIgnoreCase(compareTo)) {
                 return -1;
             } else {
                 return 0;
             }
         } else {
-            if (expected.equalsIgnoreCase(candidate) && !expected.equalsIgnoreCase(compareTo)) {
+            if (expected.equals(candidate) && !expected.equals(compareTo)) {
                 return 1;
-            } else if (!expected.equalsIgnoreCase(candidate) && expected.equalsIgnoreCase(compareTo)) {
+            } else if (!expected.equals(candidate) && expected.equals(compareTo)) {
                 return -1;
             } else {
                 return 0;
@@ -110,19 +110,19 @@ public class RuleBasedComparator {
      * @return
      */
     public static int preferEqualStrings(String candidate1, String candidate2, String compareTo1, String compareTo2,
-            boolean caseSensitive, boolean trim) {
-        if (isEqualStrings(candidate1, candidate2, caseSensitive, trim)
-                && !isEqualStrings(compareTo1, compareTo2, caseSensitive, trim)) {
+            boolean caseInsensitive, boolean trim) {
+        if (isEqualStrings(candidate1, candidate2, caseInsensitive, trim)
+                && !isEqualStrings(compareTo1, compareTo2, caseInsensitive, trim)) {
             return 1;
-        } else if (!isEqualStrings(candidate1, candidate2, caseSensitive, trim)
-                && isEqualStrings(compareTo1, compareTo2, caseSensitive, trim)) {
+        } else if (!isEqualStrings(candidate1, candidate2, caseInsensitive, trim)
+                && isEqualStrings(compareTo1, compareTo2, caseInsensitive, trim)) {
             return -1;
         } else {
             return 0;
         }
     }
 
-    private static boolean isEqualStrings(String str1, String str2, boolean caseSensitive, boolean trim) {
+    private static boolean isEqualStrings(String str1, String str2, boolean caseInsensitive, boolean trim) {
         if (str1 == null && str2 == null) {
             return true;
         }
@@ -133,10 +133,10 @@ public class RuleBasedComparator {
             str1 = str1.trim();
             str2 = str2.trim();
         }
-        if (caseSensitive) {
-            return str1.equals(str2);
-        } else {
+        if (caseInsensitive) {
             return str1.equalsIgnoreCase(str2);
+        } else {
+            return str1.equals(str2);
         }
     }
 
@@ -144,24 +144,53 @@ public class RuleBasedComparator {
      * Rule Comparator for Long
      ********************************/
 
-    public static int preferLargerLongWithThreshold(Long checking, Long checked, long threshold,
+    /**
+     * If candidate is not null AND candidate >= threshold AND (compareTo is
+     * null OR candidate > compareTo + gap), return 1 (candidate wins)
+     * 
+     * If compareTo is not null AND compareTo >= threshold AND (candidate is
+     * null OR compareTo > candidate + gap), return -1 (compareTo wins)
+     * 
+     * Otherwise return 0 (tie)
+     * 
+     * @param candidate
+     * @param compareTo
+     * @param threshold
+     * @param gap
+     * @return
+     */
+    public static int preferLargerLongWithThreshold(Long candidate, Long compareTo, long threshold,
             long gap) {
-        if (checking != null && checking >= threshold
-                && (checked == null || checking.longValue() >= (checked.longValue() + gap))) {
+        Preconditions.checkArgument(gap >= 0);
+        if (candidate != null && candidate >= threshold
+                && (compareTo == null || candidate.longValue() > (compareTo.longValue() + gap))) {
             return 1;
-        } else if (checked != null && checked >= threshold
-                && (checking == null || checked.longValue() >= (checking.longValue() + gap))) {
+        } else if (compareTo != null && compareTo >= threshold
+                && (candidate == null || compareTo.longValue() > (candidate.longValue() + gap))) {
             return -1;
         } else {
             return 0;
         }
     }
 
-    public static int preferLargerLong(Long checking, Long checked) {
-        if (checking != null && (checked == null || checking.longValue() > checked.longValue())) {
+    /**
+     * If candidate is not null AND (compareTo is null OR candidate >
+     * compareTo), return 1 (candidate wins)
+     * 
+     * If compareTo is not null AND (candidate is null OR compareTo >
+     * candidate), return -1 (compareTo wins)
+     * 
+     * Otherwise return 0 (tie)
+     * 
+     * @param candidate
+     * @param compareTo
+     * @return
+     */
+    public static int preferLargerLong(Long candidate, Long compareTo) {
+        if (candidate != null && (compareTo == null || candidate.longValue() > compareTo.longValue())) {
             return 1;
-        } else if (checked != null
-                && (checking == null || checked.longValue() > checking.longValue())) {
+        } else if (compareTo != null
+                && (candidate == null || compareTo.longValue() > candidate.longValue())) {
             return -1;
         } else {
             return 0;

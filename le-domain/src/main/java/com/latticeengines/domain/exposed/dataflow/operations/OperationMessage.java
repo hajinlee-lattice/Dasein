@@ -16,7 +16,7 @@ public class OperationMessage {
     public static final String RANDOM = "Random selection";
 
     // AccountMasterSeed primary domain selection
-    public static final String ONLY_ONE_DOMAIN = "Only one domain";
+    public static final String DOMAIN_ONLY = "Domain-only Entry";
     public static final String DOMAIN_SRC = "DomainSource=%s";
     public static final String LOW_ALEXA_RANK = "Lower AlexaRank=%d";
     public static final String ORI_PRIDOM_FLAG = "Original " + DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN + "=%s";

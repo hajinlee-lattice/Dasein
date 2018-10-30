@@ -268,10 +268,10 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
                 // Domain-only entries
                 { 13L, "h.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         null,
-                        "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Only one domain],[Step=AMSeedCleanupTransformer,Code=FILTER,Log=Non-OOB]" },
+                        "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Domain-only Entry],[Step=AMSeedCleanupTransformer,Code=FILTER,Log=Non-OOB]" },
                 { 14L, "i.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         null,
-                        "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Only one domain],[Step=AMSeedCleanupTransformer,Code=FILTER,Log=Non-OOB]" },
+                        "[Step=AMSeedMarkerTransformer,Code=IS_PRIMARY_DOMAIN,Log=Domain-only Entry],[Step=AMSeedCleanupTransformer,Code=FILTER,Log=Non-OOB]" },
                 // DUNS-only entries
                 { 15L, null, "DUNS05", "Name05", "Country05", "Orb", "N", "Y", "0", ">10,000", 100, null, 100000000L,
                         "DUNS04", "[Step=AMSeedCleanupTransformer,Code=FILTER,Log=Non-OOB]" },
