@@ -33,7 +33,7 @@ export default class GridContainer extends Component {
     super(props);
     this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
     this.getCellEditTools = this.getCellEditTools.bind(this);
-    this.saveValue = this.saveValue.bind(this);
+    this.saveTemplateName = this.saveTemplateName.bind(this);
     this.state = {
       forceReload: false,
       showEmpty: false,
@@ -115,7 +115,7 @@ export default class GridContainer extends Component {
     }
   }
 
-  saveValue(colName, rowIndex, value) {
+  saveTemplateName(colName, rowIndex, value, callbackDone) {
     if (value != "") {
       let copy = Object.assign({},this.state.data[rowIndex]);
        copy[colName] = value; 
@@ -123,6 +123,9 @@ export default class GridContainer extends Component {
         "/pls/cdl/s3/template/displayname",
         copy,
         new Observer(response => {
+          if(callbackDone){
+            callbackDone();
+          }
           if (response.getStatus() === SUCCESS) {
             let newState = [...this.state.data];
             newState[rowIndex][colName] = value;
@@ -154,12 +157,13 @@ export default class GridContainer extends Component {
               row={index}
               col="0"
               editable="true"
+              apply={this.saveTemplateName}
             >
               <CellContent>
                 <span title={row.TemplateName}>{row.TemplateName}</span>
               </CellContent>
               {this.getCellEditTools(row)}
-              <EditContainer save={this.saveValue}>
+              <EditContainer>
                 <EditorText initialValue={row.TemplateName} />
               </EditContainer>
             </LeGridCell>

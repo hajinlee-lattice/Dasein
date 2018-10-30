@@ -28,7 +28,7 @@ export default class EditorText extends Component {
             });
             break;
             case 13:
-              this.props.saveValue(this.state.value);
+              this.props.applyChanges(this.state.value);
             break;
           }
         }}
@@ -37,7 +37,7 @@ export default class EditorText extends Component {
         }}
         onBlur={() => {
           if(!this.state.cancelled){
-            this.props.saveValue(this.state.value);
+            this.props.applyChanges(this.state.value);
           }else{
             this.props.cancel();
           }
