@@ -29,7 +29,6 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         BusinessCalendar calendar = periodProxy.saveBusinessCalendar(mainCustomerSpace, businessCalendar);
         Assert.assertNotNull(calendar);
-        Assert.assertNotNull(calendar.getPid());
         Assert.assertEquals(calendar.getStartingDate(), "JAN-15");
     }
 
@@ -37,7 +36,6 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testGetBusinessCalendar() {
         BusinessCalendar calendar = periodProxy.getBusinessCalendar(mainCustomerSpace);
         Assert.assertNotNull(calendar);
-        Assert.assertNotNull(calendar.getPid());
         Assert.assertEquals(calendar.getLongerMonth(), Integer.valueOf(1));
         Assert.assertEquals(calendar.getMode(), BusinessCalendar.Mode.STARTING_DATE);
         Assert.assertEquals(calendar.getStartingDate(), "JAN-15");
