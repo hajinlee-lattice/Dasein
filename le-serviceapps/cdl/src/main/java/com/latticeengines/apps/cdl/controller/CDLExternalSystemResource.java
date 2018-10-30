@@ -71,10 +71,9 @@ public class CDLExternalSystemResource {
     @ResponseBody
     @ApiOperation(value = "Create or Update a CDL external system for a tenant")
     public void createOrUpdateCDLExternalSystem(@PathVariable String customerSpace,
-            @RequestBody CDLExternalSystem cdlExternalSystem,
-            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
+            @RequestBody CDLExternalSystem cdlExternalSystem) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem,
-                BusinessEntity.getByName(entity));
+                cdlExternalSystem.getEntity());
     }
 }
