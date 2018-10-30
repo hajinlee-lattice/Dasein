@@ -117,15 +117,19 @@ export default class GridContainer extends Component {
 
   saveValue(colName, rowIndex, value) {
     if (value != "") {
-      let newState = [...this.state.data];
-      newState[rowIndex][colName] = value;
-      this.setState({ data: newState });
-      // console.log(this.state.data);
-      let type = "success";
-      // httpService.
-      // messageService.sendMessage(
-      //   new Message(null, NOTIFICATION, type, "TODO", "API NOT CALLED")
-      // );
+      let copy = Object.assign({},this.state.data[rowIndex]);
+       copy[colName] = value; 
+      httpService.put(
+        "/pls/cdl/s3/template/displayname",
+        copy,
+        new Observer(response => {
+          if (response.getStatus() === SUCCESS) {
+            let newState = [...this.state.data];
+            newState[rowIndex][colName] = value;
+            this.setState({ data: newState });
+          }
+        })
+      );
     }
   }
   getCellEditTools(rowData) {

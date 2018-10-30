@@ -53,9 +53,9 @@ const httpService = {
             response.statusText,
             response.data
           );
-          if(response && response.data && response.data.UIAction){
+          // if(response && response.data && response.data.UIAction){
             messageService.sendMessage(new Message(response, "", "", "",""));  
-          }
+          // }
           obs.next(resp);
           obs.complete();
         })
@@ -68,7 +68,9 @@ const httpService = {
           );
           console.log("ERRRRRRRRRRR", error);
           messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
-          obs.error(respoError);
+          if(obs.error){
+            obs.error(respoError);
+          }
           obs.complete();
         });
     }).subscribe(observer);
@@ -82,10 +84,14 @@ const httpService = {
         .then(response => {
           console.log("I am back from API", response);
           let resp = new Response(
+            response,
             response.status,
             response.statusText,
             response.data
           );
+          // if(response && response.data && response.data.UIAction){
+            messageService.sendMessage(new Message(response, "", "", "",""));  
+          // }
           obs.next(resp);
           obs.complete();
         })
@@ -97,7 +103,41 @@ const httpService = {
           );
           console.log("ERRRRRRRRRRR", error.message);
           messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
-          obs.error(respoError);
+          if(obs.error){
+            obs.error(respoError);
+          }
+          obs.complete();
+        });
+    }).subscribe(observer);
+      observables.addObservable(observer.getName(),observable);
+  },
+  put: (url, body, observer) => {
+    let observable = Observable.create(obs => {
+      http
+        .put(url, body)
+        .then(response => {
+          console.log("I am back from API", response);
+          let resp = new Response(
+            response,
+            response.status,
+            response.statusText,
+            response.data
+          );
+          messageService.sendMessage(new Message(response, "", "", "",""));  
+          obs.next(resp);
+          obs.complete();
+        })
+        .catch(error => {
+          let respoError = new Error(
+            error.response.status,
+            error.response.statusText,
+            error.message
+          );
+          console.log("ERRRRRRRRRRR", error.message);
+          messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
+          if(obs.error){
+            obs.error(respoError);
+          }
           obs.complete();
         });
     }).subscribe(observer);
