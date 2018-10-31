@@ -1,16 +1,20 @@
 angular.module('lp.import.entry.contacts', [])
-.controller('ImportEntryContacts', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore
-) {
-    var vm = this;
+.component('contactsContent', {
+    templateUrl: 'app/import/entry/contacts/contacts.component.html',
+    controller: function (
+        $q, $scope, $stateParams, ResourceUtility
+    ) {
 
-    angular.extend(vm, {
+        var vm = this;
 
-    });
+        angular.extend(vm, {
+            ResourceUtility: ResourceUtility,
+            action: $stateParams.action
+        });
 
-    vm.init = function() {
+        vm.$onInit = function() {
+
+        }
 
     }
-
-    vm.init();
 });

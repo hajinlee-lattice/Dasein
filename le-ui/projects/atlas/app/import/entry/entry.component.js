@@ -6,7 +6,7 @@ angular.module('lp.import.entry', [
     'lp.import.entry.producthierarchy'
 ])
 .controller('ImportEntry', function(
-    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore, AuthorizationUtility, Banner
+    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportWizardService, ImportStore, AuthorizationUtility, Banner
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -20,6 +20,8 @@ angular.module('lp.import.entry', [
             importError: false,
             invalidcolumns:[],
             importErrorMsg: '',
+            editing: $stateParams.editing,
+            importOnly: $stateParams.importOnly
         },
         uploaded: false,
         goState: null,
@@ -30,21 +32,52 @@ angular.module('lp.import.entry', [
     });
 
     vm.init = function() {
+
+        let flowType = "";
+        switch ($stateParams.action) {
+            case "create-template": {
+                flowType = "Create";
+                break;
+            }
+            case "edit-template": {
+                flowType = "Edit";
+                break;
+            }
+            case "import-data": {
+                flowType = "Import";
+                break;
+            }
+        }
+        vm.formType = flowType;
+        vm.nextButtonText = vm.formType == 'Import' ? 'Import File' : 'Next, Field Mappings';
+
+        vm.displayType = $stateParams.type;
+
         ImportWizardStore.clear();
         vm.setFeatureFlagPermissions();
         vm.changingEntity = false;    
         var state = $state.current.name;
         switch (state) {
-            case 'home.import.entry.accounts': vm.changeEntityType('Account', 'accounts'); break;
-            case 'home.import.entry.contacts': vm.changeEntityType('Contact', 'contacts'); break;
-            case 'home.import.entry.product_purchases': vm.changeEntityType('Transaction', 'product_purchases'); break;
-            case 'home.import.entry.product_bundles': vm.changeEntityType('Product', 'product_bundles', 'BundleSchema'); break;
-            case 'home.import.entry.product_hierarchy': vm.changeEntityType('Product', 'product_hierarchy', 'HierarchySchema'); break;
+            case 'home.import.entry.accounts': 
+                vm.changeEntityType('Account', 'accounts');
+                break;
+            case 'home.import.entry.contacts': 
+                vm.changeEntityType('Contact', 'contacts'); 
+                break;
+            case 'home.import.entry.productpurchases': 
+                vm.changeEntityType('Transaction', 'productpurchases'); 
+                break;
+            case 'home.import.entry.productbundles': 
+                vm.changeEntityType('Product', 'productbundles', 'BundleSchema'); 
+                break;
+            case 'home.import.entry.producthierarchy': 
+                vm.changeEntityType('Product', 'producthierarchy', 'HierarchySchema'); 
+                break;
         }
     }
 
     vm.getDefaultMessage = function()  {
-        return "your-" + vm.goState.replace('_','-') + ".csv";
+        return "your-" + vm.goState + ".csv";
     }
 
     vm.changeEntityType = function(type, goState, feedType) {
@@ -130,7 +163,13 @@ angular.module('lp.import.entry', [
     }
 
     vm.click = function() {
-        $state.go('home.import.data.' + vm.goState + '.ids');
+        if(vm.formType != 'Import'){
+            $state.go('home.import.data.' + vm.goState + '.ids');
+        } else {
+            ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
+                $state.go('home.importtemplates'); 
+            });
+        }
     }
 
     vm.setFeatureFlagPermissions = function() {

@@ -45,7 +45,7 @@ export default class TemplatesRowControlles extends Component {
             name: ""
           }}
           callback={() => {
-            this.props.callback({action: EDIT_TEMPLATE, type: this.props.rowData.object});
+            this.props.callback({action: EDIT_TEMPLATE, type: this.props.rowData.Object});
           }}
         />
       );
@@ -64,7 +64,7 @@ export default class TemplatesRowControlles extends Component {
             name: ""
           }}
           callback={() => {
-            this.props.callback({action: IMPORT_DATA, type:  this.props.rowData.object});
+            this.props.callback({action: IMPORT_DATA, type:  this.props.rowData.Object});
           }}
         />
       );

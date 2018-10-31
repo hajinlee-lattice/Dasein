@@ -1,16 +1,20 @@
 angular.module('lp.import.entry.productpurchases', [])
-.controller('ImportEntryProductPurchases', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore
-) {
-    var vm = this;
+.component('productPurchasesContent', {
+    templateUrl: 'app/import/entry/productpurchases/productpurchases.component.html',
+    controller: function (
+        $q, $scope, $stateParams, ResourceUtility
+    ) {
 
-    angular.extend(vm, {
+        var vm = this;
 
-    });
+        angular.extend(vm, {
+            ResourceUtility: ResourceUtility,
+            action: $stateParams.action
+        });
 
-    vm.init = function() {
+        vm.$onInit = function() {
+
+        }
 
     }
-
-    vm.init();
 });

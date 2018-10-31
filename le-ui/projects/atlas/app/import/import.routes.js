@@ -63,6 +63,10 @@ angular
         })
         .state('home.import.entry', {
             url: '/entry',
+            params: {
+                action: null,
+                type: null
+            },
             views: {
                 'main@': {
                     templateUrl: 'app/import/entry/entry.component.html'
@@ -77,12 +81,10 @@ angular
             },
             params: {
                 pageIcon: 'ico-analysis',
-                pageTitle: 'My Data'
+                pageTitle: 'Data Processing & Analysis'
             },
             views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/accounts/accounts.component.html'
-                }
+                'entry_content@home.import.entry': 'accountsContent'
             }
         })
         .state('home.import.entry.contacts', {
@@ -90,34 +92,42 @@ angular
             onEnter: function(ImportWizardStore){
                 ImportWizardStore.fieldDocument = {};
             },
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
             views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/contacts/contacts.component.html'
-                }
+                'entry_content@home.import.entry': 'contactsContent'
             }
         })
-        .state('home.import.entry.product_purchases', {
-            url: '/product_purchases',
+        .state('home.import.entry.productpurchases', {
+            url: '/productpurchases',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
             views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/productpurchases/productpurchases.component.html'
-                }
+                'entry_content@home.import.entry': 'productPurchasesContent'
             }
         })
-        .state('home.import.entry.product_bundles', {
-            url: '/product_bundles',
+        .state('home.import.entry.productbundles', {
+            url: '/productbundles',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
             views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/productbundles/productbundles.component.html'
-                }
+                'entry_content@home.import.entry': 'productBundlesContent'
             }
         })
-        .state('home.import.entry.product_hierarchy', {
-            url: '/product_hierarchy',
+        .state('home.import.entry.producthierarchy', {
+            url: '/producthierarchy',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
             views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/producthierarchy/producthierarchy.component.html'
-                }
+                'entry_content@home.import.entry': 'productHierarchyContent'
             }
         })
         .state('home.import.data', {
@@ -494,8 +504,8 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_purchases', {
-            url: '/product_purchases',
+        .state('home.import.data.productpurchases', {
+            url: '/productpurchases',
             resolve: {
                 WizardValidationStore: function(ImportWizardStore) {
                     return ImportWizardStore;
@@ -510,7 +520,7 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'transaction');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.product_purchases', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.productpurchases', nextState: 'home.jobs.data' };
                 }
             },
             views: {
@@ -525,9 +535,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.import.data.product_purchases.ids'
+            redirectTo: 'home.import.data.productpurchases.ids'
         })
-        .state('home.import.data.product_purchases.ids', {
+        .state('home.import.data.productpurchases.ids', {
             url: '/transactionids',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
@@ -557,7 +567,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_purchases.ids.latticefields', {
+        .state('home.import.data.productpurchases.ids.latticefields', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -590,7 +600,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_purchases.ids.latticefields.jobstatus', {
+        .state('home.import.data.productpurchases.ids.latticefields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
@@ -598,8 +608,8 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_bundles', {
-            url: '/product_bundles',
+        .state('home.import.data.productbundles', {
+            url: '/productbundles',
             resolve: {
                 WizardValidationStore: function(ImportWizardStore) {
                     return ImportWizardStore;
@@ -614,7 +624,7 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.product_bundles', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.productbundles', nextState: 'home.jobs.data' };
                 }
             },
             views: {
@@ -629,9 +639,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.import.data.product_bundles.ids'
+            redirectTo: 'home.import.data.productbundles.ids'
         })
-        .state('home.import.data.product_bundles.ids', {
+        .state('home.import.data.productbundles.ids', {
             url: '/transactionids',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
@@ -670,7 +680,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_bundles.ids.latticefields', {
+        .state('home.import.data.productbundles.ids.latticefields', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -702,7 +712,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_bundles.ids.latticefields.jobstatus', {
+        .state('home.import.data.productbundles.ids.latticefields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
@@ -710,10 +720,10 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_hierarchy', {
-            url: '/product_hierarchy',
+        .state('home.import.data.producthierarchy', {
+            url: '/producthierarchy',
             params: {
-                wizard_steps: 'product_hierarchy'  // use this to override entity type as default for wizard step key
+                wizard_steps: 'producthierarchy'  // use this to override entity type as default for wizard step key
             },
             resolve: {
                 WizardValidationStore: function(ImportWizardStore) {
@@ -726,10 +736,10 @@ angular
                     var entityType = ImportWizardStore.getEntityType(),
                         wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
 
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_hierarchy');
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'producthierarchy');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.product_hierarchy', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.producthierarchy', nextState: 'home.jobs.data' };
                 }
             },
             views: {
@@ -744,9 +754,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.import.data.product_hierarchy.ids'
+            redirectTo: 'home.import.data.producthierarchy.ids'
         })
-        .state('home.import.data.product_hierarchy.ids', {
+        .state('home.import.data.producthierarchy.ids', {
             url: '/producthierarchyids',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
@@ -785,7 +795,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_hierarchy.ids.product_hierarchy', {
+        .state('home.import.data.producthierarchy.ids.producthierarchy', {
             url: '/producthierarchy',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
@@ -806,7 +816,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.product_hierarchy.ids.product_hierarchy.jobstatus', {
+        .state('home.import.data.producthierarchy.ids.producthierarchy.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {

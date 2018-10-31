@@ -1,16 +1,20 @@
 angular.module('lp.import.entry.productbundles', [])
-.controller('ImportEntryProductBundles', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore
-) {
-    var vm = this;
+.component('productBundlesContent', {
+    templateUrl: 'app/import/entry/productbundles/productbundles.component.html',
+    controller: function (
+        $q, $scope, $stateParams, ResourceUtility
+    ) {
 
-    angular.extend(vm, {
+        var vm = this;
 
-    });
+        angular.extend(vm, {
+            ResourceUtility: ResourceUtility,
+            action: $stateParams.action
+        });
 
-    vm.init = function() {
+        vm.$onInit = function() {
+
+        }
 
     }
-
-    vm.init();
 });

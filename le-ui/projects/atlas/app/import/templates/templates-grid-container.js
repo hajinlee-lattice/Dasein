@@ -43,6 +43,9 @@ export default class GridContainer extends Component {
   }
 
   createTemplate(response) {
+
+    console.log(response);
+
     let entity = "";
     switch (response.type) {
       case "Accounts": {
@@ -53,21 +56,24 @@ export default class GridContainer extends Component {
         entity = "contacts";
         break;
       }
-      case "Products Purchases": {
-        entity = "product_purchases";
+      case "Product Purchases": {
+        entity = "productpurchases";
         break;
       }
       case "Product Bundles": {
-        entity = "product_bundles";
+        entity = "productbundles";
         break;
       }
       case "Product Hierarchy": {
-        entity = "product_hierarchy";
+        entity = "producthierarchy";
         break;
       }
     }
     let goTo = `home.import.entry.${entity}`;
-    getAngularState().go(goTo);
+
+    console.log(goTo,response);
+
+    getAngularState().go(goTo,response);
   }
 
   actionCallbackHandler(response) {
@@ -75,10 +81,11 @@ export default class GridContainer extends Component {
       case CREATE_TEMPLATE:
         this.createTemplate(response);
         break;
-
       case EDIT_TEMPLATE:
+        this.createTemplate(response);
         break;
       case IMPORT_DATA:
+        this.createTemplate(response);
         break;
     }
   }

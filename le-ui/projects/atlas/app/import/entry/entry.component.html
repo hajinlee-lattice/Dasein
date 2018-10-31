@@ -6,29 +6,15 @@
     </div>
     <div class="columns eight offset-two box-outline">
       <div class="section-header">
-        <h4>Import</h4>
+        <h4 ng-if="vm.formType != 'Import'">{{vm.formType}} {{vm.displayType}} Template</h4>
+        <h4 ng-if="vm.formType == 'Import'">{{vm.displayType}} Data Import</h4>
       </div>
       <hr />
       <div class="section-body with-padding">
-        <div class="button-tabs">
-          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Account', 'accounts');" ui-sref="home.import.entry.accounts">
-            <span>Accounts</span>
-          </div>
-          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Contact', 'contacts');" ui-sref="home.import.entry.contacts">
-            <span>Contacts</span>
-          </div>
-          <div class="button purchases {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Transaction', 'product_purchases');" ui-sref="home.import.entry.product_purchases" ng-if="vm.showProductPurchaseImport">
-            <span>Product Purchases</span>
-          </div>
-          <div class="button products {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles', 'BundleSchema');" ui-sref="home.import.entry.product_bundles" ng-if="vm.showProductBundleImport">
-            <span>Product Bundles</span>
-          </div>
-          <div class="button product_hierarchy {{ vm.goState == 'product_hierarchy' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_hierarchy', 'HierarchySchema');" ui-sref="home.import.entry.product_hierarchy" ng-if="vm.showProductHierarchyImport">
-            <span>Product Hierarchy</span>
-          </div>
-        </div>
-        
-        <div class="import-additional-info import-additional-info-{{vm.goState}}" ui-view="entry_content"></div>
+        <div 
+          class="import-additional-info import-additional-info-{{vm.goState}}" 
+          ui-view="entry_content"></div>
+
         <div ng-if="vm.invalidcolumns.length > 0" class="invalid-columns-container">
             <div>
                 <i class="fa fa-exclamation-triangle"></i>
@@ -67,7 +53,7 @@
                 class="button blue-button"
                 ng-disabled="!vm.next"
                 ng-click="vm.click()">
-              Next, Field Mappings
+                {{ vm.nextButtonText }}
             </button>
         </div>
       </div>

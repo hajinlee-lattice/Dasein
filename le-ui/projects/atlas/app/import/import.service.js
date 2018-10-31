@@ -20,7 +20,7 @@ angular.module('lp.import')
             latticefields: false,
             customfields: true,
             jobstatus: false,
-            product_hierarchy: false
+            producthierarchy: false
         }
 
         this.saveObjects = {};
@@ -151,14 +151,14 @@ angular.module('lp.import')
         "transaction": [
             { 
                 label: 'Transaction IDs', 
-                state: 'product_purchases.ids', 
+                state: 'productpurchases.ids', 
                 nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'product_purchases.ids.latticefields', 
+                state: 'productpurchases.ids.latticefields', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
@@ -168,7 +168,7 @@ angular.module('lp.import')
                 }
             },{ 
                 label: 'Save Template', 
-                state: 'product_purchases.ids.latticefields.jobstatus', 
+                state: 'productpurchases.ids.latticefields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -181,14 +181,14 @@ angular.module('lp.import')
         "product": [
             { 
                 label: 'Product ID', 
-                state: 'product_bundles.ids', 
+                state: 'productbundles.ids', 
                 nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'product_bundles.ids.latticefields', 
+                state: 'productbundles.ids.latticefields', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -197,7 +197,7 @@ angular.module('lp.import')
                 }
             },{ 
                 label: 'Save Template', 
-                state: 'product_bundles.ids.latticefields.jobstatus', 
+                state: 'productbundles.ids.latticefields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -207,17 +207,17 @@ angular.module('lp.import')
                 }
             }
         ],
-        "product_hierarchy": [
+        "producthierarchy": [
             { 
                 label: 'Product Hierarchy ID', 
-                state: 'product_hierarchy.ids', 
+                state: 'producthierarchy.ids', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Product Hierarchy', 
-                state: 'product_hierarchy.ids.product_hierarchy', 
+                state: 'producthierarchy.ids.producthierarchy', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
@@ -227,7 +227,7 @@ angular.module('lp.import')
                 }
             },{ 
                 label: 'Save Template', 
-                state: 'product_hierarchy.ids.product_hierarchy.jobstatus', 
+                state: 'producthierarchy.ids.producthierarchy.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {

@@ -1,16 +1,20 @@
 angular.module('lp.import.entry.accounts', [])
-.controller('ImportEntryAccounts', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore
-) {
-    var vm = this;
+.component('accountsContent', {
+    templateUrl: 'app/import/entry/accounts/accounts.component.html',
+    controller: function (
+        $q, $scope, $stateParams, ResourceUtility
+    ) {
 
-    angular.extend(vm, {
+        var vm = this;
 
-    });
+        angular.extend(vm, {
+            ResourceUtility: ResourceUtility,
+            action: $stateParams.action
+        });
 
-    vm.init = function() {
+        vm.$onInit = function() {
+
+        }
 
     }
-
-    vm.init();
 });
