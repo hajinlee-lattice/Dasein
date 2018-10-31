@@ -64,13 +64,10 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
     private Map<String, String> modelGuidToEngineIdMap;
     private Map<String, Boolean> modelGuidToIsEVFlagMap;
-    private boolean isEV = false;
 
     @Override
     public void onConfigurationInitialized() {
         String scoreTableName = getStringValueFromContext(PIVOT_SCORE_INPUT_TABLE_NAME);
-
-        isEV = configuration.isEV();
         multiModel = isMultiModel();
         modelGuidToBucketMetadataMap = getModelGuidToBucketMetadataMap();
         modelGuidToEngineIdMap = getModelGuidToEngineIdMap();
@@ -172,7 +169,8 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                     .generateBucketedScoreSummary(pivotedRecords, modelGuidToIsEVFlagMap.get(modelGuid));
             List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
-            BucketedScoreSummaryUtils.computeLift(bucketedScoreSummary, bucketMetadata, modelGuidToIsEVFlagMap.get(modelGuid));
+            BucketedScoreSummaryUtils.computeLift(bucketedScoreSummary, bucketMetadata,
+                    modelGuidToIsEVFlagMap.get(modelGuid));
             if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
                 log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketedScoreSummary));
@@ -235,7 +233,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             });
         } else {
             String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
-            modelGuidToIsEVFlagMap.put(modelGuid, isEV);
+            modelGuidToIsEVFlagMap.put(modelGuid, configuration.isEV());
         }
         return modelGuidToIsEVFlagMap;
     }
@@ -285,7 +283,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             if (StringUtils.isBlank(scoreField)) {
                 throw new IllegalArgumentException("Must specify score field for pivot event and score.");
             }
-            if (isEV) {
+            if (configuration.isEV()) {
                 scoreField = InterfaceName.ExpectedRevenue.name();
             }
             scoreFieldsMap = ImmutableMap.of(modelGuid, scoreField);

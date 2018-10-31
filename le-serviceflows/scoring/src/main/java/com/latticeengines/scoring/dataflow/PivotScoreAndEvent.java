@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
@@ -36,7 +37,6 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
     private Node total;
     private boolean useEvent;
-    private boolean isEV;
 
     @Override
     public Node construct(PivotScoreAndEventParameters parameters) {
@@ -51,17 +51,17 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             String modelGuid = entry.getKey();
             String scoreField = scoreFieldMap.getOrDefault(modelGuid, InterfaceName.RawScore.name());
             useEvent = InterfaceName.Event.name().equals(scoreField);
-            isEV = InterfaceName.ExpectedRevenue.name().equals(scoreField);
+            boolean isEV = InterfaceName.ExpectedRevenue.name().equals(scoreField);
             log.info("useEvent=" + useEvent + " isEV=" + isEV + " ModeId=" + modelGuid);
 
             Node node = entry.getValue();
-            total = getTotal(node, modelGuid, scoreField);
-            Node aggregatedNode = aggregate(node, scoreField);
+            total = getTotal(node, modelGuid, scoreField, isEV);
+            Node aggregatedNode = aggregate(node, scoreField, isEV);
             String scoreDerivation = parameters.getScoreDerivationMap().get(modelGuid);
             String fitFunctionParams = parameters.getFitFunctionParametersMap().get(modelGuid);
 
             Double avgScore = avgScoresMap.get(modelGuid);
-            Node output = createLift(aggregatedNode, avgScore, scoreDerivation, fitFunctionParams);
+            Node output = createLift(aggregatedNode, avgScore, scoreDerivation, fitFunctionParams, isEV);
             if (merged == null) {
                 merged = output;
             } else {
@@ -83,7 +83,7 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         return nodes;
     }
 
-    private Node getTotal(Node node, String modelGuid, String scoreField) {
+    private Node getTotal(Node node, String modelGuid, String scoreField, boolean isEV) {
         if (useEvent) {
             node = node.apply(String.format("Boolean.TRUE.equals(%s) ? 1.0 : 0.0", scoreField),
                     new FieldList(scoreField), new FieldMetadata("EventScore", Double.class));
@@ -100,7 +100,7 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         return total;
     }
 
-    private Node aggregate(Node inputTable, String scoreField) {
+    private Node aggregate(Node inputTable, String scoreField, boolean isEV) {
         List<Aggregation> aggregations = new ArrayList<>();
         String percentileScoreField = isEV ? ScoreResultField.ExpectedRevenuePercentile.displayName
                 : ScoreResultField.Percentile.displayName;
@@ -118,7 +118,8 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         return aggregatedNode;
     }
 
-    private Node createLift(Node aggregatedNode, Double avgScore, String scoreDerivation, String fitFunctionParams) {
+    private Node createLift(Node aggregatedNode, Double avgScore, String scoreDerivation, String fitFunctionParams,
+            boolean isEV) {
         if (useEvent) {
             double modelAvgProbability = avgScore;
             String expression = String.format("%s / %f", "ConversionRate", modelAvgProbability);
@@ -136,18 +137,26 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
             if (!isEV) {
                 aggregatedNode = getTotalPositiveEvents(aggregatedNode, scoreDerivation, fitFunctionParams, isEV);
+                aggregatedNode = aggregatedNode.addColumnWithFixedValue(
+                        ScoreResultField.ExpectedRevenuePercentile.displayName, null, Integer.class);
+                aggregatedNode = aggregatedNode.addColumnWithFixedValue(BUCKET_AVG_SCORE, null, Double.class);
+                aggregatedNode = aggregatedNode.addColumnWithFixedValue(BUCKET_SUM, null, Double.class);
                 aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
-                        ScoreResultField.Percentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS,
-                        BUCKET_LIFT);
+                        ScoreResultField.Percentile.displayName, ScoreResultField.ExpectedRevenuePercentile.displayName,
+                        BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS, BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
+                log.info("non EV aggregatedNode fields = " + JsonUtils.serialize(aggregatedNode.getFieldNames()));
             } else {
                 String expression = String.format("%1$s == 0 ? 0 : (%1$s * %2$s / %3$s)", BUCKET_TOTAL_EVENTS,
                         BUCKET_SUM, MODEL_SUM);
                 aggregatedNode = aggregatedNode.apply(expression,
                         new FieldList(BUCKET_SUM, BUCKET_TOTAL_EVENTS, MODEL_SUM),
                         new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
+                aggregatedNode = aggregatedNode.addColumnWithFixedValue(ScoreResultField.Percentile.displayName, null,
+                        Integer.class);
                 aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
-                        ScoreResultField.ExpectedRevenuePercentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS,
-                        BUCKET_TOTAL_EVENTS, BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
+                        ScoreResultField.Percentile.displayName, ScoreResultField.ExpectedRevenuePercentile.displayName,
+                        BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS, BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
+                log.info("EV aggregatedNode fields = " + JsonUtils.serialize(aggregatedNode.getFieldNames()));
             }
         }
         return aggregatedNode;

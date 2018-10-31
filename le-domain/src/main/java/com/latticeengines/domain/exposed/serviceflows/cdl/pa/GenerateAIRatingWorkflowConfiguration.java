@@ -54,7 +54,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
     }
 
     public static class Builder {
-        private boolean isEV = false;
+        private boolean forceEVSteps = false;
         private GenerateAIRatingWorkflowConfiguration configuration = new GenerateAIRatingWorkflowConfiguration();
 
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
@@ -174,12 +174,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
-        public Builder setEV(boolean isEV) {
-            this.isEV = isEV;
-            pivotScoreAndEvent.setEV(isEV);
-            return this;
-        }
-
         public Builder setUseScorederivation(boolean useScorederivation) {
             score.setUseScorederivation(useScorederivation);
             return this;
@@ -223,15 +217,20 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder forceEVSteps(boolean forceEVSteps) {
+            this.forceEVSteps = forceEVSteps;
+            pivotScoreAndEvent.setEV(forceEVSteps);
+            return this;
+        }
+
         public GenerateAIRatingWorkflowConfiguration build() {
             setCdlEventTableConfig();
             setMatchConfig();
             setAddStandardAttributesConfig();
-            if (!isEV) {
-                recalculateExpectedRevenue.setSkipStep(true);
-                calculatePredictedRevenuePercentile.setSkipStep(true);
-                calculateExpectedRevenuePercentile.setSkipStep(true);
-            }
+            recalculateExpectedRevenue.setSkipStep(!forceEVSteps);
+            calculatePredictedRevenuePercentile.setSkipStep(!forceEVSteps);
+            calculateExpectedRevenuePercentile.setSkipStep(!forceEVSteps);
+
             configuration.setContainerConfiguration("generateAIRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);

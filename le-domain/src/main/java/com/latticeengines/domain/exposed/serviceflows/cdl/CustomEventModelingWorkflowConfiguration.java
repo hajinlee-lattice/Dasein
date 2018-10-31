@@ -444,7 +444,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder modelIteration(Integer modelIteration) {
             useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
-            if (modelIteration != null && modelIteration.intValue() == 0) {
+            if (modelIteration != null && modelIteration.intValue() == 1) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
             return this;

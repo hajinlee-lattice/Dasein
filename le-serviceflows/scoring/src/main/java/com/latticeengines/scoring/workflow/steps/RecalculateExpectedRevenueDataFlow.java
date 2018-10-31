@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.workflow.steps;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,29 +55,26 @@ public class RecalculateExpectedRevenueDataFlow extends RunDataFlow<RecalculateE
         Map<String, String> scoreFieldMap = getScoreFieldsMap();
         if (MapUtils.isNotEmpty(scoreFieldMap)) {
             params.setOriginalScoreFieldMap(scoreFieldMap);
-            params.setFitFunctionParametersMap(getEVFitFunctionParametersMap(getEVModelIds(scoreFieldMap)));
+            params.setFitFunctionParametersMap(getEVFitFunctionParametersMap(scoreFieldMap));
         }
         configuration.setDataFlowParams(params);
     }
 
-    private Map<String, String> getEVFitFunctionParametersMap(Collection<String> modelIds) {
+    private Map<String, String> getEVFitFunctionParametersMap(Map<String, String> modelFieldMap) {
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
-                                                                                   yarnConfiguration);
+                yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();
-        for (String modelId : modelIds) {
-            String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId, true);
+        modelFieldMap.entrySet().stream().forEach(entry -> {
+            String modelId = entry.getKey();
+            boolean isEV = ScoreResultField.ExpectedRevenue.displayName.equals(entry.getValue());
+            String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId,
+                    isEV);
             if (fitFunctionParameters != null) {
                 fitFunctionParametersMap.put(modelId, fitFunctionParameters);
             }
-        }
+        });
         return fitFunctionParametersMap;
-    }
-
-    private Collection<String> getEVModelIds(Map<String, String> modelFieldMap) {
-        return modelFieldMap.entrySet().stream()
-            .filter(entry -> ScoreResultField.ExpectedRevenue.displayName.equals(entry.getValue()))
-            .map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
     private Map<String, String> getScoreFieldsMap() {
@@ -103,10 +99,10 @@ public class RecalculateExpectedRevenueDataFlow extends RunDataFlow<RecalculateE
             return Collections.emptyList();
         }
         return allContainers.stream() //
-            .filter(container -> {
-                RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                       || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-            }).collect(Collectors.toList());
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }).collect(Collectors.toList());
     }
 }

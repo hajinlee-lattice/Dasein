@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import cascading.tuple.Fields;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -17,8 +18,13 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculateExpectedRevenueParameters;
 
+import cascading.tuple.Fields;
+
 @Component("recalculateExpectedRevenue")
 public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<RecalculateExpectedRevenueParameters> {
+
+    private static final Logger log = LoggerFactory.getLogger(RecalculateExpectedRevenue.class);
+
     @Override
     public Node construct(RecalculateExpectedRevenueParameters parameters) {
 
@@ -34,33 +40,28 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
 
         if (MapUtils.isNotEmpty(fitFunctionParametersMap)) {
             return calculateExpectedRevenueByFieldMap(originalScoreFieldMap, fitFunctionParametersMap,
-                                                      modelGuidFieldName,
-                                                      percentileFieldName,
-                                                      predictedRevenuePercentileFieldName,
-                                                      expectedRevenueFieldName,
-                                                      inputTable).retain(originalFields);
+                    modelGuidFieldName, percentileFieldName, predictedRevenuePercentileFieldName,
+                    expectedRevenueFieldName, inputTable).retain(originalFields);
         } else {
             return inputTable;
         }
     }
 
-    private Node calculateExpectedRevenueByFieldMap(Map<String, String> originalScoreFieldMap, //
-                                                    Map<String, String> fitFunctionParametersMap,
-                                                    String modelGuidFieldName,
-                                                    String percentileFieldName,
-                                                    String predictedRevenuePercentileFieldName,
-                                                    String expectedRevenueFieldName,
-                                                    Node input) {
-
+    private Node calculateExpectedRevenueByFieldMap(Map<String, String> originalScoreFieldMap,
+            Map<String, String> fitFunctionParametersMap, String modelGuidFieldName, String percentileFieldName,
+            String predictedRevenuePercentileFieldName, String expectedRevenueFieldName, Node input) {
+        input = input.addColumnWithFixedValue(predictedRevenuePercentileFieldName, null, Integer.class);
         Map<String, Node> nodes = splitNodes(input, originalScoreFieldMap, modelGuidFieldName);
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
             String modelGuid = entry.getKey();
             Node node = entry.getValue();
             String evFitFunctionParameterStr = fitFunctionParametersMap.get(modelGuid);
-            Node output = (evFitFunctionParameterStr == null) ? node :
-                calculateExpectedRevenue(percentileFieldName, predictedRevenuePercentileFieldName,
-                                         expectedRevenueFieldName, evFitFunctionParameterStr, node);
+            boolean isEV = ScoreResultField.ExpectedRevenue.displayName.equals(originalScoreFieldMap.get(modelGuid));
+            log.info(String.format("isEV = %s, modelGuid = %s", isEV, modelGuid));
+
+            Node output = isEV ? calculateExpectedRevenue(percentileFieldName, predictedRevenuePercentileFieldName,
+                    expectedRevenueFieldName, evFitFunctionParameterStr, node) : node;
             if (merged == null) {
                 merged = output;
             } else {
@@ -70,32 +71,28 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
         return merged;
     }
 
-    private Map<String, Node> splitNodes(Node input, Map<String, String> originalScoreFieldMap, String modelGuidFieldName) {
+    private Map<String, Node> splitNodes(Node input, Map<String, String> originalScoreFieldMap,
+            String modelGuidFieldName) {
         Map<String, Node> nodes = new HashMap<>();
         originalScoreFieldMap.forEach((modelGuid, scoreField) -> {
             Node model = input.filter(String.format("\"%s\".equals(%s)", modelGuid, modelGuidFieldName),
-                                      new FieldList(ScoreResultField.ModelId.displayName));
+                    new FieldList(ScoreResultField.ModelId.displayName));
             model = model.renamePipe(modelGuid);
             nodes.put(modelGuid, model);
         });
         return nodes;
     }
 
-    private Node calculateExpectedRevenue(String percentileFieldName,
-                                          String predictedRevenuePercentileFieldName,
-                                          String expectedRevenueFieldName,
-                                          String evFitFunctionParameterStr, Node node) {
+    private Node calculateExpectedRevenue(String percentileFieldName, String predictedRevenuePercentileFieldName,
+            String expectedRevenueFieldName, String evFitFunctionParameterStr, Node node) {
 
         List<String> returnedFields = new ArrayList<>(node.getFieldNames());
         List<FieldMetadata> returnedMetadata = new ArrayList<>(node.getSchema());
-        Node calculatePercentile = node.applyToAllFields(
-            new CalculateExpectedRevenueFunction(new Fields(returnedFields.toArray(new String[0])),
-                                                 percentileFieldName,
-                                                 predictedRevenuePercentileFieldName,
-                                                 expectedRevenueFieldName,
-                                                 evFitFunctionParameterStr),
-            returnedMetadata,
-            FieldList.RESULTS);
+        Node calculatePercentile = node.apply(
+                new CalculateExpectedRevenueFunction(new Fields(returnedFields.toArray(new String[0])),
+                        percentileFieldName, predictedRevenuePercentileFieldName, expectedRevenueFieldName,
+                        evFitFunctionParameterStr),
+                null, returnedMetadata, new FieldList(returnedFields), Fields.REPLACE);
 
         return calculatePercentile;
     }

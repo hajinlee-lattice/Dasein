@@ -36,8 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigura
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
-public class CrossSellImportMatchAndModelWorkflowConfiguration
-        extends BaseCDLWorkflowConfiguration {
+public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     @Override
     public Collection<String> getSwpkgNames() {
@@ -198,10 +197,8 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
-                String selectionVersion) {
-            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
-                    selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
@@ -384,7 +381,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration
         public Builder setExpectedValue(boolean expectedValue) {
             cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
-            generateAIRating.setEV(expectedValue);
+            generateAIRating.forceEVSteps(expectedValue);
             return this;
         }
 
@@ -400,7 +397,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration
 
         public Builder modelIteration(Integer modelIteration) {
             useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
-            if (modelIteration != null && modelIteration.intValue() == 0) {
+            if (modelIteration != null && modelIteration.intValue() == 1) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
             return this;
