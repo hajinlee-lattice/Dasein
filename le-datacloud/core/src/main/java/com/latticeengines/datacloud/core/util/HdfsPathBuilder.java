@@ -52,12 +52,13 @@ public class HdfsPathBuilder {
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
     private static final String COLLECTORS = "Collectors";
-    private static final String DEFAULT_POD = HdfsPodContext.getDefaultHdfsPodId();
+    private static final String DEFAULT_POD;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        DEFAULT_POD = HdfsPodContext.getDefaultHdfsPodId();
     }
 
     public Path podDir() {
