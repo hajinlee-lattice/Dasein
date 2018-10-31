@@ -78,20 +78,24 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
                 afterComplete(config);
                 return;
             }
-            submitAndWaitForCompletion();
+            boolean result = submitAndWaitForCompletion();
+            if (!result) {
+                throw new RuntimeException("Aws Batch job failed!");
+            }
         } catch (Exception ex) {
             log.error("Failed to run Python App!", ex);
+            throw new RuntimeException("Failed to generate APS table!");
         }
     }
 
-    private void submitAndWaitForCompletion() {
+    private boolean submitAndWaitForCompletion() {
         if (config == null) {
             config = configuration;
             setupConfig(config);
         }
         if (CollectionUtils.isEmpty(config.getInputPaths())) {
-            log.info("No input path was generated.");
-            return;
+            log.warn("No input path was generated.");
+            return false;
         }
 
         boolean result;
@@ -104,6 +108,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             log.info("Submitted Inline Job, result=" + result);
         }
         afterComplete(config);
+        return result;
 
     }
 

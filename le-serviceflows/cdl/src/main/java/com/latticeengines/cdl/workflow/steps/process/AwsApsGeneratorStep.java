@@ -120,6 +120,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                         config.getOutputPath());
                 apsTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
                 Map<String, List<Product>> productMap = loadProductMap(config);
+                if (productMap == null || productMap.size() == 0) {
+                    throw new RuntimeException("There's no product table or no Analytic products");
+                }
                 AwsApsGeneratorUtils.setupMetaData(apsTable, productMap);
                 metadataProxy.updateTable(customerSpace, config.getTableName(), apsTable);
                 dataCollectionProxy.upsertTable(customerSpace, config.getTableName(),
