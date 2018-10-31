@@ -369,11 +369,18 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             List<AttrConfig> customDisplayNameAttrs = lpAttrConfigService
                     .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
             if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
-                List<AttrConfig> renderedConfigList = lpAttrConfigService.renderConfigs(customDisplayNameAttrs);
-                renderedConfigList.stream().forEach(config -> {
+                // List<AttrConfig> renderedConfigList =
+                // lpAttrConfigService.renderConfigs(customDisplayNameAttrs);
+                // renderedConfigList.stream().forEach(config -> {
+                // nameToDisplayNameMap.put(config.getAttrName(),
+                // config.getPropertyFinalValue(ColumnMetadataKey.DisplayName,
+                // String.class));
+                // });
+                customDisplayNameAttrs.stream().forEach(config -> {
                     nameToDisplayNameMap.put(config.getAttrName(),
-                            config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
+                            (String) config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue());
                 });
+
             }
         } catch (LedpException e) {
             log.warn("Got LedpException " + ExceptionUtils.getStackTrace(e));
