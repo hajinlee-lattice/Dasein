@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -176,7 +177,9 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (StringUtils.isBlank(dest.getSourceLogicalDataType())) {
             dest.setSourceLogicalDataType(source.getPhysicalDataType());
         }
-        dest.setApprovedUsage(source.getApprovedUsage());
+        if (CollectionUtils.isNotEmpty(source.getApprovedUsage())) {
+            dest.setApprovedUsage(source.getApprovedUsage());
+        }
         dest.setDescription(source.getDescription());
         dest.setDataSource(source.getDataSource());
         if (source.getFundamentalType() != null) {
