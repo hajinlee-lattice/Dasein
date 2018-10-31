@@ -22,7 +22,9 @@ public class HdfsFileHttpDownloaderUnitTestNG {
 
     private HdfsFileHttpDownloader downloader = new HdfsFileHttpDownloader();;
 
-    private InputStream inputStream;
+    private InputStream topPreictorInputStream;
+
+    private InputStream rfModelInputStream;
 
     private Map<String, String> nameMap;
 
@@ -31,12 +33,14 @@ public class HdfsFileHttpDownloaderUnitTestNG {
         nameMap = new HashMap<>();
         nameMap.put("LE_EMPLOYEE_RANGE", "Employee Range Edited");
         nameMap.put("EmployeeRangeOrdinal", "Employee Range Ordinal Edited");
-        inputStream = ClassLoader.getSystemResourceAsStream("download/topPredictor.csv");
+        nameMap.put("LinkedIn_Url", "LinkedIn Url Edited");
+        topPreictorInputStream = ClassLoader.getSystemResourceAsStream("download/topPredictor.csv");
+        rfModelInputStream = ClassLoader.getSystemResourceAsStream("download/rf_model.csv");
     }
 
     @Test(groups = "unit")
     public void testFixPredictorDisplayName() throws IOException {
-        InputStream stream = downloader.fixPredictorDisplayName(inputStream, nameMap);
+        InputStream stream = downloader.fixPredictorDisplayName(topPreictorInputStream, nameMap);
         try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
                 ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                 StandardCharsets.UTF_8);) {
@@ -54,6 +58,27 @@ public class HdfsFileHttpDownloaderUnitTestNG {
                 }
             }
             Assert.assertEquals(i, 18);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testFixRfModelDisplayName() throws IOException {
+        InputStream stream = downloader.fixRfModelDisplayName(rfModelInputStream, nameMap);
+        try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
+                ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                StandardCharsets.UTF_8);) {
+            CSVFormat format = LECSVFormat.format;
+            int i = 0;
+            try (CSVParser parser = new CSVParser(reader, format)) {
+                for (CSVRecord record : parser) {
+                    i++;
+                    String attrName = record.get("Column Name");
+                    if ("LinkedIn_Url".equals(attrName)) {
+                        record.get("DisplayName").equals(nameMap.get(attrName));
+                    }
+                }
+            }
+            Assert.assertEquals(i, 55);
         }
     }
 

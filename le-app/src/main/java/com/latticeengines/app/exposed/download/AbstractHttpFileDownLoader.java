@@ -96,6 +96,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         case TOP_PREDICTOR:
             return processTopPredictorFile(inputStream);
         case RF_MODEL:
+            // TODO change to "processRfModel(inputStream);" when PLS-8703 done
             return inputStream;
         case DEFAULT:
         default:
@@ -103,7 +104,56 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         }
     }
 
-    private InputStream processTopPredictorFile(InputStream inputStream) {
+    private InputStream processRfModel(InputStream inputStream) {
+        Map<String, String> nameToDisplayNameMap = getCustomizedDisplayNames();
+        if (MapUtils.isNotEmpty(nameToDisplayNameMap)) {
+            return fixRfModelDisplayName(inputStream, nameToDisplayNameMap);
+        }
+        return inputStream;
+    }
+
+    @VisibleForTesting
+    InputStream fixRfModelDisplayName(InputStream inputStream, Map<String, String> nameToDisplayNameMap) {
+        StringBuilder sb = new StringBuilder();
+
+        log.info("start to replace rf model edit name for " + MultiTenantContext.getShortTenantId());
+        try (InputStreamReader reader = new InputStreamReader(
+                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                StandardCharsets.UTF_8);) {
+
+            CSVFormat format = LECSVFormat.format;
+            try (CSVParser parser = new CSVParser(reader, format);) {
+                parser.getHeaderMap().keySet().toArray();
+                try (CSVPrinter printer = new CSVPrinter(sb,
+                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})));) {
+                    for (CSVRecord record : parser) {
+                        String attrName = record.get("Column Name");
+                        if (attrName != null && nameToDisplayNameMap.containsKey(attrName)) {
+                            String[] s = toArray(record);
+                            log.info("replacing " + record.get("Column Name") + " with "
+                                    + nameToDisplayNameMap.get(attrName));
+                            s[1] = nameToDisplayNameMap.get(attrName);
+                            for (String val : s) {
+                                printer.print(val != null ? String.valueOf(val) : "");
+                            }
+                            printer.println();
+                        } else {
+                            printer.printRecord(record);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error reading the input stream.");
+            e.printStackTrace();
+            return inputStream;
+        }
+
+        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
+    }
+
+    private Map<String, String> getCustomizedDisplayNames() {
         Map<String, String> nameToDisplayNameMap = new HashMap<>();
         try {
             List<AttrConfig> customDisplayNameAttrs = cdlAttrConfigProxy
@@ -118,8 +168,12 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             }
         } catch (LedpException e) {
             log.warn("Got LedpException " + ExceptionUtils.getStackTrace(e));
-            return inputStream;
         }
+        return nameToDisplayNameMap;
+    }
+
+    private InputStream processTopPredictorFile(InputStream inputStream) {
+        Map<String, String> nameToDisplayNameMap = getCustomizedDisplayNames();
         if (MapUtils.isNotEmpty(nameToDisplayNameMap)) {
             return fixPredictorDisplayName(inputStream, nameToDisplayNameMap);
         }
@@ -130,7 +184,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     InputStream fixPredictorDisplayName(InputStream inputStream, Map<String, String> nameToDisplayNameMap) {
         StringBuilder sb = new StringBuilder();
 
-        log.info("start to replace edit name for " + MultiTenantContext.getShortTenantId());
+        log.info("start to replace top predictor edit name for " + MultiTenantContext.getShortTenantId());
         try (InputStreamReader reader = new InputStreamReader(
                 new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                         ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
