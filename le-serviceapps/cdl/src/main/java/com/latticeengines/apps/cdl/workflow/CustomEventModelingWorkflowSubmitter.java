@@ -80,6 +80,9 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
+    @Value("${cdl.modeling.workflow.mem.mb}")
+    protected int workflowMemMb;
+
     private InternalResourceRestApiProxy internalResourceProxy;
 
     @Inject
@@ -232,6 +235,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .modelIteration(parameters.getModelIteration()) //
+                .workflowContainerMem(workflowMemMb) //
                 .ratingEngineType(ratingEngineType) //
                 .build();
     }

@@ -450,6 +450,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         public Builder ratingEngineType(RatingEngineType ratingEngineType) {
             useConfiguredModelingAttributesBuilder.ratingEngineType(ratingEngineType);
             return this;
