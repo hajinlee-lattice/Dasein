@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -131,11 +133,13 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private DataFeedTask transactionDataFeedTask;
 
+    List<S3ImportTemplateDisplay> templates = null;
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        templates = cdlService.getS3ImportTemplate(customerSpace);
     }
 
     @Test(groups = "deployment")
@@ -611,20 +615,28 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = "importBase")
     public void testGetS3ImportDisplay() {
-        List<S3ImportTemplateDisplay> templates = cdlService.getS3ImportTemplate(customerSpace);
+        // verify that the tenant has 5 template display by default
         Assert.assertNotNull(templates);
         Assert.assertEquals(templates.size(), 5);
         // S3ImportTemplateDisplay display = templates.get(0);
         // Assert.assertEquals(display.getPath(), "N/A");
-        prepareBaseData(ENTITY_ACCOUNT);
-        // mock up one path to run through the logic
+        for (S3ImportTemplateDisplay display : templates) {
+            Assert.assertEquals(display.getPath(), "N/A");
+            Assert.assertEquals(display.getTemplateName(), "N/A");
+            Assert.assertEquals(display.getExist(), Boolean.FALSE);
+        }
         templates = cdlService.getS3ImportTemplate(customerSpace);
         Assert.assertNotNull(templates);
-        Assert.assertEquals(templates.size(), 5);
-        S3ImportTemplateDisplay display = templates.get(0);
-        Assert.assertEquals(display.getPath(), PREFIX + SLASH + "AccountSchema");
+        List<String> feedTypes = Arrays.asList(ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_CONTACT + FEED_TYPE_SUFFIX,
+                ENTITY_TRANSACTION + FEED_TYPE_SUFFIX);
+        List<S3ImportTemplateDisplay> renderedTemplats = templates.stream()
+                .filter(template -> feedTypes.contains(template.getFeedType())).collect(Collectors.toList());
+        for (S3ImportTemplateDisplay display : renderedTemplats) {
+            Assert.assertEquals(display.getPath(), PREFIX + SLASH + display.getFeedType());
+            Assert.assertEquals(display.getExist(), Boolean.TRUE);
+        }
     }
 
 }
