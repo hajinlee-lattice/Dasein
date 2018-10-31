@@ -145,7 +145,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                         String attrName = record.get("Original Column Name");
                         if (attrName != null && nameToDisplayNameMap.containsKey(attrName)) {
                             String[] s = toArray(record);
-                            log.info("replacing " + record.get("Attribute Name") + "with "
+                            log.info("replacing " + record.get("Attribute Name") + " with "
                                     + nameToDisplayNameMap.get(attrName));
                             s[1] = nameToDisplayNameMap.get(attrName);
                             for (String val : s) {
