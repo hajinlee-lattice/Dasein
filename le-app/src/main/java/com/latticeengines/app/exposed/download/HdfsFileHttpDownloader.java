@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
@@ -42,8 +43,13 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String customer;
     private String filePath;
 
+    // for test purpose
+    protected HdfsFileHttpDownloader() {
+        super(null, null);
+    }
+
     public HdfsFileHttpDownloader(DownloadRequestBuilder requestBuilder) {
-        super(requestBuilder.mimeType, requestBuilder.importFromS3Service);
+        super(requestBuilder.mimeType, requestBuilder.importFromS3Service, requestBuilder.cdlAttrConfigProxy);
         this.filter = requestBuilder.filter;
         this.modelId = requestBuilder.modelId;
         this.yarnConfiguration = requestBuilder.yarnConfiguration;
@@ -215,6 +221,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         private String modelingServiceHdfsBaseDir;
         private ModelSummaryProxy modelSummaryProxy;
         protected ImportFromS3Service importFromS3Service;
+        private CDLAttrConfigProxy cdlAttrConfigProxy;
 
         public DownloadRequestBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -248,6 +255,11 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
         public DownloadRequestBuilder setImportFromS3Service(ImportFromS3Service importFromS3Service) {
             this.importFromS3Service = importFromS3Service;
+            return this;
+        }
+
+        public DownloadRequestBuilder setCDLAttrConfigProxy(CDLAttrConfigProxy cdlAttrConfigProxy) {
+            this.cdlAttrConfigProxy = cdlAttrConfigProxy;
             return this;
         }
     }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -47,6 +48,15 @@ public class AttrConfigResource {
         return request;
     }
 
+    @GetMapping(value = "/custom-displaynames")
+    @ResponseBody
+    @ApiOperation("get cdl attribute customized display names")
+    public List<AttrConfig> getCustomDisplayNames(@PathVariable String customerSpace) {
+        List<AttrConfig> attrConfigs = attrConfigService
+                .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
+        return attrConfigs;
+    }
+
     @GetMapping(value = "/categories/{categoryName}")
     @ResponseBody
     @ApiOperation("get cdl attribute config request")
@@ -59,7 +69,16 @@ public class AttrConfigResource {
         return request;
     }
 
+    @PostMapping(value = "/render")
+    @ApiOperation("render configs given attribute configs")
+    @ResponseBody
+    public List<AttrConfig> renderConfigs(@PathVariable String customerSpace,
+            @RequestBody List<AttrConfig> configList) {
+        return attrConfigService.renderConfigs(configList);
+    }
+
     @PostMapping(value = "/overview")
+    @ResponseBody
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
             @RequestParam(value = "category", required = false) List<String> categoryNames, //
             @RequestParam(value = "activeOnly", required = false, defaultValue = "0") boolean activeOnly, //
@@ -74,8 +93,7 @@ public class AttrConfigResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation("save cdl attribute config request")
-    public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace,
-            @RequestBody AttrConfigRequest request,
+    public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace, @RequestBody AttrConfigRequest request,
             @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         request.fixJsonDeserialization();
         return attrConfigService.saveRequest(request, mode);

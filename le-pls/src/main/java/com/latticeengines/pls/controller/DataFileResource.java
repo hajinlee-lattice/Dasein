@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.app.exposed.download.HttpFileDownLoader;
 import com.latticeengines.pls.service.DataFileProviderService;
 
 import io.swagger.annotations.Api;
@@ -69,7 +69,8 @@ public class DataFileResource {
     public void getTopPredictorsCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_model.csv");
+        dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_model.csv",
+                HttpFileDownLoader.DownloadMode.TOP_PREDICTOR);
     }
 
     @RequestMapping(value = "/readoutcsv", method = RequestMethod.GET, headers = "Accept=application/json")

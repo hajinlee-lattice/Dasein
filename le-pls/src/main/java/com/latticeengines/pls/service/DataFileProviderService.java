@@ -5,7 +5,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.app.exposed.download.HttpFileDownLoader;
+
 public interface DataFileProviderService {
+
+    void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
+            String filter, HttpFileDownLoader.DownloadMode mode) throws IOException;
 
     void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
             String filter) throws IOException;

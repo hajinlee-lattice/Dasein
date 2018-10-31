@@ -395,6 +395,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public List<AttrConfig> renderConfigs(List<AttrConfig> attrConfigs) {
+        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, new ArrayList<>());
+        return generateListFromMap(attrConfigGrpsForTrim);
+    }
+
     /*
      * split configs by entity, then distribute thread to render separately
      */
@@ -494,8 +500,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     /**
      * Input AttrConfig may only have partial AttrProps
      */
-    @Override
-    public List<AttrConfig> renderForEntity(List<AttrConfig> configList, BusinessEntity entity) {
+    private List<AttrConfig> renderForEntity(List<AttrConfig> configList, BusinessEntity entity) {
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
             Set<String> attrNames = configList.stream().map(AttrConfig::getAttrName).collect(Collectors.toSet());
@@ -513,7 +518,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId) {
-        log.info("hi " + tenantId);
         return attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantId);
     }
 

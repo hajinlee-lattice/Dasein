@@ -23,7 +23,7 @@ public interface AttrConfigService {
 
     AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode);
 
-    List<AttrConfig> renderForEntity(List<AttrConfig> configList, BusinessEntity entity);
+    List<AttrConfig> renderConfigs(List<AttrConfig> configList);
 
     List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId);
 

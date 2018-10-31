@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
@@ -23,5 +24,9 @@ public interface CDLAttrConfigProxy {
 
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace,
             @Nullable List<String> categoryNames, @NonNull List<String> propertyNames, boolean activeOnly);
+
+    List<AttrConfig> getCustomDisplayNames(String customerSpace);
+
+    List<AttrConfig> renderConfigs(String customerSpace, List<AttrConfig> configs);
 
 }

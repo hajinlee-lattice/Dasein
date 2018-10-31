@@ -16,6 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader;
 import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader.DownloadRequestBuilder;
+import com.latticeengines.app.exposed.download.HttpFileDownLoader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.pls.service.DataFileProviderService;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
@@ -48,11 +50,20 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Inject
     private ImportFromS3Service importFromS3Service;
 
+    @Inject
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
+
+    @Override
+    public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
+            String filter, HttpFileDownLoader.DownloadMode mode) {
+        HdfsFileHttpDownloader downloader = getDownloader(modelId, mimeType, filter);
+        downloader.downloadFile(request, response, mode);
+    }
+
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
             String filter) {
-        HdfsFileHttpDownloader downloader = getDownloader(modelId, mimeType, filter);
-        downloader.downloadFile(request, response);
+        downloadFile(request, response, modelId, mimeType, filter, HttpFileDownLoader.DownloadMode.DEFAULT);
     }
 
     @Override
@@ -159,7 +170,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         requestBuilder.setMimeType(mimeType).setFilter(filter).setModelId(modelId)
                 .setYarnConfiguration(yarnConfiguration).setModelSummaryProxy(modelSummaryProxy);
         requestBuilder.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
-                .setImportFromS3Service(importFromS3Service);
+                .setImportFromS3Service(importFromS3Service).setCDLAttrConfigProxy(cdlAttrConfigProxy);
         return new HdfsFileHttpDownloader(requestBuilder);
     }
 

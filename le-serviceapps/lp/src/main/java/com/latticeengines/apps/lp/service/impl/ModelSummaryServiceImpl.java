@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,6 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -365,26 +365,18 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     private Map<String, String> findNameToDisplayNameMap() {
         Map<String, String> nameToDisplayNameMap = new HashMap<>();
-        List<AttrConfig> customDisplayNameAttrs = lpAttrConfigService
-                .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
-        if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
-            Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
-            customDisplayNameAttrs.forEach(attrConfig -> {
-                BusinessEntity entity = attrConfig.getEntity();
-                if (!attrConfigGrps.containsKey(entity)) {
-                    attrConfigGrps.put(entity, new ArrayList<>());
-                }
-                attrConfigGrps.get(entity).add(attrConfig);
-            });
-            Tenant tenant = MultiTenantContext.getTenant();
-            attrConfigGrps.forEach((entity, configList) -> {
-                MultiTenantContext.setTenant(tenant);
-                List<AttrConfig> renderedConfigList = lpAttrConfigService.renderForEntity(configList, entity);
+        try {
+            List<AttrConfig> customDisplayNameAttrs = lpAttrConfigService
+                    .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
+            if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
+                List<AttrConfig> renderedConfigList = lpAttrConfigService.renderConfigs(customDisplayNameAttrs);
                 renderedConfigList.stream().forEach(config -> {
                     nameToDisplayNameMap.put(config.getAttrName(),
                             config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
                 });
-            });
+            }
+        } catch (LedpException e) {
+            log.warn("Got LedpException " + ExceptionUtils.getStackTrace(e));
         }
         return nameToDisplayNameMap;
     }

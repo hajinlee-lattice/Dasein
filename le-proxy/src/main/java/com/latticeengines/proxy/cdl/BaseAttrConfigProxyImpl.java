@@ -11,7 +11,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
@@ -92,6 +94,22 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         AttrConfigRequest result = post("validate attr config request", url, request, AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
+    }
+
+    public List<AttrConfig> getCustomDisplayNames(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/custom-displaynames", //
+                shortenCustomerSpace(customerSpace));
+        log.info("getCustomDisplayNames url is " + url);
+        List<AttrConfig> result = getList("get custom displayNames", url, AttrConfig.class);
+        return result;
+    }
+
+    public List<AttrConfig> renderConfigs(String customerSpace, List<AttrConfig> configs) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/render", //
+                shortenCustomerSpace(customerSpace));
+        log.info("renderConfigs url is " + url);
+        List<?> result = post("render Configs ", url, configs, List.class);
+        return JsonUtils.convertList(result, AttrConfig.class);
     }
 
 }
