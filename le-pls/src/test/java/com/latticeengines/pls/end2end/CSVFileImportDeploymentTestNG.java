@@ -5,11 +5,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -243,7 +244,11 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(schema.getField(fieldName).getProp("PatternString"), patternString);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
-        Assert.assertEquals(records.get(0).get(fieldName).toString(), "1501084800000");
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = format.parse("2017-7-27");
+
+        Assert.assertEquals(records.get(0).get(fieldName).toString(), Long.toString(date.getTime()));
     }
 
     @Test(groups = "deployment")
