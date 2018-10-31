@@ -32,6 +32,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -190,7 +192,13 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = "updateSegment")
     public void deleteSegment() {
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
-        segmentEntityMgr.delete(retrieved);
+        segmentEntityMgr.delete(retrieved, false, false);
+        assertEquals(segmentEntityMgr.findAll().size(), 2);
+        retrieved = segmentEntityMgr.findByName(segmentName);
+        Assert.assertNotNull(retrieved);
+        Assert.assertTrue(retrieved.getDeleted());
+
+        segmentEntityMgr.delete(retrieved, false, true);
         assertEquals(segmentEntityMgr.findAll().size(), 1);
     }
 }

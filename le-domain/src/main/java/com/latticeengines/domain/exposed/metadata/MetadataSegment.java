@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.pls.SoftDeletable;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -53,7 +54,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable, SoftDeletable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,6 +100,10 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Column(name = "CREATED", nullable = false)
     @JsonProperty("created")
     private Date created;
+
+    @Column(name = "DELETED")
+    @JsonProperty("deleted")
+    private Boolean deleted = false;
 
     @JsonProperty("is_master_segment")
     @Column(name = "IS_MASTER_SEGMENT", nullable = false)
@@ -243,6 +248,16 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

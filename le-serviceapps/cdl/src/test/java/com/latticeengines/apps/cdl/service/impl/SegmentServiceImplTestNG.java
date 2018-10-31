@@ -113,7 +113,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         boolean exception = false;
         try {
             log.info("Retrieving segmentName: " + segmentName);
-            boolean res = segmentService.deleteSegmentByName(segmentName, true);
+            boolean res = segmentService.deleteSegmentByName(segmentName, true, true);
             log.info("Retrieving segment: " + res);
             assertTrue(res);
         } catch (Exception e) {

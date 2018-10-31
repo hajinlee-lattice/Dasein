@@ -1,12 +1,15 @@
 package com.latticeengines.apps.cdl.dao.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.SegmentDao;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
@@ -35,6 +38,31 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
             return null;
         }
         return (MetadataSegment) list.get(0);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    @Override
+    public List<String> getAllDeletedSegments() {
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<MetadataSegment> entityClz = getEntityClass();
+        String selectQueryStr = "SELECT name " //
+                + "FROM %s " //
+                + "WHERE deleted = :deleted ";
+
+        selectQueryStr += "ORDER BY updated DESC ";
+
+        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
+
+        Query query = session.createQuery(selectQueryStr);
+        query.setParameter("deleted", Boolean.TRUE);
+
+        List<?> rawResult = query.getResultList();
+
+        if (CollectionUtils.isEmpty(rawResult)) {
+            return new ArrayList<String>();
+        }
+        return JsonUtils.convertList(rawResult, String.class);
     }
 
 }

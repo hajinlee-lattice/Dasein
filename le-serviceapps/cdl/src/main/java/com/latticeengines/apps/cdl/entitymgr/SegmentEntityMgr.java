@@ -22,6 +22,10 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment updateSegmentWithoutAction(MetadataSegment segment, MetadataSegment existingSegment);
 
-    void delete(MetadataSegment segment, Boolean ignoreDependencyCheck);
+    void delete(MetadataSegment segment, Boolean ignoreDependencyCheck, Boolean hardDelete);
+
+    void revertDelete(String segmentName);
+
+    List<String> getAllDeletedSegments();
 
 }

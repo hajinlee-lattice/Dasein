@@ -112,9 +112,27 @@ public class SegmentResource {
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ApiOperation(value = "Delete a segment by name")
-    public Boolean deleteSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
+    public Boolean deleteSegmentByName(@PathVariable String customerSpace,
+            @PathVariable String segmentName,
+            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.deleteSegmentByName(segmentName, false);
+        return segmentService.deleteSegmentByName(segmentName, false, hardDelete);
+    }
+
+    @PutMapping(value = "/{segmentName}/revertdelete")
+    @ResponseBody
+    @ApiOperation(value = "Revert segment deletion given its name")
+    public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace,
+            @PathVariable String segmentName) {
+        segmentService.revertDeleteSegmentByName(segmentName);
+        return true;
+    }
+
+    @GetMapping(value = "/deleted")
+    @ResponseBody
+    @ApiOperation(value = "Get all deleted segments")
+    public List<String> getAllDeletedSegments(@PathVariable String customerSpace) {
+        return segmentService.getAllDeletedSegments();
     }
 
     @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.GET, headers = "Accept=application/json")

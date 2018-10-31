@@ -55,10 +55,25 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
-    public void deleteSegmentByName(String customerSpace, String segmentName) {
-        String url = constructUrl("/{customerSpace}/segments/{segmentName}", //
-                shortenCustomerSpace(customerSpace), segmentName);
+    public void deleteSegmentByName(String customerSpace, String segmentName, boolean hardDelete) {
+        String url = constructUrl(
+                "/{customerSpace}/segments/{segmentName}?hard-delete={hardDelete}", //
+                shortenCustomerSpace(customerSpace), segmentName, hardDelete);
         delete("deleteSegmentByName", url);
+    }
+
+    public void revertDeleteSegmentByName(String customerSpace, String segmentName) {
+        String url = constructUrl("/{customerSpace}/segments/{segmentName}/revertdelete", //
+                shortenCustomerSpace(customerSpace), segmentName);
+        put("revertDeleteSegmentByName", url);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List<String> getAllDeletedSegments(String customerSpace) {
+        String url = constructUrl("/{customerSpace}/segments/deleted", //
+                shortenCustomerSpace(customerSpace));
+        List raw = get("getAllDeletedSegments", url, List.class);
+        return JsonUtils.convertList(raw, String.class);
     }
 
     public Map<BusinessEntity, Long> updateSegmentCounts(String customerSpace, String segmentName) {

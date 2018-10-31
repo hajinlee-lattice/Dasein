@@ -15,7 +15,12 @@ public interface SegmentService {
 
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
 
-    Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck);
+    Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck,
+            boolean hardDelete);
+
+    Boolean revertDeleteSegmentByName(String segmentName);
+
+    List<String> getAllDeletedSegments();
 
     List<MetadataSegment> getSegments();
 

@@ -84,14 +84,25 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck) {
+    public Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck,
+            boolean hardDelete) {
         MetadataSegment segment = segmentEntityMgr.findByName(segmentName);
         if (segment == null) {
             return false;
         }
-
-        segmentEntityMgr.delete(segment, ignoreDependencyCheck);
+        segmentEntityMgr.delete(segment, ignoreDependencyCheck, hardDelete);
         return true;
+    }
+
+    @Override
+    public Boolean revertDeleteSegmentByName(String segmentName) {
+        segmentEntityMgr.revertDelete(segmentName);
+        return true;
+    }
+
+    @Override
+    public List<String> getAllDeletedSegments() {
+        return segmentEntityMgr.getAllDeletedSegments();
     }
 
     @Override

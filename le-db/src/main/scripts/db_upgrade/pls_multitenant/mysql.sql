@@ -27,8 +27,11 @@ CREATE PROCEDURE `UpdatePLSTables`()
   UPDATE `GlobalAuthentication`.`GlobalUser` SET Email = "ga_dev@lattice-engines.com" where Email = "bnguyen@lattice-engines.com"
   UPDATE `GlobalAuthentication`.`GlobalAuthentication` set Username = "ga_dev@lattice-engines.com" where Username = "bnguyen@lattice-engines.com"
 
+  ALTER TABLE `PLS_MultiTenant`.`METADATA_SEGMENT` ADD COLUMN `DELETED` bit(1) DEFAULT 0;
+
   ALTER TABLE `PLS_MultiTenant`.`CDL_EXTERNAL_SYSTEM` DROP INDEX `UKqbbh3ppo2juf81q2jm0pbws5t` ,
   ADD UNIQUE INDEX `UKqbbh3ppo2juf81q2jm0pbws5t` (`TENANT_ID` ASC, `ENTITY` ASC);
+
   END;
 //
 DELIMITER;

@@ -21,9 +21,13 @@ public interface BaseDao<T> {
 
     void deleteByPid(Long pid, boolean hardDelete);
 
+    void deleteByName(String name, boolean hardDelete);
+
     void revertDeleteById(String id);
 
     void revertDeleteByPid(Long pid);
+
+    void revertDeleteByName(String name);
 
     void deleteAll();
 

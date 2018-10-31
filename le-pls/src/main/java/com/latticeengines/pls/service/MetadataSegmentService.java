@@ -18,11 +18,15 @@ public interface MetadataSegmentService {
 
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
 
-    void deleteSegmentByName(String name);
+    void deleteSegmentByName(String name, boolean hardDelete);
+
+    void revertDeleteSegment(String segmentName);
+
+    List<String> getAllDeletedSegments();
 
     Map<String, List<String>> getDependencies(String segmentName);
 
     UIAction getDependenciesModelAndView(String segmentName);
 
-    UIAction deleteSegmentByNameModelAndView(String segmentName);
+    UIAction deleteSegmentByNameModelAndView(String segmentName, boolean hardDelete);
 }

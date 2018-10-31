@@ -80,12 +80,24 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public void delete(MetadataSegment segment, Boolean ignoreDependencyCheck) {
+    public void delete(MetadataSegment segment, Boolean ignoreDependencyCheck, Boolean hardDelete) {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new IllegalArgumentException("Cannot delete master segment");
         }
         segmentDao.update(segment);
-        segmentDao.delete(segment);
+        segmentDao.deleteByName(segment.getName(), hardDelete);
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public void revertDelete(String segmentName) {
+        segmentDao.revertDeleteByName(segmentName);
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public List<String> getAllDeletedSegments() {
+        return segmentDao.getAllDeletedSegments();
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)

@@ -228,6 +228,15 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     }
 
     @Override
+    public void deleteByName(String name, boolean hardDelete) {
+        if (hardDelete) {
+            hardDelete("name", name);
+        } else {
+            softDelete("name", name);
+        }
+    }
+
+    @Override
     public void deleteById(String id, boolean hardDelete) {
         if (hardDelete) {
             hardDelete("id", id);
@@ -266,6 +275,11 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @Override
     public void revertDeleteByPid(Long pid) {
         revertDelete("pid", pid);
+    }
+
+    @Override
+    public void revertDeleteByName(String name) {
+        revertDelete("name", name);
     }
 
     private void revertDelete(String field, Object id) {

@@ -122,9 +122,21 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     @Override
-    public void deleteSegmentByName(String name) {
+    public void deleteSegmentByName(String name, boolean hardDelete) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        segmentProxy.deleteSegmentByName(customerSpace, name);
+        segmentProxy.deleteSegmentByName(customerSpace, name, hardDelete);
+    }
+
+    @Override
+    public void revertDeleteSegment(String segmentName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        segmentProxy.revertDeleteSegmentByName(customerSpace, segmentName);
+    }
+
+    @Override
+    public List<String> getAllDeletedSegments() {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        return segmentProxy.getAllDeletedSegments(customerSpace);
     }
 
     @Override
@@ -141,10 +153,10 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     @Override
-    public UIAction deleteSegmentByNameModelAndView(String segmentName) {
+    public UIAction deleteSegmentByNameModelAndView(String segmentName, boolean hardDelete) {
         UIAction uiAction = null;
         try {
-            deleteSegmentByName(segmentName);
+            deleteSegmentByName(segmentName, hardDelete);
             uiAction = graphDependencyToUIActionUtil.generateUIAction("Segment is deleted successfully", View.Notice,
                     Status.Success, null);
         } catch (LedpException ex) {
