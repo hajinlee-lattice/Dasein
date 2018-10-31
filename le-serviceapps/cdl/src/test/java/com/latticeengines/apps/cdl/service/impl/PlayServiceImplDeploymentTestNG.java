@@ -272,6 +272,67 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
     }
 
+    @Test(groups = "deployment", dependsOnMethods = { "testDeleteViaRatingEngine" })
+    public void testDeleteViaSegment() {
+        Play newPlay = playService.getPlayByName(playName, true);
+        assertPlay(newPlay);
+        newPlay = playService.getFullPlayByName(playName, true);
+        assertPlay(newPlay);
+        List<Play> plays = playService.getAllFullPlays(false, ratingEngine1.getId());
+        Assert.assertNotNull(plays);
+        Assert.assertEquals(plays.size(), 1);
+
+        Play retrievedPlay = playService.getPlayByName(playName, false);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+
+        try {
+            String reSegmentName = retrievedPlay.getTargetSegment().getName();
+            segmentProxy.deleteSegmentByName(mainCustomerSpace, reSegmentName, true);
+            if (shouldPropagateDelete != Boolean.TRUE) {
+                Assert.fail(
+                        "Should not be able to delete segment if non-deleted rating engine exists in play");
+            } else {
+                retrievedPlay = playService.getPlayByName(playName, false);
+                Assert.assertNull(retrievedPlay);
+
+                retrievedPlay = playService.getPlayByName(playName, true);
+                Assert.assertNotNull(retrievedPlay);
+                Assert.assertEquals(retrievedPlay.getName(), playName);
+                Assert.assertNotNull(retrievedPlay.getDisplayName());
+                Assert.assertNotNull(retrievedPlay.getRatingEngine());
+                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+            }
+        } catch (LedpException ex) {
+            if (shouldPropagateDelete != Boolean.TRUE) {
+                Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40042);
+                retrievedPlay = playService.getPlayByName(playName, false);
+                Assert.assertNotNull(retrievedPlay);
+                Assert.assertEquals(retrievedPlay.getName(), playName);
+                Assert.assertNotNull(retrievedPlay.getDisplayName());
+                Assert.assertNotNull(retrievedPlay.getRatingEngine());
+                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+            } else {
+                Assert.fail("Should have been able to delete segment even "
+                        + "if non-deleted play exists as it would have first soft deleted plays");
+            }
+
+        }
+    }
+
     private void assertPlay(Play play) {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getCreatedBy(), CREATED_BY);

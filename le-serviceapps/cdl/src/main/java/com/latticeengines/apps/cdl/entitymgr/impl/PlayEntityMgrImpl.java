@@ -136,6 +136,14 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         return ratingEngineEntityMgr.findById(ratingEngineId);
     }
 
+    private MetadataSegment findTargetSegment(Play play) {
+        String segmentName = play.getTargetSegment().getName();
+        if (segmentName == null) {
+            throw new NullPointerException("Segment Name cannot be null.");
+        }
+        return segmentEntityMgr.findByName(segmentName);
+    }
+
     private void updateExistingPlay(Play existingPlay, Play play) {
         if (play.getDisplayName() != null) {
             existingPlay.setDisplayName(play.getDisplayName());
@@ -206,9 +214,12 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (play != null && play.getRatingEngine() != null) {
             String ratingId = play.getRatingEngine().getId();
             RatingEngine rating = findRatingEngine(play);
-            String targetSegmentName = rating.getSegment().getName();
+            String targetSegmentName = findTargetSegment(play).getName();
+            String ratingEngineSegment = rating.getSegment().getName();
 
             attrDepSet = new HashSet<>();
+            attrDepSet.add(ParsedDependencies.tuple(ratingEngineSegment, //
+                    VertexType.SEGMENT, EdgeType.DEPENDS_ON));
             attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
             attrDepSet.add(ParsedDependencies.tuple(ratingId, //
