@@ -83,7 +83,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
         lockTalkingPoints: false
     });
 
-    if ($scope.tp.IsNew === true || Date.now() - $scope.tp.created < 1000) { // if it hasn't been saved
+    if ($scope.tp.IsNew === true || !($scope.tp.title && $scope.tp.content) || Date.now() - $scope.tp.created < 1000) { // if it hasn't been saved
         vm.expanded = true;
     }
 

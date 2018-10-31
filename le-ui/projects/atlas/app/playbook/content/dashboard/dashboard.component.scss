@@ -17,6 +17,8 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                             }
                         }
                         &.campaign-type {
+                            background-image: url(/assets/images/ico-campaign-type.png);
+                             background-size: 24px 24px;
                             select {
                                 margin-top: .5em;
                             }
