@@ -1,8 +1,10 @@
 package com.latticeengines.aws.s3.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -262,15 +265,32 @@ public class S3ServiceImpl implements S3Service {
         object = sanitizePathToKey(object);
         if (s3Client.doesObjectExist(bucket, object)) {
             GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, object);
+            S3Object s3Object = null;
+            InputStream result = null;
             try {
-                S3Object s3Object = s3Client.getObject(getObjectRequest);
+                s3Object = s3Client.getObject(getObjectRequest);
                 log.info(String.format("Reading the object %s of type %s and size %s", object,
                         s3Object.getObjectMetadata().getContentType(),
                         FileUtils.byteCountToDisplaySize(s3Object.getObjectMetadata().getContentLength())));
-                return s3Object.getObjectContent();
+                try(S3ObjectInputStream stream = s3Object.getObjectContent()) {
+                    ByteArrayOutputStream temp = new ByteArrayOutputStream();
+                    IOUtils.copy(stream, temp);
+                    result = new ByteArrayInputStream(temp.toByteArray());
+                }
             } catch (AmazonS3Exception e) {
                 throw new RuntimeException("Failed to get object " + object + " from S3 bucket " + bucket, e);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to get object stream " + object + " from S3 bucket " + bucket, e);
+            } finally {
+                if (s3Object != null) {
+                    try {
+                        s3Object.close();
+                    } catch (IOException e) {
+                        log.error("Unable to close S3 object " + object);
+                    }
+                }
             }
+            return result;
         } else {
             log.info("Object " + object + " does not exist in bucket " + bucket);
             return null;
