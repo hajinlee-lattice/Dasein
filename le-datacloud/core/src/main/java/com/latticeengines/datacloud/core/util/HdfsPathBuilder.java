@@ -52,6 +52,7 @@ public class HdfsPathBuilder {
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
     private static final String COLLECTORS = "Collectors";
+    private static final String DEFAULT_POD = HdfsPodContext.getDefaultHdfsPodId();
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
@@ -63,8 +64,16 @@ public class HdfsPathBuilder {
         return new Path(PODS_ROOT).append(HdfsPodContext.getHdfsPodId());
     }
 
+    private Path defaultPodDir() {
+        return new Path(PODS_ROOT).append(DEFAULT_POD);
+    }
+
     public Path propDataDir() {
         return podDir().append(SERVICES).append(PROP_DATA);
+    }
+
+    private Path defaultPropDataDir() {
+        return defaultPodDir().append(SERVICES).append(PROP_DATA);
     }
 
     public Path constructTransformationSourceDir(Source source) {
@@ -289,7 +298,7 @@ public class HdfsPathBuilder {
     }
 
     public Path constructCollectorWorkerDir(String vendor, String workerId) {
-        return propDataDir().append(COLLECTORS).append(vendor).append(workerId);
+        return defaultPropDataDir().append(COLLECTORS).append(vendor).append(workerId);
     }
 
     @VisibleForTesting
