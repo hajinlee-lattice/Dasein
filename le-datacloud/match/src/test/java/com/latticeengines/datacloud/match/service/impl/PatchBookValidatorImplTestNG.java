@@ -99,8 +99,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     @Inject
     private PatchBookValidatorImpl validator;
 
-    // FIXME enable when PatchBookUtils is finalized.
-    @Test(groups = "functional", dataProvider = "patchBookValidation", enabled = false)
+    @Test(groups = "functional", dataProvider = "patchBookValidation")
     private void testPatchBookValidation(
             PatchBook.Type type, PatchBook[] books, PatchBookValidationError[] expectedErrors) {
         List<PatchBookValidationError> errors = validator.validate(type, TEST_DATA_CLOUD_VERSION, Arrays.asList(books));
@@ -162,7 +161,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
         };
     }
 
-    @Test(groups = "functional", dataProvider = "attrPatchValidateAndStandardize", enabled = true)
+    @Test(groups = "functional", dataProvider = "attrPatchValidateAndStandardize")
     private void testAttrPatchItemsValidateAndStandardize(PatchBook[] books, PatchBookValidationError[] expectedErrors) {
         List<PatchBookValidationError> errors = validator
                 .validatePatchKeyItemAndStandardize(Arrays.asList(books), TEST_DATA_CLOUD_VERSION);

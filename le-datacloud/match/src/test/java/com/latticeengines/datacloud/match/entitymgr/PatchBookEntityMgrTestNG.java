@@ -50,7 +50,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     /*
      * basic functionality check for entity manager
      */
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testBasicCRUD() {
         /* create */
 
@@ -96,7 +96,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     /*
      * test update field for a list of patch books
      */
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testUpdateFieldForMultiplePatchBooks() {
         PatchBook testBook = clone(TEST_PATCH_BOOK);
 

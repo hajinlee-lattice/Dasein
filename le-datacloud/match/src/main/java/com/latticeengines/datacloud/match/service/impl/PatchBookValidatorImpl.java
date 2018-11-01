@@ -65,15 +65,13 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         // standardize field first
         books.forEach(book -> PatchBookUtils.standardize(book, countryCodeService));
 
-        // type specific standardization
-        List<PatchBookValidationError> errors = validatePatchKeyItemAndStandardize(books, dataCloudVersion);
-
         // common validation
-        errors.addAll(validateCommon(books));
+        List<PatchBookValidationError> errors = validateCommon(books);
 
         // type specific validation
         switch (type) {
             case Attribute:
+                errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
                 errors.addAll(validateAttributePatchBook(dataCloudVersion, books));
                 break;
             case Domain:
