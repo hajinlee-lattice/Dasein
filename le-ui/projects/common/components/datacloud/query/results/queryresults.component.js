@@ -538,7 +538,9 @@ angular.module('common.datacloud.query.results', [
 
         sections.launched = (vm.topNCount && opts.suppressed ? vm.topNCount : (sections.selected > sections.suppressed ? sections.selected - sections.suppressed : sections.selected));
 
-        if(vm.topNClicked) {
+        var $topNCountEl = angular.element('input#topNCount');
+        
+        if($topNCountEl.is(':checked')) {
             sections.suppressed = Math.max(sections.total - vm.topNCount, sections.suppressed) || 0;
         }
 
