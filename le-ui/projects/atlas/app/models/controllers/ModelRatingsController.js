@@ -54,15 +54,8 @@ angular.module('lp.models.ratings', [
             vm.dashboard = ModelStore.getDashboardData();
             var dashboardIterations = vm.dashboard.iterations;
 
-
-
-
             // Show 'No Ratings Available' message if dashboard bucketMetadata isn't present for the selected iteration
             vm.hasRatingsAvailable = vm.dashboard.summary.bucketMetadata ? true : false;
-
-
-
-
 
             // use only iterations that have active modelSummaryId by creating new array
             vm.activeIterations = [];
@@ -77,13 +70,21 @@ angular.module('lp.models.ratings', [
             // Set active iteration (default value for iteration select menu) 
             // and working buckets (vm.workingBuckets is what drives the chart data)
             if ($stateParams.toggleRatings){
+
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
 
-                if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
-                }
+                // if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+
+                //     console.log("here");
+                //     console.log(vm.dashboard.summary.bucketMetadata);
+
+                //     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
+                // }
 
                 var id = vm.activeIteration.modelSummaryId;
+                ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
+                    vm.workingBuckets = result;
+                });
                 ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
                     vm.ratingsSummary = result;
                 });
@@ -108,7 +109,6 @@ angular.module('lp.models.ratings', [
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
-                    console.log(vm.workingBuckets);
                 }
             }
 
@@ -123,10 +123,6 @@ angular.module('lp.models.ratings', [
 
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
-
-
-        console.log(vm.dashboard);
-
 
         // Give the above code time to catch up before rendering the chart
         $timeout(function() {
@@ -401,8 +397,6 @@ angular.module('lp.models.ratings', [
             
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
-
-                    console.log(vm.dashboard.summary.bucketMetadata);
 
                     RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
                         vm.chartNotUpdated = true;
