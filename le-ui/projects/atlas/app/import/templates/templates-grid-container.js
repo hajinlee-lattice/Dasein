@@ -1,8 +1,6 @@
 import React, { Component } from "../../../../common/react-vendor";
 import { getAngularState } from "../react/states";
 
-
-
 import httpService from "../../../../common/app/http/http-service";
 import { SUCCESS } from "../../../../common/app/http/response";
 
@@ -13,15 +11,15 @@ import TemplatesRowActions, {
 } from "./templates-row-actions";
 import "./templates.scss";
 import Observer from "../../../../common/app/http/observer";
-import EditControl from "./components/edit-controls";
-import EditorText from "./components/editor-text";
+import EditControl from "../../../../common/widgets/table/controlls/edit-controls";
+import EditorText from "../../../../common/widgets/table/editors/editor-text";
 
 import messageService from "../../../../common/app/utilities/messaging-service";
 import Message, {
   NOTIFICATION
 } from "../../../../common/app/utilities/message";
 import LeTable from "../../../../common/widgets/table/le-table";
-import CopyComponent from "./components/copy-controll";
+import CopyComponent from "../../../../common/widgets/table/controlls/copy-controll";
 export default class GridContainer extends Component {
   constructor(props) {
     super(props);
@@ -36,7 +34,6 @@ export default class GridContainer extends Component {
   }
 
   createTemplate(response) {
-
     console.log(response);
 
     let entity = "";
@@ -64,9 +61,9 @@ export default class GridContainer extends Component {
     }
     let goTo = `home.import.entry.${entity}`;
 
-    console.log(goTo,response);
+    console.log(goTo, response);
 
-    getAngularState().go(goTo,response);
+    getAngularState().go(goTo, response);
   }
 
   actionCallbackHandler(response) {
@@ -123,7 +120,7 @@ export default class GridContainer extends Component {
     httpService.get("/pls/cdl/s3import/template", this.observer);
   }
 
-  saveTemplateNameHandler(cell, value){
+  saveTemplateNameHandler(cell, value) {
     if (value && value != "") {
       cell.setSavingState();
       let copy = Object.assign({}, this.state.data[cell.props.row]);
@@ -135,7 +132,6 @@ export default class GridContainer extends Component {
           response => {
             cell.toogleEdit();
             if (response.getStatus() === SUCCESS) {
-              
               let newState = [...this.state.data];
               newState[cell.props.row][cell.props.colName] = value;
               this.setState({ data: newState });
@@ -156,24 +152,26 @@ export default class GridContainer extends Component {
           name: "TemplateName",
           displayName: "Name",
           colSpan: 2,
-          template: (cell) =>{
-            if(!cell.state.saving && !cell.state.editing){
+          template: cell => {
+            if (!cell.state.saving && !cell.state.editing) {
               if (cell.props.rowData.Exist) {
                 return (
-                  <EditControl icon="fa fa-pencil-square-o" 
-                  title="Edit Name" 
-                  toogleEdit={cell.toogleEdit}
+                  <EditControl
+                    icon="fa fa-pencil-square-o"
+                    title="Edit Name"
+                    toogleEdit={cell.toogleEdit}
                     classes="initially-hidden"
                   />
                 );
               } else {
                 return null;
-              }  
+              }
             }
-            if(cell.state.editing && !cell.state.saving){
+            if (cell.state.editing && !cell.state.saving) {
               if (cell.props.rowData.Exist) {
                 return (
-                  <EditorText initialValue={cell.props.rowData.TemplateName} 
+                  <EditorText
+                    initialValue={cell.props.rowData.TemplateName}
                     cell={cell}
                     applyChanges={this.saveTemplateNameHandler}
                     cancel={cell.cancelHandler}
@@ -181,9 +179,8 @@ export default class GridContainer extends Component {
                 );
               } else {
                 return null;
-              }  
+              }
             }
-
           },
           datasource: "/pls/cdl/s3/template/displayname"
         },
@@ -196,10 +193,12 @@ export default class GridContainer extends Component {
           name: "Path",
           displayName: "Automated Import Location",
           colSpan: 4,
-          template: (cell) => {
+          template: cell => {
             if (cell.props.rowData.Exist) {
               return (
                 <CopyComponent
+                  title="Copy Link"
+                  data={cell.props.rowData[cell.props.colName]}
                   callback={() => {
                     messageService.sendMessage(
                       new Message(
@@ -226,7 +225,7 @@ export default class GridContainer extends Component {
         {
           name: "actions",
           colSpan: 3,
-          template: (cell) => {
+          template: cell => {
             return (
               <TemplatesRowActions
                 rowData={cell.props.rowData}
@@ -240,7 +239,7 @@ export default class GridContainer extends Component {
 
     return config;
   }
-  
+
   render() {
     return (
       <LeTable

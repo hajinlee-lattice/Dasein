@@ -1,4 +1,4 @@
-import React from "../../../../../common/react-vendor";
+import React from "../../../react-vendor";
 const EditControl = (props) => {
 
 

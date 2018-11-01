@@ -1,12 +1,9 @@
 import React, { Component } from "../../react-vendor";
 import LeGridList from "./table";
-import LeGridRow from "./table-row";
 import LeGridCell from "./table-cell";
 import CellContent from "./cell-content";
-import CellTools from "./cell-tools";
 import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
-import EditContainer from "./edit-container";
 import Aux from "../hoc/_Aux";
 
 export default class LeTable extends Component {
