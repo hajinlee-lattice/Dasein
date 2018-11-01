@@ -51,8 +51,8 @@ public class CDLResource {
 
     private static final String createS3TemplateMsg = "<p>%s template has been created.</p>";
     private static final String createS3TemplateAndImportMsg = "<p>%s template has been created.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
-    private static final String updateS3TemplateMsg = "<p>%s template has been edited.</p>";
-    private static final String updateS3TemplateAndImportMsg = "<p>%s template has been created.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
+    private static final String editS3TemplateMsg = "<p>%s template has been edited.</p>";
+    private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit Data Processing & Analysis to track the process.</p>";
 
     @Inject
@@ -129,7 +129,7 @@ public class CDLResource {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
-                            String.format(updateS3TemplateAndImportMsg, entity));
+                            String.format(editS3TemplateAndImportMsg, entity));
                 } else {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
                             String.format(createS3TemplateAndImportMsg, entity));
@@ -138,7 +138,7 @@ public class CDLResource {
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
-                            String.format(updateS3TemplateMsg, entity));
+                            String.format(editS3TemplateMsg, entity));
                 } else {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
                             String.format(createS3TemplateMsg, entity));
