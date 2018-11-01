@@ -190,6 +190,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         return this.detail.getTransactionCount();
     }
 
+    @JsonProperty("ProductCount")
+    public Long getProductCount() {
+        return this.detail.getProductCount();
+    }
+
+    @JsonProperty("ProductCount")
+    public void setProductCount(Long productCount) {
+        this.detail.setProductCount(productCount);
+    }
+
     @JsonProperty("OrphanContactCount")
     public Long getOrphanContactCount() {
         return this.detail.getOrphanContactCount();
@@ -271,6 +281,9 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         @JsonProperty("TransactionCount")
         private Long transactionCount = 0L;
 
+        @JsonProperty("ProductCount")
+        private Long productCount = 0L;
+
         @JsonProperty("OrphanContactCount")
         private Long orphanContactCount = 0L;
 
@@ -337,6 +350,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
 
         public void setTransactionCount(Long transactionCount) {
             this.transactionCount = transactionCount;
+        }
+
+        public Long getProductCount() {
+            return productCount;
+        }
+
+        public void setProductCount(Long productCount) {
+            this.productCount = productCount;
         }
 
         public Long getOrphanContactCount() {

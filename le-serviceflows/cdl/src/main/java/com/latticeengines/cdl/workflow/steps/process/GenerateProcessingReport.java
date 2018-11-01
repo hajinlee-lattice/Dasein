@@ -177,6 +177,10 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            } else if (entity == BusinessEntity.Product) {
+                ObjectNode entityNumberNode = JsonUtils.createObjectNode();
+                entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
+                entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
             }
 
             entitiesSummaryNode.set(entity.name(), entityNode);
@@ -190,18 +194,22 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
         detail.setTransactionCount(currentCnts.get(BusinessEntity.Transaction));
+        detail.setProductCount(currentCnts.get(BusinessEntity.Product));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
-
     }
 
     private Map<BusinessEntity, Long> retrieveCurrentEntityCnts() {
         Map<BusinessEntity, Long> currentCnts = new HashMap<>();
         currentCnts.put(BusinessEntity.Account, countInRedshift(BusinessEntity.Account));
         currentCnts.put(BusinessEntity.Contact, countInRedshift(BusinessEntity.Contact));
-        currentCnts.put(BusinessEntity.Product, countInRedshift(BusinessEntity.Product));
         currentCnts.put(BusinessEntity.Transaction, countRawTransactionInHdfs());
+
+        long num_products = countInRedshift(BusinessEntity.Product);
+        long num_productHierarchies = countInRedshift(BusinessEntity.ProductHierarchy);
+        currentCnts.put(BusinessEntity.Product, num_products + num_productHierarchies);
+
         return currentCnts;
     }
 
