@@ -148,6 +148,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.PLAYBOOK_MODULE, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, cg);
+        createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, cg).setDefaultValue(false);
 
 
         // multi-product flags

@@ -366,8 +366,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         String s3Bucket = importConfig.getS3Bucket();
         String s3FilePath = importConfig.getS3FilePath();
         List<String> warnings = new ArrayList<>();
-        try {
-            InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath);
+        try (InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath)) {
             InputStreamReader reader = new InputStreamReader(
                     new BOMInputStream(fileStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                             ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),

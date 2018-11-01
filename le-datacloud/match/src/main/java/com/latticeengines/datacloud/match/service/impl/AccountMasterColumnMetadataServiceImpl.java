@@ -132,8 +132,9 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
                 RetryTemplate retry = RetryUtils.getRetryTemplate(5);
                 try {
                     List<GenericRecord> recordsInAvro = retry.execute(context -> {
-                        InputStream is = s3Service.readObjectAsStream(s3Bucket, key);
-                        return AvroUtils.readFromInputStream(is);
+                        try (InputStream is = s3Service.readObjectAsStream(s3Bucket, key)) {
+                            return AvroUtils.readFromInputStream(is);
+                        }
                     });
                     records.addAll(recordsInAvro);
                 } catch (IOException e) {
