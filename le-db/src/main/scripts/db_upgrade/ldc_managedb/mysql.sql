@@ -51,10 +51,44 @@ CREATE PROCEDURE `UpdateDecisionGraphTable`()
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE `CreatePatchBookTable`()
+  BEGIN
+
+    CREATE TABLE `LDC_ManageDB`.`PatchBook` (
+      `PID` bigint not null auto_increment,
+      `City` varchar(255),
+      `Cleanup` bit not null,
+      `Country` varchar(255),
+      `CreatedBy` varchar(255),
+      `CreatedDate` datetime,
+      `Domain` varchar(255),
+      `DUNS` varchar(255),
+      `EffectiveSince` datetime,
+      `EffectiveSinceVersion` varchar(255),
+      `EOL` bit not null,
+      `ExpireAfter` datetime,
+      `ExpireAfterVersion` varchar(255),
+      `HotFix` bit not null,
+      `LastModifiedBy` varchar(255),
+      `LastModifiedDate` datetime,
+      `Logs` varchar(255),
+      `Name` varchar(255),
+      `PatchItems` JSON,
+      `State` varchar(255),
+      `Type` varchar(255) not null,
+      `Zipcode` varchar(255),
+      primary key (`PID`)
+    ) engine=InnoDB;
+
+  END //
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
     CALL `UpdateDataCloudVersionTable`();
     CALL `UpdateDecisionGraphTable`();
+    CALL `CreatePatchBookTable`();
 
     START TRANSACTION;
 
