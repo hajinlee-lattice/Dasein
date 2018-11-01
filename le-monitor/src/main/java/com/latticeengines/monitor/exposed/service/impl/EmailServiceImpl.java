@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
-import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -687,16 +686,16 @@ public class EmailServiceImpl implements EmailService {
             EmailTemplateBuilder builder;
             String inProgressSubject;
             switch (type) {
-                case EXPORT_TYPE_SEGMENT:
-                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_RUNNING);
-                    inProgressSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT;
-                    break;
-                case EXPORT_TYPE_ORPHANS:
-                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_RUNNING);
-                    inProgressSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT;
-                    break;
-                default:
-                    throw new RuntimeException("Unknown export type. Type=" + type);
+            case EXPORT_TYPE_SEGMENT:
+                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_RUNNING);
+                inProgressSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT;
+                break;
+            case EXPORT_TYPE_ORPHANS:
+                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_RUNNING);
+                inProgressSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT;
+                break;
+            default:
+                throw new RuntimeException("Unknown export type. Type=" + type);
             }
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{requestType}}", requestType);
@@ -704,28 +703,28 @@ public class EmailServiceImpl implements EmailService {
             sendMultiPartEmail(String.format(inProgressSubject, exportID), mp, Collections.singleton(user.getEmail()));
             log.info(String.format("Sending PLS export %s in-progress email to %s succeeded.", type, user.getEmail()));
         } catch (Exception e) {
-            log.error(String.format("Failed to send PLS export %s in-progress email to %s. Exception message=%s",
-                    type, user.getEmail(), e.getMessage()));
+            log.error(String.format("Failed to send PLS export %s in-progress email to %s. Exception message=%s", type,
+                    user.getEmail(), e.getMessage()));
         }
     }
 
     private void sendPlsExportSuccessEmail(User user, String hostport, String exportId, String exportType,
-                                           String requestType) {
+            String requestType) {
         try {
             log.info(String.format("Sending %s export complete email to %s started.", exportType, user.getEmail()));
             EmailTemplateBuilder builder;
             String successSubject;
             switch (exportType) {
-                case EXPORT_TYPE_SEGMENT:
-                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_SUCCESS);
-                    successSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT;
-                    break;
-                case EXPORT_TYPE_ORPHANS:
-                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_SUCCESS);
-                    successSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT;
-                    break;
-                default:
-                    throw new RuntimeException("Unknown export type. Type=" + exportType);
+            case EXPORT_TYPE_SEGMENT:
+                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_SUCCESS);
+                successSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT;
+                break;
+            case EXPORT_TYPE_ORPHANS:
+                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_SUCCESS);
+                successSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT;
+                break;
+            default:
+                throw new RuntimeException("Unknown export type. Type=" + exportType);
             }
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
@@ -735,14 +734,14 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{requestType}}", requestType);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png",
-                    "image/png", "instruction");
-            sendMultiPartEmail(String.format(successSubject, exportId), mp,
-                    Collections.singleton(user.getEmail()));
-            log.info(String.format("Sending PLS %s export complete email to %s succeeded.", exportType, user.getEmail()));
+            builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png", "image/png",
+                    "instruction");
+            sendMultiPartEmail(String.format(successSubject, exportId), mp, Collections.singleton(user.getEmail()));
+            log.info(String.format("Sending PLS %s export complete email to %s succeeded.", exportType,
+                    user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send PLS export %s complete email to %s. Exception message=%s",
-                    exportType, user.getEmail(), e.getMessage());
+            log.error("Failed to send PLS export %s complete email to %s. Exception message=%s", exportType,
+                    user.getEmail(), e.getMessage());
         }
     }
 
@@ -863,8 +862,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendS3CredentialEmail(User user, Tenant tenant, DropBoxSummary dropBoxSummary,
-            GrantDropBoxAccessResponse response) {
+    public void sendS3CredentialEmail(User user, Tenant tenant, DropBoxSummary dropBoxSummary, String initiator) {
         try {
             log.info("Sending s3 credentials to " + user.getEmail() + " on " + tenant.getName() + " started.");
             EmailTemplateBuilder builder;
@@ -878,11 +876,8 @@ public class EmailServiceImpl implements EmailService {
             if (StringUtils.isNotEmpty(dropBoxSummary.getDropBox())) {
                 builder.replaceToken("{{dropfolder}}", dropBoxSummary.getDropBox());
             }
-            if (StringUtils.isNotEmpty(response.getAccessKey())) {
-                builder.replaceToken("{{accessKey}}", response.getAccessKey());
-            }
-            if (StringUtils.isNotEmpty(response.getSecretKey())) {
-                builder.replaceToken("{{secretKey}}", response.getSecretKey());
+            if (StringUtils.isNotEmpty(initiator)) {
+                builder.replaceToken("{{initiator}}", initiator);
             }
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.S3_CREDENTIALS_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
@@ -941,8 +936,7 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{url}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(
-                    String.format(EmailSettings.S3_TEMPLATE_UPDATE_SUBJECT, templateName), mp,
+            sendMultiPartEmail(String.format(EmailSettings.S3_TEMPLATE_UPDATE_SUBJECT, templateName), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending s3 template update notification to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");

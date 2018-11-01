@@ -56,7 +56,7 @@ public class DropBoxResource {
 
     private static final Logger log = LoggerFactory.getLogger(DropBoxResource.class);
 
-    private static final String GET_DROPBOX_SUCCESS_MSG = "The credentials have been generated and emailed to all admin users.";
+    private static final String GET_DROPBOX_SUCCESS_MSG = "Bucket: %s, Dropfolder: %s, Access Key: %s, Secret Key: %s.\n This information will disappear once you close this pop up. Please store the information in a safe place.";
     private static final String GET_DROPBOX_WARNING_MSG = "Credentials have already been granted.\nYour Access Key is %s\n\n\\"
             + "Are you sure you want to generate new credential?\nThe existing key will expire immediately, and all admins will be notified.";
 
@@ -86,10 +86,11 @@ public class DropBoxResource {
             request.setAccessMode(DropBoxAccessMode.LatticeUser);
             log.info(String.format("Grant access via request %s for tenant %s.", request.toString(), customerSpace));
             GrantDropBoxAccessResponse response = dropBoxProxy.grantAccess(customerSpace, request);
-            sendEmailToAdmins(dropBoxSummary, response);
-            uiAction.setView(View.Banner);
+            sendEmailToAdmins(dropBoxSummary);
+            uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Success);
-            uiAction.setMessage(GET_DROPBOX_SUCCESS_MSG);
+            uiAction.setMessage(String.format(GET_DROPBOX_SUCCESS_MSG, dropBoxSummary.getBucket(),
+                    dropBoxSummary.getDropBox(), response.getAccessKey(), response.getSecretKey()));
         } else {
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Warning);
@@ -98,25 +99,28 @@ public class DropBoxResource {
         return uiAction;
     }
 
-    private void sendEmailToAdmins(DropBoxSummary dropBoxSummary, GrantDropBoxAccessResponse response) {
+    private void sendEmailToAdmins(DropBoxSummary dropBoxSummary) {
         Tenant tenant = MultiTenantContext.getTenant();
+        String initiator = MultiTenantContext.getEmailAddress();
         List<User> users = userService.getUsers(tenant.getId());
         List<Runnable> runnables = new ArrayList<>();
         users.stream().forEach(user -> {
             if (AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) {
                 Runnable runnable = () -> {
-                    emailService.sendS3CredentialEmail(user, tenant, dropBoxSummary, response);
+                    emailService.sendS3CredentialEmail(user, tenant, dropBoxSummary, initiator);
                 };
                 runnables.add(runnable);
             }
         });
-        log.info(String.format("Sending emails to %d external admins starts", runnables.size()));
+        log.info(String.format("Sending emails to %d external admins starts initiated by %s", runnables.size(),
+                initiator));
 
         if (tpForParallelStream == null) {
             tpForParallelStream = ThreadPoolUtils.getFixedSizeThreadPool("dropbox-resource", 4);
         }
         ThreadPoolUtils.runRunnablesInParallel(tpForParallelStream, runnables, 10, 1);
-        log.info(String.format("Sending emails to %d external admins finishes", runnables.size()));
+        log.info(String.format("Sending emails to %d external admins initiated by %s finishes", runnables.size(),
+                initiator));
     }
 
     @PutMapping("/key")
@@ -131,10 +135,11 @@ public class DropBoxResource {
         DropBoxSummary dropBoxSummary = new DropBoxSummary();
         dropBoxSummary.setBucket(response.getBucket());
         dropBoxSummary.setDropBox(response.getDropBox());
-        sendEmailToAdmins(dropBoxSummary, response);
-        uiAction.setView(View.Banner);
+        sendEmailToAdmins(dropBoxSummary);
+        uiAction.setView(View.Modal);
         uiAction.setStatus(Status.Success);
-        uiAction.setMessage(GET_DROPBOX_SUCCESS_MSG);
+        uiAction.setMessage(String.format(GET_DROPBOX_SUCCESS_MSG, response.getBucket(), response.getDropBox(),
+                response.getAccessKey(), response.getSecretKey()));
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 

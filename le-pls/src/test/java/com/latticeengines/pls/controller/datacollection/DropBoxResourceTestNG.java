@@ -66,7 +66,7 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
 
         response = new GrantDropBoxAccessResponse();
         Mockito.doNothing().when(emailService).sendS3CredentialEmail(Mockito.any(User.class), Mockito.any(Tenant.class),
-                Mockito.any(DropBoxSummary.class), Mockito.any(GrantDropBoxAccessResponse.class));
+                Mockito.any(DropBoxSummary.class), Mockito.any(String.class));
         Mockito.doReturn(response).when(dropBoxProxy).grantAccess(Mockito.any(String.class),
                 Mockito.any(GrantDropBoxAccessRequest.class));
     }
@@ -77,7 +77,7 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
         dropBoxSummary.setAccessMode(DropBoxAccessMode.LatticeUser);
         UIAction uiAction = dropBoxResource.generateUIActionBasedOnDropBox(dropBoxSummary);
         Assert.assertNotNull(uiAction);
-        Assert.assertEquals(uiAction.getView(), View.Banner);
+        Assert.assertEquals(uiAction.getView(), View.Modal);
         Assert.assertEquals(uiAction.getStatus(), Status.Success);
         Assert.assertNotNull(uiAction.getMessage());
 
