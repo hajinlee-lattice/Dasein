@@ -91,13 +91,11 @@ angular.module('lp.cg.talkingpoint.editor', [])
 
     vm.expand = function(bool) {
         vm.expanded = (bool ? bool : !vm.expanded);
-        if(vm.expanded) {
-            CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
-        }
-        var tmce = angular.element('iframe');
-        tmce.on('focus',function(){
-            console.log(focused);
-        });
+        $timeout(function(){
+            if(vm.expanded) {
+                CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
+            }
+        }, 100);
     };
 
     vm.titleFocus = function(talkingPoint) {

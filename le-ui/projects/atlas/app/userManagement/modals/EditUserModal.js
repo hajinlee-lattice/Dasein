@@ -39,7 +39,7 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
     $scope.user = $scope.$parent.user;
     
     var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
-    var userLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel);
+    var userLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel) || {};
 
     var hasLatticeEmail = $scope.user.Email.toLowerCase().includes('@lattice-engines.com');
 

@@ -63,7 +63,9 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     };
     
     $scope.showEditButton = function(user, number) {
-    	var userLevel = RightsUtility.getAccessLevel(user.AccessLevel);
+        var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel) || {},
+            userLevel = RightsUtility.getAccessLevel(user.AccessLevel) || {};
+            
     	if (currentLevel.ordinal == 3 && userLevel.ordinal == 4) {
     		return false;
     	}
