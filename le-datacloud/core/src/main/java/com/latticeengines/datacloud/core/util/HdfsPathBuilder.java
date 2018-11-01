@@ -53,7 +53,7 @@ public class HdfsPathBuilder {
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
     private static final String COLLECTORS = "Collectors";
 
-    private static String defaultPod = null;
+    private static volatile String defaultPod = null;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
