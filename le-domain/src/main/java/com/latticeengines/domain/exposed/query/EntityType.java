@@ -22,6 +22,7 @@ public enum EntityType {
             names.add(entry.getDisplayName());
         }
     }
+
     EntityType(BusinessEntity entity, SubType subType, String displayName) {
         this.entity = entity;
         this.subType = subType;
@@ -40,6 +41,15 @@ public enum EntityType {
         }
         throw new IllegalArgumentException(
                 String.format("There is no entity %s or type %s in EntityType", entity.name(), subType.name()));
+    }
+
+    public static EntityType fromDisplayNameToEntityType(String displayName) {
+        for (EntityType entry : values()) {
+            if (entry.getDisplayName().equals(displayName)) {
+                return entry;
+            }
+        }
+        throw new IllegalArgumentException(String.format("There is no corresponding EntityType for %s", displayName));
     }
 
     public BusinessEntity getEntity() {
