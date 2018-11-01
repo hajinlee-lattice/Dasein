@@ -1,28 +1,46 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
+import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.datacloud.match.util.PatchBookUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import reactor.core.publisher.ParallelFlux;
 
 @Component("patchBookValidator")
 public class PatchBookValidatorImpl implements PatchBookValidator {
+
+    @Autowired
+    @Qualifier("accountMasterColumnEntityMgr")
+    private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
 
     @Inject
     private CountryCodeService countryCodeService;
@@ -47,8 +65,11 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         // standardize field first
         books.forEach(book -> PatchBookUtils.standardize(book, countryCodeService));
 
+        // type specific standardization
+        List<PatchBookValidationError> errors = validatePatchKeyItemAndStandardize(books, dataCloudVersion);
+
         // common validation
-        List<PatchBookValidationError> errors = validateCommon(books);
+        errors.addAll(validateCommon(books));
 
         // type specific validation
         switch (type) {
@@ -69,6 +90,64 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         return errors;
     }
 
+    /*
+     * Check if patchKeyItem Key present in AccountMasterColumn and also not
+     * among the list of items which cannot be patched then standardize
+     */
+    @VisibleForTesting
+    List<PatchBookValidationError> validatePatchKeyItemAndStandardize(List<PatchBook> books,
+            String dataCloudVersion) {
+        Set<String> excludePatchItems = new HashSet<>(Arrays.asList(DataCloudConstants.LATTICE_ACCOUNT_ID,
+                DataCloudConstants.ATTR_LDC_DOMAIN, DataCloudConstants.ATTR_LDC_DUNS,
+                DataCloudConstants.ATTR_LDC_DOMAIN_SOURCE, DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN,
+                DataCloudConstants.ATTR_IS_PRIMARY_LOCATION, DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT,
+                DataCloudConstants.ATTR_IS_CTRY_PRIMARY_LOCATION, DataCloudConstants.ATTR_IS_ST_PRIMARY_LOCATION,
+                DataCloudConstants.ATTR_IS_ZIP_PRIMARY_LOCATION));
+        List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
+        ParallelFlux<AccountMasterColumn> amCols = columnEntityMgr
+                .findAll(dataCloudVersion);
+        // Getting List from ParallelFlux
+        List<AccountMasterColumn> amColsList = amCols.sequential().collectList().block();
+        // Collected AMColumnIds that we need to compare into a set
+        Set<String> amColumnIds = new HashSet<>();
+        for(AccountMasterColumn a : amColsList){
+            amColumnIds.add(a.getAmColumnId());
+        }
+        Map<String, List<Long>> errNotInAmAndExcluded = new HashMap<>();
+        // Iterate through input patch Books
+        for (PatchBook book : books) {
+            // Resetting the error message values as null
+            List<String> keysNotInAm = new ArrayList<>();
+            List<String> keysExcluded = new ArrayList<>();
+            // Iterate through the patchItems map to verify if one of AMColumn or from excluded patch list item
+            for (Map.Entry<String, Object> patchedItems : book.getPatchItems().entrySet()) {
+                if (!amColumnIds.contains(patchedItems.getKey())) {
+                    keysNotInAm.add(patchedItems.getKey());
+                }
+                if (excludePatchItems.contains(patchedItems.getKey())) {
+                    keysExcluded.add(patchedItems.getKey());
+                }
+            }
+            if (!keysNotInAm.isEmpty()) {
+
+                errNotInAmAndExcluded.putIfAbsent(PATCH_ITEM_NOT_IN_AM + keysNotInAm, new ArrayList<>());
+                errNotInAmAndExcluded.get(PATCH_ITEM_NOT_IN_AM + keysNotInAm).add(book.getPid());
+            }
+            if (!keysExcluded.isEmpty()) {
+                errNotInAmAndExcluded.putIfAbsent(EXCLUDED_PATCH_ITEM + keysExcluded, new ArrayList<>());
+                errNotInAmAndExcluded.get(EXCLUDED_PATCH_ITEM + keysExcluded).add(book.getPid());
+            }
+        }
+        // Return ErrorList
+        for (Map.Entry<String, List<Long>> itemNotInAmOrExcluded : errNotInAmAndExcluded.entrySet()) {
+            PatchBookValidationError error = new PatchBookValidationError();
+            error.setMessage(itemNotInAmOrExcluded.getKey());
+            error.setPatchBookIds(itemNotInAmOrExcluded.getValue());
+            patchBookValidErrorList.add(error);
+        }
+        return patchBookValidErrorList;
+    }
+
     private List<PatchBookValidationError> validateCommon(@NotNull List<PatchBook> books) {
         List<PatchBookValidationError> errors = new ArrayList<>();
         errors.addAll(PatchBookUtils.validateMatchKeySupport(books));
@@ -80,8 +159,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     private List<PatchBookValidationError> validateAttributePatchBook(
             @NotNull String dataCloudVersion, @NotNull List<PatchBook> books) {
         // TODO remember to validate duplicate match key
-        // TODO implement
-        return Collections.emptyList();
+        return PatchBookUtils.validateDuplicateMatchKey(books);
     }
 
     private List<PatchBookValidationError> validateLookupPatchBook(

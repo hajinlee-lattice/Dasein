@@ -11,10 +11,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.common.exposed.util.NameStringStandardizationUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
@@ -32,7 +39,8 @@ public class PatchBookUtils {
     public static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
     public static final String INVALID_EFFECTIVE_DATE_RANGE_ERROR =
             "ExpireAfter date should not be earlier than EffectiveSince date";
-    public static final String UNSUPPORTED_MATCH_KEY_ERROR = "Unsupported match key combination found for PID : ";
+    public static final String UNSUPPORTED_MATCH_KEY_ERROR = "Unsupported match key combination found. We do not support following combination : ";
+    public static final String INVALID_PATCH_ITEMS = "Invalid Patch Items : Empty Patch Item Object Found.";
 
     // Key: patch book type, Value: set of supported match key tuple (in serialized format)
     private static final Map<PatchBook.Type, Set<String>> SUPPORTED_MATCH_KEY_MAP = new HashMap<>();
@@ -124,7 +132,24 @@ public class PatchBookUtils {
      * @param countryCodeService service to standardize country string, should not be {@literal null}
      */
     public static void standardize(@NotNull PatchBook book, @NotNull CountryCodeService countryCodeService) {
-        // TODO implement
+        book.setDomain(DomainUtils.parseDomain(book.getDomain()));
+        book.setDuns(StringStandardizationUtils.getStandardDuns(book.getDuns()));
+        book.setName(NameStringStandardizationUtils.getStandardString(book.getName()));
+        book.setCity(NameStringStandardizationUtils.getStandardString(book.getCity()));
+        String cleanedCountry = countryCodeService.getStandardCountry(book.getCountry());
+        book.setCountry(cleanedCountry);
+        book.setState(LocationUtils.getStandardState(cleanedCountry, book.getState()));
+        book.setZipcode(StringStandardizationUtils.getStandardString(book.getZipcode()));
+        Map<String, Object> patchedItems = book.getPatchItems();
+        String standardizedPatchDomain = DomainUtils.parseDomain(getPatchDomain(book));
+        String standardizedPatchDuns = StringStandardizationUtils
+                .getStandardDuns(getPatchDuns(book));
+        if (patchedItems.containsKey(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Domain))) {
+            patchedItems.replace(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Domain), standardizedPatchDomain);
+        }
+        if (patchedItems.containsKey(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS))) {
+            patchedItems.replace(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS), standardizedPatchDuns);
+        }
     }
 
     /**
@@ -202,16 +227,21 @@ public class PatchBookUtils {
      * @return a list of validation errors to show which patch books have unsupported match keys
      */
     public static List<PatchBookValidationError> validateMatchKeySupport(@NotNull List<PatchBook> patchBooks) {
-        List<PatchBookValidationError> errorList = new ArrayList<>();
-        for (PatchBook entry : patchBooks) {
-            if (!isMatchKeySupported(entry)) {
-                PatchBookValidationError error = new PatchBookValidationError();
-                error.setMessage(UNSUPPORTED_MATCH_KEY_ERROR + entry.getPid());
-                error.setPatchBookIds(Collections.singletonList(entry.getPid()));
-                errorList.add(error);
-            }
-        }
-        return errorList;
+        Map<String, List<Long>> errorMap = patchBooks.stream() //
+                .filter(book -> !isMatchKeySupported(book)) //
+                .map(book -> { //
+                    String keyId = getMatchKeyValues(book).buildIdForKey(); //
+                    return Pair.of(UNSUPPORTED_MATCH_KEY_ERROR + keyId, Lists.newArrayList(book.getPid()));
+                }) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, ListUtils::union)); //
+        return errorMap.entrySet() //
+                .stream() //
+                .map(entry -> { //
+                    PatchBookValidationError error = new PatchBookValidationError(); //
+                    error.setMessage(entry.getKey()); //
+                    error.setPatchBookIds(entry.getValue()); //
+                    return error; //
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -254,8 +284,37 @@ public class PatchBookUtils {
      * @return a list of validation errors
      */
     public static List<PatchBookValidationError> validatePatchedItems(@NotNull List<PatchBook> patchBooks) {
-        // TODO implement
-        return null;
+        PatchBookValidationError error = new PatchBookValidationError();
+        List<Long> patchedIds = new ArrayList<>();
+        for (PatchBook patchBook : patchBooks) {
+            Map<String,Object> patchItems = patchBook.getPatchItems();
+            if (patchItems.isEmpty()) {
+                if (!patchedIds.contains(patchBook.getPid())) {
+                    patchedIds.add(patchBook.getPid());
+                }
+            }
+            if (!patchedIds.isEmpty()) {
+                boolean nullPatchItem = false;
+                for (Map.Entry<String,Object> items : patchItems.entrySet()) { // checking if all values corresponding to keys are empty/null
+                    if (items.getValue() == null) {
+                        nullPatchItem = true;
+                        break;
+                    }
+                }
+                if (nullPatchItem) {
+                    if (!patchedIds.contains(patchBook.getPid())) {
+                        patchedIds.add(patchBook.getPid());
+                    }
+                }
+            }
+        }
+        List<PatchBookValidationError> errorList = new ArrayList<>();
+        if (patchedIds.size() > 0) {
+            error.setMessage(INVALID_PATCH_ITEMS);
+            error.setPatchBookIds(patchedIds);
+            errorList.add(error);
+        }
+        return errorList;
     }
 
     /**

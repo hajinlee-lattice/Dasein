@@ -1,24 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
-import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
-import org.junit.Assert;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_DU_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.FACEBOOK_DCS_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.FACEBOOK_DCZ_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.FACEBOOK_DC_1;
@@ -33,6 +14,7 @@ import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_DC_1_2;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_DN_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_DN_2;
+import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_DU_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_D_1_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_D_1_2;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NCC_1;
@@ -41,6 +23,7 @@ import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NCSZ_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NCS_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NCS_2;
+import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NCZ_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NC_1_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NC_1_2;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NSCI_1;
@@ -48,15 +31,38 @@ import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NSCI_3;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NS_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NS_2;
-import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_NCZ_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_N_1_1;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_N_1_2;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.GOOGLE_N_1_3;
-import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newPatchBook;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newDomainDunsPatchItems;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newDunsPatchItems;
+import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newPatchBook;
 import static com.latticeengines.datacloud.match.util.PatchBookUtils.DUPLICATE_MATCH_KEY_ERROR;
 import static com.latticeengines.datacloud.match.util.PatchBookUtils.UNSUPPORTED_MATCH_KEY_ERROR;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.junit.Assert;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
+import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
 @ContextConfiguration(locations = { "classpath:test-datacloud-match-context.xml" })
 public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTests {
@@ -91,7 +97,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     }
 
     @Inject
-    private PatchBookValidator validator;
+    private PatchBookValidatorImpl validator;
 
     // FIXME enable when PatchBookUtils is finalized.
     @Test(groups = "functional", dataProvider = "patchBookValidation", enabled = false)
@@ -114,6 +120,59 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     private Object[][] providePatchBookValidationTestData() {
         // TODO add test data for other types and merge here
         return addType(provideLookupPatchBookValidationTestData(), PatchBook.Type.Lookup);
+    }
+
+    @DataProvider(name = "attrPatchValidateAndStandardize")
+    private Object[][] dataForPatchItemValidateAndStandardize() {
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("Domain", "abc.com"); // column not present in AccountMasterColumn
+        map1.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS), "123456778"); // excludedPatchItem
+        map1.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.City), "  Sunnyvale  "); // Valid : standardize
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("Domain", "def.com"); // column not present in AccountMasterColumn
+        map2.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS), "123456778  "); // excludedPatchItem
+        map2.put("City", "  Mountain View  "); // column not present in AccountMasterColumn
+        return new Object[][] {
+                {
+                new PatchBook[] {
+                        TestPatchBookUtils //
+                            .newPatchBook(1L,new MatchKeyTuple //
+                                .Builder() //
+                                .withDomain("google.com") //
+                                .withDuns("123234115") //
+                                .withName("Google Inc.") //
+                                .build(), map1),
+                        TestPatchBookUtils //
+                            .newPatchBook(2L,new MatchKeyTuple //
+                                .Builder() //
+                                .withDomain("yahoo.com") //
+                                .withDuns("434343433") //
+                                .withName("Yahoo Inc.") //
+                                .build(), map2) //
+                },
+                new PatchBookValidationError[] {
+                        // Column = Domain
+                                newError(PatchBookValidator.PATCH_ITEM_NOT_IN_AM + "[Domain]", 1L),
+                        // Column = LDC_DUNS
+                                newError(PatchBookValidator.EXCLUDED_PATCH_ITEM
+                                        + "[" + MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS) + "]", 1L, 2L),
+                        // Column Domain, Duns
+                                newError(PatchBookValidator.PATCH_ITEM_NOT_IN_AM + "[City, Domain]", 2L) }
+                }
+        };
+    }
+
+    @Test(groups = "functional", dataProvider = "attrPatchValidateAndStandardize", enabled = true)
+    private void testAttrPatchItemsValidateAndStandardize(PatchBook[] books, PatchBookValidationError[] expectedErrors) {
+        List<PatchBookValidationError> errors = validator
+                .validatePatchKeyItemAndStandardize(Arrays.asList(books), TEST_DATA_CLOUD_VERSION);
+        Assert.assertNotNull(errors);
+        Assert.assertEquals(errors.size(), expectedErrors.length);
+
+        List<PatchBookValidationError> expectedErrorList = Arrays.stream(expectedErrors).collect(Collectors.toList());
+        errors.forEach(error -> verifyValidationError(error, expectedErrorList));
+        // all expected errors are matched
+        Assert.assertTrue(expectedErrorList.isEmpty());
     }
 
     private Object[][] provideLookupPatchBookValidationTestData() {

@@ -1,17 +1,24 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
+import java.util.Date;
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
-import java.util.Date;
-import java.util.List;
-
 /**
  * Validator for {@link PatchBook} entries
  */
 public interface PatchBookValidator {
+
+    /**
+     * Error Messages for invalid patchItems in PatchBook
+     */
+    static final String PATCH_ITEM_NOT_IN_AM = "Invalid Patched Items provided. Column not present in LDC_ManageDB.AccountMasterColumn for current approved version :";
+    static final String EXCLUDED_PATCH_ITEM = "Invalid Patched Items provided. Column present in excluded Patch list : ";
+
     /**
      * Validate a list of {@link PatchBook} under specified DataCloud version. Only entries with the given type and
      * satisfy {@link PatchBookUtils#isEndOfLife(PatchBook, Date)} == FALSE (NOT end of life) will be validated.
