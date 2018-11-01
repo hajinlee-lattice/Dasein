@@ -541,7 +541,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         case IMPACTED_RATING_MODELS:
             return "RatingModel(s):";
         case IMPACTED_PLAYS:
-            return "Play(s):";
+            return "Campaign(s):";
         default:
             throw new IllegalArgumentException("This type conversion is not supported");
         }
