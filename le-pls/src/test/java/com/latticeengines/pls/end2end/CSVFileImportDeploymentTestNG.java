@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +30,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -243,12 +242,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(schema.getField(fieldName).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName).getProp("PatternString"), patternString);
 
+        long expected = TimeStampConvertUtils.convertToLong("2017-7-27");
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = format.parse("2017-7-27");
-
-        Assert.assertEquals(records.get(0).get(fieldName).toString(), Long.toString(date.getTime()));
+        Assert.assertEquals(records.get(0).get(fieldName).toString(), Long.toString(expected));
     }
 
     @Test(groups = "deployment")
