@@ -372,6 +372,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         //copy to hdfs
         String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, workerId).toString();
+        log.info("about to upload collected data to hdfs: " + hdfsDir);
         HdfsUtils.mkdir(yarnConfiguration, hdfsDir);
 
         for (File tmpFile : tmpFiles) {
@@ -845,79 +846,86 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     private void ingestConsumedWorker(CollectionWorker worker) throws Exception {
 
-        String vendor = worker.getVendor();
+        try {
 
-        //hdfs path contain the collection result
-        String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, worker.getWorkerId()).toString();
-        List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, ".+\\.csv");
-        if (CollectionUtils.isEmpty(hdfsFiles)) {
+            String vendor = worker.getVendor();
 
-            log.error(worker.getVendor() + " worker " + worker.getWorkerId() //
-                    + "\'s output dir on hdfs does not contain csv files");
-            return;
+            //hdfs path contain the collection result
+            String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, worker.getWorkerId()).toString();
+            log.info("handling collected data in hdfs: " + hdfsDir);
+            List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, ".+\\.csv");
+            if (CollectionUtils.isEmpty(hdfsFiles)) {
 
-        }
+                log.error(worker.getVendor() + " worker " + worker.getWorkerId() //
+                        + "\'s output dir on hdfs does not contain csv files");
+                return;
 
-        //copy hdfs file to local for processing
-        List<File> tmpFiles = new ArrayList<>();
-        for (String hdfsFile : hdfsFiles) {
+            }
 
-            File file = File.createTempFile("ingest", "csv");
-            file.deleteOnExit();
-            tmpFiles.add(file);
+            //copy hdfs file to local for processing
+            List<File> tmpFiles = new ArrayList<>();
+            for (String hdfsFile : hdfsFiles) {
 
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFile, file.getPath());
+                File file = File.createTempFile("ingest", "csv");
+                file.deleteOnExit();
+                tmpFiles.add(file);
 
-        }
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFile, file.getPath());
 
-        //bucketing
-        List<File> bucketFiles = doBucketing(tmpFiles, vendor);
-        if (CollectionUtils.isNotEmpty(bucketFiles)) {
+            }
 
-            String hdfsIngestDir = hdfsPathBuilder.constructIngestionDir(vendor + "_RAW").toString();
-            HdfsUtils.mkdir(yarnConfiguration, hdfsIngestDir);
+            //bucketing
+            List<File> bucketFiles = doBucketing(tmpFiles, vendor);
+            if (CollectionUtils.isNotEmpty(bucketFiles)) {
 
-            for (File bucketFile : bucketFiles) {
+                String hdfsIngestDir = hdfsPathBuilder.constructIngestionDir(vendor + "_RAW").toString();
+                HdfsUtils.mkdir(yarnConfiguration, hdfsIngestDir);
 
-                String hdfsFilePath = hdfsIngestDir + bucketFile.getName();
+                for (File bucketFile : bucketFiles) {
 
-                if (HdfsUtils.fileExists(yarnConfiguration, hdfsFilePath)) {
+                    String hdfsFilePath = hdfsIngestDir + bucketFile.getName();
 
-                    AvroUtils.appendToHdfsFile(yarnConfiguration, hdfsFilePath,
-                            AvroUtils.readFromLocalFile(bucketFile.getPath()), true);
+                    if (HdfsUtils.fileExists(yarnConfiguration, hdfsFilePath)) {
 
-                } else {
+                        AvroUtils.appendToHdfsFile(yarnConfiguration, hdfsFilePath,
+                                AvroUtils.readFromLocalFile(bucketFile.getPath()), true);
 
-                    HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(),
-                            hdfsIngestDir);
+                    } else {
+
+                        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(),
+                                hdfsIngestDir);
+
+                    }
 
                 }
 
             }
 
-        }
+            //clean local file
+            for (File tmpFile : tmpFiles) {
 
-        //clean local file
-        for (File tmpFile : tmpFiles) {
-
-            FileUtils.deleteQuietly(tmpFile);
-
-        }
-
-        if (CollectionUtils.isNotEmpty(bucketFiles)) {
-
-            for (File bucketFile : bucketFiles) {
-
-                FileUtils.deleteQuietly(bucketFile);
+                FileUtils.deleteQuietly(tmpFile);
 
             }
 
+            if (CollectionUtils.isNotEmpty(bucketFiles)) {
+
+                for (File bucketFile : bucketFiles) {
+
+                    FileUtils.deleteQuietly(bucketFile);
+
+                }
+
+            }
+
+            //update worker status
+            worker.setStatus(CollectionWorker.STATUS_INGESTED);
+            collectionWorkerService.getEntityMgr().update(worker);
+
         }
-
-        //update worker status
-        worker.setStatus(CollectionWorker.STATUS_INGESTED);
-        collectionWorkerService.getEntityMgr().update(worker);
-
+        catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public void ingest() {
