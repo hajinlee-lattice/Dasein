@@ -71,7 +71,6 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         // type specific validation
         switch (type) {
             case Attribute:
-                errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
                 errors.addAll(validateAttributePatchBook(dataCloudVersion, books));
                 break;
             case Domain:
@@ -156,8 +155,11 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     private List<PatchBookValidationError> validateAttributePatchBook(
             @NotNull String dataCloudVersion, @NotNull List<PatchBook> books) {
-        // TODO remember to validate duplicate match key
-        return PatchBookUtils.validateDuplicateMatchKey(books);
+        List<PatchBookValidationError> errors = new ArrayList<>();
+        errors.addAll(PatchBookUtils.validateDuplicateMatchKey(books));
+        errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
+        // TODO add other specific check for attribute patch book entries here
+        return errors;
     }
 
     private List<PatchBookValidationError> validateLookupPatchBook(
