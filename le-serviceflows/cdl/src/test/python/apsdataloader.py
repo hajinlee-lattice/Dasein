@@ -154,7 +154,7 @@ class ApsDataLoader(object):
         for df in dfs:
             params.append([df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index), self.webHdfsHostPort, self.outputPath, userId])
             index += 1
-        self.parallelExecutePool(fileWriterFunc, params, 16)
+        self.parallelExecutePool(fileWriterFunc, params, 8)
 
         files = [localDir + '/' + file for file in os.listdir(localDir)]
         for file in files:
