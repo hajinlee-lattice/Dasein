@@ -42,6 +42,7 @@ public class PatchBook implements HasPid, Serializable {
     public static final String COLUMN_EOL = "EOL";
     public static final String COLUMN_EFFECTIVE_SINCE_VERSION = "EffectiveSinceVersion";
     public static final String COLUMN_EXPIRE_AFTER_VERSION = "ExpireAfterVersion";
+    public static final String COLUMN_DOMAIN = "Domain";
     public static final String COLUMN_DUNS = "DUNS";
     public static final String COLUMN_PATCH_ITEMS = "PatchItems";
     public static final String COLUMN_CLEANUP = "Cleanup";
@@ -55,8 +56,8 @@ public class PatchBook implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = COLUMN_TYPE, nullable = false)
     private Type type;
-    @JsonProperty("Domain")
-    @Column(name = "Domain")
+    @JsonProperty(COLUMN_DOMAIN)
+    @Column(name = COLUMN_DOMAIN)
     private String domain;
 
     /* input MatchKey fields */

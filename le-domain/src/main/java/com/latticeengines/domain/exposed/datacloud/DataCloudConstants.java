@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public final class DataCloudConstants {
@@ -12,6 +13,7 @@ public final class DataCloudConstants {
     public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
     public static final String ACCOUNT_MASTER = "AccountMaster";
     public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
+    public static final String PATCH_BOOK_ATTR_PREFIX = "PATCH_";
 
     public static final String LATTIC_ID = "LatticeID";
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
@@ -51,6 +53,9 @@ public final class DataCloudConstants {
     public static final String ATTR_ALEXA_RANK = "AlexaRank";
     public static final String ATTR_ALEXA_DOMAIN = "URL";
     public static final String ATTR_LAST_UPLOAD_DATE = "LE_Last_Upload_Date";
+    public static final String ATTR_PATCH_DOMAIN = PATCH_BOOK_ATTR_PREFIX + PatchBook.COLUMN_DOMAIN;
+    public static final String ATTR_PATCH_DUNS = PATCH_BOOK_ATTR_PREFIX + PatchBook.COLUMN_DUNS;
+    public static final String ATTR_PATCH_ITEMS = PATCH_BOOK_ATTR_PREFIX + PatchBook.COLUMN_PATCH_ITEMS;
 
     // AMSeed attribute names which are different with AM
     // As for attributes shared between AMSeed and AM, just use ATTR_xxx
