@@ -221,7 +221,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
             attrDepSet.add(ParsedDependencies.tuple(ratingEngineSegment, //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON));
             attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
-                    VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
+                    VertexType.SEGMENT, EdgeType.DEPENDS_ON));
             attrDepSet.add(ParsedDependencies.tuple(ratingId, //
                     VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
             attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
