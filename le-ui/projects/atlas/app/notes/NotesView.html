@@ -18,7 +18,7 @@
                 class="button orange-button"
                 ng-click="vm.addNote(note)"
                 ng-if="!vm.saveInProgress"
-                ng-disabled="addNoteForm.$pristine">{{vm.ResourceUtility.getString('NOTES_ADD_NOTE')}}</button>
+                ng-disabled="addNoteForm.$pristine || note.length > 250">{{vm.ResourceUtility.getString('NOTES_ADD_NOTE')}}</button>
             <button
                 type="button"
                 disabled="disabled"
@@ -90,7 +90,7 @@
                             class="button orange-button pull-right"
                             ng-show="!vm.saveInProgress"
                             ng-click="vm.updateNote(note)"
-                            ng-disabled="editNoteForm.$pristine">{{vm.ResourceUtility.getString('BUTTON_SAVE_CHANGES_LABEL')}}</button>
+                            ng-disabled="editNoteForm.$pristine || note.editContents.length > 250">{{vm.ResourceUtility.getString('BUTTON_SAVE_CHANGES_LABEL')}}</button>
                         <button
                             type="button"
                             disabled="disabled"
