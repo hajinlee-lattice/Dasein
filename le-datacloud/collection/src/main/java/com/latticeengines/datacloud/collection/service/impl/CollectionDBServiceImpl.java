@@ -892,8 +892,16 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                     } else {
 
-                        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(),
-                                hdfsIngestDir);
+                        if (bucketFile.exists()) {
+
+                            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(),
+                                    hdfsIngestDir);
+
+                        } else {
+
+                            log.warn("no data gathered for bucket file: " + bucketFile.getPath());
+
+                        }
 
                     }
 
