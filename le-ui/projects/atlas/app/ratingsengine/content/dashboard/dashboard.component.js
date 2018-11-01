@@ -292,7 +292,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 }
 
                 if (vm.configFilters && vm.configFilters['QUANTITY_IN_PERIOD']) {
-                    vm.qualityCriteria = vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL' ? 'at least' : 'at most';
+                    vm.quantityCriteria = vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL' ? 'at least' : 'at most';
                 }
 
                 if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
