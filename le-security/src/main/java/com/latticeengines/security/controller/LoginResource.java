@@ -92,7 +92,7 @@ public class LoginResource {
             Ticket ticket = sessionService.authenticate(creds);
 
             if (ticket == null) {
-                doc.setErrors(Collections.singletonList("Invalid username or password."));
+                doc.setErrors(Collections.singletonList("The email address or password is not valid. Please re-enter your credentials."));
                 return doc;
             }
 
@@ -103,7 +103,7 @@ public class LoginResource {
             GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
             GlobalAuthUser userData = gaUserEntityMgr.findByUserId(ticketData.getUserId());
             if (userData == null) {
-                doc.setErrors(Collections.singletonList("Invalid username or password."));
+                doc.setErrors(Collections.singletonList("The email address or password is not valid. Please re-enter your credentials."));
                 return doc;
             }
             doc.setFirstName(userData.getFirstName());

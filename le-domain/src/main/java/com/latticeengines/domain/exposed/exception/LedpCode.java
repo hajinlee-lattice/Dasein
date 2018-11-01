@@ -123,7 +123,7 @@ public enum LedpCode {
 
     // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
-    LEDP_18001("Invalid username or password."), //
+    LEDP_18001("The email address or password is not valid. Please re-enter your credentials."), //
     LEDP_18002("Could not authenticate ticket {0}."), //
     LEDP_18003("Access denied."), //
     LEDP_18004("Could not register user {0}."), //
