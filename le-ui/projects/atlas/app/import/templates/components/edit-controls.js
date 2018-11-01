@@ -4,7 +4,7 @@ const EditControl = (props) => {
 
     return(
         <li
-        className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
+        className={`le-table-cell-icon le-table-cell-icon-actions ${props.classes ? props.classes : ''}`}
         title={props.title ? props.title : 'Edit'}
         onClick={() => {
             props.toogleEdit();

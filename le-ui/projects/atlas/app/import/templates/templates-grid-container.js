@@ -1,14 +1,7 @@
 import React, { Component } from "../../../../common/react-vendor";
-import Aux from "../../../../common/widgets/hoc/_Aux";
 import { getAngularState } from "../react/states";
 
-import LeGridList from "../../../../common/widgets/table/table";
-import LeGridRow from "../../../../common/widgets/table/table-row";
-import LeGridCell from "../../../../common/widgets/table/table-cell";
-import CellContent from "../../../../common/widgets/table/cell-content";
-import CellTools from "../../../../common/widgets/table/cell-tools";
-import LeTableHeader from "../../../../common/widgets/table/table-header";
-import LeTableBody from "../../../../common/widgets/table/table-body";
+
 
 import httpService from "../../../../common/app/http/http-service";
 import { SUCCESS } from "../../../../common/app/http/response";
@@ -22,18 +15,18 @@ import "./templates.scss";
 import Observer from "../../../../common/app/http/observer";
 import EditControl from "./components/edit-controls";
 import EditorText from "./components/editor-text";
-import EditContainer from "../../../../common/widgets/table/edit-container";
 
 import messageService from "../../../../common/app/utilities/messaging-service";
 import Message, {
   NOTIFICATION
 } from "../../../../common/app/utilities/message";
+import LeTable from "../../../../common/widgets/table/le-table";
+import CopyComponent from "./components/copy-controll";
 export default class GridContainer extends Component {
   constructor(props) {
     super(props);
     this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
-    this.getCellEditTools = this.getCellEditTools.bind(this);
-    this.saveTemplateName = this.saveTemplateName.bind(this);
+    this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
     this.state = {
       forceReload: false,
       showEmpty: false,
@@ -89,127 +82,6 @@ export default class GridContainer extends Component {
         break;
     }
   }
-  copyPath(text) {
-    // var text = "Example text to appear on clipboard";
-    window.navigator.clipboard.writeText(text).then(
-      () => {
-        console.log("Async: Copying to clipboard was successful!");
-        messageService.sendMessage(
-          new Message(null, NOTIFICATION, "success", "", "Copied to Clipboard")
-        );
-      },
-      err => {
-        console.error("Async: Could not copy text: ", err);
-      }
-    );
-  }
-
-  getCopyPathUI(rowData) {
-    if (!rowData.Exist) {
-      return null;
-    } else {
-      return (
-        <li
-          className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
-          title="Copy Link"
-          onClick={() => {
-            this.copyPath(rowData.Path);
-          }}
-        >
-          <i className="fa fa-files-o" />
-        </li>
-      );
-    }
-  }
-
-  saveTemplateName(colName, rowIndex, value, callbackDone) {
-    if (value != "") {
-      let copy = Object.assign({},this.state.data[rowIndex]);
-       copy[colName] = value; 
-      httpService.put(
-        "/pls/cdl/s3/template/displayname",
-        copy,
-        new Observer(response => {
-          if(callbackDone){
-            callbackDone();
-          }
-          if (response.getStatus() === SUCCESS) {
-            let newState = [...this.state.data];
-            newState[rowIndex][colName] = value;
-            this.setState({ data: newState });
-          }
-        })
-      );
-    }
-  }
-  getCellEditTools(rowData) {
-    if (!rowData.Exist) {
-      return <div />;
-    } else {
-      return (
-        <CellTools>
-          <EditControl icon="fa fa-pencil-square-o" title="Edit Name" />
-        </CellTools>
-      );
-    }
-  }
-  getRows() {
-    if (this.state.data.length > 0) {
-      let rowsUI = this.state.data.map((row, index) => {
-        return (
-          <LeGridRow key={index} index={index} rowData={row}>
-            <LeGridCell
-              colName="TemplateName"
-              colSpan="2"
-              row={index}
-              col="0"
-              editable="true"
-              apply={this.saveTemplateName}
-            >
-              <CellContent>
-                <span title={row.TemplateName}>{row.TemplateName}</span>
-              </CellContent>
-              {this.getCellEditTools(row)}
-              <EditContainer>
-                <EditorText initialValue={row.TemplateName} />
-              </EditContainer>
-            </LeGridCell>
-
-            <LeGridCell colName="Object" colSpan="2" row={index} col="1">
-              <CellContent>
-                <span>{row.Object}</span>
-              </CellContent>
-            </LeGridCell>
-
-            <LeGridCell colName="Path" colSpan="4" row={index} col="2">
-              <CellContent name="Path">
-                <span>{row.Path}</span>
-              </CellContent>
-              <CellTools>{this.getCopyPathUI(row)}</CellTools>
-            </LeGridCell>
-
-            <LeGridCell colName="edited" colSpan="1" row={index} col="3">
-              <CellContent name="edited">
-                <span>{row.edited}</span>
-              </CellContent>
-            </LeGridCell>
-
-            <LeGridCell colName="actions" colSpan="3" row={index} col="4">
-              <CellTools classes="templates-controlls">
-                <TemplatesRowActions
-                  rowData={row}
-                  callback={this.actionCallbackHandler}
-                />
-              </CellTools>
-            </LeGridCell>
-          </LeGridRow>
-        );
-      });
-      return rowsUI;
-    } else {
-      return null;
-    }
-  }
 
   componentWillUnmount() {
     httpService.unsubscribeObservable(this.observer);
@@ -249,49 +121,134 @@ export default class GridContainer extends Component {
       }
     );
     httpService.get("/pls/cdl/s3import/template", this.observer);
-    // TemplateService().getTemplates(this.observer);
   }
+
+  saveTemplateNameHandler(cell, value){
+    if (value && value != "") {
+      cell.setSavingState();
+      let copy = Object.assign({}, this.state.data[cell.props.row]);
+      copy[cell.props.colName] = value;
+      httpService.put(
+        "/pls/cdl/s3/template/displayname",
+        copy,
+        new Observer(
+          response => {
+            cell.toogleEdit();
+            if (response.getStatus() === SUCCESS) {
+              
+              let newState = [...this.state.data];
+              newState[cell.props.row][cell.props.colName] = value;
+              this.setState({ data: newState });
+            }
+          },
+          error => {
+            cell.toogleEdit();
+          }
+        )
+      );
+    }
+  }
+  getConfig() {
+    let config = {
+      name: "import-templates",
+      columns: [
+        {
+          name: "TemplateName",
+          displayName: "Name",
+          colSpan: 2,
+          template: (cell) =>{
+            if(!cell.state.saving && !cell.state.editing){
+              if (cell.props.rowData.Exist) {
+                return (
+                  <EditControl icon="fa fa-pencil-square-o" 
+                  title="Edit Name" 
+                  toogleEdit={cell.toogleEdit}
+                    classes="initially-hidden"
+                  />
+                );
+              } else {
+                return null;
+              }  
+            }
+            if(cell.state.editing && !cell.state.saving){
+              if (cell.props.rowData.Exist) {
+                return (
+                  <EditorText initialValue={cell.props.rowData.TemplateName} 
+                    cell={cell}
+                    applyChanges={this.saveTemplateNameHandler}
+                    cancel={cell.cancelHandler}
+                  />
+                );
+              } else {
+                return null;
+              }  
+            }
+
+          },
+          datasource: "/pls/cdl/s3/template/displayname"
+        },
+        {
+          name: "Object",
+          displayName: "Object",
+          colSpan: 2
+        },
+        {
+          name: "Path",
+          displayName: "Automated Import Location",
+          colSpan: 4,
+          template: (cell) => {
+            if (cell.props.rowData.Exist) {
+              return (
+                <CopyComponent
+                  callback={() => {
+                    messageService.sendMessage(
+                      new Message(
+                        null,
+                        NOTIFICATION,
+                        "success",
+                        "",
+                        "Copied to Clipboard"
+                      )
+                    );
+                  }}
+                />
+              );
+            } else {
+              return null;
+            }
+          }
+        },
+        {
+          name: "Edited",
+          displayName: "Edited",
+          colSpan: 1
+        },
+        {
+          name: "actions",
+          colSpan: 3,
+          template: (cell) => {
+            return (
+              <TemplatesRowActions
+                rowData={cell.props.rowData}
+                callback={this.actionCallbackHandler}
+              />
+            );
+          }
+        }
+      ]
+    };
+
+    return config;
+  }
+  
   render() {
-    console.log("RENDER");
     return (
-      <Aux>
-        <LeGridList
-          name="import-templates"
-          showLoading={this.state.showLoading}
-          showEmpty={this.state.showEmpty}
-          emptymsg={"There is no data"}
-        >
-          <LeTableHeader>
-            <LeGridCell colName="TemplateName" colSpan="2">
-              <CellContent name="TemplateName">
-                <span>Name</span>
-              </CellContent>
-            </LeGridCell>
-
-            <LeGridCell colName="Object" colSpan="2">
-              <CellContent name="Object">
-                <span>Object</span>
-              </CellContent>
-            </LeGridCell>
-
-            <LeGridCell colName="Path" colSpan="4">
-              <CellContent name="Path">
-                <span>Automated Import Location</span>
-              </CellContent>
-            </LeGridCell>
-
-            <LeGridCell colName="edited" colSpan="1">
-              <CellContent name="edited">
-                <span>Last Edited</span>
-              </CellContent>
-            </LeGridCell>
-
-            <LeGridCell colName="actions" colSpan="3" />
-          </LeTableHeader>
-
-          <LeTableBody>{this.getRows()}</LeTableBody>
-        </LeGridList>
-      </Aux>
+      <LeTable
+        config={this.getConfig()}
+        showLoading={this.state.showLoading}
+        showEmpty={this.state.showEmpty}
+        data={this.state.data}
+      />
     );
   }
 }

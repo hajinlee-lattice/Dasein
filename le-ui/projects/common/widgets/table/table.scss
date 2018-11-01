@@ -173,6 +173,12 @@ $font-size: 12px;
       width: 100%;
       flex-wrap: nowrap;
     }
+    .le-cell-template{
+      display: flex;
+      flex: 1;
+      width: 100%;
+      flex-wrap: nowrap;
+    }
   }
 
   .le-table-cell-centered {

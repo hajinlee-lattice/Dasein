@@ -2,6 +2,7 @@ import React, { Component } from "../../../../../common/react-vendor";
 export default class EditorText extends Component {
   constructor(props) {
     super(props);
+    console.log('PROPS', props);
     this.state = { value: this.props.initialValue, cancelled: false };
   }
 
@@ -10,7 +11,7 @@ export default class EditorText extends Component {
   }
   changeHandler(event) {
     this.setState({ value: event.target.value });
-    // console.log(event.target.value);
+    console.log(event.target.value);
     // this.value = event.target.value;
   }
   render() {
@@ -28,7 +29,7 @@ export default class EditorText extends Component {
             });
             break;
             case 13:
-              this.props.applyChanges(this.state.value);
+              this.props.applyChanges(this.props.cell, this.state.value);
             break;
           }
         }}
@@ -37,7 +38,7 @@ export default class EditorText extends Component {
         }}
         onBlur={() => {
           if(!this.state.cancelled){
-            this.props.applyChanges(this.state.value);
+            this.props.applyChanges(this.props.cell, this.state.value);
           }else{
             this.props.cancel();
           }
