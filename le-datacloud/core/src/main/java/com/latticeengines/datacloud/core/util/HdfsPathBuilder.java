@@ -52,13 +52,13 @@ public class HdfsPathBuilder {
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
     private static final String COLLECTORS = "Collectors";
-    private static final String DEFAULT_POD;
+
+    private static String defaultPod = null;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-        DEFAULT_POD = HdfsPodContext.getDefaultHdfsPodId();
     }
 
     public Path podDir() {
@@ -66,7 +66,15 @@ public class HdfsPathBuilder {
     }
 
     private Path defaultPodDir() {
-        return new Path(PODS_ROOT).append(DEFAULT_POD);
+        // lazy load default pod
+        if (defaultPod == null) {
+            synchronized (HdfsPathBuilder.class) {
+                if (defaultPod == null) {
+                    defaultPod = HdfsPodContext.getDefaultHdfsPodId();
+                }
+            }
+        }
+        return new Path(PODS_ROOT).append(defaultPod);
     }
 
     public Path propDataDir() {
