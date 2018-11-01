@@ -53,15 +53,12 @@ public class ComputeOrphanRecordsStep extends RunDataFlow<ComputeOrphanRecordsSt
             log.info(String.format("Update data collection artifact of pid=%s, name=%s, status=%s)",
                     artifact.getPid(), artifact.getName(), artifact.getStatus()));
         } else {
-            DataCollection collection = dataCollectionProxy
-                    .getOrCreateDataCollectionStatus(customerSpace, version)
-                    .getDataCollection();
+            DataCollection collection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
             artifact = new DataCollectionArtifact();
             artifact.setName(configuration.getOrphanRecordsType().getOrphanType());
             artifact.setUrl(null);
             artifact.setStatus(DataCollectionArtifact.Status.GENERATING);
             artifact.setDataCollection(collection);
-            log.info("keliu artifact=" + JsonUtils.serialize(artifact));
             artifact = dataCollectionProxy.createDataCollectionArtifact(customerSpace, version, artifact);
             log.info(String.format("Create new data collection artifact of pid=%s name=%s, status=%s",
                     artifact.getPid(), artifact.getName(), artifact.getStatus()));

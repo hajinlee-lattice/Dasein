@@ -47,11 +47,11 @@ public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
-    @JsonIgnore
+    @JsonProperty("ArtifactId")
     private Long pid;
 
     @Column(name = "CREATE_TIME", nullable = false)
-    @JsonIgnore
+    @JsonProperty("CreateTime")
     private Long createTime;
 
     @Column(name = "NAME")
@@ -75,7 +75,7 @@ public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("DataCollection")
+    @JsonIgnore
     private DataCollection dataCollection;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)

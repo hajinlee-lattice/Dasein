@@ -402,7 +402,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     public DataCollectionArtifact updateDataCollectionArtifact(String customerSpace, DataCollectionArtifact artifact) {
         String url = "/customerspaces/{customerSpace}/datacollection/artifact";
-        put("updateDataCollectionArtifact", constructUrl(url, shortenCustomerSpace(customerSpace)), artifact);
+        artifact = put("updateDataCollectionArtifact", constructUrl(url, shortenCustomerSpace(customerSpace)),
+                artifact, DataCollectionArtifact.class);
         return artifact;
     }
 

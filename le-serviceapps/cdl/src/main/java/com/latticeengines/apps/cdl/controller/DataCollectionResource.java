@@ -286,6 +286,7 @@ public class DataCollectionResource {
     }
 
     @GetMapping(value = "/artifact")
+    @ApiOperation(value = "Get data collection artifacts by customer space, artifact status and version.")
     public List<DataCollectionArtifact> getArtifacts(@PathVariable String customerSpace,
             @RequestParam(value = "status", required = false) DataCollectionArtifact.Status status,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
@@ -294,6 +295,7 @@ public class DataCollectionResource {
     }
 
     @GetMapping(value = "/artifact/{name}")
+    @ApiOperation(value = "Get single data collection artifact by customer space, artifact name and version.")
     public DataCollectionArtifact getArtifact(@PathVariable String customerSpace, @PathVariable String name,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -301,6 +303,7 @@ public class DataCollectionResource {
     }
 
     @PutMapping(value = "/artifact")
+    @ApiOperation(value = "Update a data collection artifact.")
     public DataCollectionArtifact updateArtifact(@PathVariable String customerSpace,
                                                  @RequestBody DataCollectionArtifact artifact) {
         if (artifact == null) {
@@ -312,14 +315,16 @@ public class DataCollectionResource {
     }
 
     @PostMapping(value = "/artifact/version/{version}")
+    @ApiOperation(value = "Create a data collection artifact.")
     public DataCollectionArtifact createArtifact(@PathVariable String customerSpace,
             @PathVariable DataCollection.Version version, @RequestBody DataCollectionArtifact artifact) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.createArtifact(customerSpace, artifact.getDataCollection().getName(),
-                artifact.getName(), artifact.getUrl(), artifact.getStatus(), version);
+        return dataCollectionService.createArtifact(customerSpace, artifact.getName(), artifact.getUrl(),
+                artifact.getStatus(), version);
     }
 
     @DeleteMapping(value = "/artifact/{name}")
+    @ApiOperation(value = "Delete a data collection artifact.")
     public DataCollectionArtifact deleteArtifact(@PathVariable String customerSpace, @PathVariable String name,
             @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();

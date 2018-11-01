@@ -67,7 +67,7 @@ public interface DataCollectionService {
 
     DataCollectionArtifact getArtifact(String customerSpace, String name, DataCollection.Version version);
 
-    DataCollectionArtifact createArtifact(String customerSpace, String collectionName, String artifactName, String url,
+    DataCollectionArtifact createArtifact(String customerSpace, String artifactName, String artifactUrl,
                                           DataCollectionArtifact.Status status, DataCollection.Version version);
 
     DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact);

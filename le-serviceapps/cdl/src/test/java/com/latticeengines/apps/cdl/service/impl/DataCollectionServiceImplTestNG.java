@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 
 public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
+
     @Inject
     private DataCollectionService dataCollectionService;
 
@@ -41,9 +42,9 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", priority = 0)
     public void testCreateArtifact() {
-        artifact1 = dataCollectionService.createArtifact(mainCustomerSpace, collectionName, name1, url1,
+        artifact1 = dataCollectionService.createArtifact(mainCustomerSpace, name1, url1,
                 DataCollectionArtifact.Status.NOT_SET, version);
-        artifact2 = dataCollectionService.createArtifact(mainCustomerSpace, collectionName, name2, url2,
+        artifact2 = dataCollectionService.createArtifact(mainCustomerSpace, name2, url2,
                 DataCollectionArtifact.Status.NOT_SET, version);
         Assert.assertNotNull(artifact1);
         Assert.assertEquals(artifact1.getName(), name1);
@@ -107,7 +108,7 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", priority = 5)
     public void testDeleteArtifact() {
-        DataCollectionArtifact artifact = dataCollectionService.createArtifact(mainCustomerSpace, collectionName,
+        DataCollectionArtifact artifact = dataCollectionService.createArtifact(mainCustomerSpace,
                 "test", "https://url.com", DataCollectionArtifact.Status.NOT_SET, version);
         Assert.assertNotNull(artifact);
         artifact = dataCollectionService.deleteArtifact(mainCustomerSpace, artifact.getName(), artifact.getVersion());

@@ -532,19 +532,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollectionArtifact createArtifact(String customerSpace, String collectionName, String artifactName,
-                                                 String url, DataCollectionArtifact.Status status,
-                                                 DataCollection.Version version) {
+    public DataCollectionArtifact createArtifact(String customerSpace, String artifactName, String artifactUrl,
+                                                 DataCollectionArtifact.Status status, DataCollection.Version version) {
         if (version == null) {
             throw new UnsupportedOperationException("Data collection version cannot be null.");
         }
 
         Tenant tenant = MultiTenantContext.getTenant();
-        DataCollection collection = getDataCollection(customerSpace, collectionName);
+        DataCollection collection = getDefaultCollection(customerSpace);
         DataCollectionArtifact artifact = new DataCollectionArtifact();
         artifact.setDataCollection(collection);
         artifact.setName(artifactName);
-        artifact.setUrl(url);
+        artifact.setUrl(artifactUrl);
         artifact.setTenant(tenant);
         artifact.setStatus(DataCollectionArtifact.Status.NOT_SET);
         artifact.setVersion(version);
@@ -555,8 +554,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact) {
-        dataCollectionArtifactEntityMgr.update(artifact);
-        return artifact;
+        DataCollectionArtifact existing = getArtifact(customerSpace, artifact.getName(), artifact.getVersion());
+        if (existing == null) {
+            existing = createArtifact(customerSpace, artifact.getName(), artifact.getUrl(), artifact.getStatus(),
+                    artifact.getVersion());
+        } else {
+            existing.setUrl(artifact.getUrl());
+            existing.setStatus(artifact.getStatus());
+        }
+        dataCollectionArtifactEntityMgr.update(existing);
+        return existing;
     }
 
     @Override

@@ -38,8 +38,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(OrphanRecordExportDeploymentTestNG.class);
     private static final String CHECK_POINT = "orphan";
-//    private static final String CREATED_BY = "lattice@lattice-engines.com";
-private static final String CREATED_BY = "kliu@lattice-engines.com";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss";
     private static final String NUM_FILES = "NUM_FILES";
     private static final String NUM_RECORDS = "NUM_RECORDS";
@@ -57,8 +56,6 @@ private static final String CREATED_BY = "kliu@lattice-engines.com";
     @Inject
     private CheckpointService checkpointService;
 
-//    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         super.setupTestEnvironment();
@@ -72,11 +69,10 @@ private static final String CREATED_BY = "kliu@lattice-engines.com";
         checkpointService.cleanup();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testOrphanTransactionExport() throws Exception {
         checkpointService.resumeCheckpoint(CHECK_POINT, 19);
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-//        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.TRANSACTION);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
 
@@ -92,11 +88,10 @@ private static final String CREATED_BY = "kliu@lattice-engines.com";
         verifyResults(expectedResults);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testOrphanContactExport() throws Exception {
         checkpointService.resumeCheckpoint(CHECK_POINT, 19);
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-//        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.CONTACT);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
 
@@ -112,11 +107,10 @@ private static final String CREATED_BY = "kliu@lattice-engines.com";
         verifyResults(expectedResults);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testUnmatchedAccountExport() throws Exception {
         checkpointService.resumeCheckpoint(CHECK_POINT, 19);
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-//        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.UNMATCHED_ACCOUNT);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
 
@@ -128,7 +122,7 @@ private static final String CREATED_BY = "kliu@lattice-engines.com";
 
         Map<String, Integer> expectedResults = new HashMap<>();
         expectedResults.put(NUM_FILES, 5);
-        expectedResults.put(NUM_RECORDS, 17218);
+        expectedResults.put(NUM_RECORDS, 18);
         verifyResults(expectedResults);
     }
 
@@ -163,22 +157,4 @@ private static final String CREATED_BY = "kliu@lattice-engines.com";
 
         return request;
     }
-
-//    private static String constructFileName(String exportPrefix, String segmentDisplayName,
-//                                            MetadataSegmentExportType type) {
-//        String exportedFileName = null;
-//        if (StringUtils.isNotBlank(exportPrefix)) {
-//            exportedFileName = exportPrefix;
-//        } else if (StringUtils.isNotEmpty(segmentDisplayName)) {
-//            exportedFileName = segmentDisplayName;
-//        }
-//
-//        if (StringUtils.isBlank(exportedFileName)) {
-//            exportedFileName = DEFAULT_EXPORT_FILE_PREFIX;
-//        }
-//
-//        exportedFileName = exportedFileName.trim().replaceAll("[^a-zA-Z0-9]", "");
-//        exportedFileName += "-" + type + "-" + dateFormat.format(new Date()) + "_UTC.csv";
-//        return exportedFileName;
-//    }
 }
