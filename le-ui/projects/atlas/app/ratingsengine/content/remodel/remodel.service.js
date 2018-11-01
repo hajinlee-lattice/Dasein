@@ -154,7 +154,7 @@ angular.module('lp.ratingsengine.remodel')
 
     this.getAttributes = function(engineId, modelId, dataStoresArray){
         var deferred = $q.defer(),
-            dataStores = dataStoresArray.join(","),
+            dataStores = dataStoresArray ? dataStoresArray.join(",") : undefined,
             dataStoresParams = dataStores ? '?data_stores=' + dataStores : '';
         $http({
             method: 'GET',
