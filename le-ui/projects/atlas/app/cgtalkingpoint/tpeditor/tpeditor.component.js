@@ -99,7 +99,9 @@ angular.module('lp.cg.talkingpoint.editor', [])
     };
 
     vm.titleFocus = function(talkingPoint) {
-        CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+        $timeout(function(){
+            CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+        }, 100);
     }
 
     if((Date.now() - $scope.tp.updated) < 2000) { // if it has been saved but you want to re-open it
