@@ -80,7 +80,9 @@ public class PatchServiceImpl implements PatchService {
     private static final String PATCH_LOG_KEY_START_AT = "StartedAt";
     private static final String PATCH_LOG_KEY_UPLOAD_AT = "UploadedAt";
     private static final String PATCH_LOG_KEY_LOGS = "Logs";
-    private static final int PATCH_LOG_FILE_URL_EXPIRES_IN_DAYS = 7; // should not be greater than 7
+    // should not be greater than 7 day
+    // leave 2 hour buffer to prevent exceeding limit
+    private static final int PATCH_LOG_FILE_URL_EXPIRES_IN_HOURS = 7 * 24 - 2;
 
     private static final Logger log = LoggerFactory.getLogger(PatchServiceImpl.class);
 
@@ -201,7 +203,7 @@ public class PatchServiceImpl implements PatchService {
         // generate s3 key
         String key = getPatchLogS3Key(mode, type, dryRun, dataCloudVersion, startAt);
         // url expires at this date
-        Date urlExpiredAt = DateUtils.addDays(new Date(), PATCH_LOG_FILE_URL_EXPIRES_IN_DAYS);
+        Date urlExpiredAt = DateUtils.addHours(new Date(), PATCH_LOG_FILE_URL_EXPIRES_IN_HOURS);
         // generate public url for downloading the log file
         String url = s3Service.generateReadUrl(patchLogS3Bucket, key, urlExpiredAt).toString();
         // upload in background
