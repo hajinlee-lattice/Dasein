@@ -234,6 +234,9 @@ public class DependencyGraphEntityMgrAspect {
             if (play.getRatingEngine() == null) {
                 play.setRatingEngine(existingPlay.getRatingEngine());
             }
+            if (play.getTargetSegment() == null) {
+                play.setTargetSegment(existingPlay.getTargetSegment());
+            }
 
             boolean isDelete = false;
             boolean alreadyDeleted = false;
