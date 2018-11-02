@@ -2,7 +2,7 @@ import React, { Component } from "../../../react-vendor";
 export default class EditorText extends Component {
   constructor(props) {
     super(props);
-    console.log('PROPS', props);
+    // console.log('PROPS', props);
     this.state = { value: this.props.initialValue, cancelled: false };
   }
 
@@ -11,7 +11,7 @@ export default class EditorText extends Component {
   }
   changeHandler(event) {
     this.setState({ value: event.target.value });
-    console.log(event.target.value);
+    // console.log(event.target.value);
     // this.value = event.target.value;
   }
   render() {
@@ -21,7 +21,7 @@ export default class EditorText extends Component {
         ref={(input) => { this.nameInput = input; }} 
         value={this.state.value}
         onKeyDown={(event) => {
-          console.log(event.keyCode);
+          // console.log(event.keyCode);
           switch(event.keyCode){
             case 27:
             this.setState({cancelled: true}, () => {

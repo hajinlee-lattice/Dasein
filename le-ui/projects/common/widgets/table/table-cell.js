@@ -38,14 +38,18 @@ export default class LeTableCell extends Component {
     this.setState({ editing: !this.state.editing, saving: false });
   }
 
+  getContentFormated(content){
+    if(this.props.columnsMapping[this.props.colName].contenFormatter){
+      return this.props.columnsMapping[this.props.colName].contenFormatter(content);
+    }else{
+      return content;
+    }
+  }
   getCellContent() {
-    let displayName = this.props.data;
-    console.log("DISPLAY NAME ", displayName);
+    let displayName = this.props.rowData[this.props.colName];
     if (displayName && !this.state.editing) {
       return (
-        <CellContent>
-          <span title={displayName}>{displayName}</span>
-        </CellContent>
+        <CellContent  value={displayName} mask={this.props.columnsMapping[this.props.colName].mask}/>
       );
     } else {
       return null;
@@ -68,25 +72,32 @@ export default class LeTableCell extends Component {
   }
 
   render() {
-    let span = `le-table-cell le-table-col-span-${this.props.colSpan} cell-${
-      this.props.row
-    }-${this.props.col} ${this.props.colName}`;
-    let externalFormatting = "";
-    if (this.props.config && this.props.config.formatter) {
-      externalFormatting = this.props.config.formatter(this.props.rowData);
-    }
-    let format = `${span} ${externalFormatting}`;
+    
     if (this.props.jsonConfig) {
+      let span = `le-table-cell le-table-col-span-${this.props.columnsMapping[this.props.colName].colSpan} cell-${
+        this.props.rowIndex
+      }-${this.props.colIndex} ${this.props.colName}`;
+      let externalFormatting = "";
+      if (this.props.columnsMapping && this.props.columnsMapping.formatter) {
+        externalFormatting = this.props.columnsMapping.formatter(this.props.rowData);
+      }
+      let format = `${span} ${externalFormatting}`;
       return (
         <ul className={format}>
           {this.getCellContent()}
           {this.getTemplate()}
-          {/* {this.getCellTools()}
-          {this.getCellEditor()} */}
           {this.getSaving()}
         </ul>
       );
     } else {
+      let span = `le-table-cell le-table-col-span-${this.props.colSpan} cell-${
+        this.props.rowIndex
+      }-${this.props.colIndex} ${this.props.colName}`;
+      let externalFormatting = "";
+      if (this.props.columnsMapping && this.props.columnsMapping.formatter) {
+        externalFormatting = this.props.columnsMapping.formatter(this.props.rowData);
+      }
+      let format = `${span} ${externalFormatting}`;
       const { children } = this.props;
       const newProps = {};
       Object.keys(this.props).forEach(prop => {
@@ -94,11 +105,6 @@ export default class LeTableCell extends Component {
           newProps[prop] = this.props[prop];
         }
       });
-      newProps.cancel = this.toogleEdit;
-      newProps.toogleEdit = this.toogleEdit;
-      newProps.editing = this.state.editing;
-      newProps.saving = this.state.saving;
-      // newProps.applyChanges = this.saveHandler;
       var childrenWithProps = React.Children.map(children, child => {
         if (child != null) {
           return React.cloneElement(child, newProps);
@@ -115,4 +121,12 @@ export default class LeTableCell extends Component {
   }
 }
 
-LeTableCell.propTypes = {};
+LeTableCell.propTypes = {
+  jsonConfig: PropTypes.bool,
+  columnsMapping: PropTypes.object,
+  colSpan: PropTypes.number,
+  rowIndex: PropTypes.number,
+  colIndex: PropTypes.number,
+  colName: PropTypes.string,
+  rowData: PropTypes.object
+};

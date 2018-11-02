@@ -124,7 +124,7 @@ export default class GridContainer extends Component {
   saveTemplateNameHandler(cell, value) {
     if (value && value != "") {
       cell.setSavingState();
-      let copy = Object.assign({}, this.state.data[cell.props.row]);
+      let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
       copy[cell.props.colName] = value;
       httpService.put(
         "/pls/cdl/s3/template/displayname",
@@ -134,7 +134,7 @@ export default class GridContainer extends Component {
             cell.toogleEdit();
             if (response.getStatus() === SUCCESS) {
               let newState = [...this.state.data];
-              newState[cell.props.row][cell.props.colName] = value;
+              newState[cell.props.rowIndex][cell.props.colName] = value;
               this.setState({ data: newState });
             }
           },
@@ -148,10 +148,34 @@ export default class GridContainer extends Component {
   getConfig() {
     let config = {
       name: "import-templates",
-      columns: [
+      header: [
         {
           name: "TemplateName",
           displayName: "Name",
+          sortable: false
+        },
+        {
+          name: "Object",
+          displayName: "Object",
+          sortable: false
+        },
+        {
+          name: "Path",
+          displayName: "Automated Import Location",
+          sortable: false
+        },
+        {
+          name: "LastEditedDate",
+          displayName: "Edited",
+          sortable: false
+        },
+        {
+          name: "actions",
+          sortable: false
+        }
+      ],
+      columns: [
+        {
           colSpan: 2,
           template: cell => {
             if (!cell.state.saving && !cell.state.editing) {
@@ -182,17 +206,12 @@ export default class GridContainer extends Component {
                 return null;
               }
             }
-          },
-          datasource: "/pls/cdl/s3/template/displayname"
+          }
         },
         {
-          name: "Object",
-          displayName: "Object",
           colSpan: 2
         },
         {
-          name: "Path",
-          displayName: "Automated Import Location",
           colSpan: 4,
           template: cell => {
             if (cell.props.rowData.Exist) {
@@ -219,12 +238,20 @@ export default class GridContainer extends Component {
           }
         },
         {
-          name: "Edited",
-          displayName: "Edited",
-          colSpan: 1
+          colSpan: 1,
+          mask: value => {
+            var options = {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit"
+            };
+            var formatted = new Date(value);
+            return formatted.toLocaleDateString("en-US", options);
+          }
         },
         {
-          name: "actions",
           colSpan: 3,
           template: cell => {
             return (

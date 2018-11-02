@@ -14,10 +14,10 @@ export default class LeTableBody extends Component {
         return (
           <LeTableRow
             key={index}
-            index={index}
-            rowData={row}
-            jsonConfig={this.props.jsonConfig}
+            jsonConfig={true}
             columnsMapping={this.props.columnsMapping}
+            rowIndex={index}
+            rowData={row}
           >
             {this.props.children}
           </LeTableRow>
@@ -30,22 +30,6 @@ export default class LeTableBody extends Component {
   }
 
   render() {
-    if (this.props.jsonConfig) {
-      return <div class="le-table-row le-table-body">{this.getRows()}</div>;
-    } else {
-      const { children } = this.props;
-      const newProps = {};
-      Object.keys(this.props).forEach(prop => {
-        if (prop != "children") {
-          newProps[prop] = this.props[prop];
-        }
-      });
-      var childrenWithProps = React.Children.map(children, child => {
-        if (child != null) {
-          return React.cloneElement(child, newProps);
-        }
-      });
-      return <div class="le-table-row le-table-body">{childrenWithProps}</div>;
-    }
+    return <div class="le-table-row le-table-body">{this.getRows()}</div>;
   }
 }

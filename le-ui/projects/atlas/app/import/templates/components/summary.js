@@ -27,7 +27,7 @@ export default class SummaryContainer extends Component {
         accountsCount: response.data.AccountCount,
         contactsCount: response.data.ContactCount,
         productPurchasesCount: response.data.TransactionCount,
-        productsCount: 0
+        productsCount: response.data.ProductCount
       });
     });
     httpService.get("/pls/datacollection/status", this.observer);

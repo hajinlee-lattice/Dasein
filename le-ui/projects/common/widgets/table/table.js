@@ -1,8 +1,6 @@
 import React, { Component } from "../../react-vendor";
 import PropTypes from "prop-types";
 
-import LeTableCell from "./table-cell";
-import CellContent from "./cell-content";
 import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
 import "./table.scss";
@@ -11,9 +9,13 @@ export default class LeTable extends Component {
   constructor(props) {
     super(props);
     this.columnsMapping = {};
-    this.props.config.columns.forEach((column, index) => {
-      this.columnsMapping[column.name] = column;
-      column.colIndex = index;
+    this.headerMapping = {};
+    this.props.config.header.forEach((header, index) => {
+      this.headerMapping[header.name] = Object.assign({},header);
+      this.headerMapping[header.name].colSpan = this.props.config.columns[index].colSpan;
+      const newItem = Object.assign(header, this.props.config.columns[index]);
+      newItem.colIndex = index;
+      this.columnsMapping[header.name] = newItem;
     });
   }
 
@@ -39,32 +41,11 @@ export default class LeTable extends Component {
       return null;
     }
   }
-  getHeader() {
-    let header = this.props.config.columns.map((column, index) => {
-      return (
-        <LeTableCell colName={column.name} colSpan={column.colSpan}>
-          {this.getHeaderTitle(column)}
-        </LeTableCell>
-      );
-    });
-    return header;
-  }
 
-  getHeaderTitle(column) {
-    if (column.displayName) {
-      return (
-        <CellContent>
-          <span>{column.displayName}</span>
-        </CellContent>
-      );
-    } else {
-      return null;
-    }
-  }
   render() {
     return (
       <div className={`le-table ${this.props.name}`}>
-        <LeTableHeader>{this.getHeader()}</LeTableHeader>
+        <LeTableHeader headerMapping={this.headerMapping} />
         <LeTableBody
           jsonConfig={true}
           columnsMapping={this.columnsMapping}

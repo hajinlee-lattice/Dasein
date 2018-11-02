@@ -51,6 +51,11 @@
             color: $pearl-white;
           }
         }
+        &.le-table-row-no-select{
+          .le-table-cell-content{
+            color: black;
+          }
+        }
       }
     }
   }

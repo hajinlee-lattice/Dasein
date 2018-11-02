@@ -1,5 +1,6 @@
 import React, { Component } from "../../react-vendor";
 import "./table.scss";
+import PropTypes from "prop-types";
 import LeTableCell from "./table-cell";
 
 export default class LeTableRow extends Component {
@@ -7,36 +8,37 @@ export default class LeTableRow extends Component {
     super(props);
   }
   getCells() {
-    let cellsUI = Object.keys(this.props.columnsMapping).map((key, index) => {
-      let column = this.props.columnsMapping[key];
-      return (
-        <LeTableCell
-          jsonConfig={this.props.jsonConfig}
-          columnsMapping={this.props.columnsMapping}
-          colName={column.name}
-          colSpan={column.colSpan}
-          row={index}
-          col={column.colIndex}
-          data={this.props.rowData[column.name]}
-          rowData={this.props.rowData}
-          apply={this.props.applyChanges}
-        />
-      );
-    });
-    return cellsUI;
+    if (this.props.columnsMapping) {
+      let cellsUI = Object.keys(this.props.columnsMapping).map((key, index) => {
+        let column = this.props.columnsMapping[key];
+        return (
+          <LeTableCell
+            key={index}
+            jsonConfig={this.props.jsonConfig}
+            columnsMapping={this.props.columnsMapping}
+            colSpan={column.colSpan}
+            rowIndex={this.props.rowIndex}
+            colIndex={index}
+            colName={column.name}
+            rowData={this.props.rowData}
+          />
+        );
+      });
+      return cellsUI;
+    } else {
+      return null;
+    }
   }
 
   render() {
-    let rowClass = `le-table-row row-${this.props.index} ${
-      this.rowClasses ? this.rowClasses : ""
+    let rowClass = `le-table-row row-${this.props.rowIndex} ${
+      this.props.rowClasses ? this.props.rowClasses : ""
     }`;
     let externalFormatting = "";
     if (this.props.formatter) {
       externalFormatting = this.props.formatter(this.props.rowData);
     }
-    let format = `${rowClass} ${
-      externalFormatting ? externalFormatting : ""
-    }`;
+    let format = `${rowClass} ${externalFormatting ? externalFormatting : ""}`;
     if (this.props.jsonConfig) {
       return <div className={format}>{this.getCells()}</div>;
     } else {
@@ -53,9 +55,15 @@ export default class LeTableRow extends Component {
         }
       });
 
-     
       // console.log('FORM ', format);
       return <div className={format}>{childrenWithProps}</div>;
     }
   }
 }
+
+LeTableRow.PropTypes = {
+  jsonConfig: PropTypes.bool,
+  columnsMapping: PropTypes.object,
+  rowIndex: PropTypes.number,
+  rowData: PropTypes.object
+};
