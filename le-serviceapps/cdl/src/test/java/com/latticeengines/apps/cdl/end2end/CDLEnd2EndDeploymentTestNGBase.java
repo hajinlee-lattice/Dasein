@@ -78,6 +78,7 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
@@ -508,6 +509,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private void modifyFieldMappingsForAccount(FieldMappingDocument fieldMappingDocument) {
         setExternalSystem(fieldMappingDocument.getFieldMappings());
+        setDateAttributes(fieldMappingDocument.getFieldMappings());
     }
 
     private void setExternalSystem(List<FieldMapping> fieldMappings) {
@@ -524,6 +526,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             }
             if (fieldMapping.getUserField().equalsIgnoreCase("MarketoAccountID")) {
                 fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.ERP);
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+    }
+
+    private void setDateAttributes(List<FieldMapping> fieldMappings) {
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
+                fieldMapping.setFieldType(UserDefinedType.DATE);
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
+                fieldMapping.setFieldType(UserDefinedType.DATE);
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }

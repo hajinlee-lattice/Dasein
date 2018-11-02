@@ -52,12 +52,19 @@ public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("CatAttrs")
     private List<Attribute> catAttrs;
 
+    // TODO(jwinter): Consider moving this out of ProfileParameters to just a field in SourceProfiler since it is
+    //     not used by the Profile Dataflow.
+    @JsonProperty("DateAttrs")
+    private List<Attribute> dateAttrs;
+
     @JsonProperty("AMAttrsToEnc")
     private List<Attribute> amAttrsToEnc;
 
     @JsonProperty("ExternalAttrsToEnc")
     private List<Attribute> exAttrsToEnc;
 
+    // TODO(jwinter): Consider moving this out of ProfileParameters to just a field in SourceProfiler since it is
+    //     not used by the Profile Dataflow.
     @JsonProperty("AttrsToRetain")
     private List<Attribute> attrsToRetain;
 
@@ -149,6 +156,14 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public List<Attribute> getCatAttrs() {
         return catAttrs;
+    }
+
+    public List<Attribute> getDateAttrs() {
+        return dateAttrs;
+    }
+
+    public void setDateAttrs(List<Attribute> dateAttrs) {
+        this.dateAttrs = dateAttrs;
     }
 
     public void setCatAttrs(List<Attribute> catAttrs) {

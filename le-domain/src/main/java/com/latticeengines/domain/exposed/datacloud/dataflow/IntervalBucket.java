@@ -19,7 +19,7 @@ public class IntervalBucket extends BucketAlgorithm {
     @Override
     @JsonIgnore
     public String getAlgorithm() {
-        return INTEVAL;
+        return INTERVAL;
     }
 
     public List<Number> getBoundaries() {

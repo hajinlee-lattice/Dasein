@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PROP_KEY;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategorizedIntervalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
@@ -97,6 +99,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             Arrays.asList(new Schema.Type[] { Schema.Type.BOOLEAN }));
     private static final Set<Schema.Type> CAT_TYPES = new HashSet<>(
             Arrays.asList(new Schema.Type[] { Schema.Type.STRING }));
+    private static final Set<Schema.Type> DATE_TYPES = new HashSet<>(Arrays
+            .asList(new Schema.Type[] { Schema.Type.LONG }));
 
     @Override
     protected String getDataFlowBeanName() {
@@ -154,6 +158,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         if (paras.getIdAttr() != null) {
             result.add(profileIdAttr(paras.getIdAttr()));
         }
+        for (ProfileParameters.Attribute dateAttr : paras.getDateAttrs()) {
+            result.add(profileDateAttr(dateAttr));
+        }
         for (ProfileParameters.Attribute attr : paras.getAttrsToRetain()) {
             result.add(profileAttrToRetain(attr));
         }
@@ -198,6 +205,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private void initProfileParameters(ProfileConfig config, ProfileParameters paras) {
         paras.setNumericAttrs(new ArrayList<>());
         paras.setCatAttrs(new ArrayList<>());
+        // TODO(jwinter): There isn't really a good reason for Date Attributes and Attributes to Retain lists
+        //     to be stored in ProfileParameters when neither is needed outside of SourceProfiler.
+        paras.setDateAttrs(new ArrayList<>());
         paras.setAttrsToRetain(new ArrayList<>());
         paras.setAmAttrsToEnc(new ArrayList<>());
         paras.setExAttrsToEnc(new ArrayList<>());
@@ -245,6 +255,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             parseEncodedAttrsConfig(amAttrsConfig, encAttrsMap, encAttrs, decAttrsMap, decodeStrs);
             // Build BitCodeBook
             BitCodeBookUtils.constructCodeBookMap(paras.getCodeBookMap(), paras.getCodeBookLookup(), decodeStrs);
+
+            // Get the current timestamp in milliseconds for setting up date attributes.
+            long curTimestamp = Instant.now().toEpochMilli();
+
             // Parse flat attrs in the profiled source
             for (Field field : schema.getFields()) {
                 boolean readyForNext = false;
@@ -258,6 +272,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isPreknownAttr(field, encAttrsMap, decAttrsMap, encAttrs, config,
                             paras);
+                }
+                if (!readyForNext) {
+                    readyForNext = AttrClassifier.isDateAttr(field, amAttrsConfig, config, paras, curTimestamp);
                 }
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isNumericAttr(field, config, paras);
@@ -599,6 +616,19 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
+    // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits, BktAlgo
+    private Object[] profileDateAttr(ProfileParameters.Attribute dateAttr) {
+        Object[] data = new Object[7];
+        data[0] = dateAttr.getAttr();
+        data[1] = dateAttr.getAttr();
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        data[6] = dateAttr.getAlgo() == null ? null : JsonUtils.serialize(dateAttr.getAlgo());
+        return data;
+    }
+
     /**
      * Group attrs to encode. Different attrs require different number of bits.
      * Each encoded attr has 64 bits
@@ -774,6 +804,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         private static boolean isNumericAttr(Field field, ProfileConfig config, ProfileParameters paras) {
             Schema.Type type = field.schema().getTypes().get(0).getType();
             if (NUM_TYPES.contains(type)) {
+                // Skip numerical attributes that are actually Date timestamps since they are processed separately.
+                if (field.getProp("logicalType") != null && field.getProp("logicalType").equals("Date")) {
+                    return true;
+                }
                 switch (config.getStage()) {
                 case DataCloudConstants.PROFILE_STAGE_SEGMENT:
                     log.debug(String.format("Interval bucketed attr %s (type %s unencode)", field.name(),
@@ -828,6 +862,28 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 paras.getCatAttrs()
                         .add(new ProfileParameters.Attribute(field.name(), null, null, new CategoricalBucket()));
                 return true;
+            }
+            return false;
+        }
+
+        private static boolean isDateAttr(Field field, Map<String, ProfileArgument> amAttrConfig, ProfileConfig config,
+                                          ProfileParameters paras, long curTimestamp) {
+            // Currently, date attributes in the Account Master are not handled by the Date Attributes feature.  Skip
+            // these for now.
+            if (amAttrConfig.containsKey(field.name())) {
+                return false;
+            }
+
+            Schema.Type type = field.schema().getTypes().get(0).getType();
+            // Make sure the schema type is Long which is the only supported type for dates.
+            if (DATE_TYPES.contains(type)) {
+                // Check that the field has Logical Type "Date" set.
+                if (field.getProp("logicalType") != null && field.getProp("logicalType").equals("Date")) {
+                    paras.getDateAttrs()
+                            .add(new ProfileParameters.Attribute(field.name(), null, null,
+                                    new DateBucket(curTimestamp)));
+                    return true;
+                }
             }
             return false;
         }

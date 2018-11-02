@@ -6,4 +6,5 @@ public enum BucketType {
     Enum, //
     TimeSeries, //
     PercentChange, //
+    Date, //
 }

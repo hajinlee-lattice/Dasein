@@ -1,14 +1,19 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class BucketAlgorithmUnitTestNG {
+    private static final Logger log = LoggerFactory.getLogger(BucketAlgorithmUnitTestNG.class);
 
     @Test(groups = "unit")
     public void test() {
@@ -57,4 +62,45 @@ public class BucketAlgorithmUnitTestNG {
         Assert.assertEquals(bucket.generateLabels(), Arrays.asList(null, "T", "F"));
     }
 
+    @Test(groups = "unit")
+    public void testDateBoundaries() {
+        // Create a date bucket with an assumed current time of 10/23/2018 12:00:00 GMT
+        DateBucket bucket = new DateBucket(1540296000000L);
+
+        // Test that the correct date boundaries are set.
+        List<Long> boundaries = bucket.getDateBoundaries();
+        Assert.assertEquals(boundaries, Arrays.asList(
+                1539734400000L,  // 10/17/2018 00:00:00 GMT - 6 days before
+                1537747200000L,  // 09/24/2018 00:00:00 GMT - 29 days before
+                1532563200000L,  // 07/26/2018 00:00:00 GMT - 89 days before
+                1524787200000L   // 04/27/2018 00:00:00 GMT - 179 days before
+        ));
+
+        // Test that the buckets have the correct default labels.
+        Assert.assertEquals(bucket.generateLabels(), Arrays.asList(
+                null,
+                "Last 7 Days",
+                "Last 30 Days",
+                "Last 90 Days",
+                "Last 180 Days",
+                "Ever"
+        ));
+
+        // Test setting the date bucket labels to custom values.
+        bucket = new DateBucket(1540296000000L);
+        bucket.setLast7DaysLabel("Last Week");
+        bucket.setLast30DaysLabel("Last Month");
+        bucket.setLast90DaysLabel("Last Quarter");
+        bucket.setLast180DaysLabel("Last Two Quarters");
+        bucket.setEverLabel("More Than Two Quarters");
+
+        Assert.assertEquals(bucket.generateLabels(), Arrays.asList(
+                null,
+                "Last Week",
+                "Last Month",
+                "Last Quarter",
+                "Last Two Quarters",
+                "More Than Two Quarters"
+        ));
+    }
 }
