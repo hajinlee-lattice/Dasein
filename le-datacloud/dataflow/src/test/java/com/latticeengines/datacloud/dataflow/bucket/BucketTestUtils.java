@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
@@ -34,6 +35,9 @@ public class BucketTestUtils {
     static final String ATTR_ENCODED_1 = "BitEncodeYes";
     static final String ATTR_ENCODED_2 = "BitEncodeNo";
     static final String ATTR_ENCODED_3 = "BitEncodeFake";
+
+    static final String ATTR_DATE_1 = "Date1";
+    static final long ATTR_DATE_1_CURTIME = 1540000000000L;  // 10/20/2018 01:46:40 AM GMT
 
     static final String ATTR_ENCODED = "Encoded";
     static final String ATTR_RELAY_STR = "RelayString";
@@ -102,6 +106,7 @@ public class BucketTestUtils {
         bktAlgos.put(ATTR_ENCODED_1, new BooleanBucket());
         bktAlgos.put(ATTR_ENCODED_2, new BooleanBucket());
         bktAlgos.put(ATTR_ENCODED_3, new BooleanBucket());
+        bktAlgos.put(ATTR_DATE_1, new DateBucket(ATTR_DATE_1_CURTIME));
     }
 
     static Object[][] profileData() {
@@ -120,7 +125,8 @@ public class BucketTestUtils {
                 bktAttr(ATTR_BOOLEAN_4), //
                 bktAttr(ATTR_ENCODED_1), //
                 bktAttr(ATTR_ENCODED_2), //
-                bktAttr(ATTR_ENCODED_3)
+                bktAttr(ATTR_ENCODED_3), //
+                bktAttr(ATTR_DATE_1)
         };
     }
 

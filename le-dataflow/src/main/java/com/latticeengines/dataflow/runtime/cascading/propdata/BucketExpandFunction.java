@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
@@ -84,14 +85,25 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                 // normal field or bucket only field
                 int attrId = argIdToAttrIdMap.get(i);
                 int bktId = value == null ? 0 : 1;
+                BucketAlgorithm algorithm = null;
                 if (bktAttrArgPos.containsKey(i)) {
                     // bucket only field
-                    BucketAlgorithm algorithm = bktAttrArgPos.get(i);
+                    algorithm = bktAttrArgPos.get(i);
                     bktId = BucketEncodeFunction.bucket(value, algorithm);
                 }
                 if (bktId > 0) {
-                    Tuple tuple = constructResult(arguments, attrId, bktId);
-                    functionCall.getOutputCollector().add(tuple);
+                    if (algorithm instanceof DateBucket) {
+                        // Add a tuple for all bucket IDs from the bucket this value is assigned to until the last
+                        // bucket since date buckets are cumulative, and this this value should be counted in all
+                        // subsequent buckets.
+                        for (int j = bktId; j <= ((DateBucket) algorithm).getDateBoundaries().size() + 1; j++) {
+                            Tuple tuple = constructResult(arguments, attrId, j);
+                            functionCall.getOutputCollector().add(tuple);
+                        }
+                    } else {
+                        Tuple tuple = constructResult(arguments, attrId, bktId);
+                        functionCall.getOutputCollector().add(tuple);
+                    }
                 }
             } else if (encAttrArgPos.containsKey(i)) {
                 // encoded field

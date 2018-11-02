@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.dataflow.bucket;
 
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_BOOLEAN_4;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_CAT_STR;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_DATE_1;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_1;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_2;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RELAY_INT;
@@ -19,6 +20,8 @@ import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -30,7 +33,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 
 public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-
     private static final int ENC_ATTR_1 = 0;
     private static final int ENC_ATTR_2 = 1;
     private static final int ENC_ATTR_3 = 2;
@@ -70,7 +72,11 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Assert.assertTrue(StringUtils.isBlank(attrBkts));
             }
             Assert.assertTrue(attrCnt >= 0);
-            Assert.assertTrue(attrCnt <= 5);
+            if (ATTR_DATE_1.equals(attrName)) {
+                Assert.assertEquals(attrCnt, 17);
+            } else {
+                Assert.assertTrue(attrCnt <= 5);
+            }
             Assert.assertNotEquals(attrName, "IgnoreField");
         }
     }
@@ -83,14 +89,15 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of(ATTR_RENAMED_ROW_ID, Long.class), //
                 Pair.of(ATTR_RELAY_STR, String.class), //
                 Pair.of(ATTR_RELAY_INT, Integer.class), //
-                Pair.of("IgnoreField", String.class) //
+                Pair.of("IgnoreField", String.class),
+                Pair.of(ATTR_DATE_1, Long.class)//
         );
         Object[][] data = new Object[][] { //
-                { 0L, 0L, 0L, 1L, "String1", 0, "hello" }, //
-                { 0L, 0L, 0L, 2L, "String2", 200, "hello" }, //
-                { 0L, 0L, 0L, 3L, "String3", null, "hello" }, //
-                { 0L, 0L, 0L, 4L, null, 10, "hello" }, //
-                { 0L, 0L, 0L, 5L, "String5", 4, "hello" } //
+                { 0L, 0L, 0L, 1L, "String1", 0, "hello" , 1539999999000L},    // 10/20/2018 01:46:39 AM GMT (< 7 Days)
+                { 0L, 0L, 0L, 2L, "String2", 200, "hello", 1539475200000L},   // 10/14/2018 12:00:00 AM GMT (< 7 Days)
+                { 0L, 0L, 0L, 3L, "String3", null, "hello", 1539475199000L }, // 10/13/2018 11:59:59 PM GMT (< 30 Days)
+                { 0L, 0L, 0L, 4L, null, 10, "hello", 1532303999000L },        // 07/22/2018 11:59:59 PM GMT (< 180 Days)
+                { 0L, 0L, 0L, 5L, "String5", 4, "hello", 1524441600000L }     // 04/23/2018 12:00:00 AM GMT (Ever)
         };
 
         populateIntervalInt(data);

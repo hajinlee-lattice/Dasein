@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
@@ -73,6 +74,9 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         }
         if (algo instanceof DiscreteBucket) {
             return bucketDiscrete(value, (DiscreteBucket) algo);
+        }
+        if (algo instanceof DateBucket) {
+            return bucketDate(value, (DateBucket) algo);
         }
         return 0;
     }
@@ -160,6 +164,35 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
                     ex);
             return 0;
         }
+    }
+
+    private static int bucketDate(Object value, DateBucket bucket) {
+        // If no value was provided for this Date Attribute, return 0 representing the "null" bucket.
+        if (value == null) {
+            return 0;
+        }
+        Long timestamp;
+        if (value instanceof Long) {
+            timestamp = (Long) value;
+        } else {
+            try {
+                timestamp = Long.valueOf(value.toString());
+            } catch (Exception e) {
+                log.error("Failed to convert value " + value + " to a timestamp for a date bucket.");
+                return 0;
+            }
+        }
+
+        List<Long> dateBoundaries = bucket.getDateBoundaries();
+        int interval = 1;
+        for (Long dateBoundary : dateBoundaries) {
+            if (timestamp < dateBoundary) {
+                interval++;
+            } else {
+                break;
+            }
+        }
+        return interval;
     }
 
     @Override
@@ -270,5 +303,4 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         }
         return result;
     }
-
 }

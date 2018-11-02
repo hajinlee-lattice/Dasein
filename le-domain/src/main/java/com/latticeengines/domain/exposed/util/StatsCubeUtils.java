@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -177,6 +178,8 @@ public class StatsCubeUtils {
             updateCategoricalBucket(bucket, (CategoricalBucket) algorithm, bktId);
         } else if (algorithm instanceof DiscreteBucket) {
             updateDiscreteBucket(bucket, (DiscreteBucket) algorithm, bktId);
+        } else if (algorithm instanceof DateBucket) {
+            updateDateBucket(bucket, (DateBucket) algorithm, bktId);
         } else {
             throw new UnsupportedOperationException(
                     "Do not know how to parse algorithm of type " + algorithm.getClass());
@@ -236,6 +239,17 @@ public class StatsCubeUtils {
         bucket.setLabel(bucketLabel);
         bucket.setValues(Collections.singletonList(bucketLabel));
         bucket.setComparisonType(ComparisonType.EQUAL);
+    }
+
+    private static void updateDateBucket(Bucket bucket, DateBucket algo, int bktId) {
+        List<String> labels = algo.generateLabels();
+        String bucketLabel = labels.get(bktId);
+        bucket.setLabel(bucketLabel);
+        bucket.setValues(Collections.singletonList(bucketLabel));
+        // TODO(jwinter): Verify comparison type is correct.  I'm assuming the comparison is 'value compared to bucket'
+        //     boundary.  So that if the value is after (greater than) the bucket boundary, it is included in the
+        //     bucket.  There is also the issue of if AFTER is inclusive or exclusive of the boundary value.
+        bucket.setComparisonType(ComparisonType.AFTER);
     }
 
     public static void sortRatingBuckets(AttributeStats attrStats) {
