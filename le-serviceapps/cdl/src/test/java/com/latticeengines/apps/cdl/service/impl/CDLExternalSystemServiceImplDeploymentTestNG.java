@@ -111,6 +111,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     public void testUpdate() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+        cdlExternalSystem.setEntity(BusinessEntity.Account);
         cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
 
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
