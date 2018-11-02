@@ -46,7 +46,6 @@ const httpService = {
       http
         .get(url)
         .then(response => {
-          console.log("I am back from API", response);
           let resp = new Response(
             response,
             response.status,
@@ -60,13 +59,11 @@ const httpService = {
           obs.complete();
         })
         .catch(error => {
-            console.log(observables);
           let respoError = new Error(
             error.response.status,
             error.response.statusText,
             error.message
           );
-          console.log("ERRRRRRRRRRR", error);
           messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
           if(obs.error){
             obs.error(respoError);
@@ -82,7 +79,6 @@ const httpService = {
       http
         .post(url, body)
         .then(response => {
-          console.log("I am back from API", response);
           let resp = new Response(
             response,
             response.status,
@@ -101,7 +97,6 @@ const httpService = {
             error.response.statusText,
             error.message
           );
-          console.log("ERRRRRRRRRRR", error.message);
           messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
           if(obs.error){
             obs.error(respoError);
@@ -116,7 +111,6 @@ const httpService = {
       http
         .put(url, body)
         .then(response => {
-          console.log("I am back from API", response);
           let resp = new Response(
             response,
             response.status,
@@ -133,7 +127,6 @@ const httpService = {
             error.response.statusText,
             error.message
           );
-          console.log("ERRRRRRRRRRR", error.message);
           messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
           if(obs.error){
             obs.error(respoError);
