@@ -47,7 +47,6 @@ export default class LeTable extends Component {
       <div className={`le-table ${this.props.name}`}>
         <LeTableHeader headerMapping={this.headerMapping} />
         <LeTableBody
-          jsonConfig={true}
           columnsMapping={this.columnsMapping}
           data={this.props.data}
         />
@@ -59,7 +58,11 @@ export default class LeTable extends Component {
 }
 
 LeTable.propTypes = {
-  name: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  config: PropTypes.object.isRequired,
+  data: PropTypes.array.isRequired,
   showEmpty: PropTypes.bool,
-  showLoading: PropTypes.bool
+  showLoading: PropTypes.bool,
+  
+
 };

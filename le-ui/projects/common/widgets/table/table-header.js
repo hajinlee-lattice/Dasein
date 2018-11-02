@@ -37,3 +37,6 @@ export default class LeTableHeader extends Component {
     );
   }
 }
+LeTableHeader.PropTypes = {
+  headerMapping: PropTypes.object.isRequired
+};

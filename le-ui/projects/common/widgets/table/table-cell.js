@@ -73,7 +73,6 @@ export default class LeTableCell extends Component {
 
   render() {
     
-    if (this.props.jsonConfig) {
       let span = `le-table-cell le-table-col-span-${this.props.columnsMapping[this.props.colName].colSpan} cell-${
         this.props.rowIndex
       }-${this.props.colIndex} ${this.props.colName}`;
@@ -89,41 +88,11 @@ export default class LeTableCell extends Component {
           {this.getSaving()}
         </ul>
       );
-    } else {
-      let span = `le-table-cell le-table-col-span-${this.props.colSpan} cell-${
-        this.props.rowIndex
-      }-${this.props.colIndex} ${this.props.colName}`;
-      let externalFormatting = "";
-      if (this.props.columnsMapping && this.props.columnsMapping.formatter) {
-        externalFormatting = this.props.columnsMapping.formatter(this.props.rowData);
-      }
-      let format = `${span} ${externalFormatting}`;
-      const { children } = this.props;
-      const newProps = {};
-      Object.keys(this.props).forEach(prop => {
-        if (prop != "children") {
-          newProps[prop] = this.props[prop];
-        }
-      });
-      var childrenWithProps = React.Children.map(children, child => {
-        if (child != null) {
-          return React.cloneElement(child, newProps);
-        }
-      });
-
-      return (
-        <ul className={format}>
-          <div>{childrenWithProps}</div>
-          {this.getSaving()}
-        </ul>
-      );
-    }
   }
 }
 
 LeTableCell.propTypes = {
-  jsonConfig: PropTypes.bool,
-  columnsMapping: PropTypes.object,
+  columnsMapping: PropTypes.object.isRequired,
   colSpan: PropTypes.number,
   rowIndex: PropTypes.number,
   colIndex: PropTypes.number,

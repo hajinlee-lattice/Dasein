@@ -14,7 +14,6 @@ export default class LeTableBody extends Component {
         return (
           <LeTableRow
             key={index}
-            jsonConfig={true}
             columnsMapping={this.props.columnsMapping}
             rowIndex={index}
             rowData={row}
@@ -33,3 +32,8 @@ export default class LeTableBody extends Component {
     return <div class="le-table-row le-table-body">{this.getRows()}</div>;
   }
 }
+
+LeTableBody.PropTypes = {
+  columnsMapping: PropTypes.object.isRequired,
+  data: PropTypes.array
+};

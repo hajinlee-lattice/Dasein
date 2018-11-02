@@ -30,3 +30,8 @@ export default class CellContent extends Component {
     }
   }
 }
+
+CellContent.PropTypes = {
+  value: PropTypes.any.isRequired,
+  mask: PropTypes.func
+}

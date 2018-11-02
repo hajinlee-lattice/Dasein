@@ -14,7 +14,6 @@ export default class LeTableRow extends Component {
         return (
           <LeTableCell
             key={index}
-            jsonConfig={this.props.jsonConfig}
             columnsMapping={this.props.columnsMapping}
             colSpan={column.colSpan}
             rowIndex={this.props.rowIndex}
@@ -39,31 +38,12 @@ export default class LeTableRow extends Component {
       externalFormatting = this.props.formatter(this.props.rowData);
     }
     let format = `${rowClass} ${externalFormatting ? externalFormatting : ""}`;
-    if (this.props.jsonConfig) {
-      return <div className={format}>{this.getCells()}</div>;
-    } else {
-      const { children } = this.props;
-      const newProps = {};
-      Object.keys(this.props).forEach(prop => {
-        if (prop != "children") {
-          newProps[prop] = this.props[prop];
-        }
-      });
-      var childrenWithProps = React.Children.map(children, child => {
-        if (child != null) {
-          return React.cloneElement(child, newProps);
-        }
-      });
-
-      // console.log('FORM ', format);
-      return <div className={format}>{childrenWithProps}</div>;
-    }
+    return <div className={format}>{this.getCells()}</div>;
   }
 }
 
 LeTableRow.PropTypes = {
-  jsonConfig: PropTypes.bool,
-  columnsMapping: PropTypes.object,
+  columnsMapping: PropTypes.object.isRequired,
   rowIndex: PropTypes.number,
   rowData: PropTypes.object
 };
