@@ -18,8 +18,8 @@ import messageService from "../../../../common/app/utilities/messaging-service";
 import Message, {
   NOTIFICATION
 } from "../../../../common/app/utilities/message";
-import LeTable from "../../../../common/widgets/table/le-table";
 import CopyComponent from "../../../../common/widgets/table/controlls/copy-controll";
+import LeTable from "../../../../common/widgets/table/table";
 export default class GridContainer extends Component {
   constructor(props) {
     super(props);
@@ -243,6 +243,7 @@ export default class GridContainer extends Component {
   render() {
     return (
       <LeTable
+        name="import-templates"
         config={this.getConfig()}
         showLoading={this.state.showLoading}
         showEmpty={this.state.showEmpty}
