@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -76,6 +77,18 @@ public class PeriodResource {
             businessCalendar = periodProxy.saveBusinessCalendar(customerSpace, businessCalendar);
             createAction(MultiTenantContext.getTenant());
             return businessCalendar;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
+    @DeleteMapping(value = "/calendar")
+    @ApiOperation(value = "Delete business calendar")
+    public void deleteBusinessCalendar() {
+        try {
+            String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+            periodProxy.deleteBusinessCalendar(customerSpace);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
