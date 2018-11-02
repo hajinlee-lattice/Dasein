@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -254,8 +253,8 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(String source, String dataFeedType, DataFeed datafeed) {
-        DataFeedTask dataFeedTask = datafeedTaskRepository.findBySourceAndFeedTypeAndDataFeed(source,
-                dataFeedType, datafeed);
+        DataFeedTask dataFeedTask = datafeedTaskRepository.findBySourceAndFeedTypeAndDataFeed(source, dataFeedType,
+                datafeed);
         if (dataFeedTask != null) {
             TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
             TableEntityMgr.inflateTable(dataFeedTask.getImportData());
@@ -320,6 +319,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setSourceConfig(dataFeedTask.getSourceConfig());
         task.setStatus(dataFeedTask.getStatus());
         deleteReferences(task.getImportTemplate());
+        task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());
