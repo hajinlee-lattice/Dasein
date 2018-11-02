@@ -94,6 +94,17 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         }
     }
 
+    public FieldMappingDocument getFieldMappings(String sourceFileName, String entity, String source, String feedType) {
+        String urlPattern = "/{sourceFileName}/fieldmappings?entity={entity}&source={source}&feedType={feedType}";
+        String url = constructUrl(urlPattern, sourceFileName, entity, source, feedType);
+        ResponseDocument<?> resp = post("get field mappings", url, null, ResponseDocument.class);
+        if (resp.isSuccess()) {
+            return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), FieldMappingDocument.class);
+        } else {
+            throw new RuntimeException("Failed to get filed mapping: " + StringUtils.join(resp.getErrors(), ","));
+        }
+    }
+
     public FieldMappingDocument getFieldMappings(String sourceFileName, SchemaInterpretation schema) {
         String urlPattern = "/{sourceFileName}/fieldmappings?schema={schema}";
         String url = constructUrl(urlPattern, sourceFileName, schema);

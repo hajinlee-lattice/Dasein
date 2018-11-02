@@ -430,21 +430,21 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
+        if (StringUtils.isBlank(feedType)) {
+            feedType = entity.name() + "Schema";
+        }
         if (s3FileName.endsWith(".gz"))
             outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
         SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
                 csvResource, outsizeFlag);
-        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
+        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(),
+                entity.name(), SourceType.FILE.getName(), feedType);
         modifyFieldMappings(entity, fieldMappingDocument);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
-        }
-
-        if (StringUtils.isBlank(feedType)) {
-            feedType = entity.name() + "Schema";
         }
 
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
@@ -460,6 +460,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void importData(BusinessEntity entity, List<String> s3FileName, String feedType, boolean compressed,
             boolean outsizeFlag) {
         List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
+        if (StringUtils.isBlank(feedType)) {
+            feedType = entity.name() + "Schema";
+        }
         for (String filename : s3FileName) {
             Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(filename, outsizeFlag), filename);
             log.info("Streaming S3 file " + filename + " as a template file for " + entity);
@@ -469,17 +472,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, filename, entity.name(),
                     csvResource, outsizeFlag);
             FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(),
-                    entity.name());
+                    entity.name(), SourceType.FILE.getName(), feedType);
             modifyFieldMappings(entity, fieldMappingDocument);
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (fieldMapping.getMappedField() == null) {
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
                 }
-            }
-
-            if (StringUtils.isBlank(feedType)) {
-                feedType = entity.name() + "Schema";
             }
 
             fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
