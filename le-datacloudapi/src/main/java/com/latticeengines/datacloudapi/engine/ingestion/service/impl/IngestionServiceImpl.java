@@ -156,7 +156,7 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     /**
-     * Only support ingestion type SFTP and API in scan
+     * Only support ingestion type SFTP, API and BW_RAW in scan
      */
     private List<IngestionProgress> createDraftProgresses(Ingestion ingestion) {
         List<IngestionProgress> progresses = new ArrayList<>();

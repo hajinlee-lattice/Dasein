@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfigur
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
@@ -154,6 +155,13 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
                 progress.setSource(fileName);
                 progress.setVersion(version);
             }
+            break;
+        case PATCH_BOOK:
+            // For PATCH_BOOK, version from request is actually datacloud
+            // version
+            progress.setSource(PatchBook.TABLE_NAME);
+            progress.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+            progress.setDestination(ingestionDir.append(progress.getVersion()).toString());
             break;
         default:
             throw new UnsupportedOperationException(

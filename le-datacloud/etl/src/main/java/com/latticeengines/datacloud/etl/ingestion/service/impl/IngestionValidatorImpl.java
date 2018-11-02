@@ -20,12 +20,17 @@ import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionValidator;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
+import com.latticeengines.domain.exposed.datacloud.ingestion.PatchBookConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration.CollectCriteria;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchRequest;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchValidationResponse;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.PatchProxy;
 
 @Component("ingestionValidator")
 public class IngestionValidatorImpl implements IngestionValidator {
@@ -48,9 +53,20 @@ public class IngestionValidatorImpl implements IngestionValidator {
     @Value(("${aws.region}"))
     private String defaultRegion;
 
+    @Inject
+    private ColumnMetadataProxy metadataProxy;
+
+    @Inject
+    private PatchProxy patchProxy;
+
     @Override
     public boolean isIngestionTriggered(Ingestion ingestion) {
         if (!ingestion.isSchedularEnabled()) {
+            return false;
+        }
+        // PATCH_BOOK ingestion is always manually triggered which is one of AM
+        // rebuild operation
+        if (ingestion.getIngestionType() == Ingestion.IngestionType.PATCH_BOOK) {
             return false;
         }
         if (StringUtils.isNotBlank(ingestion.getCronExpression())) {
@@ -105,6 +121,30 @@ public class IngestionValidatorImpl implements IngestionValidator {
             }
             return;
         case BW_RAW:
+            return;
+        case PATCH_BOOK:
+            if (StringUtils.isBlank(request.getSourceVersion())) {
+                request.setSourceVersion(metadataProxy.latestVersion().getVersion());
+            }
+            PatchBookConfiguration patchConfig = (PatchBookConfiguration) ingestion.getProviderConfiguration();
+            if (patchConfig.getBookType() == null || patchConfig.getPatchMode() == null) {
+                throw new IllegalArgumentException(
+                        "BookType or PatchMode is missing in PatchBookConfiguration. Please check Ingestion table in db");
+            }
+            // Validation of source version (datacloud version) is included
+            // patch validate api
+            PatchRequest patchRequest = new PatchRequest();
+            patchRequest.setMode(patchConfig.getPatchMode());
+            patchRequest.setDataCloudVersion(request.getSourceVersion());
+            PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
+                    patchRequest);
+            if (!patchResponse.isSuccess()) {
+                throw new RuntimeException(
+                        "PatchBook validation failed. Please call patch validation API to check detailed errors.");
+            }
+            // TODO: In validation api, better to provide info whether is
+            // anything to patch or not, don't want to auto-wire
+            // PatchBookEntityMgr here
             return;
         default:
             throw new RuntimeException(

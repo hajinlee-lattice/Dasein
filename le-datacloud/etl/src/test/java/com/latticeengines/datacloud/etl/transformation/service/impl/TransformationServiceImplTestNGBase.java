@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -276,25 +275,6 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     }
 
-    private Iterator<GenericRecord> getGenericRecords(String path) {
-        List<String> files;
-        try {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Assert.assertTrue(files.size() >= 2);
-        for (String file : files) {
-            if (!file.endsWith(SUCCESS_FLAG)) {
-                Assert.assertTrue(file.endsWith(".avro"));
-                continue;
-            }
-            Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
-        }
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
-        return records;
-    }
-
     protected Iterator<GenericRecord> iterateSource(String sourceName) {
         String path = getPathForSource(sourceName);
         System.out.println("Checking for result file: " + path);
@@ -328,16 +308,4 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         }
     }
 
-    protected boolean isObjEquals(Object actual, Object expected) {
-        if (actual == null && expected == null) {
-            return true;
-        }
-        if (actual == null || expected == null) {
-            return false;
-        }
-        if (actual instanceof Utf8) {
-            actual = actual.toString();
-        }
-        return actual.equals(expected);
-    }
 }

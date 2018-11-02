@@ -30,12 +30,13 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
  */
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "PatchBook")
+@Table(name = PatchBook.TABLE_NAME)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 public class PatchBook implements HasPid, Serializable {
 
+    public static final String TABLE_NAME = "PatchBook";
     public static final String COLUMN_PID = "PID";
     public static final String COLUMN_TYPE = "Type";
     public static final String COLUMN_HOTFIX = "HotFix";
@@ -44,8 +45,17 @@ public class PatchBook implements HasPid, Serializable {
     public static final String COLUMN_EXPIRE_AFTER_VERSION = "ExpireAfterVersion";
     public static final String COLUMN_DOMAIN = "Domain";
     public static final String COLUMN_DUNS = "DUNS";
+    public static final String COLUMN_NAME = "Name";
+    public static final String COLUMN_COUNTRY = "Country";
+    public static final String COLUMN_STATE = "State";
+    public static final String COLUMN_CITY = "City";
+    public static final String COLUMN_ZIPCODE = "Zipcode";
     public static final String COLUMN_PATCH_ITEMS = "PatchItems";
     public static final String COLUMN_CLEANUP = "Cleanup";
+    public static final String COLUMN_CREATEDATE = "CreatedDate";
+    public static final String COLUMN_CREATEBY = "CreatedBy";
+    public static final String COLUMN_LASTMODIFIEDDATE = "LastModifiedDate";
+    public static final String COLUMN_LASTMODIFIEDBY = "LastModifiedBy";
     private static final long serialVersionUID = 5460817063985318621L;
     @Id
     @JsonIgnore
@@ -65,20 +75,20 @@ public class PatchBook implements HasPid, Serializable {
     @JsonProperty(COLUMN_DUNS)
     @Column(name = COLUMN_DUNS)
     private String duns;
-    @JsonProperty("Name")
-    @Column(name = "Name")
+    @JsonProperty(COLUMN_NAME)
+    @Column(name = COLUMN_NAME)
     private String name;
-    @JsonProperty("Country")
-    @Column(name = "Country")
+    @JsonProperty(COLUMN_COUNTRY)
+    @Column(name = COLUMN_COUNTRY)
     private String country;
-    @JsonProperty("State")
-    @Column(name = "State")
+    @JsonProperty(COLUMN_STATE)
+    @Column(name = COLUMN_STATE)
     private String state;
-    @JsonProperty("City")
-    @Column(name = "City")
+    @JsonProperty(COLUMN_CITY)
+    @Column(name = COLUMN_CITY)
     private String city;
-    @JsonProperty("Zipcode")
-    @Column(name = "Zipcode")
+    @JsonProperty(COLUMN_ZIPCODE)
+    @Column(name = COLUMN_ZIPCODE)
     private String zipcode;
     @JsonProperty(COLUMN_PATCH_ITEMS)
     @Column(name = COLUMN_PATCH_ITEMS, columnDefinition = "'JSON'")
@@ -101,17 +111,17 @@ public class PatchBook implements HasPid, Serializable {
     @JsonProperty("ExpireAfter")
     @Column(name = "ExpireAfter")
     private Date expireAfter;
-    @JsonProperty("CreatedDate")
-    @Column(name = "CreatedDate")
+    @JsonProperty(COLUMN_CREATEDATE)
+    @Column(name = COLUMN_CREATEDATE)
     private Date createdDate;
-    @JsonProperty("CreatedBy")
-    @Column(name = "CreatedBy")
+    @JsonProperty(COLUMN_CREATEBY)
+    @Column(name = COLUMN_CREATEBY)
     private String createdBy;
-    @JsonProperty("LastModifiedDate")
-    @Column(name = "LastModifiedDate")
+    @JsonProperty(COLUMN_LASTMODIFIEDDATE)
+    @Column(name = COLUMN_LASTMODIFIEDDATE)
     private Date lastModifiedDate;
-    @JsonProperty("LastModifiedBy")
-    @Column(name = "LastModifiedBy")
+    @JsonProperty(COLUMN_LASTMODIFIEDBY)
+    @Column(name = COLUMN_LASTMODIFIEDBY)
     private String lastModifiedBy;
     @JsonProperty("Logs")
     @Column(name = "Logs")

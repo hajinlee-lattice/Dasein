@@ -42,6 +42,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Resource(name = "ingestionBWRawProviderService")
     private IngestionProviderService ingestionBWRawProviderService;
 
+    @Resource(name = "ingestionPatchBookProviderService")
+    private IngestionProviderService ingestionPatchBookProviderService;
+
     private IngestionProgress progress;
 
     @Override
@@ -71,6 +74,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             case BW_RAW:
                 ingestionBWRawProviderService.ingest(progress);
                 break;
+            case PATCH_BOOK:
+                ingestionPatchBookProviderService.ingest(progress);
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
@@ -82,7 +88,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     }
 
     private void failByException(Exception e) {
-        progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED) //
+        progress = ingestionProgressService.updateProgress(progress) //
+                .status(ProgressStatus.FAILED) //
                 .errorMessage(e.getMessage().substring(0, Math.min(1000, e.getMessage().length()))) //
                 .commit(true);
         log.error("Ingestion failed for progress: " + progress.toString(), e);

@@ -14,7 +14,8 @@ public class IngestionRequest {
     private String fileName; // Only for Ingestion type: SFTP
 
     @JsonProperty("SourceVersion")
-    private String sourceVersion; // Only for Ingestion type: SQL_TO_SOURCE, S3
+    private String sourceVersion; // Only for Ingestion type: SQL_TO_SOURCE, S3,
+                                  // PATCH_BOOK (datacloud versions)
 
     @JsonProperty("UpdateCurrentVersion")
     private Boolean updateCurrentVersion; // Only for Ingestion type: S3
