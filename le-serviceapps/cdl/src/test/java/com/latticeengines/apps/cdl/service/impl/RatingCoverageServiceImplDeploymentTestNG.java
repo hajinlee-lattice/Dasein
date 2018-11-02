@@ -80,7 +80,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = "JLM1541027364119";// "LETest1539973036934";
+        String existingTenant = null;// "LETest1539973036934";
 
         testPlayCreationHelper.setupTenantAndCreatePlay(existingTenant);
 
