@@ -4,7 +4,7 @@ import "./table.scss";
 import CellContent from "./cell-content";
 
 
-export default class LeGridCell extends Component {
+export default class LeTableCell extends Component {
   constructor(props) {
     super(props);
 
@@ -115,4 +115,4 @@ export default class LeGridCell extends Component {
   }
 }
 
-LeGridCell.propTypes = {};
+LeTableCell.propTypes = {};

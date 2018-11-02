@@ -1,8 +1,8 @@
 import React, { Component } from "../../react-vendor";
 import "./table.scss";
-import LeGridCell from "./table-cell";
+import LeTableCell from "./table-cell";
 
-export default class LeGridRow extends Component {
+export default class LeTableRow extends Component {
   constructor(props) {
     super(props);
   }
@@ -10,7 +10,7 @@ export default class LeGridRow extends Component {
     let cellsUI = Object.keys(this.props.columnsMapping).map((key, index) => {
       let column = this.props.columnsMapping[key];
       return (
-        <LeGridCell
+        <LeTableCell
           jsonConfig={this.props.jsonConfig}
           columnsMapping={this.props.columnsMapping}
           colName={column.name}

@@ -1,7 +1,7 @@
 import React, { Component } from "../../react-vendor";
 import PropTypes from "prop-types";
 import "./table.scss";
-import LeGridRow from "./table-row";
+import LeTableRow from "./table-row";
 
 export default class LeTableBody extends Component {
   constructor(props) {
@@ -12,7 +12,7 @@ export default class LeTableBody extends Component {
     if (this.props.data && this.props.data.length > 0) {
       let rowsUI = this.props.data.map((row, index) => {
         return (
-          <LeGridRow
+          <LeTableRow
             key={index}
             index={index}
             rowData={row}
@@ -20,7 +20,7 @@ export default class LeTableBody extends Component {
             columnsMapping={this.props.columnsMapping}
           >
             {this.props.children}
-          </LeGridRow>
+          </LeTableRow>
         );
       });
       return rowsUI;

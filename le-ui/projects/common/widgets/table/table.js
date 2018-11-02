@@ -1,7 +1,7 @@
 import React, { Component } from "../../react-vendor";
 import PropTypes from "prop-types";
 
-import LeGridCell from "./table-cell";
+import LeTableCell from "./table-cell";
 import CellContent from "./cell-content";
 import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
@@ -42,9 +42,9 @@ export default class LeTable extends Component {
   getHeader() {
     let header = this.props.config.columns.map((column, index) => {
       return (
-        <LeGridCell colName={column.name} colSpan={column.colSpan}>
+        <LeTableCell colName={column.name} colSpan={column.colSpan}>
           {this.getHeaderTitle(column)}
-        </LeGridCell>
+        </LeTableCell>
       );
     });
     return header;

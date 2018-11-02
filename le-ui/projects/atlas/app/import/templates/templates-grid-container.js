@@ -12,13 +12,14 @@ import TemplatesRowActions, {
 import "./templates.scss";
 import Observer from "../../../../common/app/http/observer";
 import EditControl from "../../../../common/widgets/table/controlls/edit-controls";
+import CopyComponent from "../../../../common/widgets/table/controlls/copy-controll";
 import EditorText from "../../../../common/widgets/table/editors/editor-text";
 
 import messageService from "../../../../common/app/utilities/messaging-service";
 import Message, {
   NOTIFICATION
 } from "../../../../common/app/utilities/message";
-import CopyComponent from "../../../../common/widgets/table/controlls/copy-controll";
+
 import LeTable from "../../../../common/widgets/table/table";
 export default class GridContainer extends Component {
   constructor(props) {
