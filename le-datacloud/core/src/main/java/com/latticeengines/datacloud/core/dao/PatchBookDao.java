@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.dao;
+package com.latticeengines.datacloud.core.dao;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.dao.BaseDao;

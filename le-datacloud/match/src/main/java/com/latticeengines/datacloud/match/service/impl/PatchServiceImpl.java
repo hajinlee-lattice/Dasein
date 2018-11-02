@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
 import com.latticeengines.datacloud.match.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -47,6 +46,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.PatchService;

@@ -31,8 +31,9 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
 
     public static final String BEAN_NAME = "mapAttributeFlow";
 
-    public static final String MAP_TRANSFORMER = "mapAttribute";
     public static final String DERIVE_TRANSFORMER = "deriveAttribute";
+
+    public static final String MAP_TRANSFORMER = "mapAttribute";
 
     public static final String MAP_STAGE = "MapStage";
     public static final String DERIVE_STAGE = "DeriveStage";

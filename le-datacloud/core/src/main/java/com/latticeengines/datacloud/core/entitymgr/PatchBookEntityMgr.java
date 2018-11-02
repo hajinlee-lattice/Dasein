@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.entitymgr;
+package com.latticeengines.datacloud.core.entitymgr;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;

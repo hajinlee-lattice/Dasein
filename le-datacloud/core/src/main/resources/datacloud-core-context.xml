@@ -24,5 +24,9 @@
     <bean id="countryCodeDao" class="com.latticeengines.datacloud.core.dao.impl.CountryCodeDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
+    
+    <bean id="patchBookDao" class="com.latticeengines.datacloud.core.dao.impl.PatchBookDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
 
 </beans>

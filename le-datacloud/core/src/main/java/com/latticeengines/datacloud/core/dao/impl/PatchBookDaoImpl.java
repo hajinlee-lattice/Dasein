@@ -1,8 +1,8 @@
-package com.latticeengines.datacloud.match.dao.impl;
+package com.latticeengines.datacloud.core.dao.impl;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.dao.PatchBookDao;
+import com.latticeengines.datacloud.core.dao.PatchBookDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import org.hibernate.Session;

@@ -1,23 +1,26 @@
-package com.latticeengines.datacloud.match.entitymgr;
+package com.latticeengines.datacloud.core.entitymgr.impl;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-import org.apache.commons.lang3.time.DateUtils;
-import org.junit.Assert;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@ContextConfiguration(locations = { "classpath:test-datacloud-match-context.xml" })
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+
+@ContextConfiguration(locations = { "classpath:test-datacloud-core-context.xml" })
 public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
 
     private static final int NUM_PATCH_BOOKS = 10;

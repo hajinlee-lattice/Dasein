@@ -1,9 +1,9 @@
-package com.latticeengines.datacloud.match.entitymgr.impl;
+package com.latticeengines.datacloud.core.entitymgr.impl;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.dao.PatchBookDao;
-import com.latticeengines.datacloud.match.entitymgr.PatchBookEntityMgr;
+import com.latticeengines.datacloud.core.dao.PatchBookDao;
+import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import org.springframework.stereotype.Component;
