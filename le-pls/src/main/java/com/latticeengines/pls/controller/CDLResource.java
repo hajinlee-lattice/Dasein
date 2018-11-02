@@ -121,7 +121,7 @@ public class CDLResource {
             MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
             EntityType entityType = EntityType.fromDisplayNameToEntityType(templateDisplay.getObject());
             String entity = entityType.getEntity().name();
-            String subType = entityType.getSubType().name();
+            String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName, source, entity,
                     templateDisplay.getFeedType(), subType, templateDisplay.getTemplateName());
             UIAction uiAction = null;
