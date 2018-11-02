@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow.steps;
 
 import javax.inject.Inject;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -50,18 +49,16 @@ public class ComputeOrphanRecordsStep extends RunDataFlow<ComputeOrphanRecordsSt
         if (artifact != null) {
             artifact.setStatus(DataCollectionArtifact.Status.GENERATING);
             artifact = dataCollectionProxy.updateDataCollectionArtifact(customerSpace, artifact);
-            log.info(String.format("Update data collection artifact of pid=%s, name=%s, status=%s)",
-                    artifact.getPid(), artifact.getName(), artifact.getStatus()));
+            log.info(String.format("Updated dataCollectionArtifact of pid=%s, name=%s, url=%s, status=%s)",
+                    artifact.getPid(), artifact.getName(), artifact.getUrl(), artifact.getStatus()));
         } else {
-            DataCollection collection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
             artifact = new DataCollectionArtifact();
             artifact.setName(configuration.getOrphanRecordsType().getOrphanType());
             artifact.setUrl(null);
             artifact.setStatus(DataCollectionArtifact.Status.GENERATING);
-            artifact.setDataCollection(collection);
             artifact = dataCollectionProxy.createDataCollectionArtifact(customerSpace, version, artifact);
-            log.info(String.format("Create new data collection artifact of pid=%s name=%s, status=%s",
-                    artifact.getPid(), artifact.getName(), artifact.getStatus()));
+            log.info(String.format("Created dataCollectionArtifact of pid=%s name=%s, url=%s, status=%s",
+                    artifact.getPid(), artifact.getName(), artifact.getUrl(), artifact.getStatus()));
         }
     }
 

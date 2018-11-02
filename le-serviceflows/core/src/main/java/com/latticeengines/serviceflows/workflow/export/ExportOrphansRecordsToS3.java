@@ -79,7 +79,7 @@ public class ExportOrphansRecordsToS3 extends BaseImportExportS3<ExportOrphansTo
         artifact.setUrl(exportPath);
         artifact.setStatus(DataCollectionArtifact.Status.READY);
         artifact = dataCollectionProxy.updateDataCollectionArtifact(customerSpace, artifact);
-        log.info(String.format("Updated data collection artifact of pid=%s, name=%s, url=%s, status=%s",
+        log.info(String.format("Updated dataCollectionArtifact of pid=%s, name=%s, url=%s, status=%s",
                 artifact.getPid(), artifact.getName(), artifact.getUrl(), artifact.getStatus()));
     }
 }

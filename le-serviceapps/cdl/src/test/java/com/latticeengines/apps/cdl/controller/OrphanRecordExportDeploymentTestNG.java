@@ -69,7 +69,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         checkpointService.cleanup();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", priority = 0)
     public void testOrphanTransactionExport() throws Exception {
         checkpointService.resumeCheckpoint(CHECK_POINT, 19);
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
@@ -88,9 +88,8 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         verifyResults(expectedResults);
     }
 
-    @Test(groups = "deployment")
-    public void testOrphanContactExport() throws Exception {
-        checkpointService.resumeCheckpoint(CHECK_POINT, 19);
+    @Test(groups = "deployment", priority = 1)
+    public void testOrphanContactExport() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.CONTACT);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
@@ -107,9 +106,8 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         verifyResults(expectedResults);
     }
 
-    @Test(groups = "deployment")
-    public void testUnmatchedAccountExport() throws Exception {
-        checkpointService.resumeCheckpoint(CHECK_POINT, 19);
+    @Test(groups = "deployment", priority = 2)
+    public void testUnmatchedAccountExport() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.UNMATCHED_ACCOUNT);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));

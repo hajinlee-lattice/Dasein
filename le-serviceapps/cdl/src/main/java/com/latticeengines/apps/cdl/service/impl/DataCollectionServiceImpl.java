@@ -545,7 +545,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         artifact.setName(artifactName);
         artifact.setUrl(artifactUrl);
         artifact.setTenant(tenant);
-        artifact.setStatus(DataCollectionArtifact.Status.NOT_SET);
+        artifact.setStatus(status);
         artifact.setVersion(version);
         artifact.setCreateTime(System.currentTimeMillis());
         dataCollectionArtifactEntityMgr.create(artifact);

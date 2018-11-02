@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
@@ -67,13 +68,21 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         String targetPath = PathBuilder.buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace)).toString();
         log.info("Use targetPath=" + targetPath);
 
+        DataCollectionArtifact artifact = new DataCollectionArtifact();
+        artifact.setName(orphanRecordsType.getOrphanType());
+        artifact.setUrl(null);
+        artifact.setStatus(request.getOrphanRecordsArtifactStatus());
+        artifact = dataCollectionProxy.createDataCollectionArtifact(customerSpace, request.getArtifactVersion(),
+                artifact);
+        log.info("Created dataCollectionArtifact=" + JsonUtils.serialize(artifact));
+
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
                 OrphanRecordsExportWorkflowConfiguration.WORKFLOW_NAME);
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.CREATED_BY, request.getCreatedBy());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.EXPORT_ID, request.getExportId());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_TYPE,
-                request.getOrphanRecordsType().name());
+                request.getOrphanRecordsType().getOrphanType());
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, request.getOrphanRecordsType().getOrphanType());
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 
@@ -112,12 +121,6 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
         return workflowJobService.submit(wfConfig, pidWrapper.getPid());
     }
-
-//    private String getTimestampFromPath(String path) {
-//        path = path.substring(0, path.length() - 1);
-//        path = path.substring(path.lastIndexOf("/") + 1);
-//        return path;
-//    }
 
     private Table getTable(TableRoleInCollection tableRoleInCollection, DataCollection.Version version) {
         Table table = dataCollectionProxy.getTable(getCustomerSpace().toString(), tableRoleInCollection, version);
