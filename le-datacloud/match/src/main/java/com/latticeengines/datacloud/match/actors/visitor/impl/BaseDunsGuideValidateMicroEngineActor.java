@@ -98,8 +98,11 @@ public abstract class BaseDunsGuideValidateMicroEngineActor extends MicroEngineA
 
             // first one that is more accurate than
             if (item.getKeyPartition().equals(keyPartition)) {
-                traveler.debug(String.format("Redirect to target DUNS=%s, input KeyPartition=%s, BookSource=%s",
-                        item.getDuns(), item.getKeyPartition(), item.getBookSource()));
+                if (!item.getDuns().equals(tuple.getDuns())) {
+                    // only generate traveler log when redirected DUNS != input DUNS to prevent confusion
+                    traveler.debug(String.format("Redirect to target DUNS=%s, input KeyPartition=%s, BookSource=%s",
+                            item.getDuns(), item.getKeyPartition(), item.getBookSource()));
+                }
                 return item.getDuns();
             }
         }

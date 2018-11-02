@@ -94,9 +94,9 @@ public class DunsRedirectFromManualMatch
         String manDuns = config.getManualSeedDuns();
         String ldcDuns = DataCloudConstants.ATTR_LDC_DUNS;
         // NOTE ManDuns should not be null, just in case
-        // ManDuns != null && LDC_DUNS != null && ManDuns != LDC_DUNS
-        String exp = String.format("%s != null && %s != null && !%s.equals(%s)",
-                manDuns, ldcDuns, manDuns, ldcDuns);
+        // ManDuns != null && LDC_DUNS != null
+        // NOTE allow ManDuns == LDC_DUNS to prevent other book source from redirecting ManDuns to other DUNS
+        String exp = String.format("%s != null && %s != null", manDuns, ldcDuns);
         return source.filter(exp, new FieldList(manDuns, ldcDuns));
     }
 }

@@ -175,14 +175,19 @@ public class DunsRedirectFromManualMatchTestNG
                 newPostMatchData("000000011","666666666", newTuple(null, null),
                         Long.MAX_VALUE, 999),
 
-                // #5: invalid rows (null ManDuns/LDC_DUNS or ManDuns == LDC_DUNS)
+                // #5: manDuns == ldcDuns, still generate a redirect book entry to prevent other sources from overriding
+                //     and redirect manDuns to other sub-optimal DUNS
+                newPostMatchData("444444444","555555555", newTuple(null, null),
+                        123L, 999),
+                newPostMatchData("555555555","555555555", newTuple(null, null),
+                        Long.MAX_VALUE, 999),
+
+                // #6: invalid rows (null ManDuns/LDC_DUNS or ManDuns == LDC_DUNS)
                 newPostMatchData(null,null, newTuple("USA", "NY"),
                         Long.MAX_VALUE, 999),
                 newPostMatchData("123456789",null, newTuple("USA", null),
                         Long.MAX_VALUE, 999),
                 newPostMatchData(null,"987654321", newTuple(null, "NY"),
-                        Long.MAX_VALUE, 999),
-                newPostMatchData("987654321","987654321", newTuple(null, null),
                         Long.MAX_VALUE, 999),
         };
     }
@@ -207,6 +212,7 @@ public class DunsRedirectFromManualMatchTestNG
                 { "888888888", "000000009", getKeyPartition("USA", "NY") }, // #4
                 { "777777777", "000000010", getKeyPartition("USA", null) }, // #4
                 { "666666666", "000000011", getKeyPartition(null, null) }, // #4
+                { "555555555", "555555555", getKeyPartition(null, null) }, // #5
         };
     }
 

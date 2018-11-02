@@ -212,6 +212,8 @@ public class PrepareDunsRedirectManualMatchTestNG
                         null, null, EMPLOYEE_SIZE_LARGE),
                 newExpectedRow("1", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
+                newExpectedRow("1", "Wall Street Chinese", "USA",
+                        "NY", null, EMPLOYEE_SIZE_LARGE),
 
                 newExpectedRow("2", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),
@@ -221,12 +223,16 @@ public class PrepareDunsRedirectManualMatchTestNG
                         "NY", null, EMPLOYEE_SIZE_SMALL),
                 newExpectedRow("2", "Wall Street Chinese", "USA",
                         null, "New York", EMPLOYEE_SIZE_SMALL),
+                newExpectedRow("2", "Wall Street Chinese", "USA",
+                        "NY", "New York", EMPLOYEE_SIZE_SMALL),
 
                 // #2: name, country, state present, large & small company size
                 newExpectedRow("3", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_LARGE),
                 newExpectedRow("3", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
+                newExpectedRow("3", "Wall Street Chinese", "USA",
+                        "NY", null, EMPLOYEE_SIZE_LARGE),
 
                 newExpectedRow("4", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),

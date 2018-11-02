@@ -68,17 +68,22 @@ public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements 
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)) {
             functionCall.getOutputCollector().add(getResult(arguments, country, null, null));
         }
+        // name, country, state
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)
+                && StringUtils.isNotBlank(state)) {
+            functionCall.getOutputCollector().add(getResult(arguments, country, state, null));
+        }
         // only for small company
         if (EMP_SIZE_SMALL.equals(employeeSize)) {
-            // name, country, state
-            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)
-                    && StringUtils.isNotBlank(state)) {
-                functionCall.getOutputCollector().add(getResult(arguments, country, state, null));
-            }
             // name, country, city
             if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)
                     && StringUtils.isNotBlank(city)) {
                 functionCall.getOutputCollector().add(getResult(arguments, country, null, city));
+            }
+            // name, country, state, city
+            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)
+                    && StringUtils.isNotBlank(state) && StringUtils.isNotBlank(city)) {
+                functionCall.getOutputCollector().add(getResult(arguments, country, state, city));
             }
         }
     }
