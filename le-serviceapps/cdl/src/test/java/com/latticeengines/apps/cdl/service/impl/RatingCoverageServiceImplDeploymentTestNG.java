@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +38,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingIdLookupColumnPair;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingModelIdPair;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
@@ -56,7 +57,7 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(RatingCoverageServiceImplDeploymentTestNG.class);
-    
+
     private static final String DUMMY_ID = "DUMMY_ID";
 
     @Autowired
@@ -79,15 +80,14 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = null;//"LETest1539973036934";
+        String existingTenant = "JLM1541027364119";// "LETest1539973036934";
 
         testPlayCreationHelper.setupTenantAndCreatePlay(existingTenant);
 
         play = testPlayCreationHelper.getPlay();
         String ratingEngineId = play.getRatingEngine().getId();
-        //String ratingEngineId = "engine_lx52_j81qjse_crhci2hsw";
-        ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
-                ratingEngineId);
+        // String ratingEngineId = "engine_amfzwkicrhokafnfhv4ruq";
+        ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(), ratingEngineId);
 
         Assert.assertNotNull(ratingEngine);
         List<RatingModel> ratingModels = ratingEngineProxy.getRatingModels(testPlayCreationHelper.getTenant().getId(),
@@ -148,7 +148,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
                 uniqueBuckets.add(ratingRule.getDefaultBucketName());
 
                 log.info("Unique Buckets: " + uniqueBuckets);
-                log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingEngineIdCoverageMap().get(ratingId)));
+                log.info("Ratings Coverage: "
+                        + JsonUtils.serialize(response.getRatingEngineIdCoverageMap().get(ratingId)));
             }
         }
     }
@@ -156,8 +157,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment-app")
     public void testSegmentIdCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
-        List<String> segmentIds = Arrays
-                .asList(new String[] { play.getRatingEngine().getSegment().getName(), DUMMY_ID });
+        List<String> segmentIds = Arrays.asList(play.getRatingEngine().getSegment().getName(), DUMMY_ID);
         request.setSegmentIds(segmentIds);
         RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
                 request);
@@ -198,7 +198,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         RatingModelIdPair p2 = new RatingModelIdPair();
         p2.setRatingEngineId(DUMMY_ID);
         p2.setRatingModelId(DUMMY_ID);
-        List<RatingModelIdPair> ratingEngineModelIds = Arrays.asList(new RatingModelIdPair[] { p1, p2 });
+        List<RatingModelIdPair> ratingEngineModelIds = Arrays.asList(p1, p2);
         request.setRatingEngineModelIds(ratingEngineModelIds);
         RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
                 request);
@@ -247,12 +247,13 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         p5.setRatingEngineId(ratingEngine.getId());
         p5.setResponseKeyId(p5Key);
         p5.setLookupColumn(InterfaceName.SalesforceAccountID.name());
+        request.setRestrictNotNullSalesforceId(true);
 
-        List<RatingIdLookupColumnPair> ratingIdLookupColumnPairs = Arrays
-                .asList(new RatingIdLookupColumnPair[] { p1, p2, p3, p4, p5 });
+        List<RatingIdLookupColumnPair> ratingIdLookupColumnPairs = Arrays.asList(p1, p2, p3, p4, p5);
         Set<RatingIdLookupColumnPair> badOnes = new HashSet<>(
                 Arrays.asList(new RatingIdLookupColumnPair[] { p3, p4, p5 }));
         request.setRatingIdLookupColumnPairs(ratingIdLookupColumnPairs);
+
         RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
                 request);
         Assert.assertNotNull(response);
@@ -299,7 +300,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         SegmentIdAndModelRulesPair r1 = new SegmentIdAndModelRulesPair();
         r1.setSegmentId(ratingEngine.getSegment().getName());
         r1.setRatingRule(ruleBasedModel.getRatingRule());
-        List<SegmentIdAndModelRulesPair> segmentIdModelRules = Arrays.asList(new SegmentIdAndModelRulesPair[] { r1 });
+        List<SegmentIdAndModelRulesPair> segmentIdModelRules = Collections.singletonList(r1);
         request.setSegmentIdModelRules(segmentIdModelRules);
         RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
                 request);
@@ -340,8 +341,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
         r2.setAccountRestriction(accountRestriction2);
 
-        List<SegmentIdAndSingleRulePair> segmentIdAndSingleRulePairs = Arrays
-                .asList(new SegmentIdAndSingleRulePair[] { r1, r2 });
+        List<SegmentIdAndSingleRulePair> segmentIdAndSingleRulePairs = Arrays.asList(r1, r2);
         request.setSegmentIdAndSingleRules(segmentIdAndSingleRulePairs);
 
         RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
@@ -367,14 +367,14 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Test(groups = "deployment-app")
     public void testRatingModelsCoverageForSegment() {
-        RatingModelsCoverageRequest request = new RatingModelsCoverageRequest();
+        RatingEnginesCoverageRequest request = new RatingEnginesCoverageRequest();
         String ratingId1 = ratingEngine.getId();
-        List<String> ratingEngineIds = Arrays.asList(ratingId1);
-        request.setRatingModelIds(ratingEngineIds);
+        List<String> ratingEngineIds = Collections.singletonList(ratingId1);
+        request.setRatingEngineIds(ratingEngineIds);
 
         // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 1
         MetadataSegment currentSegment = ratingEngine.getSegment();
-        RatingModelsCoverageResponse response = ratingCoverageService.getRatingCoveragesForSegment(
+        RatingEnginesCoverageResponse response = ratingCoverageService.getRatingCoveragesForSegment(
                 testPlayCreationHelper.getTenant().getId(), currentSegment.getName(), request);
         assertRatingModelsCoverageResponse(ratingId1, response, request);
         log.info("Rating Engine Segment {}, Account Count:{}, Contact Count: {}", currentSegment.getName(),
@@ -393,7 +393,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         CoverageInfo coverage2 = response.getRatingModelsCoverageMap().get(ratingId1);
 
         // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN < 3
-        // And check whether the coverage counts matches with other 2 segment coverages
+        // And check whether the coverage counts matches with other 2 segment
+        // coverages
         currentSegment = testPlayCreationHelper.createAggregatedSegment();
         response = ratingCoverageService.getRatingCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
                 currentSegment.getName(), request);
@@ -403,22 +404,25 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
         CoverageInfo coverageAggregated = response.getRatingModelsCoverageMap().get(ratingId1);
 
-        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()), coverageAggregated.getAccountCount());
+        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()),
+                coverageAggregated.getAccountCount());
         coverageAggregated.getBucketCoverageCounts().forEach(rbc -> {
             RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());
             RatingBucketCoverage coverage2Bucket = coverage2.getCoverageForBucket(rbc.getBucket());
-            Long computedCnt = (coverage1Bucket != null && coverage1Bucket.getCount() != null ? coverage1Bucket.getCount() : 0)
+            Long computedCnt = (coverage1Bucket != null && coverage1Bucket.getCount() != null
+                    ? coverage1Bucket.getCount() : 0)
                     + (coverage2Bucket != null && coverage2Bucket.getCount() != null ? coverage2Bucket.getCount() : 0);
             Assert.assertEquals(computedCnt, rbc.getCount(), "Bucket Count doesnot match for: " + rbc.getBucket());
         });
     }
 
-    private void assertRatingModelsCoverageResponse(String ratingId1, RatingModelsCoverageResponse response, RatingModelsCoverageRequest request) {
+    private void assertRatingModelsCoverageResponse(String ratingId1, RatingEnginesCoverageResponse response,
+            RatingEnginesCoverageRequest request) {
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getRatingModelsCoverageMap());
         Assert.assertNotNull(response.getErrorMap());
         Assert.assertTrue(response.getErrorMap().isEmpty());
-        
+
         Assert.assertEquals(response.getRatingModelsCoverageMap().size(), 1);
         Assert.assertTrue(response.getRatingModelsCoverageMap().containsKey(ratingId1));
         Assert.assertNotNull(response.getRatingModelsCoverageMap().get(ratingId1));
@@ -433,16 +437,16 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment-app")
     public void testRatingModelsCoverageWithContactsForSegment() {
 
-        RatingModelsCoverageRequest request = new RatingModelsCoverageRequest();
+        RatingEnginesCoverageRequest request = new RatingEnginesCoverageRequest();
         String ratingId1 = ratingEngine.getId();
-        List<String> ratingEngineIds = Arrays.asList(ratingId1);
-        request.setRatingModelIds(ratingEngineIds);
+        List<String> ratingEngineIds = Collections.singletonList(ratingId1);
+        request.setRatingEngineIds(ratingEngineIds);
         request.setLoadContactsCount(true);
         request.setLoadContactsCountByBucket(true);
 
         // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 1
         MetadataSegment currentSegment = ratingEngine.getSegment();
-        RatingModelsCoverageResponse response = ratingCoverageService.getRatingCoveragesForSegment(
+        RatingEnginesCoverageResponse response = ratingCoverageService.getRatingCoveragesForSegment(
                 testPlayCreationHelper.getTenant().getId(), currentSegment.getName(), request);
         log.info("Rating Engine Segment {}, Account Count:{}, Contact Count: {}", ratingEngine.getSegment().getName(),
                 currentSegment.getAccounts(), currentSegment.getContacts());
@@ -461,7 +465,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         CoverageInfo coverage2 = response.getRatingModelsCoverageMap().get(ratingId1);
 
         // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN < 3
-        // And check whether the coverage counts matches with other 2 segment coverages
+        // And check whether the coverage counts matches with other 2 segment
+        // coverages
         currentSegment = testPlayCreationHelper.createAggregatedSegment();
         response = ratingCoverageService.getRatingCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
                 currentSegment.getName(), request);
@@ -471,18 +476,25 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
         CoverageInfo coverageAggregated = response.getRatingModelsCoverageMap().get(ratingId1);
 
-        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()), coverageAggregated.getAccountCount());
-        assertEquals(new Long(coverage1.getContactCount() + coverage2.getContactCount()), coverageAggregated.getContactCount());
+        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()),
+                coverageAggregated.getAccountCount());
+        assertEquals(new Long(coverage1.getContactCount() + coverage2.getContactCount()),
+                coverageAggregated.getContactCount());
         coverageAggregated.getBucketCoverageCounts().forEach(rbc -> {
             RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());
             RatingBucketCoverage coverage2Bucket = coverage2.getCoverageForBucket(rbc.getBucket());
-            Long computedAccountCnt = (coverage1Bucket != null && coverage1Bucket.getCount() != null ? coverage1Bucket.getCount() : 0)
+            Long computedAccountCnt = (coverage1Bucket != null && coverage1Bucket.getCount() != null
+                    ? coverage1Bucket.getCount() : 0)
                     + (coverage2Bucket != null && coverage2Bucket.getCount() != null ? coverage2Bucket.getCount() : 0);
-            Assert.assertEquals(computedAccountCnt, rbc.getCount(), "Account Bucket Count doesnot match for: " + rbc.getBucket());
+            Assert.assertEquals(computedAccountCnt, rbc.getCount(),
+                    "Account Bucket Count doesnot match for: " + rbc.getBucket());
 
-            Long computedContactCnt = (coverage1Bucket != null && coverage1Bucket.getContactCount()!= null ? coverage1Bucket.getContactCount() : 0)
-                    + (coverage2Bucket != null && coverage2Bucket.getContactCount() != null ? coverage2Bucket.getContactCount() : 0);
-            Assert.assertEquals(computedContactCnt, rbc.getContactCount(), "Contact Bucket Count doesnot match for: " + rbc.getBucket());
+            Long computedContactCnt = (coverage1Bucket != null && coverage1Bucket.getContactCount() != null
+                    ? coverage1Bucket.getContactCount() : 0)
+                    + (coverage2Bucket != null && coverage2Bucket.getContactCount() != null
+                            ? coverage2Bucket.getContactCount() : 0);
+            Assert.assertEquals(computedContactCnt, rbc.getContactCount(),
+                    "Contact Bucket Count doesnot match for: " + rbc.getBucket());
         });
     }
 }

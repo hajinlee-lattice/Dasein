@@ -1,7 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 
@@ -19,7 +19,7 @@ public interface RatingCoverageService {
 
     RatingsCountResponse getCoverageInfo(String customeSpace, RatingsCountRequest request);
 
-    RatingModelsCoverageResponse getRatingCoveragesForSegment(String customerSpace, String segmentName,
-            RatingModelsCoverageRequest ratingCoverageRequest);
+    RatingEnginesCoverageResponse getRatingCoveragesForSegment(String customerSpace, String segmentName,
+                                                               RatingEnginesCoverageRequest ratingCoverageRequest);
 
 }

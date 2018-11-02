@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -27,8 +28,7 @@ public class PlayUtils {
         }
     }
 
-    public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch,
-            Play play) {
+    public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch, Play play) {
         if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
             // TODO - enable it once UI has fix for PLS-6769
             // throw new LedpException(LedpCode.LEDP_18156, new String[] {
@@ -43,10 +43,15 @@ public class PlayUtils {
             playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
         }
 
-        if (playLaunch.getDestinationOrgId() == null
-                || playLaunch.getDestinationSysType() == null) {
+        if (StringUtils.isBlank(playLaunch.getDestinationOrgId()) || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No destination system selected for the launch for play: " + play.getName() });
+        }
+
+        if (playLaunch.getExcludeItemsWithoutSalesforceId()
+                && StringUtils.isBlank(playLaunch.getDestinationAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "No destination system selected for the launch for play: " + play.getName() });
+                    "Cannot restrict accounts with null Ids if account id has not been set up for selected destination" });
         }
     }
 

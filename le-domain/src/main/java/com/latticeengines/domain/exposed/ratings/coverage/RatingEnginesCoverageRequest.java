@@ -7,30 +7,32 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RatingModelsCoverageRequest {
+public class RatingEnginesCoverageRequest {
 
-    private List<String> ratingModelIds;
+    private List<String> ratingEngineIds;
 
-    private boolean restrictNotNullSalesforceId;
+    private boolean restrictNullLookupId;
 
     private boolean loadContactsCount;
 
     private boolean loadContactsCountByBucket;
 
-    public List<String> getRatingModelIds() {
-        return ratingModelIds;
+    private String lookupId;
+
+    public List<String> getRatingEngineIds() {
+        return ratingEngineIds;
     }
 
-    public void setRatingModelIds(List<String> ratingModelIds) {
-        this.ratingModelIds = ratingModelIds;
+    public void setRatingEngineIds(List<String> ratingEngineIds) {
+        this.ratingEngineIds = ratingEngineIds;
     }
 
-    public boolean isRestrictNotNullSalesforceId() {
-        return restrictNotNullSalesforceId;
+    public boolean isRestrictNullLookupId() {
+        return restrictNullLookupId;
     }
 
-    public void setRestrictNotNullSalesforceId(boolean restrictNotNullSalesforceId) {
-        this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
+    public void setRestrictNullLookupId(boolean restrictNullLookupId) {
+        this.restrictNullLookupId = restrictNullLookupId;
     }
 
     public boolean isLoadContactsCount() {
@@ -49,5 +51,12 @@ public class RatingModelsCoverageRequest {
         this.loadContactsCountByBucket = loadContactsCountByBucket;
     }
 
+    public String getLookupId() {
+        return lookupId;
+    }
+
+    public void setLookupId(String lookupId) {
+        this.lookupId = lookupId;
+    }
 
 }

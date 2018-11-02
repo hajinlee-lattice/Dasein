@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RatingModelsCoverageResponse {
+public class RatingEnginesCoverageResponse {
 
     private Map<String, CoverageInfo> ratingModelsCoverageMap;
 
     private Map<String, String> errorMap;
 
-    public RatingModelsCoverageResponse() {
+    public RatingEnginesCoverageResponse() {
         ratingModelsCoverageMap = new ConcurrentHashMap<>();
         errorMap = new ConcurrentHashMap<>();
     }

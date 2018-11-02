@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
-import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -43,7 +44,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -75,7 +78,7 @@ public class PlayResource {
     private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
 
     @Inject
-    private RatingEntityPreviewService ratingEntityPreviewService;
+    private RatingCoverageService ratingCoverageService;
 
     @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
@@ -279,7 +282,7 @@ public class PlayResource {
         }
         playLaunch.setPlay(play);
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
-        validateNonEmptyTargetsForLaunch(play, playName, playLaunch, //
+        validateNonEmptyTargetsForLaunch(customerSpace, play, playName, playLaunch, //
                 playLaunch.getDestinationAccountId());
 
         // this dry run flag is useful in writing robust testcases
@@ -291,10 +294,18 @@ public class PlayResource {
         playLaunch.setLaunchState(LaunchState.Launching);
         playLaunch.setPlay(play);
         playLaunch.setTableName(createTable(playLaunch));
-        List<String> allAvailableBuckets = Arrays.asList(RatingBucketName.values()).stream().map(RatingBucketName::name)
-                .collect(Collectors.toList());
-        Long totalAvailableRatedAccounts = ratingEntityPreviewService.getEntityPreviewCount(play.getRatingEngine(),
-                BusinessEntity.Account, false, null, allAvailableBuckets, null);
+        
+        RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
+        coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
+        coverageRequest.setRestrictNullLookupId(playLaunch.getExcludeItemsWithoutSalesforceId());
+        coverageRequest.setLookupId(playLaunch.getDestinationAccountId());
+        RatingEnginesCoverageResponse coverageResponse = ratingCoverageService
+                .getRatingCoveragesForSegment(customerSpace, play.getTargetSegment().getName(), coverageRequest);
+
+        // Todo: change this to segment's account count once UI supports launching unscored accounts
+        Long totalAvailableRatedAccounts = coverageResponse.getRatingModelsCoverageMap()
+                .get(play.getRatingEngine().getId()).getAccountCount();
+
         playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
         playLaunch.setAccountsSuppressed(0L);
         playLaunch.setAccountsErrored(0L);
@@ -465,22 +476,34 @@ public class PlayResource {
         return playId;
     }
 
-    private void validateNonEmptyTargetsForLaunch(Play play, String playName, //
+    private void validateNonEmptyTargetsForLaunch(String customerSpace, Play play, String playName, //
             PlayLaunch playLaunch, String lookupIdColumn) {
         RatingEngine ratingEngine = play.getRatingEngine();
         ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
         play.setRatingEngine(ratingEngine);
 
-        Long previewDataCount = ratingEntityPreviewService.getEntityPreviewCount( //
-                ratingEngine, BusinessEntity.Account, //
-                playLaunch.getExcludeItemsWithoutSalesforceId(), //
-                null,
-                playLaunch.getBucketsToLaunch().stream() //
-                        .map(RatingBucketName::getName) //
-                        .collect(Collectors.toList()),
-                lookupIdColumn);
+        RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
+        coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
+        coverageRequest.setRestrictNullLookupId(playLaunch.getExcludeItemsWithoutSalesforceId());
+        coverageRequest.setLookupId(playLaunch.getDestinationAccountId());
+        RatingEnginesCoverageResponse coverageResponse = ratingCoverageService
+                .getRatingCoveragesForSegment(customerSpace, play.getTargetSegment().getName(), coverageRequest);
 
-        if (previewDataCount == null || previewDataCount <= 0L) {
+        if (coverageResponse == null || MapUtils.isNotEmpty(coverageResponse.getErrorMap())) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Unable to validate validity of launch targets due to internal Error, please retry later" });
+        }
+
+        Long accountsToLaunch = coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                .getBucketCoverageCounts().stream()
+                .filter(ratingBucket -> playLaunch.getBucketsToLaunch()
+                        .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
+                .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
+
+        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+
+        if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
         }
     }

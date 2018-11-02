@@ -51,7 +51,6 @@ import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
@@ -518,7 +517,7 @@ public class RatingEngineEntityMgrImpl //
         ratingEngineDeletionAction.setActionInitiator(actionInitiator);
         ratingEngineDeletionAction.setTenant(MultiTenantContext.getTenant());
         RatingEngineActionConfiguration reActionConfig = new RatingEngineActionConfiguration();
-        ((ActionConfiguration) reActionConfig).setHiddenFromUI(true);
+        reActionConfig.setHiddenFromUI(true);
         reActionConfig.setRatingEngineId(ratingEngineId);
         reActionConfig.setSubType(RatingEngineActionConfiguration.SubType.DELETION);
         ratingEngineDeletionAction.setActionConfiguration(reActionConfig);
@@ -589,7 +588,7 @@ public class RatingEngineEntityMgrImpl //
         Set<Triple<String, String, String>> attrDepSet = null;
         if (ratingEngine != null && ratingEngine.getSegment() != null) {
             String targetSegmentName = ratingEngine.getSegment().getName();
-            attrDepSet = new HashSet<Triple<String, String, String>>();
+            attrDepSet = new HashSet<>();
 
             attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));

@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,8 +34,10 @@ public class CoverageResource {
      * @param customerSpace
      * @param ratingModelSegmentIds
      *
-     * This method is deprecated as it is causing confusion while doing multiple things.
-     * Instead we are creating new api's for each of the usecase. Which will allow us to track api usages as well.
+     *            This method is deprecated as it is causing confusion while
+     *            doing multiple things. Instead we are creating new api's for
+     *            each of the usecase. Which will allow us to track api usages
+     *            as well.
      *
      * @return
      */
@@ -51,8 +53,8 @@ public class CoverageResource {
     @PostMapping("/segment/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get Segments CoverageInfo for List of Rating Model Ids")
-    public RatingModelsCoverageResponse getRatingEngineCoverageCountForSegment(@PathVariable String customerSpace,
-            @PathVariable String segmentName, @RequestBody RatingModelsCoverageRequest ratingCoverageRequest) {
+    public RatingEnginesCoverageResponse getRatingEngineCoverageCountForSegment(@PathVariable String customerSpace,
+            @PathVariable String segmentName, @RequestBody RatingEnginesCoverageRequest ratingCoverageRequest) {
         return ratingCoverageService.getRatingCoveragesForSegment(customerSpace, segmentName, ratingCoverageRequest);
     }
 }

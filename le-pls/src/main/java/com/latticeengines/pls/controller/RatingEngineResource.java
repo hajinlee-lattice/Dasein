@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -49,8 +48,8 @@ import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageRequest;
-import com.latticeengines.domain.exposed.ratings.coverage.RatingModelsCoverageResponse;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -253,10 +252,10 @@ public class RatingEngineResource {
     @PostMapping(value = "/coverage/segment/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingModelsCoverageResponse getRatingEngineCoverageInfo(@PathVariable String segmentName,
-            @RequestBody RatingModelsCoverageRequest ratingModelsCoverageRequest) {
+    public RatingEnginesCoverageResponse getRatingEngineCoverageInfo(@PathVariable String segmentName,
+                                                                     @RequestBody RatingEnginesCoverageRequest ratingEnginesCoverageRequest) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingCoverageProxy.getCoverageInfoForSegment(tenant.getId(), segmentName, ratingModelsCoverageRequest);
+        return ratingCoverageProxy.getCoverageInfoForSegment(tenant.getId(), segmentName, ratingEnginesCoverageRequest);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels")
