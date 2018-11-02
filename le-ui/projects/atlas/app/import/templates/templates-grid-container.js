@@ -212,7 +212,7 @@ export default class GridContainer extends Component {
           colSpan: 2
         },
         {
-          colSpan: 4,
+          colSpan: 3,
           template: cell => {
             if (cell.props.rowData.Exist) {
               return (
@@ -238,7 +238,7 @@ export default class GridContainer extends Component {
           }
         },
         {
-          colSpan: 1,
+          colSpan: 2,
           mask: value => {
             var options = {
               year: "numeric",
