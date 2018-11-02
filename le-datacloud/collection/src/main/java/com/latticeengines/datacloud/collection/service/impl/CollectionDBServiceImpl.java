@@ -54,6 +54,7 @@ import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
@@ -878,12 +879,20 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             List<File> bucketFiles = doBucketing(tmpFiles, vendor);
             if (CollectionUtils.isNotEmpty(bucketFiles)) {
 
-                String hdfsIngestDir = hdfsPathBuilder.constructIngestionDir(vendor + "_RAW").toString();
+                Path hdfsIngestLocation = hdfsPathBuilder.constructIngestionDir(vendor + "_RAW");
+                String hdfsIngestDir = hdfsIngestLocation.toString();
                 HdfsUtils.mkdir(yarnConfiguration, hdfsIngestDir);
 
                 for (File bucketFile : bucketFiles) {
 
-                    String hdfsFilePath = hdfsIngestDir + bucketFile.getName();
+                    if (!bucketFile.exists()) {
+
+                        log.warn("no data gathered for bucket file: " + bucketFile.getPath());
+                        continue;
+
+                    }
+
+                    String hdfsFilePath = hdfsIngestLocation.append(bucketFile.getName()).toString();
 
                     if (HdfsUtils.fileExists(yarnConfiguration, hdfsFilePath)) {
 
@@ -892,16 +901,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                     } else {
 
-                        if (bucketFile.exists()) {
-
-                            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(),
-                                    hdfsIngestDir);
-
-                        } else {
-
-                            log.warn("no data gathered for bucket file: " + bucketFile.getPath());
-
-                        }
+                        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(), hdfsIngestDir);
 
                     }
 
