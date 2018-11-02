@@ -38,7 +38,8 @@ public class TestFrameworkUtils {
     public static final String LP3_TENANT_REG_PREFIX = "lp3";
 
     public static final String TENANTID_PREFIX = "LETest";
-    public static final Set<String> TENANTID_PREFIXES = new HashSet<>(Arrays.asList("LETest", "letest", "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG"));
+    public static final Set<String> TENANTID_PREFIXES = new HashSet<>(Arrays.asList("LETest", "letest",
+            "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG", "CDLComponentDeploymentTestNG"));
     public static final String MODEL_PREFIX = "LETestModel";
 
     public static String usernameForAccessLevel(AccessLevel accessLevel) {
@@ -96,6 +97,13 @@ public class TestFrameworkUtils {
                 break;
             }
         }
+
+        if (!findMatch) {
+            Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+            Matcher matcher = pattern.matcher(tenantId);
+            findMatch = matcher.find();
+        }
+
         return findMatch;
     }
 
