@@ -2,13 +2,17 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +39,10 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -46,8 +53,10 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndSingleRulePair;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -65,6 +74,12 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Autowired
+    private EntityProxy entityProxy;
 
     @Autowired
     private TestPlayCreationHelper testPlayCreationHelper;
@@ -496,5 +511,60 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
             Assert.assertEquals(computedContactCnt, rbc.getContactCount(),
                     "Contact Bucket Count doesnot match for: " + rbc.getBucket());
         });
+    }
+
+    @Test(groups = "deployment-app")
+    public void testProductsCoverageForSegment() {
+        String tenantId = testPlayCreationHelper.getTenant().getId();
+        List<String> productIds = getProductIds(tenantId);
+
+        Assert.assertNotNull(productIds);
+        Assert.assertNotEquals(productIds.size(), 0);
+
+        MetadataSegment currentSegment = ratingEngine.getSegment();
+        RatingEnginesCoverageResponse response = ratingCoverageService
+                .getProductCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
+                        currentSegment.getName(), productIds);
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getRatingModelsCoverageMap());
+        Assert.assertEquals(response.getRatingModelsCoverageMap().size(), productIds.size());
+
+        for (Map.Entry<String, CoverageInfo> entry : response.getRatingModelsCoverageMap()
+                .entrySet()) {
+            Long accountCount = entry.getValue().getAccountCount();
+            Long unscoredAccountCount = entry.getValue().getUnscoredAccountCount();
+            Long totalAccounts = accountCount + unscoredAccountCount;
+            Assert.assertEquals(currentSegment.getAccounts(), totalAccounts);
+        }
+    }
+
+    private List<String> getProductIds(String tenantId) {
+        String servingTableName = dataCollectionProxy.getTableName(tenantId,
+                BusinessEntity.Product.getServingStore());
+
+        if (StringUtils.isBlank(servingTableName)) {
+            return new ArrayList<String>();
+        }
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setAccountRestriction(null);
+        frontEndQuery.setContactRestriction(null);
+        PageFilter pageFilter = new PageFilter(0,5);
+        frontEndQuery.setPageFilter(pageFilter);
+        frontEndQuery.setMainEntity(BusinessEntity.Product);
+
+        DataPage data = entityProxy.getData(tenantId, frontEndQuery);
+        List<String> productIds;
+        if (data != null && CollectionUtils.isNotEmpty(data.getData())) {
+            log.info(JsonUtils.serialize(data.getData()));
+            productIds = data.getData().stream()
+                    .map(product -> (String) product.get(InterfaceName.ProductId.toString()))
+                    .collect(Collectors.toList());
+        } else {
+            productIds = new ArrayList<>();
+        }
+
+        return productIds;
     }
 }

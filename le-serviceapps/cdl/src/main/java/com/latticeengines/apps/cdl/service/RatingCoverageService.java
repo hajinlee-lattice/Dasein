@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
@@ -21,5 +23,8 @@ public interface RatingCoverageService {
 
     RatingEnginesCoverageResponse getRatingCoveragesForSegment(String customerSpace, String segmentName,
                                                                RatingEnginesCoverageRequest ratingCoverageRequest);
+
+    RatingEnginesCoverageResponse getProductCoveragesForSegment(String customerSpace,
+            String segmentName, List<String> productIds);
 
 }

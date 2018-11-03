@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -27,5 +29,13 @@ public class RatingCoverageProxy extends MicroserviceRestApiProxy {
     public RatingEnginesCoverageResponse getCoverageInfoForSegment(String customerSpace, String segmentName, RatingEnginesCoverageRequest request) {
         String url = constructUrl(URL_PREFIX + "/segment/{segmentName}", shortenCustomerSpace(customerSpace), segmentName);
         return post("getRatingsCoverageForSegment", url, request, RatingEnginesCoverageResponse.class);
+    }
+
+    public RatingEnginesCoverageResponse getProductCoverageInfoForSegment(String customerSpace,
+            String segmentName, List<String> productIds) {
+        String url = constructUrl(URL_PREFIX + "/segment/{segmentName}/products",
+                shortenCustomerSpace(customerSpace), segmentName);
+        return post("getRatingsCoverageForSegment", url, productIds,
+                RatingEnginesCoverageResponse.class);
     }
 }

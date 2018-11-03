@@ -258,6 +258,16 @@ public class RatingEngineResource {
         return ratingCoverageProxy.getCoverageInfoForSegment(tenant.getId(), segmentName, ratingEnginesCoverageRequest);
     }
 
+    @PostMapping(value = "/coverage/segment/{segmentName}/products")
+    @ResponseBody
+    @ApiOperation(value = "Get CoverageInfo for productIds for accounts in a segment")
+    public RatingEnginesCoverageResponse getProductCoverageInfoForSegment(@PathVariable String segmentName,
+            @RequestBody List<String> productIds) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingCoverageProxy.getProductCoverageInfoForSegment(tenant.getId(), segmentName,
+                productIds);
+    }
+
     @GetMapping(value = "/{ratingEngineId}/ratingmodels")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")

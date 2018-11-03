@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -25,14 +27,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -41,6 +48,8 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
@@ -86,6 +95,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Autowired
     private RatingProxy ratingProxy;
+
+    @Autowired
+    private PeriodService periodService;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
 
     private ForkJoinPool tpForParallelStream;
 
@@ -776,7 +791,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             frontEndRestrictions.add(createRatingEngineRestriction(ratingEngineId, ratingBucket));
         }
 
-        FrontEndRestriction accountRestriction = prepareFronEndRestriction(frontEndRestrictions);
+        FrontEndRestriction accountRestriction = prepareFrontEndRestriction(frontEndRestrictions);
         FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
 
         entityFrontEndQuery.setAccountRestriction(accountRestriction);
@@ -806,9 +821,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         entityFrontEndQuery.setMainEntity(entityType);
 
-        FrontEndRestriction accountRestriction = prepareFronEndRestriction(prepareRestrctionList(
+        FrontEndRestriction accountRestriction = prepareFrontEndRestriction(prepareRestrctionList(
                 segment.getAccountRestriction(), segmentIdSingleRulePair.getAccountRestriction()));
-        FrontEndRestriction contactRestriction = prepareFronEndRestriction(prepareRestrctionList(
+        FrontEndRestriction contactRestriction = prepareFrontEndRestriction(prepareRestrctionList(
                 segment.getContactRestriction(), segmentIdSingleRulePair.getContacttRestriction()));
 
         entityFrontEndQuery.setAccountRestriction(accountRestriction);
@@ -833,7 +848,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return restrictionList;
     }
 
-    private FrontEndRestriction prepareFronEndRestriction(List<Restriction> restrictions) {
+    private FrontEndRestriction prepareFrontEndRestriction(List<Restriction> restrictions) {
         Restriction finalRestriction;
 
         if (restrictions.size() == 0) {
@@ -974,5 +989,87 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
         });
         return response;
+    }
+
+    @Override
+    public RatingEnginesCoverageResponse getProductCoveragesForSegment(String customerSpace,
+            String segmentName, List<String> productIds) {
+        RatingEnginesCoverageResponse response = null;
+
+        Tenant tenant = MultiTenantContext.getTenant();
+
+        MetadataSegment targetSegment = segmentService.findByName(segmentName);
+        if (targetSegment == null) {
+            throw new LedpException(LedpCode.LEDP_40045, new String[] { segmentName });
+        }
+
+        if (productIds.size() < thresholdForParallelProcessing) {
+            Stream<String> stream = productIds.stream();
+            response = processProductIdsStream(tenant, stream, targetSegment);
+        } else {
+            response = tpForParallelStream.submit(() -> {
+                Stream<String> parallelStream = productIds.stream().parallel();
+                return processProductIdsStream(tenant, parallelStream, targetSegment);
+            }).join();
+        }
+
+        return response;
+    }
+
+    // This method can accept parallel or sequential stream
+    private RatingEnginesCoverageResponse processProductIdsStream(Tenant tenant,
+            Stream<String> stream, MetadataSegment targetSegment) {
+        RatingEnginesCoverageResponse response = new RatingEnginesCoverageResponse();
+        stream.forEach(productId -> {
+            try {
+                CoverageInfo coverageInfo = processSingleProductId(tenant, targetSegment,
+                        productId);
+                response.getRatingModelsCoverageMap().put(productId, coverageInfo);
+            } catch (Exception ex) {
+                log.info("Ignoring exception in getting coverage info for product id: " + productId,
+                        ex);
+                response.getErrorMap().put(productId, ex != null ? ex.getMessage() : "null");
+            }
+        });
+        return response;
+    }
+
+    private CoverageInfo processSingleProductId(Tenant tenant, MetadataSegment targetSegment,
+            String productId) {
+        try {
+            MultiTenantContext.setTenant(tenant);
+            DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(tenant.getId(), null);
+            TimeFilter timeFilter = TimeFilter.ever(status.getApsRollingPeriod());
+
+            Restriction accountRestriction = Restriction.builder()
+                    .and(targetSegment.getAccountRestriction(),
+                            new TransactionRestriction(productId, timeFilter, false, null, null))
+                    .build();
+
+            FrontEndQuery frontEndQuery = new FrontEndQuery();
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
+            frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
+
+            frontEndQuery.setContactRestriction(targetSegment.getContactFrontEndRestriction());
+
+            log.info("Front end query for Account: " + JsonUtils.serialize(frontEndQuery));
+            Long count = entityProxy.getCount( //
+                    tenant.getId(), //
+                    frontEndQuery);
+
+            CoverageInfo coverageInfo = new CoverageInfo();
+            coverageInfo.setAccountCount(count);
+
+            if (targetSegment != null) {
+                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
+                    coverageInfo.setUnscoredAccountCount(
+                            targetSegment.getAccounts() - coverageInfo.getAccountCount());
+                }
+            }
+
+            return coverageInfo;
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 }
