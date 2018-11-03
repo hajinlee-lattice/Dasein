@@ -1,9 +1,16 @@
 import { axios, Observable, Subject } from "../../network.vendor";
-import messageService from '../utilities/messaging-service';
+import messageService from "../utilities/messaging-service";
 import Response from "./response";
 import Error from "./error";
 import Observables from "./observables";
-import Message, {MODAL, BANNER, NOTIFICATION, ERROR, INFO, WARNING } from "../utilities/message";
+import Message, {
+  MODAL,
+  BANNER,
+  NOTIFICATION,
+  ERROR,
+  INFO,
+  WARNING
+} from "../utilities/message";
 
 let http;
 
@@ -38,13 +45,13 @@ const httpService = {
   setUpHeader: headerObj => {
     setParams(http.defaults.headers.common, headerObj);
   },
-  unsubscribeObservable: observer =>{
-      observables.removeObservable(observer.getName());
+  unsubscribeObservable: observer => {
+    observables.removeObservable(observer.getName());
   },
-  get: (url, observer) => {
+  get: (url, observer, headers) => {
     let observable = Observable.create(obs => {
       http
-        .get(url)
+        .get(url, { headers: headers ? headers : {}})
         .then(response => {
           let resp = new Response(
             response,
@@ -53,7 +60,7 @@ const httpService = {
             response.data
           );
           // if(response && response.data && response.data.UIAction){
-            messageService.sendMessage(new Message(response, "", "", "",""));  
+          messageService.sendMessage(new Message(response, "", "", "", ""));
           // }
           obs.next(resp);
           obs.complete();
@@ -64,14 +71,22 @@ const httpService = {
             error.response.statusText,
             error.message
           );
-          messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
-          if(obs.error){
+          messageService.sendMessage(
+            new Message(
+              error.response,
+              BANNER,
+              ERROR,
+              respoError.getMsg(),
+              `${url} ${respoError.getFullMessage()}`
+            )
+          );
+          if (obs.error) {
             obs.error(respoError);
           }
           obs.complete();
         });
     }).subscribe(observer);
-      observables.addObservable(observer.getName(),observable);
+    observables.addObservable(observer.getName(), observable);
   },
 
   post: (url, body, observer) => {
@@ -86,7 +101,7 @@ const httpService = {
             response.data
           );
           // if(response && response.data && response.data.UIAction){
-            messageService.sendMessage(new Message(response, "", "", "",""));  
+          messageService.sendMessage(new Message(response, "", "", "", ""));
           // }
           obs.next(resp);
           obs.complete();
@@ -97,14 +112,22 @@ const httpService = {
             error.response.statusText,
             error.message
           );
-          messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
-          if(obs.error){
+          messageService.sendMessage(
+            new Message(
+              error.response,
+              BANNER,
+              ERROR,
+              respoError.getMsg(),
+              `${url} ${respoError.getFullMessage()}`
+            )
+          );
+          if (obs.error) {
             obs.error(respoError);
           }
           obs.complete();
         });
     }).subscribe(observer);
-      observables.addObservable(observer.getName(),observable);
+    observables.addObservable(observer.getName(), observable);
   },
   put: (url, body, observer) => {
     let observable = Observable.create(obs => {
@@ -117,7 +140,7 @@ const httpService = {
             response.statusText,
             response.data
           );
-          messageService.sendMessage(new Message(response, "", "", "",""));  
+          messageService.sendMessage(new Message(response, "", "", "", ""));
           obs.next(resp);
           obs.complete();
         })
@@ -127,14 +150,22 @@ const httpService = {
             error.response.statusText,
             error.message
           );
-          messageService.sendMessage(new Message(error.response, BANNER, ERROR, respoError.getMsg(),`${url} ${respoError.getFullMessage()}`));
-          if(obs.error){
+          messageService.sendMessage(
+            new Message(
+              error.response,
+              BANNER,
+              ERROR,
+              respoError.getMsg(),
+              `${url} ${respoError.getFullMessage()}`
+            )
+          );
+          if (obs.error) {
             obs.error(respoError);
           }
           obs.complete();
         });
     }).subscribe(observer);
-      observables.addObservable(observer.getName(),observable);
+    observables.addObservable(observer.getName(), observable);
   }
 };
 init();

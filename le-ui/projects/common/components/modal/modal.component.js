@@ -113,6 +113,10 @@ angular.module('common.modal', [])
     };
 
     this.prefab_generator = function(type, opts, cb) {
+        let modal = Modal.get(opts.name);
+        if(modal){
+            Modal.modalRemoveFromDOM(modal, {name: opts.name});
+        }
         var config = Modal.getConfig(type);
         config.callback = cb;
         config = angular.extend(config, opts);
