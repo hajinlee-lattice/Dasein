@@ -514,34 +514,38 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private void setExternalSystem(List<FieldMapping> fieldMappings) {
         for (FieldMapping fieldMapping : fieldMappings) {
-            if (fieldMapping.getUserField().equalsIgnoreCase("SalesforceAccountID")) {
-                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            }
-            if (fieldMapping.getUserField().equalsIgnoreCase("SalesforceSandboxAccountID")) {
-                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            }
-            if (fieldMapping.getUserField().equalsIgnoreCase("MarketoAccountID")) {
-                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.ERP);
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equalsIgnoreCase("SalesforceAccountID")) {
+                    fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
+                if (fieldMapping.getUserField().equalsIgnoreCase("SalesforceSandboxAccountID")) {
+                    fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
+                if (fieldMapping.getUserField().equalsIgnoreCase("MarketoAccountID")) {
+                    fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.ERP);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
             }
         }
     }
 
     private void setDateAttributes(List<FieldMapping> fieldMappings) {
         for (FieldMapping fieldMapping : fieldMappings) {
-            if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
-                fieldMapping.setFieldType(UserDefinedType.DATE);
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
-                fieldMapping.setFieldType(UserDefinedType.DATE);
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
             }
         }
     }
