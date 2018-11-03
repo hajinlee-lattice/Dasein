@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.util;
+package com.latticeengines.datacloud.core.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

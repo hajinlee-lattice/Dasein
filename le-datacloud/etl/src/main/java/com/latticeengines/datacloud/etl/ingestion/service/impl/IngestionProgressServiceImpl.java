@@ -159,6 +159,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         case PATCH_BOOK:
             // For PATCH_BOOK, version from request is actually datacloud
             // version
+            progress.setDataCloudVersion(version);
             progress.setSource(PatchBook.TABLE_NAME);
             progress.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
             progress.setDestination(ingestionDir.append(progress.getVersion()).toString());

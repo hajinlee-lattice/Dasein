@@ -56,6 +56,9 @@ public class PatchBook implements HasPid, Serializable {
     public static final String COLUMN_CREATEBY = "CreatedBy";
     public static final String COLUMN_LASTMODIFIEDDATE = "LastModifiedDate";
     public static final String COLUMN_LASTMODIFIEDBY = "LastModifiedBy";
+    public static final String COLUMN_EFFECTIVE_SINCE = "EffectiveSince";
+    public static final String COLUMN_EXPIRE_AFTER = "ExpireAfter";
+
     private static final long serialVersionUID = 5460817063985318621L;
     @Id
     @JsonIgnore
@@ -105,11 +108,11 @@ public class PatchBook implements HasPid, Serializable {
     @JsonProperty(COLUMN_EOL)
     @Column(name = COLUMN_EOL, nullable = false)
     private boolean endOfLife;
-    @JsonProperty("EffectiveSince")
-    @Column(name = "EffectiveSince")
+    @JsonProperty(COLUMN_EFFECTIVE_SINCE)
+    @Column(name = COLUMN_EFFECTIVE_SINCE)
     private Date effectiveSince;
-    @JsonProperty("ExpireAfter")
-    @Column(name = "ExpireAfter")
+    @JsonProperty(COLUMN_EXPIRE_AFTER)
+    @Column(name = COLUMN_EXPIRE_AFTER)
     private Date expireAfter;
     @JsonProperty(COLUMN_CREATEDATE)
     @Column(name = COLUMN_CREATEDATE)

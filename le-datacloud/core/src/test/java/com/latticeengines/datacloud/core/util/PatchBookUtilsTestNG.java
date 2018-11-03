@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.util;
+package com.latticeengines.datacloud.core.util;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
+import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;

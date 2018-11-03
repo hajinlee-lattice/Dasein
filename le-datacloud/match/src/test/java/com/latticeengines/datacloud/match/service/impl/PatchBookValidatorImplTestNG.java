@@ -37,8 +37,8 @@ import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newDomainDunsPatchItems;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newDunsPatchItems;
 import static com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils.newPatchBook;
-import static com.latticeengines.datacloud.match.util.PatchBookUtils.DUPLICATE_MATCH_KEY_ERROR;
-import static com.latticeengines.datacloud.match.util.PatchBookUtils.UNSUPPORTED_MATCH_KEY_ERROR;
+import static com.latticeengines.datacloud.core.util.PatchBookUtils.DUPLICATE_MATCH_KEY_ERROR;
+import static com.latticeengines.datacloud.core.util.PatchBookUtils.UNSUPPORTED_MATCH_KEY_ERROR;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -16,6 +16,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
@@ -86,6 +87,9 @@ public class IngestionProgress implements Progress, Serializable {
 
     @Column(name = "ErrorMessage", length = 1000)
     private String errorMessage;
+
+    @Transient
+    private String dataCloudVersion; // For PATCH_BOOK ingestion type
 
     @Override
     @JsonProperty("PID")
@@ -232,6 +236,16 @@ public class IngestionProgress implements Progress, Serializable {
     @JsonProperty("Version")
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    @JsonProperty("DataCloudVersion")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @JsonProperty("DataCloudVersion")
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     @Override

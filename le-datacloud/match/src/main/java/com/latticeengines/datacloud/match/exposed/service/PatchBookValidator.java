@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.util.PatchBookUtils;
+import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 import org.apache.commons.lang3.tuple.Pair;

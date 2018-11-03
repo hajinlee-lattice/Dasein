@@ -2,10 +2,10 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
+import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
-import com.latticeengines.datacloud.match.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;

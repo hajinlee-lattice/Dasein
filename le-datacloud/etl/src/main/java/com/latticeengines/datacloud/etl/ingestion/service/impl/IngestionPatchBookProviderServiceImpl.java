@@ -2,12 +2,15 @@ package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -21,6 +24,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.PatchBookConfiguration;
@@ -60,13 +64,72 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     public void ingest(IngestionProgress progress) throws Exception {
         Ingestion ingestion = progress.getIngestion();
         PatchBookConfiguration patchConfig = (PatchBookConfiguration) ingestion.getProviderConfiguration();
+        Date currentDate = new Date();
+
         List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFix(patchConfig.getBookType(),
                 PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-        long count = importToHdfs(books, progress.getDestination(), patchConfig);
+        List<PatchBook> activeBooks = getActiveBooks(books, currentDate);
+
+        long count = importToHdfs(activeBooks, progress.getDestination(), patchConfig);
         updateCurrentVersion(ingestion, progress.getVersion());
+
+        postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
+
         progress = ingestionProgressService.updateProgress(progress).size(count).status(ProgressStatus.FINISHED)
                 .commit(true);
         log.info("Ingestion finished. Progress: " + progress.toString());
+    }
+
+    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate) {
+        return books.stream() //
+                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate)) //
+                .collect(Collectors.toList());
+    }
+
+    private void postProcess(List<PatchBook> books, String dataCloudVersion, PatchBookConfiguration patchConfig, Date currentDate) {
+        List<Long> pidsToClearHotFix = new ArrayList<>();
+        List<Long> pidsToSetEOL = new ArrayList<>();
+        List<Long> pidsToClearEOL = new ArrayList<>();
+        List<Long> pidsToSetEffectiveSince = new ArrayList<>();
+        List<Long> pidsToSetExpireAfter = new ArrayList<>();
+        List<Long> pidsToClearExpireAfter = new ArrayList<>();
+        books.forEach(book -> {
+            // For hot-fixed items, need to reset HotFix flag to be false
+            if (PatchMode.HotFix.equals(patchConfig.getPatchMode())) {
+                pidsToClearHotFix.add(book.getPid()); // books are already filtered by HotFix flag
+            }
+            // For items with EOL flag not in sync with EffectiveSince and
+            // ExpireAfter, need to update EOL flag
+            boolean expectedEOL = PatchBookUtils.isEndOfLife(book, currentDate);
+            if (book.isEndOfLife() != expectedEOL) {
+                if (expectedEOL) {
+                    pidsToSetEOL.add(book.getPid());
+                } else {
+                    pidsToClearEOL.add(book.getPid());
+                }
+            }
+            // EffectiveSinceVersion is the first datacloud version when we
+            // start to patch this item. If the item is effective first, then
+            // expire, and then become effective again, EffectiveSinceVersion
+            // does not change.
+            if (!expectedEOL && StringUtils.isBlank(book.getEffectiveSinceVersion())) {
+                pidsToSetEffectiveSince.add(book.getPid());
+            }
+            // Set ExpireAfterVersion with patched datacloud version when EOL =
+            // 1 AND ExpireAfterVersion is empty
+            if (expectedEOL && StringUtils.isBlank(book.getExpireAfterVersion())) {
+                pidsToSetExpireAfter.add(book.getPid());
+            }
+            if (!expectedEOL) {
+                pidsToClearExpireAfter.add(book.getPid());
+            }
+        });
+        patchBookEntityMgr.setHotFix(pidsToClearHotFix, false);
+        patchBookEntityMgr.setEndOfLife(pidsToSetEOL, true);
+        patchBookEntityMgr.setEndOfLife(pidsToClearEOL, false);
+        patchBookEntityMgr.setEffectiveSinceVersion(pidsToSetEffectiveSince, dataCloudVersion);
+        patchBookEntityMgr.setExpireAfterVersion(pidsToSetExpireAfter, dataCloudVersion);
+        patchBookEntityMgr.setExpireAfterVersion(pidsToClearExpireAfter, null);
     }
 
     private long importToHdfs(List<PatchBook> books, String dest, PatchBookConfiguration patchConfig) throws Exception {
@@ -105,11 +168,12 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         columns.add(Pair.of(PatchBook.COLUMN_PATCH_ITEMS, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_CLEANUP, Boolean.class));
         columns.add(Pair.of(PatchBook.COLUMN_HOTFIX, Boolean.class));
-        columns.add(Pair.of(PatchBook.COLUMN_EOL, Boolean.class));
         columns.add(Pair.of(PatchBook.COLUMN_CREATEDATE, Long.class));
         columns.add(Pair.of(PatchBook.COLUMN_CREATEBY, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_LASTMODIFIEDDATE, Long.class));
         columns.add(Pair.of(PatchBook.COLUMN_LASTMODIFIEDBY, String.class));
+        columns.add(Pair.of(PatchBook.COLUMN_EFFECTIVE_SINCE, Long.class));
+        columns.add(Pair.of(PatchBook.COLUMN_EXPIRE_AFTER, Long.class));
         return columns;
     }
 
@@ -120,7 +184,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
      * @return
      */
     private Object[][] prepareData(List<PatchBook> books) {
-        Object[][] objs = new Object[books.size()][17];
+        Object[][] objs = new Object[books.size()][18];
         IntStream.range(0, books.size()).forEach(idx -> {
             objs[idx][0] = books.get(idx).getPid();
             objs[idx][1] = books.get(idx).getType().name();
@@ -134,11 +198,15 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             objs[idx][9] = JsonUtils.serialize(books.get(idx).getPatchItems());
             objs[idx][10] = books.get(idx).isCleanup();
             objs[idx][11] = books.get(idx).isHotFix();
-            objs[idx][12] = books.get(idx).isEndOfLife();
-            objs[idx][13] = books.get(idx).getCreatedDate().getTime();
-            objs[idx][14] = books.get(idx).getCreatedBy();
-            objs[idx][15] = books.get(idx).getLastModifiedDate().getTime();
-            objs[idx][16] = books.get(idx).getLastModifiedBy();
+            // Following columns are only for reference so that we have some
+            // history to track since we don't support generating logs for
+            // ingestion jobs for now
+            objs[idx][12] = books.get(idx).getCreatedDate().getTime();
+            objs[idx][13] = books.get(idx).getCreatedBy();
+            objs[idx][14] = books.get(idx).getLastModifiedDate().getTime();
+            objs[idx][15] = books.get(idx).getLastModifiedBy();
+            objs[idx][16] = books.get(idx).getEffectiveSince().getTime();
+            objs[idx][17] = books.get(idx).getExpireAfter().getTime();
         });
         return objs;
     }
