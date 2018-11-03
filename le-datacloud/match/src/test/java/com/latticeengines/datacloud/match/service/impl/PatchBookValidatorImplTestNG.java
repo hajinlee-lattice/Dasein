@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -102,7 +103,10 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "functional", dataProvider = "patchBookValidation")
     private void testPatchBookValidation(
             PatchBook.Type type, PatchBook[] books, PatchBookValidationError[] expectedErrors) {
-        List<PatchBookValidationError> errors = validator.validate(type, TEST_DATA_CLOUD_VERSION, Arrays.asList(books));
+        Pair<Integer, List<PatchBookValidationError>> validationResult = validator
+                .validate(type, TEST_DATA_CLOUD_VERSION, Arrays.asList(books));
+        Assert.assertNotNull(validationResult);
+        List<PatchBookValidationError> errors = validationResult.getValue();
         Assert.assertNotNull(errors);
         Assert.assertEquals(errors.size(), expectedErrors.length);
 

@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.match.patch.PatchResponse;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchStatus;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchValidationResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -192,11 +193,16 @@ public class PatchResource {
             @NotNull List<PatchBook> books, @NotNull PatchBook.Type type, @NotNull PatchRequest request) {
         String dataCloudVersion = request.getDataCloudVersion();
 
-        List<PatchBookValidationError> errors = patchBookValidator.validate(type, dataCloudVersion, books);
+        Pair<Integer, List<PatchBookValidationError>> validationResult = patchBookValidator
+                .validate(type, dataCloudVersion, books);
+        Integer total = validationResult.getKey();
+        List<PatchBookValidationError> errors = validationResult.getValue();
+        Preconditions.checkNotNull(total);
         Preconditions.checkNotNull(errors);
 
         PatchValidationResponse response = new PatchValidationResponse();
         response.setSuccess(errors.isEmpty());
+        response.setTotal(total);
         response.setValidationErrors(errors);
         response.setPatchBookType(type);
         response.setDataCloudVersion(dataCloudVersion);

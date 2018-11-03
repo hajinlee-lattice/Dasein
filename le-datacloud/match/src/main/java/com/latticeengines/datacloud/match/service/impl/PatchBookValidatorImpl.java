@@ -46,12 +46,12 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     private CountryCodeService countryCodeService;
 
     @Override
-    public List<PatchBookValidationError> validate(
+    public Pair<Integer, List<PatchBookValidationError>> validate(
             @NotNull PatchBook.Type type, @NotNull String dataCloudVersion, @NotNull List<PatchBook> books) {
         Preconditions.checkNotNull(books);
         Preconditions.checkNotNull(type);
         if (books.isEmpty()) {
-            return Collections.emptyList();
+            return Pair.of(0, Collections.emptyList());
         }
 
         // only validate entries with specified type and not end of life yet
@@ -84,7 +84,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                 throw new UnsupportedOperationException(msg);
         }
 
-        return errors;
+        return Pair.of(books.size(), errors);
     }
 
     /*

@@ -25,6 +25,9 @@ public class PatchValidationResponse {
     @JsonProperty("DataCloudVersion")
     private String dataCloudVersion;
 
+    @JsonProperty("Total")
+    private Integer total;
+
     @JsonProperty("ValidationErrors")
     private List<PatchBookValidationError> validationErrors;
 
@@ -58,6 +61,14 @@ public class PatchValidationResponse {
 
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
+
+    public void setTotal(Integer total) {
+        this.total = total;
     }
 
     public List<PatchBookValidationError> getValidationErrors() {
