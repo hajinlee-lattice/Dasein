@@ -124,12 +124,24 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 pidsToClearExpireAfter.add(book.getPid());
             }
         });
-        patchBookEntityMgr.setHotFix(pidsToClearHotFix, false);
-        patchBookEntityMgr.setEndOfLife(pidsToSetEOL, true);
-        patchBookEntityMgr.setEndOfLife(pidsToClearEOL, false);
-        patchBookEntityMgr.setEffectiveSinceVersion(pidsToSetEffectiveSince, dataCloudVersion);
-        patchBookEntityMgr.setExpireAfterVersion(pidsToSetExpireAfter, dataCloudVersion);
-        patchBookEntityMgr.setExpireAfterVersion(pidsToClearExpireAfter, null);
+        if (CollectionUtils.isNotEmpty(pidsToClearHotFix)) {
+            patchBookEntityMgr.setHotFix(pidsToClearHotFix, false);
+        }
+        if (CollectionUtils.isNotEmpty(pidsToSetEOL)) {
+            patchBookEntityMgr.setEndOfLife(pidsToSetEOL, true);
+        }
+        if (CollectionUtils.isNotEmpty(pidsToClearEOL)) {
+            patchBookEntityMgr.setEndOfLife(pidsToClearEOL, false);
+        }
+        if (CollectionUtils.isNotEmpty(pidsToSetEffectiveSince)) {
+            patchBookEntityMgr.setEffectiveSinceVersion(pidsToSetEffectiveSince, dataCloudVersion);
+        }
+        if (CollectionUtils.isNotEmpty(pidsToSetExpireAfter)) {
+            patchBookEntityMgr.setExpireAfterVersion(pidsToSetExpireAfter, dataCloudVersion);
+        }
+        if (CollectionUtils.isNotEmpty(pidsToClearExpireAfter)) {
+            patchBookEntityMgr.setExpireAfterVersion(pidsToClearExpireAfter, null);
+        }
     }
 
     private long importToHdfs(List<PatchBook> books, String dest, PatchBookConfiguration patchConfig) throws Exception {
