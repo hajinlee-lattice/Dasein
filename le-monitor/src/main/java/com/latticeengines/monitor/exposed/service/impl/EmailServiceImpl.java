@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -862,7 +862,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendS3CredentialEmail(User user, Tenant tenant, DropBoxSummary dropBoxSummary, String initiator) {
+    public void sendS3CredentialEmail(User user, Tenant tenant, GrantDropBoxAccessResponse response, String initiator) {
         try {
             log.info("Sending s3 credentials to " + user.getEmail() + " on " + tenant.getName() + " started.");
             EmailTemplateBuilder builder;
@@ -870,11 +870,11 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
-            if (StringUtils.isNotEmpty(dropBoxSummary.getBucket())) {
-                builder.replaceToken("{{bucket}}", dropBoxSummary.getBucket());
+            if (StringUtils.isNotEmpty(response.getBucket())) {
+                builder.replaceToken("{{bucket}}", response.getBucket());
             }
-            if (StringUtils.isNotEmpty(dropBoxSummary.getDropBox())) {
-                builder.replaceToken("{{dropfolder}}", dropBoxSummary.getDropBox());
+            if (StringUtils.isNotEmpty(response.getDropBox())) {
+                builder.replaceToken("{{dropfolder}}", response.getDropBox());
             }
             if (StringUtils.isNotEmpty(initiator)) {
                 builder.replaceToken("{{initiator}}", initiator);

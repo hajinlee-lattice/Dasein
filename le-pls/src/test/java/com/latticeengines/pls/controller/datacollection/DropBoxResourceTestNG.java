@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,6 +30,8 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DropBoxResourceTestNG.class);
 
     @Mock
     private DropBoxProxy dropBoxProxy;
@@ -65,8 +69,10 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
         Mockito.doReturn(users).when(userService).getUsers(Mockito.any(String.class));
 
         response = new GrantDropBoxAccessResponse();
+        response.setAccessKey("accessKey");
+        response.setSecretKey("secretKey");
         Mockito.doNothing().when(emailService).sendS3CredentialEmail(Mockito.any(User.class), Mockito.any(Tenant.class),
-                Mockito.any(DropBoxSummary.class), Mockito.any(String.class));
+                Mockito.any(GrantDropBoxAccessResponse.class), Mockito.any(String.class));
         Mockito.doReturn(response).when(dropBoxProxy).grantAccess(Mockito.any(String.class),
                 Mockito.any(GrantDropBoxAccessRequest.class));
     }
@@ -77,16 +83,20 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
         dropBoxSummary.setAccessMode(DropBoxAccessMode.LatticeUser);
         UIAction uiAction = dropBoxResource.generateUIActionBasedOnDropBox(dropBoxSummary);
         Assert.assertNotNull(uiAction);
+        Assert.assertEquals(uiAction.getTitle(), DropBoxResource.GET_DROPBOX_SUCCESS_TITLE);
         Assert.assertEquals(uiAction.getView(), View.Modal);
-        Assert.assertEquals(uiAction.getStatus(), Status.Success);
+        Assert.assertEquals(uiAction.getStatus(), Status.Info);
         Assert.assertNotNull(uiAction.getMessage());
+        log.info(uiAction.getMessage());
 
         dropBoxSummary.setAccessKeyId("key");
         uiAction = dropBoxResource.generateUIActionBasedOnDropBox(dropBoxSummary);
         Assert.assertNotNull(uiAction);
+        Assert.assertEquals(uiAction.getTitle(), DropBoxResource.GET_DROPBOX_WARNING_TITLE);
         Assert.assertEquals(uiAction.getView(), View.Modal);
         Assert.assertEquals(uiAction.getStatus(), Status.Warning);
         Assert.assertNotNull(uiAction.getMessage());
+        log.info(uiAction.getMessage());
     }
 
 }

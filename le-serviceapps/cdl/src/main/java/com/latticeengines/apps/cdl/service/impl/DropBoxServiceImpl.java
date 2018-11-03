@@ -138,8 +138,8 @@ public class DropBoxServiceImpl implements DropBoxService {
             for (String folder : folderList) {
                 if (StringUtils.isNotEmpty(folder)) {
                     needCreateFolder += "/" + folder;
-                    s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix,
-                            formatPath(objectName), formatPath(needCreateFolder)));
+                    s3Service.createFolder(dropBoxBucket,
+                            getFullPath(dropBoxPrefix, formatPath(objectName), formatPath(needCreateFolder)));
                 }
             }
         }
@@ -298,6 +298,8 @@ public class DropBoxServiceImpl implements DropBoxService {
         if (accessKey != null) {
             response.setAccessKey(accessKey.getAccessKeyId());
             response.setSecretKey(accessKey.getSecretAccessKey());
+            response.setBucket(bucket);
+            response.setDropBox(dropBoxId);
         }
         return response;
     }
