@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
 
-@Component("ingestionPatchBookProviderServiceImpl")
+@Component("ingestionPatchBookProviderService")
 public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServiceImpl {
 
     private static Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
