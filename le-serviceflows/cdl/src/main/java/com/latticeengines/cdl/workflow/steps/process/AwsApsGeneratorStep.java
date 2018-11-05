@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hdfs.client.HdfsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CompressionUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -137,11 +137,11 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     private Map<String, List<Product>> loadProductMap(AWSPythonBatchConfiguration config) {
         Table productTable = dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
-                TableRoleInCollection.ConsolidatedProduct, inactive);
+                TableRoleInCollection.ConsolidatedProduct, config.getVersion());
         if (productTable == null) {
-            log.info("Did not find product table in inactive version.");
+            log.info("Did not find product table in inactive version=" + config.getVersion());
             productTable = dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
-                    TableRoleInCollection.ConsolidatedProduct, active);
+                    TableRoleInCollection.ConsolidatedProduct, config.getVersion().complement());
             if (productTable == null) {
                 log.warn("Cannot find the product table in both versions");
                 return null;
