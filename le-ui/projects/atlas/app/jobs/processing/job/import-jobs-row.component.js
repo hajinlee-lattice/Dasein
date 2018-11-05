@@ -48,10 +48,14 @@ angular.module('lp.jobs.import.row', [
                     
                 });
             }else{
+                $scope.disableButton = true;
+               
                 if(modal){
                     Modal.modalRemoveFromDOM(modal, {name: 'p&aJob_Warning'});
                 }
-                $scope.disableButton = false;
+                setTimeout(() => {
+                    $scope.$apply(()=>{});
+                },0);
             }
         }
         

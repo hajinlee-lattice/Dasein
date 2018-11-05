@@ -15,7 +15,7 @@ export default class LeTableBody extends Component {
           <LeTableRow
             key={index}
             columnsMapping={this.props.columnsMapping}
-            rowIndex={index+1}
+            rowIndex={index}
             rowData={row}
           >
             {this.props.children}
