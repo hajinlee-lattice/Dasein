@@ -19,7 +19,9 @@
                         ng-change="vm.changeIterationData()"
                         class="iteration-selection"
                     ></select>
-                    &nbsp;Past Average Weighted Revenue: ${{vm.ratingsSummary.total_expected_revenue | number: 2 }}
+                    <span ng-if="vm.ratingsSummary.total_expected_revenue">
+                        &nbsp;Past Average Weighted Revenue: ${{(vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads) | number: 2}}
+                    </span>
                 </h2>
                 <h2 ng-if="vm.hasRatingsAvailable">
                     How do you want to configure your ratings?
@@ -167,8 +169,8 @@
             			<dt>{{vm.modelType}}</dt>
                         <dd>{{bucket.num_leads | number}} ({{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%)</dd>
 
-                        <dt ng-if="vm.avgRevenue[bucket.bucket_name]">Average<br>Weighted Revenue</dt>
-                        <dd ng-if="vm.avgRevenue[bucket.bucket_name]">${{vm.avgRevenue[bucket.bucket_name] | number: 2}}</dd>
+                        <dt ng-if="bucket.totalAvgRevenue">Average<br>Weighted Revenue</dt>
+                        <dd ng-if="bucket.totalAvgRevenue">${{bucket.totalAvgRevenue | number: 2}}</dd>
             		</dl>
             	</li>
             </ul><!-- End .bucket-tiles -->
@@ -190,8 +192,8 @@
                             <dt>{{vm.modelType}}</dt>
                             <dd>{{::bucket.num_leads | number}} ({{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%)</dd>
 
-                            <dt ng-if="vm.avgRevenue[bucket.bucket_name]">Average<br>Weighted Revenue</dt>
-                            <dd ng-if="vm.avgRevenue[bucket.bucket_name]">${{vm.avgRevenue[bucket.bucket_name] | number: 2}}</dd>
+                            <dt ng-if="bucket.avg_expected_revenue">Average<br>Weighted Revenue</dt>
+                            <dd ng-if="bucket.avg_expected_revenue">${{bucket.avg_expected_revenue | number: 2}}</dd>
                         </dl>
                     </li>
                 </ul>

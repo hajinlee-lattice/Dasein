@@ -10,11 +10,6 @@ export default class LeTableHeader extends Component {
     super(props);
     this.data = {};
     Object.keys(this.props.headerMapping).forEach(key => {
-
-      if (key == "headerTemplate") {
-        this.data[template] = this.data["headerTemplate"];
-      }
-
       this.data[key] = this.props.headerMapping[key].displayName ? this.props.headerMapping[key].displayName : '';
     });
   }
