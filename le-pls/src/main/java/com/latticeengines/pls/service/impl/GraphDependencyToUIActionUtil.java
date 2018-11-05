@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
@@ -30,19 +31,21 @@ public class GraphDependencyToUIActionUtil {
 
     private static final String TITLE_DEFAULT_UPDATE_FAILED = "Update failed as system detected potential circular dependency";
 
-    public UIAction processUpdateSegmentResponse(Map<String, List<String>> dependencies) {
+    public UIAction processUpdateSegmentResponse(MetadataSegment segment, Map<String, List<String>> dependencies) {
         UIAction uiAction;
         if (MapUtils.isNotEmpty(dependencies)) {
             AtomicInteger count = new AtomicInteger(0);
             dependencies.keySet().stream() //
                     .filter(k -> CollectionUtils.isNotEmpty(dependencies.get(k))) //
                     .forEach(k -> count.set(count.get() + dependencies.get(k).size()));
-            uiAction = generateUIAction("Segment In Use", View.Banner, Status.Warning,
+            uiAction = generateUIAction(String.format("Segment %s In Use", segment.getDisplayName()), View.Banner,
+                    Status.Warning,
                     generateHtmlMsg(dependencies,
                             "Changing a segment that is in use may affect the scoring and rating configuration.",
                             String.format("This segment has %d dependencies", count.get())));
         } else {
-            uiAction = generateUIAction("Segment is safe to edit", View.Notice, Status.Success, null);
+            uiAction = generateUIAction(String.format("Segment %s is safe to edit", segment.getDisplayName()),
+                    View.Notice, Status.Success, null);
         }
         return uiAction;
     }

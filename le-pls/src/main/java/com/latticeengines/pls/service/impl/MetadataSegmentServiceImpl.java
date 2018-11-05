@@ -148,7 +148,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public UIAction getDependenciesModelAndView(String segmentName) {
         Map<String, List<String>> dependencies = getDependencies(segmentName);
-        UIAction uiAction = graphDependencyToUIActionUtil.processUpdateSegmentResponse(dependencies);
+        MetadataSegment segment = getSegmentByName(segmentName);
+        UIAction uiAction = graphDependencyToUIActionUtil.processUpdateSegmentResponse(segment, dependencies);
         return uiAction;
     }
 
