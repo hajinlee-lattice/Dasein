@@ -50,8 +50,12 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     if(!CgTalkingPointStore.saveOnBlur || CgTalkingPointStore.deleteClicked) {
                         return false;
                     }
-                    
-                    var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
+                    var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint(),
+                        elementName = angular.element(e.target.contentAreaContainer).closest('.tinymce-container').data('name');
+
+                    if(elementName !== talkingPoint.name) {
+                        return false;
+                    }
                     var content = tinymce.activeEditor.getContent();
 
                     if(content === '') {
