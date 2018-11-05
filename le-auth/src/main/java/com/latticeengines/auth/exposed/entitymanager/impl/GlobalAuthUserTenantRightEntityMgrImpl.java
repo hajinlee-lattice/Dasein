@@ -67,6 +67,12 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean isRedundant(String email) {
+        return gaUserTenantRightDao.existsByEmail(email);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUserTenantRight> findByTenantId(Long tenantId) {
         return gaUserTenantRightDao.findAllByField("Tenant_ID", tenantId);
     }

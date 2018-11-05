@@ -18,4 +18,6 @@ public interface GlobalAuthUserTenantRightDao extends BaseDao<GlobalAuthUserTena
     Boolean deleteByUserId(Long userId);
 
     List<GlobalAuthUserTenantRight> findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }

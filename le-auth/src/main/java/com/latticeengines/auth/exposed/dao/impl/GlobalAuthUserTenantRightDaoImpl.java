@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Table;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -131,6 +132,18 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("email", email);
         return (List<GlobalAuthUserTenantRight>) query.list();
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
+        String queryPattern = "from %s where globalAuthUser.email = :email";
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("email", email);
+        query.setMaxResults(1);
+        return CollectionUtils.isNotEmpty(query.list());
     }
 
 }

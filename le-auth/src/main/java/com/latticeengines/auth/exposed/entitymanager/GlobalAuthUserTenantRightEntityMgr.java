@@ -22,4 +22,6 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
 
     Boolean deleteByUserId(Long userId);
 
+    boolean isRedundant(String email);
+
 }
