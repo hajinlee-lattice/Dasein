@@ -631,16 +631,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Override
     public Boolean isRedundant(String username) {
         try {
-            List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(username);
-            boolean isRedundant = rights.isEmpty();
+            boolean isRedundant = gaUserTenantRightEntityMgr.isRedundant(username);
             if (isRedundant) {
                 log.info(String.format("User %s is redundant.", username));
             } else {
-                Set<String> tenantIds = new HashSet<>();
-                for (GlobalAuthUserTenantRight right: rights) {
-                    tenantIds.add(right.getGlobalAuthTenant().getId());
-                }
-                log.info("User " + username + " is not redundant, it is still used by " + tenantIds.size() + " tenants");
+                log.info("User " + username + " is not redundant, it is still used by some tenants");
             }
             return isRedundant;
         } catch (Exception e) {
