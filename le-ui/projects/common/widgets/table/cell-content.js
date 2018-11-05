@@ -1,5 +1,5 @@
 import React, { Component } from "../../react-vendor";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import "./table.scss";
 
 export default class CellContent extends Component {
@@ -31,7 +31,7 @@ export default class CellContent extends Component {
   }
 }
 
-CellContent.PropTypes = {
-  value: PropTypes.any.isRequired,
-  mask: PropTypes.func
+CellContent.propTypes = {
+  value: propTypes.any.isRequired,
+  mask: propTypes.func
 }

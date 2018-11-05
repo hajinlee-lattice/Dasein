@@ -41,12 +41,19 @@ angular.module('lp.models.ratings', [
         currentConfiguration: CurrentConfiguration,
         workingBuckets: CurrentConfiguration,
         ratingsSummary: RatingsSummary,
+        avgRevenue: {},
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         section: ($state.params && $state.params.section ? $state.params.section : '')
     });
 
     vm.init = function() {
-
+        vm.bucketNames.forEach(function(name, index) {
+            var bucket = vm.currentConfiguration.filter(item => item.bucket_name == name);
+            if (bucket[0]) {
+                vm.avgRevenue[name] = bucket[0].total_expected_revenue;
+            }
+        });
+        console.log('-!- ratings:', vm.currentConfiguration, vm.workingBuckets, vm.ratingsSummary);
         // Atlas uses dashboard.ratings for vm.section
         if (vm.section === 'dashboard.ratings') {
             

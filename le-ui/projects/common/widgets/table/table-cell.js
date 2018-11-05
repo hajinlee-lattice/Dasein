@@ -1,5 +1,5 @@
 import React, { Component } from "../../react-vendor";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import "./table.scss";
 import CellContent from "./cell-content";
 
@@ -92,10 +92,10 @@ export default class LeTableCell extends Component {
 }
 
 LeTableCell.propTypes = {
-  columnsMapping: PropTypes.object.isRequired,
-  colSpan: PropTypes.number,
-  rowIndex: PropTypes.number,
-  colIndex: PropTypes.number,
-  colName: PropTypes.string,
-  rowData: PropTypes.object
+  columnsMapping: propTypes.object.isRequired,
+  colSpan: propTypes.number,
+  rowIndex: propTypes.number,
+  colIndex: propTypes.number,
+  colName: propTypes.string,
+  rowData: propTypes.object
 };

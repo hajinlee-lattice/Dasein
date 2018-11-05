@@ -12,13 +12,14 @@
 
             <div ng-if="vm.section === 'dashboard.ratings'" class="iteration-selection-header">
                 <h2>
-                    Which model iteration do you want to activate?
+                    Iteration
                     <select
                         ng-model="vm.activeIteration"
                         ng-options="iteration.iteration for iteration in vm.activeIterations"
                         ng-change="vm.changeIterationData()"
                         class="iteration-selection"
                     ></select>
+                    &nbsp;Past Average Weighted Revenue: ${{vm.ratingsSummary.total_expected_revenue | number: 2 }}
                 </h2>
                 <h2 ng-if="vm.hasRatingsAvailable">
                     How do you want to configure your ratings?
@@ -38,7 +39,7 @@
                 class="chart-header" 
                 ng-if="vm.section === 'dashboard.ratings'">
                 <div class="list-data pull-left">
-                    All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong>
+                    All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number }}</strong>
                 </div>
                 <div class="actions pull-right">
                 	<button 
@@ -163,11 +164,11 @@
             			<dt>Lift</dt>
             			<dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
                         
-            			<dt>{{vm.modelType}} %</dt>
-                        <dd>{{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%</dd>
-
             			<dt>{{vm.modelType}}</dt>
-            			<dd>{{bucket.num_leads | number}}</dd>
+                        <dd>{{bucket.num_leads | number}} ({{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%)</dd>
+
+                        <dt ng-if="vm.avgRevenue[bucket.bucket_name]">Average<br>Weighted Revenue</dt>
+                        <dd ng-if="vm.avgRevenue[bucket.bucket_name]">${{vm.avgRevenue[bucket.bucket_name] | number: 2}}</dd>
             		</dl>
             	</li>
             </ul><!-- End .bucket-tiles -->
@@ -185,10 +186,12 @@
                         <dl>
                             <dt>Lift</dt>
                             <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
-                            <dt>{{vm.modelType}} %</dt>
-                            <dd>{{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
+                            
                             <dt>{{vm.modelType}}</dt>
-                            <dd>{{::bucket.num_leads | number}}</dd>
+                            <dd>{{::bucket.num_leads | number}} ({{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%)</dd>
+
+                            <dt ng-if="vm.avgRevenue[bucket.bucket_name]">Average<br>Weighted Revenue</dt>
+                            <dd ng-if="vm.avgRevenue[bucket.bucket_name]">${{vm.avgRevenue[bucket.bucket_name] | number: 2}}</dd>
                         </dl>
                     </li>
                 </ul>

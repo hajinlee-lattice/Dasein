@@ -1,5 +1,5 @@
 import React, { Component } from "../../react-vendor";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import "./table.scss";
 
 import LeTableRow from './table-row';
@@ -10,6 +10,11 @@ export default class LeTableHeader extends Component {
     super(props);
     this.data = {};
     Object.keys(this.props.headerMapping).forEach(key => {
+
+      if (key == "headerTemplate") {
+        this.data[template] = this.data["headerTemplate"];
+      }
+
       this.data[key] = this.props.headerMapping[key].displayName ? this.props.headerMapping[key].displayName : '';
     });
   }
@@ -37,6 +42,6 @@ export default class LeTableHeader extends Component {
     );
   }
 }
-LeTableHeader.PropTypes = {
-  headerMapping: PropTypes.object.isRequired
+LeTableHeader.propTypes = {
+  headerMapping: propTypes.object.isRequired
 };

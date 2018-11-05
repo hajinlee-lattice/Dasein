@@ -1,5 +1,5 @@
 import React, { Component } from "../../react-vendor";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import "./table.scss";
 import LeTableRow from "./table-row";
 
@@ -15,7 +15,7 @@ export default class LeTableBody extends Component {
           <LeTableRow
             key={index}
             columnsMapping={this.props.columnsMapping}
-            rowIndex={index}
+            rowIndex={index+1}
             rowData={row}
           >
             {this.props.children}
@@ -29,11 +29,11 @@ export default class LeTableBody extends Component {
   }
 
   render() {
-    return <div class="le-table-row le-table-body">{this.getRows()}</div>;
+    return <div className="le-table-row le-table-body">{this.getRows()}</div>;
   }
 }
 
-LeTableBody.PropTypes = {
-  columnsMapping: PropTypes.object.isRequired,
-  data: PropTypes.array
+LeTableBody.propTypes = {
+  columnsMapping: propTypes.object.isRequired,
+  data: propTypes.array
 };

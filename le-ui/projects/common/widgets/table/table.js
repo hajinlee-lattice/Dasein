@@ -1,5 +1,5 @@
 import React, { Component } from "../../react-vendor";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 
 import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
@@ -58,11 +58,11 @@ export default class LeTable extends Component {
 }
 
 LeTable.propTypes = {
-  name: PropTypes.string.isRequired,
-  config: PropTypes.object.isRequired,
-  data: PropTypes.array.isRequired,
-  showEmpty: PropTypes.bool,
-  showLoading: PropTypes.bool,
+  name: propTypes.string.isRequired,
+  config: propTypes.object.isRequired,
+  data: propTypes.array.isRequired,
+  showEmpty: propTypes.bool,
+  showLoading: propTypes.bool,
   
 
 };

@@ -54,8 +54,15 @@ angular
         StateHistory.setFrom(from, trans.params('from'));
         StateHistory.setTo(to, trans.params('to'));
 
-        // clears all banners that are older than N milliseconds
-        Banner.reset(7500);
+        if (from.name !== to.name) {
+            var fromSplit = from.name.split('.');
+            var toSplit = to.name.split('.'); 
+            var fromCheck = fromSplit.splice(1, (toSplit.length >> 1) || 1).join('.');
+            var toCheck = toSplit.splice(1, (toSplit.length >> 1) || 1).join('.');
+            var delay = fromCheck === toCheck ? 7500 : 0;
+
+            Banner.reset(delay);
+        }
     });
 
     // when user hits browser Back button after app instantiate, send back to login

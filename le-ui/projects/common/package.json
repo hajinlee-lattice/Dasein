@@ -48,6 +48,8 @@
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
+    "enzyme": "3.7.0",
+    "enzyme-adapter-react-16": "1.6.0",
     "expose-loader": "^0.7.5",
     "grunt": "^0.4.5",
     "grunt-concurrent": "^2.2.1",
@@ -56,10 +58,38 @@
     "grunt-contrib-uglify": "^0.11.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-ng-annotate": "^2.0.1",
+    "jest": "23.6.0",
     "webpack": "^4.16.0",
     "webpack-cli": "^3.0.8"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "bower_components",
+      "node_components"
+    ],
+    "modulePaths": [
+      "/shared/vendor/modules"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "jsx"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "bower_components",
+      "shared"
+    ],
+    "moduleNameMapper": {
+      "^config$": "<rootDir>/configs/app-config.js",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(css|less|scss)$": "<rootDir>/__mocks__/styleMock.js"
+    },
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    }
+  },
   "scripts": {
+    "test": "jest",
     "build": "webpack --mode=production",
     "watch": "webpack --mode=development --watch"
   }

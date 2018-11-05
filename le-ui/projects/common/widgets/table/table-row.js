@@ -1,6 +1,6 @@
 import React, { Component } from "../../react-vendor";
 import "./table.scss";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import LeTableCell from "./table-cell";
 
 export default class LeTableRow extends Component {
@@ -42,8 +42,8 @@ export default class LeTableRow extends Component {
   }
 }
 
-LeTableRow.PropTypes = {
-  columnsMapping: PropTypes.object.isRequired,
-  rowIndex: PropTypes.number,
-  rowData: PropTypes.object
+LeTableRow.propTypes = {
+  columnsMapping: propTypes.object.isRequired,
+  rowIndex: propTypes.number,
+  rowData: propTypes.object
 };
