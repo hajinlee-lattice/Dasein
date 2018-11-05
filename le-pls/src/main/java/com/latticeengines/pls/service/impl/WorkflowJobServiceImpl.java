@@ -452,17 +452,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         log.info(String.format("Expanding %d actions", actions.size()));
 
         List<Job> jobList = new ArrayList<>();
-        List<String> workflowJobIds = new ArrayList<>();
         List<String> workflowJobPids = new ArrayList<>();
         for (Action action : actions) {
             // this action is a workflow job
             if (action.getTrackingPid() != null) {
                 workflowJobPids.add(action.getTrackingPid().toString());
-            } else if (action.getTrackingPid() == null && action.getTrackingId() != null) {
-                // After M23, should remove this if branch as workflow actions
-                // will use trackingpid
-                log.warn("action " + action.getPid() + " does not have trackingPid.");
-                workflowJobIds.add(action.getTrackingId().toString());
             } else if (isVisibleAction(action)) {
                 Job job = new Job();
                 job.setName(action.getType().getDisplayName());
@@ -480,10 +474,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
             jobList.addAll(workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
-                    MultiTenantContext.getCustomerSpace().toString()));
-        }
-        if (CollectionUtils.isNotEmpty(workflowJobIds)) {
-            jobList.addAll(workflowProxy.getWorkflowExecutionsByJobIds(workflowJobIds,
                     MultiTenantContext.getCustomerSpace().toString()));
         }
         return jobList;

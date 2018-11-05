@@ -112,11 +112,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder importAndDeleteJobIds(List<Long> importJobIds) {
-            processStepConfiguration.setImportAndDeleteJobIds(importJobIds);
-            return this;
-        }
-
         public Builder actionIds(List<Long> actionIds) {
             processStepConfiguration.setActionIds(actionIds);
             processTransactionWorkflowBuilder.actionIds(actionIds);
@@ -176,8 +171,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
                 List<TransformDefinition> stdTransformDefns) {
-            processRatingWorkflowBuilder.transformationGroup(transformationGroup,
-                    stdTransformDefns);
+            processRatingWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }
 
@@ -201,8 +195,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public ProcessAnalyzeWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
             configuration.add(processAccountWorkflowBuilder.build());
             configuration.add(processContactWorkflowBuilder.build());

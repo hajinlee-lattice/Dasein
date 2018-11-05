@@ -16,7 +16,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -80,42 +79,35 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetEmptyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateEmptyActions());
-        Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
-        Assert.assertNotNull(pair);
-        Assert.assertTrue(CollectionUtils.isEmpty(pair.getLeft()));
-        Assert.assertTrue(CollectionUtils.isEmpty(pair.getRight()));
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        Assert.assertNotNull(list);
+        Assert.assertTrue(CollectionUtils.isEmpty(list));
     }
 
     @Test(groups = "functional")
     public void testGetMetadataOnlyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateMetadataChangeActions());
-        Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
-        Assert.assertNotNull(pair);
-        log.info(String.format("actionIds=%s", pair.getLeft()));
-        log.info(String.format("jobIds=%s", pair.getRight()));
-        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getLeft()));
-        Assert.assertEquals(pair.getLeft().size(), 1);
-        Assert.assertEquals(pair.getLeft().get(0), METADATA_ACTION_PID);
-        Assert.assertTrue(CollectionUtils.isEmpty(pair.getRight()));
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        Assert.assertNotNull(list);
+        log.info(String.format("actionIds=%s", list));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assert.assertEquals(list.size(), 1);
+        Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
     public void testGetFullActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateFullActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
-        Assert.assertNotNull(pair);
-        log.info(String.format("actionIds=%s", pair.getLeft()));
-        log.info(String.format("jobIds=%s", pair.getRight()));
-        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getLeft()));
-        Assert.assertEquals(pair.getLeft().size(), 3);
-        Assert.assertEquals(pair.getLeft().get(0), METADATA_ACTION_PID);
-        Assert.assertEquals(pair.getLeft().get(1), COMPLETE_ACTION_1_PID);
-        Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
-        Assert.assertEquals(pair.getRight().size(), 2);
-        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
-        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        Assert.assertNotNull(list);
+        log.info(String.format("actionIds=%s", list));
+
+        Assert.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
+        Assert.assertEquals(list.get(1), COMPLETE_ACTION_1_PID);
+        Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetFullActionAndJobIds" })
@@ -125,19 +117,14 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
                 COMPLETE_ACTION_1_TRACKING_PID, COMPLETE_ACTION_2_TRACKING_PID).map(Object::toString)
                 .collect(Collectors.toList());
         when(workflowProxy.getWorkflowExecutionsByJobPids(workflowIdStr)).thenReturn(generateJobs());
-        Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
-        Assert.assertNotNull(pair);
-        log.info(String.format("actionIds=%s", pair.getLeft()));
-        log.info(String.format("jobIds=%s", pair.getRight()));
-        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getLeft()));
-        Assert.assertEquals(pair.getLeft().size(), 3);
-        Assert.assertEquals(pair.getLeft().get(0), METADATA_ACTION_PID);
-        Assert.assertEquals(pair.getLeft().get(1), COMPLETE_ACTION_1_PID);
-        Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
-        Assert.assertEquals(pair.getRight().size(), 2);
-        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
-        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        Assert.assertNotNull(list);
+        log.info(String.format("actionIds=%s", list));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
+        Assert.assertEquals(list.get(1), COMPLETE_ACTION_1_PID);
+        Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
     }
 
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")

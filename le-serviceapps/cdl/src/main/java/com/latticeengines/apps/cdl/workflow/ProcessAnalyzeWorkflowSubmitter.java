@@ -10,8 +10,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +139,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
         try {
-            Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
+            List<Long> actionIds = getActionIds(customerSpace);
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
                 List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
                         .collect(Collectors.toList());
@@ -155,13 +153,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 List<Long> copiedActionIds = lastFailedActions.stream().map(Action::getPid)
                         .collect(Collectors.toList());
                 // add to front
-                actionAndJobIds.getLeft().addAll(0, copiedActionIds);
+                actionIds.addAll(0, copiedActionIds);
             }
-            updateActions(actionAndJobIds.getLeft(), pidWrapper.getPid());
+            updateActions(actionIds, pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
-            ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                    actionAndJobIds, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
+            ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, actionIds,
+                    initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
             configuration.setFailingStep(request.getFailingStep());
 
@@ -183,7 +181,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     @VisibleForTesting
-    Pair<List<Long>, List<Long>> getActionAndJobIds(String customerSpace) {
+    List<Long> getActionIds(String customerSpace) {
         List<Action> actions = actionService.findByOwnerId(null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
@@ -196,14 +194,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("importAndDeleteJobPidStrs are %s", importAndDeleteJobPidStrs));
         List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
                 customerSpace);
-
-        List<Long> completedImportAndDeleteJobIds = CollectionUtils.isEmpty(importAndDeleteJobs)
-                ? Collections.emptyList()
-                : importAndDeleteJobs.stream().filter(
-                        job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
-                        .map(Job::getId).collect(Collectors.toList());
-        log.info(String.format("Job ids that associated with the current consolidate job are: %s",
-                completedImportAndDeleteJobIds));
 
         List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
                 ? Collections.emptyList()
@@ -241,7 +231,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .collect(Collectors.toList());
         log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
-        return new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
+        return completedActionIds;
     }
 
     /*
@@ -308,8 +298,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
-            ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status,
-            String currentDataCloudBuildNumber, long workflowPid) {
+            ProcessAnalyzeRequest request, List<Long> actionIds, Status status, String currentDataCloudBuildNumber,
+            long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
 
@@ -328,8 +318,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .initialDataFeedStatus(status) //
-                .importAndDeleteJobIds(actionAndJobIds.getRight()) //
-                .actionIds(actionAndJobIds.getLeft()) //
+                .actionIds(actionIds) //
                 .ownerId(workflowPid) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .rebuildSteps(request.getRebuildSteps()) //
@@ -341,7 +330,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
-                        .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionAndJobIds.getLeft().toString()) //
+                        .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIds.toString()) //
                         .build()) //
                 .workflowContainerMem(workflowMemMb) //
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
