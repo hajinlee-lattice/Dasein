@@ -278,7 +278,7 @@ export default class GridContainer extends Component {
         showEmpty={this.state.showEmpty}
         data={this.state.data}
       />
-      <p>*Atlas currently only support one templates for each object. </p>
+      <p>*Atlas currently only supports one template for each object. </p>
       </div>
     );
   }
