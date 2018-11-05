@@ -25,6 +25,20 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
     public static final String TRANSFORMER_NAME = "DunsGuideBookRebuild";
 
     private DunsGuideBookConfig config;
+    // AMSeed duns field
+    private static final String AMS_DUNS = DataCloudConstants.ATTR_LDC_DUNS;
+    // DunsRedirectBook duns field
+    private static final String RB_DUNS = DunsRedirectBookConfig.DUNS;
+    // DunsRedirectBook target duns field
+    private static final String RB_TG_DUNS = DunsRedirectBookConfig.TARGET_DUNS;
+    // DunsRedirectBook key partition field
+    private static final String RB_KEY = DunsRedirectBookConfig.KEY_PARTITION;
+    // DunsRedirectBook book source field
+    private static final String RB_SRC = DunsRedirectBookConfig.BOOK_SOURCE;
+    // DunsGuideBook duns field
+    private static final String GB_DUNS = DunsGuideBookConfig.DUNS;
+    // DunsGuideBook items field
+    private static final String GB_ITEMS = DunsGuideBookConfig.ITEMS;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -42,18 +56,29 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
         return guideBook;
     }
 
-    // Find all the duns from AMSeed
+    /**
+     * Find all the duns from AMSeed
+     * 
+     * @param ams
+     * @return
+     */
     private Node getFullDuns(Node ams) {
         return ams
-                .filter(DataCloudConstants.ATTR_LDC_DUNS + " != null", new FieldList(DataCloudConstants.ATTR_LDC_DUNS))
-                .retain(new FieldList(DataCloudConstants.ATTR_LDC_DUNS))
-                .groupByAndLimit(new FieldList(DataCloudConstants.ATTR_LDC_DUNS), 1);
+                .filter(AMS_DUNS + " != null", new FieldList(AMS_DUNS)).retain(new FieldList(AMS_DUNS))
+                .groupByAndLimit(new FieldList(AMS_DUNS), 1);
     }
 
-    // Merge DunsRedirectBooks
-    // For each duns, if there is conflict in target duns with same key parition
-    // from different book source, choose from the book source with higher
-    // priority (lower priority value)
+    /**
+     * Merge DunsRedirectBooks
+     * 
+     * For each duns, if there is conflict in target duns with same key parition
+     * from different book source, choose from the book source with higher
+     * priority (lower priority value)
+     * 
+     * @param fullDuns
+     * @param books
+     * @return
+     */
     private Node mergeRedirectBooks(Node fullDuns, List<Node> books) {
         books = enforceSchema(books);
 
@@ -65,27 +90,23 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
 
         // Remove target duns in merged DunsRedirectBook which does not exist in
         // AMSeed;
-        // Source duns which does not exist in AMSeed are exclude in
-        // enrichFullDuns() by joining with FullDuns
         List<String> toRetain = mergedBook.getFieldNames();
         mergedBook = mergedBook
-                .join(new FieldList(DunsRedirectBookConfig.TARGET_DUNS), fullDuns,
-                        new FieldList(DataCloudConstants.ATTR_LDC_DUNS), JoinType.INNER)
+                .join(new FieldList(RB_TG_DUNS), fullDuns, new FieldList(AMS_DUNS), JoinType.INNER)
                 .retain(new FieldList(toRetain));
 
-        String[] fields = { DunsGuideBookConfig.DUNS, DunsGuideBookConfig.ITEMS };
+        String[] fields = { GB_DUNS, GB_ITEMS };
         List<FieldMetadata> fms = new ArrayList<>();
-        fms.add(new FieldMetadata(DunsGuideBookConfig.DUNS, String.class));
-        fms.add(new FieldMetadata(DunsGuideBookConfig.ITEMS, String.class));
+        fms.add(new FieldMetadata(GB_DUNS, String.class));
+        fms.add(new FieldMetadata(GB_ITEMS, String.class));
         DunsGuideBookAggregator agg = new DunsGuideBookAggregator(new Fields(fields), config.getBookPriority());
-        mergedBook = mergedBook.groupByAndAggregate(new FieldList(DunsRedirectBookConfig.DUNS), agg, fms);
+        mergedBook = mergedBook.groupByAndAggregate(new FieldList(RB_DUNS), agg, fms);
         return mergedBook;
     }
 
     private List<Node> enforceSchema(List<Node> books) {
         List<Node> newBooks = new ArrayList<>();
-        String[] fields = { DunsRedirectBookConfig.DUNS, DunsRedirectBookConfig.TARGET_DUNS,
-                DunsRedirectBookConfig.KEY_PARTITION, DunsRedirectBookConfig.BOOK_SOURCE };
+        String[] fields = { RB_DUNS, RB_TG_DUNS, RB_KEY, RB_SRC };
         books.forEach(book -> {
             book = book.retain(new FieldList(fields));
             newBooks.add(book);
@@ -93,14 +114,26 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
         return newBooks;
     }
 
-    // Put all the duns from AMSeed in DunsGuideBook so DunsGuideBook can also
-    // serve the purpose of verifying whether duns got from DnB exists in AMSeed
+    /**
+     * Source duns in DunsGuideBook should contains all the duns from AMSeed,
+     * but they are allowed to be not existing in AMSeed
+     * 
+     * @param fullDuns
+     * @param guideBook
+     * @return
+     */
     private Node enrichFullDuns(Node fullDuns, Node guideBook) {
         guideBook = fullDuns
-                .join(new FieldList(DataCloudConstants.ATTR_LDC_DUNS), guideBook,
-                        new FieldList(DunsGuideBookConfig.DUNS), JoinType.LEFT) //
-                .discard(new FieldList(DunsGuideBookConfig.DUNS)) //
-                .rename(new FieldList(DataCloudConstants.ATTR_LDC_DUNS), new FieldList(DunsGuideBookConfig.DUNS));
+                .join(new FieldList(AMS_DUNS), guideBook,
+                        new FieldList(GB_DUNS), JoinType.OUTER) //
+                // currently expression function does not support read multiple
+                // fields and update one fields among them, can only generate a
+                // new field first
+                // ams duns != null ? ams duns : gb duns
+                .apply(String.format("%s != null ? %s : %s", AMS_DUNS, AMS_DUNS, GB_DUNS),
+                        new FieldList(AMS_DUNS, GB_DUNS), new FieldMetadata("_DUNS_TEMP_", String.class)) //
+                .discard(new FieldList(AMS_DUNS, GB_DUNS)) //
+                .rename(new FieldList("_DUNS_TEMP_"), new FieldList(GB_DUNS));
         return guideBook;
     }
 

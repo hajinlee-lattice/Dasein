@@ -119,6 +119,7 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
                 { "C4T001" }, { "C4T002" }, //
                 { "C5T001" }, { "C5T002" }, { "C5T003" }, //
                 { "C6T001" }, { "C6T002" }, //
+                { "C7T001" }, //
                 // Duns not present in DunsRedirectBook
                 { "OtherDuns" }, //
         };
@@ -264,6 +265,13 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
                 // Case 6: Duns shared between all books with KeyPartition
                 // conflict
                 { "C6D001", "C6T002", NAME_KEY, BOOKSRC_MS }, // Choose from MSBook
+
+                // Case 7: Duns does not exist in AMSeed, should still retain in
+                // AMSeed
+                { "C7D001", "C7T001", NAME_KEY, BOOKSRC_DOMDUNS },
+
+                // Case 8 & 9 are not present in result because target duns does
+                // not exist
         };
 
         for (String[] item : depivoted) {
@@ -281,6 +289,7 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
                 "C4T001", "C4T002", //
                 "C5T001", "C5T002", "C5T003", //
                 "C6T001", "C6T002", //
+                "C7T001", //
                 "OtherDuns", //
         };
         for (String duns : dunsWithoutGuideBook) {
