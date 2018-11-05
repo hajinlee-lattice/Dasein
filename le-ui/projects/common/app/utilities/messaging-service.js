@@ -19,14 +19,14 @@ const messagingService = {
     observables.removeObservable(observer.getName());
   },
   addSubscriber: observer =>{
-    console.log('ADD SUB TO MESSAGING');
+    // console.log('ADD SUB TO MESSAGING');
     subject.subscribe(observer);
   },
   removeSubscriber: observer => {
     
   },
   sendMessage: message => {
-    console.log('SENDING');
+    // console.log('SENDING');
     subject.next(message);
   }
     

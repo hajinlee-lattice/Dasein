@@ -19,7 +19,7 @@ class TemplatesComponent extends Component {
   constructor(props) {
     super(props);
     this.emailCredentialConfig = {
-      lable: "Email Automation Credentials",
+      lable: "Setup Automation",
       classNames: ["button", "gray-button"]
     };
     setAngularState(this.props.$state);
@@ -46,11 +46,11 @@ class TemplatesComponent extends Component {
                   httpService.get(
                     "/pls/dropbox",
                     new Observer(response => {
-                      console.log("BACK HERE ", response);
+                      // console.log("BACK HERE ", response);
                     }),
                     {
                       ErrorDisplayMethod: "Banner",
-                      ErrorDisplayOptions: "",
+                      ErrorDisplayOptions: "{\"title\": \"Warning\"}",
                       ErrorDisplayCallback: "TemplatesStore.regenerate"
                     }
                   );
@@ -76,8 +76,8 @@ angular
         method: "PUT",
         url: "/pls/dropbox/key",
         headers: {
-          ErrorDisplayMethod: "Modal",
-          ErrorDisplayOptions: "",
+          ErrorDisplayMethod: "",
+          ErrorDisplayOptions: "{\"confirmtext\": \"Download\",\"title\": \"S3 Credentials\"}",
           ErrorDisplayCallback: "TemplatesStore.download"
         },
         data: { AccessMode: "LatticeUser" }
@@ -91,19 +91,21 @@ angular
       );
     };
     this.download = response => {
-      let toDownload = Modal.data;
-      var element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:text/plain;charset=utf-8," + encodeURIComponent(toDownload)
-      );
-      element.setAttribute("download", 'key.txt');
-      element.style.display = "none";
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-      let modal = Modal.get(response.name);
-      Modal.modalRemoveFromDOM(modal, { name: response.name });
+      if (response && response.action != "closedForced") {
+        let toDownload = Modal.data;
+        var element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "data:text/plain;charset=utf-8," + encodeURIComponent(toDownload)
+        );
+        element.setAttribute("download", "atlas_credentials.txt");
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        let modal = Modal.get(response.name);
+        Modal.modalRemoveFromDOM(modal, { name: response.name });
+      }
     };
   })
   .component(

@@ -270,6 +270,7 @@ export default class GridContainer extends Component {
 
   render() {
     return (
+      <div className="le-flex-v-panel">
       <LeTable
         name="import-templates"
         config={this.getConfig()}
@@ -277,6 +278,8 @@ export default class GridContainer extends Component {
         showEmpty={this.state.showEmpty}
         data={this.state.data}
       />
+      <p>*Atlas currently only support one templates for each object. </p>
+      </div>
     );
   }
 }

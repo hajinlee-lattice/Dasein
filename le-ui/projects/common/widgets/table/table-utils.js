@@ -15,43 +15,38 @@ export const RELOAD = false;
 export const getData = api => {
   if (api) {
       console.log('======= OK ======');
-    return [
-      {
-        TemplateName: "Test123 Account",
-        Object: "Account",
-        Path: "s3://lattice-engines.com/home/customer/adobe/accounts",
-        edited: "n/a",
-        templateCreated: false
-      },
-      {
-        TemplateName: "Test456 Contacts",
-        Object: "Contacts",
-        Path: "path/to/the/file",
-        edited: "n/a",
-        templateCreated: true
-      },
-      {
-        TemplateName: "Test123",
-        Object: "Products Purchases",
-        Path: "path/to/the/file",
-        edited: "n/a",
-        templateCreated: false
-      },
-      {
-        TemplateName: "Test123",
-        Object: "Product Bundles",
-        Path: "path/to/the/file",
-        edited: "n/a",
-        templateCreated: false
-      },
-      {
-        TemplateName: "Test123",
-        Object: "Product Hierarchy",
-        Path: "path/to/the/file",
-        edited: "n/a",
-        templateCreated: false
-      }
-    ];
+    return [{
+      Object: "Contacts",
+      Path: "/Templates/ContactSchema",
+      TemplateName: "ContactSchema Renamed kjjsdf",
+      LastEditedDate: 1541193886000,
+      Exist: true,
+      FeedType: "ContactSchema"
+    },
+    {
+      Object: "Accounts",
+      Path: "N/A",
+      TemplateName: "N/A",
+      Exist: false
+    },
+    {
+      Object: "Product Purchases",
+      Path: "N/A",
+      TemplateName: "N/A",
+      Exist: false
+    },
+    {
+      Object: "Product Bundles",
+      Path: "N/A",
+      TemplateName: "N/A",
+      Exist: false
+    },
+    {
+      Object: "Product Hierarchy",
+      Path: "N/A",
+      TemplateName: "N/A",
+      Exist: false
+    }];
   } else {
     console.log('======= NOPE ======');
     return [];

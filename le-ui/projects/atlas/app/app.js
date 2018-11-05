@@ -116,14 +116,14 @@ var mainApp = angular
     console.log(window.navigator.userAgent);
     LeMessaging.subscribe({
       next: message => {
-        console.log("RECEIVED", message);
+        // console.log("RECEIVED", message);
         if (message.isErrorUtility()) {
           ServiceErrorUtility.process(message.getResponse());
           $scope.$apply(() => {});
         } else {
           switch (message.getPosition()) {
             case BANNER:
-              console.log(message.getMessage());
+              // console.log(message.getMessage());
               Banner[message.getType()]({
                 title: message.getMessage(),
                 message: message.getFullMessage()
@@ -132,7 +132,7 @@ var mainApp = angular
               break;
 
             case MODAL:
-              console.log(message.getMessage());
+              // console.log(message.getMessage());
               Modal[message.getType()]({
                 title: message.getMessage(),
                 message: message.getFullMessage()
@@ -141,7 +141,7 @@ var mainApp = angular
               break;
 
             case NOTIFICATION:
-              console.log(message.getMessage());
+              // console.log(message.getMessage());
               Notice[message.getType()]({
                 title: message.getMessage(),
                 message: message.getFullMessage()

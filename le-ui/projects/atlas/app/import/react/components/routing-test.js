@@ -1,8 +1,7 @@
 import React, {
   UIRouterReact,
   servicesPlugin,
-  hashLocationPlugin,
-  pushStateLocationPlugin,
+  hashLocationPlugin
 } from "../../../../../common/react-vendor";
 import { hello, about, templatelist } from "../states";
 
@@ -10,7 +9,6 @@ var router;
 
 export const getRouter = () => {
   if (!router) {
-    console.log("********* Init router **********");
     router = new UIRouterReact();
     router.plugin(servicesPlugin);
     router.plugin(hashLocationPlugin);
@@ -23,22 +21,23 @@ export const getRouter = () => {
     router.urlService.rules.initial({ state: "templatelist" });
 
     router.transitionService.onBefore(true, function(trans) {
-      console.log("Nav Start");
+      // console.log("Nav Start");
       // Do something before transition
     });
 
     router.transitionService.onSuccess(true, function(trans) {
-      console.log("Nav End");
+      // console.log("Nav End");
       // Do something after transition
     });
 
     router.transitionService.onError(true, function(err) {
-      console.log("Nav Error", err);
+      // console.log("Nav Error", err);
       // Do something if transition errors
     });
-  } else {
-    console.log("ALREADY INIT");
-  }
+  } 
+  // else {
+    // console.log("ALREADY INIT");
+  // }
 
   return router;
 };
