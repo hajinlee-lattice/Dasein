@@ -270,6 +270,10 @@ public class DropBoxServiceImpl implements DropBoxService {
             default:
                 throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
             }
+            dropbox.setExternalAccount(null);
+            dropbox.setLatticeUser(null);
+            dropbox.setAccessMode(null);
+            entityMgr.update(dropbox);
         }
     }
 
