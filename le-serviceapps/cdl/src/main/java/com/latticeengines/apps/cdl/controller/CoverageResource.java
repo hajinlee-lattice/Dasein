@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -56,5 +58,15 @@ public class CoverageResource {
     public RatingEnginesCoverageResponse getRatingEngineCoverageCountForSegment(@PathVariable String customerSpace,
             @PathVariable String segmentName, @RequestBody RatingEnginesCoverageRequest ratingCoverageRequest) {
         return ratingCoverageService.getRatingCoveragesForSegment(customerSpace, segmentName, ratingCoverageRequest);
+    }
+
+    @PostMapping("/segment/{segmentName}/products")
+    @ResponseBody
+    @ApiOperation(value = "Get Segments CoverageInfo for List of Rating Model Ids")
+    public RatingEnginesCoverageResponse getProductCoverageCountForSegment(
+            @PathVariable String customerSpace, @PathVariable String segmentName,
+            @RequestBody List<String> productIds) {
+        return ratingCoverageService.getProductCoveragesForSegment(customerSpace, segmentName,
+                productIds);
     }
 }
