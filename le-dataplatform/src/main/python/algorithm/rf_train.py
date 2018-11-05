@@ -6,6 +6,8 @@ from sklearn import ensemble
 from sklearn import tree
 
 from pipelinefwk import get_logger
+from leframework.util.trainutil import getDisplayName
+from leframework.util.trainutil import createDisplayNames 
 
 logger = get_logger("algorithm")
 
@@ -67,21 +69,20 @@ def writeModel(schema, modelDir, clf):
     numTrees = len(estimators)
 
     fo = open(modelDir + "rf_model.txt", "w")
-    fo.write("Column Name, Feature Importance\n")
+    fo.write("Column Name,Feature Importance,Column Display Name\n")
 
     features = {}
-    
     for i in range(0, numInputs):
         features[schema["features"][i]] = importances[i]
     features = sorted(features.items(), key = lambda x: x[1], reverse = True)
-    
+    displayNames = createDisplayNames(schema);
     for i in features:
-        fo.write("%s, %f\n" % (i[0], i[1]))
+        fo.write("%s,%f,%s\n" % (i[0], i[1], getDisplayName(displayNames, i[0])))
         
     fo.close()
 
     for i in range(0, numTrees):
         filename = modelDir + "rf_" + str(i) + "_tree.dot"
         with open(filename, 'w') as f:
-            f = tree.export_graphviz(estimators[i].tree_, out_file=f)
+            f = tree.export_graphviz(estimators[i].tree_, out_file=f)         
 

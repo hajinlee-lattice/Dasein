@@ -3,7 +3,9 @@ from sklearn import tree
 from leframework.consolecapture import Capture
 from leframework.consolecapture import CaptureMonitor
 from leframework.executors.parallellearningexecutor import ParallelLearningExecutor
-import math
+from leframework.util.trainutil import getDisplayName
+from leframework.util.trainutil import createDisplayNames 
+
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties=None, params=None):
     
@@ -72,16 +74,16 @@ def writeModel(schema, modelDir, clf):
     numTrees = len(estimators)
 
     fo = open(modelDir + "rf_model.txt", "w")
-    fo.write("Column Name, Feature Importance\n")
+    fo.write("Column Name,Feature Importance,Column Display Name\n")
 
     features = {}
     
     for i in range(0, numInputs):
         features[schema["features"][i]] = importances[i]
     features = sorted(features.items(), key = lambda x: x[1], reverse = True)
-    
+    displayNames = createDisplayNames(schema);
     for i in features:
-        fo.write("%s, %f\n" % (i[0], i[1]))
+        fo.write("%s,%f,%s\n" % (i[0], i[1], getDisplayName(displayNames, i[0])))
         
     fo.close()
 
