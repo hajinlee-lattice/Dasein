@@ -54,8 +54,8 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
         uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
                 @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId,
-        HasApplicationId, Fact, Dimension {
+public class ModelSummary
+        implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact, Dimension {
 
     public static final String STATUS = "Status";
     public static final String DISPLAY_NAME = "DisplayName";
@@ -93,6 +93,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String trainingTableName;
     private String targetTableName;
     private Boolean trainingFileExist = false;
+    private Double averageRevenue;
     private String transformationGroupName;
     private String predefinedSelectionName;
     private String predefinedSelectionVersion;
@@ -503,6 +504,16 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.trainingFileExist = trainingFileExist;
     }
 
+    @JsonProperty("AverageRevenue")
+    @Column(name = "AVERAGE_REVENUE", nullable = true)
+    public Double getAverageRevenue() {
+        return averageRevenue;
+    }
+
+    public void setAverageRevenue(Double averageRevenue) {
+        this.averageRevenue = averageRevenue;
+    }
+
     @JsonProperty("TransformationGroupName")
     @Column(name = "TRANSFORMATION_GROUP_NAME", nullable = true)
     public String getTransformationGroupName() {
@@ -548,8 +559,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.modelSummaryProvenanceProperties = modelSummaryProvenanceProperties;
     }
 
-    public void addModelSummaryProvenanceProperty(
-            ModelSummaryProvenanceProperty modelSummaryProvenanceProperty) {
+    public void addModelSummaryProvenanceProperty(ModelSummaryProvenanceProperty modelSummaryProvenanceProperty) {
         this.modelSummaryProvenanceProperties.add(modelSummaryProvenanceProperty);
     }
 
@@ -684,5 +694,4 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public void setHasBucketMetadata(Boolean hasBucketMetadata) {
         this.hasBucketMetadata = hasBucketMetadata;
     }
-
 }

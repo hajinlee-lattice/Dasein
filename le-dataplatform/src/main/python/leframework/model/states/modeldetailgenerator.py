@@ -1,10 +1,10 @@
 import calendar
 import logging
 import time
+import json
 from collections import OrderedDict
 from leframework.codestyle import overrides
 from leframework.model.state import State
-
 
 class ModelDetailGenerator(State):
 
@@ -40,6 +40,10 @@ class ModelDetailGenerator(State):
 
         # Conversions
         result["TotalConversions"] = int(allData[schema["target"]].sum())
+
+        if "__Revenue" in allData.columns:
+            result["AverageRevenue"] = float(allData["__Revenue"].sum()) / allData.shape[0]
+
         result["TestingConversions"] = int(testData[schema["target"]].sum())
         result["TrainingConversions"] = result["TotalConversions"] - result["TestingConversions"]
         result["ModelType"] = mediator.modelType.split(":")[0]

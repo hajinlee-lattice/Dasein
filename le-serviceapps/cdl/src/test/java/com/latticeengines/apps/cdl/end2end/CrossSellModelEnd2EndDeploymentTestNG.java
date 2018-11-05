@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -108,7 +109,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
         setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
-        setupAndRunRemodel();
+        setupAndRunRemodel(PredictionType.PROPENSITY);
     }
 
     /**
@@ -147,18 +148,30 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 testIteration1.getId());
         Assert.assertEquals(testIteration1.getModelingJobStatus(), completedStatus);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifyBucketMetadataGenerated();
+        verifyBucketMetadataGenerated(predictionType);
         Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
+        verifyModelSummary(predictionType);
     }
 
-    private void setupAndRunRemodel() {
+    private void verifyModelSummary(PredictionType predictionType) {
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummary(testModel.getId());
+        Assert.assertNotNull(modelSummary);
+        Assert.assertNotNull(modelSummary.getId());
+        if (predictionType == PredictionType.EXPECTED_VALUE) {
+            Assert.assertNotNull(modelSummary.getAverageRevenue());
+        } else {
+            Assert.assertNull(modelSummary.getAverageRevenue());
+        }
+    }
+
+    private void setupAndRunRemodel(PredictionType predictionType) {
         log.info("Starting Cross sell remodeling ...");
         testIteration2 = new AIModel();
         testIteration2.setRatingEngine(testModel);
         testIteration2.setAdvancedModelingConfig(testIteration1.getAdvancedModelingConfig());
         testIteration2.setDerivedFromRatingModel(testIteration1.getId());
-        testIteration2.setPredictionType(PredictionType.EXPECTED_VALUE);
+        testIteration2.setPredictionType(predictionType);
         testIteration2 = (AIModel) ratingEngineProxy.createModelIteration(mainTestTenant.getId(), testModel.getId(),
                 testIteration2);
 
@@ -169,7 +182,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 testModel.getId(), testIteration1.getId(), null);
         Assert.assertNotNull(attrs);
 
-        verifyBucketMetadataGenerated();
+        verifyBucketMetadataGenerated(predictionType);
 
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
                 testModel.getId(), testIteration2.getId(), refineAttributes(attrs), "some@email.com");
@@ -195,7 +208,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertTrue(bucketMetadataHistory.isEmpty());
     }
 
-    private void verifyBucketMetadataGenerated() {
+    private void verifyBucketMetadataGenerated(PredictionType predictionType) {
         Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
                 .getABCDBucketsByEngineId(mainTestTenant.getId(), testModel.getId());
         Assert.assertNotNull(bucketMetadataHistory);
@@ -205,6 +218,15 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertEquals(targetCount, latestBucketedMetadata.stream().mapToLong(BucketMetadata::getNumLeads).sum(),
                 "Sum of leads in BucketMetadata is not equal to the target count");
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
+        latestBucketedMetadata.stream().forEach(bucket -> {
+            if (predictionType == PredictionType.EXPECTED_VALUE) {
+                Assert.assertNotNull(bucket.getAverageExpectedRevenue());
+                Assert.assertNotNull(bucket.getTotalExpectedRevenue());
+            } else {
+                Assert.assertNull(bucket.getAverageExpectedRevenue());
+                Assert.assertNull(bucket.getTotalExpectedRevenue());
+            }
+        });
     }
 
     private void setupTestSegment() {
