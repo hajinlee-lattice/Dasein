@@ -207,19 +207,19 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         Set<String> priZipGrpFieldSet = new HashSet<>(Arrays.asList(priZipGrpFields));
         if (groupFields.size() == priLocGrpFields.length
                 && groupFields.stream().allMatch(f -> priLocGrpFieldSet.contains(f))) {
-            return OperationCode.IS_PRIMARY_LOC;
+            return OperationCode.IS_PRI_LOC;
         }
         if (groupFields.size() == priCtryGrpFields.length
                 && groupFields.stream().allMatch(f -> priCtryGrpFieldSet.contains(f))) {
-            return OperationCode.IS_PRIMARY_CTRY;
+            return OperationCode.IS_PRI_CTRY;
         }
         if (groupFields.size() == priStGrpFields.length
                 && groupFields.stream().allMatch(f -> priStGrpFieldSet.contains(f))) {
-            return OperationCode.IS_PRIMARY_ST;
+            return OperationCode.IS_PRI_ST;
         }
         if (groupFields.size() == priZipGrpFields.length
                 && groupFields.stream().allMatch(f -> priZipGrpFieldSet.contains(f))) {
-            return OperationCode.IS_PRIMARY_ZIP;
+            return OperationCode.IS_PRI_ZIP;
         }
         throw new RuntimeException("Cannot decide OperationCode");
     }

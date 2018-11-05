@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DomOwnerCalRootDunsFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomOwnerConstructAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ams.DomOwnerCalRootDunsFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
@@ -23,10 +23,11 @@ import cascading.tuple.Fields;
 public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwnershipConfig> {
     public final static String DATAFLOW_BEAN_NAME = "DomainOwnershipRebuildFlow";
     public final static String TRANSFORMER_NAME = "FormDomOwnershipTableTransformer";
-    private final static String ROOT_DUNS = "ROOT_DUNS";
+    private final static String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
+    private final static String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
+    private final static String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
+
     private final static String TREE_ROOT_DUNS = "TREE_ROOT_DUNS";
-    private final static String DUNS_TYPE = "DUNS_TYPE";
-    private final static String TREE_NUMBER = "TREE_NUMBER";
     private final static String REASON_TYPE = "REASON_TYPE";
     private final static String IS_NON_PROFITABLE = "IS_NON_PROFITABLE";
     private final static String ORB_SEC_PRI_DOMAIN = "PrimaryDomain";

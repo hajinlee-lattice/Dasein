@@ -15,11 +15,13 @@ public class OperationMessage {
     public static final String IS_GU_DUNS = "GU account with Duns=GUDuns";
     public static final String RANDOM = "Random selection";
 
-    // AccountMasterSeed primary domain selection
+    // AccountMasterSeed primary domain per duns/du duns selection
     public static final String DOMAIN_ONLY = "Domain-only Entry";
     public static final String DOMAIN_SRC = "DomainSource=%s";
     public static final String LOW_ALEXA_RANK = "Lower AlexaRank=%d";
     public static final String ORI_PRIDOM_FLAG = "Original " + DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN + "=%s";
+    public static final String DU_DOMAIN = "DU domain";
+    public static final String HIGH_OCCUR = "Higher occurrence=%d";
 
     // AccountMasterSeed filter FLAG_DROP_OOB_ENTRY == 0
     public static final String NON_OOB = "Non-OOB";
@@ -33,5 +35,9 @@ public class OperationMessage {
     public static final String LARGER_VAL = "Larger %s=%s";
     public static final String ORI_PRILOC_FLAG = "Original " + DataCloudConstants.ATTR_IS_PRIMARY_LOCATION + "=%s";
     public static final String USA_ACT = "USA account";
+
+    // Domain ownership table
+    public static final String CLEAN_NONOWNER_DOM = "Owned by duns %s with reason %s";
+    public static final String REPLACE_SECDOM_WITH_PRIDOM = "%s is orb sec domain";
 
 }

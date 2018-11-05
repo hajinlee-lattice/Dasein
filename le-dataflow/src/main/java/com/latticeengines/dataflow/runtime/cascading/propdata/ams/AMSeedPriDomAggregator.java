@@ -159,7 +159,7 @@ public class AMSeedPriDomAggregator extends BaseAggregator<AMSeedPriDomAggregato
             result.set(dunsLoc, context.duns);
             result.set(priDomLoc, context.priDom);
             String log = OperationLogUtils.buildLog(DataCloudConstants.TRANSFORMER_AMSEED_MARKER,
-                    OperationCode.IS_PRIMARY_DOMAIN, context.priDomReason);
+                    OperationCode.IS_PRI_DOM, context.priDomReason);
             result.set(logFieldIdx, log);
             return result;
         } else {

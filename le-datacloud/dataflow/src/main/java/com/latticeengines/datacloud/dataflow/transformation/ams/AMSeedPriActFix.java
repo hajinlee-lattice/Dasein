@@ -144,7 +144,7 @@ public class AMSeedPriActFix extends ConfigurableFlowBase<TransformerConfig> {
                 .apply(String.format("%s.equals(\"N\") && !%s.equals(%s) ? \"%s\" : %s",
                         DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN,
                         DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN + "_tmp",
-                        OperationLogUtils.buildLog(TRANSFORMER_NAME, OperationCode.NOT_PRIMARY_DOMAIN,
+                        OperationLogUtils.buildLog(TRANSFORMER_NAME, OperationCode.NOT_PRI_DOM,
                                 OperationMessage.NON_PRIMARY_ACCOUNT),
                         PRIDOM_LOG_FIELD),
                         new FieldList(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN,

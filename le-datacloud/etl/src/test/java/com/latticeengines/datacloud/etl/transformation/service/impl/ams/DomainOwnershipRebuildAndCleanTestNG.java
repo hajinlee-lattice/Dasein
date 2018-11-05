@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.ams;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,31 +15,31 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.CleanupAmSeedSrcFlow;
 import com.latticeengines.datacloud.dataflow.transformation.CleanupOrbSecSrcFlow;
 import com.latticeengines.datacloud.dataflow.transformation.DomainOwnershipRebuildFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedCleanByDomainOwner;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 
-public class DomainOwnershipRebuildAndCleanTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class DomainOwnershipRebuildAndCleanTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DomainOwnershipRebuildAndCleanTestNG.class);
 
     private static final String DOM_OWNERSHIP_TABLE = "DomainOwnershipTable";
     private static final String ORB_SEC_CLEANED = "OrbSecCleaned";
     private static final String AMS_CLEANED = "AmsCleaned";
-    GeneralSource domOwnTable = new GeneralSource(DOM_OWNERSHIP_TABLE);
-    GeneralSource orbSecClean = new GeneralSource(ORB_SEC_CLEANED);
-    GeneralSource amsClean = new GeneralSource(AMS_CLEANED);
-    GeneralSource ams = new GeneralSource("AccountMasterSeed");
-    GeneralSource orbSec = new GeneralSource("OrbCacheSeedSecondaryDomain");
-    GeneralSource alexa = new GeneralSource("AlexaMostRecent");
-    GeneralSource source = amsClean;
+    private GeneralSource domOwnTable = new GeneralSource(DOM_OWNERSHIP_TABLE);
+    private GeneralSource orbSecClean = new GeneralSource(ORB_SEC_CLEANED);
+    private GeneralSource amsClean = new GeneralSource(AMS_CLEANED);
+    private GeneralSource ams = new GeneralSource("AccountMasterSeed");
+    private GeneralSource orbSec = new GeneralSource("OrbCacheSeedSecondaryDomain");
+    private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
+    private GeneralSource source = amsClean;
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -53,21 +53,6 @@ public class DomainOwnershipRebuildAndCleanTestNG
         confirmIntermediateSource(domOwnTable, targetVersion);
         confirmIntermediateSource(orbSecClean, targetVersion);
         cleanupProgressTables();
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
@@ -109,7 +94,7 @@ public class DomainOwnershipRebuildAndCleanTestNG
             cleanupAmSeedSrc.add(alexa.getSourceName());
             step3.setInputSteps(cleanupAmSeedStep);
             step3.setBaseSources(cleanupAmSeedSrc);
-            step3.setTransformer(CleanupAmSeedSrcFlow.TRANSFORMER_NAME);
+            step3.setTransformer(AMSeedCleanByDomainOwner.TRANSFORMER_NAME);
             step3.setConfiguration(confParamStr1);
             step3.setTargetSource(amsClean.getSourceName());
 
@@ -133,18 +118,12 @@ public class DomainOwnershipRebuildAndCleanTestNG
         return JsonUtils.serialize(conf);
     }
 
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
     private void prepareAlexaData() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of("URL", String.class));
-        schema.add(Pair.of("Rank", Integer.class));
-        Object[][] data = new Object[][] { { "paypal.com", 700 }, { "rubrik.com", 701 }, { "sbiGu.com", 32 },
+        schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_URL, String.class));
+        schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_RANK, Integer.class));
+        Object[][] data = new Object[][] { //
+                { "paypal.com", 700 }, { "rubrik.com", 701 }, { "sbiGu.com", 32 },
                 { "sbiDu.com", 36 }, { "karlDu.com", 326 }, { "netappGu.com", 24 }, { "amazonGu.com", 252 },
                 { "mongodbDu.com", 15 }, { "mongodbGu.com", 89 }, { "regalGoodWill.com", 21 },
                 { "goodWillOrg.com", 62 }, { "netappDuns1.com", 83 }, { "mongoDbDuns1.com", 11 },
@@ -159,75 +138,79 @@ public class DomainOwnershipRebuildAndCleanTestNG
 
     private void prepareAmSeed() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of("Domain", String.class));
-        schema.add(Pair.of("DUNS", String.class));
-        schema.add(Pair.of("GLOBAL_ULTIMATE_DUNS_NUMBER", String.class));
-        schema.add(Pair.of("LE_PRIMARY_DUNS", String.class));
-        schema.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
-        schema.add(Pair.of("EMPLOYEES_TOTAL", String.class));
-        schema.add(Pair.of("LE_NUMBER_OF_LOCATIONS", Integer.class));
-        schema.add(Pair.of("PrimaryIndustry", String.class));
-        schema.add(Pair.of("AlexaRank", Integer.class));
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_GU_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_DU_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_SALES_VOL_US, Long.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_EMPLOYEE_TOTAL, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, Integer.class));
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_ALEXA_RANK, Integer.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, String.class));
         Object[][] data = new Object[][] {
                 // domains not present in domainOwnershipTable
-                { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200 },
-                { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201 },
-                { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202 },
-                { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203 },
-                { "amazonGu.com", "DUNS36", "DUNS36", null, 3250000242L, "11000", 2, "Energy", 204 },
-                { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205 },
-                { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206 },
-                { "regalGoodWill.com", "DUNS55", "DUNS55", null, 9728329L, "2230", 11, "Media", 207 },
-                { "goodWillOrg.com", "DUNS59", "DUNS59", null, 82329840L, "2413", 10, "Media", 208 },
-                { "netappDuns1.com", "DUNS31", "DUNS28", null, 30450010L, "10000", 3, "Junior Colleges", 209 },
-                { "mongoDbDuns1.com", "DUNS21", "DUNS17", "DUNS18", 30450010L, "10000", 1, "Wholesale", 210 },
-                { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government", 211 },
-                { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education", 212 },
-                { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education", 213 },
-                { "velocity.com", "DUNS96", "DUNS8", null, 131314L, "232", 1, "Media", 214 },
+                { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null },
+                { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201, null },
+                { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202, null },
+                { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203,
+                        null },
+                { "amazonGu.com", "DUNS36", "DUNS36", null, 3250000242L, "11000", 2, "Energy", 204, null },
+                { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205, null },
+                { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206, null },
+                { "regalGoodWill.com", "DUNS55", "DUNS55", null, 9728329L, "2230", 11, "Media", 207, null },
+                { "goodWillOrg.com", "DUNS59", "DUNS59", null, 82329840L, "2413", 10, "Media", 208, null },
+                { "netappDuns1.com", "DUNS31", "DUNS28", null, 30450010L, "10000", 3, "Junior Colleges", 209, null },
+                { "mongoDbDuns1.com", "DUNS21", "DUNS17", "DUNS18", 30450010L, "10000", 1, "Wholesale", 210, null },
+                { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government", 211, null },
+                { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education", 212, null },
+                { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education", 213, null },
+                { "velocity.com", "DUNS96", "DUNS8", null, 131314L, "232", 1, "Media", 214, null },
                 // domains present in OwnershipTable : rootDuns match
-                { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 215 },
-                { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216 },
+                { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 215, null },
+                { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216, null },
                 // domains present in OwnershipTable : rootDuns doesnt match
-                { "karlDuns1.com", "DUNS97", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217 },
-                { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218 },
-                { "netappDuns2.com", "DUNS33", null, null, 30450010L, "8000", 3, "Biotechnology", 219 },
-                { "unicef.org", "DUNS22", null, null, 104500L, "3700", 2, "Non-profit", 220 },
-                { "goodwill.com", "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media", 221 },
-                { "goodwill.com", "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media", 222 },
-                { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223 },
+                { "karlDuns1.com", "DUNS97", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217, null },
+                { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218, null },
+                { "netappDuns2.com", "DUNS33", null, null, 30450010L, "8000", 3, "Biotechnology", 219, null },
+                { "unicef.org", "DUNS22", null, null, 104500L, "3700", 2, "Non-profit", 220, null },
+                { "goodwill.com", "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media", 221, null },
+                { "goodwill.com", "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media", 222, null },
+                { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223, null },
                 // domains present in OwnershipTable with reasons multiple large
                 // company, franchise, other
-                { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media", 224 },
-                { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225 },
+                { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media", 224, null },
+                { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225, null },
                 { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,
-                        "Manufacturing - Semiconductors", 226 },
-                { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227 },
-                { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228 },
-                { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229 },
-                { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230 },
-                { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231 },
+                        "Manufacturing - Semiconductors", 226, null },
+                { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null },
+                { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228, null },
+                { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null },
+                { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null },
+                { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null },
                 // domain only entries
-                { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors", 232 },
-                { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233 },
+                { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors", 232,
+                        null },
+                { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233, null },
                 // duns only entries
-                { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234 },
-                { null, "DUNS69", null, "DUNS69", 231131L, "1313", 2, "Non-profit", 235 },
+                { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234, null },
+                { null, "DUNS69", null, "DUNS69", 231131L, "1313", 2, "Non-profit", 235, null },
                 // orb entry gets selected
-                { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236 },
-                { "paypalHQ.com", "DUNS891", "DUNS891", null, 23284781L, "447", 3, "Media", 237 },
-                { "paypal.com", "DUNS75", "DUNS75", null, 37875812L, "2425", 341, "Legal", 238 },
-                { "paypal.com", "DUNS76", "DUNS891", null, 3787581L, "2425", 341, "Legal", 239 },
-                { "rubrik.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 240 },
-                { "rubrik.com", "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241 },
+                { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236, null },
+                { "paypalHQ.com", "DUNS891", "DUNS891", null, 23284781L, "447", 3, "Media", 237, null },
+                { "paypal.com", "DUNS75", "DUNS75", null, 37875812L, "2425", 341, "Legal", 238, null },
+                { "paypal.com", "DUNS76", "DUNS891", null, 3787581L, "2425", 341, "Legal", 239, null },
+                { "rubrik.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 240, null },
+                { "rubrik.com", "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241, null },
         };
         uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, data);
     }
 
     private void prepareOrbSeedSecondaryDom() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of("SecondaryDomain", String.class));
-        schema.add(Pair.of("PrimaryDomain", String.class));
+        schema.add(Pair.of(DataCloudConstants.ORBSEC_ATTR_SECDOM, String.class));
+        schema.add(Pair.of(DataCloudConstants.ORBSEC_ATTR_PRIDOM, String.class));
+        // Schema: SecondaryDomain, PrimaryDomain
         Object[][] data = new Object[][] {
                 // PriRootDuns == null, SecRootDuns == null
                 { "airbnb.com", "lyft.com" },
@@ -293,64 +276,87 @@ public class DomainOwnershipRebuildAndCleanTestNG
     };
 
     Object[][] amSeedCleanedUpValues = new Object[][] { //
-            // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd, AlexaRank
+            // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
+            // AlexaRank, LE_OperationLogs
             // domains not present in OwnershipTable : result = domain not
             // cleaned up
-            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200 },
-            { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201 },
-            { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202 },
-            { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203 },
-            { "amazonGu.com", "DUNS36", "DUNS36", null, 3250000242L, "11000", 2, "Energy", 204 },
-            { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205 },
-            { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206 },
-            { "regalGoodWill.com", "DUNS55", "DUNS55", null, 9728329L, "2230", 11, "Media", 207 },
-            { "goodWillOrg.com", "DUNS59", "DUNS59", null, 82329840L, "2413", 10, "Media", 208 },
-            { "netappDuns1.com", "DUNS31", "DUNS28", null, 30450010L, "10000", 3, "Junior Colleges", 209 },
-            { "mongoDbDuns1.com", "DUNS21", "DUNS17", "DUNS18", 30450010L, "10000", 1, "Wholesale", 210 },
-            { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government", 211 },
-            { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education", 212 },
-            { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education", 213 },
-            { "velocity.com", "DUNS96", "DUNS8", null, 131314L, "232", 1, "Media", 214 },
+            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, null },
+            { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201, null,
+                    null },
+            { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202, null, null },
+            { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203, null,
+                    null },
+            { "amazonGu.com", "DUNS36", "DUNS36", null, 3250000242L, "11000", 2, "Energy", 204, null, null },
+            { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205, null, null },
+            { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206, null, null },
+            { "regalGoodWill.com", "DUNS55", "DUNS55", null, 9728329L, "2230", 11, "Media", 207, null, null },
+            { "goodWillOrg.com", "DUNS59", "DUNS59", null, 82329840L, "2413", 10, "Media", 208, null, null },
+            { "netappDuns1.com", "DUNS31", "DUNS28", null, 30450010L, "10000", 3, "Junior Colleges", 209, null, null },
+            { "mongoDbDuns1.com", "DUNS21", "DUNS17", "DUNS18", 30450010L, "10000", 1, "Wholesale", 210, null, null },
+            { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government", 211, null, null },
+            { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education", 212, null, null },
+            { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education", 213, null, null },
+            { "velocity.com", "DUNS96", "DUNS8", null, 131314L, "232", 1, "Media", 214, null, null },
             // domains present in OwnershipTable (rootDuns match) : result = domain not cleaned up
-            { "netappDuns1.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 83 }, // example domain replaced by amSeedCleanup
+            // example domain replaced by amSeedCleanup
+            { "netappDuns1.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 83,
+                    "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=karlDuns2.com is orb sec domain]", null },
             // domains present in OwnershipTable (rootDuns doesn't match) : result = domain cleaned up
-            { null, "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223 },
-            { null, "DUNS97", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217 },
-            { null, "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218 },
-            { null, "DUNS33", null, null, 30450010L, "8000", 3, "Biotechnology", 219 },
-            { null, "DUNS22", null, null, 104500L, "3700", 2, "Non-profit", 220 },
-            { null, "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media", 221 },
-            { null, "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media", 222 },
+            { null, "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS10 with reason HIGHER_NUM_OF_LOC]",
+                    "N" },
+            { null, "DUNS97", null, "DUNS24", 30191910L, "1001", 1, "Accounting", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS33 with reason HIGHER_SALES_VOLUME]",
+                    "N" },
+            { null, "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS28 with reason HIGHER_SALES_VOLUME]",
+                    "N" },
+            { null, "DUNS33", null, null, 30450010L, "8000", 3, "Biotechnology", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS17 with reason HIGHER_SALES_VOLUME]",
+                    "N" },
+            { null, "DUNS22", null, null, 104500L, "3700", 2, "Non-profit", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS39 with reason HIGHER_NUM_OF_LOC]",
+                    "N" },
+            { null, "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS54 with reason HIGHER_EMP_TOTAL]",
+                    "N" },
+            { null, "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS54 with reason HIGHER_EMP_TOTAL]",
+                    "N" },
             // domains present in OwnershipTable with reasons multiple large
             // company, franchise : result = not cleaned up
-            { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media", 224 },
-            { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225 },
+            { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media", 224, null, null },
+            { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225, null,
+                    null },
             { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1, "Manufacturing - Semiconductors",
-                    226 },
-            { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227 },
-            { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228 },
-            { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229 },
-            { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230 },
-            { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231 },
+                    226, null, null },
+            { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null, null },
+            { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228, null, null },
+            { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, null },
+            { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, null },
+            { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null, null },
             // domain only entries : not cleaned up
-            { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors", 232 },
-            { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233 },
+            { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors", 232,
+                    null, null },
+            { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233, null, null },
             // duns only entries : not cleaned up
-            { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234 },
-            { null, "DUNS69", null, "DUNS69", 231131L, "1313", 2, "Non-profit", 235 },
+            { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234, null, null },
+            { null, "DUNS69", null, "DUNS69", 231131L, "1313", 2, "Non-profit", 235, null, null },
             // added entries for orb cleanup for category
-            { "paypal.com", "DUNS75", "DUNS75", null, 37875812L, "2425", 341, "Legal", 238 },
-            { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236 },
-            { "paypalHQ.com", "DUNS891", "DUNS891", null, 23284781L, "447", 3, "Media", 237 },
-            { null, "DUNS76", "DUNS891", null, 3787581L, "2425", 341, "Legal", 239 },
+            { "paypal.com", "DUNS75", "DUNS75", null, 37875812L, "2425", 341, "Legal", 238, null, null },
+            { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236, null, null },
+            { "paypalHQ.com", "DUNS891", "DUNS891", null, 23284781L, "447", 3, "Media", 237, null, null },
+            { null, "DUNS76", "DUNS891", null, 3787581L, "2425", 341, "Legal", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS75 with reason HIGHER_SALES_VOLUME]",
+                    "N" },
             // dont cleanup to avoid missing root duns
-            { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216 },
-            { "rubrik.com", "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241 },
-            { "rubrik.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 240 },
+            { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216, null, null },
+            { "rubrik.com", "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241, null, null },
+            { "rubrik.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 240, null, null },
     };
 
     Object[][] orbSecSrcCleanedupValues = new Object[][] { //
-            // PrimaryDomain, SecondaryDomain
+            // Schema: PrimaryDomain, SecondaryDomain
             // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             { "netappDuns1.com", "karlDuns2.com" }, { "netappDuns1.com", "craigslist.com" },
             { "mongoDbDuns1.com", "netappDuns2.com" }, { "worldwildlife.org", "unicef.org" },
@@ -411,9 +417,18 @@ public class DomainOwnershipRebuildAndCleanTestNG
         for (Object[] data : amSeedCleanedUpValues) {
             amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
         }
-        String[] expectedValueOrder = { "Domain", "DUNS", "GLOBAL_ULTIMATE_DUNS_NUMBER", "LE_PRIMARY_DUNS",
-                "SALES_VOLUME_US_DOLLARS", "EMPLOYEES_TOTAL", "LE_NUMBER_OF_LOCATIONS", "PrimaryIndustry",
-                "AlexaRank" };
+        String[] expectedValueOrder = { //
+                DataCloudConstants.AMS_ATTR_DOMAIN, //
+                DataCloudConstants.AMS_ATTR_DUNS, //
+                DataCloudConstants.ATTR_GU_DUNS, //
+                DataCloudConstants.ATTR_DU_DUNS, //
+                DataCloudConstants.ATTR_SALES_VOL_US, //
+                DataCloudConstants.ATTR_EMPLOYEE_TOTAL, //
+                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, //
+                DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY, //
+                DataCloudConstants.ATTR_ALEXA_RANK, //
+                OperationLogUtils.DEFAULT_FIELD_NAME, //
+                DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN };
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
@@ -426,5 +441,10 @@ public class DomainOwnershipRebuildAndCleanTestNG
             rowCount++;
         }
         Assert.assertEquals(rowCount, 42);
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 }

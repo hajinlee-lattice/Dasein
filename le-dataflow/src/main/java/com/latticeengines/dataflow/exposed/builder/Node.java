@@ -223,6 +223,45 @@ public class Node {
                 builder);
     }
 
+    /**
+     * USE CASE: Group by and buffer. Able to track dataflow operation logs if
+     * withOptLog = true and in output there will be an additional field
+     * LE_OperationLogs
+     * 
+     * ATTENTION: If withOptLog = true, in Buffer constructor, should call
+     * BaseGroupbyBuffer(fieldDeclaration, withOptLog).
+     * 
+     * @param groupByFieldList:
+     *            fields to group by
+     * @param buffer
+     * @param fieldMetadatas:
+     *            field metadatas for output
+     * @param withOptLog:
+     *            whether to append log in LE_OperationLogs field
+     * 
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer, List<FieldMetadata> fieldMetadatas,
+            boolean withOptLog) {
+        Preconditions.checkNotNull(groupByFieldList);
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(groupByFieldList.getFieldsAsList()));
+        Preconditions.checkNotNull(buffer);
+
+        if (withOptLog) {
+            if (this.getSchema(OperationLogUtils.DEFAULT_FIELD_NAME) == null //
+                    && !fieldMetadatas.stream()
+                            .anyMatch(fm -> OperationLogUtils.DEFAULT_FIELD_NAME.equals(fm.getFieldName()))) {
+                fieldMetadatas.add(new FieldMetadata(OperationLogUtils.DEFAULT_FIELD_NAME, String.class));
+            }
+        }
+
+        return new Node(
+                builder.register(
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer, fieldMetadatas)),
+                builder);
+    }
+
     @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
             List<FieldMetadata> fieldMetadatas) {
@@ -267,14 +306,14 @@ public class Node {
                 builder);
     }
 
+
     /**
      * USE CASE: Group by and aggregate. Able to track dataflow operation logs
      * if withOptLog = true and in output there will be an additional field
      * LE_OperationLogs
      * 
      * ATTENTION: If withOptLog = true, in Aggregator constructor, should call
-     * BaseAggregator(fieldDeclaration, withOptLog) to pass in withOptLog as
-     * true too.
+     * BaseAggregator(fieldDeclaration, withOptLog).
      * 
      * @param groupByFieldList:
      *            fields to group by
@@ -282,7 +321,7 @@ public class Node {
      * @param fieldMetadatas:
      *            field metadatas for output
      * @param withOptLog:
-     *            whether to append field LE_OperationLogs in output fields
+     *            whether to append log in LE_OperationLogs field
      * @return
      */
     @SuppressWarnings("rawtypes")
@@ -290,7 +329,7 @@ public class Node {
             @NotNull List<FieldMetadata> fieldMetadatas, boolean withOptLog) {
         Preconditions.checkNotNull(groupByFieldList);
         Preconditions.checkNotNull(aggregator);
-        Preconditions.checkState(CollectionUtils.isNotEmpty(fieldMetadatas));
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(fieldMetadatas));
 
         if (withOptLog) {
             if (this.getSchema(OperationLogUtils.DEFAULT_FIELD_NAME) == null //

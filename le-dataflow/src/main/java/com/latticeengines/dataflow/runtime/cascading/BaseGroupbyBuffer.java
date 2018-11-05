@@ -1,8 +1,14 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -17,20 +23,38 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
 
     private static final long serialVersionUID = -9177444191170437390L;
     protected Map<String, Integer> namePositionMap;
+    protected boolean withOptLog = false;
+    protected int logFieldIdx = -1;
 
     protected BaseGroupbyBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    protected Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
-        Map<String, Integer> positionMap = new HashMap<>();
-        int pos = 0;
-        for (Object field : fieldDeclaration) {
-            String fieldName = (String) field;
-            positionMap.put(fieldName.toLowerCase(), pos++);
+    /**
+     * If want to track operation log for buffer, please use this constructor by
+     * passing withOptLog = true
+     * 
+     * @param fieldDeclaration
+     * @param addOptLog:
+     *            whether to add new column LE_OperationLogs in schema
+     */
+    public BaseGroupbyBuffer(Fields fieldDeclaration, boolean withOptLog) {
+        super(withOptLog && !StreamSupport.stream(fieldDeclaration.spliterator(), false)
+                .anyMatch(field -> OperationLogUtils.DEFAULT_FIELD_NAME.equals((String) field))
+                        ? fieldDeclaration.append(new Fields(OperationLogUtils.DEFAULT_FIELD_NAME))
+                        : fieldDeclaration);
+        namePositionMap = getPositionMap(this.fieldDeclaration);
+        this.withOptLog = namePositionMap.get(OperationLogUtils.DEFAULT_FIELD_NAME) != null;
+        if (this.withOptLog) {
+            logFieldIdx = namePositionMap.get(OperationLogUtils.DEFAULT_FIELD_NAME);
         }
-        return positionMap;
+    }
+
+    protected Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
+        return IntStream.range(0, fieldDeclaration.size())
+                .mapToObj(idx -> Pair.of((String) fieldDeclaration.get(idx), idx))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     @SuppressWarnings("unchecked")
@@ -56,7 +80,7 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
         Fields fields = group.getFields();
         for (Object field : fields) {
             String fieldName = (String) field;
-            Integer loc = namePositionMap.get(fieldName.toLowerCase());
+            Integer loc = namePositionMap.get(fieldName);
             if (loc != null && loc >= 0) {
                 result.set(loc, group.getObject(fieldName));
             } else {

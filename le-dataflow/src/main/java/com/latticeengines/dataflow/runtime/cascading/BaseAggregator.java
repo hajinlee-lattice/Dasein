@@ -2,6 +2,7 @@ package com.latticeengines.dataflow.runtime.cascading;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 
@@ -18,19 +19,29 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
     private static final long serialVersionUID = 1L;
     protected Map<String, Integer> namePositionMap;
     protected boolean withOptLog = false;
-    protected int logFieldIdx;
+    protected int logFieldIdx = -1;
 
     public BaseAggregator(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
+    /**
+     * If want to track operation log for buffer, please use this constructor by
+     * passing withOptLog = true
+     * 
+     * @param fieldDeclaration
+     * @param addOptLog:
+     *            whether to add new column LE_OperationLogs in schema
+     */
     public BaseAggregator(Fields fieldDeclaration, boolean withOptLog) {
-        super(withOptLog ? fieldDeclaration.append(new Fields(OperationLogUtils.DEFAULT_FIELD_NAME))
-                : fieldDeclaration);
-        this.namePositionMap = getPositionMap(this.fieldDeclaration);
-        this.withOptLog = withOptLog;
-        if (withOptLog) {
+        super(withOptLog && !StreamSupport.stream(fieldDeclaration.spliterator(), false)
+                .anyMatch(field -> OperationLogUtils.DEFAULT_FIELD_NAME.equals((String) field))
+                        ? fieldDeclaration.append(new Fields(OperationLogUtils.DEFAULT_FIELD_NAME))
+                        : fieldDeclaration);
+        namePositionMap = getPositionMap(this.fieldDeclaration);
+        this.withOptLog = namePositionMap.get(OperationLogUtils.DEFAULT_FIELD_NAME) != null;
+        if (this.withOptLog) {
             logFieldIdx = namePositionMap.get(OperationLogUtils.DEFAULT_FIELD_NAME);
         }
     }

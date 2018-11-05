@@ -36,7 +36,7 @@ public class DenormalizeIntoListBuffer extends BaseGroupbyBuffer {
             }
             list.add(tuple);
         }
-        result.set(namePositionMap.get(listFeatureName.toLowerCase()), list);
+        result.set(namePositionMap.get(listFeatureName), list);
         return result;
     }
 

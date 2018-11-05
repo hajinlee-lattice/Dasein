@@ -453,53 +453,53 @@ public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGB
     private void verifyAMSeedCleaned(Iterator<GenericRecord> records) {
         // LatticeID, OperationCodes in LE_OperationLog
         Object[][] expectedData = new Object[][] { //
-                { 1L, OperationCode.IS_PRIMARY_LOC }, //
-                { 2L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY }, //
-                { 3L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ZIP }, //
-                { 4L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ST }, //
-                { 5L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ZIP,
-                        OperationCode.IS_PRIMARY_ST }, //
-                { 11L, OperationCode.IS_PRIMARY_LOC }, //
+                { 1L, OperationCode.IS_PRI_LOC }, //
+                { 2L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_CTRY }, //
+                { 3L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_CTRY, OperationCode.IS_PRI_ZIP }, //
+                { 4L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_CTRY, OperationCode.IS_PRI_ST }, //
+                { 5L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_CTRY, OperationCode.IS_PRI_ZIP,
+                        OperationCode.IS_PRI_ST }, //
+                { 11L, OperationCode.IS_PRI_LOC }, //
                 { 12L, null }, //
-                { 21L, OperationCode.IS_PRIMARY_LOC }, //
-                { 22L, OperationCode.IS_PRIMARY_LOC }, //
-                { 31L, OperationCode.IS_PRIMARY_LOC }, //
-                { 33L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_DOMAIN }, //
+                { 21L, OperationCode.IS_PRI_LOC }, //
+                { 22L, OperationCode.IS_PRI_LOC }, //
+                { 31L, OperationCode.IS_PRI_LOC }, //
+                { 33L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_DOM }, //
                 { 34L, null }, //
                 { 35L, null }, //
-                { 36L, OperationCode.IS_PRIMARY_LOC }, //
-                { 37L, OperationCode.IS_PRIMARY_LOC }, //
+                { 36L, OperationCode.IS_PRI_LOC }, //
+                { 37L, OperationCode.IS_PRI_LOC }, //
                 { 38L, null }, //
-                { 39L, OperationCode.IS_PRIMARY_LOC }, //
+                { 39L, OperationCode.IS_PRI_LOC }, //
                 { 40L, null }, //
                 { 41L, null }, //
                 { 42L, null }, //
-                { 43L, OperationCode.IS_PRIMARY_LOC }, //
+                { 43L, OperationCode.IS_PRI_LOC }, //
                 { 44L, null }, //
                 { 45L, null }, //
-                { 46L, OperationCode.IS_PRIMARY_LOC }, //
+                { 46L, OperationCode.IS_PRI_LOC }, //
                 { 47L, null }, //
-                { 48L, OperationCode.IS_PRIMARY_LOC }, //
+                { 48L, OperationCode.IS_PRI_LOC }, //
                 { 49L, null }, //
                 { 50L, null }, //
-                { 51L, OperationCode.IS_PRIMARY_LOC }, //
-                { 52L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY }, //
-                { 53L, OperationCode.IS_PRIMARY_CTRY }, //
+                { 51L, OperationCode.IS_PRI_LOC }, //
+                { 52L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_CTRY }, //
+                { 53L, OperationCode.IS_PRI_CTRY }, //
                 { 54L, null }, //
                 { 55L, null }, //
-                { 56L, OperationCode.IS_PRIMARY_LOC }, //
+                { 56L, OperationCode.IS_PRI_LOC }, //
                 { 100L, null }, //
-                { 101L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_CTRY, OperationCode.IS_PRIMARY_ZIP,
-                        OperationCode.IS_PRIMARY_ST, OperationCode.IS_PRIMARY_DOMAIN }, //
-                { 1000L, OperationCode.IS_PRIMARY_LOC, OperationCode.NOT_PRIMARY_DOMAIN }, //
-                { 1001L, OperationCode.IS_PRIMARY_LOC, OperationCode.NOT_PRIMARY_DOMAIN }, //
-                { 1002L, OperationCode.IS_PRIMARY_LOC, OperationCode.IS_PRIMARY_DOMAIN }, //
-                { 1003L, OperationCode.IS_PRIMARY_LOC }, //
-                { 1004L, OperationCode.IS_PRIMARY_LOC }, //
-                { 1005L, OperationCode.IS_PRIMARY_LOC }, //
-                { 1006L, OperationCode.IS_PRIMARY_LOC }, //
-                { 1007L, OperationCode.IS_PRIMARY_LOC }, //
-                { 1008L, OperationCode.IS_PRIMARY_LOC }, //
+                { 101L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_CTRY, OperationCode.IS_PRI_ZIP,
+                        OperationCode.IS_PRI_ST, OperationCode.IS_PRI_DOM }, //
+                { 1000L, OperationCode.IS_PRI_LOC, OperationCode.NOT_PRI_DOM }, //
+                { 1001L, OperationCode.IS_PRI_LOC, OperationCode.NOT_PRI_DOM }, //
+                { 1002L, OperationCode.IS_PRI_LOC, OperationCode.IS_PRI_DOM }, //
+                { 1003L, OperationCode.IS_PRI_LOC }, //
+                { 1004L, OperationCode.IS_PRI_LOC }, //
+                { 1005L, OperationCode.IS_PRI_LOC }, //
+                { 1006L, OperationCode.IS_PRI_LOC }, //
+                { 1007L, OperationCode.IS_PRI_LOC }, //
+                { 1008L, OperationCode.IS_PRI_LOC }, //
         };
         Map<Long, Object[]> expectedOptLogs = new HashMap<>();
         for (Object[] data : expectedData) {

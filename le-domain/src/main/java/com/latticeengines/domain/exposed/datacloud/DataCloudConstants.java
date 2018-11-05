@@ -69,6 +69,12 @@ public final class DataCloudConstants {
     public static final String AMS_ATTR_PRIMARY_INDUSTRY = "PrimaryIndustry";
     public static final String AMS_ATTR_DOMAIN_SOURCE = "DomainSource";
 
+    // Attribute name in sources
+    public static final String ALEXA_ATTR_URL = "URL";
+    public static final String ALEXA_ATTR_RANK = "Rank";
+    public static final String ORBSEC_ATTR_PRIDOM = "PrimaryDomain";
+    public static final String ORBSEC_ATTR_SECDOM = "SecondaryDomain";
+
     public static final String PROFILE_STAGE_SEGMENT = "SEGMENT";
     public static final String PROFILE_STAGE_ENRICH = "ENRICH";
     public static final String PROFILE_ATTR_ATTRNAME = "AttrName";
@@ -137,6 +143,8 @@ public final class DataCloudConstants {
      ***********************************/
     public static final String TRANSFORMER_AMSEED_MARKER = "AMSeedMarkerTransformer";
     public static final String TRANSFORMER_AMSEED_PRIACT_FIX = "AMSeedPriActFixTransformer";
+    public static final String TRANSFORMER_AMS_FILL_DOM_IN_DU = "AMSeedFillDomainInDU";
+    public static final String TRANSFORMER_AMS_CLEANBY_DOM_OWNER = "AMSeedCleanByDomainOwner";
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 

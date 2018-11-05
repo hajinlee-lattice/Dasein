@@ -39,7 +39,7 @@ public class IngestionResource {
     @ResponseBody
     @ApiOperation(value = "Forcefully start an ingestion. "
             + "If an ingestion for same file/data is going on, skip the operation. "
-            + "Only support for IngestionType: SFTP, SQL_TO_SOURCE")
+            + "Only support for IngestionType: SFTP, SQL_TO_SOURCE, PATCH_BOOK")
     public IngestionProgress ingest(@PathVariable String ingestionName,
             @RequestBody IngestionRequest ingestionRequest,
             @RequestParam(value = "HdfsPod", required = false, defaultValue = "") String hdfsPod) {

@@ -88,7 +88,7 @@ public class AMSeedPriDomainAggregator extends BaseAggregator<AMSeedPriDomainAgg
             result.set(idIdx, context.id);
             if (context.priDomReason != null) {
                 result.set(logFieldIdx, OperationLogUtils.buildLog(DataCloudConstants.TRANSFORMER_AMSEED_PRIACT_FIX,
-                        OperationCode.IS_PRIMARY_DOMAIN, context.priDomReason));
+                        OperationCode.IS_PRI_DOM, context.priDomReason));
             }
             return result;
         } else {

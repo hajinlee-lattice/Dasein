@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.ams;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -6,65 +6,62 @@ import java.util.Map;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.flow.FlowProcess;
-import cascading.operation.BaseOperation;
-import cascading.operation.Buffer;
-import cascading.operation.BufferCall;
+import com.latticeengines.dataflow.runtime.cascading.BaseGroupbyBuffer;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationMessage;
+
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings("rawtypes")
-public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
+public class AMSeedDUPriDomBuffer extends BaseGroupbyBuffer {
 
     public static final String DU_PRIMARY_DOMAIN = "DUPrimaryDomain";
     private static final long serialVersionUID = 1L;
-    private static final Logger log = LoggerFactory.getLogger(DomainCleanupByDuBuffer.class);
-    protected Map<String, Integer> namePositionMap;
-    private String duField;
-    private String dunsField;
-    private String domainField;
-    private String alexaRankField;
+    private static final Logger log = LoggerFactory.getLogger(AMSeedDUPriDomBuffer.class);
+    private String duField = DataCloudConstants.ATTR_DU_DUNS;
+    private String dunsField = DataCloudConstants.AMS_ATTR_DUNS;
+    private String domainField = DataCloudConstants.AMS_ATTR_DOMAIN;
+    private String alexaRankField = DataCloudConstants.ATTR_ALEXA_RANK;
     private int duArgIdx = -1;
     private int dunsArgIdx = -1;
     private int domainArgIdx = -1;
     private int alexaRankArgIdx = -1;
 
     // output (DU, PrimaryDomain)
-    public DomainCleanupByDuBuffer(Fields fieldDeclaration, String duField, String dunsField,
-            String domainField, String alexaRankField) {
-        super(fieldDeclaration);
-        this.duField = duField;
-        this.dunsField = dunsField;
-        this.domainField = domainField;
-        this.alexaRankField = alexaRankField;
-        namePositionMap = getPositionMap(fieldDeclaration);
+    public AMSeedDUPriDomBuffer(Fields fieldDeclaration) {
+        // Input node has discarded LE_OperationLogs if it exists
+        super(fieldDeclaration, true);
     }
 
     @Override
-    public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
-        TupleEntry group = bufferCall.getGroup();
-        String groupValue = group.getString(0);
-        Tuple result = Tuple.size(getFieldDeclaration().size());
-        if (StringUtils.isNotBlank(groupValue)) {
-            // only process groups with DU != null
-            Integer duLoc = namePositionMap.get(duField.toLowerCase());
-            result.set(duLoc, groupValue);
-
-            String primaryOrMostUsedDomain = findPrimaryOrMostUsedDomain(bufferCall);
-            result = outputPrimaryDomain(result, primaryOrMostUsedDomain);
-        }
-        bufferCall.getOutputCollector().add(result);
+    protected Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
+        Pair<String, String> selectedDomAndReason = findPrimaryOrMostUsedDomain(argumentsInGroup);
+        result = outputPrimaryDomain(result, selectedDomAndReason.getLeft(), selectedDomAndReason.getRight());
+        return result;
     }
 
-    private Tuple outputPrimaryDomain(Tuple result, String primaryOrMostRecentDomain) {
-        Integer pdLoc = namePositionMap.get(DU_PRIMARY_DOMAIN.toLowerCase());
-        if (StringUtils.isNotBlank(primaryOrMostRecentDomain)) {
+    /*
+     * If DUDuns is blank, skip the group. Just safe guard.
+     */
+    @Override
+    protected boolean shouldSkipGroup(TupleEntry group) {
+        return StringUtils.isBlank(group.getString(0));
+    }
+    
+    private Tuple outputPrimaryDomain(Tuple result, String primaryDomain, String selectedReason) {
+        Integer pdLoc = namePositionMap.get(DU_PRIMARY_DOMAIN);
+        if (StringUtils.isNotBlank(primaryDomain)) {
             // we have most used domain, but that tuple does not satisfy DUNS=DU
-            result.set(pdLoc, primaryOrMostRecentDomain);
+            result.set(pdLoc, primaryDomain);
+            result.set(logFieldIdx, OperationLogUtils.buildLog(DataCloudConstants.TRANSFORMER_AMS_FILL_DOM_IN_DU,
+                    OperationCode.FILL_DOM_IN_DU, selectedReason));
             return result;
         } else {
             result.set(pdLoc, null);
@@ -72,25 +69,19 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
-        Map<String, Integer> positionMap = new HashMap<>();
-        int pos = 0;
-        for (Object field : fieldDeclaration) {
-            String fieldName = (String) field;
-            positionMap.put(fieldName.toLowerCase(), pos++);
-        }
-        return positionMap;
-    }
-
-    @SuppressWarnings("unchecked")
-    private String findPrimaryOrMostUsedDomain(BufferCall bufferCall) {
+    /**
+     * @param argumentsIter
+     * @return <selected domain, selection reason>
+     */
+    private Pair<String, String> findPrimaryOrMostUsedDomain(Iterator<TupleEntry> argumentsIter) {
         String mostUsedDomain = null;
         String primaryDomain = null;
+        String selectedReason = null;
+
         Map<String, Integer> domainCountMap = new HashMap<>();
         int maxCount = 0;
         int numTuples = 0;
         String du = null;
-        Iterator<TupleEntry> argumentsIter = bufferCall.getArgumentsIterator();
         String maxAlexaRankDomain = null;
         Integer maxAlexaRank = Integer.MAX_VALUE;
         while (argumentsIter.hasNext()) {
@@ -139,9 +130,18 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
             }
         }
 
-        return primaryDomain == null
-                ? (maxAlexaRankDomain == null ? mostUsedDomain : maxAlexaRankDomain)
-                : primaryDomain;
+        if (primaryDomain != null) {
+            selectedReason = OperationMessage.DU_DOMAIN;
+        } else if (maxAlexaRankDomain != null) {
+            primaryDomain = maxAlexaRankDomain;
+            selectedReason = String.format(OperationMessage.LOW_ALEXA_RANK, maxAlexaRank);
+        } else {
+            primaryDomain = mostUsedDomain;
+            if (primaryDomain != null) {
+                selectedReason = String.format(OperationMessage.HIGH_OCCUR, maxCount);
+            }
+        }
+        return Pair.of(primaryDomain, selectedReason);
     }
 
     private String getStringAt(TupleEntry arguments, int pos) {
@@ -172,4 +172,5 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
             }
         }
     }
+
 }

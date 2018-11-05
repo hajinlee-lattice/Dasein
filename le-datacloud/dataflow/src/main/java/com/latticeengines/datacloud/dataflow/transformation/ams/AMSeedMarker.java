@@ -104,7 +104,7 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
         node = node.leftJoin(DUNS, primaryDomain, DUNS);
         // To avoid potential field alignment issue in join -> rename operations
         node = node.retain(new FieldList(node.getFieldNames()));
-        String domainOnlyEntryLog = OperationLogUtils.buildLog(DataCloudConstants.TRANSFORMER_AMSEED_MARKER, OperationCode.IS_PRIMARY_DOMAIN, OperationMessage.DOMAIN_ONLY);
+        String domainOnlyEntryLog = OperationLogUtils.buildLog(DataCloudConstants.TRANSFORMER_AMSEED_MARKER, OperationCode.IS_PRI_DOM, OperationMessage.DOMAIN_ONLY);
         // No domain || domain != primary domain: IsPrimaryDomain = N
         // Has domain, no primary domain || domain = primary domain:
         // IsPrimaryDomain = Y
