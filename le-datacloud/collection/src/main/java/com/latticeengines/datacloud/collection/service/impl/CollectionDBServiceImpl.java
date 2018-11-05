@@ -899,9 +899,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                         AvroUtils.appendToHdfsFile(yarnConfiguration, hdfsFilePath,
                                 AvroUtils.readFromLocalFile(bucketFile.getPath()), true);
 
+                        log.info("appending to hdfs file: " + hdfsFilePath);
+
                     } else {
 
                         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(), hdfsIngestDir);
+
+                        log.info("creating hdfs file: " + hdfsFilePath);
 
                     }
 
