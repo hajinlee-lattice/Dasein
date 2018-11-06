@@ -272,25 +272,29 @@ public class PatchServiceImpl implements PatchService {
             if (StringUtils.isBlank(patchLatticeId) || patchLatticeId.equals(targetLatticeId)) {
                 // no need to update
                 configureNoopPatchLog(patchLog, book, patchLatticeId);
-            } else if (!dryRun) {
-                // TODO probably should not update in map*
-                if (targetEntry == null) {
-                    targetEntry = new AccountLookupEntry();
-                    // NOTE currently, location AM lookup patch only support Domain + Country &
-                    // Domain + Country + State & Domain + Country + ZipCode so use country to
-                    // check if location are required to build key
+            } else {
+                // set log message
+                patchLog.setMessage(String.format("Patched to lattice account ID = %s successfully", patchLatticeId));
+                if (!dryRun) {
+                    // TODO probably should not update in map*
+                    if (targetEntry == null) {
+                        targetEntry = new AccountLookupEntry();
+                        // NOTE currently, location AM lookup patch only support Domain + Country &
+                        // Domain + Country + State & Domain + Country + ZipCode so use country to
+                        // check if location are required to build key
 
-                    // NOTE have to set domain/DUNS before building ID because these fields also build ID internally.
-                    targetEntry.setDomain(book.getDomain());
-                    targetEntry.setDuns(book.getDuns());
-                    if (StringUtils.isNotBlank(book.getCountry())) {
-                        targetEntry.setId(AccountLookupEntry.buildIdWithLocation(book.getDomain(), book.getDuns(),
-                                book.getCountry(), book.getState(), book.getZipcode()));
-                    } else {
-                        targetEntry.setId(AccountLookupEntry.buildId(book.getDomain(), book.getDuns()));
+                        // NOTE have to set domain/DUNS before building ID because these fields also build ID internally.
+                        targetEntry.setDomain(book.getDomain());
+                        targetEntry.setDuns(book.getDuns());
+                        if (StringUtils.isNotBlank(book.getCountry())) {
+                            targetEntry.setId(AccountLookupEntry.buildIdWithLocation(book.getDomain(), book.getDuns(),
+                                    book.getCountry(), book.getState(), book.getZipcode()));
+                        } else {
+                            targetEntry.setId(AccountLookupEntry.buildId(book.getDomain(), book.getDuns()));
+                        }
                     }
+                    updatePatchedAccountLookupEntry(patchLog, book, dataCloudVersion, patchLatticeId, targetEntry);
                 }
-                updatePatchedAccountLookupEntry(patchLog, book, dataCloudVersion, patchLatticeId, targetEntry);
             }
 
             return patchLog;
@@ -345,7 +349,6 @@ public class PatchServiceImpl implements PatchService {
             @NotNull PatchLog patchLog, @NotNull PatchBook book, @NotNull String dataCloudVersion,
             @NotNull String patchLatticeId, @NotNull AccountLookupEntry targetEntry) {
         // update lookup entry
-        patchLog.setMessage(String.format("Patched to lattice account ID = %s successfully", patchLatticeId));
         targetEntry.setLatticeAccountId(patchLatticeId);
         targetEntry.setPatched(true);
         try {
@@ -664,7 +667,7 @@ public class PatchServiceImpl implements PatchService {
             // no DUNS matching input match key
             patchLog.setStatus(PatchStatus.Noop);
             patchLog.setMessage("No DUNS found with the input match key");
-        } else if (!dunsInAMMap.containsKey(patchDuns)) {
+        } else if (!Boolean.TRUE.equals(dunsInAMMap.get(patchDuns))) {
             // patch DUNS does not exist in DataCloud
             String msg = String.format("DUNS = %s in patchItems does not exist in DataCloud", patchDuns);
             patchLog.setStatus(PatchStatus.Noop);
