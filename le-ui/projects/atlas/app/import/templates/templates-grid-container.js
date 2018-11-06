@@ -270,7 +270,7 @@ export default class GridContainer extends Component {
 
   render() {
     return (
-      <div className="le-flex-v-panel">
+      <div>
       <LeTable
         name="import-templates"
         config={this.getConfig()}
