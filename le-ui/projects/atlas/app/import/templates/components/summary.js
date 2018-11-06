@@ -1,4 +1,4 @@
-import React, { Component } from "../../../../../common/react-vendor";
+import React, { Component, react2angular } from "../../../../../common/react-vendor";
 import "./summary.scss";
 import Aux from "../../../../../common/widgets/hoc/_Aux";
 import Observer from "../../../../../common/app/http/observer";
@@ -71,3 +71,10 @@ export default class SummaryContainer extends Component {
     );
   }
 }
+
+angular
+  .module("le.summary", [])
+  .component(
+    "leSummaryComponent",
+    react2angular(SummaryContainer, [], [])
+  );

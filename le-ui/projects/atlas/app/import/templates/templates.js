@@ -36,7 +36,6 @@ class TemplatesComponent extends Component {
   render() {
     return (
       <div className="le-flex-v-panel main-container center-h">
-        <SummaryContainer />
         <div className="le-flex-v-panel templates-main-container">
           <LeToolBar>
             <div className="right">

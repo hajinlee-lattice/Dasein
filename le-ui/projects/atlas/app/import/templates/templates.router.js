@@ -3,7 +3,8 @@ import './templates';
 angular
 .module('lp.importtemplates', [
     
-    'le.import.templates'
+    'le.import.templates',
+    'le.summary'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -19,6 +20,9 @@ angular
                 pageTitle: 'Data Processing & Analysis'
             },
             views: {
+                'summary@': {
+                    component: 'leSummaryComponent'
+                },
                 'main@': {
                     component: 'templatesComponent'
                 }
