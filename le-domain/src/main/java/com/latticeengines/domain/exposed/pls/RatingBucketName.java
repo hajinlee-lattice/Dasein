@@ -7,4 +7,7 @@ public enum RatingBucketName {
         return name();
     }
 
+    public static String getUnscoredBucketName() {
+        return "Unscored";
+    }
 }

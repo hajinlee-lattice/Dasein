@@ -166,7 +166,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     private Boolean deleted = Boolean.FALSE;
 
     public static List<Attribute> getSchemaAttributes() {
-        List<Attribute> schema = new ArrayList<Attribute>();
+        List<Attribute> schema = new ArrayList<>();
         int index = 0;
 
         setAttribute(schema, index++, "PID", Schema.Type.LONG);
@@ -220,7 +220,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
             recMap.put("LIKELIHOOD", rec.getLikelihood());
             recMap.put("COMPANY_NAME", rec.getCompanyName());
             recMap.put("SFDC_ACCOUNT_ID", rec.getSfdcAccountID());
-            recMap.put("PRIORITY_ID", rec.getPriorityID().name());
+            recMap.put("PRIORITY_ID", rec.getPriorityID() != null ? rec.getPriorityID().name() : null);
             recMap.put("PRIORITY_DISPLAY_NAME", rec.getPriorityDisplayName());
             recMap.put("MONETARY_VALUE_ISO4217_ID", rec.getMonetaryValueIso4217ID());
             recMap.put("LIFT", rec.getLift());
@@ -237,8 +237,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
         return recMap;
     }
 
-    private static void setAttribute(List<Attribute> schema, int index, String attrName,
-            Schema.Type physicalType) {
+    private static void setAttribute(List<Attribute> schema, int index, String attrName, Schema.Type physicalType) {
         Attribute attr = new Attribute(attrName);
         attr.setDisplayName(attrName);
         attr.setPhysicalDataType(physicalType.name());
@@ -358,7 +357,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     }
 
     public String getPriorityDisplayName() {
-        return priorityID != null ? priorityID.getName() : "";
+        return priorityDisplayName;
     }
 
     public void setPriorityDisplayName(String name) {

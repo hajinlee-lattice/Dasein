@@ -121,16 +121,17 @@ public class PlayLaunchProcessor {
     @Inject
     private PlayProxy playProxy;
 
-    public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
+    public void launchPlay(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
         // initialize play launch context
         PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
         try {
-            long totalRatedAccountsInSegment = playLaunchContext.getPlayLaunch().getAccountsSelected();
-            log.info(String.format("Total available rated accounts: %d", totalRatedAccountsInSegment));
+            long totalAccountsAvailableForLaunch = playLaunch.getAccountsSelected();
+            log.info(String.format("Total available accounts available for Launch: %d",
+                    totalAccountsAvailableForLaunch));
 
-            long totalAccountsCount = prepareQueriesNCalculateAccCountForLaunch(playLaunchContext);
+            long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext);
 
             Long currentTimeMillis = System.currentTimeMillis();
 
@@ -152,7 +153,7 @@ public class PlayLaunchProcessor {
                     // loop over to required number of pages
                     for (int pageNo = 0; pageNo < pages; pageNo++) {
                         // fetch and process a single page
-                        processedSegmentAccountsCount =  fetchAndProcessPage(playLaunchContext, totalAccountsCount,
+                        processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
                                 processedSegmentAccountsCount, pageNo, dataFileWriter);
                     }
                 }
@@ -167,7 +168,7 @@ public class PlayLaunchProcessor {
                         new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
             } else {
                 runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis, avroFileName, localFile);
-                long suppressedAccounts = (totalRatedAccountsInSegment - playLaunch.getAccountsLaunched()
+                long suppressedAccounts = (totalAccountsAvailableForLaunch - playLaunch.getAccountsLaunched()
                         - playLaunch.getAccountsErrored());
                 playLaunch.setAccountsSuppressed(suppressedAccounts);
                 updateLaunchProgress(playLaunchContext);
@@ -189,7 +190,7 @@ public class PlayLaunchProcessor {
         }
     }
 
-    private long prepareQueriesNCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext) {
+    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext) {
         long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext);
 
         totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount);
@@ -337,48 +338,58 @@ public class PlayLaunchProcessor {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
 
-        PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
         Play play = playProxy.getPlay(customerSpace.toString(), playName);
+        PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
         playLaunch.setPlay(play);
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
         RatingEngine ratingEngine = play.getRatingEngine();
+        ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
         if (ratingEngine == null) {
             throw new NullPointerException(String.format("Rating Engine for play %s cannot be null", play.getName()));
         }
-        MetadataSegment segment = ratingEngine.getSegment();
-        if (segment == null) {
-            throw new NullPointerException(
-                    String.format("Segment for Rating Engine %s cannot be null", ratingEngine.getId()));
+
+        MetadataSegment segment;
+        if (play.getTargetSegment() != null) {
+            segment = play.getTargetSegment();
+        } else {
+            log.info(String.format(
+                    "No Target segment defined for Play %s, falling back to target segment of Rating Engine %s",
+                    play.getName(), ratingEngine.getSegment()));
+            segment = play.getRatingEngine().getSegment();
         }
 
+        if (segment == null) {
+            throw new NullPointerException(String.format("No Target segment defined for Play %s or Rating Engine %s",
+                    play.getName(), ratingEngine.getId()));
+        }
+
+        String segmentName = segment.getName();
+
         Table recommendationTable = metadataProxy.getTable(tenant.getId(), playLaunch.getTableName());
-
         Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
-
-        ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
         RatingModel publishedIteration = ratingEngine.getPublishedIteration();
         String modelId = publishedIteration.getId();
         String ratingId = ratingEngine.getId();
-        String segmentName = segment.getName();
+
         log.info(String.format("Processing segment: %s", segmentName));
 
         playLaunchContextBuilder //
                 .customerSpace(customerSpace) //
                 .tenant(tenant) //
                 .launchTimestampMillis(launchTimestampMillis) //
-                .play(play) //
-                .playLaunch(playLaunch) //
-                .playLaunchId(playLaunchId) //
                 .playName(playName) //
+                .play(play) //
+                .playLaunchId(playLaunchId) //
+                .playLaunch(playLaunch) //
+                .ratingId(ratingId) //
                 .ratingEngine(ratingEngine) //
-                .segment(segment) //
+                .publishedIterationId(modelId) //
+                .publishedIteration(publishedIteration) //
                 .segmentName(segmentName) //
+                .segment(segment) //
                 .accountFrontEndQuery(new FrontEndQuery()) //
                 .contactFrontEndQuery(new FrontEndQuery()) //
-                .modelId(modelId) //
-                .ratingId(ratingId) //
-                .publishedIteration(publishedIteration) //
                 .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
                 .counter(new Counter()) //
                 .recommendationTable(recommendationTable) //

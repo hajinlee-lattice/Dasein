@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -153,7 +154,6 @@ public class TestPlayCreationHelper {
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier, 3);
         postInitializeTenantCreation(tenantIdentifier);
-        
     }
 
     private void postInitializeTenantCreation(String fullTenantId) {
@@ -165,7 +165,7 @@ public class TestPlayCreationHelper {
         destinationOrgId = "O_" + System.currentTimeMillis();
         destinationOrgType = CDLExternalSystemType.CRM;
     }
-    
+
     public void useExistingTenant(String tenantName) {
         log.info("Reusing Existing Tenant and Data from Redshift: " + tenantName);
         Tenant tenant = deploymentTestBed.useExistingTenantAsMain(tenantName);
@@ -224,7 +224,7 @@ public class TestPlayCreationHelper {
     public void setupTenantAndCreatePlay() throws Exception {
         setupTenantAndCreatePlay(null);
     }
-    
+
     public void setupTenantAndCreatePlay(String existingTenant) throws Exception {
         if (StringUtils.isNotBlank(existingTenant)) {
             useExistingTenant(existingTenant);
@@ -241,7 +241,8 @@ public class TestPlayCreationHelper {
     }
 
     public void setupPlayTestEnv() throws Exception {
-        Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL, BusinessEntity.Account,
+                ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
         RatingRule ratingRule = createRatingRule();
@@ -333,6 +334,7 @@ public class TestPlayCreationHelper {
         playLaunch.setDestinationSysType(destinationOrgType);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
+        playLaunch.setLaunchUnscored(true);
         playLaunch.setTopNCount(topNCount);
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
@@ -492,7 +494,7 @@ public class TestPlayCreationHelper {
         Bucket bucket = null;
 
         if (comparisonType == ComparisonType.EQUAL) {
-            bucket = Bucket.valueBkt(comparisonType, Arrays.asList(val));
+            bucket = Bucket.valueBkt(comparisonType, Collections.singletonList(val));
         } else if (comparisonType == ComparisonType.LESS_THAN) {
             bucket = Bucket.rangeBkt(null, val);
         }
@@ -590,7 +592,7 @@ public class TestPlayCreationHelper {
         RatingRule ratingRule = new RatingRule();
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = populateBucketToRuleMap();
         ratingRule.setBucketToRuleMap(bucketToRuleMap);
-        ratingRule.setDefaultBucketName(RatingBucketName.C.name());
+        // ratingRule.setDefaultBucketName(RatingBucketName.C.name());
         return ratingRule;
     }
 
@@ -781,10 +783,12 @@ public class TestPlayCreationHelper {
 
     public MetadataSegment createPlayTargetSegment() {
         log.info("creating playTargetSegment");
-        Restriction dynRest = createBucketRestriction(2, ComparisonType.EQUAL,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
-        Restriction accountRestriction = createAccountRestriction(dynRest);
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Delaware"));
+        BucketRestriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         Restriction contactRestriction = createContactRestriction();
-        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlayTargetSegment"), accountRestriction, contactRestriction);
+        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlayTargetSegment"), accountRestriction,
+                contactRestriction);
         return playTargetSegment;
     }
 
@@ -796,7 +800,8 @@ public class TestPlayCreationHelper {
     }
 
     public MetadataSegment createAggregatedSegment() {
-        Restriction dynRest = createBucketRestriction(3, ComparisonType.LESS_THAN,BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction dynRest = createBucketRestriction(3, ComparisonType.LESS_THAN, BusinessEntity.Account,
+                ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
         return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);

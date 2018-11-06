@@ -189,7 +189,7 @@ public class PlayLaunchContext {
 
         private String segmentName;
 
-        private String modelId;
+        private String publishedIterationId;
 
         private String ratingId;
 
@@ -260,8 +260,8 @@ public class PlayLaunchContext {
             return this;
         }
 
-        public PlayLaunchContextBuilder modelId(String modelId) {
-            this.modelId = modelId;
+        public PlayLaunchContextBuilder publishedIterationId(String publishedIterationId) {
+            this.publishedIterationId = publishedIterationId;
             return this;
         }
 
@@ -308,7 +308,7 @@ public class PlayLaunchContext {
 
         public PlayLaunchContext build() {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
-                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, ratingId, publishedIteration,
+                    launchTimestampMillis, ratingEngine, segment, segmentName, publishedIterationId, ratingId, publishedIteration,
                     accountFrontEndQuery, contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter,
                     recommendationTable, schema);
         }

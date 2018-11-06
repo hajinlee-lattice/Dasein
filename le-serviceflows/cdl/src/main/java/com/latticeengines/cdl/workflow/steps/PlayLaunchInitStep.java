@@ -53,7 +53,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info(String.format("For playId: %s", playName));
             log.info(String.format("For playLaunchId: %s", playLaunchId));
 
-            playLaunchProcessor.executeLaunchActivity(tenant, config);
+            playLaunchProcessor.launchPlay(tenant, config);
             successUpdates(customerSpace, playName, playLaunchId);
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);

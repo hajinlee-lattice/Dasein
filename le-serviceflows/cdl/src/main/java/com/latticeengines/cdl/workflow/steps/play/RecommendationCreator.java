@@ -13,6 +13,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,12 +89,11 @@ public class RecommendationCreator {
 
     private Recommendation processSingleAccount(PlayLaunchContext playLaunchContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
-        RatingBucketName bucket = getBucketInfo(playLaunchContext, account);
         Recommendation recommendation;
 
         // prepare recommendation
         recommendation = //
-                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, bucket);
+                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList);
 
         // update corresponding counters
         playLaunchContext.getCounter().getContactLaunched().addAndGet(
@@ -103,13 +103,8 @@ public class RecommendationCreator {
         return recommendation;
     }
 
-    private RatingBucketName getBucketInfo(PlayLaunchContext playLaunchContext, Map<String, Object> account) {
-        String bucketName = checkAndGet(account, playLaunchContext.getRatingId());
-        return RatingBucketName.valueOf(bucketName);
-    }
-
     private Recommendation prepareRecommendation(PlayLaunchContext playLaunchContext, Map<String, Object> account,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, RatingBucketName bucket) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         long launchTimestampMillis = playLaunchContext.getLaunchTimestampMillis();
         String playName = playLaunchContext.getPlayName();
@@ -153,6 +148,10 @@ public class RecommendationCreator {
         recommendation.setTenantId(tenant.getPid());
         String score = checkAndGet(account,
                 playLaunchContext.getRatingId() + PlaymakerConstants.RatingScoreColumnSuffix);
+        String bucketName = checkAndGet(account, playLaunchContext.getRatingId(),
+                RatingBucketName.getUnscoredBucketName());
+        RatingBucketName bucket = EnumUtils.isValidEnum(RatingBucketName.class, bucketName)
+                ? RatingBucketName.valueOf(bucketName) : null;
         recommendation.setLikelihood(
                 StringUtils.isNotEmpty(score) ? Double.parseDouble(score) : getDefaultLikelihood(bucket));
 
@@ -164,7 +163,7 @@ public class RecommendationCreator {
         setSyncDestination(playLaunch, recommendation);
 
         recommendation.setPriorityID(bucket);
-        recommendation.setPriorityDisplayName(bucket.getName());
+        recommendation.setPriorityDisplayName(bucketName);
 
         recommendation.setRatingModelId(playLaunchContext.getPublishedIteration().getId());
         recommendation.setModelSummaryId(
@@ -203,10 +202,17 @@ public class RecommendationCreator {
     }
 
     private String checkAndGet(Map<String, Object> account, String columnName) {
-        return account.get(columnName) != null ? account.get(columnName).toString() : null;
+        return checkAndGet(account, columnName, null);
+    }
+
+    private String checkAndGet(Map<String, Object> account, String columnName, String defaultValue) {
+        return account.get(columnName) != null ? account.get(columnName).toString() : defaultValue;
     }
 
     private static double getDefaultLikelihood(RatingBucketName bucket) {
+        if (bucket == null)
+            return 0;
+
         switch (bucket) {
         case A:
             return 95.0D;
