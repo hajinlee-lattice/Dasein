@@ -97,7 +97,7 @@ angular
           "href",
           "data:text/plain;charset=utf-8," + encodeURIComponent(toDownload)
         );
-        element.setAttribute("download", "atlas_credentials.txt");
+        element.setAttribute("download", "atlas_credentials.html");
         element.style.display = "none";
         document.body.appendChild(element);
         element.click();
