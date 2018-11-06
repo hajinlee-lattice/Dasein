@@ -68,7 +68,7 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean isRedundant(String email) {
-        return gaUserTenantRightDao.existsByEmail(email);
+        return !gaUserTenantRightDao.existsByEmail(email);
     }
 
     @Override
