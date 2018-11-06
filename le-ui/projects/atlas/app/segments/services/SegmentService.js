@@ -236,6 +236,13 @@ angular
             }
         }
     }
+    this.modalCallback = function(args) {
+        if(args.action === "ok") {
+            return true;
+        } else if (args.action === "closedForced"){
+            return false;
+        }
+    }
 })
 .service('SegmentService', function($http, $q, $state) {
     this.GetSegments = function() {
@@ -332,7 +339,8 @@ angular
             method: 'DELETE',
             url: url,
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'ErrorDisplayCallback': 'SegmentStore.modalCallback'
             }
         }).then(
             function onSuccess(response) {
