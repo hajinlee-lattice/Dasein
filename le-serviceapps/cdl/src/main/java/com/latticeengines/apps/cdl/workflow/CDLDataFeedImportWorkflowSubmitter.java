@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,10 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
             DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo,
             @NonNull Long actionPid, boolean s3ImportEmail) {
+        String filePath = "";
+        if (StringUtils.isNotEmpty(csvImportFileInfo.getReportFilePath())) {
+                filePath = csvImportFileInfo.getReportFilePath();
+        }
 
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
@@ -93,8 +98,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, csvImportFileInfo.getReportFileName()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                                 csvImportFileInfo.getReportFileDisplayName()) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, filePath)
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
-                        .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))
+                        .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))//
                         .build())
                 .build();
     }

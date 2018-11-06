@@ -299,11 +299,15 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (StringUtils.isEmpty(importConfig.getFeedType())) {
             throw new IllegalArgumentException("Template name cannot be empty for S3 import!");
         }
+        if (StringUtils.isEmpty(importConfig.getS3FilePath())) {
+            throw new IllegalArgumentException("Template path cannot be empty for S3 import!");
+        }
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
                 importConfig.getFeedType());
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
         }
+        String filePath = importConfig.getS3FilePath();
         String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(),
                 dataFeedTask.getEntity(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setS3FilePath(newFilePath);
@@ -316,6 +320,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setFileUploadInitiator(DEFAULT_S3_USER);
         csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
+        csvImportFileInfo.setReportFilePath(filePath);
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
                 JsonUtils.serialize(importConfig), csvImportFileInfo, true, new WorkflowPidWrapper(-1L));

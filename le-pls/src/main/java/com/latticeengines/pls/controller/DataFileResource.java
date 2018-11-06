@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,10 +198,15 @@ public class DataFileResource {
     @ApiOperation(value = "Get source file uploaded to create model or score against model via internal file name")
     public void getSourceFileViaFileName( //
             @RequestParam(value = "fileName", required = true) String fileName, //
+            @RequestParam(value = "filePath", required = false) String filePath,
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
-            dataFileProviderService.downloadFileByFileName(request, response, "application/csv", fileName);
+            if (StringUtils.isEmpty(filePath)) {
+                dataFileProviderService.downloadFileByFileName(request, response, "application/csv", fileName);
+            } else {
+                dataFileProviderService.downloadS3File(request, response, "application/csv", fileName, filePath);
+            }
         } catch (Exception e) {
             throw e;
         }

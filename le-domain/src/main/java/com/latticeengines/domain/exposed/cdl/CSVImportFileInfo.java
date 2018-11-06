@@ -14,6 +14,9 @@ public class CSVImportFileInfo {
     @JsonProperty("report_file_display_name")
     private String reportFileDisplayName;
 
+    @JsonProperty("report_file_path")
+    private String reportFilePath;
+
     public String getFileUploadInitiator() {
         return this.fileUploadInitiator;
     }
@@ -36,6 +39,14 @@ public class CSVImportFileInfo {
 
     public void setReportFileDisplayName(String reportFileDisplayName) {
         this.reportFileDisplayName = reportFileDisplayName;
+    }
+
+    public String getReportFilePath() {
+        return reportFilePath;
+    }
+
+    public void setReportFilePath(String reportFilePath) {
+        this.reportFilePath = reportFilePath;
     }
 
     @Override

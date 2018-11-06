@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
+import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader;
 import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader.DownloadRequestBuilder;
 import com.latticeengines.app.exposed.download.HttpFileDownLoader;
@@ -198,5 +199,16 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @VisibleForTesting
     void setImportFromS3Service(ImportFromS3Service importFromS3Service) {
         this.importFromS3Service = importFromS3Service;
+    }
+
+    @Override
+    public void downloadS3File(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String fileName, String filePath) throws IOException {
+        log.info(String.format("Download file with fileName %s and filePath %s.", fileName, filePath));
+        CustomerSpaceS3FileDownloader.S3FileDownloadBuilder builder = new CustomerSpaceS3FileDownloader.S3FileDownloadBuilder();
+        builder.setMimeType(mimeType).setFilePath(filePath).setImportFromS3Service(importFromS3Service);
+        CustomerSpaceS3FileDownloader customerSpaceS3FileDownloader = new CustomerSpaceS3FileDownloader(builder);
+        customerSpaceS3FileDownloader.downloadFile(request, response);
+
     }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -150,6 +151,12 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
     @Override
     public String getPodId() {
         return podId;
+    }
+
+    @Override
+    public InputStream getS3FileInputStream(String key) {
+        InputStream in = s3Service.readObjectAsStream(getS3Bucket(), key);
+        return in;
     }
 
 }

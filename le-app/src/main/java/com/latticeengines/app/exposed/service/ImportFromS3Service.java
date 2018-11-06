@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.service;
 
+import java.io.InputStream;
 import java.util.List;
 
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -14,6 +15,8 @@ public interface ImportFromS3Service {
     void importTable(String customer, Table table, String queueName);
 
     void importFile(String tenantId, String s3Path, String hdfsPath, String queueNameS);
+
+    InputStream getS3FileInputStream(String key);
 
     String getS3Bucket();
 

@@ -30,6 +30,9 @@ public interface DataFileProviderService {
     void downloadFileByFileName(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName) throws IOException;
 
+    void downloadS3File(HttpServletRequest request, HttpServletResponse response, String mimeType, String fileName,
+            String filePath) throws IOException;
+
     void downloadFileByPath(HttpServletRequest request, HttpServletResponse response, String mimeType, String filePath)
             throws IOException;
 
