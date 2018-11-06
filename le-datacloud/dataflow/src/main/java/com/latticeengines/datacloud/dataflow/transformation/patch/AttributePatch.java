@@ -57,9 +57,9 @@ public class AttributePatch extends ConfigurableFlowBase<TransformerConfig> {
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node attrPatchBook = addSource(parameters.getBaseTables().get(0))
+        Node am = addSource(parameters.getBaseTables().get(0)); // account master
+        Node attrPatchBook = addSource(parameters.getBaseTables().get(1))
                 .retain(new FieldList(PATCH_DOMAIN, PATCH_DUNS, PATCH_ITEMS)); // Attribute patch book entries
-        Node am = addSource(parameters.getBaseTables().get(1)); // account master
 
         FieldList patchDomainDunsFields = new FieldList(PATCH_DOMAIN, PATCH_DUNS);
         FieldList amDomainDunsFields = new FieldList(AM_DOMAIN, AM_DUNS);

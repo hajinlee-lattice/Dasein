@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters.ENGINE_CONFIG;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -149,7 +152,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             step.setBaseTables(baseTables);
             Table result = executeDataFlow(workflowDir, step, parameters);
             step.setCount(result.getCount());
-            List<Schema> baseSchemas = getBaseSourceSchemas(step);
+            List<Schema> baseSchemas = getBaseSourceSchemas(step, configuration.isShouldInheritSchemaProp());
             step.setTargetSchema(getTargetSchema(result, parameters, configuration, baseSchemas));
             postDataFlowProcessing(step, workflowDir, parameters, configuration);
             updateStepCount(step, workflowDir);
@@ -167,13 +170,14 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     @SuppressWarnings("rawtypes")
-    private List<Schema> getBaseSourceSchemas(TransformStep step) {
+    private List<Schema> getBaseSourceSchemas(TransformStep step, boolean shouldInheritSchemaProp) {
         Transformer transformer = step.getTransformer();
         if (!(transformer instanceof AbstractDataflowTransformer)) {
             return null;
         }
         boolean needAvsc = ((AbstractDataflowTransformer) transformer).needBaseAvsc();
-        if (needAvsc) {
+        // NOTE if we want to inherit schema properties, we must have base source schemas.
+        if (needAvsc || shouldInheritSchemaProp) {
             Source[] baseSources = step.getBaseSources();
             List<String> baseSourceVersions = step.getBaseVersions();
             List<Schema> schemas = new ArrayList<>();
@@ -246,7 +250,36 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     protected Schema getTargetSchema(Table result, P parameters, T configuration, List<Schema> baseSchemas) {
-        return null;
+        if (configuration.isShouldInheritSchemaProp() && CollectionUtils.isNotEmpty(baseSchemas)
+                && baseSchemas.get(0) != null) {
+            return inheritSchemaPropFromBaseSchema(result, baseSchemas);
+        } else {
+            return null;
+        }
+    }
+
+    /*
+     * Retain all schema properties from the first base schema. Input list of base schema must have at least one item
+     * and the first one must be non-null
+     */
+    protected Schema inheritSchemaPropFromBaseSchema(Table result, List<Schema> baseSchemas) {
+        String extractPath = result.getExtracts().get(0).getPath();
+        String glob;
+        if (extractPath.endsWith(".avro")) {
+            glob = extractPath;
+        } else if (extractPath.endsWith(File.pathSeparator)) {
+            glob = extractPath + "*.avro";
+        } else {
+            glob = extractPath + File.separator + "*.avro";
+        }
+        Schema parsed = AvroUtils.getSchemaFromGlob(yarnConfiguration, glob);
+        Schema base = baseSchemas.get(0);
+        for (Map.Entry<String, org.codehaus.jackson.JsonNode> entry : base.getJsonProps().entrySet()) {
+            if (parsed.getProp(entry.getKey()) == null) {
+                parsed.addProp(entry.getKey(), entry.getValue());
+            }
+        }
+        return parsed;
     }
 
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, P parameters, T configuration) {

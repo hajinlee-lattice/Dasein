@@ -2,8 +2,10 @@ package com.latticeengines.datacloud.etl.transformation.service.impl.patch;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.patch.AttributePatch;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
@@ -17,6 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
@@ -46,6 +49,7 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
     // NOTE linked hash map is used to guarantee the order
     private static final Map<Class<?>, Object> SUPPORTED_TYPES = new LinkedHashMap<>();
     private static final List<Pair<String, Class<?>>> AM_SCHEMA = new ArrayList<>();
+    private static final Map<String, String> AM_SCHEMA_PROPERTIES = new HashMap<>();
     // type => position when iterating SUPPORTED_TYPES
     private static final Map<Class<?>, Integer> TYPE_POSITION_MAP = new HashMap<>();
     // column name => position in AM
@@ -84,6 +88,11 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
             AM_SCHEMA.add(Pair.of(clz.getSimpleName(), clz));
             COLUMN_POSITION_MAP.put(clz.getSimpleName(), i);
         }
+
+        // add schema properties to make sure they are inherited
+        AM_SCHEMA_PROPERTIES.put("DataCloudVersion", "2.0.15");
+        AM_SCHEMA_PROPERTIES.put("TestProp1", "TestVal1");
+        AM_SCHEMA_PROPERTIES.put("TestProp2", "TestVal2");
     }
 
     @Override
@@ -100,26 +109,26 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
         // Fake AM + Flink
         TransformationStepConfig step0 = new TransformationStepConfig();
         step0.setBaseSources(Arrays
-                .asList(attrPatchBookForFakeAM.getSourceName(), fakeAM.getSourceName()));
+                .asList(fakeAM.getSourceName(), attrPatchBookForFakeAM.getSourceName()));
         step0.setTransformer(AttributePatch.TRANSFORMER_NAME);
         step0.setTargetSource(fakePatchedAM.getSourceName());
-        step0.setConfiguration(JsonUtils.serialize(new TransformerConfig()));
+        step0.setConfiguration(getConfigStr());
 
         // Fake AM + TEZ (test TEZ's compatibility)
         TransformationStepConfig step1 = new TransformationStepConfig();
         step1.setBaseSources(Arrays
-                .asList(attrPatchBookForFakeAM.getSourceName(), fakeAM.getSourceName()));
+                .asList(fakeAM.getSourceName(), attrPatchBookForFakeAM.getSourceName()));
         step1.setTransformer(AttributePatch.TRANSFORMER_NAME);
         step1.setTargetSource(fakePatchedAMTez.getSourceName());
-        step1.setConfiguration(setDataFlowEngine(JsonUtils.serialize(new TransformerConfig()), "TEZ"));
+        step1.setConfiguration(setDataFlowEngine(getConfigStr(), "TEZ"));
 
         // Real AM + TEZ (large # of columns)
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setBaseSources(Arrays
-                .asList(attrPatchBookForRealAM.getSourceName(), realAM.getSourceName()));
+                .asList(realAM.getSourceName(), attrPatchBookForRealAM.getSourceName()));
         step2.setTransformer(AttributePatch.TRANSFORMER_NAME);
         step2.setTargetSource(realPatchedAM.getSourceName());
-        step2.setConfiguration(setDataFlowEngine(JsonUtils.serialize(new TransformerConfig()), "TEZ"));
+        step2.setConfiguration(setDataFlowEngine(getConfigStr(), "TEZ"));
 
         // -----------
         List<TransformationStepConfig> steps = Arrays.asList(step0, step1, step2);
@@ -140,8 +149,10 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
         // upload data for fake & real AM
         prepareAttributePatchBook(attrPatchBookDataForFakeAM, attrPatchBookForFakeAM.getSourceName());
         uploadBaseSourceData(fakeAM.getSourceName(), baseSourceVersion, AM_SCHEMA, fakeAMData);
+        generateSchemaFile(fakeAM, baseSourceVersion, AM_SCHEMA_PROPERTIES);
         prepareAttributePatchBook(attrPatchBookDataForRealAM, attrPatchBookForRealAM.getSourceName());
         uploadBaseSourceFile(realAM.getSourceName(), REAL_AM_TEST_FILE, baseSourceVersion);
+        generateSchemaFile(realAM, baseSourceVersion, AM_SCHEMA_PROPERTIES);
         // perform transformation
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -156,6 +167,8 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
 
     @Override
     protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
+        // verify schema properties are inherited
+        verifySchemaProperties(new GeneralSource(source), version);
         if (fakePatchedAM.getSourceName().equals(source) || fakePatchedAMTez.getSourceName().equals(source)) {
             verifyFakeAMTestData(records);
         } else if (realPatchedAM.getSourceName().equals(source)) {
@@ -229,6 +242,25 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
     }
 
     /*
+     * Generate Avro schema file for the input source and add all input properties to the schema file
+     */
+    private void generateSchemaFile(
+            @NotNull Source source, @NotNull String version, @NotNull Map<String, String> properties) {
+        try {
+            String avroDir = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
+            List<String> srcFiles = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
+            Schema srcSchema = AvroUtils.getSchema(yarnConfiguration, new Path(srcFiles.get(0)));
+            properties.forEach(srcSchema::addProp);
+
+            String avscPath = hdfsPathBuilder.constructSchemaFile(source.getSourceName(), version)
+                    .toString();
+            HdfsUtils.writeToFile(yarnConfiguration, avscPath, srcSchema.toString());
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to create schema file for AccountMaster", e);
+        }
+    }
+
+    /*
      * Check whether the fake AM data is patched correctly
      */
     private void verifyFakeAMTestData(Iterator<GenericRecord> records) {
@@ -291,6 +323,26 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
                 Assert.assertEquals(type, expectedType);
             }
         });
+    }
+
+    /*
+     * Verify that all AM schema properties are inherited in the specified source schema file
+     */
+    private void verifySchemaProperties(Source source, String version) {
+        Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source, version);
+        Assert.assertNotNull(schema);
+        Assert.assertNotNull(schema.getJsonProps());
+        AM_SCHEMA_PROPERTIES.forEach((key, val) -> {
+            // property is inherited
+            Assert.assertEquals(schema.getProp(key), val);
+        });
+    }
+
+    private String getConfigStr() {
+        TransformerConfig config = new TransformerConfig();
+        // need to retain json properties from AM
+        config.setShouldInheritSchemaProp(true);
+        return JsonUtils.serialize(config);
     }
 
     /*

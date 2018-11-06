@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,12 +14,24 @@ public class TransformerConfig {
     @JsonProperty("Transfomer")
     private String transformer = "TransformerBase";
 
+    // If true, target schema will retain all the properties from the first base schema
+    @JsonProperty("InheritSchemaProp")
+    private boolean shouldInheritSchemaProp;
+
     public String getTransformer() {
         return transformer;
     }
 
     public void setTransformer(String transformer) {
         this.transformer = transformer;
+    }
+
+    public boolean isShouldInheritSchemaProp() {
+        return shouldInheritSchemaProp;
+    }
+
+    public void setShouldInheritSchemaProp(boolean shouldInheritSchemaProp) {
+        this.shouldInheritSchemaProp = shouldInheritSchemaProp;
     }
 
     public boolean validate(List<String> sourceNames) {
