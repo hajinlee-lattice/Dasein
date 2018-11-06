@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -56,7 +57,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-    private static final String PREFIX = "/Templates/";
+    private static final String PATH_PATTERN = "/%s/dropfolder/%s/Templates/%s";
     private static final String TEMPLATENAME = "N/A";
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
@@ -70,11 +71,10 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId submitCSVImport(String customerSpace, String templateFileName, String dataFileName,
-                                         String source, String entity, String feedType) {
+            String source, String entity, String feedType) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the file upload initiator is %s", email));
-        CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, dataFileName,
-                email);
+        CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, dataFileName, email);
         // temp fix for file upload directly.
         String subType = "";
         if (feedType.contains("Bundle")) {
@@ -91,7 +91,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public String createS3Template(String customerSpace, String templateFileName, String source, String entity,
-                                   String feedType, String subType, String displayName) {
+            String feedType, String subType, String displayName) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
@@ -109,26 +109,25 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
-                                 CleanupOperationType cleanupOperationType) {
+            CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
         switch (schemaInterpretation) {
-            case DeleteAccountTemplate:
-                entity = BusinessEntity.Account;
-                break;
-            case DeleteContactTemplate:
-                entity = BusinessEntity.Contact;
-                break;
-            case DeleteTransactionTemplate:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
+        case DeleteAccountTemplate:
+            entity = BusinessEntity.Account;
+            break;
+        case DeleteContactTemplate:
+            entity = BusinessEntity.Contact;
+            break;
+        case DeleteTransactionTemplate:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Error);
-            uiAction.setMessage(generateDeleteResultMsg(
-                    String.format("<p>Cleanup operation does not support schema: %s </p>",
-                            schemaInterpretation.name())));
+            uiAction.setMessage(generateDeleteResultMsg(String
+                    .format("<p>Cleanup operation does not support schema: %s </p>", schemaInterpretation.name())));
             throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         SourceFile sourceFile = getSourceFile(sourceFileName);
@@ -144,9 +143,8 @@ public class CDLServiceImpl implements CDLService {
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Error);
-            uiAction.setMessage(
-                    generateDeleteResultMsg(
-                            String.format("<p>Source file %s doesn't have a schema.</p>", sourceFileName)));
+            uiAction.setMessage(generateDeleteResultMsg(
+                    String.format("<p>Source file %s doesn't have a schema.</p>", sourceFileName)));
             throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         String email = MultiTenantContext.getEmailAddress();
@@ -174,15 +172,15 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime, 
-                                            SchemaInterpretation schemaInterpretation) {
+    public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
+            SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-            case Transaction:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        case Transaction:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
+            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         try {
@@ -196,17 +194,17 @@ public class CDLServiceImpl implements CDLService {
     public ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-            case Account:
-                entity = BusinessEntity.Account;
-                break;
-            case Contact:
-                entity = BusinessEntity.Contact;
-                break;
-            case Transaction:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        case Account:
+            entity = BusinessEntity.Account;
+            break;
+        case Contact:
+            entity = BusinessEntity.Contact;
+            break;
+        case Transaction:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
+            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         return cdlProxy.cleanupAllData(customerSpace, entity, email);
@@ -214,7 +212,7 @@ public class CDLServiceImpl implements CDLService {
 
     @VisibleForTesting
     CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName,
-                                         String email) {
+            String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         SourceFile templateSourceFile = getSourceFile(templateFileName);
         SourceFile dataSourceFile = getSourceFile(dataFileName);
@@ -254,6 +252,12 @@ public class CDLServiceImpl implements CDLService {
     public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
         List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null);
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        if (dropBoxSummary == null) {
+            throw new RuntimeException("Tenant " + customerSpace //
+                    + " does not have a dropbox.");
+        }
+
         S3ImportTemplateDisplay display = null;
         if (CollectionUtils.isEmpty(folderNames)) {
             log.info("Empty path in s3 folders for tenant %s in", customerSpace);
@@ -264,7 +268,8 @@ public class CDLServiceImpl implements CDLService {
             if (task == null) {
                 log.warn("Empty data feed task for tenant %s in %s with feedtype %s", customerSpace, folderName);
             } else {
-                display.setPath(PREFIX + folderName);
+                display.setPath(String.format(PATH_PATTERN, dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                        folderName));
                 display.setExist(Boolean.TRUE);
                 display.setLastEditedDate(task.getLastUpdated());
                 // get from data feed task
@@ -294,6 +299,5 @@ public class CDLServiceImpl implements CDLService {
             }
         }
     }
-
 
 }
