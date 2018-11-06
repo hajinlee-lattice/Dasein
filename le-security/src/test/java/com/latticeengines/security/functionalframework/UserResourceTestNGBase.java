@@ -37,8 +37,8 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
 
     protected void createTestTenant() {
         testTenant = new Tenant();
-        testTenant.setName("User Resource Test Tenant");
-        testTenant.setId("USER_RESOURCE_TEST_TENANT");
+        testTenant.setName(this.getClass().getSimpleName());
+        testTenant.setId(this.getClass().getSimpleName());
         destroyTestTenant();
         try {
             tenantService.registerTenant(testTenant);
