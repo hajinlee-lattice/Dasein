@@ -74,7 +74,7 @@ public class HdfsFileHttpDownloaderUnitTestNG {
                     i++;
                     String attrName = record.get("Column Name");
                     if ("LinkedIn_Url".equals(attrName)) {
-                        record.get("DisplayName").equals(nameMap.get(attrName));
+                        record.get("Column Display Name").equals(nameMap.get(attrName));
                     }
                 }
             }

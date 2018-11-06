@@ -96,8 +96,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         case TOP_PREDICTOR:
             return processTopPredictorFile(inputStream);
         case RF_MODEL:
-            // TODO change to "processRfModel(inputStream);" when PLS-8703 done
-            return inputStream;
+            return processRfModel(inputStream);
         case DEFAULT:
         default:
             return inputStream;
@@ -133,7 +132,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                             String[] s = toArray(record);
                             log.info("replacing " + record.get("Column Name") + " with "
                                     + nameToDisplayNameMap.get(attrName));
-                            s[1] = nameToDisplayNameMap.get(attrName);
+                            s[2] = nameToDisplayNameMap.get(attrName);
                             for (String val : s) {
                                 printer.print(val != null ? String.valueOf(val) : "");
                             }
