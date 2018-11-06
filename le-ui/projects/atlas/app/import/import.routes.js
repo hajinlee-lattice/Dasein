@@ -321,6 +321,8 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
+                    controller: 'ImportWizardJobStatus',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
@@ -341,7 +343,7 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contact');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.contacts', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.contacts', nextState: 'home.importtemplates' };
                 }
             },
             views: {
@@ -520,7 +522,7 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'transaction');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.productpurchases', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.productpurchases', nextState: 'home.importtemplates' };
                 }
             },
             views: {
@@ -624,7 +626,7 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.productbundles', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.productbundles', nextState: 'home.importtemplates' };
                 }
             },
             views: {
@@ -739,7 +741,7 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'producthierarchy');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.producthierarchy', nextState: 'home.jobs.data' };
+                    return { backState: 'home.import.entry.producthierarchy', nextState: 'home.importtemplates' };
                 }
             },
             views: {

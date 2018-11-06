@@ -37,6 +37,7 @@ angular.module('lp.import')
         this.nonCustomIds = [];
 
         this.calendar = null;
+        this.autoImport = true;
     }
 
     this.init();
@@ -91,9 +92,10 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
-                        $state.go(nextState); 
-                    });
+                    var autoImport = ImportWizardStore.getAutoImport(),
+                        fileName = ImportWizardStore.getCsvFileName(), 
+                        entityType = ImportWizardStore.getEntityType();
+                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
                 }
             }
         ],
@@ -142,9 +144,10 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
-                        $state.go(nextState); 
-                    });
+                    var autoImport = ImportWizardStore.getAutoImport(),
+                        fileName = ImportWizardStore.getCsvFileName(), 
+                        entityType = ImportWizardStore.getEntityType();
+                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
                 }
             }
         ],
@@ -172,9 +175,10 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
-                        $state.go(nextState); 
-                    });
+                    var autoImport = ImportWizardStore.getAutoImport(),
+                        fileName = ImportWizardStore.getCsvFileName(), 
+                        entityType = ImportWizardStore.getEntityType();
+                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
                 }
             }
         ],
@@ -201,9 +205,10 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(){
-                        $state.go(nextState); 
-                    });
+                    var autoImport = ImportWizardStore.getAutoImport(),
+                        fileName = ImportWizardStore.getCsvFileName(), 
+                        entityType = ImportWizardStore.getEntityType();
+                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
                 }
             }
         ],
@@ -231,9 +236,10 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(){
-                        $state.go(nextState); 
-                    });
+                    var autoImport = ImportWizardStore.getAutoImport(),
+                        fileName = ImportWizardStore.getCsvFileName(), 
+                        entityType = ImportWizardStore.getEntityType();
+                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
                 }
             }
         ]
@@ -257,7 +263,6 @@ angular.module('lp.import')
 
     this.nextSaveMapping = function(nextState) {
         this.saveDocumentFields($state.current.name);
-        
         // this.saveDocumentFields(nextState);
         if(nextState){
             var copyFormer = this.getSavedDocumentCopy($state.current.name);
@@ -450,6 +455,14 @@ angular.module('lp.import')
     this.setEntityType = function(type) {
         this.entityType = type;
     };
+
+    this.getAutoImport = function(){
+        return this.autoImport;
+    }
+
+    this.setAutoImport = function(importStatus){
+        this.autoImport = importStatus;
+    }
 
     this.getCustomFields = function(type) {
         var data = [],
@@ -800,6 +813,18 @@ angular.module('lp.import')
 
 	        return deferred.promise;
 	    };
+
+        this.checkAutoImportStatus = function(autoImport, fileName, entityType, nextState){
+            console.log(autoImport, nextState);
+            if(autoImport){
+                this.startImportCsv(fileName, entityType).then(function(){
+                    $state.go(nextState); 
+                });
+            } else {
+                $state.go(nextState); 
+            }
+
+        }
 
 	    this.startImportCsv = function(FileName, entity, feedType) {
 	        var deferred = $q.defer();

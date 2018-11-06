@@ -5,10 +5,15 @@ angular.module('lp.import.wizard.jobstatus', [])
     var vm = this;
 
     angular.extend(vm, {
+    	autoImport: true
     });
 
     vm.init = function() {
         //ImportWizardStore.setValidation('jobstatus', true);
+    }
+
+    vm.checkForAutoImport = function(){
+    	ImportWizardStore.setAutoImport(vm.autoImport);
     }
 
     vm.init();

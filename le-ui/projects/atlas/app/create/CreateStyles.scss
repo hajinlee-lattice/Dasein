@@ -69,6 +69,7 @@ section.container.setup-import {
         }
         div.fileUpload {
             position: relative;
+            border: #ddd solid 1px;
             &:hover {
                 background: #fafafa;
             }
