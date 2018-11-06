@@ -25,6 +25,7 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
+import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -66,6 +67,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         return segmentDao;
     }
 
+    @SoftDeleteConfiguration
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String name) {
@@ -94,6 +96,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         segmentDao.revertDeleteByName(segmentName);
     }
 
+    @SoftDeleteConfiguration
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public List<String> getAllDeletedSegments() {

@@ -52,7 +52,8 @@ import io.swagger.annotations.ApiModelProperty;
         "TENANT_ID", "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
+        @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable, SoftDeletable {
 
