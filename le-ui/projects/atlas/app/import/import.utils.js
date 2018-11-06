@@ -90,7 +90,6 @@ angular.module('lp.import.utils', [])
         userFields.forEach(function(userFieldName){
             updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName]);
         });
-        console.log(fieldsMapped);
     };
 
     function updateUserFieldType(fieldsMapped, userFieldName, newType){
