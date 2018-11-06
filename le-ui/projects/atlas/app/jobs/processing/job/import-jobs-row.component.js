@@ -23,7 +23,7 @@ angular.module('lp.jobs.import.row', [
 
 
         function callbackModalWindow(action) {
-            var modal = Modal.get('processJob_Warning');
+            var modal = Modal.get('p&aJob_Warning');
             
             
             if (action && action.action === 'ok') {
@@ -35,7 +35,7 @@ angular.module('lp.jobs.import.row', [
                 $scope.disableButton = true;
                 JobsStore.runJob($scope.job).then(function (result) {
                     if(modal){
-                        Modal.modalRemoveFromDOM(modal, {name: 'processJob_Warning'});
+                        Modal.modalRemoveFromDOM(modal, {name: 'p&aJob_Warning'});
                     }
                     $scope.disableButton = true;
                     if(result.Success === true && action.obj) {
@@ -47,21 +47,11 @@ angular.module('lp.jobs.import.row', [
                     }
                     
                 });
-            }else if("closedForced" == action.name){
-                $scope.disableButton = false;
-                setTimeout(() => {
-                    $scope.$apply(()=>{});
-                },0);
-            }else {
-                $scope.disableButton = false;
+            }else{
                 if(modal){
-                    Modal.modalRemoveFromDOM(modal, {name: 'processJob_Warning'});
+                    Modal.modalRemoveFromDOM(modal, {name: 'p&aJob_Warning'});
                 }
-                setTimeout(() => {
-                    $scope.$apply(()=>{
-                        
-                    });
-                },0);
+                $scope.disableButton = false;
             }
         }
         
@@ -145,7 +135,7 @@ angular.module('lp.jobs.import.row', [
             var msg = $scope.getWarningMessage(job);
             if (msg != null) {
                 Modal.warning({
-                    name: 'processJob_Warning',
+                    name: 'p&aJob_Warning',
                     title: "Run Job",
                     message: msg,
                     confirmtext: "Yes, Run"
