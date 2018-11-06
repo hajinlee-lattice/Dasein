@@ -90,18 +90,14 @@ public class TestFrameworkUtils {
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
         boolean findMatch = false;
         for (String prefix: TENANTID_PREFIXES) {
-            Pattern pattern = Pattern.compile(prefix + "\\d+");
+            Pattern pattern = Pattern.compile(prefix + "\\d+" +
+                    "|" + prefix + "_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_UTC" +
+                    "|" + prefix + "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
             Matcher matcher = pattern.matcher(tenantId);
             if (matcher.find()) {
                 findMatch = true;
                 break;
             }
-        }
-
-        if (!findMatch) {
-            Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
-            Matcher matcher = pattern.matcher(tenantId);
-            findMatch = matcher.find();
         }
 
         return findMatch;
