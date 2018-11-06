@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.rating', [])
 .controller('PlaybookWizardRating', function(
-    $state, $stateParams, $scope, $filter, ResourceUtility, Ratings, PlaybookWizardStore
+    $state, $stateParams, $scope, $filter, ResourceUtility, Ratings, PlaybookWizardStore, PlaybookWizardService
 ) {
     var vm = this;
 
@@ -10,13 +10,20 @@ angular.module('lp.playbook.wizard.rating', [])
         ratingsCounts: null,
         currentPage: 1,
         pageSize: 10,
-        block_user: true
+        block_user: true,
+        scoredAccountsKeys: [],
+        scoredAccounts: {}
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
         if(vm.search || oldValue) {
             vm.currentPage = 1;
+            vm.makeScores();
         }
+    });
+
+    $scope.$watch('vm.currentPage', function(newValue, oldValue) {
+        vm.makeScores();
     });
 
     if($stateParams.rating_id) {
@@ -43,10 +50,38 @@ angular.module('lp.playbook.wizard.rating', [])
                     PlaybookWizardStore.setRating(play.ratingEngine);
                     PlaybookWizardStore.setValidation('rating', true);
                 }
-
             });
         } else {
             vm.block_user = false;
+        }
+    }
+
+    vm.makeScores = _.debounce(makeScores, 250);
+
+    function makeScores() {
+        var filteredList = vm.filteredList.slice(vm.pageSize * (vm.currentPage-1), vm.pageSize * vm.currentPage),
+            engines = [];
+
+        filteredList.forEach(function(engine) {
+            if(vm.scoredAccountsKeys.indexOf(engine.id) === -1) {
+                engines.push(engine.id);
+            }
+        });
+        if(engines.length) {
+            var segmentName = PlaybookWizardStore.settings.targetSegment.name;
+            PlaybookWizardService.getRatingSegmentCounts(segmentName, engines, {
+                loadContactsCount: true, 
+                loadContactsCountByBucket: true
+            }).then(function(result) {
+                for(var i in result.ratingModelsCoverageMap) {
+                        var item = result.ratingModelsCoverageMap[i];
+                    vm.scoredAccounts[i] = {
+                        scoredAccountCount: item.accountCount,
+                        unscoredAccountCount: item.unscoredAccountCount
+                    }
+                    vm.scoredAccountsKeys.push(i);
+                }
+            });
         }
     }
 

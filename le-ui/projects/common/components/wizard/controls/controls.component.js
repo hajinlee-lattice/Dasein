@@ -56,7 +56,11 @@ angular.module('common.wizard.controls', [])
          * them back to the play list
          */
         if(!StateHistory.lastFrom().name) {
-            $state.go('home');
+            if(preventUnload === true) {
+                $state.go('home');
+            } else {
+                $state.go(preventUnload);
+            }
         } else {
             $window.onbeforeunload = function(event) {
                 var warning = 'Changes you made may not be saved. Are you sure?'; // this is just the default messaging which can't be changed in chrome anyway

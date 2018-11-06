@@ -525,14 +525,18 @@ angular.module('common.datacloud.query.results', [
         vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
             sections.total += parseInt(count.count);
         });
-        
+
+        var _contacts = 0;
         for(var i in vm.selectedBuckets) {
             var bucket = vm.selectedBuckets[i];
             var count = vm.accountsCoverage.bucketCoverageCounts.find(function(value) {
                 return value.bucket === bucket;
             });
             sections.selected += parseInt(count.count);
+            _contacts = _contacts + count.contactCount;
         }
+
+        sections.contacts = _contacts; //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 
         sections.suppressed = parseInt(sections.total - sections.selected);
 
@@ -543,8 +547,6 @@ angular.module('common.datacloud.query.results', [
         if($topNCountEl.is(':checked')) {
             sections.suppressed = Math.max(sections.total - vm.topNCount, sections.suppressed) || 0;
         }
-
-        sections.contacts = vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 
         vm.recommendationCounts = sections;
         PlaybookWizardStore.setRecommendationCounts(sections);

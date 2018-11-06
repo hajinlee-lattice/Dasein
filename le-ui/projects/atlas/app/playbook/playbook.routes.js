@@ -369,7 +369,7 @@ angular
 
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, {noSalesForceId: true}).then(function(data){
                         var engineId = data.ratingEngine.id,
                             engineIdObject = [{id: engineId}];
 
@@ -644,7 +644,8 @@ angular
                 WizardControlsOptions: function() {
                     return { 
                         backState: '', 
-                        nextState: 'home.playbook' 
+                        nextState: 'home.playbook',
+                        preventUnload: 'home.playbook'
                     };
                 },
                 WizardHeaderTitle: function() {
@@ -811,7 +812,7 @@ angular
                     return { 
                         backState: '', // '' takes you to lastFrom // 'home.playbook', 
                         nextState: 'home.playbook',
-                        preventUnload: true
+                        preventUnload: 'home.playbook'
                     };
                 },
                 WizardHeaderTitle: function($stateParams) { 
@@ -977,19 +978,35 @@ angular
                 NoSFIdsCount: [function(){
                     return null;
                 }],
-                AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+                AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', 'PlaybookWizardService', function($q, $stateParams, PlaybookWizardStore, PlaybookWizardService) {
 
                     var deferred = $q.defer();
 
                     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
 
                         var engineId = data.ratingEngine.id,
-                            engineIdObject = [{id: engineId}];
+                            engineIdObject = [{id: engineId}], 
+                            getExcludeItems = PlaybookWizardStore.getExcludeItems(),
+                            getSegmentsOpts = {
+                                loadContactsCount: true,
+                                loadContactsCountByBucket: true
+                            };
 
-                        PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                            var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
+                        if(getExcludeItems) {
+                            getSegmentsOpts.lookupId = PlaybookWizardStore.getDestinationAccountId();
+                        }
+
+                        var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
+                        PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], getSegmentsOpts).then(function(result) {
+                            var accountsCoverage = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
                             deferred.resolve(accountsCoverage);
                         });
+
+                        // PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                        //     var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
+                        //     console.log(accountsCoverage);
+                        //     deferred.resolve(accountsCoverage);
+                        // });
                     
                     });
 

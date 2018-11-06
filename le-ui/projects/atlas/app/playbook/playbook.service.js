@@ -1017,6 +1017,35 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.getRatingSegmentCounts = function(segmentName, ratings, opts) {
+        var deferred = $q.defer(),
+            opts = opts || {};
+        $http({
+            method: 'POST',
+            url: this.host + '/ratingengines/coverage/segment/' +  segmentName,
+            data: {
+                ratingEngineIds: ratings,
+                loadContactsCountByBucket: opts.loadContactsCountByBucket,
+                loadContactsCount: opts.loadContactsCount,
+                lookupId: opts.lookupId,
+                restrictNullLookupId: opts.restrictNullLookupId
+            }
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
     this.getLookupCounts = function(engineId, accountId) {
         var deferred = $q.defer();
         $http({

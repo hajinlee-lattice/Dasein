@@ -33,11 +33,11 @@
                     </ul>
                 </li>
                 <li 
-                    ng-repeat="rating in (filteredList = (vm.ratings | filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                    ng-repeat="rating in (vm.filteredList = (vm.ratings | filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
                     ng-class="{'selected': vm.stored.rating_selection == rating.id}"
                     ng-disabled="vm.block_user"
                     class="item rating_"
-                    ng-if="filteredList.length">
+                    ng-if="vm.filteredList.length">
                     <ul>
                         <li class="segment">
                             <input 
@@ -51,21 +51,31 @@
                             <label for="{{rating.id}}">{{rating.displayName}}</label>
                         </li>
                         <li class="unscored">
-                            <label for="{{rating.id}}">0</label>
+                            <label for="{{rating.id}}" ng-if="!vm.scoredAccounts[rating.id]">
+                                <span class="fa fa-spinner fa-spin fa-fw"></span>
+                            </label>
+                            <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id]">
+                                {{vm.scoredAccounts[rating.id].unscoredAccountCount}}
+                            </label>
                         </li>
                         <li class="scored">
-                            <label for="{{rating.id}}">0</label>
+                            <label for="{{rating.id}}" ng-if="!vm.scoredAccounts[rating.id]">
+                                <span class="fa fa-spinner fa-spin fa-fw"></span>
+                            </label>
+                            <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id]">
+                                {{vm.scoredAccounts[rating.id].scoredAccountCount}}
+                            </label>
                         </li>
                     </ul>
                 </li>
-                <li class="item centered-info-message" ng-if="!filteredList.length">
+                <li class="item centered-info-message" ng-if="!vm.filteredList.length">
                     No Models Found
                 </li>
             </ul>
-            <div class="pd-pagination-container-margin-top pull-right" ng-if="(filteredList.length / vm.pageSize) > 0">
+            <div class="pd-pagination-container-margin-top pull-right" ng-if="(vm.filteredList.length / vm.pageSize) > 0">
                 <pd-pagination-controls
                     current="vm.currentPage"
-                    max="filteredList.length / vm.pageSize">
+                    max="vm.filteredList.length / vm.pageSize">
                 </pd-pagination-controls>
             </div>
         </div>
