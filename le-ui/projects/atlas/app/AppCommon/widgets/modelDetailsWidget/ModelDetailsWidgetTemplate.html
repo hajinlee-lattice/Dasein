@@ -70,9 +70,17 @@
                         </p>
                     </div>
                 </div>
-                <div class="stats stats-group" ng-if="!IsRuleBased">
-                    <h3>Total Conversions</h3>
-                    <h4>{{::totalSuccessEvents }} ({{::conversionRate}}%)</h4>
+                <div class="stats stats-group flex-content-half" ng-if="!IsRuleBased">
+                    <div>
+                        <h3>Total Conversions</h3>
+                        <h4>{{::totalSuccessEvents }} ({{::conversionRate}}%)</h4>
+                    </div>
+                    <div class="text-right">
+                        <p ng-if="expectedValueModel">
+                            ${{averageRevenue}}<br/>
+                            Average Revenue
+                        </p>
+                    </div>
                 </div>
                 <div class="stats stats-group">
                     <h3>Attribute Source</h3>

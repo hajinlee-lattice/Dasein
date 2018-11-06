@@ -15,8 +15,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.ResourceUtility = ResourceUtility;
     var data = ModelStore.data;
 
-    // console.log(data);
-
     if (data === undefined) {
 
         var ratingEngine = $scope.RatingEngine;
@@ -29,6 +27,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.createdBy = ratingEngine.createdBy;
         $scope.created = ratingEngine.created;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
+
+
 
         if (ratingEngine.segment) {
             $scope.segmentName = ratingEngine.segment.display_name;
@@ -66,8 +66,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
 
-            // console.log(ratingEngine);
-            // console.log($scope.model);
+            console.log(ratingEngine);
+            console.log($scope.model);
 
             var engineId = $stateParams.rating_id,
                 ratingModelId = $scope.model.id;
@@ -139,10 +139,22 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             }
 
             if($scope.typeContext == 'AI'){
-                $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
 
                 var engineId = $stateParams.rating_id,
                     ratingModelId = data.ModelDetails.Name;
+
+                if(ratingEngine.published_iteration || ratingEngine.scoring_iteration) {
+                    $scope.model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
+                } else {
+                    $scope.model = ratingEngine.latest_iteration.AI;
+                }
+
+                $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
+
+                $scope.expectedValueModel = $scope.model.predictionType === 'EXPECTED_VALUE' ? true : false;
+                if($scope.expectedValueModel){
+                    $scope.averageRevenue = data.ModelDetails.AverageRevenue;
+                }
 
                 RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
                     $scope.iteration = iteration.AI;

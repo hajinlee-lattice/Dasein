@@ -422,6 +422,8 @@ angular.module('mainApp.models.services.ModelService', [
                 if (!StringUtility.IsEmptyString(data.Details.Payload)) {
                     modelSummary = JSON.parse(data.Details.Payload);
                 }
+
+                modelSummary.ModelDetails.AverageRevenue = data.AverageRevenue;
                 modelSummary.ModelDetails.Status = data.Status;
                 modelSummary.ModelDetails.DisplayName = data.DisplayName;
                 modelSummary.ModelDetails.Uploaded = data.Uploaded;
