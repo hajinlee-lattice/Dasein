@@ -38,13 +38,14 @@ angular.module('lp.jobs.import.row', [
                         Modal.modalRemoveFromDOM(modal, {name: 'processJob_Warning'});
                     }
                     $scope.disableButton = true;
-                    if(result.Success === true && action.obj) {
+                    if(result.Success === true) {
                         $scope.job.jobStatus = 'Pending';
-                    } else {
-                        var errorMsg = result.errorMsg;
+                    } 
+                    // else {
+                    //     var errorMsg = result.errorMsg;
 
-                        Banner.error({ message: errorMsg });
-                    }
+                    //     Banner.error({ message: errorMsg });
+                    // }
                     
                 });
             }else if("closedForced" == action.action){
