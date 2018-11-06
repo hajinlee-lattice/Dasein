@@ -75,8 +75,10 @@
                         <h3>Total Conversions</h3>
                         <h4>{{::totalSuccessEvents }} ({{::conversionRate}}%)</h4>
                     </div>
-                    <div class="text-right">
-                        <p ng-if="expectedValueModel">
+                    <div 
+                        class="text-right"
+                        ng-if="expectedValueModel && averageRevenue">
+                        <p>
                             ${{averageRevenue}}<br/>
                             Average Revenue
                         </p>

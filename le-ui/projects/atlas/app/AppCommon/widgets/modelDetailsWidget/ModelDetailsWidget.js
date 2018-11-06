@@ -153,7 +153,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
                 $scope.expectedValueModel = $scope.model.predictionType === 'EXPECTED_VALUE' ? true : false;
                 if($scope.expectedValueModel){
-                    $scope.averageRevenue = data.ModelDetails.AverageRevenue;
+                    $scope.averageRevenue = data.ModelDetails.AverageRevenue ? data.ModelDetails.AverageRevenue : false;
                 }
 
                 RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
