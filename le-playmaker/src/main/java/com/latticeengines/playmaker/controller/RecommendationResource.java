@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,8 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping(value = "/playmaker")
 public class RecommendationResource {
+
+    Logger log = Logger.getLogger(this.getClass());
 
     @Inject
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
@@ -52,7 +55,8 @@ public class RecommendationResource {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendations(tenantName, lookupSource, start, offset, maximum,
                 SynchronizationDestinationEnum.mapToIntType(destination), playIds,
-                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -67,7 +71,8 @@ public class RecommendationResource {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendationCount(tenantName, lookupSource, start,
                 SynchronizationDestinationEnum.mapToIntType(destination), playIds,
-                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/plays", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -97,6 +102,7 @@ public class RecommendationResource {
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        log.info("/playcount  " + destination);
         return playmakerRecommendationMgr.getPlayCount(tenantName, lookupSource, start, playgroupIds,
                 SynchronizationDestinationEnum.mapToIntType(destination),
                 tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
@@ -129,7 +135,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get record count of account extension")
-    public Map<String, Object> getAccountExtensionCount(HttpServletRequest request,
+    public Map<String, Object> getAccountExtensionCount(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) Long start,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified. This is mutual exclusive to filberBy/recStart.", required = false) @RequestParam(value = "accountId", required = false) List<String> accountIds,
@@ -139,8 +145,8 @@ public class RecommendationResource {
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getAccountextExsionCount(tenantName, lookupSource, start, accountIds,
-                filterBy, recStart);
+        return playmakerRecommendationMgr.getAccountExtensionCount(tenantName, lookupSource, start, accountIds,
+                filterBy, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -164,57 +170,79 @@ public class RecommendationResource {
     @RequestMapping(value = "/contacts", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get contacts")
-    public Map<String, Object> getContacts(HttpServletRequest request,
+    public Map<String, Object> getContacts(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds,
-            @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
+            @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<String> contactIds,
+            @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<String> accountIds,
+            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
+                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContacts(tenantName, lookupSource, start, offset, maximum, contactIds,
-                accountIds);
+                accountIds, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/contactcount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get contact count")
-    public Map<String, Object> getContactCount(HttpServletRequest request,
+    public Map<String, Object> getContactCount(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds,
-            @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
+            @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<String> contactIds,
+            @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<String> accountIds,
+            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
+                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getContactCount(tenantName, lookupSource, start, contactIds, accountIds);
+        return playmakerRecommendationMgr.getContactCount(tenantName, lookupSource, start, contactIds, accountIds,
+                recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/contactextensions", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get contact extensions")
-    public Map<String, Object> getContactExtensions(HttpServletRequest request,
+    public Map<String, Object> getContactExtensions(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+            @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<String> contactIds,
+            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
+                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContactExtensions(tenantName, lookupSource, start, offset, maximum,
-                contactIds);
+                contactIds, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/contactextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get record count of contact extension")
-    public Map<String, Object> getContactExtensionCount(HttpServletRequest request,
+    public Map<String, Object> getContactExtensionCount(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+            @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<String> contactIds,
+            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
+                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getContactExtensionCount(tenantName, lookupSource, start, contactIds);
+        return playmakerRecommendationMgr.getContactExtensionCount(tenantName, lookupSource, start, contactIds,
+                recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/contactextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -56,8 +56,7 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
         "classpath:playmakercore-context.xml", "classpath:test-playmaker-context.xml" })
 public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(LpiPMAccountExtensionImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(LpiPMAccountExtensionImplDeploymentTestNG.class);
 
     private LpiPMAccountExtensionImpl lpiPMAccountExtensionImpl;
 
@@ -84,8 +83,8 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     private Map<String, String> orgInfo;
 
-    private List<List<String>> expectedResultFields = Arrays.asList(
-            Arrays.asList("AccountId", "CDLUpdatedTime", "SalesforceAccountID"), Arrays.asList( //
+    private List<List<String>> expectedResultFields = Arrays
+            .asList(Arrays.asList("AccountId", "CDLUpdatedTime", "SalesforceAccountID"), Arrays.asList( //
                     "LatticeAccountId", //
                     "CDLUpdatedTime", //
                     "AccountId", //
@@ -97,8 +96,8 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                     "SalesforceAccountID", //
                     "RowNum"));
 
-    private List<List<Object>> expectedResultFieldValues = Arrays.asList(
-            Arrays.asList("abc", "abc", "abc", new Long(123), new Long(123), 1, 1), Arrays.asList( //
+    private List<List<Object>> expectedResultFieldValues = Arrays
+            .asList(Arrays.asList("abc", "abc", "abc", new Long(123), new Long(123), 1, 1), Arrays.asList( //
                     "123", //
                     new Date(), //
                     "1", //
@@ -115,8 +114,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         testPlayCreationHelper.setupTenantAndData();
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
-        orgInfo = setupLookupIdMapping(PlaymakerConstants.SfdcAccountID,
-                testPlayCreationHelper.getTenant().getId());
+        orgInfo = setupLookupIdMapping(PlaymakerConstants.SfdcAccountID, testPlayCreationHelper.getTenant().getId());
 
         lpiPMAccountExtensionImpl = new LpiPMAccountExtensionImpl();
         lpiPMAccountExtensionImpl.setEntityProxy(entityProxy);
@@ -133,8 +131,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         PageFilter pageFilter = new PageFilter(0L, 5L);
         frontEndQuery.setPageFilter(pageFilter);
 
-        DataPage result = entityProxy.getData(testPlayCreationHelper.getTenant().getId(),
-                frontEndQuery);
+        DataPage result = entityProxy.getData(testPlayCreationHelper.getTenant().getId(), frontEndQuery);
         Assert.assertNotNull(result);
         Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
         Assert.assertEquals(result.getData().size(), 5);
@@ -144,11 +141,16 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
             Assert.assertTrue(row.containsKey(InterfaceName.AccountId.name()));
             Assert.assertTrue(row.containsKey(InterfaceName.SalesforceAccountID.name()));
             String actualInternalAccountId = row.get(InterfaceName.AccountId.name()).toString();
-            String actualSfdcAccountId = row.get(InterfaceName.SalesforceAccountID.name())
-                    .toString();
+            String actualSfdcAccountId = row.get(InterfaceName.SalesforceAccountID.name()).toString();
             internalAccountIds.add(actualInternalAccountId);
             sfdcAccountIds.add(actualSfdcAccountId);
         });
+    }
+
+    @Test(groups = "deployment")
+    public void testGetAccountExtensionCount() {
+        accountCount = lpiPMAccountExtensionImpl.getAccountExtensionCount(0L, null, null, 0L, orgInfo);
+        Assert.assertTrue(accountCount > 0);
     }
 
     private Map<String, String> setupLookupIdMapping(String accountIdColumn, String tenantId) {
@@ -166,8 +168,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNull(lookupIdMap.getAccountId());
 
         lookupIdMap.setAccountId(accountIdColumn);
-        lookupIdMap = lookupIdMappingProxy.updateLookupIdMap(tenantId, lookupIdMap.getId(),
-                lookupIdMap);
+        lookupIdMap = lookupIdMappingProxy.updateLookupIdMap(tenantId, lookupIdMap.getId(), lookupIdMap);
         Assert.assertNotNull(lookupIdMap.getAccountId());
         Assert.assertEquals(lookupIdMap.getAccountId(), accountIdColumn);
 
@@ -183,11 +184,12 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         return orgInfo;
     }
 
-    @Test(groups = "deployment")
-    public void testGetAccountExtensionCount() {
-        accountCount = lpiPMAccountExtensionImpl.getAccountExtensionCount(0L, null, 0L);
-        Assert.assertTrue(accountCount > 0);
-    }
+    // @Test(groups = "deployment")
+    // public void testGetAccountExtensionCount() {
+    // accountCount = lpiPMAccountExtensionImpl.getAccountExtensionCount(0L,
+    // null, 0L);
+    // Assert.assertTrue(accountCount > 0);
+    // }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetAccountExtensionCount" })
     public void testGetAccountExtensionsWithoutAccountIds() throws Exception {
@@ -199,7 +201,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, null, null, //
-                        null, false, null);
+                        null, null, false, null);
         log.info(datapage.toString());
 
         checkResult(datapage, expectedResultFields.get(0), expectedResultFieldValues.get(0), max);
@@ -215,7 +217,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, internalAccountIds, null, //
-                        null, false, orgInfo);
+                        null, null, false, orgInfo);
         log.info(datapage.toString());
 
         checkResult(datapage, expectedResultFields.get(0), expectedResultFieldValues.get(0), max);
@@ -230,7 +232,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                 expectedResultFieldValues.get(1), true, (int) max);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
-                        0, 0, max, internalAccountIds, null, //
+                        0, 0, max, internalAccountIds, null, null, //
                         String.join(",", expectedResultFields.get(1)), false, null);
         log.info(datapage.toString());
 
@@ -246,7 +248,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                 expectedResultFieldValues.get(1), true, (int) max);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
-                        0, 0, max, internalAccountIds, null, //
+                        0, 0, max, internalAccountIds, null, null, //
                         String.join(",", expectedResultFields.get(1)), false, orgInfo);
         log.info(datapage.toString());
 
@@ -259,20 +261,19 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         long max = accountCount > 5L ? 5L : accountCount;
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         List<Object> emptyResultsList = new ArrayList<Object>();
-        createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1),
-                emptyResultsList, false, (int) max);
+        createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1), emptyResultsList, false,
+                (int) max);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
-                        0, 0, max, Arrays.asList("id1", "id2", "id3", "id4", "id5"), null, //
+                        0, 0, max, Arrays.asList("id1", "id2", "id3", "id4", "id5"), null, null, //
                         String.join(",", expectedResultFields.get(1)), false, orgInfo);
         log.info(datapage.toString());
 
         checkResult(datapage, expectedResultFields.get(1), emptyResultsList, 0);
     }
 
-    private void createMockedMatchProxy(MatchProxy mockedMatchProxy,
-            List<String> expectedResultFields, List<Object> expectedResultFieldValues,
-            boolean shouldCreateGoodResult, int maximum) {
+    private void createMockedMatchProxy(MatchProxy mockedMatchProxy, List<String> expectedResultFields,
+            List<Object> expectedResultFieldValues, boolean shouldCreateGoodResult, int maximum) {
         MatchOutput matchOutput = new MatchOutput(UUID.randomUUID().toString());
         matchOutput.setOutputFields(expectedResultFields);
         ArrayList<OutputRecord> result = new ArrayList<OutputRecord>();
@@ -305,8 +306,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                     Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
                     Assert.assertNotNull(row.get(PlaymakerConstants.ID));
                     Assert.assertNotNull(row.get(PlaymakerConstants.LEAccountExternalID));
-                    Assert.assertNotNull(
-                            row.get(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY));
+                    Assert.assertNotNull(row.get(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY));
                     Assert.assertNotNull(row.get(PlaymakerConstants.RowNum));
                     expectedResultFields.stream() //
                             .forEach(field -> {
@@ -316,8 +316,8 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                                             JsonUtils.serialize(row.keySet())));
                                 }
 
-                                Assert.assertTrue(row.containsKey(field), String.format(
-                                        "row = %s, field = %s", JsonUtils.serialize(row), field));
+                                Assert.assertTrue(row.containsKey(field),
+                                        String.format("row = %s, field = %s", JsonUtils.serialize(row), field));
                             });
                 });
     }

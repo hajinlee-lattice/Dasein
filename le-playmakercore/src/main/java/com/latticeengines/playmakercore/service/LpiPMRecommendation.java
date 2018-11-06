@@ -9,13 +9,23 @@ import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinatio
 
 public interface LpiPMRecommendation {
     List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
-            SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo);
+            SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo,
+            Map<String, String> appId);
 
-    int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo);
+    List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, int offset, int maximum);
+
+    int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination, List<String> playIds,
+            Map<String, String> orgInfo, Map<String, String> appId);
+
+    int getRecommendationCountByLaunchIds(List<String> launchIds);
 
     Recommendation getRecommendationById(String recommendationId);
 
     int cleanupRecommendations(String playId);
 
     int cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate);
+
+    List<String> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, int offset, int max);
+
+    int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds);
 }

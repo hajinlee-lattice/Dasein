@@ -22,4 +22,6 @@ public interface RecommendationService {
 
     List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, //
             int offset, int max, String syncDestination, List<String> playIds, Map<String, String> orgInfo);
+
+    List<Recommendation> findByLaunchIds(List<String> launchIds);
 }

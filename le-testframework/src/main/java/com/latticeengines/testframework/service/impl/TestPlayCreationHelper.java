@@ -37,6 +37,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -146,6 +147,13 @@ public class TestPlayCreationHelper {
     protected String getDeployedRestAPIHostPort() {
         return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
                 : deployedHostPort;
+    }
+
+    public Map<String, String> getOrgInfo() {
+        Map<String, String> org = new HashMap<>();
+        org.put(CDLConstants.ORG_ID, destinationOrgId);
+        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, destinationOrgType.toString());
+        return org;
     }
 
     public void setupTenantAndData() {

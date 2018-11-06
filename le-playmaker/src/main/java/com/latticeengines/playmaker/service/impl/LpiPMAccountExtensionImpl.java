@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.service.impl;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,6 +30,9 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
+import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -36,8 +42,12 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
+import com.latticeengines.playmaker.service.LpiPMPlay;
+import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
+import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -55,10 +65,16 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     private MatchProxy matchProxy;
 
     @Inject
+    private LpiPMPlay lpiPMPlay;
+
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private LpiPMRecommendation lpiRecommendationDao;
 
     @Inject
     private EntityQueryGenerator entityQueryGenerator;
@@ -79,8 +95,9 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum,
-            List<String> accountIds, Long recStart, String columns, boolean hasSfdcContactId,
+            List<String> accountIds, String filterBy, Long recStart, String columns, boolean hasSfdcContactId,
             Map<String, String> orgInfo) {
+
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
 
         Set<String> attributes = new HashSet<>(REQUIRED_FIELDS);
@@ -97,19 +114,37 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             attributes.add(lookupIdColumn);
         }
 
-        List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
-                accountIds, lookupIdColumn, start, offset, maximum);
-
+        List<String> internalAccountIds = null;
         DataPage dataPage;
+
+        if (recStart == null) {
+            recStart = 0L;
+        }
+
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            internalAccountIds = accountIds;
+        } else if (recStart > 0L) {
+            internalAccountIds = getAccountIdsByRecommendationsInfo(true, recStart, offset, maximum, orgInfo);
+        } else {
+            internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace, accountIds, lookupIdColumn, start,
+                    offset, maximum);
+        }
+
         if (CollectionUtils.isNotEmpty(internalAccountIds)) {
             dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountIds, attributes);
-            log.info(String.format("Accounts returned from matchapi: %s",
-                    JsonUtils.serialize(dataPage)));
+            log.info(String.format("Accounts returned from matchapi: %s", JsonUtils.serialize(dataPage)));
         } else {
             dataPage = AccountExtensionUtil.createEmptyDataPage();
         }
 
         return postProcess(dataPage.getData(), offset, lookupIdColumn);
+    }
+
+    @Override
+    public List<String> getAccountIdsByRecommendationsInfo(boolean latest, Long recStart, long offset, long max,
+            Map<String, String> orgInfo) {
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latest, recStart, null, 0, orgInfo);
+        return lpiRecommendationDao.getAccountIdsFromRecommendationByLaunchId(launchIds, (int) offset, (int) max);
     }
 
     private void setPageFilter(FrontEndQuery frontEndQuery, Long offset, Long maximum) {
@@ -145,19 +180,19 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         return data;
     }
 
-    private List<String> getInternalAccountsIdViaObjectApi(String customerSpace,
-            List<String> accountIds, String lookupIdColumn, Long start, Long offset, Long maximum) {
+    private List<String> getInternalAccountsIdViaObjectApi(String customerSpace, List<String> accountIds,
+            String lookupIdColumn, Long start, Long offset, Long maximum) {
 
         DataPage entityData;
         try {
-            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                    accountIds, lookupIdColumn, start, true);
+            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
+                    lookupIdColumn, start, true);
             setPageFilter(frontEndQuery, offset, maximum);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getData(customerSpace, frontEndQuery);
         } catch (Exception e) {
-            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                    accountIds, lookupIdColumn, start, false);
+            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
+                    lookupIdColumn, start, false);
             setPageFilter(frontEndQuery, offset, maximum);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getData(customerSpace, frontEndQuery);
@@ -166,14 +201,13 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         return AccountExtensionUtil.extractAccountIds(entityData);
     }
 
-    private DataPage getAccountByIdViaMatchApi(String customerSpace,
-            List<String> internalAccountIds, Set<String> attributes) {
+    private DataPage getAccountByIdViaMatchApi(String customerSpace, List<String> internalAccountIds,
+            Set<String> attributes) {
 
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace,
-                internalAccountIds, attributes, dataCloudVersion);
-        log.info(String.format("Calling matchapi with request payload: %s",
-                JsonUtils.serialize(matchInput)));
+        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, attributes,
+                dataCloudVersion);
+        log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
@@ -181,7 +215,23 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     @Override
-    public long getAccountExtensionCount(long start, List<String> accountIds, Long recStart) {
+    public long getAccountExtensionCount(long start, List<String> accountIds, String filterBy, Long recStart,
+            Map<String, String> orgInfo) {
+
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            return accountIds.size();
+        }
+        if (recStart != null) {
+            if (recStart > 1L) {
+                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, recStart, null, 0, orgInfo);
+                if (CollectionUtils.isNotEmpty(launchIds)) {
+                    return lpiRecommendationDao.getAccountIdsCountFromRecommendationByLaunchId(launchIds);
+                } else {
+                    return 0;
+                }
+            }
+        }
+
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);

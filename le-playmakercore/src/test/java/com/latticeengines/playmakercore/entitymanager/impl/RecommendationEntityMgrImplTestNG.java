@@ -86,15 +86,13 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         LAUNCH_1_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (5 * 1000L));
         LAUNCH_2_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (1 * 1000L));
 
-        T1 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L - 24*3600L);
-        T2 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L + 24*3600L);
-        T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 24*3600L);
-        T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 24*3600L);
+        T1 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L - 24 * 3600L);
+        T2 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L + 24 * 3600L);
+        T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 24 * 3600L);
+        T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 24 * 3600L);
 
-        System.out.println(String.format(
-                "LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
-                        + "T1 = %s, T2 = %s, T3 = %s, T4 = %s",
-                LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
+        System.out.println(String.format("LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
+                + "T1 = %s, T2 = %s, T3 = %s, T4 = %s", LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
 
         recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, LAUNCH_DATE, SFDC_ACCOUNT_ID, null, null,
                 "A");
@@ -167,6 +165,14 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 LAUNCH_1_DATE, SFDC_ACCOUNT_ID_1, DESTINATION_ORG_ID_1, DESTINATION_SYS_TYPE_1, "C")));
         IntStream.range(0, 100).forEach(i -> testCreateRecommendation(createRecommendationObject(LAUNCH_ID_2,
                 LAUNCH_2_DATE, SFDC_ACCOUNT_ID_2, DESTINATION_ORG_ID_2, DESTINATION_SYS_TYPE_2, "D")));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "populateMoreRecommendations" })
+    public void testGetAccountIdsByLaunchIds() {
+        List<String> launchIds = new ArrayList<String>();
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> launchIds.add(rec.getLaunchId()));
+        testGetAccountIdsByLaunchIds(launchIds);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "populateMoreRecommendations" })
@@ -357,6 +363,18 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         for (Recommendation recommendation : recommendations) {
             compareOriginalAndExtractedRecommendations(originalRec, recommendation);
         }
+    }
+
+    private void testGetAccountIdsByLaunchIds(List<String> launchIds) {
+        MultiTenantContext.setTenant(tenant);
+        List<String> accountIds = recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, 0,
+                1000);
+        int num = recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds);
+        System.out.print(launchIds);
+        Assert.assertNotNull(accountIds);
+        System.out.println(accountIds);
+        Assert.assertTrue(num > 0);
+        Assert.assertTrue(accountIds.size() > 0);
     }
 
     private void testGetRecommendationByPlayId(Recommendation originalRecommendation) {

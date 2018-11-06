@@ -38,8 +38,6 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
-    private long accountCount;
-
     private Play firstPlayWithLaunch;
     private Play secondPlayWithLaunch;
 

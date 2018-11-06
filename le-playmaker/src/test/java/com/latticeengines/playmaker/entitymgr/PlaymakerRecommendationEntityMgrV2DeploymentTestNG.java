@@ -100,9 +100,13 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
     private String syncDestination = "SFDC";
     private Map<String, String> orgInfo;
     private Map<String, String> badOrgInfo;
+    private Map<String, String> eloquaAppId;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        eloquaAppId = new HashMap<String, String>();
+        eloquaAppId.put(CDLConstants.AUTH_APP_ID, "BIS01234");
+
         bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.values()));
         excludeItemsWithoutSalesforceId = true;
         topNCount = 5L;
@@ -193,7 +197,7 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
     public void testRecommendation() {
         Map<String, Object> recommendations = playmakerRecommendationMgr.getRecommendations(customerSpace.toString(),
                 PlaymakerSyncLookupSource.V2.name(), 0L, 0, 100, SynchronizationDestinationEnum.SFDC.ordinal(), null,
-                orgInfo);
+                orgInfo, eloquaAppId);
         Assert.assertNotNull(recommendations);
         Assert.assertNotNull(recommendations.get(PlaymakerRecommendationEntityMgr.START_KEY));
         Assert.assertNotNull(recommendations.get(PlaymakerRecommendationEntityMgr.END_KEY));
@@ -233,6 +237,10 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
             rec.setRecommendationId("ID_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);
             rec.setSynchronizationDestination(syncDestination);
             rec.setTenantId(tenant.getPid());
+            String contactStr = "[{\"Email\":\"FirstName5763@com\",  \"Address\": \"null Dr\",  \"Phone\":\"248.813.2000\",\"State\":\"MI\",\"ZipCode\":\"48098-2815\","
+                    + "\"ContactID\":\"" + String.valueOf(launchDate.toInstant().toEpochMilli()) + "\","
+                    + "\"Country\":\"USA\",\"SfdcContactID\": \"\",\"City\": \"Troy\",\"ContactID\": \"5763\",\"Name\": \"FirstName5763 LastName5763\"}]";
+            rec.setContacts(contactStr);
             recommendationEntityMgr.create(rec);
         }
     }

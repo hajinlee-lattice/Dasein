@@ -15,7 +15,7 @@ public interface PlaymakerRecommendationEntityMgr {
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName, String lookupSource);
 
     Map<String, Object> getRecommendations(String tenantName, String lookupSource, long start, int offset, int maximum,
-            int syncDestination, List<String> playIds, Map<String, String> orgInfo);
+            int syncDestination, List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId);
 
     Map<String, Object> getPlays(String tenantName, String lookupSource, long start, int offset, int maximum,
             List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo);
@@ -30,13 +30,13 @@ public interface PlaymakerRecommendationEntityMgr {
     List<Map<String, Object>> getWorkflowTypes(String tenantName, String lookupSource);
 
     Map<String, Object> getRecommendationCount(String tenantName, String lookupSource, long start, int syncDestination,
-            List<String> playIds, Map<String, String> orgInfo);
+            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId);
 
     Map<String, Object> getPlayCount(String tenantName, String lookupSource, long start, List<Integer> playgroupIds,
             int syncDestination, Map<String, String> orgInfo);
 
-    Map<String, Object> getAccountextExsionCount(String tenantName, String lookupSource, Long start,
-            List<String> accountIds, String filterBy, Long recStart);
+    Map<String, Object> getAccountExtensionCount(String tenantName, String lookupSource, Long start,
+            List<String> accountIds, String filterBy, Long recStart, Map<String, String> orgInfo);
 
     Map<String, Object> getPlayValueCount(String tenantName, String lookupSource, long start,
             List<Integer> playgroupIds);
@@ -49,19 +49,21 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getPlayGroupCount(String tenantName, String lookupSource, long start);
 
     Map<String, Object> getContacts(String tenantName, String lookupSource, long start, int offset, int maximum,
-            List<Integer> contactIds, List<Integer> accountIds);
+            List<String> contactIds, List<String> accountIds, Long recStart, Map<String, String> orgInfo,
+            Map<String, String> appId);
 
-    Map<String, Object> getContactCount(String tenantName, String lookupSource, long start, List<Integer> contactIds,
-            List<Integer> accountIds);
+    Map<String, Object> getContactCount(String tenantName, String lookupSource, long start, List<String> contactIds,
+            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId);
 
     Map<String, Object> getContactExtensionColumnCount(String tenantName, String lookupSource);
 
     List<Map<String, Object>> getContactExtensionSchema(String tenantName, String lookupSource);
 
     Map<String, Object> getContactExtensionCount(String tenantName, String lookupSource, long start,
-            List<Integer> accountIds);
+            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId);
 
     Map<String, Object> getContactExtensions(String tenantName, String lookupSource, long start, int offset,
-            int maximum, List<Integer> accountIds);
+            int maximum, List<String> accountIds, Long recStart, Map<String, String> orgInfo,
+            Map<String, String> appId);
 
 }

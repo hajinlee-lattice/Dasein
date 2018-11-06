@@ -476,6 +476,7 @@ public enum LedpCode {
     LEDP_22003("Tenant exists, but username is blank, tenant name={0}"), //
     LEDP_22004("Tenant exists, but user password is blank, tenant name={0}"), //
     LEDP_22007("Failed to get recommendations after retry."), //
+    LEDP_22008("Function is not support: {0}"), //
 
     // le-oauth2db
     LEDP_23001("Access token does not exist!"), //

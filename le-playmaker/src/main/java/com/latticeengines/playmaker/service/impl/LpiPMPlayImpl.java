@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,16 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.LaunchHistory;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -59,7 +64,8 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         return handlePagination(start, offset, maximum, plays);
     }
 
-    private List<Play> getPlayList(long start, List<Integer> playgroupIds, int syncDestination,
+    @Override
+    public List<Play> getPlayList(long start, List<Integer> playgroupIds, int syncDestination,
             Map<String, String> orgInfo) {
         // following API has sub-second performance even for large number of
         // plays (50+). This API returns only those plays for with there is
@@ -70,14 +76,54 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard;
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, null,
-                    0L, 0L, 1L, null, null, null, null, null);
+                    0L, 0L, 1000L, null, null, null, null, null);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, null,
-                    0L, 0L, 1L, null, null, null, effectiveOrgInfo.getLeft(), effectiveOrgInfo.getRight());
+                    0L, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(), effectiveOrgInfo.getRight());
         }
         plays = dashboard.getUniquePlaysWithLaunches();
         return plays;
+    }
+
+    @Override
+    public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<Integer> playgroupIds,
+            int syncDestination, Map<String, String> orgInfo) {
+        PlayLaunchDashboard dashboard;
+        List<LaunchState> launchstates = new ArrayList<>();
+        launchstates.add(LaunchState.Launched);
+        launchstates.add(LaunchState.UnLaunched);
+        if (orgInfo == null) {
+            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
+                    launchstates, start, 0L, 1000L, null, null, null, null, null);
+        } else {
+            Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
+            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
+                    launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
+                    effectiveOrgInfo.getRight());
+        }
+        List<LaunchSummary> summaries = dashboard.getLaunchSummaries();
+        List<String> launchIds = new ArrayList<String>();
+        if (latest) {
+            Map<String, String> match = new HashMap<String, String>();
+            summaries.stream().forEach(launch -> {
+                if (StringUtils.isNotBlank(launch.getLaunchId())) {
+                    if (!match.containsKey(launch.getPlayName())) {
+                        match.put(launch.getPlayName(), launch.getLaunchId());
+                        launchIds.add(launch.getLaunchId());
+                    }
+                }
+            });
+        } else {
+            summaries.stream().forEach(launch -> {
+                if (StringUtils.isNotBlank(launch.getLaunchId())) {
+                    launchIds.add(launch.getLaunchId());
+                }
+            });
+
+        }
+
+        return launchIds;
     }
 
     private List<Map<String, Object>> getAllProducts() {

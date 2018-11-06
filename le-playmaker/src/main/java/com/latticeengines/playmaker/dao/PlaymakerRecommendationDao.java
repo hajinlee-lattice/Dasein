@@ -8,9 +8,10 @@ import com.latticeengines.db.exposed.dao.GenericDao;
 public interface PlaymakerRecommendationDao extends GenericDao {
 
     List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
-            List<String> playIds, Map<String, String> orgInfo);
+            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId);
 
-    long getRecommendationCount(long start, int syncDestination, List<String> playIds, Map<String, String> orgInfo);
+    long getRecommendationCount(long start, int syncDestination, List<String> playIds, Map<String, String> orgInfo,
+            Map<String, String> appId);
 
     List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds,
             int syncDestination, Map<String, String> orgInfo);
@@ -20,7 +21,8 @@ public interface PlaymakerRecommendationDao extends GenericDao {
     List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, List<String> accountIds,
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId, Map<String, String> orgInfo);
 
-    long getAccountExtensionCount(Long start, List<String> accountIds, String filterBy, Long recStart);
+    long getAccountExtensionCount(Long start, List<String> accountIds, String filterBy, Long recStart,
+            Map<String, String> orgInfo);
 
     List<Map<String, Object>> getAccountExtensionSchema(String customerSpace);
 
@@ -36,16 +38,19 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     long getPlayGroupCount(long start);
 
-    List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds,
-            List<Integer> accountIds);
+    List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<String> contactIds,
+            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId);
 
-    long getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds);
+    long getContactCount(long start, List<String> contactIds, List<String> accountIds, Long recStart,
+            Map<String, String> orgInfo, Map<String, String> appId);
 
     List<Map<String, Object>> getContactExtensionSchema(String customerSpace);
 
-    long getContactExtensionCount(long start, List<Integer> contactIds);
+    long getContactExtensionCount(long start, List<String> contactIds, Long recStart, Map<String, String> orgInfo,
+            Map<String, String> appId);
 
-    List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<Integer> contactIds);
+    List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<String> contactIds,
+            Long recStart, Map<String, String> orgInfo, Map<String, String> appId);
 
     long getContactExtensionColumnCount(String customerSpace);
 

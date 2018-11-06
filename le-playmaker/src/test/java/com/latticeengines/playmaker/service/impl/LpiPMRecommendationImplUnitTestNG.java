@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
@@ -47,15 +48,20 @@ public class LpiPMRecommendationImplUnitTestNG {
     private List<String> idList;
     private int TOTAL_REC_COUNT;
     private List<Map<String, Object>> resultMaps;
+    private Map<String, String> eloquaAppId;
 
     @BeforeClass(groups = "unit")
     public void setup() {
+        eloquaAppId = new HashMap<String, String>();
+        eloquaAppId.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
         String randId = UUID.randomUUID().toString();
         playId = "play__" + randId;
         playLaunchId = "launch__" + randId;
         TOTAL_REC_COUNT = 2;
         idList = new ArrayList<>();
         idList.add(playId);
+        eloquaAppId = new HashMap<String, String>();
+        eloquaAppId.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
 
         resultMaps = createDummyRecommendationResult(TOTAL_REC_COUNT);
 
@@ -76,14 +82,15 @@ public class LpiPMRecommendationImplUnitTestNG {
     @Test(groups = "unit")
     public void testGetRecommendationCount() {
         int count = lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList,
-                new HashMap<String, String>());
+                new HashMap<String, String>(), eloquaAppId);
         Assert.assertEquals(count, TOTAL_REC_COUNT);
     }
 
     @Test(groups = "unit")
     public void testGetRecommendations() {
         List<Map<String, Object>> recommendations = lpiPMRecommendationImpl.getRecommendations(0, 0,
-                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList, new HashMap<String, String>());
+                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList, new HashMap<String, String>(),
+                eloquaAppId);
         Assert.assertTrue(recommendations != null);
         Assert.assertFalse(recommendations.isEmpty());
         Assert.assertEquals(TOTAL_REC_COUNT, recommendations.size());

@@ -14,16 +14,22 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
+import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
 
     private static final String ACC_EXT_LAST_MODIFIED_FIELD_NAME = "LastModified";
+
+    private static final String ELOQUA_APP_ID = "lattice.eloqua";
 
     @Inject
     private LpiPMPlay lpiPMPlay;
@@ -33,6 +39,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Inject
     private LpiPMAccountExtension lpiPMAccountExtension;
+
+    @Inject
+    private RecommendationEntityMgr recommendationEntityMgr;
 
     public LpiPMRecommendationDaoAdapterImpl() {
         super(null);
@@ -44,16 +53,28 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
-            List<String> playIds, Map<String, String> orgInfo) {
+            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds, orgInfo);
+        if (appId != null) {
+            if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
+                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
+            }
+        }
+        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds, orgInfo, appId);
     }
 
     @Override
     public long getRecommendationCount(long start, int syncDestination, List<String> playIds,
-            Map<String, String> orgInfo) {
+            Map<String, String> orgInfo, Map<String, String> appId) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds, orgInfo);
+        if (appId != null) {
+            if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
+                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+                return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds);
+            }
+        }
+        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds, orgInfo, appId);
     }
 
     @Override
@@ -63,8 +84,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public long getPlayCount(long start, List<Integer> playgroupIds,
-            int syncDestination, Map<String, String> orgInfo) {
+    public long getPlayCount(long start, List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo) {
         return lpiPMPlay.getPlayCount(start, playgroupIds, syncDestination, orgInfo);
     }
 
@@ -78,13 +98,14 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             columns = ACC_EXT_LAST_MODIFIED_FIELD_NAME + "," + columns;
         }
 
-        return lpiPMAccountExtension.getAccountExtensions(start, offset, maximum, accountIds, recStart, columns,
-                hasSfdcContactId, orgInfo);
+        return lpiPMAccountExtension.getAccountExtensions(start, offset, maximum, accountIds, filterBy, recStart,
+                columns, hasSfdcContactId, orgInfo);
     }
 
     @Override
-    public long getAccountExtensionCount(Long start, List<String> accountIds, String filterBy, Long recStart) {
-        return lpiPMAccountExtension.getAccountExtensionCount(start, accountIds, recStart);
+    public long getAccountExtensionCount(Long start, List<String> accountIds, String filterBy, Long recStart,
+            Map<String, String> orgInfo) {
+        return lpiPMAccountExtension.getAccountExtensionCount(start, accountIds, filterBy, recStart, orgInfo);
     }
 
     @Override
@@ -98,27 +119,58 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds,
-            List<Integer> accountIds) {
+    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<String> contactIds,
+            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId) {
+
+        List<Map<String, Object>> contactList = null;
+        if (recStart == null) {
+            recStart = 0L;
+        }
+        if (recStart > 0L) {
+            List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+            contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, accountIds);
+            System.out.println(contactList);
+            if (contactList != null) {
+                contactList = contactList.subList(Math.min(contactList.size() - 1, offset),
+                        Math.min(maximum, contactList.size()));
+            }
+
+        } else {
+            // Return LEDP exception if the recStart timestamp is Null.
+            throw new LedpException(LedpCode.LEDP_22008, new String[] { "recStart is Null or Zero" });
+        }
+        // query contact from redshift
+        return contactList;
+    }
+
+    @Override
+    public long getContactCount(long start, List<String> contactIds, List<String> accountIds, Long recStart,
+            Map<String, String> orgInfo, Map<String, String> appId) {
+        int result = 0;
+        if (recStart == null) {
+            recStart = 0L;
+        }
+        if (recStart > 0L) {
+            List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+            result = recommendationEntityMgr.findContactsCountByLaunchIds(launchIds, accountIds);
+        } else {
+            // Return LEDP exception if the recStart timestamp is Null.
+            throw new LedpException(LedpCode.LEDP_22008, new String[] { "recStart is Null or Zero" });
+        }
+        // query contact from redshift
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<String> contactIds,
+            Long recStart, Map<String, String> orgInfo, Map<String, String> appId) {
         // TODO - not implemented in M13
         return new ArrayList<>();
     }
 
     @Override
-    public long getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
-        // TODO - not implemented in M13
-        return 0L;
-    }
-
-    @Override
-    public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum,
-            List<Integer> contactIds) {
-        // TODO - not implemented in M13
-        return new ArrayList<>();
-    }
-
-    @Override
-    public long getContactExtensionCount(long start, List<Integer> contactIds) {
+    public long getContactExtensionCount(long start, List<String> contactIds, Long recStart,
+            Map<String, String> orgInfo, Map<String, String> appId) {
         // TODO - not implemented in M13
         return 0L;
     }

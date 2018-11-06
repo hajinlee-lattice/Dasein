@@ -104,6 +104,12 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
         return recommendationDao.findByLaunchId(launchId);
     }
 
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Recommendation> findByLaunchIds(List<String> launchIds) {
+        return recommendationDao.findByLaunchIds(launchIds);
+    }
+
     private String generateRecommendationId() {
         return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
@@ -125,10 +131,22 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int findRecommendationCountByLaunchIds(List<String> launchIds) {
+        return recommendationDao.findRecommendationCountByLaunchIds(launchIds);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, int offset, int max,
             String syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         return recommendationDao.findRecommendationsAsMap(lastModificationDate, offset, max, syncDestination, playIds,
                 orgInfo);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, int offset, int max) {
+        return recommendationDao.findRecommendationsAsMapByLaunchIds(launchIds, offset, max);
     }
 
     @Override
@@ -154,4 +172,29 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
     public void delete(Recommendation entity) {
         getDao().deleteByPid(entity.getPid(), false);
     }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public List<String> findAccountIdsFromRecommendationByLaunchId(List<String> launchIds, int offset, int max) {
+        return recommendationDao.findAccountIdsByLaunchIds(launchIds, offset, max);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public int findAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds) {
+        return recommendationDao.findAccountIdCountByLaunchIds(launchIds);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, List<String> accountIds) {
+        return recommendationDao.findContactsByLaunchIds(launchIds, accountIds);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public int findContactsCountByLaunchIds(List<String> launchIds, List<String> accountIds) {
+        return recommendationDao.findContactsCountByLaunchIds(launchIds, accountIds);
+    }
+
 }

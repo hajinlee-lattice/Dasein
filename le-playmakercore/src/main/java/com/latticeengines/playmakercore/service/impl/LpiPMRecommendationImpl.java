@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
@@ -50,9 +51,23 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
-            SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo) {
-        return postProcess(recommendationEntityMgr.findRecommendationsAsMap(PlaymakerUtils.dateFromEpochSeconds(start),
-                offset, maximum, syncDestination.name(), playIds, orgInfo), offset);
+            SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo,
+            Map<String, String> appId) {
+        List<Map<String, Object>> data = recommendationEntityMgr.findRecommendationsAsMap(
+                PlaymakerUtils.dateFromEpochSeconds(start), offset, maximum, syncDestination.name(), playIds, orgInfo);
+        return postProcess(data, offset);
+    }
+
+    @Override
+    public List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, int offset, int maximum) {
+        List<Map<String, Object>> data = recommendationEntityMgr.findRecommendationsAsMapByLaunchIds(launchIds, offset,
+                maximum);
+        return postProcess(data, offset);
+    }
+
+    @Override
+    public int getRecommendationCountByLaunchIds(List<String> launchIds) {
+        return recommendationEntityMgr.findRecommendationCountByLaunchIds(launchIds);
     }
 
     private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
@@ -149,7 +164,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     @Override
     public int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination, List<String> playIds,
-            Map<String, String> orgInfo) {
+            Map<String, String> orgInfo, Map<String, String> appId) {
         return recommendationEntityMgr.findRecommendationCount(PlaymakerUtils.dateFromEpochSeconds(start),
                 syncDestination.name(), playIds, orgInfo);
     }
@@ -258,5 +273,15 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     @VisibleForTesting
     public void setPlayProxy(PlayProxy playProxy) {
         this.playProxy = playProxy;
+    }
+
+    @Override
+    public List<String> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, int offset, int max) {
+        return recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, offset, max);
+    }
+
+    @Override
+    public int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds) {
+        return recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds);
     }
 }

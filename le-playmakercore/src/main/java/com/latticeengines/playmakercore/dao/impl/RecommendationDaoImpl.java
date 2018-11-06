@@ -1,6 +1,7 @@
 package com.latticeengines.playmakercore.dao.impl;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +19,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("recommendationDao")
 public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Recommendation>
@@ -60,6 +66,36 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setParameter("launchId", launchId);
         query.setParameter("deleted", Boolean.FALSE);
         return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Recommendation> findByLaunchIds(List<String> launchIds) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = String.format("FROM %s " //
+                + "WHERE launchId in (:launchIds) " //
+                + "AND deleted = :deleted ORDER BY recommendationId", entityClz.getSimpleName());
+        Query<Recommendation> query = session.createQuery(queryStr);
+        query.setParameterList("launchIds", launchIds);
+        query.setParameter("deleted", Boolean.FALSE);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public int findRecommendationCountByLaunchIds(List<String> launchIds) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = "SELECT count(*) " //
+                + "FROM %s " //
+                + "WHERE launchId in (:launchIds) " //
+                + "AND deleted = :deleted ";
+        queryStr = String.format(queryStr, entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameterList("launchIds", launchIds);
+        query.setParameter("deleted", Boolean.FALSE);
+        return ((Long) query.uniqueResult()).intValue();
     }
 
     @SuppressWarnings("unchecked")
@@ -133,6 +169,21 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         return ((Long) query.uniqueResult()).intValue();
     }
 
+    // private List<String> findAccountIdsByLaunchId(List<String> launchId) {
+    // Session session = getSessionFactory().getCurrentSession();
+    // Class<Recommendation> entityClz = getEntityClass();
+    // String queryStr = String.format("FROM %s " //
+    // + "WHERE launchId = :launchId " //
+    // + "AND deleted = :deleted ", entityClz.getSimpleName());
+    // Query<Recommendation> query = session.createQuery(queryStr);
+    // query.setParameter("launchId", launchId);
+    // if (!CollectionUtils.isEmpty(playIds)) {
+    // query.setParameterList("playIds", playIds);
+    // }
+    // query.setParameter("deleted", Boolean.FALSE);
+    // return query.list();
+    // }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, int offset, int max,
@@ -184,6 +235,50 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
         setParamValues(playIds, effectiveOrgInfo, query);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, int offset, int max) {
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = "SELECT new map " //
+                + "( " //
+                + "  recommendationId AS " + PlaymakerConstants.ID //
+                + ", accountId AS " + PlaymakerConstants.AccountID //
+                + ", leAccountExternalID AS " + PlaymakerConstants.LEAccountExternalID //
+                + ", playId AS " + PlaymakerConstants.PlayID //
+                + ", launchId AS " + PlaymakerConstants.LaunchID //
+                + ", description AS " + PlaymakerConstants.Description //
+                + ", UNIX_TIMESTAMP(launchDate) AS " + PlaymakerConstants.LaunchDate //
+                + ", UNIX_TIMESTAMP(lastUpdatedTimestamp) AS " + PlaymakerConstants.LastModificationDate //
+                + ", monetaryValue AS " + PlaymakerConstants.MonetaryValue //
+                + ", likelihood AS " + PlaymakerConstants.Likelihood //
+                + ", companyName AS " + PlaymakerConstants.CompanyName //
+                + ", sfdcAccountID AS " + PlaymakerConstants.SfdcAccountID //
+                + ", priorityID AS " + PlaymakerConstants.PriorityID //
+                + ", priorityDisplayName AS " + PlaymakerConstants.PriorityDisplayName //
+                + ", monetaryValueIso4217ID AS " + PlaymakerConstants.MonetaryValueIso4217ID //
+                + ", contacts AS " + PlaymakerConstants.Contacts //
+                + ", lift AS " + PlaymakerConstants.Lift//
+                + ", ratingModelId AS " + PlaymakerConstants.RatingModelId //
+                + ", modelSummaryId AS " + PlaymakerConstants.ModelSummaryId //
+                + " ) " //
+                + "FROM %s " //
+                + "WHERE deleted = :deleted " //
+                + "AND launchId IN (:launchIds) " //
+                + "ORDER BY lastUpdatedTimestamp";
+
+        queryStr = String.format(queryStr, entityClz.getSimpleName());
+
+        @SuppressWarnings("rawtypes")
+        Query query = session.createQuery(queryStr);
+        query.setMaxResults(max);
+        query.setFirstResult(offset);
+        query.setParameter("deleted", Boolean.FALSE);
+        query.setParameterList("launchIds", launchIds);
         return query.list();
     }
 
@@ -315,5 +410,104 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setParameter("deleted", Boolean.TRUE);
         query.setParameterList("recommendationIds", recommendationIds);
         return query.executeUpdate();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> findAccountIdsByLaunchIds(List<String> launchIds, int offset, int max) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = "SELECT DISTINCT accountId FROM %s " //
+                + "WHERE deleted = :deleted AND launchId in (:launchIds) ORDER BY accountId";
+
+        queryStr = String.format(queryStr, entityClz.getSimpleName());
+
+        Query<String> query = session.createQuery(queryStr);
+        query.setMaxResults(max);
+        query.setFirstResult(offset);
+        query.setParameter("deleted", Boolean.FALSE);
+        if (CollectionUtils.isNotEmpty(launchIds)) {
+            query.setParameterList("launchIds", launchIds);
+        } else {
+            return null;
+        }
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> findAccountIdsByLaunchIds(List<String> launchIds) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = "SELECT DISTINCT accountId FROM %s " //
+                + "WHERE deleted = :deleted " + "AND launchId in (:launchIds) " + "order by accountId";
+
+        queryStr = String.format(queryStr, entityClz.getSimpleName());
+
+        Query<String> query = session.createQuery(queryStr);
+        query.setParameter("deleted", Boolean.FALSE);
+        if (CollectionUtils.isNotEmpty(launchIds)) {
+            query.setParameterList("launchIds", launchIds);
+        } else {
+            return null;
+        }
+        return query.list();
+    }
+
+    @Override
+    public int findAccountIdCountByLaunchIds(List<String> launchIds) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = "SELECT COUNT(DISTINCT accountId) FROM %s " //
+                + "WHERE deleted = :deleted " + "AND launchId in (:launchIds) ";
+        queryStr = String.format(queryStr, entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("deleted", Boolean.FALSE);
+        if (CollectionUtils.isNotEmpty(launchIds)) {
+            query.setParameterList("launchIds", launchIds);
+        } else {
+            return 0;
+        }
+        return ((Long) query.uniqueResult()).intValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, List<String> accountIds) {
+        if (CollectionUtils.isEmpty(launchIds)) {
+            return null;
+        }
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = "SELECT contacts FROM %s " //
+                + "WHERE deleted = :deleted AND launchId in (:launchIds)";
+
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            queryStr += " AND accoundId in (:accountIds)";
+        }
+        queryStr += " ORDER BY accountId";
+        queryStr = String.format(queryStr, entityClz.getSimpleName());
+        Query<String> query = session.createQuery(queryStr);
+        query.setParameter("deleted", Boolean.FALSE);
+        query.setParameterList("launchIds", launchIds);
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            query.setParameterList("accountIds", accountIds);
+        }
+        List<String> queryResult = query.list();
+        List<Map<String, Object>> contacts = new ArrayList<Map<String, Object>>();
+        queryResult.stream().forEach(contactStr -> {
+            if (StringUtils.isNotBlank(contactStr)) {
+                List<Map<String, Object>> contactsList = PlaymakerUtils.getExpandedContacts(contactStr, Object.class);
+                contacts.addAll(contactsList);
+            }
+        });
+        return contacts;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public int findContactsCountByLaunchIds(List<String> launchIds, List<String> accountIds) {
+        List<Map<String, Object>> contacts = findContactsByLaunchIds(launchIds, accountIds);
+        return contacts.size();
     }
 }
