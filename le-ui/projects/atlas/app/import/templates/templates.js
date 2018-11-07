@@ -49,8 +49,8 @@ class TemplatesComponent extends Component {
                     }),
                     {
                       ErrorDisplayMethod: "Banner",
-                      ErrorDisplayOptions: "{\"title\": \"Warning\"}",
-                      ErrorDisplayCallback: "TemplatesStore.regenerate"
+                      ErrorDisplayOptions: '{"title": "Warning"}',
+                      ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
                     }
                   );
                 }}
@@ -70,13 +70,27 @@ angular
   .module("le.import.templates", [])
   .service("TemplatesStore", function($http, Modal) {
     let TemplatesStore = this;
+
+    this.checkIfRegenerate = data => {
+      switch (data.action) {
+        case "ok":
+          TemplatesStore.regenerate();
+          break;
+
+        case "cancel":
+          TemplatesStore.removeUIActionModal(data.name);
+          break;
+      }
+    };
+
     this.regenerate = () => {
       $http({
         method: "PUT",
         url: "/pls/dropbox/key",
         headers: {
           ErrorDisplayMethod: "",
-          ErrorDisplayOptions: "{\"confirmtext\": \"Download\",\"title\": \"S3 Credentials\"}",
+          ErrorDisplayOptions:
+            '{"confirmtext": "Download","title": "S3 Credentials"}',
           ErrorDisplayCallback: "TemplatesStore.download"
         },
         data: { AccessMode: "LatticeUser" }
@@ -89,6 +103,7 @@ angular
         }
       );
     };
+
     this.download = response => {
       if (response && response.action != "closedForced") {
         let toDownload = Modal.data;
@@ -102,9 +117,15 @@ angular
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
-        let modal = Modal.get(response.name);
-        Modal.modalRemoveFromDOM(modal, { name: response.name });
+        TemplatesStore.removeUIActionModal(response.name);
+        // let modal = Modal.get(response.name);
+        // Modal.modalRemoveFromDOM(modal, { name: response.name });
       }
+    };
+
+    this.removeUIActionModal = modalName => {
+      let modal = Modal.get(modalName);
+      Modal.modalRemoveFromDOM(modal, { name: modalName });
     };
   })
   .component(
