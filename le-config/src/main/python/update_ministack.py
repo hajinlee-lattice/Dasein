@@ -16,10 +16,13 @@ KEYS_TO_BE_UPDATED = [
 def main():
     args = parse_args()
     print "profile=%s, consul=%s" % (args.profile, args.consul)
-    update_profile(args.profile, args.environment, args.stack, args.consul)
+    update_profile(args.profile, args.environment, args.stack, args.consul, args.ministackip)
 
-def update_profile(profile, environment, stack, consul):
-    ip = read_from_stack(consul, environment, stack, HAPROXY_KEY)
+def update_profile(profile, environment, stack, consul, ministackip):
+    if ministackip is None or ministackip == "":
+        ip = read_from_stack(consul, environment, stack, HAPROXY_KEY)
+    else:
+        ip = ministackip
     print "found haproxy ip %s for stack %s in %s" % (ip, stack, environment)
     with open(profile, "r") as fin:
         with open(profile + NEW_SUFFIX, "w") as fout:
@@ -79,7 +82,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Replace tokens in properties')
     parser.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser.add_argument('-s', dest='stack', type=str, required=True, help='the LE_STACK to be created')
-    parser.add_argument('-c', dest='consul', type=str, required=True, help='consul server address')
+    parser.add_argument('-c', dest='consul', type=str, required=False, help='consul server address')
+    parser.add_argument('-m', dest='ministackip', type=str, required=False, help='ministack ip')
     parser.add_argument('-p', dest='profile', type=str, required=True,
                         help='the stack profile file to be used to replace tokens')
     args = parser.parse_args()
