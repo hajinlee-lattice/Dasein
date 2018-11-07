@@ -157,11 +157,6 @@
                                       tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py"
                                       overwrite="true"/>
 
-                                <!-- workflow app -->
-                                <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
-                                      overwrite="true" />
-
                                 <!-- datascience app -->
                                 <copy file="${project.basedir}/../le-dataplatform/target/ledatascience.tar.gz"
                                       tofile="${project.basedir}/${datascienceapp.docker.context}/ledatascience.tar.gz"
