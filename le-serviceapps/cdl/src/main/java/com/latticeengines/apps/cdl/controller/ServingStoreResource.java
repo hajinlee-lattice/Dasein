@@ -87,6 +87,16 @@ public class ServingStoreResource {
         return flux;
     }
 
+    @GetMapping(value = "/systemmetadata")
+    @ResponseBody
+    @ApiOperation(value = "Get system metadata attributes")
+    public Flux<ColumnMetadata> getSystemMetadataAttrs( //
+            @PathVariable String customerSpace, //
+            @RequestParam(name = "entity", required = true) BusinessEntity entity, //
+            @RequestParam(name = "version", required = false) DataCollection.Version version) {
+        return getSystemMetadataAttrFlux(customerSpace, entity, version);
+    }
+
     @GetMapping(value = "/new-modeling")
     @ResponseBody
     @ApiOperation(value = "Get attributes that are enabled for first iteration modeling")
@@ -111,11 +121,20 @@ public class ServingStoreResource {
     public Flux<ColumnMetadata> getAllowedModelingAttrs( //
             @PathVariable String customerSpace,
             @RequestParam(name = "version", required = false) DataCollection.Version version) {
+        log.info("Get allow modeling attributes for " + customerSpace);
+        Flux<ColumnMetadata> flux = getSystemMetadataAttrFlux(customerSpace, BusinessEntity.Account, version);
+        flux = flux.filter(cm -> {
+            return Boolean.TRUE.equals(cm.getCanModel());
+        });
+        return flux;
+    }
 
+    private Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
+            DataCollection.Version version) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
-        flux = servingStoreService.getSystemMetadata(BusinessEntity.Account,
+        flux = servingStoreService.getSystemMetadata(entity,
                 version != null ? version : dataCollectionService.getActiveVersion(customerSpace)).sequential();
         flux = flux //
                 .doOnSubscribe(s -> {
@@ -128,10 +147,6 @@ public class ServingStoreResource {
                     log.info("Finished serving system metadata for " + counter.get() + " attributes from "
                             + customerSpace + " TimeElapsed=" + duration + " msec");
                 });
-
-        flux = flux.filter(cm -> {
-            return Boolean.TRUE.equals(cm.getCanModel());
-        });
         return flux;
     }
 
