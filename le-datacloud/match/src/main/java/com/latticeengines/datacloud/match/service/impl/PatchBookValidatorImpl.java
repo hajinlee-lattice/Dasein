@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -140,6 +141,81 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             PatchBookValidationError error = new PatchBookValidationError();
             error.setMessage(itemNotInAmOrExcluded.getKey());
             error.setPatchBookIds(itemNotInAmOrExcluded.getValue());
+            patchBookValidErrorList.add(error);
+        }
+        return patchBookValidErrorList;
+    }
+
+    /*
+     * Helper function to check conflict in patchItems
+     */
+    private boolean hasConflict(Map<String, Object> patchItems1, Map<String, Object> patchItems2) {
+        for (Map.Entry<String, Object> patchItem : patchItems2.entrySet()) {
+            if (patchItems1 != null && patchItems1.containsKey(patchItem.getKey())) {
+                Object patchItemValue = patchItems1.get(patchItem.getKey());
+                if (patchItemValue != null && !patchItemValue.equals(patchItem.getValue())) { // ensuring same patchItem with different value for same key
+                    return true; // hasConflict
+                }
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Check if any conflict in patch attributes within one match key and across
+     * all match keys
+     */
+    @VisibleForTesting
+    List<PatchBookValidationError> validateConflictInPatchItems(List<PatchBook> books,
+            String dataCloudVersion) {
+        // seperator
+        String seperator = "_AND_";
+        /* Populate all the maps */
+        // matchKey = Domain -> PatchBook
+        Map<String, PatchBook> domainMap = new HashMap<>();
+        // matchKey = DUNS -> PatchBook
+        Map<String, PatchBook> dunsMap = new HashMap<>();
+        // matchKey = Domain+DUNS -> PatchBook
+        Map<String, PatchBook> domainDunsMap = new HashMap<>();
+        // Iterate through input patch Books and populate perspective maps
+        List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
+        for (PatchBook book : books) {
+            if(!StringUtils.isEmpty(book.getDomain()) && StringUtils.isEmpty(book.getDuns())) { // domain only match key
+                domainMap.put(book.getDomain(), book);
+            }
+            if(StringUtils.isEmpty(book.getDomain()) && !StringUtils.isEmpty(book.getDuns())) { // DUNS only match key
+                dunsMap.put(book.getDuns(), book);
+            }
+            if(!StringUtils.isEmpty(book.getDomain()) && !StringUtils.isEmpty(book.getDuns())) { // domain+DUNS match key
+                domainDunsMap.put(book.getDomain() + seperator + book.getDuns(), book);
+            }
+        }
+        List<Long> conflictPids = new ArrayList<>();
+        // Iterate domainDuns Map and check if individual domain/duns present in domainMap or dunsMap
+        for (String item : domainDunsMap.keySet()) {
+            String domain = item.split(seperator)[0];
+            String duns = item.split(seperator)[1];
+            PatchBook domainDunsPatchBook = domainDunsMap.get(domain + seperator + duns);
+            Long pid = domainDunsPatchBook.getPid();
+            if (domainMap.containsKey(domain)
+                    && hasConflict(domainMap.get(domain).getPatchItems(), domainDunsPatchBook.getPatchItems())) {
+                conflictPids.add(domainMap.get(domain).getPid());
+                if (!conflictPids.contains(pid)) {
+                    conflictPids.add(pid);
+                }
+            }
+            if (dunsMap.containsKey(duns)
+                    && hasConflict(dunsMap.get(duns).getPatchItems(), domainDunsPatchBook.getPatchItems())) {
+                conflictPids.add(dunsMap.get(duns).getPid());
+                if (!conflictPids.contains(pid)) {
+                    conflictPids.add(pid);
+                }
+            }
+        }
+        if (!conflictPids.isEmpty()) {
+            PatchBookValidationError error = new PatchBookValidationError();
+            error.setMessage(CONFLICT_IN_PATCH_ITEM);
+            error.setPatchBookIds(conflictPids);
             patchBookValidErrorList.add(error);
         }
         return patchBookValidErrorList;

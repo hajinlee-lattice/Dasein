@@ -21,6 +21,11 @@ public interface PatchBookValidator {
     String EXCLUDED_PATCH_ITEM = "Invalid Patched Items provided. Column present in excluded Patch list : ";
 
     /**
+     * Error Messages for conflict in patchItems in patchBook
+     */
+    static final String CONFLICT_IN_PATCH_ITEM = "Conflict exists in provided patch items for match keys : ";
+
+    /**
      * Validate a list of {@link PatchBook} under specified DataCloud version. Only entries with the given type and
      * satisfy {@link PatchBookUtils#isEndOfLife(PatchBook, Date)} == FALSE (NOT end of life) will be validated.
      * Other fields will not be filtered, you should do that before passing in the list of patch books
