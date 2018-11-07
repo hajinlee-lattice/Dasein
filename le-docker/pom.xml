@@ -141,11 +141,6 @@
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/playmaker.war"
                                       overwrite="true" />
 
-                                <!-- workflow app -->
-                                <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
-                                      overwrite="true" />
-
                                 <!-- python app -->
                                 <copy file="${project.basedir}/../le-dataplatform/target/leframework.tar.gz"
                                       tofile="${project.basedir}/${pythonapp.docker.context}/leframework.tar.gz"
