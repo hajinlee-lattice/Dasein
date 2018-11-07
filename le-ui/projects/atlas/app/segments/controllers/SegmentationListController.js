@@ -256,9 +256,18 @@ angular.module('lp.segments.segments', [
 
                         case 'Numerical':
                             if (QueryTreeService.two_inputs.indexOf(restriction.bucketRestriction.bkt.Cmp) < 0) {
-                                attrs.push({label: enrichment.DisplayName + ': ', value: QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0)});
+                                let label = QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp];
+                                let operation = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0);
+                                // console.log('LABEL ',label, ' OPERATION ', operation);
+                                attrs.push({
+                                    label: enrichment.DisplayName + ': ', 
+                                    value: QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + 
+                                    `${operation ? operation : ''}`});
                             } else {
-                                attrs.push({label: enrichment.DisplayName + ': ', value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) + '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1)});
+                                attrs.push({
+                                    label: enrichment.DisplayName + ': '
+                                    , value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) + 
+                                    '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1)});
                             }
                             
                             break;

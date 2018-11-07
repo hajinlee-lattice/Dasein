@@ -73,7 +73,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'GREATER_OR_EQUAL': 'Greater than or Equal to',
             'LESS_THAN': 'Less Than',
             'LESS_OR_EQUAL': 'Less than or Equal to',
-            'GTE_AND_LT': 'Between'
+            'GTE_AND_LT': 'Between',
+            'IS_NULL': 'Is Empty'
         };
 
         this.enum_operations = {
@@ -109,7 +110,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'GREATER_THAN': '>',
             'GREATER_OR_EQUAL': '>=',
             'LESS_THAN': '<',
-            'LESS_OR_EQUAL': '<='
+            'LESS_OR_EQUAL': '<=',
+            'IS_NULL': 'is empty'
         };
 
         this.prevBucketCountAttr = null;
