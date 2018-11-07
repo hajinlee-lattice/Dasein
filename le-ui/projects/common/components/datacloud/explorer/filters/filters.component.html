@@ -47,6 +47,13 @@
             <i class="fa fa-cloud-upload"></i>
         </button>
     </li>
+    <li class="configure-calendar show-tooltip title-tooltip top" ng-if="vm.showFileImport() === true">
+        <div class="tooltip_"><span><i class="fa fa-link"></i>Configure Calendar</span></div>
+        <button class="button borderless-button" 
+                ui-sref="home.import.calendar">
+            <i class="fa fa-calendar"></i>
+        </button>
+    </li>
     <li class="import show-tooltip title-tooltip top right" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && vm.hasDeleteAccessRights">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Delete Data</span></div>
         <button class="button borderless-button" 

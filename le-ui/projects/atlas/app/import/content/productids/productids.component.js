@@ -28,9 +28,9 @@ angular.module('lp.import.wizard.productids', [])
         if(!FieldDocument) {
             $state.go('home.import.entry.product_hierarchy');
             return false;
-        } else if (!Calendar || (Calendar && Object.keys(Calendar).length === 0)) {
-            $state.go('home.import.calendar');
-            return false;
+        // } else if (!Calendar || (Calendar && Object.keys(Calendar).length === 0)) {
+        //     $state.go('home.import.calendar');
+        //     return false;
         }
         vm.showPage = true;
         

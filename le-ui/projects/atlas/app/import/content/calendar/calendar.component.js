@@ -5,7 +5,7 @@ angular.module('lp.import.calendar', [])
 ) {
     var vm = this,
         debug = false, // goto /import/calendar
-        preventUnload = !debug,
+        preventUnload = false, //!debug,
         year = new Date().getFullYear(),
         months = ['January','February','March','April','May','June','July','August','September','October','November','December'],
         weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
@@ -197,26 +197,29 @@ angular.module('lp.import.calendar', [])
 
     vm.useStandardCalendar = function() {
         vm.saveStandardCalendar();
-        return false;
-        var mode = 'STARTING_DATE';
-        vm.mode = mode;
-        var date = new Date(),
-            _day = '03',
-            _month = '11',
-            year = date.getFullYear(),
-            day = parseInt(_day),
-            dayText = _day,
-            month = parseInt(_month),
-            monthText = months[month - 1].substring(0,3).toUpperCase(),
-            standardCalendarObj = {
-                mode: mode,
-                startingDate: monthText + '-' + dayText,
-                evaluationYear: year, 
-                longerMonth: '1',
-            };
-        console.log(standardCalendarObj);
-        picker.setDate(monthText + '-' + dayText + '-' + year); // MM/DD/YYYY - second param prevents onSelect callback
-        picker.gotoDate(new Date(year, month - 1));  
+        /**
+         * If you wanted to change the calendar you'd do as below
+         */
+        
+        // var mode = 'STARTING_DATE';
+        // vm.mode = mode;
+        // var date = new Date(),
+        //     _day = '03',
+        //     _month = '11',
+        //     year = date.getFullYear(),
+        //     day = parseInt(_day),
+        //     dayText = _day,
+        //     month = parseInt(_month),
+        //     monthText = months[month - 1].substring(0,3).toUpperCase(),
+        //     standardCalendarObj = {
+        //         mode: mode,
+        //         startingDate: monthText + '-' + dayText,
+        //         evaluationYear: year, 
+        //         longerMonth: '1',
+        //     };
+        // console.log(standardCalendarObj);
+        // picker.setDate(monthText + '-' + dayText + '-' + year); // MM/DD/YYYY - second param prevents onSelect callback
+        // picker.gotoDate(new Date(year, month - 1));  
     }
 
     vm.modalCallback = function (args) {
@@ -232,7 +235,7 @@ angular.module('lp.import.calendar', [])
                 vm.saving = true;
                 ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
                     Modal.modalRemoveFromDOM(modal, {name: 'calendar_warning'});
-                    $state.go(vm.lastFrom.name);
+                    $state.go('home');
                 });
             }
         }
@@ -249,11 +252,13 @@ angular.module('lp.import.calendar', [])
                 console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
             } else {
                 vm.saving = true;
+                // this just deletes the calendar, then standard calendar is used by default
                 Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
-                // ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                //     Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
-                //     $state.go(vm.lastFrom.name);
-                // });
+                ImportWizardService.deleteCalendar().then(function(result) {
+                    console.log(result);
+                    vm.saving = false;
+                    //$state.go('home');
+                });
             }
         }
     }
@@ -267,10 +272,10 @@ angular.module('lp.import.calendar', [])
             vm.selectedQuarter = vm.calendarOptions.longerMonth;
         }
 
-        if((preventUnload) && !FieldDocument) {
-            $state.go('home.import.entry.product_hierarchy');
-            return false;
-        }
+        // if((preventUnload) && !FieldDocument) {
+        //     $state.go('home.import.entry.product_hierarchy');
+        //     return false;
+        // }
 
         $timeout(initDatePicker, 0);
     };

@@ -533,7 +533,8 @@ angular.module('common.datacloud.query.results', [
                 return value.bucket === bucket;
             });
             sections.selected += parseInt(count.count);
-            _contacts = _contacts + count.contactCount;
+            console.log(count.contactCount, parseInt(count.contactCount || 0));
+            _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
         sections.contacts = _contacts; //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this

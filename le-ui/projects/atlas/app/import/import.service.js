@@ -981,4 +981,21 @@ angular.module('lp.import')
 
             return deferred.promise;
         };
+        this.deleteCalendar = function() {
+            var deferred = $q.defer();
+            $http({
+                method: 'DELETE',
+                url: '/pls/datacollection/periods/calendar'
+            }).then(
+                function onSuccess(response) {
+                    deferred.resolve(response);
+
+                }, function onError(response) {
+                    deferred.resolve(response);
+                }
+            );
+
+            return deferred.promise;
+
+        }
     });

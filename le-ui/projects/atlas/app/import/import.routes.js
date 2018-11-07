@@ -35,6 +35,7 @@ angular
             url: '/calendar',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    return false;
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
                         ImportWizardStore.setFieldDocument(result.Result);
