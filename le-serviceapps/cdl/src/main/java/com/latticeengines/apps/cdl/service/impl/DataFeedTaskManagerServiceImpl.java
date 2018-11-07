@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.cdl.CDLConstants.DEFAULT_S3_USER;
+import static java.util.stream.Collectors.groupingBy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -388,8 +389,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                             new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
                 }
             }
-            Map<String, Attribute> displayNameMap = template.getAttributes().stream()
-                    .collect(Collectors.toMap(Attribute::getDisplayName, attr -> attr));
+            Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
+                    .collect(groupingBy(Attribute::getDisplayName));
             List<String> templateMissing = new ArrayList<>();
             List<String> csvMissing = new ArrayList<>();
             List<String> requiredMissing = new ArrayList<>();
@@ -398,11 +399,13 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     templateMissing.add(header);
                 }
             }
-            for (Map.Entry<String, Attribute> entry : displayNameMap.entrySet()) {
+            for (Map.Entry<String, List<Attribute>> entry : displayNameMap.entrySet()) {
                 if (!headerFields.contains(entry.getKey())) {
                     csvMissing.add(entry.getKey());
-                    if (entry.getValue().getRequired()) {
-                        requiredMissing.add(entry.getKey());
+                    for (Attribute attr : entry.getValue()) {
+                        if (attr.getRequired()) {
+                            requiredMissing.add(entry.getKey());
+                        }
                     }
                 }
             }
@@ -431,8 +434,12 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
             log.error(e.getMessage());
             throw e;
+        } catch (Exception e) {
+            log.error("Unknown Exception when validate S3 import! " + e.toString());
+            s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
+            sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
+            throw e;
         }
-
     }
 
     private List<DataFeedTask> getAllDataFeedTask(String customerSpaceStr, BusinessEntity entity) {
