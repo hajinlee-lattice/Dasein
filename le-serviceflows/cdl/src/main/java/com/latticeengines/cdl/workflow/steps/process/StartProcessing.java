@@ -120,17 +120,17 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
         putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
 
-        // get current active collection status
-        DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
-                null);
-        dcStatus.setEvaluationDate(evaluationDate);
-        dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
-        log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
-        if (MapUtils.isEmpty(dcStatus.getDateMap())) {
-            dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
-        }
-        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
+        setupDataCollectionStatus(evaluationDate);
 
+        updateDataFeed();
+
+        createReportJson();
+        setupInactiveVersion();
+        setGrapherContext();
+        // clearPhaseForRetry();
+    }
+
+    private void updateDataFeed() {
         DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace.toString(),
                 DataFeedExecutionJobType.PA, jobId);
         log.info(String.format("current running execution %s", execution));
@@ -147,11 +147,23 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         } else {
             setEntityImportsMap(execution);
         }
+    }
 
-        createReportJson();
-        setupInactiveVersion();
-        setGrapherContext();
-        // clearPhaseForRetry();
+    private void setupDataCollectionStatus(String evaluationDate) {
+        // get current active collection status
+        DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
+                null);
+        dcStatus.setEvaluationDate(evaluationDate);
+        dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
+        log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
+        if (MapUtils.isEmpty(dcStatus.getDateMap())) {
+            dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
+        }
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
+
+        // update LDC builder number of inactive version with PA's
+        dcStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), dcStatus, inactiveVersion);
     }
 
     @SuppressWarnings("unused")
