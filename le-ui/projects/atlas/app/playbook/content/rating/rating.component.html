@@ -55,7 +55,7 @@
                                 <span class="fa fa-spinner fa-spin fa-fw"></span>
                             </label>
                             <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id]">
-                                {{vm.scoredAccounts[rating.id].unscoredAccountCount}}
+                                {{vm.scoredAccounts[rating.id].unscoredAccountCount || 0}}
                             </label>
                         </li>
                         <li class="scored">
@@ -63,7 +63,7 @@
                                 <span class="fa fa-spinner fa-spin fa-fw"></span>
                             </label>
                             <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id]">
-                                {{vm.scoredAccounts[rating.id].scoredAccountCount}}
+                                {{vm.scoredAccounts[rating.id].scoredAccountCount || 0}}
                             </label>
                         </li>
                     </ul>
