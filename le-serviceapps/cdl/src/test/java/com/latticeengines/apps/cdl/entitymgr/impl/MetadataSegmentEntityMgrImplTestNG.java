@@ -193,7 +193,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     public void deleteSegment() {
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         segmentEntityMgr.delete(retrieved, false, false);
-        assertEquals(segmentEntityMgr.findAll().size(), 2);
+        assertEquals(segmentEntityMgr.getAllDeletedSegments().size(), 1);
+        assertEquals(segmentEntityMgr.findAll().size(), 1);
         retrieved = segmentEntityMgr.findByName(segmentName);
         Assert.assertNotNull(retrieved);
         Assert.assertTrue(retrieved.getDeleted());
