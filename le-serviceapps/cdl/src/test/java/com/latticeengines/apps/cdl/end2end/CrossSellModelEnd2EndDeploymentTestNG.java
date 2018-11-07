@@ -151,11 +151,11 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         verifyBucketMetadataGenerated(predictionType);
         Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
-        verifyModelSummary(testIteration1.getId(), predictionType);
+        verifyModelSummary(testIteration1.getModelSummaryId(), predictionType);
     }
 
-    private void verifyModelSummary(String iterationId, PredictionType predictionType) {
-        ModelSummary modelSummary = modelSummaryProxy.getModelSummary(iterationId);
+    private void verifyModelSummary(String modelSummaryId, PredictionType predictionType) {
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummary(modelSummaryId);
         Assert.assertNotNull(modelSummary);
         Assert.assertNotNull(modelSummary.getId());
         if (predictionType == PredictionType.EXPECTED_VALUE) {
