@@ -59,9 +59,9 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         String applicationId = submission.getApplicationIds().get(0);
         dataFeedTask.setActiveJob(applicationId);
         dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask);
+        saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         waitForAppId(applicationId);
         EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
-        saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         Long totalFailed = 0L;
         totalFailed += jobDetail.getIgnoredRows() == null ? 0L : jobDetail.getIgnoredRows();
         totalFailed += jobDetail.getDedupedRows() == null ? 0L : jobDetail.getDedupedRows();
