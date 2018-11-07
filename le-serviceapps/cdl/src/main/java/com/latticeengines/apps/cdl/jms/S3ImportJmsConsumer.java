@@ -2,7 +2,12 @@ package com.latticeengines.apps.cdl.jms;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -15,7 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
@@ -37,11 +45,15 @@ public class S3ImportJmsConsumer {
 
     private static final String RECORDS = "Records";
     private static final String MESSAGE = "Message";
+    private static final String MESSAGE_ID = "MessageId";
     private static final String S3 = "s3";
     private static final String BUCKET = "bucket";
     private static final String NAME = "name";
     private static final String OBJECT = "object";
     private static final String KEY = "key";
+
+    private static Map<String, Integer> messageIdMap = new HashMap<>();
+    private static Queue<String> messageIdQueue = new LinkedList<>();
 
     private static final String PS_SHARE = "PS_SHARE";
 
@@ -64,6 +76,9 @@ public class S3ImportJmsConsumer {
     @Value("${common.le.stack}")
     private String currentStack;
 
+    @Value("${cdl.sqs.buffer.message.count:30000}")
+    private int bufferedMessageIdCount;
+
     @JmsListener(destination = "${cdl.s3.file.import.sqs.name}")
     public void processMessage(@Payload String message) {
         if (StringUtils.isEmpty(message)) {
@@ -79,6 +94,20 @@ public class S3ImportJmsConsumer {
         try {
             ObjectMapper om = new ObjectMapper();
             JsonNode node = om.readTree(message);
+            String messageId = node.get(MESSAGE_ID).asText();
+            if (StringUtils.isEmpty(messageId)) {
+                log.warn("Message Id is empty, skip import!");
+                return;
+            }
+            synchronized (this) {
+                if (messageIdMap.containsKey(messageId)) {
+                    log.warn("Already processed message: " + messageId);
+                    putMessageIdToBuffer(messageId);
+                    return;
+                } else {
+                    putMessageIdToBuffer(messageId);
+                }
+            }
             records = om.readTree(node.get(MESSAGE).asText()).get(RECORDS);
         } catch (Exception e) {
             log.error("Cannot deserialize message : " + message);
@@ -138,7 +167,10 @@ public class S3ImportJmsConsumer {
     }
 
     @PostConstruct
-    private void setRestTemplate() {
+    private void initialize() {
+        if (bufferedMessageIdCount <= 0) {
+            bufferedMessageIdCount = 30000;
+        }
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
     }
 
@@ -154,9 +186,15 @@ public class S3ImportJmsConsumer {
             log.warn("Cannot get AUTO_IMPORT_ON_INACTIVE flag for " + tenantId + "default running on active stack");
         }
         try {
-            Map<String, String> stackInfo = restTemplate.getForObject(url, Map.class);
-            if (MapUtils.isNotEmpty(stackInfo) && stackInfo.containsKey("CurrentStack")) {
-                String activeStack = stackInfo.get("CurrentStack");
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                    Collections.singleton(HttpServerErrorException.class), null);
+            AtomicReference<Map<String, String>> stackInfo = new AtomicReference<>();
+            retry.execute(retryContext -> {
+                stackInfo.set(restTemplate.getForObject(url, Map.class));
+                return true;
+            });
+            if (MapUtils.isNotEmpty(stackInfo.get()) && stackInfo.get().containsKey("CurrentStack")) {
+                String activeStack = stackInfo.get().get("CurrentStack");
                 currentActive = currentStack.equalsIgnoreCase(activeStack);
                 log.info("Current stack: " + currentStack + " Active stack: " + activeStack + " INACTIVE IMPORT=" +
                         String.valueOf(inactiveImport));
@@ -166,6 +204,24 @@ public class S3ImportJmsConsumer {
             // active stack is down, running on inactive
             log.warn("Cannot get active stack!", e);
             return inactiveImport;
+        }
+    }
+
+    private void putMessageIdToBuffer(String messageId) {
+        while (messageIdQueue.size() >= bufferedMessageIdCount) {
+            String popMessage = messageIdQueue.poll();
+            if (messageIdMap.containsKey(popMessage)) {
+                messageIdMap.put(popMessage, messageIdMap.get(popMessage) - 1);
+                if (messageIdMap.get(popMessage) <= 0) {
+                    messageIdMap.remove(popMessage);
+                }
+            }
+        }
+        messageIdQueue.offer(messageId);
+        if (messageIdMap.containsKey(messageId)) {
+            messageIdMap.put(messageId, messageIdMap.get(messageId) + 1);
+        } else {
+            messageIdMap.put(messageId, 1);
         }
     }
 }
