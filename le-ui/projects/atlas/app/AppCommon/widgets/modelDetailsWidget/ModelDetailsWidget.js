@@ -66,8 +66,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
 
-            console.log(ratingEngine);
-            console.log($scope.model);
+
+            $scope.expectedValueModel = $scope.model.predictionType === 'EXPECTED_VALUE' ? true : false;
+            if($scope.expectedValueModel){
+                $scope.averageRevenue = data.ModelDetails.AverageRevenue ? data.ModelDetails.AverageRevenue : false;
+            }
 
             var engineId = $stateParams.rating_id,
                 ratingModelId = $scope.model.id;

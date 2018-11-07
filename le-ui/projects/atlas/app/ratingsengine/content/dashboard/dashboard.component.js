@@ -334,8 +334,13 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.getCustomEventAvailableAttributes = function(model) {
         var dataStore = model.advancedModelingConfig.custom_event.dataStores;
-        return dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : 
+        if(dataStore){
+            return dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : 
                 RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
+        } else {
+            return false;
+        }
+
     };
     vm.getScoringButtonLable = function(){
         if(vm.isRulesBased){
