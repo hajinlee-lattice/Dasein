@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -118,7 +119,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     private InputStream processDates(InputStream inputStream) {
         // todo: hard-coded date format. Need to be replaced in date attribute phase 2.
-        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a Z";
+        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
 
         List<String> dateAttributes = getDateAttributes();
         if (CollectionUtils.isNotEmpty(dateAttributes)) {
@@ -185,8 +186,9 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                 String columnValue = record.get(columnName);
                                 if (StringUtils.isNotBlank(columnValue) && dateToFormats.containsKey(columnName)) {
                                     String dateFormat = dateToFormats.get(columnName);
-                                    String dateInString = new SimpleDateFormat(dateFormat)
-                                            .format(new Date(Long.valueOf(columnValue)));
+                                    SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+                                    formatter.setTimeZone(TimeZone.getTimeZone("PST"));
+                                    String dateInString = formatter.format(new Date(Long.valueOf(columnValue)));
                                     log.info("Reformat " + columnValue + " to " + dateInString);
                                     recordAsArray[columnIndex] = dateInString;
                                 }

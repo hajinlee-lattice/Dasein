@@ -33,10 +33,10 @@ public class HdfsFileHttpDownloaderUnitTestNG {
 
     private Map<String, String> dateMap;
 
-    private final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a Z";
+    private final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
     private final String[] EXPECTED_DATE_STRINGS = new String[] {
-            "11/06/2018 03:15:15 PM -0800",
-            "11/06/2018 08:20:20 PM -0800"
+            "11/06/2018 03:15:15 PM PST",
+            "11/06/2018 08:20:20 PM PST"
     };
 
     @BeforeClass(groups = "unit")
