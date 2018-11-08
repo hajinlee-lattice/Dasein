@@ -908,7 +908,9 @@ public class EmailServiceImpl implements EmailService {
             }
             builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{type}}", type);
-            builder.replaceToken("{{filename}}", fileName);
+            if (StringUtils.isNotEmpty(fileName)) {
+                builder.replaceToken("{{filename}}", fileName);
+            }
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();

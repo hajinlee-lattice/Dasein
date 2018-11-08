@@ -58,12 +58,22 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
     @Override
     public void invoke(S3FileToHdfsConfiguration config) {
         try {
+            initialize(config);
             copyToHdfs(config);
             importFile(config);
         } catch (Exception e) {
             cdls3FolderProxy.moveToFailed(config.getCustomerSpace().toString(), config.getS3FilePath());
             throw e;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize(S3FileToHdfsConfiguration config) {
+        String jobDetailIds = config.getProperty(ImportProperty.EAIJOBDETAILIDS);
+        List<Object> jobDetailIdsRaw = JsonUtils.deserialize(jobDetailIds, List.class);
+        List<Long> eaiJobDetailIds = JsonUtils.convertList(jobDetailIdsRaw, Long.class);
+        Long jobDetailId = eaiJobDetailIds.size() > 0 ? eaiJobDetailIds.get(0) : -1L;
+        initJobDetail(jobDetailId, config.getJobIdentifier(), SourceType.FILE, config.getS3FileName());
     }
 
     private void copyToHdfs(S3FileToHdfsConfiguration config) {
@@ -126,7 +136,6 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find the dataFeed task for import!");
             }
-            initJobDetail(jobDetailId, config.getJobIdentifier(), SourceType.FILE, config.getS3FileName());
             Table template = dataFeedTask.getImportTemplate();
             log.info(String.format("Modeling metadata for template: %s",
                     JsonUtils.serialize(template.getModelingMetadata())));
