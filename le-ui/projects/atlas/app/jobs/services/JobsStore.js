@@ -60,7 +60,8 @@ angular
             case 'segmentExportWorkflow':
             case 'cdlDataFeedImportWorkflow': 
             case 'cdlOperationWorkflow':
-            case 'metadataChange': {
+            case 'metadataChange':
+            case 'playLaunchWorkflow': {
                 return false;
             }
             default: {
@@ -105,7 +106,17 @@ angular
     }
 
     this.filterByStatus = function(job) {
-        return job.jobStatus == 'Pending' || job.jobStatus == 'Running';
+        let ret = job.jobStatus == 'Pending' || job.jobStatus == 'Running';
+        return ret;
+    }
+
+    this.filterOutType = (jobsArray, toFilterObj) =>{
+        let ret = jobsArray.filter((job) => {
+            if(!toFilterObj[job.jobType]){
+                return job;
+            }
+        });
+        return ret;
     }
 
     this.getJob = function(jobId) {
@@ -186,8 +197,9 @@ angular
                         nullIdsMap[type] = false;
                     })
                     if(res){
-                        JobsStore.data.allActiveJobs = $filter('filter')(res, JobsStore.filterByStatus, true);
-
+                        let jobsByStatus = $filter('filter')(res, JobsStore.filterByStatus, true);
+                        let jobsFiltered = JobsStore.filterOutType(jobsByStatus, {"playLaunchWorkflow":true});
+                        JobsStore.data.allActiveJobs = jobsFiltered;
                         for (var i=0; i<res.length; i++) {
                             var job = res[i];
 
@@ -229,6 +241,8 @@ angular
                     JobsStore.manageSubjobsRunning(job);
                     break;
                 };
+                case 'playLaunchWorkflow':
+                break;
                 default:
                     JobsStore.addModelJob(job);
                     break;

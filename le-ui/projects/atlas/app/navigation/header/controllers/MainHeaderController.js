@@ -53,7 +53,7 @@ angular.module('pd.navigation.header', [
 
     $scope.getActiveJobs = function() {
         return JobsStore.data.allActiveJobs;
-    }
+    };
 
     $scope.statusFilter = function (item) {
         return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
