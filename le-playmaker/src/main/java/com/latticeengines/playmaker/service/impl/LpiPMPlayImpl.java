@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
+import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -103,12 +104,19 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                     effectiveOrgInfo.getRight());
         }
         List<LaunchSummary> summaries = dashboard.getLaunchSummaries();
+        List<Play> uniquePlays = dashboard.getUniquePlaysWithLaunches();
+        Map<String, String> activePlays = new HashMap<String, String>();
+        uniquePlays.forEach(play->{
+            if (play.getPlayStatus() == PlayStatus.ACTIVE) {
+                activePlays.put(play.getName(), play.getName());
+            }
+        });
         List<String> launchIds = new ArrayList<String>();
         if (latest) {
             Map<String, String> match = new HashMap<String, String>();
             summaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
-                    if (!match.containsKey(launch.getPlayName())) {
+                    if ((!match.containsKey(launch.getPlayName())) && activePlays.containsKey(launch.getPlayName())) {
                         match.put(launch.getPlayName(), launch.getLaunchId());
                         launchIds.add(launch.getLaunchId());
                     }
@@ -117,12 +125,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         } else {
             summaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
-                    launchIds.add(launch.getLaunchId());
+                    if (activePlays.containsKey(launch.getPlayName())) {
+                        launchIds.add(launch.getLaunchId());
+                    }
                 }
             });
-
         }
-
         return launchIds;
     }
 

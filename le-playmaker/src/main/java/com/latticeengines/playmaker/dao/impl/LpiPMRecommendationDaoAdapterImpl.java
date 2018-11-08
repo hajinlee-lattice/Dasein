@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -54,28 +55,54 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
             List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
-        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
+        boolean latestLaunchFlag = false;
         if (appId != null) {
             if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
-                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
-                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
+                latestLaunchFlag = true;
             }
         }
-        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds, orgInfo, appId);
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, null, 0, orgInfo);
+        return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
     }
 
     @Override
     public long getRecommendationCount(long start, int syncDestination, List<String> playIds,
             Map<String, String> orgInfo, Map<String, String> appId) {
-        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
+        boolean latestLaunchFlag = false;
         if (appId != null) {
             if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
-                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
-                return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds);
+                latestLaunchFlag = true;
             }
         }
-        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds, orgInfo, appId);
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, null, 0, orgInfo);
+        return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds);
     }
+
+//    @Override
+//    public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
+//            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
+//        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
+//        if (appId != null) {
+//            if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
+//                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+//                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
+//            }
+//        }
+//        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds, orgInfo, appId);
+//    }
+//
+//    @Override
+//    public long getRecommendationCount(long start, int syncDestination, List<String> playIds,
+//            Map<String, String> orgInfo, Map<String, String> appId) {
+//        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
+//        if (appId != null) {
+//            if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
+//                List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+//                return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds);
+//            }
+//        }
+//        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds, orgInfo, appId);
+//    }
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds,
@@ -123,23 +150,12 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId) {
 
         List<Map<String, Object>> contactList = null;
-        if (recStart == null) {
-            recStart = 0L;
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+        contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, accountIds);
+        if (CollectionUtils.isNotEmpty(contactList)) {
+            contactList = contactList.subList(Math.min(contactList.size() - 1, offset),
+                    Math.min(maximum, contactList.size()));
         }
-        if (recStart > 0L) {
-            List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
-            contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, accountIds);
-            System.out.println(contactList);
-            if (contactList != null) {
-                contactList = contactList.subList(Math.min(contactList.size() - 1, offset),
-                        Math.min(maximum, contactList.size()));
-            }
-
-        } else {
-            // Return LEDP exception if the recStart timestamp is Null.
-            throw new LedpException(LedpCode.LEDP_22008, new String[] { "recStart is Null or Zero" });
-        }
-        // query contact from redshift
         return contactList;
     }
 
@@ -147,17 +163,8 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     public long getContactCount(long start, List<String> contactIds, List<String> accountIds, Long recStart,
             Map<String, String> orgInfo, Map<String, String> appId) {
         int result = 0;
-        if (recStart == null) {
-            recStart = 0L;
-        }
-        if (recStart > 0L) {
-            List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
-            result = recommendationEntityMgr.findContactsCountByLaunchIds(launchIds, accountIds);
-        } else {
-            // Return LEDP exception if the recStart timestamp is Null.
-            throw new LedpException(LedpCode.LEDP_22008, new String[] { "recStart is Null or Zero" });
-        }
-        // query contact from redshift
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+        result = recommendationEntityMgr.findContactsCountByLaunchIds(launchIds, accountIds);
         return result;
     }
 
