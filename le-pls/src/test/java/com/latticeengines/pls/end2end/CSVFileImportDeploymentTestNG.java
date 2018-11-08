@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -50,6 +51,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
@@ -61,6 +63,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -87,7 +90,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
     private static final String SLASH = "/";
-    private static final String PREFIX = "/Templates";
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -112,6 +114,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
     private ActionProxy actionProxy;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
 
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
@@ -635,7 +640,10 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         List<S3ImportTemplateDisplay> renderedTemplats = templates.stream()
                 .filter(template -> feedTypes.contains(template.getFeedType())).collect(Collectors.toList());
         for (S3ImportTemplateDisplay display : renderedTemplats) {
-            Assert.assertEquals(display.getPath(), PREFIX + SLASH + display.getFeedType());
+            DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+            Assert.assertNotNull(dropBoxSummary);
+            Assert.assertEquals(display.getPath(), S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
+                    dropBoxSummary.getDropBox(), display.getFeedType()));
             Assert.assertEquals(display.getExist(), Boolean.TRUE);
         }
     }

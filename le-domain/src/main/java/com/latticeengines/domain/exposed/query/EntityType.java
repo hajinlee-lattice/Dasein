@@ -41,8 +41,13 @@ public enum EntityType {
                 return entry;
             }
         }
-        throw new IllegalArgumentException(
-                String.format("There is no entity %s or type %s in EntityType", entity.name(), subType.name()));
+        if (subType == null) {
+            throw new IllegalArgumentException(
+                    String.format("There is no entity %s with null type in EntityType", entity.name()));
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("There is no entity %s or type %s in EntityType", entity.name(), subType.name()));
+        }
     }
 
     public static EntityType fromDisplayNameToEntityType(String displayName) {

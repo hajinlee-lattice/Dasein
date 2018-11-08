@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -57,7 +58,6 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-    private static final String PATH_PATTERN = "/%s/dropfolder/%s/Templates/%s";
     private static final String TEMPLATENAME = "N/A";
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
@@ -260,15 +260,16 @@ public class CDLServiceImpl implements CDLService {
 
         S3ImportTemplateDisplay display = null;
         if (CollectionUtils.isEmpty(folderNames)) {
-            log.info("Empty path in s3 folders for tenant %s in", customerSpace);
+            log.info(String.format("Empty path in s3 folders for tenant %s in", customerSpace));
         }
         for (String folderName : folderNames) {
             display = new S3ImportTemplateDisplay();
             DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
             if (task == null) {
-                log.warn("Empty data feed task for tenant %s in %s with feedtype %s", customerSpace, folderName);
+                log.warn(String.format("Empty data feed task for tenant %s with feedtype %s", customerSpace,
+                        folderName));
             } else {
-                display.setPath(String.format(PATH_PATTERN, dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         folderName));
                 display.setExist(Boolean.TRUE);
                 display.setLastEditedDate(task.getLastUpdated());
