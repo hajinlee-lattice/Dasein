@@ -46,7 +46,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     @Inject
     private DataUnitProxy dataUnitProxy;
 
-    protected DataCollectionProxy() {
+    public DataCollectionProxy() {
         super("cdl");
     }
 

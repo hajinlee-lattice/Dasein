@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +39,23 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
-
     private String mimeType;
     protected ImportFromS3Service importFromS3Service;
     private CDLAttrConfigProxy cdlAttrConfigProxy;
+    private DataCollectionProxy dataCollectionProxy;
+    private MetadataProxy metadataProxy;
+
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpFileDownLoader.class);
 
     protected abstract String getFileName() throws Exception;
@@ -55,6 +66,8 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         this.mimeType = mimeType;
         this.importFromS3Service = importFromS3Service;
         this.cdlAttrConfigProxy = null;
+        this.dataCollectionProxy = new DataCollectionProxy();
+        this.metadataProxy = new MetadataProxy();
     }
 
     protected AbstractHttpFileDownLoader(String mimeType, ImportFromS3Service importFromS3Service,
@@ -99,8 +112,107 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             return processRfModel(inputStream);
         case DEFAULT:
         default:
+            return processDates(inputStream);
+        }
+    }
+
+    private InputStream processDates(InputStream inputStream) {
+        // todo: hard-coded date format. Need to be replaced in date attribute phase 2.
+        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
+
+        List<String> dateAttributes = getDateAttributes();
+        if (CollectionUtils.isNotEmpty(dateAttributes)) {
+            Map<String, String> dateToFormats = new HashMap<>();
+            dateAttributes.forEach(attrib -> { dateToFormats.put(attrib, DATE_FORMAT); });
+            return reformatDates(inputStream, dateToFormats);
+        }
+        return inputStream;
+    }
+
+    private List<String> getDateAttributes() {
+        List<String> dateAttributes = new ArrayList<>();
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion
+                (MultiTenantContext.getShortTenantId());
+        String accountTableName = dataCollectionProxy.getTableName(
+                MultiTenantContext.getShortTenantId(),
+                TableRoleInCollection.ConsolidatedAccount,
+                activeVersion);
+        String contactTableName = dataCollectionProxy.getTableName(
+                MultiTenantContext.getShortTenantId(),
+                TableRoleInCollection.ConsolidatedContact,
+                activeVersion);
+        List<ColumnMetadata> accountMetadata = metadataProxy.getTableColumns(
+                MultiTenantContext.getShortTenantId(), accountTableName);
+        List<ColumnMetadata> contactMetadata = metadataProxy.getTableColumns(
+                MultiTenantContext.getShortTenantId(), contactTableName);
+        List<ColumnMetadata> metadatas = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(accountMetadata)) {
+            metadatas.addAll(accountMetadata);
+        }
+        if (CollectionUtils.isNotEmpty(contactMetadata)) {
+            metadatas.addAll(contactMetadata);
+        }
+        for (ColumnMetadata metadata : metadatas) {
+            if (metadata.getLogicalDataType().equals(LogicalDataType.Date)) {
+                dateAttributes.add(metadata.getAttrName());
+            }
+        }
+
+        return dateAttributes;
+    }
+
+    @VisibleForTesting
+    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats) {
+        log.info("Start to reformat date for tenant " + MultiTenantContext.getShortTenantId());
+
+        StringBuilder sb = new StringBuilder();
+        try (InputStreamReader reader = new InputStreamReader(
+                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                StandardCharsets.UTF_8)) {
+            CSVFormat format = LECSVFormat.format;
+            try (CSVParser parser = new CSVParser(reader, format)) {
+                Map<String, Integer> headerMap = parser.getHeaderMap();
+                try (CSVPrinter printer = new CSVPrinter(sb,
+                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[]{})))) {
+                    List<CSVRecord> recordsWithErrors = new ArrayList<>();
+                    for (CSVRecord record : parser) {
+                        try {
+                            String[] recordAsArray = toArray(record);
+                            for (Map.Entry<String, Integer> entry : headerMap.entrySet()) {
+                                String columnName = entry.getKey();
+                                Integer columnIndex = entry.getValue();
+                                String columnValue = record.get(columnName);
+                                if (StringUtils.isNotBlank(columnValue) && dateToFormats.containsKey(columnName)) {
+                                    String dateFormat = dateToFormats.get(columnName);
+                                    String dateInString = new SimpleDateFormat(dateFormat)
+                                            .format(new Date(Long.valueOf(columnValue)));
+                                    log.info("Reformat " + columnValue + " to " + dateInString);
+                                    recordAsArray[columnIndex] = dateInString;
+                                }
+                            }
+                            for (String val : recordAsArray) {
+                                printer.print(val != null ? String.valueOf(val) : "");
+                            }
+                            printer.println();
+                        } catch (IOException exc) {
+                            recordsWithErrors.add(record);
+                        }
+                    }
+
+                    // deal with records having errors
+                    for (CSVRecord record : recordsWithErrors) {
+                        printer.printRecord(record);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error reading the input stream.");
+            e.printStackTrace();
             return inputStream;
         }
+
+        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
     }
 
     private InputStream processRfModel(InputStream inputStream) {
@@ -119,13 +231,13 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         try (InputStreamReader reader = new InputStreamReader(
                 new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                         ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                StandardCharsets.UTF_8);) {
+                StandardCharsets.UTF_8)) {
 
             CSVFormat format = LECSVFormat.format;
-            try (CSVParser parser = new CSVParser(reader, format);) {
+            try (CSVParser parser = new CSVParser(reader, format)) {
                 parser.getHeaderMap().keySet().toArray();
                 try (CSVPrinter printer = new CSVPrinter(sb,
-                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})));) {
+                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                     for (CSVRecord record : parser) {
                         String attrName = record.get("Column Name");
                         if (attrName != null && nameToDisplayNameMap.containsKey(attrName)) {
@@ -160,7 +272,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
                 List<AttrConfig> renderedConfigList = cdlAttrConfigProxy
                         .renderConfigs(MultiTenantContext.getShortTenantId(), customDisplayNameAttrs);
-                renderedConfigList.stream().forEach(config -> {
+                renderedConfigList.forEach(config -> {
                     nameToDisplayNameMap.put(config.getAttrName(),
                             config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
                 });
@@ -187,13 +299,13 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         try (InputStreamReader reader = new InputStreamReader(
                 new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                         ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                StandardCharsets.UTF_8);) {
+                StandardCharsets.UTF_8)) {
 
             CSVFormat format = LECSVFormat.format;
-            try (CSVParser parser = new CSVParser(reader, format);) {
+            try (CSVParser parser = new CSVParser(reader, format)) {
                 parser.getHeaderMap().keySet().toArray();
                 try (CSVPrinter printer = new CSVPrinter(sb,
-                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})));) {
+                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                     for (CSVRecord record : parser) {
                         String attrName = record.get("Original Column Name");
                         if (attrName != null && nameToDisplayNameMap.containsKey(attrName)) {
