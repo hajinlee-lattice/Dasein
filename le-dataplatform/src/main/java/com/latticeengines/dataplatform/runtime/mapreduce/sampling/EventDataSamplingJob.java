@@ -30,6 +30,7 @@ import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRe
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.runtime.mapreduce.MRJobCustomizationBase;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 public class EventDataSamplingJob extends MRJobCustomizationBase {
 
@@ -63,6 +64,9 @@ public class EventDataSamplingJob extends MRJobCustomizationBase {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
                 MRJobUtil.getPlatformShadedJarPath(getConf(), "/"));
+
+        // TODO: (YSong-M24) should be retired, or change to read from properties
+        properties.setProperty(PythonContainerProperty.CONDA_ENV.name(), "lattice");
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {
