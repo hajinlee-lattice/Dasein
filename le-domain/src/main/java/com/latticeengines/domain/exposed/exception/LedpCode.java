@@ -78,8 +78,7 @@ public enum LedpCode {
     LEDP_15011("Could not customize sampling job for the specified sampling type."), //
     LEDP_15012("SamplingConfiguration was not set up correctly."), //
     LEDP_15013("Failed to validate SamplingConfiguration."), //
-    LEDP_15014(
-            "Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
+    LEDP_15014("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
     LEDP_15015("Could not set up configuration file correctly for MapReduce."), //
     LEDP_15016("Cannot model with an empty feature list."), //
     LEDP_15017("Cannot provision modeling service because {0}"), //
@@ -105,8 +104,7 @@ public enum LedpCode {
     LEDP_17001("File import can only have one data source."), //
     LEDP_17002("No metadata for attribute {0}."), //
     LEDP_17003("Could not retrieve metadata of attributes {0} for table {1} from Endpoint."), //
-    LEDP_17004(
-            "{0}'s Source Credential is Invalid. Cannot use this credential to establish connection to {1}."), //
+    LEDP_17004("{0}'s Source Credential is Invalid. Cannot use this credential to establish connection to {1}."), //
     LEDP_17005("Failed to retrieve HttpClientConfig from Zookeeper for Tenant {0}"), //
     LEDP_17006("Got NULL Value from Last Modified Key for Tenant {0}"), //
     LEDP_17007("Got NULL Value from Table {0} for Tenant {1}"), //
@@ -146,8 +144,7 @@ public enum LedpCode {
     LEDP_18021("Cannot delete active model."), //
     LEDP_18022("Failed to download file."), //
     LEDP_18023("File not found."), //
-    LEDP_18024(
-            "Cannot change deleted model to active directly; change it to inactive first, then delete it."), //
+    LEDP_18024("Cannot change deleted model to active directly; change it to inactive first, then delete it."), //
     LEDP_18025("Segment with name {0} not found."), //
     LEDP_18026("Cannot update the name of a segment. Delete and recreate."), //
     LEDP_18027("Can not provision JAMS."), //
@@ -211,8 +208,7 @@ public enum LedpCode {
     LEDP_18086("Failed to retrieve space configuration from ZK for the tenant {0}."), //
     LEDP_18087("Missing required fields [{0}] in csv file {1}."), //
     LEDP_18088("Could not locate table with name {0}."), //
-    LEDP_18089(
-            "Failed to retrieve premium attributes limitation from ZK for the tenant {0}, error: {1}."), //
+    LEDP_18089("Failed to retrieve premium attributes limitation from ZK for the tenant {0}, error: {1}."), //
     LEDP_18090("Metadata type {0} is not supported."), //
     LEDP_18091("Artifact type {0} with name {1} already exists in module {2}."), //
     LEDP_18092("File exceeds maximum allowed limit of {0}."), //
@@ -235,10 +231,8 @@ public enum LedpCode {
     LEDP_18109("Problem reading csv file header: {0}"), //
     LEDP_18110("Expected at least 1 record. Instead found 0"), //
     LEDP_18111("Copying Model {0} from tenant {1} to tenant {2} failed"), //
-    LEDP_18112(
-            "Saving of lead enrichment selection failed, maximum {0} premium attributes of {1} can be selected."), //
-    LEDP_18113(
-            "Saving of lead enrichment selection failed, field name {0} occurs more than once in selection."), //
+    LEDP_18112("Saving of lead enrichment selection failed, maximum {0} premium attributes of {1} can be selected."), //
+    LEDP_18113("Saving of lead enrichment selection failed, field name {0} occurs more than once in selection."), //
     LEDP_18114("Saving of lead enrichment selection failed, field name {0} is invalid."), //
     LEDP_18115("File Validation Failed due to: {0}"), //
     LEDP_18116("Failed to Authenticate Marketo REST Credentials due to: {0}"), //
@@ -253,8 +247,7 @@ public enum LedpCode {
     LEDP_18125("Error retrieving pivot score chart data for model: {0}"), //
     LEDP_18126("Error retrieving bucket metadata for model: {0}"), //
     LEDP_18127("Cannot copy model with application id: {0}. Error when copying ABCD buckets"), //
-    LEDP_18128("invalid_bucket_information",
-            "The model {0} does not have valid bucket metadata information"), //
+    LEDP_18128("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     LEDP_18129("Table name should be specified for Vdb table import workflow."), //
     LEDP_18130("Import table total rows should be greater than 0."), //
@@ -274,7 +267,8 @@ public enum LedpCode {
     LEDP_18145("Play displayName cannot be empty."), //
     LEDP_18146("Play Launch not found for {0}"), //
     LEDP_18147("User {0} do not have access for tenant {1}"), //
-    LEDP_18148("Your file has {0} million rows. Please reduce number of rows to below 1 million."), //
+    LEDP_18148(
+            "Standard file import only. Your file has {0} million rows. Please use drop folder for file exceeds 1 million rows."), //
     LEDP_18149("Play {0} cannot be launched since it does not have Rating Engine specified."), //
     LEDP_18150("Cannot get tenant configuration."), //
     LEDP_18151("Play not found for {0}."), //
@@ -282,8 +276,7 @@ public enum LedpCode {
     LEDP_18153("Segment not defined for Rating Engine {0}."), //
     LEDP_18154("Type not defined for Rating Engine {0}."), //
     LEDP_18155("Play {0} cannot be launched since corresponding ratings engine is not active."), //
-    LEDP_18156(
-            "PlayLaunch for Play {0} cannot be started since it does not have buckets specified."), //
+    LEDP_18156("PlayLaunch for Play {0} cannot be started since it does not have buckets specified."), //
     LEDP_18157("PlayLaunch workflow failed."), //
     LEDP_18158("Error in evaluating restriction."), //
     LEDP_18159("Could not generate minimum required recommendations. " //
@@ -304,13 +297,10 @@ public enum LedpCode {
     LEDP_18172("Action Ids for job {0} is empty."), //
     LEDP_18173("SchemaInterpretation {0} not supported for cleanup file template!"), //
     LEDP_18174("Cannot transition Rating Engine: {0} from {1} to {2}"), //
-    LEDP_18175(
-            "There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
-    LEDP_18176(
-            "PlayLaunch for Play {0} cannot be started since it does not have any launchable accounts."), //
+    LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
+    LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchable accounts."), //
     LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
-    LEDP_18178(
-            "Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
+    LEDP_18178("Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
     LEDP_18179("Error finding the AI Model for {0}."), //
     LEDP_18180(
             "There is no active Rating Model associated with the current Rating Engine {0} and thus it cannot be activated."), //
@@ -320,16 +310,13 @@ public enum LedpCode {
     LEDP_18184("Job cannot be null or incomplete"), //
     LEDP_18185("User {0} does not have the right to deactivate attribute"), //
     LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
-    LEDP_18187(
-            "Cannot populate full play information since No Rating Engine associated with the Play: {0}"), //
+    LEDP_18187("Cannot populate full play information since No Rating Engine associated with the Play: {0}"), //
     LEDP_18188(
             "The following field name length exceeded the limit of {0} characters. Shorten the field name to upload the file. \"{1}\""), //
-    LEDP_18189(
-            "There are Rating Models associated with the current segment {0} and thus it cannot be deleted."), //
+    LEDP_18189("There are Rating Models associated with the current segment {0} and thus it cannot be deleted."), //
     LEDP_18190("Update Usage Attribute Config failed due to dependency check failure"), //
     LEDP_18191("Marketo Scoring setup is missing required {0}"), //
-    LEDP_18192(
-            "This Model is already configured for the given Marketo Profile {0}. Please refresh the page."), //
+    LEDP_18192("This Model is already configured for the given Marketo Profile {0}. Please refresh the page."), //
     LEDP_18193("Marketo Scoring Request Configuration is in invalid State. {0}."), //
     LEDP_18194("Could not find Scoring Request Configuration for given ConfigID: {0}."), //
     LEDP_18195("Update Activation Attribute Config failed due to usage enbaled"), //
@@ -344,8 +331,8 @@ public enum LedpCode {
     LEDP_18204("User {0} does not have the right to update name/description of attribute"), //
     LEDP_18205("Unable to update PlayLaunch due to {0}"), //
     LEDP_18206("Play validation failure: Segment is empty"), LEDP_18207(
-            "Play validation failure: Segment Name is empty"),
-    LEDP_18208("CSV file name validations failed: CSV injection in the file name or headers"), //
+            "Play validation failure: Segment Name is empty"), LEDP_18208(
+                    "CSV file name validations failed: CSV injection in the file name or headers"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -353,8 +340,7 @@ public enum LedpCode {
     LEDP_19002("Access denied."), //
     LEDP_19003("Resource not found."), //
     LEDP_19004("External User is not allowed with Lattice Email ID."), //
-    LEDP_19005(
-            "Could not validate current user as the required information is missing from Identity Provider."), //
+    LEDP_19005("Could not validate current user as the required information is missing from Identity Provider."), //
     LEDP_19006("Sign jwt token fail."), LEDP_19007("No such jwt handler {0}."), LEDP_19008(
             "URL encode fail."), LEDP_19009("No User Name key/value"), LEDP_19010(
                     "No User Email key/value"), LEDP_19011("No return_to key/value"), LEDP_19012(
@@ -383,10 +369,8 @@ public enum LedpCode {
     LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."), //
     LEDP_20007("User error: The following model is not provided: {0}"), //
     LEDP_20008("User error: Cannot find any model for tenant: {0}"), //
-    LEDP_20009(
-            "Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."), //
-    LEDP_20010(
-            "Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."), //
+    LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."), //
+    LEDP_20010("Not all the leads are transformed and stored. {0} leads are passed in, but only {1} got transformed."), //
     LEDP_20011("The scoring python script (scoring.py) failed, with the error message: {0}.}"), //
     LEDP_20012("Output file {0} does not exist.}"), //
     LEDP_20013("Scoring output file in incorrect format.}"), //
@@ -415,8 +399,7 @@ public enum LedpCode {
     LEDP_20036("This score does not have model Id."), //
     LEDP_20037("This score does not have valid score."), //
     LEDP_20038("This score does not have valid raw score."), //
-    LEDP_20039(
-            "Lead enrichment columns {0} does not have corresponding type in the lead enrichment attribute map."), //
+    LEDP_20039("Lead enrichment columns {0} does not have corresponding type in the lead enrichment attribute map."), //
     LEDP_20040("Convert the sql type to avro type encounters illegal argument exception."), //
     LEDP_20041("Convert the sql type to avro type encounters illegal access exception."), //
     LEDP_20042("Unable to Initialize Score normalizer due to error: \n {0}"),
@@ -425,37 +408,30 @@ public enum LedpCode {
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //
     LEDP_21001("Problem installing segment spec; DataLoader result code: {0}, error message {1}"), //
     LEDP_21002("Problem installing VisiDB structure file via DataLoader REST: {0}"), //
-    LEDP_21003(
-            "Problem updating segments. Updated segment names {0} does not match existing segment names {1}"), //
+    LEDP_21003("Problem updating segments. Updated segment names {0} does not match existing segment names {1}"), //
     LEDP_21004("Problem installing DataLoader config file via DataLoader REST: {0}"), //
     LEDP_21005("Problem getting DataLoader tenant settings via DataLoader REST: {0}"), //
     LEDP_21006("Problem creating DataLoader tenant via DataLoader REST: {0}"), //
     LEDP_21007("Problem deleting DataLoader tenant via DataLoader REST: {0}"), //
     LEDP_21008("Problem getting spec details via DataLoader REST: {0}"), //
     LEDP_21009("Problem getting query metadata via DataLoader REST: {0}"), //
-    LEDP_21010(
-            "Problem executing group via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21010("Problem executing group via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
     LEDP_21011("Problem executing group via DataLoader REST: {0}"), //
-    LEDP_21012(
-            "Problem getting launch jobs via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21012("Problem getting launch jobs via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
     LEDP_21013("Problem getting launch jobs via DataLoader REST: {0}"), //
-    LEDP_21014(
-            "Problem getting group status via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21014("Problem getting group status via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
     LEDP_21015("Problem getting group status via DataLoader REST: {0}"), //
     LEDP_21016("Problem getting group last success time: there is no success launch in DL."), //
     LEDP_21017("Problem getting group last failure launch: there is no failure launch in DL."), //
-    LEDP_21018(
-            "Problem canceling launch via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
+    LEDP_21018("Problem canceling launch via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
     LEDP_21019("Problem canceling launch via DataLoader REST: {0}"), //
     LEDP_21020("Problem running query via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21021("Problem running query via DataLoader REST: {0}"), //
     LEDP_21022("Problem getting query status via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21023("Problem getting query status via DataLoader REST: {0}"), //
-    LEDP_21024(
-            "Problem getting query result data via DataLoader REST; DataLoader error message: {0}"), //
+    LEDP_21024("Problem getting query result data via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21025("Problem getting query result data via DataLoader REST: {0}"), //
-    LEDP_21026(
-            "Problem getting source table metadata via DataLoader REST; DataLoader error message: {0}"), //
+    LEDP_21026("Problem getting source table metadata via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21027("Problem getting source table metadata via DataLoader REST: {0}"), //
     LEDP_21028("Invalid Marketo REST Identity endpoint: {0}"), //
     LEDP_21029("Problem communicating with Marketo REST Identity endpoint: {0}"), //
@@ -510,8 +486,7 @@ public enum LedpCode {
     LEDP_25012("Error in processing dataflow for transformation for source: {0}, Reason: {1}"), //
     LEDP_25013("Error in executing workflow for transformation for source: {0}"), //
     LEDP_25014("Could not create new transformation progress entry"), //
-    LEDP_25015(
-            "Failed to find a chance to kick off a refresh of {0} after {1} retries. Errors: {2}"), //
+    LEDP_25015("Failed to find a chance to kick off a refresh of {0} after {1} retries. Errors: {2}"), //
     LEDP_25016("Invalid ingestion configuration for {0}"), //
     LEDP_25017("Failed to scan ingestion progress"), //
     LEDP_25018("Could not find schema"), //
@@ -522,8 +497,7 @@ public enum LedpCode {
     LEDP_25023("Name and CountryCode are required in DnB realtime entity matching"), //
     LEDP_25024("Email is required in DnB realtime email matching"), //
     LEDP_25025("DnBAPIType {0} is not supported in DnB realtime matching"), //
-    LEDP_25026(
-            "Updated metadata: {0} for version: {1} is not valid due to approved usage conflict"), //
+    LEDP_25026("Updated metadata: {0} for version: {1} is not valid due to approved usage conflict"), //
     LEDP_25027("Fail to get token from DnB authentication service"), //
     LEDP_25028("Cannot find the root attribute for dimension {0}:{1}"), //
     LEDP_25029("Cannot find the attribute id for query [ {0} ]: {1}"), //
@@ -531,10 +505,8 @@ public enum LedpCode {
     LEDP_25031("The target lattice account id {0} is not valid."), //
     LEDP_25032("Must provide sufficiently many match keys."), //
     LEDP_25033("Patching domain and location (without Name) is not supported."), //
-    LEDP_25034(
-            "The specified input can already match to lattice account id {0}, no need to patch."), //
-    LEDP_25035(
-            "Cannot correctly parse the input domain {0}. Please remove this domain from your input."), //
+    LEDP_25034("The specified input can already match to lattice account id {0}, no need to patch."), //
+    LEDP_25035("Cannot correctly parse the input domain {0}. Please remove this domain from your input."), //
     LEDP_25036("Cannot find a unique DUNS for the input. The matched DUNS is: {0}"), //
     LEDP_25037("HTTP Status: 400 Bad Request"), //
     LEDP_25038("HTTP Status: 404 Not Found"), //
@@ -582,8 +554,7 @@ public enum LedpCode {
     LEDP_28010("Modeling yarn app {0} did not succeed:{1}."), //
     LEDP_28011("Workflow name was not specified in workflow config:{0}"), //
     LEDP_28012("No models were generated from modeling steps"), //
-    LEDP_28013(
-            "Not all models were downloaded. Expected model appid's:{0}, Only found model appid's:{1}"), //
+    LEDP_28013("Not all models were downloaded. Expected model appid's:{0}, Only found model appid's:{1}"), //
     LEDP_28014("No result directory for modeling job {0}"), //
     LEDP_28015("Workflow yarn step {0} did not succeed:{1}."), //
     LEDP_28016("Could not find tenant with id:{0}"), //
@@ -608,8 +579,7 @@ public enum LedpCode {
     LEDP_29002("The input parameter {0} is null."), //
     LEDP_29003("The file {0} is not recorded in the Execution_Log table."), //
     LEDP_29004("Failed to download or unzip File , name={0}."), //
-    LEDP_29005(
-            "The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
+    LEDP_29005("The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
     LEDP_29006(
             "The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
     LEDP_29007("Cannot get the bean name. Did you change the quartz bean name for Dell ebi"), //
@@ -627,8 +597,7 @@ public enum LedpCode {
     LEDP_31004("Too many model files exist at {0}"), //
     LEDP_31005("Matched fieldname size {0} does not equal matched fieldvalue size {1}"), //
     LEDP_31006("Problem creating model artifacts directory {0}"), //
-    LEDP_31007(
-            "ModelSummary {0} is missing appId value and there are more than 1 potential appId subfolders {1}"), //
+    LEDP_31007("ModelSummary {0} is missing appId value and there are more than 1 potential appId subfolders {1}"), //
     LEDP_31008("ModelSummary {0} is missing eventTableName value"), //
     LEDP_31009("Retrieved null EventTable {0}"), //
     LEDP_31010("EventTable {0} interpretation is null or empty"), //
@@ -653,22 +622,16 @@ public enum LedpCode {
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //
     LEDP_31102("invalid_model_id", "{0} is not a valid activated model"), //
-    LEDP_31103("problem_populating_missing_field",
-            "Problem populating missing field {0} with value {1}"), //
-    LEDP_31104("problem_scoring_missing_fields",
-            "Problem scoring the record due to missing fields {0}"), //
-    LEDP_31105("mismatched_datatype",
-            "Input record contains columns that do not match expected datatypes: {0}"), //
+    LEDP_31103("problem_populating_missing_field", "Problem populating missing field {0} with value {1}"), //
+    LEDP_31104("problem_scoring_missing_fields", "Problem scoring the record due to missing fields {0}"), //
+    LEDP_31105("mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), //
     LEDP_31106("invalid_start_date", "{0} is not a valid start date"), //
     LEDP_31107("unsupported_model_type", "Unsupported model type {0}"), //
     LEDP_31108("error_scoring_data", "Error in calculating score for input record, Cause: {0}"), //
-    LEDP_31109("error_parsing_data",
-            "Input record contains columns that are not parsable. Cause: {0}"), //
-    LEDP_31110("error_transforming_data",
-            "Input record contains columns that cannot be transformed. Cause: {0}"), //
+    LEDP_31109("error_parsing_data", "Input record contains columns that are not parsable. Cause: {0}"), //
+    LEDP_31110("error_transforming_data", "Input record contains columns that cannot be transformed. Cause: {0}"), //
     LEDP_31111("api_error", "Could not process record. Cause: {0}"), //
-    LEDP_31112("enrichment_config_error",
-            "Error while extracting enrichment configuration. Cause: {0}"), //
+    LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
     LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
     LEDP_31199("missing_domain",
@@ -677,8 +640,7 @@ public enum LedpCode {
                     + "specify either 'Website' or 'Domain' fields. If these fields " //
                     + "are not specified then specify either 'CompanyName' " //
                     + "or 'DUNS' field."), //
-    LEDP_31200("invalid_bucket_information",
-            "The model {0} does not have valid bucket metadata information"), //
+    LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // Generic Errors
     LEDP_32000("Validations failed: {0}"), //
@@ -694,9 +656,8 @@ public enum LedpCode {
     LEDP_33006("Could not initiate the login for Tenant: {0}, as its SSO url is missing"), //
 
     // le-encryption
-    LEDP_34000(
-            "Directory {0} already exists and is non-empty.  Encryption requires a completely new customer with "
-                    + "empty or non-existent data directories.  Try a different customer id"), //
+    LEDP_34000("Directory {0} already exists and is non-empty.  Encryption requires a completely new customer with "
+            + "empty or non-existent data directories.  Try a different customer id"), //
     LEDP_34001("Could not create key for customer {0}"), //
     LEDP_34002("Could not delete key for customer {0}"), //
     LEDP_34003("Could not locate tenant with name {0}"), //
@@ -709,8 +670,7 @@ public enum LedpCode {
     LEDP_35003("{0} cannot be empty"), //
     LEDP_35004("{0} cannot be empty for {1} type tenant"), //
     LEDP_35005("Training set not found in HDFS for Tenant: {0} and modelID: {1}"), //
-    LEDP_35006(
-            "No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"), //
+    LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"), //
     LEDP_35007("The pipeline.json file was not found in the location : {0}"), //
 
     // le-app
@@ -720,8 +680,7 @@ public enum LedpCode {
 
     // le-query
     LEDP_37000("Lookup must have range specified"), //
-    LEDP_37001(
-            "Could not locate bucket to resolve bucketed attribute {0} for specified value {1}."), //
+    LEDP_37001("Could not locate bucket to resolve bucketed attribute {0} for specified value {1}."), //
     LEDP_37002("Must implement BusinessObject.processFreeFormSearch for object {0}"), //
     LEDP_37003("Could not find table of type {0} in data collection"), //
     LEDP_37004("Cannot find 1-to-1 or many-to-1 relationship to satisfy necessary join {0}"), //
@@ -761,10 +720,8 @@ public enum LedpCode {
     LEDP_38017("Unable to delete Talking points {0} due to an internal error"), //
     LEDP_38018("Talking point not associated with any Play"), //
     LEDP_38019("Failed to revert Talking points for the play {0}, CustomerSpace {1}"), //
-    LEDP_38020(
-            "Unable to create lead in Dante for the recommendation {0}, play {1} ,CustomerSpace {2}"), //
-    LEDP_38021(
-            "Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}"), //
+    LEDP_38020("Unable to create lead in Dante for the recommendation {0}, play {1} ,CustomerSpace {2}"), //
+    LEDP_38021("Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}"), //
     LEDP_38022("Empty or null play, Failed to create lead in dante for CustomerSpace {0}"), //
     LEDP_38023("No account attributes found for tenant {0}"), //
 
@@ -791,10 +748,8 @@ public enum LedpCode {
     LEDP_40009(
             "RatingEngine {0} or RatingModel {1} type unsupported for modeling query generation. Customer Space {2}"), //
     LEDP_40010("Invalid ModelingQueryType {0}."), //
-    LEDP_40011(
-            "Cross sell Repeat Purchase model {0} is missing PURCHASED_BEFORE_PERIOD configuration."), //
-    LEDP_40012(
-            "Cannot model Cross-Sell AI Model {0} since no target products were defined. Customer Space {1}"), //
+    LEDP_40011("Cross sell Repeat Purchase model {0} is missing PURCHASED_BEFORE_PERIOD configuration."), //
+    LEDP_40012("Cannot model Cross-Sell AI Model {0} since no target products were defined. Customer Space {1}"), //
     LEDP_40013("No Rating Engine provided. Customer Space {0}"), //
     LEDP_40014("RatingModel for the Rating Engine {0} cannot be null. Customer Space {1}"), //
     LEDP_40015("Cannot parse {0} to a valid starting date"), //
@@ -802,8 +757,7 @@ public enum LedpCode {
     LEDP_40017("Unsupported Modeling strategy"), //
     LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"), //
     LEDP_40019("Unsupported Custom Event Modeling Type {0}"), //
-    LEDP_40020(
-            "Unable to find a Model Summary for the AIModel {0} of the RatingEngine {1}, Customer Space {2}"), //
+    LEDP_40020("Unable to find a Model Summary for the AIModel {0} of the RatingEngine {1}, Customer Space {2}"), //
     LEDP_40021("Unable to set the default model name correctly, setting it to {0}"), //
     LEDP_40022("Serving store is empty or wrong customer config leads to empty store"), //
     LEDP_40023("Wrong customer config, system can't render these attributes {0} "), //
@@ -811,28 +765,20 @@ public enum LedpCode {
     LEDP_40025("Dependency detection among segment. {0}"), //
     LEDP_40026("invalid attribute config {0} after render"), //
     LEDP_40027("invalid attribute config {0} in DB"), //
-    LEDP_40028(
-            "Cannot change job Status for ai model {0} since the current status is already terminal"), //
+    LEDP_40028("Cannot change job Status for ai model {0} since the current status is already terminal"), //
     LEDP_40029("RatingModel {0} not associated with Rating Engine {1}"), //
-    LEDP_40030(
-            "BucketMetadata not provided for Iteration {0} while setting ScoringIteration for Model {1}"), //
-    LEDP_40031(
-            "No ModelSummary for Iteration {0}, cannot set it as the ScoringIteration for Model {1}"), //
+    LEDP_40030("BucketMetadata not provided for Iteration {0} while setting ScoringIteration for Model {1}"), //
+    LEDP_40031("No ModelSummary for Iteration {0}, cannot set it as the ScoringIteration for Model {1}"), //
     LEDP_40032("Curated attribute validation failed due to: {0}"), //
-    LEDP_40033(
-            "Cannot model iteration {0} of the Cross-Sell Model {1} since number of positive events({2}) is less "
-                    + //
-                    "then minimum required({3}). Customer Space {4}"), //
+    LEDP_40033("Cannot model iteration {0} of the Cross-Sell Model {1} since number of positive events({2}) is less " + //
+            "then minimum required({3}). Customer Space {4}"), //
     LEDP_40034("Modeling not complete yet for Iteration {0} of Model {1}. Customer Space {2}"), //
     LEDP_40035("Modeling did not succeed for Iteration {0} of Model {1}. Customer Space {2}"), //
     LEDP_40036("Unable to find {0} for Iteration {1} of Model {2}. Customer Space {3}"), //
-    LEDP_40037(
-            "Feature Importance was not populated in file {0} for ModelSUmmary {1}. Customer Space {2}"), //
+    LEDP_40037("Feature Importance was not populated in file {0} for ModelSUmmary {1}. Customer Space {2}"), //
     LEDP_40038("Iterations are not supported for {0} Models. Customer Space {1}"), //
-    LEDP_40039(
-            "Cannot create iteration since no iteration to derive from has been provided. Customer Space {0}"), //
-    LEDP_40040(
-            "Cannot create an iteration derived from iteration of another Model. Customer Space {0}"), //
+    LEDP_40039("Cannot create iteration since no iteration to derive from has been provided. Customer Space {0}"), //
+    LEDP_40040("Cannot create an iteration derived from iteration of another Model. Customer Space {0}"), //
     LEDP_40041("Cannot perform action as potential circular dependencies found: {0}"), //
     LEDP_40042("Cannot perform deletion as there are direct dependencies: {0}"), //
     LEDP_40043("S3 File missing the following required fields: {0}"), LEDP_40044(
