@@ -61,6 +61,15 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Value("${dataplatform.hdfs.stack:}")
     protected String stackName;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${dataplatform.python.conda.env}")
+    private String condaEnv;
+
+    @Value("${dataplatform.python.conda.env.ambari}")
+    private String condaEnvAmbari;
+
     @Inject
     private EMREnvService emrEnvService;
 
@@ -68,6 +77,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public ApplicationId score(Properties properties) {
+        properties.setProperty(ScoringProperty.CONDA_ENV.name(), getCondaEnv());
         return jobService.submitMRJob(ScoringDaemonService.SCORING_JOB_TYPE, properties);
     }
 
@@ -147,5 +157,13 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     public void setConfiguration(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
+    }
+
+    private String getCondaEnv() {
+        if (Boolean.TRUE.equals(useEmr)) {
+            return condaEnv;
+        } else {
+            return condaEnvAmbari;
+        }
     }
 }
