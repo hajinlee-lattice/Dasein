@@ -39,6 +39,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         public static String Segment1Name = "Segment1Name";
         public static String Segment2Name = "Segment2Name";
         public static String Segment3Name = "Segment3Name";
+        public static String DisplayName = "DisplayName";
     }
 
     @Override
@@ -64,6 +65,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         entity.put(DanteAccountSegmentProperty.Segment1Name, isSegment ? accountId : spendAnalyticsSegmentName);
         entity.put(DanteAccountSegmentProperty.Segment2Name, "");
         entity.put(DanteAccountSegmentProperty.Segment3Name, "");
+        entity.put(DanteAccountSegmentProperty.DisplayName, isSegment ? accountId : null);
         if (entity.containsKey(InterfaceName.RepresentativeAccounts.toString().toLowerCase())) {
             entity.put(InterfaceName.RepresentativeAccounts.toString(),
                     entity.get(InterfaceName.RepresentativeAccounts.toString().toLowerCase()));
