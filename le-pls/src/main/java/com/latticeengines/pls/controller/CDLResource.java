@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,8 +123,10 @@ public class CDLResource {
             EntityType entityType = EntityType.fromDisplayNameToEntityType(templateDisplay.getObject());
             String entity = entityType.getEntity().name();
             String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
+            String feedType = StringUtils.isBlank(templateDisplay.getFeedType()) ? entityType.getDefaultFeedTypeName() :
+                    templateDisplay.getFeedType();
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName, source, entity,
-                    templateDisplay.getFeedType(), subType, templateDisplay.getTemplateName());
+                    feedType, subType, templateDisplay.getTemplateName());
             UIAction uiAction = null;
             if (importData) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);

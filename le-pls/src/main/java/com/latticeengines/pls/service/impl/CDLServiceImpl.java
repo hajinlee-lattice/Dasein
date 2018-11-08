@@ -296,7 +296,6 @@ public class CDLServiceImpl implements CDLService {
                 display.setExist(Boolean.FALSE);
                 display.setObject(object.getDisplayName());
                 display.setTemplateName(TEMPLATENAME);
-                display.setFeedType(object.getFeedType());
                 templates.add(display);
             }
         }
