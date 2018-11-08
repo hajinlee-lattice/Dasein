@@ -115,6 +115,7 @@ public class DataFeedTask implements HasPid, Serializable {
 
     @Column(name = "SUBTYPE")
     @JsonProperty("subtype")
+    @Enumerated(EnumType.STRING)
     private SubType subType;
 
     @JsonIgnore
