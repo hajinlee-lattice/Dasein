@@ -118,7 +118,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     private InputStream processDates(InputStream inputStream) {
         // todo: hard-coded date format. Need to be replaced in date attribute phase 2.
-        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
+        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a Z";
 
         List<String> dateAttributes = getDateAttributes();
         if (CollectionUtils.isNotEmpty(dateAttributes)) {
