@@ -398,7 +398,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         CoverageInfo coverage1 = response.getRatingModelsCoverageMap().get(ratingId1);
 
         // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 2
-        currentSegment = testPlayCreationHelper.getPlayTargetSegment();
+        currentSegment = testPlayCreationHelper.createTargetSegment();
         response = ratingCoverageService.getRatingCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
                 currentSegment.getName(), request);
         assertRatingModelsCoverageResponse(ratingId1, response, request);
@@ -470,7 +470,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         assertRatingModelsCoverageResponse(ratingId1, response, request);
 
         // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 2
-        currentSegment = testPlayCreationHelper.getPlayTargetSegment();
+        currentSegment = testPlayCreationHelper.createTargetSegment();
         response = ratingCoverageService.getRatingCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
                 currentSegment.getName(), request);
         assertRatingModelsCoverageResponse(ratingId1, response, request);

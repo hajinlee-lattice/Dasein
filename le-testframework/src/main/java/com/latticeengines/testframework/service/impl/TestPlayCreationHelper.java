@@ -814,4 +814,13 @@ public class TestPlayCreationHelper {
         Restriction contactRestriction = createContactRestriction();
         return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
     }
+
+    public MetadataSegment createTargetSegment() {
+        Restriction dynRest = createBucketRestriction(2, ComparisonType.EQUAL,
+                BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction accountRestriction = createAccountRestriction(dynRest);
+        Restriction contactRestriction = createContactRestriction();
+        return createSegment(NamingUtils.timestamp("TargetSegment"), accountRestriction,
+                contactRestriction);
+    }
 }
