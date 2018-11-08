@@ -288,13 +288,14 @@ public class CDLServiceImpl implements CDLService {
 
     private void populateDefaultTemplate(List<S3ImportTemplateDisplay> templates) {
         Set<String> existingObjects = templates.stream().map(entry -> entry.getObject()).collect(Collectors.toSet());
-        for (String object : EntityType.getNames()) {
-            if (!existingObjects.contains(object)) {
+        for (EntityType object : EntityType.values()) {
+            if (!existingObjects.contains(object.getDisplayName())) {
                 S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
                 display.setPath(PATHNAME);
                 display.setExist(Boolean.FALSE);
-                display.setObject(object);
+                display.setObject(object.getDisplayName());
                 display.setTemplateName(TEMPLATENAME);
+                display.setFeedType(object.getFeedType());
                 templates.add(display);
             }
         }

@@ -6,14 +6,15 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 
 public enum EntityType {
-    Accounts(BusinessEntity.Account, null, "Accounts"), //
-    Contacts(BusinessEntity.Contact, null, "Contacts"), //
-    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases"), //
-    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles"), //
-    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy");
+    Accounts(BusinessEntity.Account, null, "Accounts", "AccountSchema"), //
+    Contacts(BusinessEntity.Contact, null, "Contacts", "ContactSchema"), //
+    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases", "TransactionSchema"), //
+    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "BundleSchema"), //
+    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "HierarchySchema");
     private BusinessEntity entity;
     private SubType subType;
     private String displayName;
+    private String feedType;
 
     private static List<String> names;
     static {
@@ -23,10 +24,11 @@ public enum EntityType {
         }
     }
 
-    EntityType(BusinessEntity entity, SubType subType, String displayName) {
+    EntityType(BusinessEntity entity, SubType subType, String displayName, String feedType) {
         this.entity = entity;
         this.subType = subType;
         this.displayName = displayName;
+        this.feedType = feedType;
     }
 
     public static List<String> getNames() {
@@ -62,6 +64,10 @@ public enum EntityType {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getFeedType() {
+        return feedType;
     }
 
 }
