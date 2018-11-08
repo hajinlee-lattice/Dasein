@@ -84,7 +84,6 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Assert.assertNotNull(request.getAttrConfigs());
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, true);
         Assert.assertNotNull(request.getAttrConfigs());
-        System.out.print("Rating:" + JsonUtils.serialize(request));
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.PurchaseHistory,
                 true);
         Assert.assertNotNull(request.getAttrConfigs());
@@ -188,6 +187,25 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
+
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = { "testDeleteConfigWhenEmptyProps" })
+    public void testCleanupAttrConfigForTenant() throws Exception {
+        cdlAttrConfigProxy.removeAttrConfigByTenant(mainTestTenant.getId());
+        Thread.sleep(500L);
+
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
+                BusinessEntity.Account, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
+
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.PurchaseHistory,
+                false);
         assertEquals(request.getAttrConfigs().size(), 0);
     }
 

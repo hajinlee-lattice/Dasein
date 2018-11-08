@@ -112,4 +112,11 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(result, AttrConfig.class);
     }
 
+    public void removeAttrConfigByTenant(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/", //
+                shortenCustomerSpace(customerSpace));
+        log.info("removeAttrConfigByTenant url is " + url);
+        delete("remove config by tenant ", url);
+
+    }
 }

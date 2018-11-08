@@ -27,4 +27,6 @@ public interface AttrConfigService {
 
     List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId);
 
+    void removeAttrConfig(String tenantId);
+
 }

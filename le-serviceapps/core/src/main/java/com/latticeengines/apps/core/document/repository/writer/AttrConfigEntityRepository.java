@@ -28,8 +28,4 @@ public interface AttrConfigEntityRepository extends MultiTenantDocumentRepositor
     @Modifying
     List<AttrConfigEntity> removeByTenantIdAndEntity(String tenantId, BusinessEntity entity);
 
-    @Transactional
-    @Modifying
-    List<AttrConfigEntity> removeByAttrNameStartingWith(String attrName);
-
 }

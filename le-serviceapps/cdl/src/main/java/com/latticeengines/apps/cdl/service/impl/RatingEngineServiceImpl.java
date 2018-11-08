@@ -43,7 +43,6 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
-import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -157,9 +156,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private Boolean shouldPropagateDelete;
 
     private ForkJoinPool tpForParallelStream;
-
-    @Inject
-    private AttrConfigEntityMgr attrConfigEntityMgr;
 
     @PostConstruct
     public void postConstruct() {
@@ -409,7 +405,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 relatedPlays.forEach(p -> playService.deleteByName(p.getName(), hardDelete));
             }
         }
-        attrConfigEntityMgr.deleteByAttrNameStartingWith(id);
         ratingEngineEntityMgr.deleteById(id, hardDelete, actionInitiator);
         evictRatingMetadataCache();
     }

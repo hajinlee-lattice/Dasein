@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -97,6 +98,13 @@ public class AttrConfigResource {
             @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         request.fixJsonDeserialization();
         return attrConfigService.saveRequest(request, mode);
+    }
+
+    @DeleteMapping(value = "")
+    @ResponseBody
+    @ApiOperation("delete attribute for tenant")
+    public void removeAttrConfig(@PathVariable String customerSpace) {
+        attrConfigService.removeAttrConfig(MultiTenantContext.getShortTenantId());
     }
 
     // Deprecated before M23

@@ -29,4 +29,6 @@ public interface CDLAttrConfigProxy {
 
     List<AttrConfig> renderConfigs(String customerSpace, List<AttrConfig> configs);
 
+    void removeAttrConfigByTenant(String customerSpace);
+
 }

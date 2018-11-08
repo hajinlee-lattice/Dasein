@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -45,6 +46,9 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @Inject
     private RedshiftService redshiftService;
@@ -109,6 +113,8 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
 
         log.info("Start cleanup all operation!");
         if (config.getCleanupOperationType() == CleanupOperationType.ALL) {
+            log.info(String.format("begin to clean up attr config of CustomerSpace %s", customerSpace));
+            cdlAttrConfigProxy.removeAttrConfigByTenant(customerSpace);
             log.info(String.format("begin clean up cdl metadata of CustomerSpace %s", customerSpace));
             DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
             List<DataFeedTask> tasks = dataFeed.getTasks();

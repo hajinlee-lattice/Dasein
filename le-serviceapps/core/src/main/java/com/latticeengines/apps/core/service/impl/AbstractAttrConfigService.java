@@ -521,6 +521,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantId);
     }
 
+    public void removeAttrConfig(String tenantId) {
+        attrConfigEntityMgr.cleanupTenant(tenantId);
+    }
     @SuppressWarnings("unchecked")
     public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfigs) {
         if (systemMetadata == null) {
