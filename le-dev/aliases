@@ -105,3 +105,4 @@ alias kfk-connect='bash $WSHOME/le-dev/scripts/start-kafka-connect.sh'
 alias le-lint='bash $WSHOME/le-dev/scripts/lint.sh'
 
 alias emr-ip='bash $WSHOME/le-dev/scripts/emr_ip.sh'
+alias ministack-ip='bash $WSHOME/le-dev/scripts/ministack_ip.sh'
