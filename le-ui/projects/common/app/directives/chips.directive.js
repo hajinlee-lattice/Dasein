@@ -30,7 +30,21 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.isSelectionDone = false;
             scope.showIcon = scope.showicon;
 
-            // console.log(scope);
+           
+            scope.sortList = (objA, objB) => {
+                let a = objA[scope.displayname];
+                let b = objB[scope.displayname];
+                a = a.toLowerCase();
+                b = b.toLowerCase();
+              
+                if (a > b) {
+                  return 1;
+                } else if (a < b) {
+                  return -1;
+                } else if (a === b) {
+                  return 0;
+                }
+            };
 
             scope.filterFunction = function(item) {
                 return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
@@ -162,7 +176,9 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.clearQuery = function () {
                 scope.query = '';
             }
-
+            if(scope.queryItems && scope.queryItems.length > 0){
+                scope.queryItems = scope.queryItems.sort(scope.sortList);
+            }
             if (scope.initialvalue != undefined || scope.initialvalue != null) {
 
                 let initialvalues = [];
