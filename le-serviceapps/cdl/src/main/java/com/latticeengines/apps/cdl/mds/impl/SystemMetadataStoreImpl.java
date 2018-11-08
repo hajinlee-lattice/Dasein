@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.mds.ChainedDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratedMetadataStore;
@@ -159,6 +160,12 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                                 cm.disableGroup(CompanyProfile);
                                 cm.disableGroup(Model);
                                 cm.setCanModel(false);
+
+                                // disable date attributes to be used in modeling
+                                if (cm.getLogicalDataType().equals(LogicalDataType.Date)) {
+                                    cm.disableGroup(Model);
+                                    cm.setCanModel(false);
+                                }
 
                                 if (BusinessEntity.Account.equals(entity)) {
                                     if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
