@@ -287,7 +287,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (retrievedRatingEngine == null) {
                 log.warn(String.format("Rating Engine with id %s for tenant %s cannot be found", ratingEngine.getId(),
                         tenant.getId()));
-//                ratingEngine.setId(RatingEngine.generateIdStr());
+                // ratingEngine.setId(RatingEngine.generateIdStr());
                 ratingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
             } else { // update an existing one by updating the delta passed from
                 // front end
@@ -602,12 +602,17 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (CollectionUtils.isEmpty(dataStores)) {
                 errors.add("No datastore selected, atleast one attribute set needed for modeling");
             }
-            Set<Category> selectedCategories = CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
-            List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
-                    .getNewModelingAttrs(customerSpace, dataCollectionService.getActiveVersion(customerSpace))
-                    .filter(cm -> selectedCategories.contains(cm.getCategory())).collectList().block();
-            if (CollectionUtils.isEmpty(userSelectedAttributesForModeling)) {
-                errors.add(LedpCode.LEDP_40044.getMessage());
+
+            if (aiModel.getIteration() == 1) {
+                Set<Category> selectedCategories = CustomEventModelingDataStoreUtil
+                        .getCategoriesByDataStores(dataStores);
+                List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
+                        .getNewModelingAttrs(customerSpace).filter(cm -> selectedCategories.contains(cm.getCategory()))
+                        .collectList().block();
+
+                if (CollectionUtils.isEmpty(userSelectedAttributesForModeling)) {
+                    errors.add(LedpCode.LEDP_40044.getMessage());
+                }
             }
             break;
         case PROSPECTING:
