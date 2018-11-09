@@ -42,7 +42,7 @@ angular.module('lp.jobs.row.subjobs', [])
             $scope.getDownloadLink = function (subjob) {
                 var path = '/files/datafiles/sourcefile?fileName=';
                 var fileName = subjob.inputs != undefined ? subjob.inputs['SOURCE_FILE_NAME'] : '';
-                var filePath = subjob.inputs != undefined ? subjob.inputs['SOURCE_FILE_PATH'] : '';
+                var filePath = subjob.inputs != undefined ? (subjob.inputs['SOURCE_FILE_PATH'] != undefined ? subjob.inputs['SOURCE_FILE_PATH'] : '') : '';
                 var auth = BrowserStorageUtility.getTokenDocument();
                 var clientSession = BrowserStorageUtility.getClientSession();
                 var tenantId = clientSession.Tenant.Identifier;
