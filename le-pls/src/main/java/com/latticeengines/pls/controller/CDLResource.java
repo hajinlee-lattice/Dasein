@@ -168,8 +168,7 @@ public class CDLResource {
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find template for S3 import!");
             }
-            cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), dataFeedTask.getUniqueId(),
-                    templateFileName);
+            cdlService.importFileToS3(customerSpace.toString(), templateFileName, templateDisplay.getPath());
             UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
                     importUsingTemplateMsg);
             return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));

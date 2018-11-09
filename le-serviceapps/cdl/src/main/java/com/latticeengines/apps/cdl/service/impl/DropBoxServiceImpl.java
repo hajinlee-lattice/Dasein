@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,7 @@ import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
@@ -54,6 +58,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Inject
     private DropBoxEntityMgr entityMgr;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Inject
     private S3Service s3Service;
@@ -152,6 +159,22 @@ public class DropBoxServiceImpl implements DropBoxService {
 
         return s3Service.listSubFolders(dropBoxBucket,
                 getFullPath(dropBoxPrefix, formatPath(objectName), formatPath(path)));
+    }
+
+    @Override
+    public boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath) {
+        try (InputStream inputStream = HdfsUtils.getInputStream(yarnConfiguration, hdfsPath)){
+            String dropBoxBucket = getDropBoxBucket();
+            key = key.replaceFirst(dropBoxBucket, "");
+            if (!key.endsWith("/")) {
+               key += "/";
+            }
+            key += s3FileName;
+            s3Service.uploadInputStream(dropBoxBucket, key, inputStream, false);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private String getFullPath(String dropBoxPrefix, String objectName, String path) {

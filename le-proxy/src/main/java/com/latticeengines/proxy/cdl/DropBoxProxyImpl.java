@@ -67,6 +67,13 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
         return getList("get all sub folders", url, String.class);
     }
 
+    @Override
+    public boolean importS3file(String customerSpace, String s3Path, String hdfsPath) {
+        String url = "/customerspaces/{customerSpace}/dropbox/import?s3Path={s3Path}&hdfsPath={hdfsPath}";
+        url = constructUrl(url, customerSpace, s3Path, hdfsPath);
+        return post("Import File to S3", url, null, Boolean.class);
+    }
+
     private String formatFolder(String folder) {
         if (StringUtils.isNotEmpty(folder)) {
             if (folder.startsWith("/")) {

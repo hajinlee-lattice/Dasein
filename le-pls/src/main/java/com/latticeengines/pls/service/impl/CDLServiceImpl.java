@@ -108,6 +108,15 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
+    public void importFileToS3(String customerSpace, String templateFileName, String s3Path) {
+        SourceFile sourceFile = getSourceFile(templateFileName);
+        if (sourceFile == null) {
+            throw new IllegalArgumentException("Cannot find source file: " + templateFileName);
+        }
+        dropBoxProxy.importS3file(customerSpace, s3Path, sourceFile.getPath());
+    }
+
+    @Override
     public UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
             CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;

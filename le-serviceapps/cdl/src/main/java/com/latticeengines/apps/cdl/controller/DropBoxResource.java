@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -87,6 +90,16 @@ public class DropBoxResource {
                                          @RequestParam(required = false) String objectName,
                                          @RequestParam(required = false) String path) {
         return dropBoxService.getDropFolders(customerSpace, objectName, path);
+    }
+
+    @RequestMapping(value = "/import", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation("Import file to s3")
+    public boolean importFileToS3(@PathVariable String customerSpace,
+                                  @RequestParam("s3Path") String s3Path,
+                                  @RequestParam("hdfsPath") String hdfsPath) {
+        String s3FileName = "file_" + DateTime.now().getMillis() + ".csv";
+        return dropBoxService.uploadFileToS3(customerSpace, s3Path, s3FileName, hdfsPath);
     }
 
 }

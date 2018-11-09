@@ -34,4 +34,6 @@ public interface DropBoxService {
 
     List<String> getDropFolders(String customerSpace, String objectName, String path);
 
+    boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath);
+
 }

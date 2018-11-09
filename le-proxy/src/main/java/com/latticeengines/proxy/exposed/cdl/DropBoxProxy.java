@@ -18,4 +18,6 @@ public interface DropBoxProxy {
 
     List<String> getAllSubFolders(String customerSpace, String objectName, String path);
 
+    boolean importS3file(String customerSpace, String s3Path, String hdfsPath);
+
 }
