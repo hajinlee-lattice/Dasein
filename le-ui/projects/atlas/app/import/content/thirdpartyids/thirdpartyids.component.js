@@ -10,11 +10,12 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     }
 
     angular.extend(vm, {
-        identifiers: Identifiers,
+        identifliers: Identifiers,
         fieldMappings: FieldDocument.fieldMappings,
         fieldMapping: ImportWizardStore.getThirdpartyidFields().map,
         fields: ImportWizardStore.getThirdpartyidFields().fields,
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
+        entityType: ImportWizardStore.entityType,
         availableFields: [],
         unavailableFields: [],
         unavailableTypes: [],
