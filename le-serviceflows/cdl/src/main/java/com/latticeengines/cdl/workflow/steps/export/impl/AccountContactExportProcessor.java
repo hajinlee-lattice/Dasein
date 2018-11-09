@@ -32,14 +32,15 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
 
     @Override
     public boolean accepts(MetadataSegmentExportType type) {
-        return !MetadataSegmentExportType.CONTACT.equals(type) && !MetadataSegmentExportType.ORPHAN_CONTACT.equals(type);
+        return !MetadataSegmentExportType.CONTACT.equals(type)
+                && !MetadataSegmentExportType.ORPHAN_CONTACT.equals(type);
     }
 
     @Override
     protected void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext, File localFile)
             throws IOException {
         long segmentAccountsCount = accountFetcher.getCount(segmentExportContext);
-        log.info("accountCount = ", segmentAccountsCount);
+        log.info(String.format("accountCount = %d", segmentAccountsCount));
 
         if (segmentAccountsCount > 0) {
             // process accounts that exists in segment
