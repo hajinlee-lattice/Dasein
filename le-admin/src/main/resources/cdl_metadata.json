@@ -9,6 +9,15 @@
               "Business Year", "Business Quarter", "Business Month", "Business Week"
             ]
         }
+    },
+    { "Node": "ModelingProfilingVersion",
+      "Data": {
+        "Type": "options",
+        "Required": "false",
+        "Options": [
+              "v1", "v2"
+            ]
+        }
     }
   ]
 }

@@ -4,7 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableSet;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -19,6 +23,7 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+    private static Logger log = LoggerFactory.getLogger(CdlModelWorkflowConfiguration.class);
 
     @Override
     public Collection<String> getSwpkgNames() {
@@ -101,8 +106,7 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
                 List<TransformDefinition> stdTransformDefns) {
-            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName,
-                    transformationGroup.getName());
+            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
             return this;
         }
 
@@ -126,8 +130,7 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
         }
 
         public Builder excludePublicDomain(boolean excludePublicDomains) {
-            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
-                    excludePublicDomains);
+            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
             return this;
         }
 
@@ -206,10 +209,13 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 
-            configuration.setContainerConfiguration("cdlModelWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("cdlModelWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(model);
             configuration.add(export);
+            log.info(String.format("Build configuration (type %s) for model workflow: %s",
+                    CdlModelWorkflowConfiguration.class.getSimpleName(),
+                    JsonUtils.serialize(configuration)));
             return configuration;
         }
 

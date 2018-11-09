@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -16,10 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
-import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -43,7 +43,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
-public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmitter {
+public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModelWorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(CrossSellImportMatchAndModelWorkflowSubmitter.class);
 
     @Autowired
@@ -68,6 +68,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
 
     public CrossSellImportMatchAndModelWorkflowConfiguration generateConfiguration(
             CrossSellModelingParameters parameters) {
+        FeatureFlagValueMap flags = getFeatureFlagValueMap();
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "CrossSellImportMatchAndModelWorkflow");
@@ -123,10 +124,11 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
                 .targetTableName(targetTableName) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
-                .enableV2Profiling(true) //
+                .enableV2Profiling(isV2ProfilingEnabled()) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, true) //
+                .addProvenanceProperty(ProvenancePropertyName.IsV2ProfilingEnabled, isV2ProfilingEnabled()) //
                 // TODO: plsFeatureFlagService.isFuzzyMatchEnabled()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .moduleName(moduleName) //

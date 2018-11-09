@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.util.ArtifactUtils;
-import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
-import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -45,14 +42,13 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWor
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
-public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
+public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelingWorkflowSubmitter.class);
 
@@ -61,12 +57,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private MatchCommandProxy matchCommandProxy;
-
-    @Inject
-    private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    private BatonService batonService;
 
     @Value("${pls.modeling.validation.min.rows:300}")
     private long minRows;
@@ -103,14 +93,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         if (sourceFile == null) {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { parameters.getFilename() });
         }
-        FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
-
-        TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
-
-        if (parameters.getTransformationGroup() == null) {
-            parameters.setTransformationGroup(transformationGroup);
-        }
-        CustomEventModelingWorkflowConfiguration configuration = generateConfiguration(parameters, sourceFile, flags);
+        CustomEventModelingWorkflowConfiguration configuration = generateConfiguration(parameters, sourceFile);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         sourceFile.setApplicationId(applicationId.toString());
         internalResourceProxy.updateSourceFile(sourceFile, customerSpace);
@@ -118,7 +101,14 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private CustomEventModelingWorkflowConfiguration generateConfiguration(ModelingParameters parameters,
-            SourceFile sourceFile, FeatureFlagValueMap flags) {
+            SourceFile sourceFile) {
+        FeatureFlagValueMap flags = getFeatureFlagValueMap();
+
+        TransformationGroup transformationGroup = getTransformationGroup(flags);
+        if (parameters.getTransformationGroup() == null) {
+            parameters.setTransformationGroup(transformationGroup);
+        }
+        transformationGroup = parameters.getTransformationGroup();
 
         String trainingTableName = sourceFile.getTableName();
 
@@ -163,7 +153,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         log.debug("Modeling parameters: " + parameters.toString());
 
         String schemaInterpretation = sourceFile.getSchemaInterpretation().toString();
-        TransformationGroup transformationGroup = parameters.getTransformationGroup();
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
         boolean isLPI = CustomEventModelingType.LPI.equals(parameters.getCustomEventModelingType());
@@ -186,8 +175,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns()) //
                 .keepMatchLid(true) //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
-                .matchDebugEnabled(
-                        !parameters.getExcludePropDataColumns() && FeatureFlagUtils.isMatchDebugEnabled(flags)) //
+                .matchDebugEnabled(!parameters.getExcludePropDataColumns() && isMatchDebugEnabled(flags)) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .fetchOnly(!isLPI) //
@@ -205,11 +193,11 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .minPositiveEvents(minPositiveEvents) //
                 .minNegativeEvents(minNegativeEvents) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
-                .enableV2Profiling(FeatureFlagUtils.isV2ProfilingEnabled(flags)) //
+                .enableV2Profiling(isV2ProfilingEnabled()) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath()) //
-                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled,
-                        FeatureFlagUtils.isFuzzyMatchEnabled(flags)) //
+                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, isFuzzyMatchEnabled(flags)) //
+                .addProvenanceProperty(ProvenancePropertyName.IsV2ProfilingEnabled, isV2ProfilingEnabled()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .moduleName(moduleName != null ? moduleName : null) //
                 .runTimeParams(parameters.runTimeParams) //
@@ -239,16 +227,4 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .ratingEngineType(ratingEngineType) //
                 .build();
     }
-
-    private String getDataCloudVersion(ModelingParameters parameters, FeatureFlagValueMap flags) {
-        if (StringUtils.isNotEmpty(parameters.getDataCloudVersion())) {
-            return parameters.getDataCloudVersion();
-        }
-        if (FeatureFlagUtils.useDnBFlagFromZK(flags)) {
-            // retrieve latest version from matchapi
-            return columnMetadataProxy.latestVersion(null).getVersion();
-        }
-        return null;
-    }
-
 }

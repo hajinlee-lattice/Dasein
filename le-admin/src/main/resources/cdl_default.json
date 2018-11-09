@@ -12,6 +12,10 @@
     {
       "Node": "DefaultAPSRollupPeriod",
       "Data": "Business Month"
+    },
+    { 
+      "Node": "ModelingProfilingVersion",
+      "Data": "v2"
     }
   ]
 }
