@@ -54,12 +54,11 @@ public class GenericAndUsageValidatorUnitTestNG {
 
     @Test(groups = "unit")
     public void testUsage() throws Exception {
-
         List<AttrConfig> attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, true, true,
                 true, true);
         usageValidator.validate(new ArrayList<>(), attrList);
         int num = AttrConfigTestUtils.getErrorNumber(attrList);
-        Assert.assertEquals(attrList.size() - 6, num);
+        Assert.assertEquals(attrList.size() - 8, num);
         attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false);
         genericValidator.validate(new ArrayList<>(), attrList);
         num = AttrConfigTestUtils.getErrorNumber(attrList);
