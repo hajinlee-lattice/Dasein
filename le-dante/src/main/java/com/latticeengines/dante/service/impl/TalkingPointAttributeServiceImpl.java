@@ -98,6 +98,13 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
                         .collect(Collectors.toList());
                 allAttrs.addAll(phAttrs);
             }
+            List<ColumnMetadata> curatedAccountAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.CuratedAccount);
+            if (CollectionUtils.isNotEmpty(curatedAccountAttrs)) {
+                curatedAccountAttrs = curatedAccountAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                        .collect(Collectors.toList());
+                allAttrs.addAll(curatedAccountAttrs);
+            }
 
             if (CollectionUtils.isEmpty(allAttrs)) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
