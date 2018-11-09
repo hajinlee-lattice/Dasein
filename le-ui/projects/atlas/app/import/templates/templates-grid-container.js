@@ -62,8 +62,6 @@ export default class GridContainer extends Component {
     }
     let goTo = `home.import.entry.${entity}`;
 
-    console.log(goTo, response);
-
     getAngularState().go(goTo, response);
   }
 

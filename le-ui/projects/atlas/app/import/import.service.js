@@ -37,7 +37,10 @@ angular.module('lp.import')
         this.nonCustomIds = [];
 
         this.calendar = null;
+
+        this.postBody = null;
         this.autoImport = true;
+        this.importOnly = false;
     }
 
     this.init();
@@ -51,9 +54,12 @@ angular.module('lp.import')
             { 
                 label: 'Account IDs', 
                 state: 'accounts.ids', 
-                backState: 'home.segment.explorer.attributes',
+                backState: 'home.importtemplates',
                 nextLabel: 'Next, Add Other IDs',
                 nextFn: function(nextState) {
+
+                    console.log(ImportWizardStore.getPostBody());
+
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -92,10 +98,14 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    var autoImport = ImportWizardStore.getAutoImport(),
-                        fileName = ImportWizardStore.getCsvFileName(), 
-                        entityType = ImportWizardStore.getEntityType();
-                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
+                    var fileName = ImportWizardStore.getCsvFileName(),
+                        importOnly = ImportWizardStore.getImportOnly(),
+                        autoImportData = ImportWizardStore.getAutoImport(),
+                        postBody = ImportWizardStore.getPostBody();
+
+                    ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -103,7 +113,7 @@ angular.module('lp.import')
             { 
                 label: 'Contact IDs', 
                 state: 'contacts.ids',
-                backState: 'home.segment.explorer.attributes',
+                backState: 'home.importtemplates',
                 nextLabel: 'Next, Provide CRM/MAP IDs', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
@@ -144,10 +154,14 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    var autoImport = ImportWizardStore.getAutoImport(),
-                        fileName = ImportWizardStore.getCsvFileName(), 
-                        entityType = ImportWizardStore.getEntityType();
-                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
+                    var fileName = ImportWizardStore.getCsvFileName(),
+                        importOnly = ImportWizardStore.getImportOnly(),
+                        autoImportData = ImportWizardStore.getAutoImport(),
+                        postBody = ImportWizardStore.getPostBody();
+
+                    ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -155,6 +169,7 @@ angular.module('lp.import')
             { 
                 label: 'Transaction IDs', 
                 state: 'productpurchases.ids', 
+                backState: 'home.importtemplates',
                 nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
@@ -175,10 +190,14 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    var autoImport = ImportWizardStore.getAutoImport(),
-                        fileName = ImportWizardStore.getCsvFileName(), 
-                        entityType = ImportWizardStore.getEntityType();
-                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
+                    var fileName = ImportWizardStore.getCsvFileName(),
+                        importOnly = ImportWizardStore.getImportOnly(),
+                        autoImportData = ImportWizardStore.getAutoImport(),
+                        postBody = ImportWizardStore.getPostBody();
+
+                    ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -186,6 +205,7 @@ angular.module('lp.import')
             { 
                 label: 'Product ID', 
                 state: 'productbundles.ids', 
+                backState: 'home.importtemplates',
                 nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
@@ -205,10 +225,14 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    var autoImport = ImportWizardStore.getAutoImport(),
-                        fileName = ImportWizardStore.getCsvFileName(), 
-                        entityType = ImportWizardStore.getEntityType();
-                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
+                    var fileName = ImportWizardStore.getCsvFileName(),
+                        importOnly = ImportWizardStore.getImportOnly(),
+                        autoImportData = ImportWizardStore.getAutoImport(),
+                        postBody = ImportWizardStore.getPostBody();
+
+                    ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -236,10 +260,14 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    var autoImport = ImportWizardStore.getAutoImport(),
-                        fileName = ImportWizardStore.getCsvFileName(), 
-                        entityType = ImportWizardStore.getEntityType();
-                    ImportWizardService.checkAutoImportStatus(autoImport, fileName, entityType, nextState);
+                    var fileName = ImportWizardStore.getCsvFileName(),
+                        importOnly = ImportWizardStore.getImportOnly(),
+                        autoImportData = ImportWizardStore.getAutoImport(),
+                        postBody = ImportWizardStore.getPostBody();
+
+                    ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ]
@@ -411,10 +439,26 @@ angular.module('lp.import')
     this.getCsvFileName = function() {
         return this.csvFileName;
     };
-
     this.setCsvFileName = function(fileName) {
         this.csvFileName = fileName;
     };
+
+    this.setPostBody = function(postBody) {
+        console.log(postBody);
+        this.postBody = postBody;
+    }
+    this.getPostBody = function() {
+        console.log(this.postBody);
+        return this.postBody;
+    }
+
+    this.setImportOnly = function(importOnly) {
+        this.importOnly = importOnly;
+    }
+    this.getImportOnly = function() {
+        console.log(this.importOnly);
+        return this.importOnly;
+    }
 
     this.getFieldDocument = function() {
         return angular.copy(this.fieldDocument);
@@ -814,39 +858,34 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-        this.checkAutoImportStatus = function(autoImport, fileName, entityType, nextState){
-            console.log(autoImport, nextState);
-            if(autoImport){
-                this.startImportCsv(fileName, entityType).then(function(){
-                    $state.go(nextState); 
-                });
-            } else {
-                $state.go(nextState); 
-            }
-
-        }
-
-	    this.startImportCsv = function(FileName, entity, feedType) {
-	        var deferred = $q.defer();
-	        var result;
-	        var params = { 
-                    'templateFileName':FileName ,
-    	            'dataFileName': FileName,
+	    this.templateDataIngestion = function(fileName, importOnly, autoImportData, postBody) {
+	        var deferred = $q.defer(),
+                result,
+                url = importOnly ? '/cdl/s3/template/import' : '/cdl/s3/template',
+                params = { 
+                    'templateFileName':fileName,
     	            'source': 'File',
-    	            'entity': entity,
-                    'feedType': feedType || entity + 'Schema' 
+                    'importData': autoImportData
+    	            // 'entity': entity,
+                    // 'feedType': feedType || entity + 'Schema'
                 };
+
+            console.log(fileName, importOnly, autoImportData, postBody);
 
 	        $http({
 	            method: 'POST',
-	            url: '/pls/cdl/import/csv',
+	            url: url,
 	            headers: { 'Content-Type': 'application/json' },
 	            params: params,
+                data: postBody
 	        }).then(
                 function onSuccess(response) {
                     var result = response.data;
                     if (result != null && result !== "") {
                         result = response.data;
+
+                        console.log(result);
+
                         deferred.resolve(result);
                     } else {
                         // var errors = result.Errors;

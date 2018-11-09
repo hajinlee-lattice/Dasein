@@ -66,7 +66,8 @@ angular
             url: '/entry',
             params: {
                 action: null,
-                type: null
+                type: null,
+                data: null
             },
             views: {
                 'main@': {
@@ -167,7 +168,7 @@ angular
                 WizardControlsOptions: function() {
                     return { 
                         backState: 'home.import.entry.accounts', 
-                        nextState: 'home.jobs.data' 
+                        nextState: 'home.importtemplates' 
                     };
                 }
             },
@@ -344,7 +345,10 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contact');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.contacts', nextState: 'home.importtemplates' };
+                    return { 
+                        backState: 'home.import.entry.contacts', 
+                        nextState: 'home.importtemplates' 
+                    };
                 }
             },
             views: {
@@ -523,7 +527,10 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'transaction');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.productpurchases', nextState: 'home.importtemplates' };
+                    return { 
+                        backState: 'home.import.entry.productpurchases', 
+                        nextState: 'home.importtemplates' 
+                    };
                 }
             },
             views: {
@@ -627,7 +634,10 @@ angular
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product');
                 },
                 WizardControlsOptions: function() {
-                    return { backState: 'home.import.entry.productbundles', nextState: 'home.importtemplates' };
+                    return { 
+                        backState: 'home.import.entry.productbundles', 
+                        nextState: 'home.importtemplates' 
+                    };
                 }
             },
             views: {

@@ -54,6 +54,8 @@ angular.module('lp.import.entry', [
         vm.displayType = $stateParams.type;
 
         ImportWizardStore.clear();
+        ImportWizardStore.setPostBody($stateParams.data);
+        
         vm.setFeatureFlagPermissions();
         vm.changingEntity = false;    
         var state = $state.current.name;
@@ -166,8 +168,13 @@ angular.module('lp.import.entry', [
         if(vm.formType != 'Import'){
             $state.go('home.import.data.' + vm.goState + '.ids');
         } else {
-            ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
-                $state.go('home.importtemplates'); 
+            var fileName = ImportWizardStore.getCsvFileName(),
+                importOnly = true,
+                autoImportData = ImportWizardStore.getAutoImport(),
+                postBody = $stateParams.data;
+
+            ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                $state.go('home.importtemplates');
             });
         }
     }
