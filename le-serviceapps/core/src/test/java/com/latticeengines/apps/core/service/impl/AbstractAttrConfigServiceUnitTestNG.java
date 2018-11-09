@@ -83,7 +83,8 @@ public class AbstractAttrConfigServiceUnitTestNG {
         log.info("overviewWithSomeActive is " + overview);
         // attr9 's State allowCustomization is false. For Activate/Deactivate
         // page, hide attributes that are: Inactive and AllowCustomization=FALSE
-        Assert.assertEquals(overview.getTotalAttrs() - (generatePropertyListWithSomeActive().size() - 3), 0);
+        List<AttrConfig> attrs = generatePropertyListWithSomeActive();
+        Assert.assertEquals(overview.getTotalAttrs(), new Long(generatePropertyListWithSomeActive().size() - 4));
         Assert.assertEquals(overview.getLimit() - intentLimit, 0);
         Map<String, Map<?, Long>> propSummary = overview.getPropSummary();
         Assert.assertNotNull(propSummary);
@@ -91,8 +92,8 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertTrue(propSummary.containsKey(ColumnMetadataKey.State));
         Map<?, Long> map = propSummary.get(ColumnMetadataKey.State);
 
-        Assert.assertEquals(map.get(AttrState.Inactive).longValue() - 3, 0L);
-        Assert.assertEquals(map.get(AttrState.Active).longValue() - 3, 0L);
+        Assert.assertEquals(map.get(AttrState.Inactive).longValue(),  2);
+        Assert.assertEquals(map.get(AttrState.Active).longValue(), 3);
 
         overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generatePropertyListWithSomeUsedForSegment(),
                 Category.FIRMOGRAPHICS, Arrays.asList(ColumnSelection.Predefined.usageProperties), true);
@@ -108,20 +109,20 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.TalkingPoint.getName()));
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.CompanyProfile.getName()));
         map = propSummary.get(ColumnSelection.Predefined.Segment.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 3, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue(), 3);
         // For Enable/Disable page, hide hide attributes that are: disabled and
         // AllowCustomization=FALSE.
-        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 3, 0L);
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue(), 2);
 
         map = propSummary.get(ColumnSelection.Predefined.Enrichment.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue(), 5);
         map = propSummary.get(ColumnSelection.Predefined.TalkingPoint.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue(), 5);
         map = propSummary.get(ColumnSelection.Predefined.CompanyProfile.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue(), 5);
         // For model usage, the number is not impacted by the state
         map = propSummary.get(ColumnSelection.Predefined.Model.getName());
-        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 5, 0L);
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue(), 5);
 
         overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
                 AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false),
@@ -131,7 +132,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Model.getName()));
         // For model usage, the number is not impacted by the state
         map = propSummary.get(ColumnSelection.Predefined.Model.getName());
-        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 5, 0L);
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue(), 5);
     }
 
     @Test(groups = "unit")
