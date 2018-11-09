@@ -127,9 +127,16 @@ public class ServingStoreResource {
         log.info("Get allow modeling attributes for " + customerSpace);
         Flux<ColumnMetadata> flux = getSystemMetadataAttrFlux(customerSpace, BusinessEntity.Account,
                 version);
+        flux = flux.map(cm -> {
+            if (cm.getTagList() == null
+                    || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
+                cm.setTagList(Collections.singletonList(Tag.INTERNAL));
+            }
+            return cm;
+        });
         if (Boolean.TRUE.equals(allCustomerAttrs)) {
             flux = flux.filter(cm -> // not external (not LDC) or can model
-            !cm.getTagList().contains(Tag.EXTERNAL) || Boolean.TRUE.equals(cm.getCanModel()));
+            cm.getTagList().contains(Tag.INTERNAL) || Boolean.TRUE.equals(cm.getCanModel()));
         } else {
             flux = flux.filter(cm -> Boolean.TRUE.equals(cm.getCanModel()));
         }

@@ -273,13 +273,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             verifyFlags(config, cat, null, //
-                    // FIXME: YSong - M23, lcChg should be false for curated
-                    // attrs
-                    Active, true, //
+                    Active, false, //
                     true, true, //
                     false, true, //
                     true, true, //
-                    false, false, //
+                    false, true, //
                     false, false);
             return true;
         });
