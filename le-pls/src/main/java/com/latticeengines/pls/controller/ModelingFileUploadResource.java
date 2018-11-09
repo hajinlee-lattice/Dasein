@@ -24,10 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -64,6 +66,9 @@ public class ModelingFileUploadResource {
 
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
+
+    @Autowired
+    private BatonService batonService;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -107,7 +112,9 @@ public class ModelingFileUploadResource {
         if (!StringUtils.isEmpty(entity)) {
             schemaInterpretation = SchemaInterpretation.getByName(entity);
         }
-        if (StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
+        boolean hasCgProduct = batonService.hasProduct(MultiTenantContext.getCustomerSpace(),
+                LatticeProduct.CG);
+        if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             return ResponseDocument.successResponse(modelingFileMetadataService
                     .getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters));
         } else {
@@ -124,7 +131,9 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "source", required = false, defaultValue = "") String source,
             @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
             @RequestBody FieldMappingDocument fieldMappingDocument) {
-        if (StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
+        boolean hasCgProduct = batonService.hasProduct(MultiTenantContext.getCustomerSpace(),
+                LatticeProduct.CG);
+        if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);
         } else {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, entity, source, feedType);
@@ -139,7 +148,9 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam(value = "source", required = false, defaultValue = "") String source,
             @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType) {
-        if (StringUtils.isEmpty(entity)) {
+        boolean hasCgProduct = batonService.hasProduct(MultiTenantContext.getCustomerSpace(),
+                LatticeProduct.CG);
+        if (!hasCgProduct || StringUtils.isEmpty(entity)) {
             return ResponseDocument.successResponse(
                     modelingFileMetadataService.getSchemaToLatticeSchemaFields(excludeLatticeDataAttributes));
         } else {
