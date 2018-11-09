@@ -84,7 +84,7 @@ public class AttrSpecification {
     }
 
     public static AttrSpecification CDL_RATING() {
-        return new AttrSpecification("CDL Rating Attributes", true, true, false, true, false, false,
+        return new AttrSpecification("CDL Rating Attributes", true, true, true, true, false, false,
                 false, false, false, false, false, false);
     }
 
