@@ -287,7 +287,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 CustomerSpace.shortenCustomerSpace(customerSpace), table.getName()).collectMap(this::getKey).block();
 
         Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
-                .getAllowedModelingAttrs(customerSpace, dataCollectionService.getActiveVersion(customerSpace))
+                .getAllowedModelingAttrs(customerSpace, false, dataCollectionService.getActiveVersion(customerSpace))
                 .collectMap(this::getKey,
                         cm -> iterationAttributes.containsKey(getKey(cm)) ? iterationAttributes.get(getKey(cm)) : cm,
                         () -> iterationAttributes)
