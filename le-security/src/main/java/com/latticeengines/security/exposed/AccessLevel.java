@@ -65,6 +65,7 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
             GrantedRight.VIEW_PLS_CDL_DATA, //
             GrantedRight.EDIT_PLS_CDL_DATA, //
+            GrantedRight.GENERATE_S3_CREDENTIAL, //
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
             GrantedRight.CREATE_PLS_PLAYS, //

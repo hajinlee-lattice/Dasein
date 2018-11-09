@@ -69,6 +69,7 @@ public class DropBoxResource {
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get drop box summary")
+    @PreAuthorize("hasRole('Generate_S3_Credential')")
     public ModelAndView getDropBox() {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         String customerSpace = MultiTenantContext.getShortTenantId();
@@ -133,7 +134,7 @@ public class DropBoxResource {
     @PutMapping("/key")
     @ResponseBody
     @ApiOperation(value = "Refresh access key to drop box, if the access was granted to a Lattice user")
-    @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
+    @PreAuthorize("hasRole('Generate_S3_Credential')")
     public ModelAndView refreshAccessKey(@RequestBody GrantDropBoxAccessRequest request) {
         String customerSpace = MultiTenantContext.getShortTenantId();
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
