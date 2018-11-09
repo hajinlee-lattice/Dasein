@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -78,22 +79,31 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
 
     private void copyToHdfs(S3FileToHdfsConfiguration config) {
         try {
-            Path rawPath = new Path(getValiePath(config.getS3FilePath()));
-            String s3nPath = rawPath.toS3NUri(config.getS3Bucket());
+            String s3nPath = getS3nPath(config.getS3Bucket(), config.getS3FilePath());
             Path hdfsPath = PathBuilder.buildS3FilePath(CamilleEnvironment.getPodId(), config.getCustomerSpace());
-            hdfsPath = hdfsPath.append(String.valueOf(new Date().getTime()));
-            hdfsPath = hdfsPath.append(config.getS3FileName());
+            hdfsFilePath = getHdfsFilePath(hdfsPath, String.valueOf(new Date().getTime()), config.getS3FileName());
             String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
             String overwriteQueue = LedpQueueAssigner.overwriteQueueAssignment(queue,
                     emrEnvService.getYarnQueueScheme());
-            HdfsUtils.distcp(yarnConfiguration, s3nPath, hdfsPath.toString(), overwriteQueue);
-            hdfsFilePath = hdfsPath.toString();
+            log.info("hdfsPath: " + hdfsFilePath);
+            log.info("s3nPath: " + s3nPath);
+            HdfsUtils.distcp(yarnConfiguration, s3nPath, hdfsFilePath, overwriteQueue);
         } catch (Exception e) {
             throw new RuntimeException("Cannot copy s3 file to hdfs!" + e.getMessage());
         }
     }
 
-    private String getValiePath(String path) {
+    private String getHdfsFilePath(Path root, String... parts) {
+        String path = root.toString();
+        Joiner joiner = Joiner.on("/");
+        return path + "/" + joiner.join(parts);
+    }
+
+    private String getS3nPath(String bucket, String path) {
+        return "s3n://" + bucket + getValidPath(path);
+    }
+
+    private String getValidPath(String path) {
         if (!path.startsWith("/")) {
             return "/" + path;
         } else {
