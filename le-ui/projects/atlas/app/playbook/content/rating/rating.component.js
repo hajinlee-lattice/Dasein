@@ -68,7 +68,7 @@ angular.module('lp.playbook.wizard.rating', [])
             }
         });
         if(engines.length) {
-            var segmentName = PlaybookWizardStore.settings.targetSegment.name;
+            var segmentName = (PlaybookWizardStore.settings && PlaybookWizardStore.settings.targetSegment ? PlaybookWizardStore.settings.targetSegment.name : '');
             PlaybookWizardService.getRatingSegmentCounts(segmentName, engines, {
                 loadContactsCount: true, 
                 loadContactsCountByBucket: true

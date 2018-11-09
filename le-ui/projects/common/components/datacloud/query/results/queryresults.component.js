@@ -533,7 +533,6 @@ angular.module('common.datacloud.query.results', [
                 return value.bucket === bucket;
             });
             sections.selected += parseInt(count.count);
-            console.log(count.contactCount, parseInt(count.contactCount || 0));
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
@@ -541,7 +540,7 @@ angular.module('common.datacloud.query.results', [
 
         sections.suppressed = parseInt(sections.total - sections.selected);
 
-        sections.launched = (vm.topNCount && opts.suppressed ? vm.topNCount : (sections.selected > sections.suppressed ? sections.selected - sections.suppressed : sections.selected));
+        sections.launched = (vm.topNCount && opts.suppressed ? vm.topNCount : (sections.selected > sections.suppressed ? sections.total - sections.suppressed : sections.selected));
 
         var $topNCountEl = angular.element('input#topNCount');
         
