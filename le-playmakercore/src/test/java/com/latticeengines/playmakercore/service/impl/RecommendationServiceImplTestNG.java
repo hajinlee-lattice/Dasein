@@ -112,6 +112,30 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
             Assert.assertNotNull(recommendation.getPid());
         }
     }
+    
+//    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByLaunchId" })
+//    public void testGetRecommendationByPlayId() {
+//        MultiTenantContext.setTenant(tenant);
+//
+//        List<String> playIds = new ArrayList<>();
+//        playIds.add(PLAY_ID);
+//
+//        int recommendationCount = recommendationService.findRecommendationCount(new Date(0L), //
+//                SynchronizationDestinationEnum.SFDC.toString(), playIds, null);
+//
+//        Assert.assertEquals(1, recommendationCount);
+//
+//        List<Recommendation> recommendations = recommendationService.findRecommendations(new Date(0L), //
+//                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, null);
+//        Assert.assertNotNull(recommendations);
+//        Assert.assertTrue(recommendations.size() > 0);
+//        Assert.assertEquals(recommendations.size(), recommendationCount);
+//
+//        for (Recommendation recommendation : recommendations) {
+//            Assert.assertNotNull(recommendation.getRecommendationId());
+//            Assert.assertNotNull(recommendation.getPid());
+//        }
+//    }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByPlayId" })
     public void testGetRecommendationAsMapByPlayId() {

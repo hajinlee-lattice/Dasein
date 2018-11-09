@@ -88,7 +88,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     @Override
-    public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<Integer> playgroupIds,
+    public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds,
             int syncDestination, Map<String, String> orgInfo) {
         PlayLaunchDashboard dashboard;
         List<LaunchState> launchstates = new ArrayList<>();
@@ -104,28 +104,42 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                     effectiveOrgInfo.getRight());
         }
         List<LaunchSummary> summaries = dashboard.getLaunchSummaries();
-        List<Play> uniquePlays = dashboard.getUniquePlaysWithLaunches();
         Map<String, String> activePlays = new HashMap<String, String>();
-        uniquePlays.forEach(play->{
-            if (play.getPlayStatus() == PlayStatus.ACTIVE) {
-                activePlays.put(play.getName(), play.getName());
-            }
-        });
+        if (CollectionUtils.isNotEmpty(playIds)) {
+            playIds.forEach(playId->{
+                if (!activePlays.containsKey(playId)) {
+                    activePlays.put(playId, playId); 
+                }
+            });
+        }
         List<String> launchIds = new ArrayList<String>();
         if (latest) {
             Map<String, String> match = new HashMap<String, String>();
             summaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
-                    if ((!match.containsKey(launch.getPlayName())) && activePlays.containsKey(launch.getPlayName())) {
-                        match.put(launch.getPlayName(), launch.getLaunchId());
-                        launchIds.add(launch.getLaunchId());
+                    if (!match.containsKey(launch.getPlayName()) ) {
+                        if (CollectionUtils.isNotEmpty(playIds)) {
+                            if (activePlays.containsKey(launch.getPlayName())){
+                                match.put(launch.getPlayName(), launch.getLaunchId());
+                                launchIds.add(launch.getLaunchId());
+                            }
+                        }
+                        else {
+                            match.put(launch.getPlayName(), launch.getLaunchId());
+                            launchIds.add(launch.getLaunchId());
+                        }
                     }
                 }
             });
         } else {
             summaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
-                    if (activePlays.containsKey(launch.getPlayName())) {
+                    if (CollectionUtils.isNotEmpty(playIds)) {
+                        if (activePlays.containsKey(launch.getPlayName())){
+                            launchIds.add(launch.getLaunchId());
+                        }
+                    }
+                    else {
                         launchIds.add(launch.getLaunchId());
                     }
                 }

@@ -9,19 +9,23 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerSyncLookupSource;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -29,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.dao.impl.LpiPMRecommendationDaoAdapterImpl;
+import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
@@ -48,6 +53,9 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @Inject
     private RecommendationEntityMgr recommendationEntityMgr;
+    
+    @Inject
+    private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
 
     @Inject
     private LpiPMRecommendation lpiPMRecommendation;
@@ -72,10 +80,12 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     private Play play;
 
     private PlayLaunch playLaunch;
+    
+    private CustomerSpace customerSpace;
 
     private Map<String, String> eloquaAppId1;
     private Map<String, String> eloquaAppId2;
-
+    private Map<String, String> badOrgInfo;
     private Date launchTime;
 
     private int maxUpdateRows = 20;
@@ -84,6 +94,9 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        badOrgInfo = new HashMap<>();
+        badOrgInfo.put(CDLConstants.ORG_ID, "BAD_ID_" + System.currentTimeMillis());
+        badOrgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
         eloquaAppId1 = new HashMap<String, String>();
         eloquaAppId2 = new HashMap<String, String>();
         eloquaAppId1.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
@@ -91,6 +104,7 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
         tenant = testPlayCreationHelper.getTenant();
+        customerSpace = CustomerSpace.parse(tenant.getId());
 
         play = testPlayCreationHelper.getPlay();
         playLaunch = testPlayCreationHelper.getPlayLaunch();
@@ -168,6 +182,59 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         Assert.assertTrue(count >= maxUpdateRows);
         System.out.println("This is Contacts List:");
         System.out.println(contacts.toString());
+    }
+    
+    @AfterClass(groups = { "deployment" })
+    public void teardown() throws Exception {
+        //testPlayCreationHelper.cleanupArtifacts();
+    }
+
+    @Test(groups = "deployment")
+    public void testPlays() {
+        Map<String, Object> playCount = playmakerRecommendationMgr.getPlayCount(customerSpace.toString(),
+                PlaymakerSyncLookupSource.V2.name(), 0, null, SynchronizationDestinationEnum.SFDC.ordinal(),
+                badOrgInfo);
+        Assert.assertNotNull(playCount);
+        Object countObj = playCount.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+        Assert.assertNotNull(countObj);
+        Long count = (Long) countObj;
+        Assert.assertNotNull(count);
+        Assert.assertTrue(count == 0);
+
+        playCount = playmakerRecommendationMgr.getPlayCount(customerSpace.toString(),
+                PlaymakerSyncLookupSource.V2.name(), 0, null, SynchronizationDestinationEnum.SFDC.ordinal(), orgInfo);
+        Assert.assertNotNull(playCount);
+        countObj = playCount.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+        Assert.assertNotNull(countObj);
+        count = (Long) countObj;
+        Assert.assertNotNull(count);
+        Assert.assertTrue(count > 0);
+        // not actual restriction - only for this test scenario
+        Assert.assertTrue(count < 100);
+
+        Map<String, Object> plays = playmakerRecommendationMgr.getPlays(customerSpace.toString(),
+                PlaymakerSyncLookupSource.V2.name(), 0, 0, 10, null, SynchronizationDestinationEnum.SFDC.ordinal(),
+                orgInfo);
+        Assert.assertNotNull(plays);
+        Assert.assertNotNull(plays.get(PlaymakerRecommendationEntityMgr.START_KEY));
+        Assert.assertNotNull(plays.get(PlaymakerRecommendationEntityMgr.END_KEY));
+        Assert.assertNotNull(plays.get(PlaymakerRecommendationEntityMgr.RECORDS_KEY));
+        @SuppressWarnings({ "unchecked" })
+        List<Map<String, Object>> result = (List<Map<String, Object>>) plays
+                .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), count.intValue());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(result));
+        result.stream() //
+                .forEach(playMap -> {
+                    Assert.assertNotNull(playMap);
+                    Assert.assertTrue(MapUtils.isNotEmpty(playMap));
+                    Assert.assertNotNull(playMap.get(PlaymakerConstants.ID));
+                    Assert.assertNotNull(playMap.get(PlaymakerConstants.ID + PlaymakerConstants.V2));
+                    Assert.assertNotNull(playMap.get(PlaymakerConstants.ExternalId));
+                    Assert.assertNotNull(playMap.get(PlaymakerConstants.DisplayName));
+                    Assert.assertNotNull(playMap.get(PlaymakerConstants.RowNum));
+                });
     }
 
     private void createDummyRecommendations(int newRecommendationsCount, Date launchDate) {

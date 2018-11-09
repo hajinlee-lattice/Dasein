@@ -61,8 +61,13 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 latestLaunchFlag = true;
             }
         }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, null, 0, orgInfo);
-        return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
+        if (CollectionUtils.isNotEmpty(launchIds)) {
+            return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
@@ -74,8 +79,13 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 latestLaunchFlag = true;
             }
         }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, null, 0, orgInfo);
-        return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds);
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
+        if (CollectionUtils.isNotEmpty(launchIds)) {
+            return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds);
+        }
+        else {
+            return 0;
+        }
     }
 
 //    @Override

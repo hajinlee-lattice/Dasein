@@ -15,6 +15,6 @@ public interface LpiPMPlay {
 
     int getPlayCount(long start, List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo);
 
-    List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<Integer> playgroupIds, int syncDestination,
+    List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds, int syncDestination,
             Map<String, String> orgInfo);
 }
