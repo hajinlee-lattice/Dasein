@@ -3,6 +3,8 @@ package com.latticeengines.workflow.exposed.util;
 import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.LOG_REDIRECT_LINK;
 import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.REDIRECT_RESOURCE;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -11,8 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.ExitStatus;
@@ -33,6 +35,9 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 
 public class WorkflowJobUtils {
     private static final String CUSTOMER_SPACE = "CustomerSpace";
+    private static final Date MIGRATE_THRESHOLD = Date.from(ZonedDateTime.of(
+            2019, 2, 1, 0, 0, 0, 0, ZoneId.of("UTC-05:00"))
+            .toInstant());
 
     public static Job assembleJob(ReportService reportService, LEJobExecutionRetriever leJobExecutionRetriever,
                             String lpUrl, WorkflowJob workflowJob, Boolean includeDetails) {
@@ -83,20 +88,39 @@ public class WorkflowJobUtils {
         if (workflowJob.getStartTimeInMillis() != null) {
             job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
         } else if (workflowStatus != null) {
-            job.setStartTimestamp(workflowStatus.getStartTime());
+            Date startTime = workflowStatus.getStartTime();
+            if (startTime.compareTo(MIGRATE_THRESHOLD) < 0) {
+                startTime = adjustDate(startTime, "UTC-05:00", "UTC");
+            }
+            job.setStartTimestamp(startTime);
         } else {
             job.setStartTimestamp(null);
         }
 
         if (job.getJobStatus() != null && job.getJobStatus().isTerminated()) {
             if (workflowStatus != null) {
-                job.setEndTimestamp(workflowStatus.getEndTime());
+                Date endTime = workflowStatus.getEndTime();
+                if (endTime.compareTo(MIGRATE_THRESHOLD) < 0) {
+                    endTime = adjustDate(endTime, "UTC-05:00", "UTC");
+                }
+                job.setEndTimestamp(endTime);
             } else {
                 job.setEndTimestamp(null);
             }
         }
 
         return job;
+    }
+
+    @VisibleForTesting
+    public static Date adjustDate(Date dateToAdjust, String fromZone, String toZone) {
+        if (dateToAdjust != null) {
+            ZonedDateTime fromDatetime = ZonedDateTime.ofInstant(dateToAdjust.toInstant(), ZoneId.of(fromZone));
+            ZonedDateTime toDateTime = fromDatetime.toInstant().atZone(ZoneId.of(toZone));
+            return Date.from(toDateTime.toInstant());
+        } else {
+            return null;
+        }
     }
 
     private static String logRedirectLink(String lpUrl, long workflowPid) {
@@ -180,9 +204,9 @@ public class WorkflowJobUtils {
         }
 
         Set<String> workflowJobStatuses = new HashSet<>();
-        jobStatuses.stream().forEach(jobStatus -> {
+        jobStatuses.forEach(jobStatus -> {
             workflowJobStatuses.addAll(JobStatus.mappedWorkflowJobStatuses(jobStatus));
         });
-        return workflowJobStatuses.stream().collect(Collectors.toList());
+        return new ArrayList<>(workflowJobStatuses);
     }
 }

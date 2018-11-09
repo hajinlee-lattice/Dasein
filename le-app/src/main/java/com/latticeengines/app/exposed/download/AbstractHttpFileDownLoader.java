@@ -189,7 +189,6 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                     SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
                                     formatter.setTimeZone(TimeZone.getTimeZone("PST"));
                                     String dateInString = formatter.format(new Date(Long.valueOf(columnValue)));
-                                    log.info("Reformat " + columnValue + " to " + dateInString);
                                     recordAsArray[columnIndex] = dateInString;
                                 }
                             }
