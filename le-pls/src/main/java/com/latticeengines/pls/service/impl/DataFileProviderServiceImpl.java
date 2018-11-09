@@ -206,7 +206,10 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
             String fileName, String filePath) throws IOException {
         log.info(String.format("Download file with fileName %s and filePath %s.", fileName, filePath));
         CustomerSpaceS3FileDownloader.S3FileDownloadBuilder builder = new CustomerSpaceS3FileDownloader.S3FileDownloadBuilder();
-        builder.setMimeType(mimeType).setFilePath(filePath).setImportFromS3Service(importFromS3Service);
+        builder.setMimeType(mimeType)
+                .setFilePath(filePath)
+                .setFileName(fileName)
+                .setImportFromS3Service(importFromS3Service);
         CustomerSpaceS3FileDownloader customerSpaceS3FileDownloader = new CustomerSpaceS3FileDownloader(builder);
         customerSpaceS3FileDownloader.downloadFile(request, response);
 
