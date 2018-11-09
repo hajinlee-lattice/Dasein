@@ -79,7 +79,7 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
             }
 
             @Override
-            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Version version) {
+            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Boolean allCustomerAttrs, Version version) {
                 return null;
             }
 

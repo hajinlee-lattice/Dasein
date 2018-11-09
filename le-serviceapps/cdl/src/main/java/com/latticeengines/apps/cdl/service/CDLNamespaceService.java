@@ -18,7 +18,7 @@ public interface CDLNamespaceService {
     boolean hasTableRole(TableRoleInCollection role, DataCollection.Version version);
     Namespace2<String, String> resolveServingStore(BusinessEntity businessEntity, DataCollection.Version version);
 
-    Namespace1<String> resolveDataCloudVersion();
+    Namespace1<String> resolveDataCloudVersion(DataCollection.Version version);
 
     <T extends Serializable> Namespace2<T, DataCollection.Version> appendActiveVersion(T coord);
     <T extends Serializable> Namespace2<T, DataCollection.Version> appendActiveVersion(Namespace1<T> namespace);

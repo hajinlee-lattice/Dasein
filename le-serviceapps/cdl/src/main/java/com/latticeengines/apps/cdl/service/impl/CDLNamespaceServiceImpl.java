@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -33,9 +32,6 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
 
     @Inject
     private DataCollectionService dataCollectionService;
-
-    @Inject
-    private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -76,7 +72,6 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
 
     @Override
     public boolean hasTableRole(TableRoleInCollection role, DataCollection.Version version) {
-        String tenantId = MultiTenantContext.getShortTenantId();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         List<String> names = dataCollectionService.getTableNames(customerSpace, "", role, version);
         return CollectionUtils.isNotEmpty(names);
@@ -92,9 +87,11 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
     }
 
     @Override
-    public Namespace1<String> resolveDataCloudVersion() {
+    public Namespace1<String> resolveDataCloudVersion(DataCollection.Version version) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
+        if (version == null) {
+            version = dataCollectionService.getActiveVersion(customerSpace);
+        }
         DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
         String dcBuildNumber = status.getDataCloudBuildNumber();
         String dcVersion;

@@ -203,7 +203,7 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                 ThreadLocal<AtomicLong> amCounter = new ThreadLocal<>();
                 if (BusinessEntity.Account.equals(entity)) {
                     // merge serving store and AM, for Account
-                    Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion();
+                    Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion(version);
                     boolean internalEnrichEnabled = zkConfigService
                             .isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
                     ParallelFlux<ColumnMetadata> amFlux = amMetadataStore.getMetadataInParallel(amNs) //

@@ -2,6 +2,7 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -121,11 +122,18 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
-    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Version version) {
+    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Boolean allCustomerAttrs, Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/allow-modeling",
                 shortenCustomerSpace(customerSpace));
+        List<String> params = new ArrayList<>();
         if (version != null) {
-            url += "?version=" + version.toString();
+            params.add("version=" + version.toString());
+        }
+        if (Boolean.TRUE.equals(allCustomerAttrs)) {
+            params.add("all-customer-attrs=1");
+        }
+        if (CollectionUtils.isNotEmpty(params)) {
+            url += "?" + StringUtils.join(params, "&");
         }
         List<ColumnMetadata> list = getList("serving store allowed modeling", url, ColumnMetadata.class);
         if (CollectionUtils.isNotEmpty(list)) {

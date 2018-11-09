@@ -304,7 +304,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             dataCollectionProxy.upsertTable(customerSpace.toString(), masterTable.getName(), entity.getBatchStore(),
                     inactive);
         }
-        List<String> retainAttrNames = servingStoreProxy.getAllowedModelingAttrs(customerSpace.toString(), inactive) //
+        List<String> retainAttrNames = servingStoreProxy.getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
         if (retainAttrNames == null) {
