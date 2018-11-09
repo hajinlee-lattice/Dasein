@@ -444,11 +444,9 @@ angular.module('lp.import')
     };
 
     this.setPostBody = function(postBody) {
-        console.log(postBody);
         this.postBody = postBody;
     }
     this.getPostBody = function() {
-        console.log(this.postBody);
         return this.postBody;
     }
 
@@ -861,7 +859,7 @@ angular.module('lp.import')
 	    this.templateDataIngestion = function(fileName, importOnly, autoImportData, postBody) {
 	        var deferred = $q.defer(),
                 result,
-                url = importOnly ? '/cdl/s3/template/import' : '/cdl/s3/template',
+                url = importOnly ? '/pls/cdl/s3/template/import' : '/pls/cdl/s3/template',
                 params = { 
                     'templateFileName':fileName,
     	            'source': 'File',
