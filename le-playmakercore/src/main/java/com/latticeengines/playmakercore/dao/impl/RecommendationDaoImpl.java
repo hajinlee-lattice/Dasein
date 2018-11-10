@@ -484,7 +484,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + "WHERE deleted = :deleted AND launchId in (:launchIds)";
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
-            queryStr += " AND accoundId in (:accountIds)";
+            queryStr += " AND accountId in (:accountIds)";
         }
         queryStr += " ORDER BY accountId";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
