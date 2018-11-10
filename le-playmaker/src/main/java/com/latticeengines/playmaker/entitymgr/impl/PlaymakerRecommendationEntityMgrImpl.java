@@ -5,18 +5,24 @@ import java.util.List;
 import java.util.Map;
 import java.lang.String;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
+import com.latticeengines.playmakercore.dao.impl.RecommendationDaoImpl;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
 
     static final int MAXIMUM_DESCRIPTION_LENGTH = 255;
+    
+    private static final Logger log = LoggerFactory.getLogger(PlaymakerRecommendationEntityMgrImpl.class);
+    
     @Autowired
     private PlaymakerDaoFactory daoFactory;
 
@@ -131,6 +137,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds, accountIds, recStart,
                 orgInfo, appId);
         Map<String, Object> result = wrapResult(contacts);
+        log.info("get contacts reply: " + result.toString() + "\n");
         return result;
     }
 

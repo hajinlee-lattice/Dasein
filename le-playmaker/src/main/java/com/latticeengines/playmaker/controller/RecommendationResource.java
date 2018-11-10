@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -183,6 +184,7 @@ public class RecommendationResource {
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        log.info("getContact API: " + request.toString() + "\n");
         return playmakerRecommendationMgr.getContacts(tenantName, lookupSource, start, offset, maximum, contactIds,
                 accountIds, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));

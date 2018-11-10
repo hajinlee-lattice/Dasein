@@ -474,6 +474,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     @SuppressWarnings("unchecked")
     @Override
     public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, List<String> accountIds) {
+        log.info("contact requst with launchIds: " + launchIds.toString());
         if (CollectionUtils.isEmpty(launchIds)) {
             return null;
         }
