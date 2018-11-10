@@ -93,15 +93,20 @@ angular.module('lp.playbook.plays', [
 
     vm.tileClick = function ($event, play) {
         $event.preventDefault();
+
+        var $clickedEl = angular.element($event.target),
+            $click = angular.element($event.target).attr('ng-click'),
+            $clickFunction = ($click ? $click.split('(')[0] : ''),
+            $sref = angular.element($event.target).attr('ui-sref');
+
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
         PlaybookWizardStore.setPlay(play);
 
-        if(launchedStatus.hasLaunched) {
-            $state.go('home.playbook.dashboard', {play_name: play.name} );
-        } else if (play.ratingEngine && play.ratingEngine.id) {
-            $state.go('home.playbook.dashboard', {play_name: play.name} );
-            //$state.go('home.playbook.create.rating', { play_name: play.name, rating_id: play.ratingEngine.id } );
+        if($clickFunction !== 'vm.tileClick' && ($click || $sref)) {
+            return false;
         }
+
+        $state.go('home.playbook.dashboard', {play_name: play.name} );
     };
 
     var oldPlayDisplayName = '';
