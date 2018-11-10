@@ -100,16 +100,16 @@ public final class DataCloudConstants {
     public static final String STATS_ATTR_BKTS = "BktCounts";
     public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
 
-    public static final String TRANSFORMER_AM_DECODER = "AMDecoder";
+
     public static final String TRANSFORMER_AM_ENRICHER = "AMAttrEnricher";
     public static final String TRANSFORMER_PROFILER = "SourceProfiler";
-    public static final String TRANSFORMER_CLEANER = "AMCleaner";
     public static final String TRANSFORMER_BUCKETER = "sourceBucketer";
     public static final String TRANSFORMER_BUCKETED_FILTER = "bucketedFilter";
     public static final String TRANSFORMER_MERGE_MATCH = "mergeMatch";
     public static final String TRANSFORMER_STATS_CALCULATOR = "statsCalculator";
     public static final String TRANSFORMER_SORTER = "sourceSorter";
     public static final String TRANSFORMER_COPIER = "sourceCopier";
+    public static final String TRANSFORMER_DIFFER = "sourceDiffer";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
     public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
     public static final String TRANSFORMER_CONTACT_NAME_CONCATENATER = "contactNameConcatenater";
@@ -127,7 +127,6 @@ public final class DataCloudConstants {
     public static final String PERIOD_DATA_FILTER = "periodDatafilter";
     public static final String PERIOD_DATA_AGGREGATER = "periodDataAggregater";
     public static final String PERIOD_DATA_DISTRIBUTOR = "periodDataDistributor";
-    public static final String AM_REFRESH_VERSION_UPDATER = "amRefreshVersionUpdater";
     public static final String PERIOD_COLLECTOR = "periodCollector";
     public static final String PERIOD_CONVERTOR = "periodConvertor";
     public static final String PERIOD_DATE_CONVERTOR = "periodDateConvertor";
@@ -141,10 +140,14 @@ public final class DataCloudConstants {
     /***********************************
      * Transformer names for AM rebuild
      ***********************************/
+    public static final String TRANSFORMER_MAP_ATTR = "mapAttribute";
     public static final String TRANSFORMER_AMSEED_MARKER = "AMSeedMarkerTransformer";
     public static final String TRANSFORMER_AMSEED_PRIACT_FIX = "AMSeedPriActFixTransformer";
     public static final String TRANSFORMER_AMS_FILL_DOM_IN_DU = "AMSeedFillDomainInDU";
     public static final String TRANSFORMER_AMS_CLEANBY_DOM_OWNER = "AMSeedCleanByDomainOwner";
+    public static final String TRANSFORMER_CLEANER = "AMCleaner";
+    public static final String TRANSFORMER_AM_DECODER = "AMDecoder";
+    public static final String TRANSFORMER_AM_REFRESH_VER_UPDATER = "amRefreshVersionUpdater";
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 
