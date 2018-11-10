@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import shutil
 from replace_token import replace
@@ -15,7 +16,7 @@ def test_replace():
 
     replace(conf_dir, profile)
     with open(conf_dir + "/app.properties") as file:
-        print file.read()
+        print(file.read())
         for line in file:
             if 'app.conf.1' in line:
                 assert '=value1' in line

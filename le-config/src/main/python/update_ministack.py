@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import base64
 import httplib
@@ -15,7 +16,7 @@ KEYS_TO_BE_UPDATED = [
 
 def main():
     args = parse_args()
-    print "profile=%s, consul=%s" % (args.profile, args.consul)
+    print("profile=%s, consul=%s" % (args.profile, args.consul))
     update_profile(args.profile, args.environment, args.stack, args.consul, args.ministackip)
 
 def update_profile(profile, environment, stack, consul, ministackip):
@@ -23,7 +24,7 @@ def update_profile(profile, environment, stack, consul, ministackip):
         ip = read_from_stack(consul, environment, stack, HAPROXY_KEY)
     else:
         ip = ministackip
-    print "found haproxy ip %s for stack %s in %s" % (ip, stack, environment)
+    print("found haproxy ip %s for stack %s in %s" % (ip, stack, environment))
     with open(profile, "r") as fin:
         with open(profile + NEW_SUFFIX, "w") as fout:
             http_protocal = 'http'
@@ -52,7 +53,7 @@ def remove_stack(server, stack):
     conn = httplib.HTTPConnection(server)
     conn.request("DELETE", "/v1/kv/%s?recurse" % stack)
     response = conn.getresponse()
-    print response.status, response.reason
+    print(response.status, response.reason)
 
 def read_from_stack(server, environment, stack, key):
     key = "%s/%s/%s" % (environment, stack, key)
@@ -62,13 +63,13 @@ def _write_to_consul(server, key, value):
     conn = httplib.HTTPConnection(server)
     conn.request("PUT", "/v1/kv/%s" % key, value)
     response = conn.getresponse()
-    print response.status, response.reason
+    print(response.status, response.reason)
 
 def _read_from_consul(server, key):
     conn = httplib.HTTPConnection(server)
     conn.request("GET", "/v1/kv/%s" % key)
     response = conn.getresponse()
-    print response.status, response.reason
+    print(response.status, response.reason)
     body = response.read()
     return base64.b64decode(json.loads(body)[0]["Value"])
 
@@ -76,7 +77,7 @@ def _remove_from_consul(server, key):
     conn = httplib.HTTPConnection(server)
     conn.request("DELETE", "/v1/kv/%s?recurse" % key)
     response = conn.getresponse()
-    print response.status, response.reason
+    print(response.status, response.reason)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Replace tokens in properties')

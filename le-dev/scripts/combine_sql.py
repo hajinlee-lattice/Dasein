@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 
 TABLE_TO_DELETE = []
@@ -18,10 +19,10 @@ def main():
     ddl_file = args.generated
     out_file = args.output
     DATABASE = args.db
-    print "using db %s" % DATABASE
-    print "using diff file %s" % diff_file
-    print "using ddl file %s" % ddl_file
-    print "using output file %s" % out_file
+    print("using db %s" % DATABASE)
+    print("using diff file %s" % diff_file)
+    print("using ddl file %s" % ddl_file)
+    print("using output file %s" % out_file)
 
     with open(out_file, 'w') as ofile:
         ofile.write('USE `%s`;\n' % DATABASE)
@@ -87,7 +88,7 @@ def process_alter_table_line(line, flags):
         ALTER_TABLE_DROP_LINES.append(line)
         key = find_fk_to_be_drop(line)
         if key is not None:
-            print "Find a FK to be dropped: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
+            print("Find a FK to be dropped: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE))
             DROP_FKS.append(key)
         return
     else:
@@ -105,7 +106,7 @@ def process_alter_table_line(line, flags):
         key = find_fk_to_be_created(line)
         if key is not None:
             line = line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
-            print "Find a FK to be created: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
+            print("Find a FK to be created: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE))
             CREATE_FKS.append(key)
         if line.strip() == '':
             flags['alter_table_block'] = False
@@ -136,10 +137,10 @@ def process_missing_table_line(line, missing_on_remote):
         parts = line.split(':')
         table = parts[1].strip()
         if missing_on_remote:
-            print "found a table to be created on remote server: " + table
+            print("found a table to be created on remote server: " + table)
             TABLE_TO_CREATE.append(table)
         else:
-            print "found a table can be deleted from remote server: " + table
+            print("found a table can be deleted from remote server: " + table)
             TABLE_TO_DELETE.append(table)
         return True
 
@@ -198,7 +199,7 @@ def cleanup_script(outfile):
 def process_ddl(ddl_file):
     global TABLE_TO_CREATE
     global LINES_TO_FILE
-    print 'tables to create: ', TABLE_TO_CREATE
+    print('tables to create: ', TABLE_TO_CREATE)
     with open(ddl_file, 'r') as file:
         seen_first_create = False
         for line in file:

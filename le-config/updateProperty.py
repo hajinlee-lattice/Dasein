@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This script is used to update property file in specified environment
 import glob
 import os
@@ -11,7 +12,7 @@ ENVIRONMENTS=('qaclustera', 'qaclusterb', 'prodclustera', 'prodclusterb')
 def main():
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     topLevelDir = os.getcwd()
-    print "Change to top level directory: " + topLevelDir
+    print("Change to top level directory: " + topLevelDir)
 
     dictionaryFileName = DICTIONARY_FILE
     dictionaryFile = open(dictionaryFileName)
@@ -27,8 +28,8 @@ def main():
 
 
 def printCurrentDir(dir):
-    print LINE_SEPERATOR
-    print "Current directory is: " + dir
+    print(LINE_SEPERATOR)
+    print("Current directory is: " + dir)
 
 def updatePropertyFiles(environment, dir, dictionary):
     qaPropertyFiles = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
@@ -57,19 +58,19 @@ def updateContents(environment, filename, conents, dictionary, file):
             if '${INSIDE_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${INSIDE_TOMCAT}', dictionary['%s.inside.tomcat' % environment])
-                print filename + ' : ' + environment + " : " + line.replace('\n', '')
+                print(filename + ' : ' + environment + " : " + line.replace('\n', ''))
             if '${OUTSIDE_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
-                print filename + ' : ' + environment + " : " + line.replace('\n', '')
+                print(filename + ' : ' + environment + " : " + line.replace('\n', ''))
             if '${API_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${API_TOMCAT}', dictionary['%s.api.tomcat' % environment])
-                print filename + ' : ' + environment + " : " + line.replace('\n', '')
+                print(filename + ' : ' + environment + " : " + line.replace('\n', ''))
             if '${LE_STACK}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${LE_STACK}', dictionary['%s.le.stack' % environment])
-                print filename + ' : ' + environment + " : " + line.replace('\n', '')
+                print(filename + ' : ' + environment + " : " + line.replace('\n', ''))
         file.write(line)
 
 def loadContents(conents):
@@ -85,8 +86,8 @@ def loadContents(conents):
 
             if 'qacluster' in pair[0] or 'prodcluster' in pair[0]:
                 dictionary[pair[0]] = dictionary[pair[0]].replace('\n', '')
-                print '%s=%s' % (pair[0], dictionary[pair[0]])
-    print ''
+                print('%s=%s' % (pair[0], dictionary[pair[0]]))
+    print('')
 
     return dictionary
 

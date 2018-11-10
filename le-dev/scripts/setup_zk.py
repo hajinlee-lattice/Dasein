@@ -1,9 +1,10 @@
+from __future__ import print_function
 import argparse
 import os
 from kazoo.client import KazooClient
 
 WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print 'WSHOME=%s' % WSHOME
+print('WSHOME=%s' % WSHOME)
 
 def main():
     args = parseCliArgs()
@@ -11,15 +12,15 @@ def main():
     zk = KazooClient(hosts='127.0.0.1:2181')
     zk.start()
 
-    print 'bootstrap source db in zk'
+    print('bootstrap source db in zk')
     filename = 'source_dbs_qa.json' if args.qasourcedbs else 'source_dbs_dev.json'
     json_file = os.path.join(WSHOME, 'le-dev', 'testartifacts', 'zookeeper', filename)
     with open(json_file) as f:
         stack = os.environ['LE_STACK']
         node = "/Pods/Default/Services/PropData/Stacks/%s/DataSources/SourceDB" % stack
-        print node
+        print(node)
         value = f.read()
-        print value
+        print(value)
         zk.ensure_path(node)
         zk.set(node, value)
 

@@ -193,7 +193,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
             for (String col : fewColumns) {
                 Object val = record.get(col);
                 Assert.assertNotNull(val);
-                Assert.assertNotNull(StringUtils.isNotBlank(val.toString()));
+                Assert.assertTrue(StringUtils.isNotBlank(val.toString()));
             }
 
             if (shouldCheckRating) {

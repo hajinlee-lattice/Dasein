@@ -10,7 +10,7 @@ CONDA_ARTIFACT_DIR=${WSHOME}/le-dev/conda/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
-    ANACONDA_VERSION=5.2.0
+    ANACONDA_VERSION=5.3.0
 
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
@@ -43,7 +43,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     fi
 fi
 
-for CONDAENV in 'lattice|2.7' 'v01|2.7'
+for CONDAENV in 'lattice|2.7' 'v01|2.7' 'p2|2.7'
     do
         envname=`echo $CONDAENV | cut -d \| -f 1`
         pythonversion=`echo $CONDAENV | cut -d \| -f 2`
@@ -58,6 +58,13 @@ for CONDAENV in 'lattice|2.7' 'v01|2.7'
     done
 
 ${ANACONDA_HOME}/bin/conda update -y -n base conda
+
+source ${ANACONDA_HOME}/bin/activate p2
+
+pip install --upgrade pip
+pip install -r $WSHOME/le-dev/scripts/requirements.txt
+
+source ${ANACONDA_HOME}/bin/deactivate
 
 source ${ANACONDA_HOME}/bin/activate lattice
 

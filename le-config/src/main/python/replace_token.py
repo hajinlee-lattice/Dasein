@@ -1,3 +1,4 @@
+from __future__ import print_function
 import glob
 import os
 import sys
@@ -8,12 +9,12 @@ NEW_SUFFIX=".new"
 
 def main():
     dir, profile = sys.argv[1:3]
-    print "dir=%s, profile=%s" % (dir, profile)
+    print("dir=%s, profile=%s" % (dir, profile))
     replace(dir, profile)
 
 def replace(dir, profile):
     tokens = load_tokens(profile)
-    print "\nFound tokens:", tokens
+    print("\nFound tokens:", tokens)
 
     prop_files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
     env_files = glob.glob(dir + '/' + ENV_FILE)
@@ -31,7 +32,7 @@ def replace(dir, profile):
                         for k, v in tokens.items():
                             new_value = new_value.replace('${%s}' % k, v).strip()
                         if new_value != value:
-                            print 'Set %s=%s' % (key.strip(), new_value)
+                            print('Set %s=%s' % (key.strip(), new_value))
                         new_file.write('%s=%s\n' % (key.strip(), new_value))
                     else:
                         new_file.write(line)

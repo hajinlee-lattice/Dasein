@@ -5,11 +5,12 @@ Created on Mar 30, 2016
 
 @author: smeng
 '''
+from __future__ import print_function
 
-import requests
-import json
 import argparse
 import hashlib
+import json
+import requests
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-env', dest='env', action='store', required=False, help='Environment: prod or qa', default='qa')
@@ -17,8 +18,6 @@ parser.add_argument('-t', dest='tenant', action='store', required=True, help='LP
 parser.add_argument('-u', dest='username', action='store', required=False, help='username for LP', default='ga_dev@lattice-engines.com')
 parser.add_argument('-p', dest='password', action='store', required=False, help='password for LP', default='tahoe')
 args = parser.parse_args()
-
-
 
 LP_SERVER_HOST = ''
 if (args.env == 'prod'):
@@ -30,9 +29,9 @@ elif (args.env == 'qa'):
 def getToken():
     auth_token = __getAuthenticationToken(args.tenant, args.username, hashlib.sha256(args.password).hexdigest())
     access_token = __getAccessToken(args.tenant, auth_token)
-    print '\n**************************************************'
-    print 'ACCESS TOKEN: ' + access_token
-    print '**************************************************\n'
+    print('\n**************************************************')
+    print('ACCESS TOKEN: ' + access_token)
+    print('**************************************************\n')
 
 
 

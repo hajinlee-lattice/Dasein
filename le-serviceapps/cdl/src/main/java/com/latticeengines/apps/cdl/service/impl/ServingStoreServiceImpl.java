@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +63,21 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 if (Boolean.TRUE.equals(cm.getShouldDeprecate()) && !AttrState.Inactive.equals(cm.getAttrState())) {
                     cm.setAttrState(AttrState.Deprecated);
                 }
+
+                if (AttrState.Inactive.equals(cm.getAttrState())) {
+                    // disable these useages if it is inactive attribute.
+                    cm.disableGroup(ColumnSelection.Predefined.Segment);
+                    cm.disableGroup(ColumnSelection.Predefined.Enrichment);
+                    cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
+                    cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
+                }
+
+                if (AttrState.Deprecated.equals(cm.getAttrState())) {
+                    // disable these useages if it is deprecated attribute.
+                    cm.disableGroup(ColumnSelection.Predefined.Enrichment);
+                    cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
+                }
+
                 return cm;
             });
         } else {

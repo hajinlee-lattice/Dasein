@@ -5,6 +5,7 @@ import base64
 import boto3
 import re
 import subprocess
+import sys
 
 NEXUS_DOCKER_REGISTRY="10.41.1.75:18666"
 NAMESPACE="latticeengines"
@@ -181,7 +182,10 @@ def login_aws(environment):
     client = ecr_client(environment)
     res = client.get_authorization_token(registryIds=[account_id])
     data = res['authorizationData'][0]
-    username, password = base64.b64decode(data['authorizationToken']).split(':')
+    token = base64.b64decode(data['authorizationToken'])
+    if sys.version_info >= (3,0):
+        token = token.decode("utf-8")
+    username, password = token.split(':')
     return 'docker login -u %s -p %s %s' % (username, password, data['proxyEndpoint'])
 
 def ecr_client(environment):

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import glob
 import os
 
@@ -9,7 +10,7 @@ ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster')
 WSHOME=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 def main():
-    print "Scanning WSHOME " + WSHOME
+    print("Scanning WSHOME " + WSHOME)
 
     for environment in ENVIRONMENTS:
         try:
@@ -33,7 +34,7 @@ def main():
         if os.path.isfile(target_path):
             os.remove(target_path)
         with open(target_path, 'w') as f:
-            print 'Writing to ' + target_path
+            print('Writing to ' + target_path)
             f.write(aggregated)
 
 def aggregate_props(dir, keys, quiet=False):
