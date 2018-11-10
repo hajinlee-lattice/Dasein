@@ -60,6 +60,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                             processedSegmentAccountsCount, pageNo, dataFileWriter, schema);
                 }
             }
+            log.info(String.format("processedSegmentAccountsCount = %d", processedSegmentAccountsCount));
         }
     }
 
