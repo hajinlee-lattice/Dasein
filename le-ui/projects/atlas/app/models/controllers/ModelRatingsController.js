@@ -25,10 +25,12 @@ angular.module('lp.models.ratings', [
     }
   };
 })
-.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, Notice, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore) {
-
+.controller('ModelRatingsController', function (
+    $scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, Model, Notice, 
+    ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore
+) {
     var vm = this;
+
     angular.extend(vm, {
         stateParams: $stateParams,
         modelId: $stateParams.modelId,
@@ -46,6 +48,10 @@ angular.module('lp.models.ratings', [
     });
 
     vm.init = function() {
+        vm.currentRating = RatingsEngineStore.currentRating;
+        vm.activeModel = vm.currentRating.activeModel;
+        vm.predictionType = vm.activeModel.AI.predictionType;
+
         // Atlas uses dashboard.ratings for vm.section
         if (vm.section === 'dashboard.ratings') {
             
@@ -180,7 +186,6 @@ angular.module('lp.models.ratings', [
     }
 
     function refreshChartData(){
-
         vm.buckets = vm.workingBuckets;
         vm.bucketsLength = vm.buckets.length;
         vm.updateContent = false;
@@ -191,59 +196,59 @@ angular.module('lp.models.ratings', [
         } else if (vm.buckets.length < 6) {
             vm.bucketNames = ['A', 'B', 'C', 'D', 'E'];
             vm.canAddBucket = true;
-        };
-
+        }
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
-
+            var bucket = vm.buckets[i];
             var previousBucket = vm.buckets[i-1];
+
             if (previousBucket != null) {
-              vm.previousRightBoundScore = previousBucket["right_bound_score"];
+                vm.previousRightBoundScore = previousBucket["right_bound_score"];
             }
 
             // set each buckets left_bound_score to the previous buckets right_bound_score minus one
-            vm.buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
+            bucket.left_bound_score = vm.previousRightBoundScore - 1;
             vm.buckets[0].left_bound_score = 99;
 
-            if(vm.buckets[i].right_bound_score === 0){
-                vm.buckets[i].right_bound_score = 5;
-            };
+            if (bucket.right_bound_score === 0){
+                bucket.right_bound_score = 5;
+            }
 
-            vm.rightScore = vm.buckets[i].right_bound_score - 1;
+            vm.rightScore = bucket.right_bound_score - 1;
             vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
             vm.rightConverted = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_converted;
-            vm.leftScore = vm.buckets[i].left_bound_score;
+            vm.leftScore = bucket.left_bound_score;
             vm.leftLeads = vm.ratingsSummary.bucketed_scores[vm.leftScore].left_num_leads;
             vm.leftConverted = vm.ratingsSummary.bucketed_scores[vm.leftScore].left_num_converted;
             
             vm.totalLeads = vm.rightLeads - vm.leftLeads;
             vm.totalConverted = vm.rightConverted - vm.leftConverted;
 
-            if (vm.ratingsSummary.total_expected_revenue) {
-                var totalLeads = 0;
-                var totalRevenue = 0;
+            var totalLeads = 0;
+            var totalRevenue = 0;
+            var totalConverted = 0;
+            var score = null;
 
-                for (var index = vm.leftScore; index > vm.rightScore; index--) {
-                    var bs = vm.ratingsSummary.bucketed_scores[index];
-                    totalLeads += bs.num_leads;
-                    totalRevenue += bs.expected_revenue;
-                }
+            for (var index = vm.leftScore; index > vm.rightScore; index--) {
+                score = vm.ratingsSummary.bucketed_scores[index];
 
-                vm.buckets[i].totalAvgRevenue = totalRevenue / totalLeads;
+                totalLeads += score.num_leads;
+                totalRevenue += score.expected_revenue;
+                totalConverted += (score.num_converted * score.num_leads);
             }
-    
-            // console.log(vm.leftScore + " - " + vm.rightScore + "::: " + vm.rightLeads + " - " + vm.leftLeads + " = " + (vm.rightLeads - vm.leftLeads));
 
-            vm.buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
+            bucket.conversionRate = (totalConverted / (totalLeads * totalLeads)) * 100;
+            bucket.totalAvgRevenue = totalRevenue / totalLeads;
+            bucket.num_leads = vm.rightLeads - vm.leftLeads;
 
-            if (vm.totalLeads == 0 || vm.ratingsSummary.total_num_converted == 0 || vm.ratingsSummary.total_num_leads == 0) {
-                vm.buckets[i].lift = 0;
+            if (vm.totalLeads === 0 || vm.ratingsSummary.total_num_converted === 0 || vm.ratingsSummary.total_num_leads === 0) {
+                bucket.lift = 0;
             } else {
-                vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
+                bucket.lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
             }
 
-            vm.buckets[i].bucket_name = vm.bucketNames[i];
+            bucket.bucket_name = vm.bucketNames[i];
         }
     }
 

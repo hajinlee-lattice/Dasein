@@ -328,8 +328,11 @@ angular.module('common.attributes')
             confirmtext: 'Yes, discard changes'
         }, function(opts) {
             switch (opts.action) {
-                case "cancel": deferred.reject("user cancelled action"); HideSpinner(); break;
-                default: deferred.resolve(true); 
+                case "ok": 
+                    deferred.resolve(true); break; 
+                default: 
+                    deferred.reject("user cancelled action"); 
+                    HideSpinner(); 
             }
 
             return true;

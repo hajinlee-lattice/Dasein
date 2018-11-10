@@ -114,9 +114,11 @@ angular.module('common.modal', [])
 
     this.prefab_generator = function(type, opts, cb) {
         let modal = Modal.get(opts.name);
-        if(modal){
+
+        if (modal){
             Modal.modalRemoveFromDOM(modal, {name: opts.name});
         }
+
         var config = Modal.getConfig(type);
         config.callback = cb;
         config = angular.extend(config, opts);
@@ -154,6 +156,8 @@ angular.module('common.modal', [])
 
     this.modalCallback = function(args) {
         var modal = Modal.get(args.name);
+
+        // if the callback exists and returns FALSE, modal will stay open
         var remove = modal.config.callback
             ? modal.config.callback(args)
             : true;

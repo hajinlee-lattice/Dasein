@@ -168,10 +168,13 @@
             			<dt>{{vm.modelType}}</dt>
                         <dd>{{bucket.num_leads | number}} ({{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%)</dd>
 
-                        <dt ng-if="bucket.totalAvgRevenue">Average<br>Weighted Revenue</dt>
-                        <dd ng-if="bucket.totalAvgRevenue">${{bucket.totalAvgRevenue | number: 2}}</dd>
-            		</dl>
-            	</li>
+                        <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.totalAvgRevenue">Average<br>Weighted Revenue</dt>
+                        <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.totalAvgRevenue">${{bucket.totalAvgRevenue | number: 2}}</dd>
+
+                        <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">Conversion Rate</dt>
+                        <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">{{ bucket.conversionRate | number: 2 }}%</dd>
+                    </dl>
+                </li>
             </ul><!-- End .bucket-tiles -->
 
             <div ng-if="(vm.section === 'dashboard.ratings' && vm.dashboard.summary.bucketMetadata) || vm.section != 'dashboard.ratings'">
@@ -191,8 +194,11 @@
                             <dt>{{vm.modelType}}</dt>
                             <dd>{{::bucket.num_leads | number}} ({{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%)</dd>
 
-                            <dt ng-if="bucket.avg_expected_revenue">Average<br>Weighted Revenue</dt>
-                            <dd ng-if="bucket.avg_expected_revenue">${{bucket.avg_expected_revenue | number: 2}}</dd>
+                            <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.avg_expected_revenue">Average<br>Weighted Revenue</dt>
+                            <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.avg_expected_revenue">${{bucket.avg_expected_revenue | number: 2}}</dd>
+
+                            <!-- <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">Conversion Rate</dt> -->
+                            <!-- <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">{{ (bucket.num_leads / vm.ratingsSummary.total_num_leads) * 100 | number: 2 }}%</dd> -->
                         </dl>
                     </li>
                 </ul>
