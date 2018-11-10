@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.AM_REFRESH_VERSION_UPDATER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_AM_REFRESH_VER_UPDATER;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component(AMRefreshVersionUpdater.TRANSFORMER_NAME)
 public class AMRefreshVersionUpdater extends AbstractTransformer<TransformerConfig> {
     private static final Logger log = LoggerFactory.getLogger(AMRefreshVersionUpdater.class);
-    public static final String TRANSFORMER_NAME = AM_REFRESH_VERSION_UPDATER;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_AM_REFRESH_VER_UPDATER;
     GeneralSource baseSource = new GeneralSource("AMRefreshVersionUpdater");
     GeneralSource targetSource = new GeneralSource("LDCDEV_AMRefreshVersionUpdater");
 
