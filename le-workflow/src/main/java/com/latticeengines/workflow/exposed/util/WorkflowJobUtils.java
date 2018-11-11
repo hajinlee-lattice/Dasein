@@ -100,7 +100,7 @@ public class WorkflowJobUtils {
         if (job.getJobStatus() != null && job.getJobStatus().isTerminated()) {
             if (workflowStatus != null) {
                 Date endTime = workflowStatus.getEndTime();
-                if (endTime.compareTo(MIGRATE_THRESHOLD) < 0) {
+                if (endTime != null && endTime.compareTo(MIGRATE_THRESHOLD) < 0) {
                     endTime = adjustDate(endTime, "UTC-05:00", "UTC");
                 }
                 job.setEndTimestamp(endTime);
