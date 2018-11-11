@@ -126,6 +126,9 @@ public class EMRScalingRunnable implements Runnable {
                     + " and vcores " + availableVCores);
             scale = false;
         }
+        if (!scale) {
+            scalingDownCounter = 0;
+        }
         return scale;
     }
 
