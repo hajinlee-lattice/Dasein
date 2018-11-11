@@ -128,9 +128,6 @@ public class EMRScalingRunnable implements Runnable {
                     + " and vcores " + availableVCores);
             scale = false;
         }
-        if (!scale) {
-            scalingDownCounter.set(0);
-        }
         return scale;
     }
 
@@ -152,6 +149,9 @@ public class EMRScalingRunnable implements Runnable {
                     + availableVCores + " are both too high.");
             scale = true;
         }
+        if (!scale) {
+            resetScaleDownCounter();
+        }
         return scale;
     }
 
@@ -166,6 +166,7 @@ public class EMRScalingRunnable implements Runnable {
                     emrCluster, running, requested, target));
             if (target > requested) {
                 lastScalingUp.set(System.currentTimeMillis());
+                resetScaleDownCounter();
             }
             return scale(target);
         } else {
@@ -190,8 +191,11 @@ public class EMRScalingRunnable implements Runnable {
                         emrCluster, running, requested, target));
                 if (target < requested) {
                     log.info("Scaling down counter: " + scalingDownCounter.incrementAndGet());
-                }
-                if (scalingDownCounter.get() >= 5) {
+                    if (scalingDownCounter.get() >= 5) {
+                        scale(target);
+                    }
+                } else {
+                    resetScaleDownCounter();
                     scale(target);
                 }
             }
@@ -200,7 +204,6 @@ public class EMRScalingRunnable implements Runnable {
 
     private boolean scale(int target) {
         try {
-            scalingDownCounter.set(0);
             emrService.scaleTaskGroup(emrCluster, target);
             return true;
         } catch (Exception e) {
@@ -321,6 +324,11 @@ public class EMRScalingRunnable implements Runnable {
         } else {
             return 0;
         }
+    }
+
+    private void resetScaleDownCounter() {
+        log.info("Reset scaling down counter");
+        scalingDownCounter.set(0);
     }
 
     private static class MinNodeResource {
