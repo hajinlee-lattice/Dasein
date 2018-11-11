@@ -66,6 +66,7 @@ public class EMRScalingRunnable implements Runnable {
     private final EMREnvService emrEnvService;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
+    private InstanceGroup taskGrp;
 
     EMRScalingRunnable(String emrCluster, EMRService emrService, EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
@@ -92,6 +93,8 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
+        taskGrp = emrService.getTaskGroup(emrCluster);
+
         boolean scaled = false;
         if (needToScaleUp()) {
             scaled = scaleUp();
@@ -111,9 +114,15 @@ public class EMRScalingRunnable implements Runnable {
 
         int availableMB = metrics.availableMB;
         int availableVCores = metrics.availableVirtualCores;
+        int running = taskGrp.getRunningInstanceCount();
+        int requested = taskGrp.getRequestedInstanceCount();
 
         boolean scale;
-        if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
+        if (requested < running) {
+            log.info(scaleLogPrefix + "scaling down from " + running + " to " //
+                    + requested + ", might need to adjust.");
+            scale = true;
+        } else if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
             log.info(scaleLogPrefix + "there are " + reqResource.reqMb + " mb and " //
                     + reqResource.reqVCores + " pending requests.");
             scale = true;
@@ -149,15 +158,11 @@ public class EMRScalingRunnable implements Runnable {
                     + availableVCores + " are both too high.");
             scale = true;
         }
-        if (!scale) {
-            resetScaleDownCounter();
-        }
         return scale;
     }
 
     private boolean scaleUp() {
         // only scale up when insufficient resource
-        InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
         int running = taskGrp.getRunningInstanceCount();
         int requested = taskGrp.getRequestedInstanceCount();
         int target = getTargetTaskNodes();
@@ -166,19 +171,15 @@ public class EMRScalingRunnable implements Runnable {
                     emrCluster, running, requested, target));
             if (target > requested) {
                 lastScalingUp.set(System.currentTimeMillis());
-                resetScaleDownCounter();
             }
             return scale(target);
-        } else {
-            // if scaling down, can check if need to adjust
-            return requested < running;
         }
+        return false;
     }
 
     private void scaleDown() {
         if (reqResource.reqMb < metrics.availableMB && reqResource.reqVCores < metrics.availableVirtualCores) {
             // scale when there are excessive resource
-            InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
             int running = taskGrp.getRunningInstanceCount();
             int requested = taskGrp.getRequestedInstanceCount();
             int target = getTargetTaskNodes();
@@ -189,15 +190,7 @@ public class EMRScalingRunnable implements Runnable {
                 }
                 log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
-                if (target < requested) {
-                    log.info("Scaling down counter: " + scalingDownCounter.incrementAndGet());
-                    if (scalingDownCounter.get() >= 5) {
-                        scale(target);
-                    }
-                } else {
-                    resetScaleDownCounter();
-                    scale(target);
-                }
+                scale(target);
             }
         }
     }
@@ -324,11 +317,6 @@ public class EMRScalingRunnable implements Runnable {
         } else {
             return 0;
         }
-    }
-
-    private void resetScaleDownCounter() {
-        log.info("Reset scaling down counter");
-        scalingDownCounter.set(0);
     }
 
     private static class MinNodeResource {
