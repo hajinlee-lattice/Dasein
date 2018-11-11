@@ -95,17 +95,78 @@ public class EMRScalingRunnable implements Runnable {
 
         taskGrp = emrService.getTaskGroup(emrCluster);
 
-        boolean scaled = false;
-        if (needToScaleUp()) {
-            scaled = scaleUp();
-        }
-
-        if (!scaled && needToScaleDown()) {
-            scaleDown();
+        if (needToScale()) {
+            attemptScale();
+        } else {
+            resetScalingDownCounter();
         }
 
         metrics = new ClusterMetrics();
         log.debug("Finished processing emr cluster " + emrCluster);
+    }
+
+    private boolean needToScale() {
+        String scaleLogPrefix = "Might need to scale " + emrCluster + ": ";
+        String noScaleLogPrefix = "No need to scale " + emrCluster + ": ";
+
+        int availableMB = metrics.availableMB;
+        int availableVCores = metrics.availableVirtualCores;
+        int running = taskGrp.getRunningInstanceCount();
+        int requested = taskGrp.getRequestedInstanceCount();
+
+        boolean scale;
+        if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
+            // pending requests
+            log.info(scaleLogPrefix + "there are " + reqResource.reqMb + " mb and " //
+                    + reqResource.reqVCores + " pending requests.");
+            scale = true;
+        } else if (availableMB < MIN_AVAIL_MEM_MB) {
+            // low mem
+            log.info(scaleLogPrefix + "available mb " + availableMB + " is not enough.");
+            scale = true;
+        } else if (availableVCores < MIN_AVAIL_VCORES) {
+            // low vcores
+            log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
+            scale = true;
+        } else if (availableMB >= MAX_AVAIL_MEM_MB && availableVCores >= MAX_AVAIL_VCORES) {
+            // too much mem and vcores
+            log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
+                    + availableVCores + " are both too high.");
+            scale = true;
+        } else if (requested < running) {
+            // during scaling down, might need to adjust
+            log.info(scaleLogPrefix + "scaling down from " + running + " to " //
+                    + requested + ", might need to adjust.");
+            scale = true;
+        } else {
+            log.debug(noScaleLogPrefix + "available mb " + availableMB //
+                    + " and vcores " + availableVCores + " look healthy.");
+            scale = false;
+        }
+        return scale;
+    }
+
+    private void attemptScale() {
+        int running = taskGrp.getRunningInstanceCount();
+        int requested = taskGrp.getRequestedInstanceCount();
+        int target = getTargetTaskNodes();
+        if (target != requested) {
+            if (target > requested) {
+                log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
+                        emrCluster, running, requested, target));
+                lastScalingUp.set(System.currentTimeMillis());
+                scale(target);
+                resetScalingDownCounter();
+            } else {
+                log.info(String.format("Scale down %s, attempt=%d, running=%d, requested=%d, target=%d", //
+                        emrCluster, scalingDownCounter.incrementAndGet(), running, requested, target));
+                if (requested < running && scalingDownCounter.get() >= 3) {
+                    // be conservative about terminating machines
+                    scale(target);
+                    resetScalingDownCounter();
+                }
+            }
+        }
     }
 
     private boolean needToScaleUp() {
@@ -317,6 +378,11 @@ public class EMRScalingRunnable implements Runnable {
         } else {
             return 0;
         }
+    }
+
+    private void resetScalingDownCounter() {
+        log.info("Reset scaling down counter.");
+        scalingDownCounter.set(0);
     }
 
     private static class MinNodeResource {
