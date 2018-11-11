@@ -89,7 +89,7 @@ public class WorkflowJobUtils {
             job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
         } else if (workflowStatus != null) {
             Date startTime = workflowStatus.getStartTime();
-            if (startTime.compareTo(MIGRATE_THRESHOLD) < 0) {
+            if (startTime != null && startTime.compareTo(MIGRATE_THRESHOLD) < 0) {
                 startTime = adjustDate(startTime, "UTC-05:00", "UTC");
             }
             job.setStartTimestamp(startTime);
