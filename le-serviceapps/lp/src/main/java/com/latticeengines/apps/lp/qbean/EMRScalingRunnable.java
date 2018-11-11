@@ -49,8 +49,6 @@ public class EMRScalingRunnable implements Runnable {
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
     private static final long SCALE_UP_COOLING_PERIOD = TimeUnit.MINUTES.toMillis(40);
 
-    private static final AtomicLong lastScalingUp = new AtomicLong(0);
-
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
             Sets.newEnumSet(Arrays.asList(//
                     YarnApplicationState.NEW, //
@@ -62,9 +60,11 @@ public class EMRScalingRunnable implements Runnable {
     private final String emrCluster;
     private final EMRService emrService;
     private final EMREnvService emrEnvService;
+    private final AtomicLong lastScalingUp = new AtomicLong(0);
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
     private InstanceGroup taskGrp;
+    private int scalingDownCounter = 0;
 
     EMRScalingRunnable(String emrCluster, EMRService emrService, EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
@@ -189,13 +189,19 @@ public class EMRScalingRunnable implements Runnable {
                 }
                 log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
-                scale(target);
+                if (target < requested) {
+                    log.info("Scaling down counter: " + (++scalingDownCounter));
+                }
+                if (scalingDownCounter >= 5) {
+                    scale(target);
+                }
             }
         }
     }
 
     private boolean scale(int target) {
         try {
+            scalingDownCounter = 0;
             emrService.scaleTaskGroup(emrCluster, target);
             return true;
         } catch (Exception e) {
