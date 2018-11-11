@@ -207,8 +207,9 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         currentCnts.put(BusinessEntity.Transaction, countRawTransactionInHdfs());
 
         long num_products = countInRedshift(BusinessEntity.Product);
-        long num_productHierarchies = countInRedshift(BusinessEntity.ProductHierarchy);
-        currentCnts.put(BusinessEntity.Product, num_products + num_productHierarchies);
+//        long num_productHierarchies = countInRedshift(BusinessEntity.ProductHierarchy);
+//        currentCnts.put(BusinessEntity.Product, num_products + num_productHierarchies);
+        currentCnts.put(BusinessEntity.Product, num_products);
 
         return currentCnts;
     }
