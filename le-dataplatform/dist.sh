@@ -42,7 +42,7 @@ if [ ! -z "${STACK_PROFILE}" ]; then
         python2.7 update_ministack.py -e ${LE_ENVIRONMENT} -s ${LE_STACK} -c ${CONSUL_SERVER} -p ${STACK_PROFILE}
     fi
     cp ../le-config/src/main/python/replace_token.py .
-    sed -i "s/LE_STACK=/LE_STACK=${LE_STACK}/g" ${STACK_PROFILE}
+    sed -i "s/LE_STACK=.*/LE_STACK=${LE_STACK}/" ${STACK_PROFILE}
     python2.7 replace_token.py ${dist}/conf ${STACK_PROFILE}
 fi
 cp ../le-config/conf/env/${LE_ENVIRONMENT}/log4j.properties ${dist}/conf
