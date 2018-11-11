@@ -162,7 +162,7 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                                 cm.setCanModel(false);
 
                                 // disable date attributes to be used in modeling
-                                if (cm.getLogicalDataType().equals(LogicalDataType.Date)) {
+                                if (LogicalDataType.Date.equals(cm.getLogicalDataType())) {
                                     cm.disableGroup(Model);
                                     cm.setCanModel(false);
                                 }
