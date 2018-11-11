@@ -56,7 +56,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private ModelSummaryProxy modelSummaryProxy;
+    private ModelSummaryProxy plsModelSummaryProxy;
+
+    @Inject
+    private com.latticeengines.proxy.exposed.lp.ModelSummaryProxy modelSummaryProxy;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -127,21 +130,22 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                         SEGMENT_NAME_MODELING);
                 Assert.assertNotNull(segment);
 
-                ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
+                modelSummaryProxy.downloadModelSummary(mainCustomerSpace);
+                ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(plsModelSummaryProxy, uuid1);
                 ai1 = createCrossSellEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                         ai1.getId(), ai1.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
                 activateRatingEngine(ai1.getId());
 
-                modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
+                modelSummary = waitToDownloadModelSummaryWithUuid(plsModelSummaryProxy, uuid2);
                 ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
                         ai2.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
                 activateRatingEngine(ai2.getId());
 
-                modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid3);
+                modelSummary = waitToDownloadModelSummaryWithUuid(plsModelSummaryProxy, uuid3);
                 ai3 = createCustomEventEngine(segment, modelSummary);
                 activateRatingEngine(ai3.getId());
             }
@@ -149,7 +153,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private void setupAIModels() {
-        testBed.attachProtectedProxy(modelSummaryProxy);
+        testBed.attachProtectedProxy(plsModelSummaryProxy);
         testBed.switchToSuperAdmin();
         uuid1 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model.tar.gz");
         uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model.tar.gz");

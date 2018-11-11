@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 
-@Service("modelSummaryProxy")
+@Service("plsModelSummaryProxy")
 public class ModelSummaryProxy extends PlsRestApiProxyBase {
 
     public ModelSummaryProxy() {
