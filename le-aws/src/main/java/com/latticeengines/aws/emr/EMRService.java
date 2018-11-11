@@ -14,6 +14,8 @@ public interface EMRService {
 
     boolean isActive(String clusterId);
 
+    boolean isEncrypted(String clusterName);
+
     String getClusterId(String clusterName);
 
     String getLogBucket(String clusterId);

@@ -21,6 +21,8 @@ import com.amazonaws.services.elasticmapreduce.model.ClusterState;
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
+import com.amazonaws.services.elasticmapreduce.model.DescribeSecurityConfigurationRequest;
+import com.amazonaws.services.elasticmapreduce.model.DescribeSecurityConfigurationResult;
 import com.amazonaws.services.elasticmapreduce.model.Instance;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupModifyConfig;
@@ -34,8 +36,10 @@ import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsResult;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Service("emrService")
@@ -91,6 +95,27 @@ public class EMRServiceImpl implements EMRService {
             }
         }
         return masterIp;
+    }
+
+    @Override
+    public boolean isEncrypted(String clusterName) {
+        boolean encrypted = false;
+        String clusterId = getClusterId(clusterName);
+        AmazonElasticMapReduce emr = getEmr();
+        if (StringUtils.isNotBlank(clusterId)) {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
+                    Collections.singleton(NoSuchEntityException.class));
+            DescribeClusterResult cluster = retryTemplate.execute(context -> //
+                    emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
+            String securityConf = cluster.getCluster().getSecurityConfiguration();
+            DescribeSecurityConfigurationRequest request = //
+                    new DescribeSecurityConfigurationRequest().withName(securityConf);
+            DescribeSecurityConfigurationResult result = retryTemplate.execute(context ->
+                    emr.describeSecurityConfiguration(request));
+            JsonNode jsonNode = JsonUtils.deserialize(result.getSecurityConfiguration(), JsonNode.class);
+            encrypted = jsonNode.get("EncryptionConfiguration").get("EnableAtRestEncryption").asBoolean();
+        }
+        return encrypted;
     }
 
     @Override

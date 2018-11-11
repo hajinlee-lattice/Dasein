@@ -62,7 +62,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "manual"})
     public void setup() throws Exception {
         switchHdfsPod(podId);
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsPathBuilder.podDir().toString())) {
@@ -70,7 +70,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional"})
     public void testMatchBlockInYarnContainer() throws Exception {
         String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);
@@ -100,7 +100,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "manual"})
     public void testEnrichment() throws Exception {
         String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);

@@ -27,6 +27,9 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${aws.emr.cluster}")
+    private String clusterName;
+
     @Value("${aws.default.access.key}")
     protected String awsKey;
 
@@ -42,6 +45,9 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
                 throw new RuntimeException("Cannot find the master IP for main EMR cluster.");
             }
             configuration = getEmrConfiguration(masterIp);
+            if (emrService.isEncrypted(clusterName)) {
+                configuration.set("hadoop.rpc.protection", "privacy");
+            }
         } else {
             configuration = getBaseConfiguration();
         }

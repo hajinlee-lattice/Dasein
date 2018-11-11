@@ -46,48 +46,6 @@ hdfs dfs -copyFromLocal target/dist /app/${LE_STACK}/$(leversion) &&
 hdfs dfs -copyFromLocal target/dist_python/* /app/${LE_STACK}/$(leversion)
 popd
 
-#for servicecmd in 'dataplatform|dpdplnobld' 'sqoop|sqdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld'
-#do
-#    service=`echo $servicecmd | cut -d \| -f 1` &&
-#    cmd=`echo $servicecmd | cut -d \| -f 2` &&
-#    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
-#    pushd $WSHOME/le-${service} &&
-#    eval $cmd 2>> /tmp/errors.txt &&
-#    popd &
-#done
-#wait
-#
-#for servicecmd in 'datacloud|dcdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'dellebi|dedplnobld'
-#do
-#    service=`echo $servicecmd | cut -d \| -f 1` &&
-#    cmd=`echo $servicecmd | cut -d \| -f 2` &&
-#    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
-#    pushd $WSHOME/le-${service} &&
-#    eval $cmd 2>> /tmp/errors.txt &&
-#    popd &
-#done
-#wait
-#
-#UNAME=`uname`
-#if [[ "${UNAME}" == 'Darwin' ]]; then
-#    echo "You are on Mac"
-#    sed -i '' "/INFO /d" /tmp/errors.txt
-#    sed -i '' "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
-#    sed -i '' "/\/app\/swlib/d" /tmp/errors.txt
-#else
-#    echo "You are on ${UNAME}"
-#    sed -i "/INFO /d" /tmp/errors.txt
-#    sed -i "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
-#    sed -i "/\/app\/swlib/d" /tmp/errors.txt
-#fi
-#
-#if [ ! -z "$(cat /tmp/errors.txt)" ]
-#then
-#    echo "Error!"
-#    cat /tmp/errors.txt
-#    exit -1
-#fi
-
 echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
