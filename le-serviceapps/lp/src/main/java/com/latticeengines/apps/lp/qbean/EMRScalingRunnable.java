@@ -64,6 +64,7 @@ public class EMRScalingRunnable implements Runnable {
     private final EMREnvService emrEnvService;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
+    private InstanceGroup taskGrp;
 
     EMRScalingRunnable(String emrCluster, EMRService emrService, EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
@@ -90,6 +91,8 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
+        taskGrp = emrService.getTaskGroup(emrCluster);
+
         boolean scaled = false;
         if (needToScaleUp()) {
             scaled = scaleUp();
@@ -111,7 +114,12 @@ public class EMRScalingRunnable implements Runnable {
         int availableVCores = metrics.availableVirtualCores;
 
         boolean scale;
-        if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
+        int requested = taskGrp.getRequestedInstanceCount();
+        int running = taskGrp.getRunningInstanceCount();
+        if (requested < running) {
+            log.info(scaleLogPrefix + "scaling down from " + running + " to " + requested);
+            scale = true;
+        } else if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
             log.info(scaleLogPrefix + "there are " + reqResource.reqMb + " mb and " //
                     + reqResource.reqVCores + " pending requests.");
             scale = true;
@@ -152,7 +160,6 @@ public class EMRScalingRunnable implements Runnable {
 
     private boolean scaleUp() {
         // only scale up when insufficient resource
-        InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
         int running = taskGrp.getRunningInstanceCount();
         int requested = taskGrp.getRequestedInstanceCount();
         int target = getTargetTaskNodes();
@@ -172,7 +179,6 @@ public class EMRScalingRunnable implements Runnable {
     private void scaleDown() {
         if (reqResource.reqMb < metrics.availableMB && reqResource.reqVCores < metrics.availableVirtualCores) {
             // scale when there are excessive resource
-            InstanceGroup taskGrp = emrService.getTaskGroup(emrCluster);
             int running = taskGrp.getRunningInstanceCount();
             int requested = taskGrp.getRequestedInstanceCount();
             int target = getTargetTaskNodes();
