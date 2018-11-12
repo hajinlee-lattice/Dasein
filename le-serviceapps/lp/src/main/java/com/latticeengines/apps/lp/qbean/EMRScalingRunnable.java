@@ -381,8 +381,10 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void resetScalingDownCounter() {
-        log.info("Reset scaling down counter.");
-        scalingDownCounter.set(0);
+        if (scalingDownCounter.get() > 0) {
+            log.info("Reset scaling down counter from " + scalingDownCounter.get());
+            scalingDownCounter.set(0);
+        }
     }
 
     private static class MinNodeResource {
