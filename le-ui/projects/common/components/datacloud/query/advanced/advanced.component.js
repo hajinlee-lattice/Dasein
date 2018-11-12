@@ -407,7 +407,6 @@ angular.module('common.datacloud.query.builder', [
     
     vm.clickUndo = function() {
         var lastState;
-
         while (lastState = vm.history.pop()) {
             if (vm.setState(lastState)) {
                 vm.updateCount();
