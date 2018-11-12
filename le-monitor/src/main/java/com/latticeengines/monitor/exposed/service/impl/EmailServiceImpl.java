@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -926,19 +927,46 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, String templateName) {
+    public void sendS3TemplateCreateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo) {
+        try {
+            log.info("Sending s3 template create notification to " + user.getEmail() + " on " + tenant.getName()
+                    + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.S3_TEMPLATE_CREATE);
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{templatename}}", emailInfo.getTemplateName());
+            builder.replaceToken("{{type}}", emailInfo.getEntityType().getDisplayName());
+            builder.replaceToken("{{dropfolder}}", emailInfo.getDropFolder());
+            builder.replaceToken("{{useremail}}", emailInfo.getUser());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+
+            builder.replaceToken("{{url}}", hostport);
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(String.format(EmailSettings.S3_TEMPLATE_CREATE_SUBJECT, emailInfo.getTemplateName()), mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending s3 template create notification to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send s3 template create notification to " + user.getEmail() + " on " + tenant.getName()
+                    + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo) {
         try {
             log.info("Sending s3 template update notification to " + user.getEmail() + " on " + tenant.getName()
                     + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.S3_TEMPLATE_UPDATE);
             builder.replaceToken("{{firstname}}", user.getFirstName());
-            builder.replaceToken("{{templatename}}", templateName);
-
+            builder.replaceToken("{{templatename}}", emailInfo.getTemplateName());
+            builder.replaceToken("{{type}}", emailInfo.getEntityType().getDisplayName());
+            builder.replaceToken("{{dropfolder}}", emailInfo.getDropFolder());
+            builder.replaceToken("{{useremail}}", emailInfo.getUser());
             builder.replaceToken("{{tenantname}}", tenant.getName());
 
             builder.replaceToken("{{url}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.S3_TEMPLATE_UPDATE_SUBJECT, templateName), mp,
+            sendMultiPartEmail(String.format(EmailSettings.S3_TEMPLATE_UPDATE_SUBJECT, emailInfo.getTemplateName()), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending s3 template update notification to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");

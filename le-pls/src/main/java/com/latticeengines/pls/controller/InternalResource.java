@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -732,21 +733,33 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/emails/s3template/create/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after s3 template created")
+    public void sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
+                                          @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        Tenant tenant = tenantService.findByTenantId(tenantId);
+        for (User user : users) {
+            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                emailService.sendS3TemplateCreateEmail(user, tenant, appPublicUrl, emailInfo);
+            }
+        }
+    }
+
     @RequestMapping(value = "/emails/s3template/update/"
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
     public void sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
-                                  @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
+                                          @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
-        String templateName = emailInfo.getExtraInfoMap().get("TemplateName");
 
         for (User user : users) {
             if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, templateName);
-            } else if (user.getEmail().equals(emailInfo.getUserId())) {
-                emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, templateName);
+                emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, emailInfo);
             }
         }
     }

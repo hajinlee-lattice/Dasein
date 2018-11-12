@@ -15,6 +15,7 @@ import org.springframework.lang.NonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
@@ -375,13 +376,23 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void sendS3TemplateUpdateEmail(String tenantId, AdditionalEmailInfo emailInfo) {
+    public void sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl("pls/internal/emails/s3template/update", tenantId);
             log.info(String.format("Putting to %s", url));
             restTemplate.put(url, emailInfo);
         } catch (Exception e) {
             throw new RuntimeException("sendS3TemplateUpdateEmail: Remote call failure", e);
+        }
+    }
+
+    public void sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
+        try {
+            String url = constructUrl("pls/internal/emails/s3template/create", tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, emailInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("sendS3TemplateCreateEmail: Remote call failure", e);
         }
     }
 

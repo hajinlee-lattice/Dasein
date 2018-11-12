@@ -67,10 +67,10 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
     @Test(groups = "deployment")
     public void testCreateDataFeedTask() {
         String taskId1 = dataFeedTaskManagerService.createDataFeedTask(mainTestTenant.getId(), "TestAccount", "Account",
-                "VisiDB", "", "", false, vdbMetadata1);
+                "VisiDB", "", "", false, "", vdbMetadata1);
         Assert.assertNotNull(taskId1);
         String taskId2 = dataFeedTaskManagerService.createDataFeedTask(mainTestTenant.getId(), "TestAccount", "Account",
-                "VisiDB", "", "", false, vdbMetadata2);
+                "VisiDB", "", "", false, "", vdbMetadata2);
         Assert.assertEquals(taskId1, taskId2);
     }
 

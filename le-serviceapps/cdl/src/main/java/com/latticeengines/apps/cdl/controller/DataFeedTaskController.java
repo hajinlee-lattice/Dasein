@@ -54,7 +54,7 @@ public class DataFeedTaskController {
         } else {
             VdbImportConfig vdbImportConfig = new VdbImportConfig();
             vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
-            return createDataFeedTask(customerSpace, source, feedtype, entity,"", "", false, vdbImportConfig);
+            return createDataFeedTask(customerSpace, source, feedtype, entity,"", "", false, "", vdbImportConfig);
         }
     }
 
@@ -69,12 +69,13 @@ public class DataFeedTaskController {
                      @RequestParam(value = "subType", required = false) String subType,
                      @RequestParam(value = "displayName", required = false) String displayName,
                      @RequestParam(value = "sendEmail", required = false, defaultValue = "false" ) boolean sendEmail,
+                     @RequestParam(value = "user", required = false) String user,
                      @RequestBody CDLImportConfig importConfig) {
         try {
             customerSpace = CustomerSpace.parse(customerSpace).toString();
             entity = BusinessEntity.getByName(entity).name();
             String taskId = dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source,
-                    subType, displayName, sendEmail, importConfig);
+                    subType, displayName, sendEmail, user, importConfig);
             return ResponseDocument.successResponse(taskId);
         } catch (Exception e) {
             log.error(String.format("Failed to create data feed task, exception: %s", e.toString()), e);

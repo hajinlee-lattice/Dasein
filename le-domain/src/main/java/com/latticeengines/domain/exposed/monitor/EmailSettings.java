@@ -61,6 +61,7 @@ public class EmailSettings {
     public static final String S3_CREDENTIALS_EMAIL_SUBJECT = "File Transfer Credentials";
     public static final String CDL_INGESTION_STATUS_SUBJECT = " %s - %s File Transfer";
     public static final String S3_TEMPLATE_UPDATE_SUBJECT = " Template %s has been updated";
+    public static final String S3_TEMPLATE_CREATE_SUBJECT = " Template %s has been created";
     public static final String LATTICE_HELP_CENTER_URL = "http://help.lattice-engines.com";
     private String from;
     private String password;

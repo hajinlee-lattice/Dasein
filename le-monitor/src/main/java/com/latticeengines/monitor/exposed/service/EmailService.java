@@ -6,6 +6,7 @@ import java.util.List;
 import javax.mail.Multipart;
 
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -91,5 +92,7 @@ public interface EmailService {
     void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
             String fileName, String failedMessage, String type);
 
-    void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, String templateName);
+    void sendS3TemplateCreateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
+
+    void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
 }

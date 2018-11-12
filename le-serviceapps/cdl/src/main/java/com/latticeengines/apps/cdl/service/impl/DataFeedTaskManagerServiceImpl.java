@@ -51,6 +51,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -68,9 +70,11 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -133,7 +137,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Override
     public synchronized String createDataFeedTask(String customerSpaceStr, String feedType, String entity,
                                                   String source, String subType, String templateDisplayName,
-                                                  boolean sendEmail, CDLImportConfig importConfig) {
+                                                  boolean sendEmail, String user, CDLImportConfig importConfig) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(importConfig);
         if (dlTenantMappingEnabled) {
@@ -168,7 +172,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
                 if (sendEmail) {
-                    sendS3TemplateUpdateEmail(customerSpace.toString(), dataFeedTask);
+                    sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, false);
                 }
             }
             dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
@@ -207,6 +211,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
                     dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());
                 }
+            }
+            if (sendEmail) {
+                sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, true);
             }
             dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
                     customerSpace.toString());
@@ -350,16 +357,28 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
     }
 
-    private void sendS3TemplateUpdateEmail(String customerSpace, DataFeedTask dataFeedTask) {
+    private void sendS3TemplateChangeEmail(String customerSpace, DataFeedTask dataFeedTask, String user,
+                                           boolean isCreate) {
         try {
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             if (dataFeedTask != null) {
-                AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
-                Map<String, String> infoMap = new HashMap<>();
-                infoMap.put("TemplateName", dataFeedTask.getTemplateDisplayName());
-                emailInfo.setExtraInfoMap(infoMap);
+                S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
+                DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+                emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                        dataFeedTask.getFeedType()));
+                emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
+                        dataFeedTask.getSubType()));
+                String templateName = dataFeedTask.getTemplateDisplayName() == null ? dataFeedTask.getFeedType() :
+                        dataFeedTask.getTemplateDisplayName();
+                emailInfo.setTemplateName(templateName);
+                emailInfo.setUser(user);
+
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
-                proxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
+                if (isCreate) {
+                    proxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
+                } else {
+                    proxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
+                }
             }
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());

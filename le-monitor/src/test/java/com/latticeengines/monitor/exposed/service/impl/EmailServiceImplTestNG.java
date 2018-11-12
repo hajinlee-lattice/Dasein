@@ -20,6 +20,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
@@ -357,7 +359,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendS3TemplateUpdateEmail() {
-        emailService.sendS3TemplateUpdateEmail(user, tenant, HOSTPORT, "AccountSchema");
+        S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
+        emailInfo.setUser("system@lattice-engines.com");
+        emailInfo.setTemplateName("AccountSchema");
+        emailInfo.setEntityType(EntityType.Accounts);
+        emailInfo.setDropFolder("lattice-engines-dev/dropfolder/Templates/AccountSchema");
+        emailService.sendS3TemplateUpdateEmail(user, tenant, HOSTPORT, emailInfo);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending s3 template update notification"));

@@ -87,12 +87,13 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
                                      String subType, String displayName, CDLImportConfig metadata) {
-        return createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, false, metadata);
+        return createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, false, "", metadata);
     }
 
     @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
-                                     String subType, String displayName, boolean sendEmail, CDLImportConfig metadata) {
+                                     String subType, String displayName, boolean sendEmail, String user,
+                                     CDLImportConfig metadata) {
         String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create"
                 + "?source={source}&feedtype={feedtype}&entity={entity}&sendEmail={sendEmail}";
         List<String> args = new ArrayList<>();
@@ -108,6 +109,10 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (StringUtils.isNotBlank(displayName)) {
             baseUrl += "&displayName={displayName}";
             args.add(displayName);
+        }
+        if (StringUtils.isNotBlank(user)) {
+            baseUrl += "&user={user}";
+            args.add(user);
         }
 
         String url = constructUrl(baseUrl, args.toArray());
