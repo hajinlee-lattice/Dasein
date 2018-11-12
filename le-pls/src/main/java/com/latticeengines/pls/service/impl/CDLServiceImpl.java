@@ -58,7 +58,6 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-    private static final String TEMPLATENAME = "N/A";
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
     private static final String DELETE_FAIL_TITLE = "Validation Error";
@@ -304,7 +303,7 @@ public class CDLServiceImpl implements CDLService {
                 display.setPath(PATHNAME);
                 display.setExist(Boolean.FALSE);
                 display.setObject(object.getDisplayName());
-                display.setTemplateName(TEMPLATENAME);
+                display.setTemplateName(object.getDisplayName());
                 templates.add(display);
             }
         }
