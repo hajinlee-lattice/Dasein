@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -21,7 +20,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
@@ -109,8 +107,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         play = testPlayCreationHelper.getPlay();
         playLaunch = testPlayCreationHelper.getPlayLaunch();
         orgInfo = testPlayCreationHelper.getOrgInfo();
-        playProxy.updatePlayLaunch(MultiTenantContext.getCustomerSpace().toString(), play.getName(),
-                playLaunch.getLaunchId(), LaunchState.Launched);
+        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launching);
+        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launched);
         // List<Recommendation> recommendations =
         // recommendationEntityMgr.findAll();
         // Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
@@ -183,10 +181,10 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         System.out.println("This is Contacts List:");
         System.out.println(contacts.toString());
     }
-    
+
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
-        //testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts();
     }
 
     @Test(groups = "deployment")

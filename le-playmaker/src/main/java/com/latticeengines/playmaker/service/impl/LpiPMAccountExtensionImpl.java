@@ -222,7 +222,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             return accountIds.size();
         }
         if (recStart != null) {
-            if (recStart > 1L) {
+            if (recStart > 0L) {
                 List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, recStart, null, 0, orgInfo);
                 if (CollectionUtils.isNotEmpty(launchIds)) {
                     return lpiRecommendationDao.getAccountIdsCountFromRecommendationByLaunchId(launchIds);

@@ -93,7 +93,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard;
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
-        launchstates.add(LaunchState.UnLaunched);
+        //launchstates.add(LaunchState.UnLaunched);
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
                     launchstates, start, 0L, 1000L, null, null, null, null, null);
