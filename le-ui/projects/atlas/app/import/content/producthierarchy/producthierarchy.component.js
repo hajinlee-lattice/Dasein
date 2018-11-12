@@ -140,7 +140,7 @@ angular.module('lp.import.wizard.producthierarchy', [])
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('product_hierarchy', form.$valid);
+        ImportWizardStore.setValidation('producthierarchy', form.$valid);
     }
 
     vm.init();
