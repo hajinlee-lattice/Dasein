@@ -163,18 +163,44 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath) {
-        try (InputStream inputStream = HdfsUtils.getInputStream(yarnConfiguration, hdfsPath)){
+        try (InputStream inputStream = HdfsUtils.getInputStream(yarnConfiguration, hdfsPath)) {
             String dropBoxBucket = getDropBoxBucket();
-            key = key.replaceFirst(dropBoxBucket, "");
-            if (!key.endsWith("/")) {
-               key += "/";
-            }
-            key += s3FileName;
+            key = getValidkey(dropBoxBucket, key, s3FileName);
             s3Service.uploadInputStream(dropBoxBucket, key, inputStream, false);
             return true;
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private String getValidkey(String bucketname, String originalkey, String filename) {
+        originalkey = originalkey.replaceFirst(bucketname, "");
+        originalkey = formatString(originalkey);
+        if (!originalkey.endsWith("/")) {
+            originalkey += "/";
+        }
+        String dest_key = originalkey + filename;
+        int suffix = 1;
+        int dot = filename.lastIndexOf(".");
+        String suffix_name = filename.substring(dot + 1);
+        String file_name = filename.substring(0, dot);
+        while (s3Service.objectExist(bucketname, dest_key)) {
+            dest_key = originalkey + file_name + "_" + String.valueOf(suffix) + "." + suffix_name;
+            suffix++;
+        }
+        return dest_key;
+    }
+
+    private String formatString(String path) {
+        if (StringUtils.isNotEmpty(path)) {
+            while (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            while (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
     }
 
     private String getFullPath(String dropBoxPrefix, String objectName, String path) {
@@ -394,7 +420,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
-        ));
+                ));
     }
 
     private String listDropBoxStmtId(String dropBoxId) {
@@ -498,12 +524,11 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withId(accountId + "_" + dropBoxId + "_list") //
                 .withPrincipals(new Principal(accountId)) //
                 .withActions(S3Actions.ListObjects) //
-                .withResources(new Resource(ARN_PREFIX + bucketName))
-                .withConditions(new StringCondition(//
+                .withResources(new Resource(ARN_PREFIX + bucketName)).withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
-        ));
+                ));
     }
 
     private void revokeAccountFromDropBox(Policy policy, String dropBoxId, String accountId) {

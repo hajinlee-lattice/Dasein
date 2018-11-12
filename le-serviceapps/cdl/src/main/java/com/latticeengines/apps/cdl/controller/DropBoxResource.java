@@ -97,9 +97,9 @@ public class DropBoxResource {
     @ApiOperation("Import file to s3")
     public boolean importFileToS3(@PathVariable String customerSpace,
                                   @RequestParam("s3Path") String s3Path,
-                                  @RequestParam("hdfsPath") String hdfsPath) {
-        String s3FileName = "file_" + DateTime.now().getMillis() + ".csv";
-        return dropBoxService.uploadFileToS3(customerSpace, s3Path, s3FileName, hdfsPath);
+                                  @RequestParam("hdfsPath") String hdfsPath,
+                                  @RequestParam("filename") String filename) {
+        return dropBoxService.uploadFileToS3(customerSpace, s3Path, filename, hdfsPath);
     }
 
 }

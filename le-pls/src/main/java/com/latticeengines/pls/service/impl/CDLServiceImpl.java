@@ -113,7 +113,7 @@ public class CDLServiceImpl implements CDLService {
         if (sourceFile == null) {
             throw new IllegalArgumentException("Cannot find source file: " + templateFileName);
         }
-        dropBoxProxy.importS3file(customerSpace, s3Path, sourceFile.getPath());
+        dropBoxProxy.importS3file(customerSpace, s3Path, sourceFile.getPath(), sourceFile.getDisplayName());
     }
 
     @Override

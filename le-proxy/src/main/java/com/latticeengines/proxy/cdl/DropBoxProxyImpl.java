@@ -68,9 +68,9 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
     }
 
     @Override
-    public boolean importS3file(String customerSpace, String s3Path, String hdfsPath) {
-        String url = "/customerspaces/{customerSpace}/dropbox/import?s3Path={s3Path}&hdfsPath={hdfsPath}";
-        url = constructUrl(url, customerSpace, s3Path, hdfsPath);
+    public boolean importS3file(String customerSpace, String s3Path, String hdfsPath, String filename) {
+        String url = "/customerspaces/{customerSpace}/dropbox/import?s3Path={s3Path}&hdfsPath={hdfsPath}&filename={filename}";
+        url = constructUrl(url, customerSpace, s3Path, hdfsPath, filename);
         return post("Import File to S3", url, null, Boolean.class);
     }
 
