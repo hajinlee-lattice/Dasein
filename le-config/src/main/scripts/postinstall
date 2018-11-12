@@ -5,6 +5,7 @@ echo $LE_ENVIRONMENT
 
 echo "copying files from temporary folders"
 cp -f /tmp/ledp/$LE_ENVIRONMENT/*.properties /etc/ledp/
+sed -i 's/hadoop.use.emr=.*/hadoop.use.emr=false/g' /etc/ledp/latticeengines.properties
 chmod 755 /etc/ledp/*
 
 echo "cleaning up"
