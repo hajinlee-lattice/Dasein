@@ -366,7 +366,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void sendS3ImportEmail(String result, String tenantId, AdditionalEmailInfo emailInfo) {
+    public void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl("pls/internal/emails/s3import/result", result, tenantId);
             log.info(String.format("Putting to %s", url));

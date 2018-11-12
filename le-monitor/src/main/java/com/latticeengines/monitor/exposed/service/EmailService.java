@@ -89,8 +89,7 @@ public interface EmailService {
 
     void sendS3CredentialEmail(User user, Tenant tenant, GrantDropBoxAccessResponse response, String initiator);
 
-    void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
-            String fileName, String failedMessage, String type);
+    void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, S3ImportEmailInfo emailInfo);
 
     void sendS3TemplateCreateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
 

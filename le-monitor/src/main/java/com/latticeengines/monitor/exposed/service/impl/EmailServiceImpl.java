@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -890,8 +891,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
-            String fileName, String errorMessage, String type) {
+    public void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, S3ImportEmailInfo emailInfo) {
         try {
             log.info("Sending cdl ingestion status to " + user.getEmail() + " on " + tenant.getName() + " started.");
             EmailTemplateBuilder builder;
@@ -903,20 +903,25 @@ public class EmailServiceImpl implements EmailService {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_IN_PROCESS);
             }
             builder.replaceToken("{{firstname}}", user.getFirstName());
-            builder.replaceToken("{{templatename}}", templateName);
-            if (StringUtils.isNotEmpty(errorMessage)) {
-                builder.replaceToken("{{errormessage}}", errorMessage);
+            builder.replaceToken("{{templatename}}", emailInfo.getTemplateName());
+            if (StringUtils.isNotEmpty(emailInfo.getErrorMsg())) {
+                builder.replaceToken("{{errormessage}}", emailInfo.getErrorMsg());
             }
             builder.replaceToken("{{tenantname}}", tenant.getName());
-            builder.replaceToken("{{type}}", type);
-            if (StringUtils.isNotEmpty(fileName)) {
-                builder.replaceToken("{{filename}}", fileName);
+            builder.replaceToken("{{type}}", emailInfo.getEntityType().getDisplayName());
+            if (StringUtils.isNotEmpty(emailInfo.getFileName())) {
+                builder.replaceToken("{{filename}}", emailInfo.getFileName());
+            }
+            builder.replaceToken("{{dropfolder}}", emailInfo.getDropFolder());
+            if (emailInfo.getTimeReceived() != null) {
+                String dateStr = DateTimeUtils.format(emailInfo.getTimeReceived());
+                builder.replaceToken("{{timereceived}}", dateStr);
             }
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(
-                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), templateName), mp,
+                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), emailInfo.getTemplateName()), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");

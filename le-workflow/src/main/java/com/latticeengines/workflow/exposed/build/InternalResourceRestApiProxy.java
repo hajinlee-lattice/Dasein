@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -210,7 +211,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void sendS3ImportEmail(String result, String tenantId, AdditionalEmailInfo emailInfo) {
+    public void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl("pls/internal/emails/s3import/result", result, tenantId);
             log.info(String.format("Putting to %s", url));

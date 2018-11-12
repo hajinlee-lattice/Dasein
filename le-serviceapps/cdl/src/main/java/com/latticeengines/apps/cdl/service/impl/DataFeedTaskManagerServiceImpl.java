@@ -263,7 +263,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
-                csvImportFileInfo, false, new WorkflowPidWrapper(-1L));
+                csvImportFileInfo, false, null, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
@@ -320,8 +320,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.getEntity(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setS3FilePath(newFilePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
+
+        S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(), importConfig.getS3FileName(),
+                dataFeedTask, new Date());
         // validate
-        validateS3File(dataFeedTask, importConfig, customerSpace.toString());
+        validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo);
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
@@ -331,27 +334,33 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFilePath(filePath);
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
-                JsonUtils.serialize(importConfig), csvImportFileInfo, true, new WorkflowPidWrapper(-1L));
+                JsonUtils.serialize(importConfig), csvImportFileInfo, true, emailInfo, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
-    private void sendS3ImportEmail(String customerSpace, String result, String fileName, String message,
-                                   DataFeedTask dataFeedTask) {
+    private S3ImportEmailInfo generateEmailInfo(String customerSpace, String fileName, DataFeedTask dataFeedTask,
+                                                Date timeReceived) {
+        S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                dataFeedTask.getFeedType()));
+        emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
+                dataFeedTask.getSubType()));
+        String templateName = dataFeedTask.getTemplateDisplayName() == null ? dataFeedTask.getFeedType() :
+                dataFeedTask.getTemplateDisplayName();
+        emailInfo.setTemplateName(templateName);
+        emailInfo.setFileName(fileName);
+        emailInfo.setTimeReceived(timeReceived);
+        emailInfo.setTenantName(CustomerSpace.parse(customerSpace).getTenantId());
+        return emailInfo;
+    }
+
+    private void sendS3ImportEmail(String customerSpace, String result, S3ImportEmailInfo emailInfo) {
         try {
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
-            if (dataFeedTask != null) {
-                AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
-                Map<String, String> infoMap = new HashMap<>();
-                infoMap.put("TemplateName", dataFeedTask.getFeedType());
-                infoMap.put("Entity", dataFeedTask.getEntity());
-                infoMap.put("FileName", fileName);
-                if (StringUtils.isNotEmpty(message)) {
-                    infoMap.put("FailedMessage", message);
-                }
-                emailInfo.setExtraInfoMap(infoMap);
-                String tenantId = CustomerSpace.parse(customerSpace).toString();
-                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
-            }
+
+            String tenantId = CustomerSpace.parse(customerSpace).toString();
+            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
@@ -386,7 +395,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     private void validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
-                                String customerSpace) {
+                                String customerSpace, S3ImportEmailInfo emailInfo) {
         Table template = dataFeedTask.getImportTemplate();
         String s3Bucket = importConfig.getS3Bucket();
         String s3FilePath = importConfig.getS3FilePath();
@@ -441,22 +450,26 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
             parser.close();
             String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
-            sendS3ImportEmail(customerSpace, "In_Progress", importConfig.getS3FileName(), message, dataFeedTask);
+            emailInfo.setErrorMsg(message);
+            sendS3ImportEmail(customerSpace, "In_Progress", emailInfo);
         } catch (LedpException e) {
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
-            sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
+            emailInfo.setErrorMsg(e.getMessage());
+            sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         } catch (IOException e) {
             log.error(e.getMessage());
         } catch (IllegalArgumentException e) {
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
-            sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
+            emailInfo.setErrorMsg(e.getMessage());
+            sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             log.error(e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error("Unknown Exception when validate S3 import! " + e.toString());
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
-            sendS3ImportEmail(customerSpace, "Failed", importConfig.getS3FileName(), e.getMessage(), dataFeedTask);
+            emailInfo.setErrorMsg(e.getMessage());
+            sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         }
     }

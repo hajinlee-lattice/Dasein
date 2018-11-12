@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -88,6 +89,14 @@ public class DataFeedTaskImportListener extends LEJobListener {
             return;
         }
 
+        String emailInfoStr = job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_INFO);
+        S3ImportEmailInfo emailInfo = null;
+        if (StringUtils.isEmpty(emailInfoStr)) {
+            log.error("Cannot get email info for import job: " + applicationId);
+        } else {
+            emailInfo = JsonUtils.deserialize(emailInfoStr, S3ImportEmailInfo.class);
+        }
+
         VdbLoadTableStatus vdbLoadTableStatus = null;
         String statusUrl = eaiImportJobDetail.getReportURL();
         String queryHandle = eaiImportJobDetail.getQueryHandle();
@@ -100,7 +109,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
             if (sendS3ImportEmail) {
                 String message = "Failed to import s3 file, please contact Lattice admin.";
                 sendS3ImportEmail(hostPort, customerSpace, "Failed",
-                        importJobIdentifier, eaiImportJobDetail.getImportFileName(), message);
+                        importJobIdentifier, emailInfo, message);
             }
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
@@ -167,7 +176,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 if (sendS3ImportEmail) {
                     sendS3ImportEmail(hostPort, customerSpace, "Success",
-                            importJobIdentifier, eaiImportJobDetail.getImportFileName(), null);
+                            importJobIdentifier, emailInfo, null);
                 }
             } catch (Exception e) {
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
@@ -179,7 +188,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 if (sendS3ImportEmail) {
                     sendS3ImportEmail(hostPort, customerSpace, "Failed",
-                            importJobIdentifier, eaiImportJobDetail.getImportFileName(), e.getMessage());
+                            importJobIdentifier, emailInfo, e.getMessage());
                 }
             }
 
@@ -198,20 +207,14 @@ public class DataFeedTaskImportListener extends LEJobListener {
     }
 
     private void sendS3ImportEmail(String hostPort, String customerSpace, String result,
-                                   String taskId, String fileName, String message) {
+                                   String taskId, S3ImportEmailInfo emailInfo, String message) {
         try {
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
-            if (dataFeedTask != null) {
-                AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
-                Map<String, String> infoMap = new HashMap<>();
-                infoMap.put("TemplateName", dataFeedTask.getFeedType());
-                infoMap.put("Entity", dataFeedTask.getEntity());
-                infoMap.put("FileName", fileName);
+            if (dataFeedTask != null && emailInfo != null) {
                 if (StringUtils.isNotEmpty(message)) {
-                    infoMap.put("FailedMessage", message);
+                    emailInfo.setErrorMsg(message);
                 }
-                emailInfo.setExtraInfoMap(infoMap);
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
                 proxy.sendS3ImportEmail(result, tenantId, emailInfo);
             }

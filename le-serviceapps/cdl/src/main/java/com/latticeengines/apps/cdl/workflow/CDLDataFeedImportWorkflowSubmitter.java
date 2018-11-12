@@ -13,11 +13,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
+import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -40,12 +42,13 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
-            CSVImportFileInfo csvImportFileInfo, boolean s3ImportEmail, WorkflowPidWrapper pidWrapper) {
+                                CSVImportFileInfo csvImportFileInfo, boolean s3ImportEmail,
+                                S3ImportEmailInfo emailInfo, WorkflowPidWrapper pidWrapper) {
         log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
         Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
-                connectorConfig, csvImportFileInfo, action.getPid(), s3ImportEmail);
+                connectorConfig, csvImportFileInfo, action.getPid(), s3ImportEmail, emailInfo);
 
         ApplicationId appId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return appId;
@@ -80,12 +83,16 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
             DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo,
-            @NonNull Long actionPid, boolean s3ImportEmail) {
+            @NonNull Long actionPid, boolean s3ImportEmail, S3ImportEmailInfo emailInfo) {
         String filePath = "";
         if (StringUtils.isNotEmpty(csvImportFileInfo.getReportFilePath())) {
                 filePath = csvImportFileInfo.getReportFilePath();
         }
 
+        String emailInfoStr = "";
+        if (s3ImportEmail && emailInfo != null) {
+            emailInfoStr = JsonUtils.serialize(emailInfo);
+        }
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
                 .internalResourceHostPort(internalResourceHostPort) //
@@ -101,6 +108,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, filePath)
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))//
+                        .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_INFO, emailInfoStr)
                         .build())
                 .build();
     }
