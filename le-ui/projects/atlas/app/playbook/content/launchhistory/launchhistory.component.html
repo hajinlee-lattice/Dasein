@@ -166,7 +166,7 @@
             type="button"
             class="button blue-button pull-right"
             ng-disabled="vm.launching"
-            ng-click="vm.relaunchPlay()">
+            ui-sref="home.playbook.launch({play_name:vm.currentPlay.name,status:(vm.launching?'Launching...':'ReLaunch')})">
             <span ng-show="!vm.launching">ReLaunch</span>
             <span ng-show="vm.launching">Launching...</span>
         </button>
