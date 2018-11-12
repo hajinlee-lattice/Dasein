@@ -50,8 +50,11 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         Schema schema = getSchema(recordType);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(SRC_DUNS_KEY, srcDuns);
-        builder.set(SRC_DU_DUNS_KEY, srcDUDuns);
-        builder.set(SRC_GU_DUNS_KEY, srcGUDuns);
+        // TODO: Comment out following 2 lines for now. Otherwise it's
+        // not compatible with current schema. Need to consider backward
+        // compatibility issue
+//        builder.set(SRC_DU_DUNS_KEY, srcDUDuns);
+//        builder.set(SRC_GU_DUNS_KEY, srcGUDuns);
         String itemsStr = JsonUtils.serialize(items == null ? Collections.emptyList() : items);
         builder.set(ITEMS_KEY, itemsStr);
         return builder.build();
