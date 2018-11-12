@@ -100,7 +100,7 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private void sleepToAllowDbWriterReaderSync() {
         try {
-            Thread.sleep(3000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             // Ignore
         }
