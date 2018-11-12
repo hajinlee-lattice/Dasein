@@ -507,6 +507,8 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
+                    controller: 'ImportWizardJobStatus',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
@@ -614,6 +616,8 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
+                    controller: 'ImportWizardJobStatus',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
@@ -729,6 +733,8 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
+                    controller: 'ImportWizardJobStatus',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
@@ -833,6 +839,8 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
+                    controller: 'ImportWizardJobStatus',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }

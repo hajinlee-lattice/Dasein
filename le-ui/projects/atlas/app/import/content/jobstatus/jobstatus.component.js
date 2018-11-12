@@ -10,6 +10,8 @@ angular.module('lp.import.wizard.jobstatus', [])
 
     vm.init = function() {
         //ImportWizardStore.setValidation('jobstatus', true);
+
+        console.log(vm.autoImport);
     }
 
     vm.checkForAutoImport = function(){
