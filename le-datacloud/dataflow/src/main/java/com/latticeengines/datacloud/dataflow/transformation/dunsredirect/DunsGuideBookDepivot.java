@@ -14,7 +14,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.DunsGuideBookDepiv
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsGuideBookNLEnrichFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBookConfig;
+import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -27,22 +27,32 @@ public class DunsGuideBookDepivot extends ConfigurableFlowBase<TransformerConfig
     public static final String DATAFLOW_BEAN_NAME = "DunsGuideBookDepivotFlow";
     public static final String TRANSFORMER_NAME = "DunsGuideBookDepivot";
 
+    // DunsGuideBook fields
+    private static final String GB_DUNS = DunsGuideBook.SRC_DUNS_KEY;
+    private static final String GB_ITEMS = DunsGuideBook.ITEMS_KEY;
+
+    // DunsRedirectBook fields
+    private static final String RB_TGT_DUNS = DunsRedirectBookConfig.TARGET_DUNS;
+    private static final String RB_KEY_PAR = DunsRedirectBookConfig.KEY_PARTITION;
+    private static final String RB_BOOK_SRC = DunsRedirectBookConfig.BOOK_SOURCE;
+
+    // AMSeed fields
+    private static final String AMS_DUNS = DataCloudConstants.ATTR_LDC_DUNS;
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         Node book = addSource(parameters.getBaseTables().get(0));
         Node ams = addSource(parameters.getBaseTables().get(1));
 
         // Get all duns with target duns
-        book = book.filter(DunsGuideBookConfig.ITEMS + " != null", new FieldList(DunsGuideBookConfig.ITEMS));
+        book = book.filter(GB_ITEMS + " != null", new FieldList(GB_ITEMS));
 
         // Depivot items
         List<FieldMetadata> fms = new ArrayList<>();
-        fms.add(new FieldMetadata(DunsRedirectBookConfig.TARGET_DUNS, String.class));
-        fms.add(new FieldMetadata(DunsRedirectBookConfig.KEY_PARTITION, String.class));
-        fms.add(new FieldMetadata(DunsRedirectBookConfig.BOOK_SOURCE, String.class));
-        List<String> fields = new ArrayList<>(
-                Arrays.asList(DunsGuideBookConfig.DUNS, DunsRedirectBookConfig.TARGET_DUNS,
-                        DunsRedirectBookConfig.KEY_PARTITION, DunsRedirectBookConfig.BOOK_SOURCE));
+        fms.add(new FieldMetadata(RB_TGT_DUNS, String.class));
+        fms.add(new FieldMetadata(RB_KEY_PAR, String.class));
+        fms.add(new FieldMetadata(RB_BOOK_SRC, String.class));
+        List<String> fields = new ArrayList<>(Arrays.asList(GB_DUNS, RB_TGT_DUNS, RB_KEY_PAR, RB_BOOK_SRC));
         Node bookDepivoted = book.apply(
                 new DunsGuideBookDepivotFunction(new Fields(fields.toArray(new String[fields.size()]))),
                 new FieldList(book.getFieldNames()),
@@ -50,11 +60,11 @@ public class DunsGuideBookDepivot extends ConfigurableFlowBase<TransformerConfig
 
         // Dedup AccountMasterSeed by duns so that when enriching name+location
         // to DunsGuideBookDepivoted, no duplication introduced
-        ams = ams.groupByAndLimit(new FieldList(DataCloudConstants.ATTR_LDC_DUNS), 1);
+        ams = ams.groupByAndLimit(new FieldList(AMS_DUNS), 1);
 
         // Enrich name + location to bookDepivoted
-        bookDepivoted = bookDepivoted.join(new FieldList(DunsGuideBookConfig.DUNS), ams,
-                new FieldList(DataCloudConstants.ATTR_LDC_DUNS), JoinType.LEFT);
+        bookDepivoted = bookDepivoted.join(new FieldList(GB_DUNS), ams,
+                new FieldList(AMS_DUNS), JoinType.LEFT);
         List<String> nlFields = Arrays.asList(MatchKey.Name.name(), MatchKey.Country.name(), MatchKey.State.name(),
                 MatchKey.City.name());
         fields.addAll(nlFields);

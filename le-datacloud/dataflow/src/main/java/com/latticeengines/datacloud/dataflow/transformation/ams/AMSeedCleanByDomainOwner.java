@@ -127,8 +127,8 @@ public class AMSeedCleanByDomainOwner extends ConfigurableFlowBase<DomainOwnersh
                 .join(new FieldList(AMS_DOMAIN), domainOwner, new FieldList(renameField(AMS_DOMAIN)), JoinType.LEFT);
 
         // function to check if ROOT_DUNS of ams and domain owner
-        // are same : if equal then
-        // retain and if not equal then don't retain (mark domain = null)
+        // are same : if equal then retain and if not equal then don't retain
+        // (mark domain = null)
         AMSeedCleanByDomOwnFunction func = new AMSeedCleanByDomOwnFunction(
                 new Fields(joinAMSWithDomOwn.getFieldNamesArray()), renameField(AMS_DOMAIN), renameField(ROOT_DUNS));
         Node amsClean = joinAMSWithDomOwn

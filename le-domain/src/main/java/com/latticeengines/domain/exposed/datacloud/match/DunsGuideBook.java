@@ -28,16 +28,21 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         implements FabricEntity<DunsGuideBook> {
 
-    private static final String SRC_DUNS_KEY = "Duns";
-    private static final String ITEMS_KEY = "Items";
+    public static final String SRC_DUNS_KEY = "Duns";
+    public static final String SRC_DU_DUNS_KEY = "DUDuns"; // Serve CDL match
+    public static final String SRC_GU_DUNS_KEY = "GUDuns"; // Serve CDL match
+    public static final String ITEMS_KEY = "Items";
     // name of the tag used to check whether this entry is patched
     // the tag value will NOT be serialized to avro
     private static final String PATCHED_TAG = "Patched";
+
 
     private static final TypeReference<List<Item>> ITEMS_TYPE_REFERENCE = new TypeReference<List<Item>>() {
     };
 
     private String srcDuns;
+    private String srcDUDuns;
+    private String srcGUDuns;
     private List<Item> items;
 
     @Override
@@ -45,6 +50,8 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         Schema schema = getSchema(recordType);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(SRC_DUNS_KEY, srcDuns);
+        builder.set(SRC_DU_DUNS_KEY, srcDUDuns);
+        builder.set(SRC_GU_DUNS_KEY, srcGUDuns);
         String itemsStr = JsonUtils.serialize(items == null ? Collections.emptyList() : items);
         builder.set(ITEMS_KEY, itemsStr);
         return builder.build();
@@ -56,15 +63,24 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         return SchemaBuilder.record(replaceSpacialChars(recordType)).fields()
                 /* source DUNS */
                 .name(SRC_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
-                .name(ITEMS_KEY)
+                // TODO: Comment out following 2 lines for now. Otherwise it's
+                // not compatible with current schema. Need to consider backward
+                // compatibility issue
+
+                /* source DU DUNS */
+                // .name(SRC_DU_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
+                /* source GU DUNS */
+                // .name(SRC_GU_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
                 /* JSON string of DunsGuideBook.Item array */
-                .type(Schema.create(Schema.Type.STRING)).noDefault().endRecord();
+                .name(ITEMS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault().endRecord();
     }
 
     @Override
     public DunsGuideBook fromFabricAvroRecord(GenericRecord record) {
         Preconditions.checkNotNull(record);
         setId(getString(record.get(SRC_DUNS_KEY)));
+        setSrcDUDuns(getString(record.get(SRC_DU_DUNS_KEY)));
+        setSrcGUDuns(getString(record.get(SRC_GU_DUNS_KEY)));
         String itemsStr = getString(record.get(ITEMS_KEY));
         if (itemsStr != null) {
             List<Item> items = JsonUtils.deserialize(itemsStr, ITEMS_TYPE_REFERENCE);
@@ -89,6 +105,22 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
     @Override
     public void setId(String id) {
         this.srcDuns = id;
+    }
+
+    public String getSrcDUDuns() {
+        return srcDUDuns;
+    }
+
+    public void setSrcDUDuns(String srcDUDuns) {
+        this.srcDUDuns = srcDUDuns;
+    }
+
+    public String getSrcGUDuns() {
+        return srcGUDuns;
+    }
+
+    public void setSrcGUDuns(String srcGUDuns) {
+        this.srcGUDuns = srcGUDuns;
     }
 
     public List<Item> getItems() {
@@ -127,13 +159,21 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Item {
-        private static final String DUNS_KEY = "TargetDuns";
-        private static final String KEYPARTITION_KEY = "KeyPartition";
-        private static final String BOOKSOURCE_KEY = "BookSource";
+        public static final String DUNS_KEY = "TargetDuns";
+        // Serve CDL match
+        public static final String DU_DUNS_KEY = "TargetDUDuns";
+        // Serve CDL match
+        public static final String GU_DUNS_KEY = "TargetGUDuns";
+        public static final String KEYPARTITION_KEY = "KeyPartition";
+        public static final String BOOKSOURCE_KEY = "BookSource";
         private static final String PATCHED_KEY = "Patched";
 
         @JsonProperty(DUNS_KEY)
         private String duns;
+        @JsonProperty(DU_DUNS_KEY)
+        private String duDuns;
+        @JsonProperty(GU_DUNS_KEY)
+        private String guDuns;
         @JsonProperty(KEYPARTITION_KEY)
         private String keyPartition;
         @JsonProperty(BOOKSOURCE_KEY)
@@ -141,8 +181,10 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         @JsonProperty(PATCHED_KEY)
         private Boolean patched = false;
 
-        public Item(String duns, String keyPartition, String bookSource) {
+        public Item(String duns, String duDuns, String guDuns, String keyPartition, String bookSource) {
             this.duns = duns;
+            this.duDuns = duDuns;
+            this.guDuns = guDuns;
             this.keyPartition = keyPartition;
             this.bookSource = bookSource;
         }
@@ -157,6 +199,22 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
 
         public void setDuns(String duns) {
             this.duns = duns;
+        }
+
+        public String getDuDuns() {
+            return duDuns;
+        }
+
+        public void setDuDuns(String duDuns) {
+            this.duDuns = duDuns;
+        }
+
+        public String getGuDuns() {
+            return guDuns;
+        }
+
+        public void setGuDuns(String guDuns) {
+            this.guDuns = guDuns;
         }
 
         public String getKeyPartition() {

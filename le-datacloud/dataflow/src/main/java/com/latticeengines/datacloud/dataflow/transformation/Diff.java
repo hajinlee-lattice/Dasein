@@ -13,6 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiffferParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
@@ -23,7 +24,7 @@ import cascading.tuple.Fields;
 @Component(Diff.DATAFLOW_BEAN_NAME)
 public class Diff extends TransformationFlowBase<BasicTransformationConfiguration, DiffferParameters> {
     public final static String DATAFLOW_BEAN_NAME = "DiffFlow";
-    public final static String TRANSFORMER_NAME = "SourceDifferTransformer";
+    public final static String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_DIFFER;
 
     public final static String CHECK_SUM = "_CHECKSUM_";
     public final static String COMP = "_COMP_";

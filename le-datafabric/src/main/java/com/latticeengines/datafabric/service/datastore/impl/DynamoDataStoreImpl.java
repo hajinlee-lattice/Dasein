@@ -488,7 +488,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 return reader.read(null, decoder);
             }
         } catch (Exception e) {
-            log.warn("Exception in decoding generic record.");
+            log.warn("Exception in decoding generic record.", e);
             return null;
         }
     }

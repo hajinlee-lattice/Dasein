@@ -1,25 +1,26 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBookConfig;
+import com.latticeengines.dataflow.runtime.cascading.BaseFunction;
+import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
 
 import cascading.flow.FlowProcess;
-import cascading.operation.BaseOperation;
-import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class DunsGuideBookNLEnrichFunction extends BaseOperation implements Function {
+public class DunsGuideBookNLEnrichFunction extends BaseFunction {
 
     private static final long serialVersionUID = -8506196845291044144L;
+
+    private static final String DUNS = DunsGuideBook.SRC_DUNS_KEY;
+    private static final String TGT_DUNS = DunsRedirectBookConfig.TARGET_DUNS;
+    private static final String KEY_PAR = DunsRedirectBookConfig.KEY_PARTITION;
+    private static final String BOOK_SRC = DunsRedirectBookConfig.BOOK_SOURCE;
 
     private int dunsLoc;
     private int targetDunsLoc;
@@ -32,21 +33,20 @@ public class DunsGuideBookNLEnrichFunction extends BaseOperation implements Func
 
     public DunsGuideBookNLEnrichFunction(Fields fieldDeclarations) {
         super(fieldDeclarations);
-        Map<String, Integer> namePositionMap = getPositionMap(fieldDeclaration);
         nameLoc = namePositionMap.get(MatchKey.Name.name());
         countryLoc = namePositionMap.get(MatchKey.Country.name());
         stateLoc = namePositionMap.get(MatchKey.State.name());
         cityLoc = namePositionMap.get(MatchKey.City.name());
-        dunsLoc = namePositionMap.get(DunsGuideBookConfig.DUNS);
-        targetDunsLoc = namePositionMap.get(DunsRedirectBookConfig.TARGET_DUNS);
-        keyPartitionLoc = namePositionMap.get(DunsRedirectBookConfig.KEY_PARTITION);
-        bookSourceLoc = namePositionMap.get(DunsRedirectBookConfig.BOOK_SOURCE);
+        dunsLoc = namePositionMap.get(DUNS);
+        targetDunsLoc = namePositionMap.get(TGT_DUNS);
+        keyPartitionLoc = namePositionMap.get(KEY_PAR);
+        bookSourceLoc = namePositionMap.get(BOOK_SRC);
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String keyPartition = arguments.getString(DunsRedirectBookConfig.KEY_PARTITION);
+        String keyPartition = arguments.getString(KEY_PAR);
         String name = keyPartition.contains(MatchKey.Name.name())
                 ? arguments.getString(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Name)) : null;
         String country = keyPartition.contains(MatchKey.Country.name())
@@ -61,20 +61,10 @@ public class DunsGuideBookNLEnrichFunction extends BaseOperation implements Func
         result.set(countryLoc, country);
         result.set(stateLoc, state);
         result.set(cityLoc, city);
-        result.set(dunsLoc, arguments.getString(DunsGuideBookConfig.DUNS));
-        result.set(targetDunsLoc, arguments.getString(DunsRedirectBookConfig.TARGET_DUNS));
-        result.set(keyPartitionLoc, arguments.getString(DunsRedirectBookConfig.KEY_PARTITION));
-        result.set(bookSourceLoc, arguments.getString(DunsRedirectBookConfig.BOOK_SOURCE));
+        result.set(dunsLoc, arguments.getString(DUNS));
+        result.set(targetDunsLoc, arguments.getString(TGT_DUNS));
+        result.set(keyPartitionLoc, arguments.getString(KEY_PAR));
+        result.set(bookSourceLoc, arguments.getString(BOOK_SRC));
         functionCall.getOutputCollector().add(result);
-    }
-
-    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
-        Map<String, Integer> positionMap = new HashMap<>();
-        int pos = 0;
-        for (Object field : fieldDeclaration) {
-            String fieldName = (String) field;
-            positionMap.put(fieldName, pos++);
-        }
-        return positionMap;
     }
 }

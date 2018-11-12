@@ -12,6 +12,7 @@ import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsGuideBookAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -27,6 +28,10 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
     private DunsGuideBookConfig config;
     // AMSeed duns field
     private static final String AMS_DUNS = DataCloudConstants.ATTR_LDC_DUNS;
+    // AMSeed du duns field
+    private static final String AMS_DU_DUNS = DataCloudConstants.ATTR_DU_DUNS;
+    // AMSeed gu duns field
+    private static final String AMS_GU_DUNS = DataCloudConstants.ATTR_GU_DUNS;
     // DunsRedirectBook duns field
     private static final String RB_DUNS = DunsRedirectBookConfig.DUNS;
     // DunsRedirectBook target duns field
@@ -36,9 +41,13 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
     // DunsRedirectBook book source field
     private static final String RB_SRC = DunsRedirectBookConfig.BOOK_SOURCE;
     // DunsGuideBook duns field
-    private static final String GB_DUNS = DunsGuideBookConfig.DUNS;
+    private static final String GB_DUNS = DunsGuideBook.SRC_DUNS_KEY;
+    // DunsGuideBook du duns field
+    private static final String GB_DU_DUNS = DunsGuideBook.SRC_DU_DUNS_KEY;
+    // DunsGuideBook gu duns field
+    private static final String GB_GU_DUNS = DunsGuideBook.SRC_GU_DUNS_KEY;
     // DunsGuideBook items field
-    private static final String GB_ITEMS = DunsGuideBookConfig.ITEMS;
+    private static final String GB_ITEMS = DunsGuideBook.ITEMS_KEY;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -60,11 +69,13 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
      * Find all the duns from AMSeed
      * 
      * @param ams
+     *            (duns, duduns, guduns)
      * @return
      */
     private Node getFullDuns(Node ams) {
         return ams
-                .filter(AMS_DUNS + " != null", new FieldList(AMS_DUNS)).retain(new FieldList(AMS_DUNS))
+                .filter(AMS_DUNS + " != null", new FieldList(AMS_DUNS)) //
+                .retain(new FieldList(AMS_DUNS, AMS_DU_DUNS, AMS_GU_DUNS)) //
                 .groupByAndLimit(new FieldList(AMS_DUNS), 1);
     }
 
@@ -76,7 +87,9 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
      * priority (lower priority value)
      * 
      * @param fullDuns
+     *            (duns, duduns, guduns)
      * @param books
+     *            duns redirect books
      * @return
      */
     private Node mergeRedirectBooks(Node fullDuns, List<Node> books) {
@@ -89,11 +102,12 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
         }
 
         // Remove target duns in merged DunsRedirectBook which does not exist in
-        // AMSeed;
+        // AMSeed; Append target duns' du duns and gu duns
         List<String> toRetain = mergedBook.getFieldNames();
+        toRetain.add(AMS_DU_DUNS);
+        toRetain.add(AMS_GU_DUNS);
         mergedBook = mergedBook
-                .join(new FieldList(RB_TG_DUNS), fullDuns, new FieldList(AMS_DUNS), JoinType.INNER)
-                .retain(new FieldList(toRetain));
+                .join(new FieldList(RB_TG_DUNS), fullDuns, new FieldList(AMS_DUNS), JoinType.INNER);
 
         String[] fields = { GB_DUNS, GB_ITEMS };
         List<FieldMetadata> fms = new ArrayList<>();
@@ -118,7 +132,10 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
      * Source duns in DunsGuideBook should contains all the duns from AMSeed,
      * but they are allowed to be not existing in AMSeed
      * 
+     * Enrich source duns's du duns & gu duns from AMSeed
+     * 
      * @param fullDuns
+     *            (duns, duDuns, guDuns)
      * @param guideBook
      * @return
      */
@@ -133,7 +150,8 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
                 .apply(String.format("%s != null ? %s : %s", AMS_DUNS, AMS_DUNS, GB_DUNS),
                         new FieldList(AMS_DUNS, GB_DUNS), new FieldMetadata("_DUNS_TEMP_", String.class)) //
                 .discard(new FieldList(AMS_DUNS, GB_DUNS)) //
-                .rename(new FieldList("_DUNS_TEMP_"), new FieldList(GB_DUNS));
+                .rename(new FieldList("_DUNS_TEMP_", AMS_DU_DUNS, AMS_GU_DUNS),
+                        new FieldList(GB_DUNS, GB_DU_DUNS, GB_GU_DUNS));
         return guideBook;
     }
 

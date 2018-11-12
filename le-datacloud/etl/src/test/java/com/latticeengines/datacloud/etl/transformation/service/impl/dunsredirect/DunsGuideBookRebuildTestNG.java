@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,6 +49,13 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
     private static final String BOOKSRC_DOMDUNS = "DomainDunsMap";
     private static final String BOOKSRC_HQ = "DunsTree";
     private static final String BOOKSRC_MS = "ManualSeed";
+
+    private static final String DUNS = DunsGuideBook.SRC_DUNS_KEY;
+    private static final String ITEMS = DunsGuideBook.ITEMS_KEY;
+
+    // To fake data
+    private static final String DU_SUFFIX = "_DU";
+    private static final String GU_SUFFIX = "_GU";
 
     @Test(groups = "pipeline1")
     public void testTransformation() {
@@ -107,6 +115,8 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
     private void prepareData() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_DU_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_GU_DUNS, String.class));
         Object[][] amsData = new Object[][] {
                 // Source Duns
                 { "C1D001" }, { "C1D002" }, { "C1D003" }, { "C2D001" }, //
@@ -123,7 +133,13 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
                 // Duns not present in DunsRedirectBook
                 { "OtherDuns" }, //
         };
-        uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, amsData);
+        Object[][] amsDataFinal = new Object[amsData.length][3];
+        IntStream.range(0, amsData.length).forEach(i -> {
+            System.arraycopy(amsData[i], 0, amsDataFinal[i], 0, amsData[i].length);
+            amsDataFinal[i][1] = (String) amsDataFinal[i][0] + DU_SUFFIX;
+            amsDataFinal[i][2] = (String) amsDataFinal[i][0] + GU_SUFFIX;
+        });
+        uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, amsDataFinal);
 
         schema = new ArrayList<>();
         schema.add(Pair.of(DunsRedirectBookConfig.DUNS, String.class));
@@ -275,10 +291,12 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
         };
 
         for (String[] item : depivoted) {
-            if (!map.containsKey(item[0])) {
-                map.put(item[0], new ArrayList<>());
+            String id = buildIdentifier(item[0]);
+            if (!map.containsKey(id)) {
+                map.put(id, new ArrayList<>());
             }
-            map.get(item[0]).add(new DunsGuideBook.Item(item[1], item[2], item[3]));
+            map.get(id)
+                    .add(new DunsGuideBook.Item(item[1], item[1] + DU_SUFFIX, item[1] + GU_SUFFIX, item[2], item[3]));
         }
 
         String[] dunsWithoutGuideBook = { //
@@ -293,30 +311,37 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
                 "OtherDuns", //
         };
         for (String duns : dunsWithoutGuideBook) {
-            map.put(duns, null);
+            map.put(buildIdentifier(duns), null);
         }
         return map;
+    }
+
+    private String buildIdentifier(String duns) {
+        String duDuns = duns + DU_SUFFIX;
+        String guDuns = duns + GU_SUFFIX;
+        return duns + duDuns + guDuns;
     }
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         Map<String, List<DunsGuideBook.Item>> expected = constructExpectedDunsGuideBook();
-        Set<String> visitedDuns = new HashSet<>();
+        Set<String> visitedIds = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            String duns = record.get(DunsGuideBookConfig.DUNS).toString();
-            Assert.assertTrue(expected.containsKey(duns));
+            String duns = record.get(DUNS).toString();
+            String id = buildIdentifier(duns);
+            Assert.assertTrue(expected.containsKey(id));
             List<DunsGuideBook.Item> books = null;
-            if (record.get(DunsGuideBookConfig.ITEMS) != null) {
-                String items = record.get(DunsGuideBookConfig.ITEMS).toString();
+            if (record.get(ITEMS) != null) {
+                String items = record.get(ITEMS).toString();
                 List<?> list = JsonUtils.deserialize(items, List.class);
                 books = JsonUtils.convertList(list, DunsGuideBook.Item.class);
             }
-            verifyDunsGuideBooks(books, expected.get(duns));
-            visitedDuns.add(duns);
+            verifyDunsGuideBooks(books, expected.get(id));
+            visitedIds.add(id);
         }
-        Assert.assertEquals(visitedDuns.size(), expected.size());
+        Assert.assertEquals(visitedIds.size(), expected.size());
     }
 
     private void verifyDunsGuideBooks(List<DunsGuideBook.Item> actual, List<DunsGuideBook.Item> expected) {
@@ -329,6 +354,8 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
 
         Comparator<DunsGuideBook.Item> comparator = Comparator.comparing(DunsGuideBook.Item::getKeyPartition) //
                 .thenComparing(DunsGuideBook.Item::getDuns) //
+                .thenComparing(DunsGuideBook.Item::getDuDuns) //
+                .thenComparing(DunsGuideBook.Item::getGuDuns) //
                 .thenComparing(DunsGuideBook.Item::getBookSource);
         Collections.sort(actual, comparator);
         Collections.sort(expected, comparator);

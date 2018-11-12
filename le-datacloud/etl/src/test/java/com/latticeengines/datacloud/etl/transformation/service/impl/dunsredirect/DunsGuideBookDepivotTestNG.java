@@ -18,7 +18,7 @@ import com.latticeengines.datacloud.dataflow.transformation.dunsredirect.DunsGui
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBookConfig;
+import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -31,6 +31,11 @@ public class DunsGuideBookDepivotTestNG extends PipelineTransformationTestNGBase
     private GeneralSource ams = new GeneralSource("AccountMasterSeed");
     private GeneralSource dunsGuideBookDepivoted = new GeneralSource("DunsGuideBookDepivoted");
     private GeneralSource source = dunsGuideBookDepivoted;
+
+    private static final String DUNS = DunsGuideBook.SRC_DUNS_KEY;
+    private static final String DU_DUNS = DunsGuideBook.SRC_DU_DUNS_KEY;
+    private static final String GU_DUNS = DunsGuideBook.SRC_GU_DUNS_KEY;
+    private static final String ITEMS = DunsGuideBook.ITEMS_KEY;
 
     @Test(groups = "pipeline1")
     public void testTransformation() {
@@ -74,22 +79,26 @@ public class DunsGuideBookDepivotTestNG extends PipelineTransformationTestNGBase
 
     private void prepareDunsGuideBook() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of(DunsGuideBookConfig.DUNS, String.class));
-        schema.add(Pair.of(DunsGuideBookConfig.ITEMS, String.class));
+        schema.add(Pair.of(DUNS, String.class));
+        schema.add(Pair.of(DU_DUNS, String.class));
+        schema.add(Pair.of(GU_DUNS, String.class));
+        schema.add(Pair.of(ITEMS, String.class));
 
         // Schema: Duns, Items
         Object[][] data = new Object[][] { //
                 // Case 1: null Items
-                { "DUNS01", null }, //
+                { "DUNS01", "DUDUNS01", "GUDUNS01", null }, //
                 // Case 2: Items is empty list
-                { "DUNS02", "[]" }, //
+                { "DUNS02", "DUDUNS02", "GUDUNS02", "[]" }, //
                 // Case 3: Items list has single item
-                { "DUNS03",
-                        "[{\"TargetDuns\":\"TDUNS3\",\"KeyPartition\":\"Country,Name,State\",\"BookSource\":\"DomDunsMap\"}]" }, //
+                { "DUNS03", "DUDUNS03", "GUDUNS03",
+                        "[{\"TargetDuns\":\"TDUNS3\",\"TargetDUDuns\":\"TDUDUNS3\",\"TargetGUDuns\":\"TGUDUNS3\",\"KeyPartition\":\"Country,Name,State\",\"BookSource\":\"DomDunsMap\"}]" }, //
                 // Case 4: Items list has multiple items. Case 3 & 4 covers all
                 // the possible KeyPartition
-                { "DUNS04",
-                        "[{\"TargetDuns\":\"TDUNS4\",\"KeyPartition\":\"Country,Name\",\"BookSource\":\"ManualMatch\"},{\"TargetDuns\":\"TDUNS44\",\"KeyPartition\":\"Name\",\"BookSource\":\"DunsTree\"},{\"TargetDuns\":\"TDUNS444\",\"KeyPartition\":\"City,Country,Name,State\",\"BookSource\":\"DomDunsMap\"}]" }, //
+                { "DUNS04", "DUDUNS04", "GUDUNS04",
+                        "[{\"TargetDuns\":\"TDUNS4\",\"TargetDUDuns\":\"TDUDUNS4\",\"TargetGUDuns\":\"TGUDUNS4\",\"KeyPartition\":\"Country,Name\",\"BookSource\":\"ManualMatch\"},"
+                                + "{\"TargetDuns\":\"TDUNS44\",\"TargetDUDuns\":\"TDUDUNS44\",\"TargetGUDuns\":\"TGUDUNS44\",\"KeyPartition\":\"Name\",\"BookSource\":\"DunsTree\"},"
+                                + "{\"TargetDuns\":\"TDUNS444\",\"TargetDUDuns\":\"TDUDUNS444\",\"TargetGUDuns\":\"TGUDUNS444\",\"KeyPartition\":\"City,Country,Name,State\",\"BookSource\":\"DomDunsMap\"}]" }, //
         };
         uploadBaseSourceData(dunsGuideBook.getSourceName(), baseSourceVersion, schema, data);
     }
@@ -136,10 +145,10 @@ public class DunsGuideBookDepivotTestNG extends PipelineTransformationTestNGBase
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            String id = buildId(record.get(DunsGuideBookConfig.DUNS), record.get(DunsRedirectBookConfig.KEY_PARTITION));
+            String id = buildId(record.get(DUNS), record.get(DunsRedirectBookConfig.KEY_PARTITION));
             Object[] expected = expectedMap.get(id);
             Assert.assertNotNull(expected);
-            Assert.assertTrue(isObjEquals(record.get(DunsGuideBookConfig.DUNS), expected[0]));
+            Assert.assertTrue(isObjEquals(record.get(DUNS), expected[0]));
             Assert.assertTrue(isObjEquals(record.get(DunsRedirectBookConfig.TARGET_DUNS), expected[1]));
             Assert.assertTrue(isObjEquals(record.get(DunsRedirectBookConfig.KEY_PARTITION), expected[2]));
             Assert.assertTrue(isObjEquals(record.get(DunsRedirectBookConfig.BOOK_SOURCE), expected[3]));
