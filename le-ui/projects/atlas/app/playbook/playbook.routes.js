@@ -994,6 +994,7 @@ angular
 
                         if(getExcludeItems) {
                             getSegmentsOpts.lookupId = PlaybookWizardStore.getDestinationAccountId();
+                            getSegmentsOpts.restrictNullLookupId = true;
                         }
 
                         var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
