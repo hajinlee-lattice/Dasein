@@ -18,10 +18,10 @@ class AwsEnvironment:
         self.env = env
 
     def aws_account_id(self):
-        if self.env == "qa":
-            return "028036828464"
-        elif self.env == "prod":
+        if self.env == "prod":
             return "158854640770"
+        else:
+            return "028036828464"
 
     def ecr_registry(self):
         return "%s.dkr.ecr.us-east-1.amazonaws.com" % self.aws_account_id()
@@ -39,16 +39,11 @@ def push(args):
     tag_for_remote(args)
     print("pushing image %s:%s to repo ..." % (args.image, args.remotetag))
 
-    if args.environment != "dev":
-        create_ecr_if_not_exists(args.environment, args.image)
+    create_ecr_if_not_exists(args.environment, args.image)
     print("login")
     login_cmd = login_internal(args.environment)
-
-    if args.environment == 'dev':
-        reg_url = NEXUS_DOCKER_REGISTRY
-    else:
-        config = AwsEnvironment(args.environment)
-        reg_url = config.ecr_registry()
+    config = AwsEnvironment(args.environment)
+    reg_url = config.ecr_registry()
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
     if args.dryrun:
         print(login_cmd + "; docker push %s" % destination)
@@ -69,10 +64,7 @@ def purge(args):
     purge_internal(args.environment, args.image, args.dryrun)
 
 def pull_internal(environment, image, remotetag, localtag, skiplogin=False, withf=False):
-    if environment == 'dev':
-        registry = NEXUS_DOCKER_REGISTRY
-    else:
-        registry = AwsEnvironment(environment).ecr_registry()
+    registry = AwsEnvironment(environment).ecr_registry()
     source = registry + "/" + NAMESPACE + "/" + image + ":" + remotetag
     if skiplogin:
         subprocess.call("docker pull %s" % source, shell=True)
@@ -124,11 +116,8 @@ def purge_internal(environment, image, dryrun=False):
 
 def tag_for_remote(args):
     source = NAMESPACE + "/" +  args.image + ":" + args.localtag
-    if args.environment == 'dev':
-        reg_url = NEXUS_DOCKER_REGISTRY
-    else:
-        config = AwsEnvironment(args.environment)
-        reg_url = config.ecr_registry()
+    config = AwsEnvironment(args.environment)
+    reg_url = config.ecr_registry()
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
     print("tagging image %s as %s ..." % (source, destination))
     if args.withf:
@@ -165,10 +154,7 @@ def repo_in_ecr(env, image):
     return False
 
 def login_internal(environment):
-    if environment == 'dev':
-        return login_nexus()
-    else:
-        return login_aws(environment)
+    return login_aws(environment)
 
 def login_nexus():
     username, password, url = 'deploy', 'welcome', NEXUS_DOCKER_REGISTRY

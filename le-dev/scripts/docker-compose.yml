@@ -3,6 +3,7 @@ version: "3"
 services:
 
   zookeeper:
+    container_name: le_zookeeper
     image: latticeengines/zookeeper
     ports:
       - '2181:2181'
@@ -11,14 +12,23 @@ services:
       - $DOCKER_DATA_ROOT/zookeeper/data-log:/usr/zookeeper/data-log
 
   mysql:
+    container_name: le_mysql
     image: latticeengines/mysql
     ports:
       - '3306:3306'
     volumes:
       - $DOCKER_DATA_ROOT/mysql:/var/lib/mysql
       - $WSHOME/le-dev/mysql:/etc/mysql/conf.d
+      - $WSHOME/le-dev/mysql/my.cnf:/etc/mysql/my.cnf
+
+  redis:
+    container_name: le_redis
+    image: latticeengines/redis
+    ports:
+    - '6379:6379'
 
   tez-ui:
+    container_name: le_tez_ui
     image: latticeengines/tez-ui
     ports:
       - '8001:8080'

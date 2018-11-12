@@ -25,6 +25,7 @@ echo "replace tokens"
 cd /tmp/ledp
 ls -al
 
+sed -i 's/USE_EMR=.*/USE_EMR=false/g' ${STACK_PROFILE}
 cat ${STACK_PROFILE}
 
 su -l yarn -c "hdfs dfs -rm -r -f /app/${VERSION}/conf" || true

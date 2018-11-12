@@ -3,15 +3,16 @@ FROM latticeengines/jre
 ENV ZK_LOG_DIR /usr/zookeeper/logs
 ENV ZOOKEEPER_HOME /usr/zookeeper
 ENV PATH $PATH:$ZOOKEEPER_HOME/bin
+ENV ZOOKEEPER_VERSION=3.4.13
 
 # zookeeper
 RUN yum install -y wget jq && yum clean all
 RUN APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred') \
-    && wget ${APACHE_MIRROR}zookeeper/zookeeper-3.4.11/zookeeper-3.4.11.tar.gz \
-    && tar xzf zookeeper-3.4.11.tar.gz \
-	&& mv zookeeper-3.4.11 /usr/zookeeper \
+    && wget ${APACHE_MIRROR}zookeeper/zookeeper-${ZOOKEEPER_VERSION}/zookeeper-${ZOOKEEPER_VERSION}.tar.gz \
+    && tar xzf zookeeper-${ZOOKEEPER_VERSION}.tar.gz \
+	&& mv zookeeper-${ZOOKEEPER_VERSION} /usr/zookeeper \
 	&& mkdir -p /usr/zookeeper/logs \
-	&& rm zookeeper-3.4.11.tar.gz
+	&& rm zookeeper-${ZOOKEEPER_VERSION}.tar.gz
 
 RUN mkdir -p /usr/zookeeper/data; touch /usr/zookeeper/data/myid
 

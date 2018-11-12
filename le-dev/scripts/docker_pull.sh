@@ -6,7 +6,7 @@ IMAGE=$1
 
 if [ -z "${IMAGE}" ]; then
 
-    for img in 'mysql' 'zookeeper' 'dynamo' 'tez-ui'
+    for img in 'mysql' 'zookeeper' 'redis' 'tez-ui'
     do
         echo "pulling ${img}"
         python -m docker pull ${img}
