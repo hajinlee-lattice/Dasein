@@ -2,13 +2,14 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 
 import com.latticeengines.datacloud.core.annotation.PodContextAware;
+import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -43,14 +43,14 @@ import io.swagger.annotations.ApiOperation;
 public class MatchResource {
     private static final Logger log = LoggerFactory.getLogger(MatchResource.class);
 
-    @Autowired
+    @Inject
     private RealTimeMatchService realTimeMatchService;
 
-    @Autowired
+    @Inject
     private List<BulkMatchService> bulkMatchServiceList;
 
-    @Autowired
-    private MatchMonitorService matchMonitorService;
+    @Inject
+    private MatchValidationService matchValidationService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -63,7 +63,7 @@ public class MatchResource {
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
-        matchMonitorService.precheck(input.getDataCloudVersion());
+        matchValidationService.validateDataCloudVersion(input.getDataCloudVersion());
         if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId) //
                 && !"AccountId".equals(input.getKeyMap().get(MatchKey.LookupId).get(0))) {
             input = mockForCDLLookup(input);
@@ -82,7 +82,7 @@ public class MatchResource {
         try {
             if (CollectionUtils.isNotEmpty(input.getInputList())) {
                 for (MatchInput matchInput : input.getInputList()) {
-                    matchMonitorService.precheck(matchInput.getDataCloudVersion());
+                    matchValidationService.validateDataCloudVersion(matchInput.getDataCloudVersion());
                 }
             }
             return realTimeMatchService.matchBulk(input);
@@ -106,7 +106,8 @@ public class MatchResource {
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
-            matchMonitorService.precheck(matchVersion);
+            matchValidationService.validateDataCloudVersion(matchVersion);
+            matchValidationService.validateDecisionGraph(input.getDecisionGraph());
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
@@ -126,7 +127,7 @@ public class MatchResource {
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
-            matchMonitorService.precheck(matchVersion);
+            matchValidationService.validateDataCloudVersion(matchVersion);
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.getWorkflowConf(input, hdfsPod);
         } catch (Exception e) {

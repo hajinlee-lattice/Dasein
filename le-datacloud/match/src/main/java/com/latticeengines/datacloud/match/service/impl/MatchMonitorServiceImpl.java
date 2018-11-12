@@ -16,18 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DnBLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DynamoDBLookupService;
-import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
-import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
-import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
-import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
 public class MatchMonitorServiceImpl implements MatchMonitorService {
@@ -35,9 +30,6 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
 
     @Autowired
     private DnBCacheService dnbCacheService;
-
-    @Autowired
-    private AccountLookupService accountLookupService;
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -163,38 +155,6 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
             }
         }
         log.info(sb.toString());
-    }
-
-    @Override
-    public void precheck(String matchVersion) {
-        checkDataFabricEntityMgr(matchVersion);
-    }
-
-    private void checkDataFabricEntityMgr(String matchVersion) {
-        checkDnBCacheEntityMgr(matchVersion);
-        checkAccountLookupEntityMgr(matchVersion);
-    }
-
-    private void checkDnBCacheEntityMgr(String matchVersion) {
-        if (MatchUtils.isValidForAccountMasterBasedMatch(matchVersion)) {
-            DnBCacheEntityMgr entityMgr = dnbCacheService.getCacheMgr();
-            if (entityMgr == null || entityMgr.isDisabled()) {
-                throw new RuntimeException("DnBCacheEntityMgr is disabled.");
-            }
-        }
-    }
-
-    private void checkAccountLookupEntityMgr(String matchVersion) {
-        if (MatchUtils.isValidForAccountMasterBasedMatch(matchVersion)) {
-            AccountLookupEntryMgr lookupEntityMgr = accountLookupService.getLookupMgr(matchVersion);
-            if (lookupEntityMgr == null || lookupEntityMgr.isDisabled()) {
-                throw new RuntimeException("AccountLookupEntryMgr is disabled.");
-            }
-            LatticeAccountMgr latticeAccountMgr = accountLookupService.getAccountMgr(matchVersion);
-            if (latticeAccountMgr == null || latticeAccountMgr.isDisabled()) {
-                throw new RuntimeException("LatticeAccountMgr is disabled.");
-            }
-        }
     }
 
     public void pushMetrics(String service, String message) {
