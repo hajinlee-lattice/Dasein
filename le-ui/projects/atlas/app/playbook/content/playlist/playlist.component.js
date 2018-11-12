@@ -98,7 +98,7 @@ angular.module('lp.playbook.plays', [
             $click = angular.element($event.target).attr('ng-click'),
             $clickFunction = ($click ? $click.split('(')[0] : ''),
             $sref = angular.element($event.target).attr('ui-sref');
-
+console.log($clickedEl, $click, $clickFunction, $sref);
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
         PlaybookWizardStore.setPlay(play);
 

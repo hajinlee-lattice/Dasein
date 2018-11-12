@@ -116,7 +116,7 @@
                             type="button"
                             class="button blue-button pull-right"
                             ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
-                            ng-click="vm.continuePlaySetup($event)">
+                            ui-sref="home.playbook.dashboard({play_name: play.name})">
                             Continue
                         </button>
                          <button 
