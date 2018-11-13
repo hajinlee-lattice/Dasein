@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ -z "$(which zookeeper_import)" ]; then
+if [ -z `which zookeeper_import` ]; then
     echo "Have you installed zc.zk python package? You can use 'pip install zc.zk' to install it."
     exit 1
 fi
