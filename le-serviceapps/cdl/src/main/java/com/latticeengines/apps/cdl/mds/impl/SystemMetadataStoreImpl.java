@@ -168,7 +168,7 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                                     cm.setCanModel(true);
 
                                     // disable date attributes to be used in modeling
-                                    if (cm.getLogicalDataType().equals(LogicalDataType.Date)) {
+                                    if (LogicalDataType.Date.equals(cm.getLogicalDataType())) {
                                         cm.disableGroup(Model);
                                         cm.setCanModel(false);
                                         // TODO: need to find a way to set "life cycle change" to True for cm
