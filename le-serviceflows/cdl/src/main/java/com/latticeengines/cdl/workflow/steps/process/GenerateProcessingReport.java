@@ -204,32 +204,31 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         Map<BusinessEntity, Long> currentCnts = new HashMap<>();
         currentCnts.put(BusinessEntity.Account, countInRedshift(BusinessEntity.Account));
         currentCnts.put(BusinessEntity.Contact, countInRedshift(BusinessEntity.Contact));
-        currentCnts.put(BusinessEntity.Transaction, countRawTransactionInHdfs());
-
-        long num_products = countInRedshift(BusinessEntity.Product);
-//        long num_productHierarchies = countInRedshift(BusinessEntity.ProductHierarchy);
-//        currentCnts.put(BusinessEntity.Product, num_products + num_productHierarchies);
-        currentCnts.put(BusinessEntity.Product, num_products);
+        currentCnts.put(BusinessEntity.Transaction,
+                countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedRawTransaction));
+        currentCnts.put(BusinessEntity.Product, countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedProduct));
 
         return currentCnts;
     }
 
-    private long countRawTransactionInHdfs() {
+    private long countRawEntitiesInHdfs(TableRoleInCollection tableRoleInCollection) {
         try {
             String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                    TableRoleInCollection.ConsolidatedRawTransaction, inactive);
+                    tableRoleInCollection, inactive);
             if (StringUtils.isBlank(rawTableName)) {
-                log.info("Cannot find raw transaction table in version " + inactive);
+                log.info(String.format("Cannot find table role %s in version %s",
+                        tableRoleInCollection.name(), inactive));
                 rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                        TableRoleInCollection.ConsolidatedRawTransaction, active);
+                        tableRoleInCollection, active);
                 if (StringUtils.isBlank(rawTableName)) {
-                    log.info("Cannot find raw transaction table in version " + active);
+                    log.info(String.format("Cannot find table role %s in version %s",
+                            tableRoleInCollection.name(), active));
                     return 0L;
                 }
             }
             Table rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
             if (rawTable == null) {
-                log.error("Cannot find raw transaction table " + rawTableName);
+                log.error("Cannot find table " + rawTableName);
                 return 0L;
             }
 
@@ -243,7 +242,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             }
             return AvroUtils.count(yarnConfiguration, hdfsPath);
         } catch (Exception ex) {
-            log.error("Fail to count raw transaction table", ex);
+            log.error("Fail to count raw entities in table.", ex);
             return 0L;
         }
     }

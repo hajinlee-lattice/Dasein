@@ -161,17 +161,18 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                                 cm.disableGroup(Model);
                                 cm.setCanModel(false);
 
-                                // disable date attributes to be used in modeling
-                                if (LogicalDataType.Date.equals(cm.getLogicalDataType())) {
-                                    cm.disableGroup(Model);
-                                    cm.setCanModel(false);
-                                }
-
                                 if (BusinessEntity.Account.equals(entity)) {
                                     if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
                                         cm.setSubcategory("Account IDs");
                                     }
                                     cm.setCanModel(true);
+
+                                    // disable date attributes to be used in modeling
+                                    if (cm.getLogicalDataType().equals(LogicalDataType.Date)) {
+                                        cm.disableGroup(Model);
+                                        cm.setCanModel(false);
+                                        // TODO: need to find a way to set "life cycle change" to True for cm
+                                    }
                                 }
 
                                 // TODO: YSong (M22) to be moved to a specific
