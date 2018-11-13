@@ -868,12 +868,15 @@ angular.module('lp.import')
                     // 'feedType': feedType || entity + 'Schema'
                 };
 
-            console.log(fileName, importOnly, autoImportData, postBody);
-
+            // console.log(fileName, importOnly, autoImportData, postBody);
+            let headers = {'Content-Type': 'application/json'};
+            if(autoImportData){
+                headers['ErrorDisplayOptions'] = '{"delay":5000}'; 
+            }
 	        $http({
-	            method: 'POST',
+                method: 'POST',
 	            url: url,
-	            headers: { 'Content-Type': 'application/json' },
+                headers: headers,
 	            params: params,
                 data: postBody
 	        }).then(
