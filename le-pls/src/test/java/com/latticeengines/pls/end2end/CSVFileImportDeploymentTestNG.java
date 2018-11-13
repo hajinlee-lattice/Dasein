@@ -630,7 +630,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         // Assert.assertEquals(display.getPath(), "N/A");
         for (S3ImportTemplateDisplay display : templates) {
             Assert.assertEquals(display.getPath(), "N/A");
-            Assert.assertEquals(display.getTemplateName(), "N/A");
             Assert.assertEquals(display.getExist(), Boolean.FALSE);
         }
         templates = cdlService.getS3ImportTemplate(customerSpace);
