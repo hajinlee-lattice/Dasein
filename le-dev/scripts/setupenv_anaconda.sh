@@ -15,10 +15,10 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
         echo "You are on Mac"
-        ANACONDA_SH=Anaconda2-${ANACONDA_VERSION}-MacOSX-x86_64.sh
+        ANACONDA_SH=Anaconda3-${ANACONDA_VERSION}-MacOSX-x86_64.sh
     else
         echo "You are on ${UNAME}"
-        ANACONDA_SH=Anaconda2-${ANACONDA_VERSION}-Linux-x86_64.sh
+        ANACONDA_SH=Anaconda3-${ANACONDA_VERSION}-Linux-x86_64.sh
     fi
 
     if [ -f $ARTIFACT_DIR/$ANACONDA_SH ]; then
@@ -36,7 +36,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     popd
     sudo chown -R ${USER} ${ANACONDA_HOME}
     ${ANACONDA_HOME}/bin/pip install --upgrade pip
-    ${ANACONDA_HOME}/bin/pip install -r $WSHOME/le-dev/scripts/requirements.txt
+    ${ANACONDA_HOME}/bin/pip install -r $WSHOME/le-dev/scripts/requirements3.txt
 
     if [ "${ANACONDA_HOME}" != "/opt/conda" ]; then
         sudo ln -f -s ${ANACONDA_HOME} /opt/conda

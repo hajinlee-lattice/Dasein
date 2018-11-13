@@ -19,7 +19,7 @@ fi
 AWS_HOME="${HOME}/.aws"
 if [ ! -f "${AWS_HOME}/config" ]; then
     mkdir -p ${AWS_HOME} || true
-    echo '[default]' > ${AWS_HOME}/config
+    echo '[profile default]' > ${AWS_HOME}/config
     echo "aws_access_key_id=${AWS_KEY}" >> ${AWS_HOME}/config
     echo "aws_secret_access_key=${AWS_SECRET}" >> ${AWS_HOME}/config
     echo "region=us-east-1" >> ${AWS_HOME}/config
