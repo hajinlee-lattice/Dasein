@@ -5,9 +5,16 @@ pipeline {
     }
   }
   stages {
-    stage('wait tomcat') {
+    stage('build') {
       steps {
-        sh 'echo Hello'
+        jobs = [:]
+        jobs['cdl'] = {
+          build job: 'cd_trunk_health_cdl'
+        }
+        jobs['lpi'] = {
+          build job: 'cd_trunk_health_lpi'
+        }
+        parallel jobs
       }
     }
   }
