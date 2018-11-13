@@ -106,9 +106,6 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     }
 
     private void createNewPlay(Play play) {
-        if (play.getRatingEngine() != null) {
-            play.setRatingEngine(findRatingEngine(play));
-        }
         if (play.getTargetSegment() == null) {
             throw new LedpException(LedpCode.LEDP_18206);
         } else {
@@ -118,6 +115,11 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
             }
             MetadataSegment selSegment = segmentEntityMgr.findByName(segmentName.trim());
             play.setTargetSegment(selSegment);
+        }
+        if (play.getRatingEngine() == null) {
+            throw new LedpException(LedpCode.LEDP_18209);
+        } else {
+            play.setRatingEngine(findRatingEngine(play));
         }
         // TODO: Remove in M24
         if (play.getDisplayName() == null) {
