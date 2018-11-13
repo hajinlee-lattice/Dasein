@@ -906,6 +906,8 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{templatename}}", emailInfo.getTemplateName());
             if (StringUtils.isNotEmpty(emailInfo.getErrorMsg())) {
                 builder.replaceToken("{{errormessage}}", emailInfo.getErrorMsg());
+            } else {
+                builder.replaceToken("{{errormessage}}", "N/A");
             }
             builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{type}}", emailInfo.getEntityType().getDisplayName());

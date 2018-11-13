@@ -12,8 +12,12 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EmailTemplateBuilder {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailTemplateBuilder.class);
 
     private String htmlTemplate;
 
@@ -24,7 +28,11 @@ public class EmailTemplateBuilder {
     }
 
     public EmailTemplateBuilder replaceToken(String token, String value) {
-        htmlTemplate = htmlTemplate.replace(token, value);
+        if (value != null) {
+            htmlTemplate = htmlTemplate.replace(token, value);
+        } else {
+            log.error(String.format("Cannot replace token %s with null!", token));
+        }
         return this;
     }
 
