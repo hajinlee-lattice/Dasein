@@ -7,14 +7,16 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        jobs = [:]
-        jobs['cdl'] = {
-          build job: 'cd_trunk_health_cdl'
+        script {
+          jobs = [:]
+          jobs['cdl'] = {
+            build job: 'cd_trunk_health_cdl'
+          }
+          jobs['lpi'] = {
+            build job: 'cd_trunk_health_lpi'
+          }
+          parallel jobs
         }
-        jobs['lpi'] = {
-          build job: 'cd_trunk_health_lpi'
-        }
-        parallel jobs
       }
     }
   }
