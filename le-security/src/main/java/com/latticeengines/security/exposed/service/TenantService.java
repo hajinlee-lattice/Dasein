@@ -8,6 +8,8 @@ public interface TenantService {
 
     void registerTenant(Tenant tenant);
 
+    void registerTenant(Tenant tenant, String userName);
+
     void updateTenant(Tenant tenant);
 
     void updateTenantEmailFlag(String tenantId, boolean emailSent);

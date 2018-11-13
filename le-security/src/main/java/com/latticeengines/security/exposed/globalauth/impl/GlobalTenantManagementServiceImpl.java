@@ -41,6 +41,26 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
     }
 
     @Override
+    public synchronized boolean registerTenant(Tenant tenant, String userName) {
+
+        try {
+            log.info(String.format("Registering tenant with id %s.", tenant.getId()));
+            GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant.getId());
+            if (tenantData != null) {
+                throw new Exception("The specified tenant already exists");
+            }
+            tenantData = new GlobalAuthTenant();
+            tenantData.setId(tenant.getId());
+            tenantData.setName(tenant.getName());
+            tenantData.setUser(userName);
+            gaTenantEntityMgr.create(tenantData);
+            return true;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18012, new String[] { tenant.getId(), tenant.getName() });
+        }
+    }
+
+    @Override
     public synchronized boolean discardTenant(Tenant tenant) {
 
         try {

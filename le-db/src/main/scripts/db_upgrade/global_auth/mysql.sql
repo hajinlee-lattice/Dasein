@@ -19,6 +19,14 @@ CREATE PROCEDURE `AddGlobalUserTenantConfig`()
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE `UpdateGlobalTenantConfig`()
+  BEGIN
+      ALTER TABLE `GlobalAuthentication`.`GlobalTenant` ADD COLUMN `Create_User` varchar(255);
+  END;
+//
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
     START TRANSACTION;
@@ -29,3 +37,4 @@ CREATE PROCEDURE `UpdateSchema`()
 DELIMITER ;
 
 CALL `UpdateSchema`();
+CALL `UpdateGlobalTenantConfig`();

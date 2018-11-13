@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface TenantService {
 
-    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration);
+    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration, String userName);
 
     Collection<TenantDocument> getTenants(String contractId);
 

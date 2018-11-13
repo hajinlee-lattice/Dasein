@@ -1,9 +1,11 @@
 package com.latticeengines.admin.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +34,6 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMa
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.security.exposed.Constants;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
@@ -55,8 +54,15 @@ public class TenantResource {
     @ApiOperation(value = "Create a Lattice tenant")
     public boolean createTenant(@PathVariable String tenantId, //
             @RequestParam(value = "contractId") String contractId, //
-            @RequestBody TenantRegistration registration) {
-        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration);
+            @RequestBody TenantRegistration registration, HttpServletRequest request) {
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        String userName = "_defaultUser";
+        if (!StringUtils.isEmpty(ticket)) {
+            String decrypted = CipherUtils.decrypt(ticket);
+            String[] tokens = decrypted.split("\\|");
+            userName = tokens[0];
+        }
+        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName);
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")

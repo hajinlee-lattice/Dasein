@@ -3,17 +3,17 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -37,6 +37,16 @@ public class TenantServiceImpl implements TenantService {
     public void registerTenant(Tenant tenant) {
         try {
             globalTenantManagementService.registerTenant(tenant);
+        } catch (LedpException e) {
+            log.warn("Error registering tenant with GA.", e);
+        }
+        tenantEntityMgr.create(tenant);
+    }
+
+    @Override
+    public void registerTenant(Tenant tenant, String userName) {
+        try {
+            globalTenantManagementService.registerTenant(tenant, userName);
         } catch (LedpException e) {
             log.warn("Error registering tenant with GA.", e);
         }

@@ -6,6 +6,7 @@ public class TenantProperties extends BaseProperties {
     public String status;
     public String tenantType;
     public String contract;
+    public String userName;
     public TenantProperties(String displayName, String description) {
         super(displayName, description);
         this.displayName = displayName;

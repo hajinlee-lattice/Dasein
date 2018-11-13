@@ -68,6 +68,7 @@ public class PLSComponentManager {
             throw new LedpException(LedpCode.LEDP_18028, String.format("Getting tenant document error."), e);
         }
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
+        String userName = tenantDocument.getTenantInfo().properties.userName;
 
         String maxPremiumEnrichAttributesStr;
         try {
@@ -141,11 +142,11 @@ public class PLSComponentManager {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
         }
 
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
     }
 
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
-            List<String> externalAdminEmails, List<String> thirdPartyEmails) {
+            List<String> externalAdminEmails, List<String> thirdPartyEmails, String userName) {
         if (tenantService.hasTenantId(tenant.getId())) {
             LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
             try {
@@ -156,7 +157,7 @@ public class PLSComponentManager {
             }
         } else {
             try {
-                tenantService.registerTenant(tenant);
+                tenantService.registerTenant(tenant, userName);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, String.format("Registering tenant %s error. "
                         + "Tenant name possibly already exists.", tenant.getId()), e);

@@ -126,7 +126,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public boolean createTenant(final String contractId, final String tenantId, TenantRegistration tenantRegistration) {
+    public boolean createTenant(final String contractId, final String tenantId,
+                                TenantRegistration tenantRegistration, String userName) {
         final ContractInfo contractInfo = tenantRegistration.getContractInfo();
         final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -141,9 +142,10 @@ public class TenantServiceImpl implements TenantService {
             log.error("Error checking tenant", e);
         }
 
+        tenantInfo.properties.userName = userName;
         boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo,
                 spaceInfo);
-        
+
         tenantCreationSuccess = tenantCreationSuccess && setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
         if (!tenantCreationSuccess) {

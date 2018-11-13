@@ -38,6 +38,10 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject
     @Column(name = "Display_Name", nullable = true)
     private String name;
 
+    @JsonProperty("create_user")
+    @Column(name = "Create_User", nullable = true)
+    private String user;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -56,10 +60,7 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject
     }
 
     @Override
-    public void setPid(Long pid) {
-        this.pid = pid;
-
-    }
+    public void setPid(Long pid) { this.pid = pid; }
 
     @Override
     public String getId() {
@@ -80,6 +81,10 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getUser() { return user; }
+
+    public void setUser(String user) { this.user = user; }
 
     public List<GlobalAuthUserTenantRight> getUserTenantRights() {
         return gaUserTenantRights;
