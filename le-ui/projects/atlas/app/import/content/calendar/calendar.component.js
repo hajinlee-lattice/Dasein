@@ -257,7 +257,7 @@ angular.module('lp.import.calendar', [])
                 ImportWizardService.deleteCalendar().then(function(result) {
                     console.log(result);
                     vm.saving = false;
-                    //$state.go('home');
+                    $state.go('home');
                 });
             }
         }
