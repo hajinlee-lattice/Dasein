@@ -50,6 +50,12 @@ echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
 
+if [ -d ${ANACONDA_HOME}/envs/p2 ]; then
+    source ${ANACONDA_HOME}/bin/activate p2
+else
+    source ${ANACONDA_HOME}/bin/activate lattice
+fi
+
 if [ "${USE_QA_RTS}" == "true" ]; then
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py --qa-source-dbs
 else
@@ -60,3 +66,5 @@ echo "Clean up old test tenants"
 runtest testframework -g cleanup -t GlobalAuthCleanupTestNG
 
 echo "Success!!!"
+
+source ${ANACONDA_HOME}/bin/deactivate

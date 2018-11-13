@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-if [ -z `which zookeeper_import` ]; then
-    echo "Have you installed zc.zk python package? You can use 'pip install zc.zk' to install it."
-    exit 1
-fi
-
 echo "Setting up Zookeeper"
 
 if [ -d ${ANACONDA_HOME}/envs/p2 ]; then
@@ -13,6 +8,10 @@ else
     source ${ANACONDA_HOME}/bin/activate lattice
 fi
 
+if [ -z `which zookeeper_import` ]; then
+    echo "Have you installed zc.zk python package? You can use 'pip install zc.zk' to install it."
+    exit 1
+fi
 
 PYTHON=${PYTHON:=python}
 ZK_HOST="localhost:2181"
