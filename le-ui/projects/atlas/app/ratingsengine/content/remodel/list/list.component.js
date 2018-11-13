@@ -83,7 +83,12 @@ angular.module('lp.ratingsengine.remodel.list', [])
 
             if ( approvedUsage.indexOf( 'None' ) > -1 ) {
                 approvedUsage.splice(0,1);
-                approvedUsage.push(attribute.OriginalApprovedUsage);
+                if(attribute.OriginalApprovedUsage){
+                    approvedUsage.push(attribute.OriginalApprovedUsage);    
+                } else {
+                    approvedUsage.push('ModelAndAllInsights');
+                }
+                
             } else {
                 attribute.OriginalApprovedUsage = approvedUsage[0];
                 approvedUsage.splice(0,1);
