@@ -5,12 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -19,16 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("recommendationDao")
 public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Recommendation>
@@ -480,7 +472,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         }
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "SELECT contacts FROM %s " //
+        String queryStr = "SELECT accountId,contacts FROM %s " //
                 + "WHERE deleted = :deleted AND launchId in (:launchIds)";
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
@@ -488,18 +480,24 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         }
         queryStr += " ORDER BY accountId";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
-        Query<String> query = session.createQuery(queryStr);
+        Query<Object[]> query = session.createQuery(queryStr);
         query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
         if (CollectionUtils.isNotEmpty(accountIds)) {
             query.setParameterList("accountIds", accountIds);
         }
-        List<String> queryResult = query.list();
+        List<Object[]> queryResult = (List<Object[]>)query.list();
         List<Map<String, Object>> contacts = new ArrayList<Map<String, Object>>();
-        queryResult.stream().forEach(contactStr -> {
+        String accountIdName = PlaymakerConstants.AccountID + PlaymakerConstants.V2;
+        queryResult.stream().forEach(result -> {
+            String accountId = (String)result[0];
+            String contactStr = (String)result[1];
             if (StringUtils.isNotBlank(contactStr)) {
                 List<Map<String, Object>> contactsList = PlaymakerUtils.getExpandedContacts(contactStr, Object.class);
-                contacts.addAll(contactsList);
+                contactsList.stream().forEach(c -> {
+                    c.put(accountIdName, accountId);
+                    contacts.add(c);
+                });
             }
         });
         return contacts;
