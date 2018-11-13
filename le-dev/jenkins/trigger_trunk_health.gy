@@ -1,0 +1,14 @@
+pipeline {
+  agent {
+    node {
+      label "general"
+    }
+  }
+  stages {
+    stage('wait tomcat') {
+      steps {
+        sh 'echo Hello'
+      }
+    }
+  }
+}
