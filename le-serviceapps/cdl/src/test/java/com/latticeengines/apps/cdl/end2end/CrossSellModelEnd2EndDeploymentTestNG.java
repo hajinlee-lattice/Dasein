@@ -40,8 +40,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1537307147289"; // LETest1528844192916-14
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "LETest1542050905153"; // LETest1528844192916-14
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -86,9 +86,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     }
 
     /**
-     * This test is part of CD pipeline
+     * This test is part of trunk health and CD pipeline
      */
-    @Test(groups = "end2end")
+    @Test(groups = { "precheckin" })
     public void testFirstPurchase() throws Exception {
         log.info("Running testFirstPurchase");
         setupEnd2EndTestEnvironment();
@@ -99,9 +99,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     }
 
     /**
-     * This test is part of trunk health and CD pipeline
+     * This test is part of CD pipeline
      */
-    @Test(groups = { "precheckin" })
+    @Test(groups = "end2end")
     public void testRepeatedPurchase() throws Exception {
         log.info("Running testRepeatedPurchase");
         setupEnd2EndTestEnvironment();
@@ -129,8 +129,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
         setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.EXPECTED_VALUE);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
 
     }
 
