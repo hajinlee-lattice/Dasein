@@ -81,18 +81,21 @@ public abstract class AbstractModelWorkflowSubmitter extends WorkflowSubmitter {
         return null;
     }
 
-    public String getModelingProfilingVersion() {
+    private String getModelingProfilingVersion() {
+        String profiling = MODELING_PROFILING_V2;
         try {
             Camille camille = CamilleEnvironment.getCamille();
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     CDLComponent.componentName);
             docPath = docPath.append(MODELING_PROFILING_VERSION);
-            return camille.get(docPath).getData();
+            if (camille.exists(docPath)) {
+                profiling = camille.get(docPath).getData();
+            }
         } catch (Exception ex) {
             log.error(String.format("Can not get tenant's modeling profining version from ZK, " //
-                    + "defaulting to %s", MODELING_PROFILING_V2), ex);
-            return MODELING_PROFILING_V2;
+                    + "defaulting to %s", profiling), ex);
         }
+        return profiling;
     }
 }

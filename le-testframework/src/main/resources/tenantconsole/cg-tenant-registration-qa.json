@@ -56,6 +56,10 @@
         {
           "Node": "InvokeTime",
           "Data": "-1"
+        },
+        {
+          "Node": "ModelingProfilingVersion",
+          "Data": "v2"
         }
       ]
     }

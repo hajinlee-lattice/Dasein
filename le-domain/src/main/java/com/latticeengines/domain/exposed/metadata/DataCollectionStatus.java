@@ -255,6 +255,8 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         this.detail.setDateMap(dateMap);
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class DataCollectionStatusDetail implements Serializable {
         private static final long serialVersionUID = -6030795342397598056L;
         @JsonProperty("DateMap")
