@@ -566,6 +566,7 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         var ClientSession = BrowserStorageUtility.getClientSession();
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
+        opts.updatedBy = ClientSession.EmailAddress;
 
         PlaybookWizardService.savePlay(opts).then(function(data){
             PlaybookWizardStore.setPlay(data);
