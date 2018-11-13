@@ -42,7 +42,16 @@ class ModelDetailGenerator(State):
         result["TotalConversions"] = int(allData[schema["target"]].sum())
 
         if "__Revenue" in allData.columns:
-            result["AverageRevenue"] = float(allData["__Revenue"].sum()) / allData.shape[0]
+            if schema.has_key("config_metadata") and schema["config_metadata"].has_key("Metadata"):
+                for me in schema["config_metadata"]["Metadata"]:
+                    if me["ColumnName"] == "__Revenue":
+                        dataType = me["DataType"]
+                        if dataType in ["long", "int", "double", "float"]:
+                            self.logger.info("Calculating 'AverageRevenue' using '__Revenue'")
+                            result["AverageRevenue"] = float(allData["__Revenue"].sum()) / allData.shape[0]
+                        else:
+                            self.logger.info("Skip calculation of 'AverageRevenue' using '__Revenue'")
+                        break
 
         result["TestingConversions"] = int(testData[schema["target"]].sum())
         result["TrainingConversions"] = result["TotalConversions"] - result["TestingConversions"]
