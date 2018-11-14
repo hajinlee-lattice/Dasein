@@ -80,6 +80,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private WorkflowJob workflowJob2;
     private WorkflowJob workflowJob3;
     private WorkflowJob workflowJob31;
+    private WorkflowJob workflowJobNoWorkflowId;
 
     private WorkflowJobUpdate jobUpdate1;
     private WorkflowJobUpdate jobUpdate11;
@@ -357,7 +358,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         setupLEJobExecutionRetriever();
 
         List<Job> jobs = workflowJobService.getJobsByCustomerSpace(WFAPITEST_CUSTOMERSPACE.toString(), false);
-        Assert.assertEquals(jobs.size(), 5);
+        Assert.assertEquals(jobs.size(), 6);
         List<String> applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
         Assert.assertTrue(applicationIds.contains("application_10000"));
         Assert.assertTrue(applicationIds.contains("application_10001"));
@@ -377,7 +378,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
         MultiTenantContext.setTenant(null);
         jobs = workflowJobService.getJobsByCustomerSpace(null, false);
-        Assert.assertEquals(jobs.size(), 7);
+        Assert.assertEquals(jobs.size(), 8);
         applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
         Assert.assertTrue(applicationIds.contains("application_10000"));
         Assert.assertTrue(applicationIds.contains("application_10001"));
@@ -414,7 +415,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         List<Long> pids = new ArrayList<>(workflowPids.values());
         jobs = workflowJobService.getJobsByWorkflowPids(WFAPITEST_CUSTOMERSPACE.toString(), pids,
                 null, true, null, null);
-        Assert.assertEquals(jobs.size(), 5);
+        Assert.assertEquals(jobs.size(), 6);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
         Assert.assertEquals(jobs.get(0).getSteps().size(), 2);
         Assert.assertEquals(jobs.get(0).getSteps().get(0).getJobStepType(), "step1_2");
@@ -660,6 +661,16 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(executionContext11c, executionContext11a);
     }
 
+    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
+    public void testWorkflowJobNoWorkflowId() {
+        try {
+            List<Job> jobs = workflowJobService.getJobsByCustomerSpace(WFAPITEST_CUSTOMERSPACE.toString(), false);
+            Assert.assertEquals(jobs.size(), 6);
+        } catch (Exception exc) {
+            Assert.fail("Shoud not throw exception.");
+        }
+    }
+
     private void createWorkflowJobs() {
         jobInstanceDao = new MapJobInstanceDao();
         jobExecutionDao = new MapJobExecutionDao();
@@ -898,6 +909,15 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate31.setLastUpdateTime(failedTime);
         jobUpdate31.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate31);
+
+        applicationId = "application_90001";
+        workflowJobNoWorkflowId = new WorkflowJob();
+        workflowJobNoWorkflowId.setTenant(tenant);
+        workflowJobNoWorkflowId.setApplicationId(applicationId);
+        workflowJobNoWorkflowId.setStartTimeInMillis(1530327693564L);
+        workflowJobNoWorkflowId.setStatus(JobStatus.RUNNING.name());
+        workflowJobEntityMgr.create(workflowJobNoWorkflowId);
+        workflowPids.put(91L, workflowJobNoWorkflowId.getPid());
     }
 
     private void createTenant() {

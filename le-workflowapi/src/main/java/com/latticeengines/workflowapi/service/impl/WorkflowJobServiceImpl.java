@@ -589,6 +589,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 continue;
             }
 
+            if (workflowJob.getWorkflowId() == null) {
+                log.warn("WorkflowJob.getWorkflowId() is null. Skip checking lastUpdateTime. WorkflowPid="
+                        + workflowJob.getPid());
+                continue;
+            }
+
             if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
                 continue;
             }
@@ -661,6 +667,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     if (applicationId != null) {
                         com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
                                 workflowContainerService.getJobStatus(applicationId);
+
+                        // TODO: check if yarnStatus is empty (application_id comes from differnt EMR cluster), then log an warning.
+                        // if (yarnStatus is empty) {
+                        //     log.warn(...);
+                        // }
+
                         JobStatus status = JobStatus.fromString(yarnStatus.getStatus().name(), yarnStatus.getState());
                         if (status != null) {
                             workflowJob.setStatus(status.name());
