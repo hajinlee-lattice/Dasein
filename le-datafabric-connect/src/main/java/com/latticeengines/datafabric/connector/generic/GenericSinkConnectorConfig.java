@@ -24,7 +24,7 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
     static final WorkerProperty<String> KAFKA_ZKCONNECT = new WorkerProperty<String>("kafka.zkConnect",
             "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181/kafka");
     static final WorkerProperty<String> REPOSITORIES = new WorkerProperty<String>("datafabric.connect.repositories",
-            "Supported stores .e.g HDFS, REDIS, DYNAMO", "stores").setDefaultValue("HDFS;DYNAMO");
+            "Supported stores .e.g HDFS, REDIS, DYNAMO", "stores").setDefaultValue("HDFS");
 
     // camille
     static final WorkerProperty<String> CAMILLE_ZK_CONNECTION = new WorkerProperty<String>("camille.zk.connectionString",
@@ -39,10 +39,10 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
             "HDFS base directory to save files.", "HDFS base Directory").setDefaultValue("/Pods/Default/Services/PropData/Sources");
 
     // DYNAMO
-    static final WorkerProperty<String> ACCESS_KEY = new WorkerProperty<String>("aws.default.access.key",
-            "AWS access key", "AWS access key").setDefaultValue("AKIAJYGRJBKAXQAV5OXQ");
-    static final WorkerProperty<String> SECRET_KEY = new WorkerProperty<String>("aws.default.secret.key",
-            "AWS secret key", "AWS secret key").setDefaultValue("Kw4HndU744WxSegVdAZ+hgiL3ogupKIkI1Ce8Cjj");
+//    static final WorkerProperty<String> ACCESS_KEY = new WorkerProperty<String>("aws.default.access.key",
+//            "AWS access key", "AWS access key").setDefaultValue("AKIAJYGRJBKAXQAV5OXQ");
+//    static final WorkerProperty<String> SECRET_KEY = new WorkerProperty<String>("aws.default.secret.key",
+//            "AWS secret key", "AWS secret key").setDefaultValue("Kw4HndU744WxSegVdAZ+hgiL3ogupKIkI1Ce8Cjj");
 
     static {
         initialize();
@@ -57,9 +57,9 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
         addPropertyToGroup(HADOOP_CONF_DIR, String.class, GENERIC_HDFS_GROUP);
         addPropertyToGroup(HDFS_BASE_DIR, String.class, GENERIC_HDFS_GROUP);
 
-        addGroup(GENERIC_DYNAMO_GROUP);
-        addPropertyToGroup(ACCESS_KEY, String.class, GENERIC_DYNAMO_GROUP);
-        addPropertyToGroup(SECRET_KEY, String.class, GENERIC_DYNAMO_GROUP);
+        // addGroup(GENERIC_DYNAMO_GROUP);
+        // addPropertyToGroup(ACCESS_KEY, String.class, GENERIC_DYNAMO_GROUP);
+        // addPropertyToGroup(SECRET_KEY, String.class, GENERIC_DYNAMO_GROUP);
 
         config = tmpConfig.get();
     }

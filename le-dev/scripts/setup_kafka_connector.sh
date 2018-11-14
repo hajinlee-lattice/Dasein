@@ -29,18 +29,18 @@ if [ $1 == dev ]; then
 elif [ $1 == devcluster ]; then
     hdfs_pod=QA
     zk_servers=10.41.1.116:2181,10.41.1.137:2181,10.41.1.138:2181
-    camille_zk_servers=internal-zookeeper-1213348105.us-east-1.elb.amazonaws.com:2181
+    camille_zk_servers=qazklayer1.lattice.local,qazklayer4.lattice.local,qazklayer5.lattice.local
     camille_zk_pod_id=QA
 elif [ $1 == qacluster ]; then
     hdfs_pod=QA
     zk_servers=10.41.1.116:2181,10.41.1.137:2181,10.41.1.138:2181
-    camille_zk_servers=internal-zookeeper-1213348105.us-east-1.elb.amazonaws.com:2181
+    camille_zk_servers=qazklayer1.lattice.local,qazklayer4.lattice.local,qazklayer5.lattice.local
     camille_zk_pod_id=QA
     repl_factor=3
 elif [ $1 == prodcluster ]; then
     hdfs_pod=Production
     zk_servers=10.51.1.78:2181,10.51.1.79:2181,10.51.1.114:2181
-    camille_zk_servers=internal-Zookeeper-227174924.us-east-1.elb.amazonaws.com:2181
+    camille_zk_servers=zklayer4.prod.lattice.local,zklayer5.prod.lattice.local,zklayer6.prod.lattice.local
     camille_zk_pod_id=Production
     repl_factor=3
 else 
