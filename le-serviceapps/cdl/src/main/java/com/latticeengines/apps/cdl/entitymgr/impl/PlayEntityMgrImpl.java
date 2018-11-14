@@ -168,6 +168,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (play.getPlayType() != null && !play.getPlayType().getId().equals(existingPlay.getPlayType().getId())) {
             existingPlay.setPlayType(play.getPlayType());
         }
+        existingPlay.setUpdatedBy(play.getUpdatedBy());
     }
 
     @Override

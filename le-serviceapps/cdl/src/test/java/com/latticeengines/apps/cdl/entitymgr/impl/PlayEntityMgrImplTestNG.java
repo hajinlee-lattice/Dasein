@@ -35,6 +35,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private final static String NEW_DISPLAY_NAME = "playHarder!";
     private final static String DESCRIPTION = "playHardest";
     private final static String CREATED_BY = "lattice@lattice-engines.com";
+    private final static String UPDATED_BY = "updated@lattice-engines.com";
     private final static String PLAY_SEGMENT_NAME = "PlayTargetSegment";
 
     @Autowired
@@ -149,6 +150,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         retrievedPlay.setDescription(null);
         retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);
         retrievedPlay.setPlayStatus(PlayStatus.INACTIVE);
+        retrievedPlay.setUpdatedBy(UPDATED_BY);
         RatingEngine newRatingEngine = new RatingEngine();
         newRatingEngine.setId(ratingEngine2.getId());
         retrievedPlay.setRatingEngine(newRatingEngine);
@@ -168,6 +170,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
+        Assert.assertEquals(retrievedPlay.getUpdatedBy(), UPDATED_BY);
 
         assertPlayTargetSegment(retrievedPlay);
 
