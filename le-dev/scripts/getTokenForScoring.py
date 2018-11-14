@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-env', dest='env', action='store', required=False, help='Environment: prod or qa', default='qa')
 parser.add_argument('-t', dest='tenant', action='store', required=True, help='LP tenant name')
 parser.add_argument('-u', dest='username', action='store', required=False, help='username for LP', default='ga_dev@lattice-engines.com')
-parser.add_argument('-p', dest='password', action='store', required=False, help='password for LP', default='tahoe')
+parser.add_argument('-p', dest='password', action='store', required=False, help='password for LP', default='WorkflowAp1')
 args = parser.parse_args()
 
 LP_SERVER_HOST = ''

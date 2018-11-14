@@ -36,8 +36,8 @@ class PLSEnvironments(object):
     pls_tenant_console_pwd = "Lattice1"
     pls_model_url = "http://bodcdevhdpweb52.dev.lattice.local:8080"
     pls_model_user = "ga_dev@lattice-engines.com"
-    pls_model_pwd = "tahoe"
-    pls_model_pwd_encryptd = "3ff74a580f8b39f039822455e92c2ef25658229622f16dc0f9918222c0be4900"
+    pls_model_pwd = "WorkflowAp1"
+    pls_model_pwd_encryptd = "196e9fea4a1251c01ae8a8fb2fa3c5fc8223657fc28f1d1e7b19cca5f882ff56"
 
     dl_server = "https://%s.dev.lattice.local:8080/" % dl_server_name;
     dl_server_user = "richard.liu@lattice-engines.com";

@@ -101,7 +101,7 @@ INSERT INTO GlobalAuthentication (
 ) SELECT
   GlobalUser_ID,
   Email,
-  'mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=',
+  '0eKk6IkISySyu3c2PiWh18U/KGh+FW9+99QC014FwXc=',
   0,
   NOW(),
   NOW(),

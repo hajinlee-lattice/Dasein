@@ -373,7 +373,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertFalse(users.isEmpty());
 
         final String username = "ga_dev@lattice-engines.com";
-        final String password = "tahoe";
+        final String password = "WorkflowAp1";
 
         UserDocument userDoc = plsComponentDeploymentTestNG.loginAndAttach(username, password, PLSTenantId);
         Assert.assertNotNull(userDoc);
