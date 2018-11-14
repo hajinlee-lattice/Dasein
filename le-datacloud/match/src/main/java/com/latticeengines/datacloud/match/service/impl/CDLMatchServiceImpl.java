@@ -121,7 +121,12 @@ public class CDLMatchServiceImpl implements CDLMatchService {
     public List<DynamoDataUnit> parseCustomDynamo(MatchInput input) {
         String customerSpace = input.getTenant().getId();
         DataCollection.Version version = input.getDataCollectionVersion();
-        TableRoleInCollection[] tableRoles = {TableRoleInCollection.ConsolidatedAccount, TableRoleInCollection.PivotedRating, TableRoleInCollection.CalculatedPurchaseHistory};
+        TableRoleInCollection[] tableRoles = { //
+                TableRoleInCollection.ConsolidatedAccount, //
+                TableRoleInCollection.PivotedRating, //
+                TableRoleInCollection.CalculatedPurchaseHistory, //
+                TableRoleInCollection.CalculatedCuratedAccountAttribute //
+        };
         return dataCollectionProxy.getDynamoDataUnits(customerSpace, version, Arrays.asList(tableRoles));
     }
 

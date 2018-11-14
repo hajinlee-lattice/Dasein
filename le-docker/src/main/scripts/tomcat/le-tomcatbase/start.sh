@@ -51,11 +51,13 @@ if [ -f "/etc/internaladdr.txt" ]; then
     echo "RMI_SERVER=${RMI_SERVER}"
 fi
 
-export JAVA_OPTS="-Duser.timezone=US/Eastern"
+export JAVA_OPTS="-Dfile.encoding=UTF8"
+if [ "${ENVIRONMENT}" = "prodcluster" ]; then
+    export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=US/Eastern"
+fi
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"
-export JAVA_OPTS="${JAVA_OPTS} -Dfile.encoding=UTF8"
 
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"

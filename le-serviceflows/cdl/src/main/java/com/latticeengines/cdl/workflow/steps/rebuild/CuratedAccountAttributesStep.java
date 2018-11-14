@@ -245,6 +245,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
         updateDCStatusForCuratedAccountAttributes();
+        registerDynamoExport();
     }
 
     @Override
@@ -282,5 +283,11 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             }
         }
+    }
+
+    private void registerDynamoExport() {
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), getEntity().getServingStore(),
+                inactive);
+        exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 }
