@@ -123,10 +123,14 @@ public class CDLResource {
             EntityType entityType = EntityType.fromDisplayNameToEntityType(templateDisplay.getObject());
             String entity = entityType.getEntity().name();
             String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
-            String feedType = StringUtils.isBlank(templateDisplay.getFeedType()) ? entityType.getDefaultFeedTypeName() :
-                    templateDisplay.getFeedType();
+            String feedType = StringUtils.isBlank(templateDisplay.getFeedType()) ? entityType.getDefaultFeedTypeName()
+                    : templateDisplay.getFeedType();
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName, source, entity,
                     feedType, subType, templateDisplay.getTemplateName());
+            log.info("Create " + templateDisplay.toString());
+            log.info("templateDisplay.getTemplateName() " + templateDisplay.getTemplateName());
+            log.info("templateDisplay.getObject() " + templateDisplay.getObject());
+
             UIAction uiAction = null;
             if (importData) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
