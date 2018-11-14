@@ -52,6 +52,7 @@ public class BusinessCalendarEntityMgrImpl extends BaseEntityMgrRepositoryImpl<B
         BusinessCalendar existing = repository.findByTenant(tenant);
         if (existing != null) {
             businessCalendar.setPid(existing.getPid());
+            businessCalendar.setCreated(existing.getCreated());
         }
         businessCalendar.setTenant(tenant);
         super.createOrUpdate(businessCalendar);
