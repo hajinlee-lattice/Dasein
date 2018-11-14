@@ -19,8 +19,6 @@ import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 public class BucketedScoreSummaryUtils {
     private static final Logger log = LoggerFactory.getLogger(BucketedScoreSummaryUtils.class);
 
-    public static final String SCORE = "Score";
-    public static final String EXPECTED_REVENUE_SCORE = "ExpectedRevenuePercentile";
     public static final String TOTAL_EVENTS = "TotalEvents";
     public static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
     public static final int MIN_SCORE = 5;
@@ -239,6 +237,6 @@ public class BucketedScoreSummaryUtils {
     }
 
     private static String scoreColumn(boolean isEV) {
-        return isEV ? EXPECTED_REVENUE_SCORE : SCORE;
+        return ScoreResultField.Percentile.displayName;
     }
 }

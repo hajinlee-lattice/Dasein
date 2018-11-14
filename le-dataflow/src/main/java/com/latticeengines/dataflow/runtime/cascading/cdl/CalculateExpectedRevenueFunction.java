@@ -1,5 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.EVFitFunctionParameters;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
@@ -14,6 +17,9 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class CalculateExpectedRevenueFunction extends BaseOperation implements Function {
+
+    private static final Logger log = LoggerFactory.getLogger(CalculateExpectedRevenueFunction.class);
+
     private static final long serialVersionUID = 8549465250465151489L;
     private String percentileFieldName;
     private String predictedRevenuePercentileFieldName;
@@ -30,13 +36,16 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
         this.predictedRevenuePercentileFieldName = predictedRevenuePercentileFieldName;
         this.expectedRevenueFieldPos = fieldDeclaration.getPos(expectedRevenuePercentileFieldName);
 
-        EVFitFunctionParameters evFitFunctionParameters = parseEVFitFunctionParams(
-                evFitFunctionParamsStr);
+        EVFitFunctionParameters evFitFunctionParameters = parseEVFitFunctionParams(evFitFunctionParamsStr);
         FitFunctionParameters probFitParams = evFitFunctionParameters.getProbabilityParameters();
-        FitFunctionParameters predictedRevenueFitParams = evFitFunctionParameters
-                .getRevenueParameters();
+        FitFunctionParameters predictedRevenueFitParams = evFitFunctionParameters.getRevenueParameters();
         probabilityFitter = getFitter(probFitParams);
         predictedRevenueFitter = getFitter(predictedRevenueFitParams);
+        log.info(String.format(
+                "percentileFieldName = %s, predictedRevenuePercentileFieldName = %s,  expectedRevenuePercentileFieldName = %s, "
+                        + "expectedRevenueFieldPos = %d",
+                percentileFieldName, predictedRevenuePercentileFieldName, expectedRevenuePercentileFieldName,
+                expectedRevenueFieldPos));
     }
 
     @Override
@@ -44,26 +53,26 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
 
         TupleEntry arguments = functionCall.getArguments();
         Integer percentile = arguments.getInteger(percentileFieldName);
-        Integer predictedRevenuePercentile = arguments
-                .getInteger(predictedRevenuePercentileFieldName);
+        Integer predictedRevenuePercentile = arguments.getInteger(predictedRevenuePercentileFieldName);
         double probFit = probabilityFitter.calculate(percentile);
         double revenueFit = predictedRevenueFitter.calculate(predictedRevenuePercentile);
         double expectedRevenue = probFit * revenueFit;
         Tuple result = arguments.getTupleCopy();
         result.set(expectedRevenueFieldPos, expectedRevenue);
+        log.info(String.format("percentile = %s, predictedRevenuePercentile = %s,  expectedRevenue = %s", percentile,
+                predictedRevenuePercentile, expectedRevenue));
 
         functionCall.getOutputCollector().add(result);
     }
 
     private FittedConversionRateCalculator getFitter(FitFunctionParameters params) {
         switch (params.getVersion()) {
-            case "v1":
-                return new FittedConversionRateCalculatorImplV1(params);
-            case "v2":
-                return new FittedConversionRateCalculatorImplV2(params);
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported fit function version " + params.getVersion());
+        case "v1":
+            return new FittedConversionRateCalculatorImplV1(params);
+        case "v2":
+            return new FittedConversionRateCalculatorImplV2(params);
+        default:
+            throw new IllegalArgumentException("Unsupported fit function version " + params.getVersion());
         }
     }
 

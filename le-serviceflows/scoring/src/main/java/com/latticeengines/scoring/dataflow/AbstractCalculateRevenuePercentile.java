@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
     protected Map<String, String> originalScoreFieldMap;
     protected int minPct = 5;
     protected int maxPct = 99;
+    protected boolean renameNewPercentileToStandardPercentileField;
+    protected String standardScoreField = ScoreResultField.Percentile.displayName;
 
     abstract void parseParamAndSetFields(T parameters);
 
@@ -53,10 +56,27 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
             Node mergedScoreCount = mergeCount(addPercentileColumn, modelGuidFieldName);
             Node calculatePercentile = calculatePercentileByFieldMap(originalScoreFieldMap, modelGuidFieldName,
                     percentileFieldName, minPct, maxPct, mergedScoreCount);
-            return calculatePercentile.retain(retainedFields);
-        } else {
-            return addPercentileColumn;
+            calculatePercentile = calculatePercentile.retain(retainedFields);
+            log.info(String.format(
+                    "renameNewPercentileToStandardPercentileField = %s, percentileFieldName '%s', standardScoreField '%s'",
+                    renameNewPercentileToStandardPercentileField, percentileFieldName, standardScoreField));
+            if (renameNewPercentileToStandardPercentileField //
+                    && !standardScoreField.equals(percentileFieldName)) {
+                log.info(String.format("Drop standardScoreField '%s'", standardScoreField));
+                calculatePercentile = calculatePercentile.discard(standardScoreField);
+                log.info(String.format("Rename percentileFieldName '%s' to standardScoreField '%s'",
+                        percentileFieldName, standardScoreField));
+                calculatePercentile = calculatePercentile.rename(new FieldList(percentileFieldName),
+                        new FieldList(standardScoreField));
+                retainedFields = new FieldList( //
+                        addPercentileColumn.getFieldNames().stream() //
+                                .filter(field -> !field.equals(percentileFieldName)) //
+                                .collect(Collectors.toList()));
+                calculatePercentile.retain(retainedFields);
+            }
+            return calculatePercentile;
         }
+        return addPercentileColumn;
     }
 
     private Node calculatePercentileByFieldMap(Map<String, String> originalScoreFieldMap, //

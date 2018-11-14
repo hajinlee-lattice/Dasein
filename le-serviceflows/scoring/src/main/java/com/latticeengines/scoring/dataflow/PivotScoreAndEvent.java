@@ -102,8 +102,7 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
     private Node aggregate(Node inputTable, String scoreField, boolean isEV) {
         List<Aggregation> aggregations = new ArrayList<>();
-        String percentileScoreField = isEV ? ScoreResultField.ExpectedRevenuePercentile.displayName
-                : ScoreResultField.Percentile.displayName;
+        String percentileScoreField = ScoreResultField.Percentile.displayName;
         aggregations.add(new Aggregation(percentileScoreField, BUCKET_TOTAL_EVENTS, AggregationType.COUNT));
         if (useEvent) {
             inputTable = inputTable.apply(String.format("Boolean.TRUE.equals(%s) ? 1 : 0", InterfaceName.Event.name()),
@@ -137,13 +136,13 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
             if (!isEV) {
                 aggregatedNode = getTotalPositiveEvents(aggregatedNode, scoreDerivation, fitFunctionParams, isEV);
-                aggregatedNode = aggregatedNode.addColumnWithFixedValue(
-                        ScoreResultField.ExpectedRevenuePercentile.displayName, null, Integer.class);
+                aggregatedNode = aggregatedNode.addColumnWithFixedValue(ScoreResultField.Percentile.displayName, null,
+                        Integer.class);
                 aggregatedNode = aggregatedNode.addColumnWithFixedValue(BUCKET_AVG_SCORE, null, Double.class);
                 aggregatedNode = aggregatedNode.addColumnWithFixedValue(BUCKET_SUM, null, Double.class);
                 aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
-                        ScoreResultField.Percentile.displayName, ScoreResultField.ExpectedRevenuePercentile.displayName,
-                        BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS, BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
+                        ScoreResultField.Percentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS,
+                        BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
                 log.info("non EV aggregatedNode fields = " + JsonUtils.serialize(aggregatedNode.getFieldNames()));
             } else {
                 String expression = String.format("%1$s == 0 ? 0 : (%1$s * %2$s / %3$s)", BUCKET_TOTAL_EVENTS,
@@ -151,11 +150,9 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
                 aggregatedNode = aggregatedNode.apply(expression,
                         new FieldList(BUCKET_SUM, BUCKET_TOTAL_EVENTS, MODEL_SUM),
                         new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
-                aggregatedNode = aggregatedNode.addColumnWithFixedValue(ScoreResultField.Percentile.displayName, null,
-                        Integer.class);
                 aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
-                        ScoreResultField.Percentile.displayName, ScoreResultField.ExpectedRevenuePercentile.displayName,
-                        BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS, BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
+                        ScoreResultField.Percentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS,
+                        BUCKET_LIFT, BUCKET_AVG_SCORE, BUCKET_SUM);
                 log.info("EV aggregatedNode fields = " + JsonUtils.serialize(aggregatedNode.getFieldNames()));
             }
         }

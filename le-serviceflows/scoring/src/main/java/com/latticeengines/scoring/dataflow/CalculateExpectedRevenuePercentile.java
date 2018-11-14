@@ -16,5 +16,6 @@ public class CalculateExpectedRevenuePercentile
         originalScoreFieldMap = parameters.getOriginalScoreFieldMap();
         minPct = parameters.getPercentileLowerBound();
         maxPct = parameters.getPercentileUpperBound();
+        renameNewPercentileToStandardPercentileField = true;
     }
 }
