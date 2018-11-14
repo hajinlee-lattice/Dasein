@@ -279,11 +279,13 @@ angular.module('lp.playbook')
                 changed = true;
             }
             if(changed) {
-                PlaybookWizardStore.savePlay(opts).then(function(play){
-                    if(['home.playbook.dashboard'].indexOf(nextState) > -1) {
-                        $state.go(nextState);
-                    } else {
-                        $state.go(nextState, {play_name: play.name});
+                PlaybookWizardStore.savePlay(opts).then(function(play) {
+                    if(play && typeof play === 'object' && play.name) {
+                        if(['home.playbook.dashboard'].indexOf(nextState) > -1) {
+                            $state.go(nextState);
+                        } else {
+                            $state.go(nextState, {play_name: play.name});
+                        }
                     }
                 });
             }

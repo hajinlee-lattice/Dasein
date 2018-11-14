@@ -18,15 +18,6 @@ angular.module('lp.playbook.wizard.segmentcreate', [])
         }
     });
 
-    if($stateParams.segment_name) {
-        vm.stored.segment_selection = $stateParams.segment_name;
-        PlaybookWizardStore.setRating({
-            targetSegment: {
-                name: $stateParams.segment_name
-            }
-        });
-    }
-
     vm.init = function() {
         PlaybookWizardStore.setValidation('segment', false);
         if(vm.stored.segment_selection) {
@@ -54,6 +45,28 @@ angular.module('lp.playbook.wizard.segmentcreate', [])
             }
         });
     }
+
+    if($stateParams.segment_name) {
+        vm.stored.segment_selection = $stateParams.segment_name;
+        PlaybookWizardStore.setRating({
+            targetSegment: {
+                name: $stateParams.segment_name
+            }
+        });
+        PlaybookWizardStore.setSettings({
+            targetSegment: {
+                name: $stateParams.segment_name
+            }
+        });
+    }
+
+    function findSegmentByName(segment_name) {
+        var segment = Segments.find(function(segment) {
+            return segment.name === segment_name
+        });
+        return segment;
+    }
+
 
     vm.searchFields = function(segment){
         if (vm.search) {
