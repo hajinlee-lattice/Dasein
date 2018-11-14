@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -15,6 +17,7 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
 public class BucketedScoreSummaryUtils {
+    private static final Logger log = LoggerFactory.getLogger(BucketedScoreSummaryUtils.class);
 
     public static final String SCORE = "Score";
     public static final String EXPECTED_REVENUE_SCORE = "ExpectedRevenuePercentile";
@@ -151,6 +154,7 @@ public class BucketedScoreSummaryUtils {
 
     public static List<BucketMetadata> computeLift(BucketedScoreSummary scoreSummary,
             List<BucketMetadata> bucketMetadataList, boolean isEV) {
+        log.info(String.format("isEV = %s", isEV));
         bucketMetadataList = sortBucketMetadata(bucketMetadataList, true);
         List<Integer> lowerBounds = null;
         for (BucketMetadata bucketMetadata : bucketMetadataList) {
@@ -180,7 +184,11 @@ public class BucketedScoreSummaryUtils {
                 isEV ? 0D : null, //
                 isEV ? 0D : null));
 
-        double overallConversion = scoreSummary.getTotalNumConverted() / scoreSummary.getTotalNumLeads();
+        int totalNumLeads = scoreSummary.getTotalNumLeads();
+        double overallConversion = scoreSummary.getTotalNumConverted() / totalNumLeads;
+        double totalExpectedRevenue = 0;
+        double overallAverageExpectedRevenue = 0;
+
         for (int i = 0; i < bucketMetadataList.size(); i++) {
             BucketedScore lowerBound = boundaries.get(i);
             BucketedScore upperBound = boundaries.get(i + 1);
@@ -198,12 +206,21 @@ public class BucketedScoreSummaryUtils {
             bucketMetadataList.get(i).setLift(lift);
             bucketMetadataList.get(i).setNumLeads(totolLeads);
             if (isEV) {
+                if (totalExpectedRevenue == 0) {
+                    totalExpectedRevenue = scoreSummary.getTotalExpectedRevenue();
+                    overallAverageExpectedRevenue = totalExpectedRevenue / totalNumLeads;
+                }
+
                 double totalBucketExpectedRevenue = lowerBound.getLeftExpectedRevenue()
                         + lowerBound.getExpectedRevenue();
                 totalBucketExpectedRevenue -= upperBound.getLeftExpectedRevenue() + upperBound.getExpectedRevenue();
                 double averageBucketExpectedRevenue = totalBucketExpectedRevenue / totolLeads;
                 bucketMetadataList.get(i).setTotalExpectedRevenue(totalBucketExpectedRevenue);
                 bucketMetadataList.get(i).setAverageExpectedRevenue(averageBucketExpectedRevenue);
+                if (overallAverageExpectedRevenue > 0) {
+                    lift = averageBucketExpectedRevenue / overallAverageExpectedRevenue;
+                    bucketMetadataList.get(i).setLift(lift);
+                }
             }
         }
 
