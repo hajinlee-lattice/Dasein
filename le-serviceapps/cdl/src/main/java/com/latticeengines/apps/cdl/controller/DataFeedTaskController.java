@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -45,16 +44,14 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
     public ResponseDocument<String> createDataFeedTaskForVdb(@PathVariable String customerSpace,
-                                                                 @RequestParam(value = "source") String source,
-                                                                 @RequestParam(value = "feedtype") String feedtype,
-                                                                 @RequestParam(value = "entity") String entity,
-                                                                 @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
+            @RequestParam(value = "source") String source, @RequestParam(value = "feedtype") String feedtype,
+            @RequestParam(value = "entity") String entity, @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
         if (vdbLoadTableConfig == null) {
             return ResponseDocument.failedResponse(new RuntimeException("Vdb load table config can't be null!"));
         } else {
             VdbImportConfig vdbImportConfig = new VdbImportConfig();
             vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
-            return createDataFeedTask(customerSpace, source, feedtype, entity,"", "", false, "", vdbImportConfig);
+            return createDataFeedTask(customerSpace, source, feedtype, entity, "", "", false, "", vdbImportConfig);
         }
     }
 
@@ -63,19 +60,18 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
     public ResponseDocument<String> createDataFeedTask(@PathVariable String customerSpace,
-                     @RequestParam(value = "source") String source,
-                     @RequestParam(value = "feedtype") String feedtype,
-                     @RequestParam(value = "entity") String entity,
-                     @RequestParam(value = "subType", required = false) String subType,
-                     @RequestParam(value = "displayName", required = false) String displayName,
-                     @RequestParam(value = "sendEmail", required = false, defaultValue = "false" ) boolean sendEmail,
-                     @RequestParam(value = "user", required = false) String user,
-                     @RequestBody CDLImportConfig importConfig) {
+            @RequestParam(value = "source") String source, @RequestParam(value = "feedtype") String feedtype,
+            @RequestParam(value = "entity") String entity,
+            @RequestParam(value = "subType", required = false) String subType,
+            @RequestParam(value = "displayName", required = false) String displayName,
+            @RequestParam(value = "sendEmail", required = false, defaultValue = "false") boolean sendEmail,
+            @RequestParam(value = "user", required = false) String user, @RequestBody CDLImportConfig importConfig) {
         try {
             customerSpace = CustomerSpace.parse(customerSpace).toString();
             entity = BusinessEntity.getByName(entity).name();
             String taskId = dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source,
-                    subType, displayName, sendEmail, user, importConfig);
+                    subType, displayName != null ? java.net.URLDecoder.decode(displayName, "UTF-8") : null, sendEmail,
+                    user, importConfig);
             return ResponseDocument.successResponse(taskId);
         } catch (Exception e) {
             log.error(String.format("Failed to create data feed task, exception: %s", e.toString()), e);
@@ -84,42 +80,38 @@ public class DataFeedTaskController {
 
     }
 
-    @RequestMapping(value = "/import/{taskIdentifier}", method = RequestMethod.POST, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/import/{taskIdentifier}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
-    public ResponseDocument<String>  startImportJobForVdb(@PathVariable String customerSpace,
-                                                         @PathVariable String taskIdentifier,
-                                                         @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
+    public ResponseDocument<String> startImportJobForVdb(@PathVariable String customerSpace,
+            @PathVariable String taskIdentifier, @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
         VdbImportConfig vdbImportConfig = new VdbImportConfig();
         vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
         return startImportJob(customerSpace, taskIdentifier, vdbImportConfig);
     }
 
-    @RequestMapping(value = "/import/internal/{taskIdentifier}", method = RequestMethod.POST, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/import/internal/{taskIdentifier}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
-    public ResponseDocument<String>  startImportJob(@PathVariable String customerSpace,
-                                                              @PathVariable String taskIdentifier,
-                                                              @RequestBody CDLImportConfig importConfig) {
+    public ResponseDocument<String> startImportJob(@PathVariable String customerSpace,
+            @PathVariable String taskIdentifier, @RequestBody CDLImportConfig importConfig) {
         try {
-            String applicationId = dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, importConfig);
+            String applicationId = dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier,
+                    importConfig);
             return ResponseDocument.successResponse(applicationId);
         } catch (Exception e) {
             return ResponseDocument.failedResponse(e);
         }
     }
 
-    @RequestMapping(value = "/s3import", method = RequestMethod.POST, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/s3import", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
-    public ResponseDocument<String>  startImportJobForS3(@PathVariable String customerSpace,
-                                                          @RequestBody S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
+    public ResponseDocument<String> startImportJobForS3(@PathVariable String customerSpace,
+            @RequestBody S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
         try {
             String applicationId = dataFeedTaskManagerService.submitS3ImportJob(customerSpace,
                     s3FileToHdfsConfiguration);
@@ -130,12 +122,11 @@ public class DataFeedTaskController {
         }
     }
 
-    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     public ResponseDocument<Boolean> resetImport(@PathVariable String customerSpace,
-                            @RequestParam(value = "entity", required = false) BusinessEntity entity) {
+            @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         if (dataFeedTaskManagerService.resetImport(customerSpace, entity)) {
             return ResponseDocument.successResponse(true);
         } else {
