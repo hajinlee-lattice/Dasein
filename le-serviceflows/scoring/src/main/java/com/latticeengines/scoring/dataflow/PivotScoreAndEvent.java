@@ -136,8 +136,6 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
             if (!isEV) {
                 aggregatedNode = getTotalPositiveEvents(aggregatedNode, scoreDerivation, fitFunctionParams, isEV);
-                aggregatedNode = aggregatedNode.addColumnWithFixedValue(ScoreResultField.Percentile.displayName, null,
-                        Integer.class);
                 aggregatedNode = aggregatedNode.addColumnWithFixedValue(BUCKET_AVG_SCORE, null, Double.class);
                 aggregatedNode = aggregatedNode.addColumnWithFixedValue(BUCKET_SUM, null, Double.class);
                 aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
