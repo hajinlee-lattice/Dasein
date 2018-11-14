@@ -127,9 +127,6 @@ public class CDLResource {
                     : templateDisplay.getFeedType();
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName, source, entity,
                     feedType, subType, templateDisplay.getTemplateName());
-            log.info("Create " + templateDisplay.toString());
-            log.info("templateDisplay.getTemplateName() " + templateDisplay.getTemplateName());
-            log.info("templateDisplay.getObject() " + templateDisplay.getObject());
 
             UIAction uiAction = null;
             if (importData) {
