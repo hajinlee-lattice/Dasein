@@ -13,7 +13,7 @@ angular.module('lp.import.entry.accounts', [])
         });
 
         vm.$onInit = function() {
-            console.log($stateParams);
+            
         }
 
     }

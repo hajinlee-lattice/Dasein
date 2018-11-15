@@ -33,8 +33,12 @@ angular.module('lp.import.entry', [
 
     vm.init = function() {
 
+        const templateAction = $stateParams.action ? $stateParams.action : ImportWizardStore.getTemplateAction();
+
+        ImportWizardStore.setTemplateAction(templateAction);
+
         let flowType = "";
-        switch ($stateParams.action) {
+        switch (templateAction) {
             case "create-template": {
                 flowType = "Create";
                 break;
@@ -51,9 +55,11 @@ angular.module('lp.import.entry', [
         vm.formType = flowType;
         vm.nextButtonText = vm.formType == 'Import' ? 'Import File' : 'Next, Field Mappings';
 
-        vm.displayType = $stateParams.type;
+        vm.displayType = $stateParams.type ? $stateParams.type : ImportWizardStore.getDisplayType();
+        ImportWizardStore.setDisplayType(vm.displayType);        
 
-        ImportWizardStore.clear();
+        // ImportWizardStore.clear();
+
         ImportWizardStore.setPostBody($stateParams.data);
         
         vm.setFeatureFlagPermissions();

@@ -35,8 +35,6 @@ export default class GridContainer extends Component {
   }
 
   createTemplate(response) {
-    console.log(response);
-
     let entity = "";
     switch (response.type) {
       case "Accounts": {

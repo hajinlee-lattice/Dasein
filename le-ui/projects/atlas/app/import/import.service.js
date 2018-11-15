@@ -31,6 +31,8 @@ angular.module('lp.import')
             map: []
         };
 
+        this.templateAction = 'create-template';
+        this.displayType = null;
         this.entityType = null;
         this.feedType = null;
 
@@ -458,10 +460,12 @@ angular.module('lp.import')
         return this.importOnly;
     }
 
+    this.setFieldDocument = function(data) {
+        this.fieldDocument = data;
+    };
     this.getFieldDocument = function() {
         return angular.copy(this.fieldDocument);
     };
-
     this.getFieldDocumentAttr = function(name) {
         if(name == 'fieldMappings') {
             return this.fieldDocument.fieldMappings;
@@ -470,18 +474,30 @@ angular.module('lp.import')
         }
     };
 
-    this.setFieldDocument = function(data) {
-        this.fieldDocument = data;
-    };
-
     this.getUnmappedFields = function() {
         return this.unmappedFields;
     };
-
     this.setUnmappedFields = function(data) {
         this.unmappedFields = data;
     };
 
+    this.setTemplateAction = function(templateAction) {
+        this.templateAction = templateAction;
+    };
+    this.getTemplateAction = function() {
+        return this.templateAction;
+    };
+
+    this.setDisplayType = function(displayType) {
+        this.displayType = displayType;
+    };
+    this.getDisplayType = function() {
+        return this.displayType;
+    };
+
+    this.setEntityType = function(type) {
+        this.entityType = type;
+    };
     this.getEntityType = function() {
         return this.entityType;
     };
@@ -489,13 +505,8 @@ angular.module('lp.import')
     this.getFeedType = function() {
         return this.feedType;
     };
-
     this.setFeedType = function(type) {
         this.feedType = type;
-    };
-
-    this.setEntityType = function(type) {
-        this.entityType = type;
     };
 
     this.getAutoImport = function(){
