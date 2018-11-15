@@ -523,8 +523,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
         }
 
-        var isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
+        var isNumericRange = false;
+        if(!predictor.FundamentalType && predictor.FundamentalType != null ){
+         isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
                 predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Currency;
+        }
         var maxBucket = null;
 
         for (var i = 0; i < predictor.Elements.length; i++) {
@@ -696,7 +699,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
 
             // Use variables to combine and create a new "Other, Less Popular" bucket
-            newCombinedBucket = {
+            let newCombinedBucket = {
                 name: otherLessPopular.name,
                 lift: otherLessPopular.lift + zeroPercentTotal.lift,
                 percentTotal: parseInt(otherLessPopular.percentTotal) + parseInt(zeroPercentTotal.percentTotal),
