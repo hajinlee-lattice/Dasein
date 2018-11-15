@@ -8,6 +8,13 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +59,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
@@ -84,6 +92,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
     private String accountFeaturesTablePrefix = "AccountFeatures";
     private String masterSlimTableName;
+    // The date that the Process/Analyze pipeline was run as a string.
+    private String evaluationDateStr;
+    // The timestamp representing the beginnging of the day that the Process/Analyze pipeline was run.  Used for date
+    // attribute profiling.
+    private long evaluationDateAsTimestamp;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -101,6 +114,36 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         super.initializeConfiguration();
         masterSlimTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.AccountBatchSlim, inactive);
+        // Convert the evaluation date (generally the current date which is when the pipeline is running) to a
+        // timestamp.
+        evaluationDateStr = findEvaluationDate();
+        LocalDate evaluationDate;
+        if (!StringUtils.isBlank(evaluationDateStr)) {
+            try {
+                evaluationDate = LocalDate.parse(evaluationDateStr, DateTimeFormatter.ISO_DATE);
+            } catch (DateTimeParseException e) {
+                log.error("Could not parse evaluation date string \"" + evaluationDateStr
+                        + "\" from Period Proxy as an ISO formatted date");
+                log.error("Error is: " + e.getLocalizedMessage());
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                log.error(sw.toString());
+                evaluationDate = LocalDate.now();
+                evaluationDateStr = evaluationDate.format(DateTimeFormatter.ISO_DATE);
+            }
+        } else {
+            log.warn("Evaluation Date from Period Proxy is blank.  Profile Account will generate date");
+            evaluationDate = LocalDate.now();
+            evaluationDateStr = evaluationDate.format(DateTimeFormatter.ISO_DATE);
+        }
+        evaluationDateAsTimestamp = evaluationDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
+        log.info("Evaluation date for Profile Account date attributes: " + evaluationDateStr);
+        log.info("Evaluation timestamp for Profile Account date attributes: " + evaluationDateAsTimestamp);
+
+        // Convert current timestamp of PA pipeline run to human readable string.
+        //ZonedDateTime dateTime = Instant.ofEpochMilli(evaluationDateAsTimestamp).atZone(ZoneId.systemDefault());
+        //String dateTimeStr = dateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a"));
+        //log.info("Timestamp used for PA pipeline run is " + evaluationDateAsTimestamp + " translating to " + dateTimeStr);
 
     }
 
@@ -246,6 +289,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
+        // Pass current timestamp as a configuration parameter to the profile step.
+        conf.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -429,6 +474,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         masterTable.getAttributes().forEach(attr -> {
             masterAttrs.put(attr.getName(), attr);
         });
+
+        // Convert current timestamp of PA pipeline run to human readable string.
+        //ZonedDateTime dateTime = Instant.ofEpochMilli(evaluationDateAsTimestamp).atZone(ZoneId.systemDefault());
+        //String dateTimeStr = dateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a"));
+        //log.info("Timestamp used for PA pipeline run is " + evaluationDateAsTimestamp + " translating to " + dateTimeStr);
+
         List<Attribute> attrs = new ArrayList<>();
         final AtomicLong dcCount = new AtomicLong(0);
         final AtomicLong masterCount = new AtomicLong(0);
@@ -453,6 +504,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 dcCount.incrementAndGet();
             } else if (masterAttrs.containsKey(attr0.getName())) {
                 attr = copyMasterAttr(masterAttrs, attr0);
+                if (LogicalDataType.Date.equals(attr0.getLogicalDataType())) {
+                    // TODO(jwinter): Fix the wording of this by asking Product.
+                    log.info("Setting secondary display name for date attribute: " + attr.getName() + " to "
+                            + evaluationDateStr);
+                    attr.setSecondaryDisplayName("Day values relative to last processing time of " + evaluationDateStr);
+                }
                 masterCount.incrementAndGet();
             }
             if (StringUtils.isBlank(attr.getCategory())) {

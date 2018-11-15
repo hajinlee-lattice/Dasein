@@ -54,6 +54,9 @@ public class Bucket implements Serializable {
     @JsonProperty("Chg")
     private Change change;
 
+    @JsonProperty("Fltr")
+    private TimeFilter dateTimeFilter;
+
     public Bucket() {
     }
 
@@ -244,6 +247,15 @@ public class Bucket implements Serializable {
     public void setChange(Change change) {
         this.change = change;
     }
+
+    public TimeFilter getDateTimeFilter() {
+        return dateTimeFilter;
+    }
+
+    public void setDateTimeFilter(TimeFilter dateTimeFilter) {
+        this.dateTimeFilter = dateTimeFilter;
+    }
+
 
     public int getIdAsInt() {
         return id.intValue();

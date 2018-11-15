@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
@@ -245,11 +246,16 @@ public class StatsCubeUtils {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
-        bucket.setValues(Collections.singletonList(bucketLabel));
-        // TODO(jwinter): Verify comparison type is correct.  I'm assuming the comparison is 'value compared to bucket'
-        //     boundary.  So that if the value is after (greater than) the bucket boundary, it is included in the
-        //     bucket.  There is also the issue of if AFTER is inclusive or exclusive of the boundary value.
-        bucket.setComparisonType(ComparisonType.AFTER);
+        // Date buckets are cumulative.  Hence, the "within" comparison type is used which covers the day boundary
+        // forward to the current time.
+        List<Integer> dayBoundaries = algo.getDayBoundaries();
+        Integer dayBound = bktId == dayBoundaries.size() + 1 ? null : dayBoundaries.get(bktId - 1);
+        if (dayBound != null) {
+            bucket.setDateTimeFilter(TimeFilter.within(dayBound, PeriodStrategy.Template.Day.name()));
+        } else {
+            bucket.setDateTimeFilter(TimeFilter.ever(PeriodStrategy.Template.Day.name()));
+        }
+
     }
 
     public static void sortRatingBuckets(AttributeStats attrStats) {

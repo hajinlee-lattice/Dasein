@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProc
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntityStepConfiguration>
@@ -45,6 +46,9 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    protected PeriodProxy periodProxy;
 
     @Inject
     protected MetadataProxy metadataProxy;
@@ -109,6 +113,18 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
                 throw new IllegalStateException("Cannot find the master table in default collection");
             }
         }
+    }
+
+    protected String findEvaluationDate() {
+        String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isBlank(evaluationDate)) {
+            log.error("Failed to find evaluation date from workflow context");
+            evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+            if (StringUtils.isBlank(evaluationDate)) {
+                log.error("Failed to get evaluation date from Period Proxy.");
+            }
+        }
+        return evaluationDate;
     }
 
     protected TransformationWorkflowConfiguration generateWorkflowConf() {

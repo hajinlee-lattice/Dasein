@@ -102,9 +102,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private Configuration yarnConfiguration;
 
     @Inject
-    private PeriodProxy periodProxy;
-
-    @Inject
     private ActivityMetricsProxy metricsProxy;
 
     @Inject
@@ -197,6 +194,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         if (StringUtils.isBlank(evaluationDate)) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
             evaluationDate = LocalDate.now().format(formatter);
+            log.info("Evaluation date for purchase history profiling: " + evaluationDate);
         }
 
         periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
@@ -288,16 +286,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             periods.add(m.getPeriodsConfig().get(0).getPeriod());
         });
         return PeriodStrategyUtils.filterPeriodTablesByPeriods(periodTables, periods);
-    }
-
-    private String findEvaluationDate() {
-        String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
-        if (StringUtils.isBlank(evaluationDate)) {
-            log.error("Fail to find evaluation date from workflow context");
-            evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
-        }
-        log.info("Evaluation date for purchase history profiling: " + evaluationDate);
-        return evaluationDate;
     }
 
     private void loadProductMap() {

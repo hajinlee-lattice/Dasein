@@ -64,8 +64,9 @@ public class BucketAlgorithmUnitTestNG {
 
     @Test(groups = "unit")
     public void testDateBoundaries() {
-        // Create a date bucket with an assumed current time of 10/23/2018 12:00:00 GMT
-        DateBucket bucket = new DateBucket(1540296000000L);
+        // Create a date bucket with an assumed current time of 10/23/2018 00:00:00 UTC.
+        // Since the current time is right on the date boundary, no truncation occurs.
+        DateBucket bucket = new DateBucket(1540252800000L);
 
         // Test that the correct date boundaries are set.
         List<Long> boundaries = bucket.getDateBoundaries();
@@ -87,7 +88,7 @@ public class BucketAlgorithmUnitTestNG {
         ));
 
         // Test setting the date bucket labels to custom values.
-        bucket = new DateBucket(1540296000000L);
+        bucket = new DateBucket(1540252800000L);
         bucket.setLast7DaysLabel("Last Week");
         bucket.setLast30DaysLabel("Last Month");
         bucket.setLast90DaysLabel("Last Quarter");
@@ -102,5 +103,19 @@ public class BucketAlgorithmUnitTestNG {
                 "Last Two Quarters",
                 "More Than Two Quarters"
         ));
+
+        // Create a date bucket with an assumed current time of 10/23/2018 12:12:12 UTC.
+        // This will test if truncation of hours, minutes, and seconds is working.
+        bucket = new DateBucket(1540296732000L);
+
+        // Test that the correct date boundaries are set.
+        boundaries = bucket.getDateBoundaries();
+        Assert.assertEquals(boundaries, Arrays.asList(
+                1539734400000L,  // 10/17/2018 00:00:00 GMT - 6 days before
+                1537747200000L,  // 09/24/2018 00:00:00 GMT - 29 days before
+                1532563200000L,  // 07/26/2018 00:00:00 GMT - 89 days before
+                1524787200000L   // 04/27/2018 00:00:00 GMT - 179 days before
+        ));
+
     }
 }

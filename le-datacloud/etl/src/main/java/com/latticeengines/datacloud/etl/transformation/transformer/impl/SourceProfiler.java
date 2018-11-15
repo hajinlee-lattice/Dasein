@@ -5,7 +5,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PROP_KEY;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,6 +101,13 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private static final Set<Schema.Type> DATE_TYPES = new HashSet<>(Arrays
             .asList(new Schema.Type[] { Schema.Type.LONG }));
 
+    // List of Attributes classified as date attributes.
+    private List<Attribute> dateAttrs;
+
+    // List of Attributes to retain which will be defined in the SourceProfiler class itself, rather than through
+    // the Profile data flow.
+    private List<Attribute> attrsToRetain;
+
     @Override
     protected String getDataFlowBeanName() {
         return Profile.BEAN_NAME;
@@ -121,6 +127,18 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     protected Class<ProfileParameters> getDataFlowParametersClass() {
         return ProfileParameters.class;
     }
+
+    public List<Attribute> getDateAttrs() {
+        return dateAttrs;
+    }
+
+    public void setDateAttrs(List<Attribute> dateAttrs) {
+        this.dateAttrs = dateAttrs;
+    }
+
+    public List<Attribute> getAttrsToRetain() { return attrsToRetain; }
+
+    public void setAttrsToRetain(List<Attribute> attrsToRetain) { this.attrsToRetain = attrsToRetain; }
 
     /*
      * 1. Before dataflow executed, classify attributes in base source and
@@ -158,10 +176,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         if (paras.getIdAttr() != null) {
             result.add(profileIdAttr(paras.getIdAttr()));
         }
-        for (ProfileParameters.Attribute dateAttr : paras.getDateAttrs()) {
+        for (ProfileParameters.Attribute dateAttr : getDateAttrs()) {
             result.add(profileDateAttr(dateAttr));
         }
-        for (ProfileParameters.Attribute attr : paras.getAttrsToRetain()) {
+        for (ProfileParameters.Attribute attr : getAttrsToRetain()) {
             result.add(profileAttrToRetain(attr));
         }
         Map<String, List<ProfileParameters.Attribute>> amAttrsToEnc = groupAttrsToEnc(paras.getAmAttrsToEnc(),
@@ -203,12 +221,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     private void initProfileParameters(ProfileConfig config, ProfileParameters paras) {
+        setDateAttrs(new ArrayList<>());
+        setAttrsToRetain(new ArrayList<>());
+
         paras.setNumericAttrs(new ArrayList<>());
         paras.setCatAttrs(new ArrayList<>());
-        // TODO(jwinter): There isn't really a good reason for Date Attributes and Attributes to Retain lists
-        //     to be stored in ProfileParameters when neither is needed outside of SourceProfiler.
-        paras.setDateAttrs(new ArrayList<>());
-        paras.setAttrsToRetain(new ArrayList<>());
         paras.setAmAttrsToEnc(new ArrayList<>());
         paras.setExAttrsToEnc(new ArrayList<>());
         paras.setCodeBookMap(new HashMap<>());
@@ -256,9 +273,6 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             // Build BitCodeBook
             BitCodeBookUtils.constructCodeBookMap(paras.getCodeBookMap(), paras.getCodeBookLookup(), decodeStrs);
 
-            // Get the current timestamp in milliseconds for setting up date attributes.
-            long curTimestamp = Instant.now().toEpochMilli();
-
             // Parse flat attrs in the profiled source
             for (Field field : schema.getFields()) {
                 boolean readyForNext = false;
@@ -267,14 +281,14 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     readyForNext = AttrClassifier.isAttrToDiscard(field, amAttrsConfig);
                 }
                 if (!readyForNext) {
-                    readyForNext = AttrClassifier.isAttrNoBucket(field, amAttrsConfig, paras);
+                    readyForNext = AttrClassifier.isAttrNoBucket(field, amAttrsConfig, getAttrsToRetain());
                 }
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isPreknownAttr(field, encAttrsMap, decAttrsMap, encAttrs, config,
-                            paras);
+                            paras, getAttrsToRetain());
                 }
                 if (!readyForNext) {
-                    readyForNext = AttrClassifier.isDateAttr(field, amAttrsConfig, config, paras, curTimestamp);
+                    readyForNext = AttrClassifier.isDateAttr(field, amAttrsConfig, config, getDateAttrs());
                 }
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isNumericAttr(field, config, paras);
@@ -286,7 +300,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     readyForNext = AttrClassifier.isCategoricalAttr(field, config, paras);
                 }
                 if (!readyForNext) {
-                    readyForNext = AttrClassifier.isAttrToRetain(field, paras);
+                    readyForNext = AttrClassifier.isAttrToRetain(field, getAttrsToRetain());
                 }
             }
         } catch (Exception ex) {
@@ -464,7 +478,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
             boolean readyForNext = false;
             readyForNext = AttrClassifier.isNoBucketAttr(attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                    paras, numericAttrsMap, catAttrsMap);
+                    paras, getAttrsToRetain(), numericAttrsMap, catAttrsMap);
             if (!readyForNext) {
                 readyForNext = AttrClassifier.isIntervalBucketAttr(attrName,
                         record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), numericAttrsMap);
@@ -524,13 +538,13 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     "%d numeric attrs(grouped into encode attrs and retain attrs), %d categorical attrs(grouped into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
                     paras.getNumericAttrs().size(), paras.getCatAttrs().size(), amAttrsToEnc.size(),
                     exAttrsToEnc.size(),
-                    paras.getAttrsToRetain().size()));
+                    getAttrsToRetain().size()));
             break;
         case DataCloudConstants.PROFILE_STAGE_SEGMENT:
             log.info(String.format(
                     "%d numeric attrs, %d categorical attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
                     paras.getNumericAttrs().size(), paras.getCatAttrs().size(), amAttrsToEnc.size(),
-                    exAttrsToEnc.size(), paras.getAttrsToRetain().size()));
+                    exAttrsToEnc.size(), getAttrsToRetain().size()));
             break;
         default:
             throw new RuntimeException("Unrecognized stage " + config.getStage());
@@ -760,7 +774,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isAttrNoBucket(Field field, Map<String, ProfileArgument> amAttrConfig,
-                ProfileParameters paras)
+                List<Attribute> attrsToRetain)
                 throws JsonProcessingException, IOException {
             if (!amAttrConfig.containsKey(field.name())) {
                 return false;
@@ -769,19 +783,19 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return false;
             }
             log.debug(String.format("Retained attr: %s (unencode)", field.name()));
-            paras.getAttrsToRetain().add(new ProfileParameters.Attribute(field.name(), null, null, null));
+            attrsToRetain.add(new ProfileParameters.Attribute(field.name(), null, null,null));
             return true;
         }
 
         private static boolean isPreknownAttr(Field field, Map<String, List<ProfileParameters.Attribute>> encAttrsMap,
                 Map<String, ProfileParameters.Attribute> decAttrsMap, Set<String> encAttrs, ProfileConfig config,
-                ProfileParameters paras) {
+                ProfileParameters paras, List<Attribute> attrsToRetain) {
             // Preknown attributes which are encoded (usually for Enrichment use
             // case, since profiled source is AM)
             if (encAttrsMap.containsKey(field.name())) {
                 for (ProfileParameters.Attribute attr : encAttrsMap.get(field.name())) {
                     classifyPreknownAttr(attr, config.getStage(), paras.getNumericAttrs(), paras.getCatAttrs(),
-                            paras.getAmAttrsToEnc(), paras.getAttrsToRetain());
+                            paras.getAmAttrsToEnc(), attrsToRetain);
                 }
                 return true;
             }
@@ -789,7 +803,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             // Segment use case, since profiled source is match result)
             if (decAttrsMap.containsKey(field.name())) {
                 classifyPreknownAttr(decAttrsMap.get(field.name()), config.getStage(), paras.getNumericAttrs(),
-                        paras.getCatAttrs(), paras.getAmAttrsToEnc(), paras.getAttrsToRetain());
+                        paras.getCatAttrs(), paras.getAmAttrsToEnc(), attrsToRetain);
                 return true;
             }
             if (encAttrs.contains(field.name())) {
@@ -821,7 +835,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     throw new RuntimeException("Unrecognized stage " + config.getStage());
                 }
                 paras.getNumericAttrs()
-                        .add(new ProfileParameters.Attribute(field.name(), null, null, new IntervalBucket()));
+                        .add(new ProfileParameters.Attribute(field.name(), null, null,
+                                new IntervalBucket()));
                 return true;
             }
             return false;
@@ -860,14 +875,15 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     throw new RuntimeException("Unrecognized stage " + config.getStage());
                 }
                 paras.getCatAttrs()
-                        .add(new ProfileParameters.Attribute(field.name(), null, null, new CategoricalBucket()));
+                        .add(new ProfileParameters.Attribute(field.name(), null, null,
+                                new CategoricalBucket()));
                 return true;
             }
             return false;
         }
 
         private static boolean isDateAttr(Field field, Map<String, ProfileArgument> amAttrConfig, ProfileConfig config,
-                                          ProfileParameters paras, long curTimestamp) {
+                                          List<Attribute> dateAttrs) {
             // Currently, date attributes in the Account Master are not handled by the Date Attributes feature.  Skip
             // these for now.
             if (amAttrConfig.containsKey(field.name())) {
@@ -879,21 +895,22 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (DATE_TYPES.contains(type)) {
                 // Check that the field has Logical Type "Date" set.
                 if (field.getProp("logicalType") != null && field.getProp("logicalType").equals("Date")) {
-                    paras.getDateAttrs()
-                            .add(new ProfileParameters.Attribute(field.name(), null, null,
-                                    new DateBucket(curTimestamp)));
+                    dateAttrs.add(new ProfileParameters.Attribute(
+                            field.name(), null, null,
+                            new DateBucket(config.getEvaluationDateAsTimestamp())));
                     return true;
                 }
             }
             return false;
         }
 
-        private static boolean isAttrToRetain(Field field, ProfileParameters paras) {
+        private static boolean isAttrToRetain(Field field, List<Attribute> attrsToRetain) {
             log.debug(String.format("Retained attr: %s (unencode)", field.name()));
-            paras.getAttrsToRetain().add(new ProfileParameters.Attribute(field.name(), null, null, null));
+            attrsToRetain.add(new ProfileParameters.Attribute(
+                    field.name(), null, null, null));
             return true;
         }
-        
+
         private static void classifyPreknownAttr(ProfileParameters.Attribute attr, String stage,
                 List<Attribute> numericAttrs,
                 List<Attribute> catAttrs, List<Attribute> amAttrsToEnc, List<Attribute> attrsToRetain) {
@@ -934,7 +951,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isNoBucketAttr(String attrName, Object bucketAlgo, ProfileParameters paras,
-                Map<String, Attribute> numericAttrsMap, Map<String, Attribute> catAttrsMap) {
+                                              List<Attribute> attrsToRetain, Map<String, Attribute> numericAttrsMap,
+                                              Map<String, Attribute> catAttrsMap) {
             Set<String> catAttrsNotEnc = paras.getCatAttrsNotEnc() != null
                     ? new HashSet<>(Arrays.asList(paras.getCatAttrsNotEnc()))
                     : new HashSet<>();
@@ -943,7 +961,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
             if (numericAttrsMap.containsKey(attrName)) {
                 numericAttrsMap.get(attrName).setAlgo(null);
-                paras.getAttrsToRetain().add(numericAttrsMap.get(attrName));
+                attrsToRetain.add(numericAttrsMap.get(attrName));
                 paras.getNumericAttrs().remove(numericAttrsMap.get(attrName));
                 log.warn(String.format(
                         "Attribute %s is moved from encode numeric group to retained group due to all the values are null: %s",
@@ -952,7 +970,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
             if (catAttrsMap.containsKey(attrName)) {
                 catAttrsMap.get(attrName).setAlgo(null);
-                paras.getAttrsToRetain().add(catAttrsMap.get(attrName));
+                attrsToRetain.add(catAttrsMap.get(attrName));
                 paras.getCatAttrs().remove(catAttrsMap.get(attrName));
                 log.warn(String.format(
                         "Attribute %s is moved from encode categorical group to retained group due to there is no buckets or it is a dimensional attribute for stats calculation: (%s) ",

@@ -46,17 +46,24 @@ public class DateBucket extends BucketAlgorithm  {
     @JsonProperty("ever")
     private String everLabel;
 
+    // Timestamp used as base value from which to evaluation all bucket boundaries.
     @JsonProperty("curTimestamp")
     private long curTimestamp;
 
+    // Timestamps that define the boundaries between buckets.
     @JsonProperty("dateBoundaries")
     private List<Long> dateBoundaries;
+
+    // Number of days prior to the current date that each bucket represents.
+    @JsonProperty("dayBoundaries")
+    private List<Integer> dayBoundaries;
 
     public DateBucket() { }
 
     public DateBucket(long curTimestamp) {
         this.curTimestamp = curTimestamp;
         this.dateBoundaries = defineDateBoundaries(curTimestamp);
+        this.dayBoundaries = Arrays.asList(7, 30, 90, 180);
     }
 
     public String getLast7DaysLabel() {
@@ -101,13 +108,20 @@ public class DateBucket extends BucketAlgorithm  {
 
     public void setCurTimestamp(long curTimestamp) { this.curTimestamp = curTimestamp; }
 
-    public List<Long> getDateBoundaries() {
-        return dateBoundaries;
-    }
+    public List<Long> getDateBoundaries() { return dateBoundaries; }
 
     public void setDateBoundaries(List<Long> dateBoundaries) {
         this.dateBoundaries = dateBoundaries;
     }
+
+    public List<Integer> getDayBoundaries() {
+        return dayBoundaries;
+    }
+
+    public void setDayBoundaries(List<Integer> dayBoundaries) {
+        this.dayBoundaries = dayBoundaries;
+    }
+
 
     @JsonIgnore
     public String getLast7DaysLabelWithDefault() {
@@ -166,6 +180,7 @@ public class DateBucket extends BucketAlgorithm  {
     @JsonIgnore
     static public List<Long> defineDateBoundaries(long curTimestamp) {
         Instant curTime = Instant.ofEpochMilli(curTimestamp);
+        // Truncate the current time to the day boundary in UTC to compute the various boundary points.
         Instant roundedDayTime = curTime.truncatedTo(ChronoUnit.DAYS);
         long roundedDayTimestamp = roundedDayTime.toEpochMilli();
 

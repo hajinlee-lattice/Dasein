@@ -37,6 +37,9 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
     private int maxDiscrete = 5; // Maximum allowed discrete bucket number
                                      // not be encoded
 
+    @JsonProperty("EvaluationDateAsTimestamp")
+    private long evaluationDateAsTimestamp; // Timestamp the PA job is run for use for Date Attribute profiling.
+
     public ProfileConfig() {
 
     }
@@ -70,13 +73,15 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
         this.bucketNum = bucketNum;
     }
 
-    public int getMinBucketSize() {
-        return minBucketSize;
-    }
+    public int getMinBucketSize() { return minBucketSize; }
 
     public void setMinBucketSize(int minBucketSize) {
         this.minBucketSize = minBucketSize;
     }
+
+    public String getDataCloudVersion() { return dataCloudVersion; }
+
+    public void setDataCloudVersion(String dataCloudVersion) { this.dataCloudVersion = dataCloudVersion; }
 
     public Long getRandSeed() {
         return randSeed;
@@ -126,12 +131,8 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
         this.maxDiscrete = maxDiscrete;
     }
 
-    public String getDataCloudVersion() {
-        return dataCloudVersion;
-    }
+    public long getEvaluationDateAsTimestamp() { return evaluationDateAsTimestamp; }
 
-    public void setDataCloudVersion(String dataCloudVersion) {
-        this.dataCloudVersion = dataCloudVersion;
-    }
+    public void setEvaluationDateAsTimestamp(long evaluationDateAsTimestamp) { this.evaluationDateAsTimestamp = evaluationDateAsTimestamp; }
 
 }
