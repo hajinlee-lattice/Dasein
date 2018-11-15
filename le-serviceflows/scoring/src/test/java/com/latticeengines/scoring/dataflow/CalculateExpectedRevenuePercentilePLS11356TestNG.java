@@ -4,17 +4,20 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = {"classpath:serviceflows-scoring-dataflow-context.xml"})
+@ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
 public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Override
@@ -38,10 +41,23 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ServiceFlo
         List<GenericRecord> inputRecords = readInput("InputTable");
         List<GenericRecord> outputRecords = readOutput();
         assertEquals(outputRecords.size(), inputRecords.size());
+        AtomicInteger evRecordCount = new AtomicInteger(0);
+        AtomicInteger nonEvRecordCount = new AtomicInteger(0);
         outputRecords.forEach(record -> {
-            System.out.println(record);
-            // Assert.assertNotNull(record.get("Score"));
+            Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
+            if (record.get(ScoreResultField.ExpectedRevenuePercentile.displayName) != null) {
+                Assert.assertEquals(record.get(ScoreResultField.Percentile.displayName),
+                        record.get(ScoreResultField.ExpectedRevenuePercentile.displayName));
+                evRecordCount.getAndIncrement();
+            } else {
+                nonEvRecordCount.getAndIncrement();
+                System.out.println(record);
+            }
         });
+        System.out.println("evRecordCount = " + evRecordCount.get());
+        System.out.println("nonEvRecordCount = " + nonEvRecordCount.get());
+        Assert.assertTrue(evRecordCount.get() > 0);
+        Assert.assertTrue(nonEvRecordCount.get() > 0);
     }
 
     @Override
@@ -52,7 +68,8 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ServiceFlo
     private CalculateExpectedRevenuePercentileParameters prepareInputWithExpectedRevenue() {
         InputStream inputStream = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("calculateExpectedRevenuePercentile/PLS-11356/params.json");
-        CalculateExpectedRevenuePercentileParameters parameters = JsonUtils.deserialize(inputStream, CalculateExpectedRevenuePercentileParameters.class);
+        CalculateExpectedRevenuePercentileParameters parameters = JsonUtils.deserialize(inputStream,
+                CalculateExpectedRevenuePercentileParameters.class);
         return parameters;
     }
 

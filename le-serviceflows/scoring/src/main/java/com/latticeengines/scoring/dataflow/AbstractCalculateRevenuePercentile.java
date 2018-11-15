@@ -62,11 +62,24 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
                     renameNewPercentileToStandardPercentileField, percentileFieldName, standardScoreField));
             if (renameNewPercentileToStandardPercentileField //
                     && !standardScoreField.equals(percentileFieldName)) {
+                String outputFieldName = "__TEMP__" + System.currentTimeMillis();
+                log.info(String.format("Using temporary ScoreField '%s' to merge values from %s and %s",
+                        outputFieldName, percentileFieldName, standardScoreField));
+
+                final String expression = "%s != null ? %s : %s";
+
+                calculatePercentile = calculatePercentile //
+                        .addFunction(
+                                String.format(expression, percentileFieldName, percentileFieldName, standardScoreField), //
+                                new FieldList(percentileFieldName, standardScoreField), //
+                                new FieldMetadata(outputFieldName, Integer.class));
+
                 log.info(String.format("Drop standardScoreField '%s'", standardScoreField));
                 calculatePercentile = calculatePercentile.discard(standardScoreField);
-                log.info(String.format("Rename percentileFieldName '%s' to standardScoreField '%s'",
-                        percentileFieldName, standardScoreField));
-                calculatePercentile = calculatePercentile.rename(new FieldList(percentileFieldName),
+                log.info(String.format("Rename temporary ScoreField '%s' to standardScoreField '%s'", outputFieldName,
+                        standardScoreField));
+
+                calculatePercentile = calculatePercentile.rename(new FieldList(outputFieldName),
                         new FieldList(standardScoreField));
                 retainedFields = new FieldList( //
                         addPercentileColumn.getFieldNames().stream() //
