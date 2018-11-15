@@ -163,16 +163,16 @@
             		<div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{bucket.bucket_name}}</div>
             		<dl>
             			<dt>Lift</dt>
-            			<dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+            			<dd class="lift"><span ng-if="bucket.lift === 0.1010101">&lt;</span>{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
                         
             			<dt>{{vm.modelType}}</dt>
                         <dd>{{bucket.num_leads | number}} ({{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%)</dd>
 
-                        <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.totalAvgRevenue">Average<br>Weighted Revenue</dt>
-                        <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.totalAvgRevenue">${{bucket.totalAvgRevenue | number: 2}}</dd>
+                        <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.bucketAvgRevenue">Average<br>Weighted Revenue</dt>
+                        <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.bucketAvgRevenue">${{bucket.bucketAvgRevenue | number: 2}}</dd>
 
-                        <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">Conversion Rate</dt>
-                        <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">{{ bucket.conversionRate | number: 2 }}%</dd>
+                        <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.bucketAvgRevenue">Conversion Rate</dt>
+                        <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.bucketAvgRevenue">{{ bucket.conversionRate | number: 2 }}%</dd>
                     </dl>
                 </li>
             </ul><!-- End .bucket-tiles -->
@@ -185,8 +185,7 @@
                 <ul class="bucket-tiles published buckets-{{::vm.currentConfiguration.length}}">
                     <li ng-repeat="bucket in ::vm.currentConfiguration">
                         <div 
-                            class="bucket-label" 
-                            ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{::bucket.bucket_name}}</div>
+                            class="bucket-label">{{::bucket.bucket_name}}</div>
                         <dl>
                             <dt>Lift</dt>
                             <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>

@@ -198,6 +198,13 @@ angular.module('lp.models.ratings', [
             vm.canAddBucket = true;
         }
 
+        if (vm.predictionType === 'EXPECTED_VALUE'){
+            var array1 = vm.ratingsSummary.bucketed_scores.filter(item => item != null && item.avg_expected_revenue != null);
+            vm.avgRevenueTotal = array1.reduce(function(prev, cur) {
+                return prev + cur.avg_expected_revenue;
+            }, 0);
+        }
+
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
             var bucket = vm.buckets[i];
@@ -225,27 +232,39 @@ angular.module('lp.models.ratings', [
             vm.totalLeads = vm.rightLeads - vm.leftLeads;
             vm.totalConverted = vm.rightConverted - vm.leftConverted;
 
-            var totalLeads = 0;
-            var totalRevenue = 0;
-            var totalConverted = 0;
+            var bucketLeads = 0;
+            var bucketRevenue = 0;
+            var bucketConverted = 0; 
+
             var score = null;
+
 
             for (var index = vm.leftScore; index > vm.rightScore; index--) {
                 score = vm.ratingsSummary.bucketed_scores[index];
 
-                totalLeads += score.num_leads;
-                totalRevenue += score.expected_revenue;
-                totalConverted += (score.num_converted * score.num_leads);
+                bucketLeads += score.num_leads;
+                bucketRevenue += score.expected_revenue;
+                bucketConverted += (score.num_converted * score.num_leads);
             }
 
-            bucket.conversionRate = (totalConverted / (totalLeads * totalLeads)) * 100;
-            bucket.totalAvgRevenue = totalRevenue / totalLeads;
+            bucket.conversionRate = (bucketConverted / (bucketLeads * bucketLeads)) * 100;
+            bucket.bucketAvgRevenue = bucketRevenue / bucketLeads;
             bucket.num_leads = vm.rightLeads - vm.leftLeads;
 
-            if (vm.totalLeads === 0 || vm.ratingsSummary.total_num_converted === 0 || vm.ratingsSummary.total_num_leads === 0) {
-                bucket.lift = 0;
+
+            // bucket.lift = ( bucketAvgRevenue / total average expected revenue across all buckets);
+
+            if (vm.predictionType === 'EXPECTED_VALUE'){
+
+                bucket.lift = (bucket.bucketAvgRevenue / vm.avgRevenueTotal) > 0.1 ? (bucket.bucketAvgRevenue / vm.avgRevenueTotal) : 0.1010101;
+
             } else {
-                bucket.lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
+
+                if (vm.totalLeads === 0 || vm.ratingsSummary.total_num_converted === 0 || vm.ratingsSummary.total_num_leads === 0) {
+                    bucket.lift = 0;
+                } else {
+                    bucket.lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
+                }
             }
 
             bucket.bucket_name = vm.bucketNames[i];

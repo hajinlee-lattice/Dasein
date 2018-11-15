@@ -345,6 +345,9 @@
     	background: #f9f9f9 url('/assets/images/ico-ratings-published.png') 97% 4px/18px no-repeat;
 		border: solid 1px #e8e8e8;
 		text-align: center;
+		dd.lift > span{
+			font-size: 24px;
+		}
     }
     &.buckets-6 {
 		li {
