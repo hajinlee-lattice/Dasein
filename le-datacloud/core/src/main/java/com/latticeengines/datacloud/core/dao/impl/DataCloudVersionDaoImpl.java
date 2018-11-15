@@ -22,8 +22,13 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
 
     public DataCloudVersion latestApprovedForMajorVersion(String majorVersion) {
         Session session = sessionFactory.getCurrentSession();
+        // 1. version = "<majorVersion>.<minorVersion>"
+        // 2. SUBSTRING(version, ...) to get minorVersion. Note that index start with 1 in HQL and we need to
+        //    increase one more to skip '.', so there is + 2
+        // 3. cast as int so that it is sorted correctly. E.g., 2.0.10 > 2.0.5
         String queryStr = String.format(
-                "from %s where MajorVersion = :majorVersion and Status = '%s' order by CONVERT(SUBSTRING_INDEX(Version, '.', -1), UNSIGNED) desc",
+                "from %s where MajorVersion = :majorVersion and Status = '%s' " +
+                "order by CAST(SUBSTRING(Version, LENGTH(:majorVersion) + 2) as int) desc",
                 getEntityClass().getSimpleName(), DataCloudVersion.Status.APPROVED);
         Query<DataCloudVersion> query = session.createQuery(queryStr, DataCloudVersion.class);
         query.setParameter("majorVersion", majorVersion);
