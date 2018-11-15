@@ -8,11 +8,15 @@ public class TimeStampConvertUtilsUnitTestNG {
     @Test(groups = { "unit", "functional" })
     public void testConvertToLong() throws Exception {
         String str = "4/13/2016";
+        long value1 = TimeStampConvertUtils.convertToLong(str);
         Assert.assertTrue(TimeStampConvertUtils.convertToLong(str) > 0);
         str = "2/22/2017 1:01:00 AM";
         Assert.assertTrue(TimeStampConvertUtils.convertToLong(str) > 0);
         str = "2017/7/27 16:57:39";
         Assert.assertTrue(TimeStampConvertUtils.convertToLong(str) > 0);
+        str = "4/13/16";
+        long value2 = TimeStampConvertUtils.convertToLong(str);
+        Assert.assertEquals(value1, value2);
     }
 
     @Test(groups = { "unit", "functional" })

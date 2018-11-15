@@ -54,11 +54,19 @@ public class VdbValueConverter implements ValueConverter {
             return valueStr;
         } else {
             try {
-                return Long.toString(TimeStampConvertUtils.convertToLong(valueStr));
+                long timeTicks = TimeStampConvertUtils.convertToLong(valueStr);
+                if (timeTicks < 0) {
+                    throw new RuntimeException("Cannot parse date: " + valueStr);
+                }
+                return Long.toString(timeTicks);
             } catch (Exception e) {
                 try {
                     DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
-                    return Long.toString(dtf.parseDateTime(valueStr).getMillis());
+                    long timeTicks = dtf.parseDateTime(valueStr).getMillis();
+                    if (timeTicks < 0) {
+                        throw new RuntimeException("Cannot parse date: " + valueStr);
+                    }
+                    return Long.toString(timeTicks);
                 } catch (Exception e1) {
                     log.error("Vdb value converter cannot convert DataTime: " + valueStr);
                     throw e1;

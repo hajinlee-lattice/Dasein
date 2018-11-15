@@ -332,7 +332,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case LONG:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                     LOG.info("Date value from csv: " + fieldCsvValue);
-                    return TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getPatternString());
+                    Long timeTicks = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getPatternString());
+                    if (timeTicks < 0) {
+                        throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                    }
+                    return timeTicks;
                 } else {
                     return new Long(parseStringToNumber(fieldCsvValue).longValue());
                 }
@@ -343,12 +347,20 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                     LOG.info("Timestamp value from csv: " + fieldCsvValue);
                     try {
-                        return Long.toString(TimeStampConvertUtils.convertToLong(fieldCsvValue));
+                        Long timeTicks = TimeStampConvertUtils.convertToLong(fieldCsvValue);
+                        if (timeTicks < 0) {
+                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                        }
+                        return Long.toString(timeTicks);
                     } catch (Exception e) {
                         LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
                                 "value %s.", attr.getName(), fieldCsvValue));
                         DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
-                        return Long.toString(dtf.parseDateTime(fieldCsvValue).getMillis());
+                        Long timeTicks = dtf.parseDateTime(fieldCsvValue).getMillis();
+                        if (timeTicks < 0) {
+                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                        }
+                        return Long.toString(timeTicks);
                     }
                 }
                 return fieldCsvValue;

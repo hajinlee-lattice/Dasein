@@ -23,6 +23,7 @@ public class TimeStampConvertUtils {
             new DateTimeFormatterBuilder()
                     .append(null, new DateTimeParser[]{
                             DateTimeFormat.forPattern("MM-dd-yyyy").getParser(),
+                            DateTimeFormat.forPattern("MM/dd/yy").getParser(),
                             DateTimeFormat.forPattern("MM/dd/yyyy").getParser(),
                             DateTimeFormat.forPattern("yyyy-MM-dd").getParser(),
                             DateTimeFormat.forPattern("yyyy/MM/dd").getParser()})
