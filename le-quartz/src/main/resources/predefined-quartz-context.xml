@@ -204,6 +204,17 @@
         <property name="jobTimeout" value="${quartz.admin.recycletenant.job.timeout:3000}" />
     </bean>
 
+    <bean name="adminCleanupErrorTenantJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="adminCleanupErrorTenantJob" />
+        <property name="cronTrigger" value="${quartz.admin.cleanuptenant.job.cron:0 0 2 * * ?}" />
+        <property name="destUrl" value="${quartz.admin.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.admin.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.admin.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.admin.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;adminCleanupErrorTenantJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.admin.cleanuptenant.job.timeout:3000}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
@@ -223,6 +234,7 @@
         <ref bean="cdlOrchestrationJob"/>
         <ref bean="cdlDateFeedExecutionCleanupJob"/>
         <ref bean="adminRecycleTenantJob"/>
+        <ref bean="adminCleanupErrorTenantJob"/>
     </util:list>
 
 </beans>
