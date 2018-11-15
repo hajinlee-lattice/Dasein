@@ -147,10 +147,13 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     @Override
     public UIAction getDependenciesModelAndView(String segmentName) {
-        Map<String, List<String>> dependencies = getDependencies(segmentName);
         MetadataSegment segment = getSegmentByName(segmentName);
-        UIAction uiAction = graphDependencyToUIActionUtil.processUpdateSegmentResponse(segment, dependencies);
-        return uiAction;
+        if (segment == null) {
+            log.warn(String.format("Cannot find segment with name %s", segmentName));
+            return null;
+        }
+        Map<String, List<String>> dependencies = getDependencies(segmentName);
+        return graphDependencyToUIActionUtil.processUpdateSegmentResponse(segment, dependencies);
     }
 
     @Override

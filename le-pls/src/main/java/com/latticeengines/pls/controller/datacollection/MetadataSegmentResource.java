@@ -24,13 +24,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -84,7 +80,8 @@ public class MetadataSegmentResource {
     public ModelAndView getDependenciesModelAndView(@PathVariable String segmentName) throws Exception {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = metadataSegmentService.getDependenciesModelAndView(segmentName);
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return uiAction == null ? null
+                : new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -106,10 +103,8 @@ public class MetadataSegmentResource {
     public ModelAndView deleteSegmentByNameModelAndView(@PathVariable String segmentName,
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        UIAction uiAction = metadataSegmentService.deleteSegmentByNameModelAndView(segmentName,
-                hardDelete);
-        return new ModelAndView(jsonView,
-                ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        UIAction uiAction = metadataSegmentService.deleteSegmentByNameModelAndView(segmentName, hardDelete);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
