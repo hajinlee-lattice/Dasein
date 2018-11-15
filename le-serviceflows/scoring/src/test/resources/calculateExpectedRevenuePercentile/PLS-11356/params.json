@@ -1,0 +1,36 @@
+{
+  "calculateExpectedRevenuePercentileParameters": {
+    "no_flink": false,
+    "input_table_name": "InputTable",
+    "percentile_field_name": "ExpectedRevenuePercentile",
+    "original_score_field_map": {
+      "ms__513e6f35-6350-4c3f-986c-e999a4a3fb6e-ai_vitp1": "RawScore",
+      "ms__3c06f15c-bce1-47fe-8961-088b6f980691-ai_koe_p": "RawScore",
+      "ms__17443e5e-a700-482b-a6a5-7233efc8f529-ai_vl1xy": "RawScore",
+      "ms__31839b1c-ce02-4086-96e1-08bbccebfa98-ai_b0ubn": "RawScore",
+      "ms__3e8c7a84-65f7-44b1-b2f5-5231e5720e2d-ai_gag7y": "RawScore",
+      "ms__1d79c6ad-7342-476e-9135-03b4cf4ac022-ai_dovne": "RawScore",
+      "ms__3be01005-7c1a-4445-bfb5-0b615a1ba269-ai_j6jq0": "RawScore",
+      "ms__c960b9ae-1b7d-407b-bc3e-e3b7888f41ac-ai_2t_jm": "RawScore",
+      "ms__d4bcdf8b-c9bb-4584-a7ae-cff5360804b8-ai_bar14": "ExpectedRevenue",
+      "ms__82bf50ff-ff3d-4338-8320-d0dc3ce3c351-ai_wn0_m": "RawScore",
+      "ms__f6b04854-2de4-471b-ae80-b9eb2fabb967-ai_vdr5_": "RawScore",
+      "ms__c64371c3-1baf-4520-ac13-5a05875e22af-ai_ur46p": "RawScore",
+      "ms__052cd3e9-a140-4499-ada0-f5855653c062-ai_2tu6u": "ExpectedRevenue",
+      "ms__26431f1a-fe5d-4360-97d0-32ab82b1810a-ai_h__ut": "RawScore",
+      "ms__a93ab43e-2b78-4d67-af50-e38c8b592272-ai_kqsow": "RawScore",
+      "ms__74c8a1a4-e0d5-4950-9d9c-264c461cd5f7-ai_vhuez": "RawScore",
+      "ms__20dbc237-fd87-4f7d-a006-fdc0cc8b725b-ai_47vrj": "RawScore",
+      "ms__ee4d44a2-e497-4995-8d5c-16d219a1e92f-ai_1pvbc": "RawScore",
+      "ms__9863eb12-d7d1-4cc6-8ac4-464bf856030c-ai_6xiur": "RawScore",
+      "ms__b8b77707-3d77-4c57-b8aa-2489e6ff2792-ai_ntoqu": "RawScore",
+      "ms__72452f22-a378-4ba7-a7a8-8aa1c76ae350-ai_a4rzj": "ExpectedRevenue",
+      "ms__fd7b7dd0-866d-4362-a624-8011b0e8b890-ai_oellp": "RawScore",
+      "ms__d46fa446-ccba-4d9d-87fe-104d56e4a0e2-ai_3gs6p": "RawScore",
+      "ms__5bb75f06-43e2-4e43-bc96-bd7d5d999a41-ai_wepzs": "RawScore"
+    },
+    "model_guid_field": "Model_GUID",
+    "percentile_lower_bound": 5,
+    "percentile_upper_bound": 99
+  }
+}
