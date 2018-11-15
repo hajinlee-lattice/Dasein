@@ -63,7 +63,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "DisplayName", nullable = false)
     private String displayName;
 
-    @Column(name = "Description", length = 1000)
+    @Column(name = "Description", length = 2000)
     private String description;
 
     @Column(name = "JavaClass", nullable = false, length = 50)
