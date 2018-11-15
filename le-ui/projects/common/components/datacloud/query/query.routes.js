@@ -106,7 +106,7 @@ angular.module('common.datacloud.query')
                     
                 }
                 
-                if(lastFrom !== 'home.segment.explorer.attributes') {
+                if(lastFrom !== 'home.segment.explorer.attributes' && (name && name !== 'Create')) {
                     SegmentService.GetSegmentDependenciesModelView(name);
                 }
             }],
