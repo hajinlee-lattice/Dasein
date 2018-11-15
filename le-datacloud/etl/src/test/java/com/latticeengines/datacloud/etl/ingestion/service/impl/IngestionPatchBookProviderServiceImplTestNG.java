@@ -1,5 +1,10 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,9 +30,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
-import com.latticeengines.datacloud.core.entitymgr.impl.PatchBookEntityMgrImpl;
+import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
@@ -41,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
 
 public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
@@ -214,7 +219,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         });
     }
 
-    @DataProvider(name = "Ingestions")
+    @DataProvider(name = "Ingestions", parallel = false)
     private Object[][] getIngestions() {
         return new Object[][] { //
                 { createIngestion(PatchBook.Type.Attribute) }, //
@@ -296,32 +301,25 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         }
     }
 
-    // TODO: Change to TestPatchBookUtils
     private static PatchBook fakeDomainPatchItem(long pid) {
-        PatchBook book = new PatchBook();
-        book.setPid(pid);
-        book.setDuns(String.valueOf(pid));
-        Map<String, Object> patchItems = new HashMap<>();
-        patchItems.put(DataCloudConstants.ATTR_LDC_DOMAIN, "google.com");
-        book.setPatchItems(patchItems);
+        MatchKeyTuple tuple = new MatchKeyTuple.Builder().withDuns(String.valueOf(pid)).build();
+        Map<String, Object> patchItems = TestPatchBookUtils.newDomainPatchItems("google.com");
+        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Domain, tuple, patchItems);
         book.setCleanup(true); // Cleanup mode is only for Domain patch
-        book.setType(PatchBook.Type.Domain);
         return book;
     }
 
-    // TODO: Change to TestPatchBookUtils
     private static PatchBook fakeAttrPatchItem(long pid) {
-        PatchBook book = new PatchBook();
-        book.setPid(pid);
-        book.setDomain(fakeValue(pid, DOMAIN));
-        book.setCountry(fakeValue(pid, COUNTRY));
-        book.setState(fakeValue(pid, STATE));
-        book.setZipcode(fakeValue(pid, ZIPCODE));
+        MatchKeyTuple tuple = new MatchKeyTuple.Builder() //
+                .withDomain(fakeValue(pid, DOMAIN)) //
+                .withCountry(fakeValue(pid, COUNTRY)) //
+                .withState(fakeValue(pid, STATE)) //
+                .withZipcode(fakeValue(pid, ZIPCODE)) //
+                .build();
         Map<String, Object> patchItems = new HashMap<>();
         patchItems.put(DataCloudConstants.ATTR_ALEXA_RANK, ALEXA_RANK);
-        book.setPatchItems(patchItems);
+        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Attribute, tuple, patchItems);
         book.setCleanup(false);
-        book.setType(PatchBook.Type.Attribute);
         return book;
     }
 
@@ -329,55 +327,59 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         return String.valueOf(pid) + "_" + postfix;
     }
 
+    @SuppressWarnings("unchecked")
     private PatchBookEntityMgr mockPatchBookEntityMgr() {
-        TestPatchBookEntityMgrImpl testPatchBookEntityMgrImpl = new TestPatchBookEntityMgrImpl();
-        PatchBookEntityMgr patchBookEntityMgr = Mockito.spy(testPatchBookEntityMgrImpl);
+        PatchBookEntityMgr patchBookEntityMgr = Mockito.mock(PatchBookEntityMgr.class);
+        when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Domain), any(boolean.class)))
+                .thenReturn(MOCK_DOMAIN_BOOKS);
+
+        when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Attribute), any(boolean.class)))
+                .thenReturn(MOCK_ATTR_BOOKS);
+
+        doAnswer(inv -> {
+            mockSetHotFix((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
+            return null;
+        }).when(patchBookEntityMgr).setHotFix(any(), any(boolean.class));
+
+        doAnswer(inv -> {
+            mockSetEndOfLife((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
+            return null;
+        }).when(patchBookEntityMgr).setEndOfLife(any(), any(boolean.class));
+
+        doAnswer(inv -> {
+            mockSetEffectiveSinceVersion((List<Long>) inv.getArguments()[0], (String) inv.getArguments()[1]);
+            return null;
+        }).when(patchBookEntityMgr).setEffectiveSinceVersion(any(), any());
+
+        doAnswer(inv -> {
+            mockSetExpireAfterVersion((List<Long>) inv.getArguments()[0], (String) inv.getArguments()[1]);
+            return null;
+        }).when(patchBookEntityMgr).setExpireAfterVersion(any(), any());
+
         return patchBookEntityMgr;
     }
 
-    /**
-     * Extend {@link PatchBookEntityMgrImpl} and override required methods for
-     * package access and mocking in the tests.
-     */
-    static class TestPatchBookEntityMgrImpl extends PatchBookEntityMgrImpl {
-        @Override
-        public List<PatchBook> findByTypeAndHotFix(@NotNull PatchBook.Type type, boolean hotFix) {
-            switch (type) {
-            case Domain:
-                return MOCK_DOMAIN_BOOKS;
-            case Attribute:
-                return MOCK_ATTR_BOOKS;
-            default:
-                return null;
-            }
-        }
+    private void mockSetHotFix(List<Long> pids, boolean hotFix) {
+        pids.forEach(pid -> {
+            PATCH_BOOKS.get(pid).setHotFix(hotFix);
+        });
+    }
 
-        @Override
-        public void setHotFix(List<Long> pids, boolean hotFix) {
-            pids.forEach(pid -> {
-                PATCH_BOOKS.get(pid).setHotFix(hotFix);
-            });
-        }
+    private void mockSetEndOfLife(List<Long> pids, boolean endOfLife) {
+        pids.forEach(pid -> {
+            PATCH_BOOKS.get(pid).setEndOfLife(endOfLife);
+        });
+    }
 
-        @Override
-        public void setEndOfLife(List<Long> pids, boolean endOfLife) {
-            pids.forEach(pid -> {
-                PATCH_BOOKS.get(pid).setEndOfLife(endOfLife);
-            });
-        }
+    private void mockSetEffectiveSinceVersion(List<Long> pids, String version) {
+        pids.forEach(pid -> {
+            PATCH_BOOKS.get(pid).setEffectiveSinceVersion(version);
+        });
+    }
 
-        @Override
-        public void setEffectiveSinceVersion(List<Long> pids, String version) {
-            pids.forEach(pid -> {
-                PATCH_BOOKS.get(pid).setEffectiveSinceVersion(version);
-            });
-        }
-
-        @Override
-        public void setExpireAfterVersion(List<Long> pids, String version) {
-            pids.forEach(pid -> {
-                PATCH_BOOKS.get(pid).setExpireAfterVersion(version);
-            });
-        }
+    private void mockSetExpireAfterVersion(List<Long> pids, String version) {
+        pids.forEach(pid -> {
+            PATCH_BOOKS.get(pid).setExpireAfterVersion(version);
+        });
     }
 }
