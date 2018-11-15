@@ -8,6 +8,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
@@ -45,13 +46,22 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     @Test(groups = "deployment", enabled = true)
     public void runModelNGINX() {
         try {
+            String localPath = ClassLoader
+                    .getSystemResource("com/latticeengines/modelquality/csvfiles/NGINXReducedRowsEnhanced_20160712.csv")
+                    .getFile();
+            String remoteFile = "/Pods/Default/Services/ModelQuality/datasets/NGINXReducedRowsEnhanced_20160712.csv";
+            if (HdfsUtils.fileExists(yarnConfiguration, remoteFile)) {
+                HdfsUtils.rmdir(yarnConfiguration, remoteFile);
+            }
+            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, localPath,
+                    remoteFile);
             ModelRunEntityNames aModelRunEntityNames = modelRunEntityNames.get(0);
             aModelRunEntityNames.setName(namedModelRunEntityNames.get(0));
 
             DataSet thisDataset = modelQualityProxy.getDataSetByName(dataset.getName());
             thisDataset.setName("ModelRunResourceDeploymentTestNG-NGINX");
             thisDataset.setTrainingSetHdfsPath(
-                    "/Pods/Default/Services/ModelQuality/datasets/NGINXReducedRowsEnhanced_20160712.csv");
+                    remoteFile);
             thisDataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
             if (datasetAlreadyExists != null)
