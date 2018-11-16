@@ -163,7 +163,7 @@ ShowSpinner(<text>, 'bar');
 		position: relative;
 		overflow: hidden;
 		&.indeterminate {
-			width: 100%;
+			width: 0%;
 		}
 	}
 	& > span:after, .animate > span > span {
