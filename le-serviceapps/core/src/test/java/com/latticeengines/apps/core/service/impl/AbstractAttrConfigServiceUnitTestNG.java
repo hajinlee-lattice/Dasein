@@ -17,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -50,6 +51,9 @@ public class AbstractAttrConfigServiceUnitTestNG {
     @Mock
     private ZKConfigService zkConfigService;
 
+    @Mock
+    private AttrConfigEntityMgr attrConfigEntityMgr;
+
     @BeforeTest(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -61,6 +65,8 @@ public class AbstractAttrConfigServiceUnitTestNG {
         MultiTenantContext.setTenant(tenant);
         doReturn(technologyLimit).when(zkConfigService).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
                 DataLicense.HG.getDataLicense());
+        doReturn(generateFindAllHaveCustomDisplayNameByTenantId()).when(attrConfigEntityMgr)
+                .findAllHaveCustomDisplayNameByTenantId(tenant.getId());
     }
 
     @Test(groups = "unit")
@@ -92,7 +98,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertTrue(propSummary.containsKey(ColumnMetadataKey.State));
         Map<?, Long> map = propSummary.get(ColumnMetadataKey.State);
 
-        Assert.assertEquals(map.get(AttrState.Inactive).longValue(),  2);
+        Assert.assertEquals(map.get(AttrState.Inactive).longValue(), 2);
         Assert.assertEquals(map.get(AttrState.Active).longValue(), 3);
 
         overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generatePropertyListWithSomeUsedForSegment(),
@@ -233,6 +239,16 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(trimConfig, trimConfig2);
     }
 
+    @Test(groups = "unit")
+    public void testFindAllHaveCustomDisplayName() {
+        Map<BusinessEntity, List<AttrConfig>> map = cdlAttrConfigServiceImpl
+                .findAllHaveCustomDisplayNameByTenantId(tenant.getId());
+        Assert.assertNotNull(map);
+        Assert.assertEquals(map.size(), 2);
+        Assert.assertEquals(map.get(BusinessEntity.Contact).size(), 1);
+        Assert.assertEquals(map.get(BusinessEntity.Account).size(), 3);
+    }
+
     private AttrConfigProp<String> generateDisplayNamePropertyAllowedForCustomizationWithNoCustomValue() {
         AttrConfigProp<String> displayNameProp = new AttrConfigProp<String>();
         displayNameProp.setSystemValue(displayName1);
@@ -253,6 +269,15 @@ public class AbstractAttrConfigServiceUnitTestNG {
         displayNameProp.setAllowCustomization(true);
         displayNameProp.setCustomValue(displayName2);
         return displayNameProp;
+    }
+
+    private List<AttrConfig> generateFindAllHaveCustomDisplayNameByTenantId() {
+        List<AttrConfig> result = Arrays.asList( //
+                AttrConfigTestUtils.getCDLStdAttr(Category.FIRMOGRAPHICS, true), //
+                AttrConfigTestUtils.getCDLLookIDAttr(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getCDLContactExtensionAttr(Category.FIRMOGRAPHICS, false));
+        return result;
     }
 
     private List<AttrConfig> generatePropertyListWithSomeActive() {

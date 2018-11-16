@@ -517,13 +517,25 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId) {
-        return attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantId);
+    public Map<BusinessEntity, List<AttrConfig>> findAllHaveCustomDisplayNameByTenantId(String tenantId) {
+        Map<BusinessEntity, List<AttrConfig>> result = new HashMap<>();
+        List<AttrConfig> totalList = attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantId);
+        totalList.forEach(attrConfig -> {
+            if (result.containsKey(attrConfig.getEntity())) {
+                result.get(attrConfig.getEntity()).add(attrConfig);
+            } else {
+                List<AttrConfig> list = new ArrayList<>();
+                list.add(attrConfig);
+                result.put(attrConfig.getEntity(), list);
+            }
+        });
+        return result;
     }
 
     public void removeAttrConfig(String tenantId) {
         attrConfigEntityMgr.cleanupTenant(tenantId);
     }
+
     @SuppressWarnings("unchecked")
     public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfigs) {
         if (systemMetadata == null) {

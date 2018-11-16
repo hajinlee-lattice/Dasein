@@ -52,10 +52,8 @@ public class AttrConfigResource {
     @GetMapping(value = "/custom-displaynames")
     @ResponseBody
     @ApiOperation("get cdl attribute customized display names")
-    public List<AttrConfig> getCustomDisplayNames(@PathVariable String customerSpace) {
-        List<AttrConfig> attrConfigs = attrConfigService
-                .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
-        return attrConfigs;
+    public Map<BusinessEntity, List<AttrConfig>> getCustomDisplayNames(@PathVariable String customerSpace) {
+        return attrConfigService.findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
     }
 
     @GetMapping(value = "/categories/{categoryName}")

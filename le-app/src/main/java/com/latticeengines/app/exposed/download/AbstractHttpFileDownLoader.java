@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -118,13 +119,16 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     }
 
     private InputStream processDates(InputStream inputStream) {
-        // todo: hard-coded date format. Need to be replaced in date attribute phase 2.
+        // todo: hard-coded date format. Need to be replaced in date attribute
+        // phase 2.
         final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
 
         List<String> dateAttributes = getDateAttributes();
         if (CollectionUtils.isNotEmpty(dateAttributes)) {
             Map<String, String> dateToFormats = new HashMap<>();
-            dateAttributes.forEach(attrib -> { dateToFormats.put(attrib, DATE_FORMAT); });
+            dateAttributes.forEach(attrib -> {
+                dateToFormats.put(attrib, DATE_FORMAT);
+            });
             return reformatDates(inputStream, dateToFormats);
         }
         return inputStream;
@@ -132,20 +136,16 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     private List<String> getDateAttributes() {
         List<String> dateAttributes = new ArrayList<>();
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion
-                (MultiTenantContext.getShortTenantId());
-        String accountTableName = dataCollectionProxy.getTableName(
-                MultiTenantContext.getShortTenantId(),
-                TableRoleInCollection.ConsolidatedAccount,
-                activeVersion);
-        String contactTableName = dataCollectionProxy.getTableName(
-                MultiTenantContext.getShortTenantId(),
-                TableRoleInCollection.ConsolidatedContact,
-                activeVersion);
-        List<ColumnMetadata> accountMetadata = metadataProxy.getTableColumns(
-                MultiTenantContext.getShortTenantId(), accountTableName);
-        List<ColumnMetadata> contactMetadata = metadataProxy.getTableColumns(
-                MultiTenantContext.getShortTenantId(), contactTableName);
+        DataCollection.Version activeVersion = dataCollectionProxy
+                .getActiveVersion(MultiTenantContext.getShortTenantId());
+        String accountTableName = dataCollectionProxy.getTableName(MultiTenantContext.getShortTenantId(),
+                TableRoleInCollection.ConsolidatedAccount, activeVersion);
+        String contactTableName = dataCollectionProxy.getTableName(MultiTenantContext.getShortTenantId(),
+                TableRoleInCollection.ConsolidatedContact, activeVersion);
+        List<ColumnMetadata> accountMetadata = metadataProxy.getTableColumns(MultiTenantContext.getShortTenantId(),
+                accountTableName);
+        List<ColumnMetadata> contactMetadata = metadataProxy.getTableColumns(MultiTenantContext.getShortTenantId(),
+                contactTableName);
         List<ColumnMetadata> metadatas = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(accountMetadata)) {
             metadatas.addAll(accountMetadata);
@@ -175,7 +175,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             try (CSVParser parser = new CSVParser(reader, format)) {
                 Map<String, Integer> headerMap = parser.getHeaderMap();
                 try (CSVPrinter printer = new CSVPrinter(sb,
-                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[]{})))) {
+                        CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                     List<CSVRecord> recordsWithErrors = new ArrayList<>();
                     for (CSVRecord record : parser) {
                         try {
@@ -268,12 +268,11 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     private Map<String, String> getCustomizedDisplayNames() {
         Map<String, String> nameToDisplayNameMap = new HashMap<>();
         try {
-            List<AttrConfig> customDisplayNameAttrs = cdlAttrConfigProxy
+            Map<BusinessEntity, List<AttrConfig>> customDisplayNameAttrs = cdlAttrConfigProxy
                     .getCustomDisplayNames(MultiTenantContext.getShortTenantId());
-            if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
-                List<AttrConfig> renderedConfigList = cdlAttrConfigProxy
-                        .renderConfigs(MultiTenantContext.getShortTenantId(), customDisplayNameAttrs);
-                renderedConfigList.forEach(config -> {
+            if (MapUtils.isNotEmpty(customDisplayNameAttrs)
+                    && CollectionUtils.isNotEmpty(customDisplayNameAttrs.get(BusinessEntity.Account))) {
+                customDisplayNameAttrs.get(BusinessEntity.Account).forEach(config -> {
                     nameToDisplayNameMap.put(config.getAttrName(),
                             config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
                 });

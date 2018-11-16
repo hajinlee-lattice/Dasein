@@ -96,11 +96,12 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         return result;
     }
 
-    public List<AttrConfig> getCustomDisplayNames(String customerSpace) {
+    @SuppressWarnings("unchecked")
+    public Map<BusinessEntity, List<AttrConfig>> getCustomDisplayNames(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/custom-displaynames", //
                 shortenCustomerSpace(customerSpace));
         log.info("getCustomDisplayNames url is " + url);
-        List<AttrConfig> result = getList("get custom displayNames", url, AttrConfig.class);
+        Map<BusinessEntity, List<AttrConfig>> result = getKryo("get custom displayNames", url, Map.class);
         return result;
     }
 

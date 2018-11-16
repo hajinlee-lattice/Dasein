@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -366,17 +367,11 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     private Map<String, String> findNameToDisplayNameMap() {
         Map<String, String> nameToDisplayNameMap = new HashMap<>();
         try {
-            List<AttrConfig> customDisplayNameAttrs = lpAttrConfigService
+            Map<BusinessEntity, List<AttrConfig>> customDisplayNameAttrs = lpAttrConfigService
                     .findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
-            if (CollectionUtils.isNotEmpty(customDisplayNameAttrs)) {
-                // List<AttrConfig> renderedConfigList =
-                // lpAttrConfigService.renderConfigs(customDisplayNameAttrs);
-                // renderedConfigList.stream().forEach(config -> {
-                // nameToDisplayNameMap.put(config.getAttrName(),
-                // config.getPropertyFinalValue(ColumnMetadataKey.DisplayName,
-                // String.class));
-                // });
-                customDisplayNameAttrs.stream().forEach(config -> {
+            if (MapUtils.isNotEmpty(customDisplayNameAttrs)
+                    && customDisplayNameAttrs.containsKey(BusinessEntity.Account)) {
+                customDisplayNameAttrs.get(BusinessEntity.Account).forEach(config -> {
                     nameToDisplayNameMap.put(config.getAttrName(),
                             (String) config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue());
                 });

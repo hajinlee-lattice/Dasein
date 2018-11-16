@@ -25,7 +25,7 @@ public interface CDLAttrConfigProxy {
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace,
             @Nullable List<String> categoryNames, @NonNull List<String> propertyNames, boolean activeOnly);
 
-    List<AttrConfig> getCustomDisplayNames(String customerSpace);
+    Map<BusinessEntity, List<AttrConfig>> getCustomDisplayNames(String customerSpace);
 
     List<AttrConfig> renderConfigs(String customerSpace, List<AttrConfig> configs);
 

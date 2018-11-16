@@ -25,7 +25,7 @@ public interface AttrConfigService {
 
     List<AttrConfig> renderConfigs(List<AttrConfig> configList);
 
-    List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId);
+    Map<BusinessEntity, List<AttrConfig>> findAllHaveCustomDisplayNameByTenantId(String tenantId);
 
     void removeAttrConfig(String tenantId);
 
