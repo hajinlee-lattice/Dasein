@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 CLUSTER_NAME=$1
+PROFILE=$2
 PROFILE=${PROFILE:=default}
 
 if [ -z "${CLUSTER_NAME}" ]; then
@@ -14,5 +15,5 @@ aws ec2 describe-instances \
         "Name=tag:aws:elasticmapreduce:instance-group-role,Values=MASTER" \
         "Name=instance-state-name,Values=running" \
     --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress[]' \
-    --profile ${PROFILE} \
+    --profile=${PROFILE} \
     --output text
