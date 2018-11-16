@@ -193,8 +193,11 @@ public class EMRServiceImpl implements EMRService {
     @Override
     public String getClusterId(String clusterName) {
         AmazonElasticMapReduce emr = getEmr();
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10);
         ListClustersResult clustersResult = retryTemplate.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info(String.format("(attempt=%d) list emr clusters", context.getRetryCount() + 1));
+            }
             ListClustersRequest request = new ListClustersRequest().withClusterStates(ClusterState.RUNNING,
                     ClusterState.WAITING);
             return emr.listClusters(request);
