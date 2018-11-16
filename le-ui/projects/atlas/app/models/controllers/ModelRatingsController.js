@@ -48,13 +48,12 @@ angular.module('lp.models.ratings', [
     });
 
     vm.init = function() {
-        vm.currentRating = RatingsEngineStore.currentRating;
-        vm.activeModel = vm.currentRating.activeModel;
-        vm.predictionType = vm.activeModel.AI.predictionType;
-
         // Atlas uses dashboard.ratings for vm.section
         if (vm.section === 'dashboard.ratings') {
-            
+            vm.currentRating = RatingsEngineStore.currentRating;
+            vm.activeModel = vm.currentRating.activeModel;
+            vm.predictionType = vm.activeModel.AI.predictionType;
+
             // Get dashboard data for list of iterations
             vm.dashboard = ModelStore.getDashboardData();
             var dashboardIterations = vm.dashboard.iterations;
