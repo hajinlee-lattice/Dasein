@@ -68,8 +68,7 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
     @Override
     protected void uploadArtifactsToHdfs() throws IOException {
         super.uploadArtifactsToHdfs();
-        String scoringHdfsPath = String.format("/app/%s/scoring", versionManager.getCurrentVersionInStack(stackName))
-                .toString();
+        String scoringHdfsPath = String.format("/app/%s/scoring", versionManager.getCurrentVersionInStack(stackName));
         FileUtils.deleteDirectory(new File("scoring"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, scoringHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "scoring", scoringHdfsPath);

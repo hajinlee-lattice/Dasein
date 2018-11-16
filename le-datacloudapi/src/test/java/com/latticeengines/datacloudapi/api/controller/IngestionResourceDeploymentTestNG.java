@@ -90,7 +90,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static Object[][] getIngestions2() {
         return new Object[][] {
                 { DNB_INGESTION,
-                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
                         IngestionType.SFTP }, //
                 { ALEXA_INGESTION,
                         "{\"ClassName\":\"SqlToSourceConfiguration\",\"ConcurrentNum\":1,\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Alexa\", \"Source\":\"Alexa\",\"TimestampColumn\":\"Creation_Date\",\"CollectCriteria\":\"NEW_DATA\",\"Mappers\":4}",

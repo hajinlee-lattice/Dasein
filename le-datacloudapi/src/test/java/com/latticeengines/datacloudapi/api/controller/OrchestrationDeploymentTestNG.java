@@ -91,7 +91,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     // IngestionName, Config, IngestionType
     private static Object[][] getIngestions() {
         return new Object[][] { { DNB_INGESTION,
-                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
                 IngestionType.SFTP }, //
         };
     }
@@ -139,7 +139,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Test(groups = "deployment", enabled = false)
     public void testOrchestration() {
         List<OrchestrationProgress> progresses = orchService.scan(POD_ID); // No job should be triggered
-        Assert.assertEquals(progresses.size(), 0);  
+        Assert.assertEquals(progresses.size(), 0);
         uploadDnBIngestion();
         uploadDnBPipelineConfig();
         progresses = orchService.scan(POD_ID); // DnB pipeline is triggered

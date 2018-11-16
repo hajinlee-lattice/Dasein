@@ -75,7 +75,7 @@ public class AttrSpecification {
 
     public static AttrSpecification CDL_DERIVED_PB() {
         return new AttrSpecification("CDL Derived Attributes for Product Bundles", true, true,
-                true, true, false, false, false, false, false, false, false, false);
+                false, true, false, false, false, false, false, false, false, false);
     }
 
     public static AttrSpecification CDL_DERIVED_WBC() {

@@ -66,7 +66,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
     private MiniDFSCluster hdfsCluster;
 
-    @Value("${dataplatform.hdfs.stack:}")
+    @Value("${dataplatform.hdfs.stack}")
     protected String stackName;
 
     @Inject

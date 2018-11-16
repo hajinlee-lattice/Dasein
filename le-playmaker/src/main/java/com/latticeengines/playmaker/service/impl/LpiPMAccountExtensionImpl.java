@@ -1,9 +1,9 @@
 package com.latticeengines.playmaker.service.impl;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,8 +15,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,9 +28,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
-import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -43,18 +38,15 @@ import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
-import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Component("lpiPMAccountExtension")
 public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
@@ -276,22 +268,24 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     private List<Map<String, Object>> getSchema(String customerSpace, BusinessEntity entity) {
         List<ColumnMetadata> cms = servingStoreProxy
                 .getDecoratedMetadata(customerSpace, entity, filterByPredefinedSelection).collectList().block();
+        if (CollectionUtils.isNotEmpty(cms)) {
+            Flux<Map<String, Object>> flux = Flux.fromIterable(cms) //
+                    .map(metadata -> {
+                        Map<String, Object> metadataInfoMap = new HashMap<>();
+                        metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
+                        metadataInfoMap.put(PlaymakerConstants.Type,
+                                PlaymakerUtils.convertToSFDCFieldType(metadata.getJavaClass()));
+                        metadataInfoMap.put(PlaymakerConstants.StringLength,
+                                PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
+                        metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());
+                        return metadataInfoMap;
+                    }) //
+                    .sort(Comparator.comparing(a -> ((String) a.get(PlaymakerConstants.Field))));
 
-        Mono<List<Map<String, Object>>> stream = Flux.fromIterable(cms) //
-                .map(metadata -> {
-                    Map<String, Object> metadataInfoMap = new HashMap<>();
-                    metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
-                    metadataInfoMap.put(PlaymakerConstants.Type,
-                            PlaymakerUtils.convertToSFDCFieldType(metadata.getJavaClass()));
-                    metadataInfoMap.put(PlaymakerConstants.StringLength,
-                            PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
-                    metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());
-                    return metadataInfoMap;
-                }) //
-                .collectSortedList((a, b) -> ((String) a.get(PlaymakerConstants.Field))
-                        .compareTo(((String) b.get(PlaymakerConstants.Field))));
-
-        return stream.block();
+            return flux.collectList().block();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     @VisibleForTesting

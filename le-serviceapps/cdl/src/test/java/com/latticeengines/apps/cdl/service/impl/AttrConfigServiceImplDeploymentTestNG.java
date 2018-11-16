@@ -277,7 +277,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
                     true, true, //
                     false, true, //
                     true, true, //
-                    false, true, //
+                    false, false, //
                     false, false);
             return true;
         });
