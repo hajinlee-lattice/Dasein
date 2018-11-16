@@ -45,6 +45,9 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     @Value("${proxy.test.keystore.path}")
     private String keystorePath;
 
+    @Value("${proxy.test.keystore.password.encrypted}")
+    private String keyStorePassword;
+
     private Undertow server;
 
     @BeforeClass(groups = "functional")
@@ -155,10 +158,10 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
             File keyStoreFile = new File(keystorePath);
             if (keyStoreFile.exists()) {
                 KeyStore keyStore = KeyStore.getInstance("JKS");
-                keyStore.load(new FileInputStream(keyStoreFile), "Lattice1".toCharArray());
+                keyStore.load(new FileInputStream(keyStoreFile), keyStorePassword.toCharArray());
                 KeyManagerFactory keyManagerFactory = KeyManagerFactory
                         .getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                keyManagerFactory.init(keyStore, "Lattice1".toCharArray());
+                keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
                 return keyManagerFactory.getKeyManagers();
             } else {
                 return null;
