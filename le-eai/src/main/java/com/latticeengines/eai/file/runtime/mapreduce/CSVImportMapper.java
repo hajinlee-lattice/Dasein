@@ -331,12 +331,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 return new Integer(parseStringToNumber(fieldCsvValue).intValue());
             case LONG:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
-                    LOG.info("Date value from csv: " + fieldCsvValue);
-                    Long timeTicks = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getPatternString());
-                    if (timeTicks < 0) {
+                    LOG.info("Date value from csv: " + fieldCsvValue + " Date/Time Format: "
+                            + attr.getDateTimeFormatString() + " Timezone: " + attr.getTimezone());
+                    Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateTimeFormatString(),
+                            attr.getTimezone());
+                    if (timestamp < 0) {
                         throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
                     }
-                    return timeTicks;
+                    return timestamp;
                 } else {
                     return new Long(parseStringToNumber(fieldCsvValue).longValue());
                 }
@@ -347,20 +349,20 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                     LOG.info("Timestamp value from csv: " + fieldCsvValue);
                     try {
-                        Long timeTicks = TimeStampConvertUtils.convertToLong(fieldCsvValue);
-                        if (timeTicks < 0) {
+                        Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
+                        if (timestamp < 0) {
                             throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
                         }
-                        return Long.toString(timeTicks);
+                        return Long.toString(timestamp);
                     } catch (Exception e) {
                         LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
                                 "value %s.", attr.getName(), fieldCsvValue));
                         DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
-                        Long timeTicks = dtf.parseDateTime(fieldCsvValue).getMillis();
-                        if (timeTicks < 0) {
+                        Long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
+                        if (timestamp < 0) {
                             throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
                         }
-                        return Long.toString(timeTicks);
+                        return Long.toString(timestamp);
                     }
                 }
                 return fieldCsvValue;

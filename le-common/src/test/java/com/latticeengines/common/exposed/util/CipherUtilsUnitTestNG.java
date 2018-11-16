@@ -15,7 +15,7 @@ public class CipherUtilsUnitTestNG {
         String encrypted = CipherUtils.encrypt(strToEncrypt);
         String decrypted = CipherUtils.decrypt(encrypted);
         System.out.println("Encrypted: " + encrypted + "\n" + "Decrypted: " + decrypted);
-        Assert.assertEquals(strToEncrypt, decrypted);
+        Assert.assertEquals(decrypted, strToEncrypt);
     }
 
     @Test(groups = "unit")

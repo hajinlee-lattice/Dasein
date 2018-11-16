@@ -204,12 +204,21 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE,
                         feedType);
 
-        String patternString = "dd/MM/yyyy";
+        String dateTimeFormatString1 = "DD/MM/YYYY";
+        String timezone1 = "PST";
+        String dateTimeFormatString2 = "MM.DD.YY 00:00:00 24H";
+        String timezone2 = "GMT+8";
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
-            if (mapping.getUserField().equals("TestDate")) {
+            if (mapping.getUserField().equals("TestDate1")) {
                 mapping.setFieldType(UserDefinedType.DATE);
                 mapping.setMappedToLatticeField(false);
-                mapping.setPatternString(patternString);
+                mapping.setDateTimeFormatString(dateTimeFormatString1);
+                mapping.setTimezone(timezone1);
+            } else if (mapping.getUserField().equals("TestDate2")) {
+                mapping.setFieldType(UserDefinedType.DATE);
+                mapping.setMappedToLatticeField(false);
+                mapping.setDateTimeFormatString(dateTimeFormatString2);
+                mapping.setTimezone(timezone2);
             }
         }
 
@@ -242,14 +251,38 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
         Assert.assertEquals(rowCount, 50);
-        String fieldName = "user_TestDate";
-        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
-        Assert.assertEquals(schema.getField(fieldName).schema().getTypes().get(0).getType(), Schema.Type.LONG);
-        Assert.assertEquals(schema.getField(fieldName).getProp("PatternString"), patternString);
 
-        long expected = TimeStampConvertUtils.convertToLong("2017-7-27");
+        // Validate TestDate1
+        String fieldName1 = "user_TestDate1";
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
+        Assert.assertEquals(schema.getField(fieldName1).schema().getTypes().get(0).getType(), Schema.Type.LONG);
+        Assert.assertEquals(schema.getField(fieldName1).getProp("DateTimeFormatString"), dateTimeFormatString1);
+        Assert.assertEquals(schema.getField(fieldName1).getProp("Timezone"), timezone1);
+        long expected1a = TimeStampConvertUtils.convertToLong("2017-7-27");
+        long expected1b = TimeStampConvertUtils.convertToLong("2018-7-27");
+        long expected1c = TimeStampConvertUtils.convertToLong("2019-7-27");
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
-        Assert.assertEquals(records.get(0).get(fieldName).toString(), Long.toString(expected));
+        Assert.assertEquals(records.get(0).get(fieldName1).toString(), Long.toString(expected1a));
+        Assert.assertEquals(records.get(1).get(fieldName1).toString(), Long.toString(expected1b));
+        Assert.assertEquals(records.get(2).get(fieldName1).toString(), Long.toString(expected1c));
+
+        // Validate TestDate2
+        String fieldName2 = "user_TestDate2";
+        Assert.assertEquals(schema.getField(fieldName2).schema().getTypes().get(0).getType(), Schema.Type.LONG);
+        Assert.assertEquals(schema.getField(fieldName2).getProp("DateTimeFormatString"), dateTimeFormatString2);
+        Assert.assertEquals(schema.getField(fieldName2).getProp("Timezone"), timezone2);
+        long expected2a = 1514826061000L;
+        //log.info("Library gave: " + TimeStampConvertUtils.convertToLong("1.2.18 1:1:1",
+        //        "MM.DD.YY 00:00:00 24H", "GMT+8"));
+        long expected2b = 1546271999000L;
+        //log.info("Library gave: " + TimeStampConvertUtils.convertToLong("12.31.18 23:59:59",
+        //        "MM.DD.YY 00:00:00 24H", "GMT+8"));
+        long expected2c = 4081725296000L;
+        //log.info("Library gave: " + TimeStampConvertUtils.convertToLong("5.6.99 12:34:56",
+        //        "MM.DD.YY 00:00:00 24H", "GMT+8"));
+        Assert.assertEquals(records.get(0).get(fieldName2).toString(), Long.toString(expected2a));
+        Assert.assertEquals(records.get(1).get(fieldName2).toString(), Long.toString(expected2b));
+        Assert.assertEquals(records.get(2).get(fieldName2).toString(), Long.toString(expected2c));
     }
 
     @Test(groups = "deployment")

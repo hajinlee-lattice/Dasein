@@ -1201,8 +1201,8 @@ public class Attribute
 
     @Transient
     @JsonIgnore
-    public String getPatternString() {
-        Object raw = properties.get("PatternString");
+    public String getDateTimeFormatString() {
+        Object raw = properties.get("DateTimeFormatString");
         if (raw == null) {
             return null;
         }
@@ -1212,9 +1212,28 @@ public class Attribute
 
     @Transient
     @JsonIgnore
-    public void setPatternString(String patternString) {
-        if (patternString != null) {
-            properties.put("PatternString", patternString);
+    public void setDateTimeFormatString(String dateTimeFormatString) {
+        if (dateTimeFormatString != null) {
+            properties.put("DateTimeFormatString", dateTimeFormatString);
+        }
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getTimezone() {
+        Object raw = properties.get("Timezone");
+        if (raw == null) {
+            return null;
+        }
+
+        return raw.toString();
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setTimezone(String timezone) {
+        if (timezone != null) {
+            properties.put("Timezone", timezone);
         }
     }
 }

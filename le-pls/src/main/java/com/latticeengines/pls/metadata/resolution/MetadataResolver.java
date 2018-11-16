@@ -387,7 +387,8 @@ public class MetadataResolver {
         attribute.setLogicalDataType(
                 fieldMapping.getFieldType() == UserDefinedType.DATE ? LogicalDataType.Date : attribute.getLogicalDataType());
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
-        attribute.setPatternString(fieldMapping.getPatternString());
+        attribute.setDateTimeFormatString(fieldMapping.getDateTimeFormatString());
+        attribute.setTimezone(fieldMapping.getTimezone());
 
         return attribute;
     }
