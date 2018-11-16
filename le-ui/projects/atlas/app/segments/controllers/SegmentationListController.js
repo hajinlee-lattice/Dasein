@@ -98,8 +98,7 @@ angular.module('lp.segments.segments', [
                 
             });
         }
-        
-        
+        tileState.showCustomMenu = false;
     }
 
     vm.onInputFocus = function($event) {
@@ -110,7 +109,6 @@ angular.module('lp.segments.segments', [
         if ($event != null) {
             $event.stopPropagation();
         }
-
         var tileState = vm.tileStates[segment.name];
         tileState.showCustomMenu = !tileState.showCustomMenu
 
