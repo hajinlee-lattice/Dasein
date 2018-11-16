@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 CLUSTER_NAME=$1
+PROFILE=${PROFILE:=default}
 
 if [ -z "${CLUSTER_NAME}" ]; then
     echo "usage: emr-ip CLUSTER_NAME"
@@ -13,5 +14,5 @@ aws ec2 describe-instances \
         "Name=tag:aws:elasticmapreduce:instance-group-role,Values=MASTER" \
         "Name=instance-state-name,Values=running" \
     --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress[]' \
-    --region us-east-1 \
+    --profile ${PROFILE} \
     --output text
