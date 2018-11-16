@@ -58,7 +58,7 @@ public class GenericAndUsageValidatorUnitTestNG {
                 true, true);
         usageValidator.validate(new ArrayList<>(), attrList);
         int num = AttrConfigTestUtils.getErrorNumber(attrList);
-        Assert.assertEquals(attrList.size() - 8, num);
+        Assert.assertEquals(attrList.size() - 7, num);
         attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false);
         genericValidator.validate(new ArrayList<>(), attrList);
         num = AttrConfigTestUtils.getErrorNumber(attrList);
