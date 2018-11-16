@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
@@ -36,7 +38,8 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
     // the tag value will NOT be serialized to avro
     private static final String PATCHED_TAG = "Patched";
 
-
+    private static final Schema OPTIONAL_STRING_SCHEMA = Schema.createUnion(
+            Arrays.asList(Schema.create(Schema.Type.STRING), Schema.create(Schema.Type.NULL)));
     private static final TypeReference<List<Item>> ITEMS_TYPE_REFERENCE = new TypeReference<List<Item>>() {
     };
 
@@ -50,11 +53,8 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         Schema schema = getSchema(recordType);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(SRC_DUNS_KEY, srcDuns);
-        // TODO: Comment out following 2 lines for now. Otherwise it's
-        // not compatible with current schema. Need to consider backward
-        // compatibility issue
-//        builder.set(SRC_DU_DUNS_KEY, srcDUDuns);
-//        builder.set(SRC_GU_DUNS_KEY, srcGUDuns);
+        builder.set(SRC_DU_DUNS_KEY, srcDUDuns);
+        builder.set(SRC_GU_DUNS_KEY, srcGUDuns);
         String itemsStr = JsonUtils.serialize(items == null ? Collections.emptyList() : items);
         builder.set(ITEMS_KEY, itemsStr);
         return builder.build();
@@ -66,14 +66,10 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
         return SchemaBuilder.record(replaceSpacialChars(recordType)).fields()
                 /* source DUNS */
                 .name(SRC_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
-                // TODO: Comment out following 2 lines for now. Otherwise it's
-                // not compatible with current schema. Need to consider backward
-                // compatibility issue
-
                 /* source DU DUNS */
-                // .name(SRC_DU_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
+                .name(SRC_DU_DUNS_KEY).type(OPTIONAL_STRING_SCHEMA).noDefault()
                 /* source GU DUNS */
-                // .name(SRC_GU_DUNS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault()
+                .name(SRC_GU_DUNS_KEY).type(OPTIONAL_STRING_SCHEMA).noDefault()
                 /* JSON string of DunsGuideBook.Item array */
                 .name(ITEMS_KEY).type(Schema.create(Schema.Type.STRING)).noDefault().endRecord();
     }
@@ -161,6 +157,7 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
      * Holder object that contains the target duns to redirect to
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Item {
         public static final String DUNS_KEY = "TargetDuns";
         // Serve CDL match
