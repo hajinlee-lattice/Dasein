@@ -334,6 +334,8 @@ public enum LedpCode {
             "Play validation failure: Segment Name is empty"), LEDP_18208(
                     "CSV file name validations failed: CSV injection in the file name or headers"), LEDP_18209(
                             "Play validation failure: RatingEngine is empty"), //
+    LEDP_18210("You do not have admin rights to setup automation on this tenant. Contact your Admin and setup your file transfers. For more information, visit help.lattice-engines.com"),
+
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
