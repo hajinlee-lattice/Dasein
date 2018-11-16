@@ -230,7 +230,8 @@ VALUES
   ('2.0.11', '2018-04-24', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.12', '2018-05-15', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.13', '2018-07-24', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.15', '2018-10-27', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -346,5 +347,12 @@ SET
   `EnrichmentStatsVersion`   = '2018-09-15_00-00-00_UTC',
   `DynamoTableSignature_DunsGuideBook` = '20180918'
 WHERE `Version` = '2.0.14';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2018-10-23_00-00-00_UTC',
+  `AccountLookupHdfsVersion` = '2018-10-23_00-00-00_UTC',
+  `EnrichmentStatsVersion`   = '2018-10-23_00-00-00_UTC'
+WHERE `Version` = '2.0.15';
 
 SET SQL_SAFE_UPDATES = 1;
