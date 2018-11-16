@@ -36,7 +36,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
             gaTenantEntityMgr.create(tenantData);
             return true;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18012, new String[] { tenant.getId(), tenant.getName() });
+            throw new LedpException(LedpCode.LEDP_18012, e, new String[] { tenant.getId(), tenant.getName() });
         }
     }
 
@@ -56,7 +56,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
             gaTenantEntityMgr.create(tenantData);
             return true;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18012, new String[] { tenant.getId(), tenant.getName() });
+            throw new LedpException(LedpCode.LEDP_18012, e, new String[] { tenant.getId(), tenant.getName() });
         }
     }
 
@@ -72,7 +72,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
             gaTenantEntityMgr.delete(tenantData);
             return true;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18013, new String[] { tenant.getId() });
+            throw new LedpException(LedpCode.LEDP_18013, e, new String[] { tenant.getId() });
         }
     }
 
