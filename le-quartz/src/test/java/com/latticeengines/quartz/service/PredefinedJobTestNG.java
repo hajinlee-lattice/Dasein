@@ -26,6 +26,7 @@ public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
 
     public static final String JOB_NAME = "testPredefinedJob";
     public static final String JOB_GROUP = "PredefinedJobs";
+
     @Autowired
     private Scheduler scheduler;
 
@@ -117,9 +118,7 @@ public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
             try {
                 Thread.sleep(1000);
                 scheduler.triggerJob(jobKey);
-            } catch (SchedulerException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (SchedulerException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
