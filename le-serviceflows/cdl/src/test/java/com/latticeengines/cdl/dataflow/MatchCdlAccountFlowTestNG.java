@@ -73,15 +73,20 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
         for (GenericRecord record : outputRecords) {
             Object accountId = record.get("AccountId");
             if (accountId != null && accountId.toString().equals("1-10Q63")) {
-                record0 = record;
+                if (record0 == null || (long) record.get("PeriodId") > (long) record0.get("PeriodId")) {
+                    record0 = record;
+                }
                 continue;
             }
             if (accountId != null && accountId.toString().equals("1-12UDF")) {
+                if (record1 == null || (long) record.get("PeriodId") > (long) record1.get("PeriodId")) {
+                    record1 = record;
+                }
                 record1 = record;
                 continue;
             }
         }
-        Assert.assertEquals(record0.get("PeriodId").toString(), "9");
+        Assert.assertEquals(record0.get("PeriodId").toString(), "10");
         Assert.assertEquals(record1.get("PeriodId").toString(), "10");
     }
 
