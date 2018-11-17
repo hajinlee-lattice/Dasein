@@ -82,7 +82,6 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
                 if (record1 == null || (long) record.get("PeriodId") > (long) record1.get("PeriodId")) {
                     record1 = record;
                 }
-                record1 = record;
                 continue;
             }
         }
