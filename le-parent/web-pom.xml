@@ -95,7 +95,7 @@
                                     <scanIntervalSeconds>0</scanIntervalSeconds>
                                     <daemon>true</daemon>
                                     <waitForChild>false</waitForChild>
-                                    <jvmArgs>${jacoco.agent.itArgLine}</jvmArgs>
+                                    <jvmArgs>${jacoco.agent.itArgLine} -Xmx2g</jvmArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -261,7 +261,7 @@
 		                                    <url>http://lattice-engines.com </url>
 		                                </contact>
 		                            </info>
-		                            <!-- 
+		                            <!--
 		                            <securityDefinitions>
 		                                <securityDefinition>
 		                                    <type>apiKey</type>
@@ -272,7 +272,7 @@
 		                            -->
 		                            <templatePath>${basedir}/templates/strapdown.html.hbs</templatePath>
 		                            <outputPath>${basedir}/target/swagger-gen/document.html</outputPath>
-		                             
+
 		                            <swaggerDirectory>target/swagger-gen</swaggerDirectory>
 		                        </apiSource>
 		                    </apiSources>

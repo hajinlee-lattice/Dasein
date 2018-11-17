@@ -1,8 +1,7 @@
 package com.latticeengines.scoring.dataflow;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
@@ -12,6 +11,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -47,7 +47,7 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
     public void execute() throws Exception {
         executeDataFlow(getStandardParameters());
         List<GenericRecord> outputRecords = readOutput();
-        assertEquals(outputRecords.size(), 17);
+        Assert.assertEquals(outputRecords.size(), 17);
 
         CSVFormat format = LECSVFormat.format.withSkipHeaderRecord(true);
         try (CSVParser parser = new CSVParser(new InputStreamReader(
@@ -61,45 +61,11 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
                 GenericRecord avroRecord = outputRecords.get(i);
                 log.info("avro:" + avroRecord);
                 log.info("csv:" + csvRecord);
-                for (int j = 1; j < csvRecord.size(); j++) {
-                    assertEquals(Double.valueOf(csvRecord.get(j)) - Double.valueOf(avroRecord.get(j).toString()), 0.0);
+                for (String field: Arrays.asList("Score", "TotalEvents", "TotalPositiveEvents", "Lift")) {
+                    Assert.assertEquals(Double.valueOf(csvRecord.get(field)), Double.valueOf(avroRecord.get(field).toString()));
                 }
             }
         }
     }
 
-    // public static void main(String[] args) throws IOException {
-    // String uuid = "f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06";
-    // URL url1 =
-    // ClassLoader.getSystemResource("pivotScoreAndEvent/ScoreOutput/score_data.avro");
-    //
-    // DatumWriter userDatumWriter = new GenericDatumWriter<GenericRecord>();
-    // DataFileWriter dataFileWriter = new DataFileWriter(userDatumWriter);
-    // Configuration config = new Configuration();
-    // config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
-    //
-    // Table t = MetadataConverter.getTable(config, url1.getPath());
-    // Attribute a = new Attribute();
-    // a.setName(ScoreResultField.ModelId.displayName);
-    // a.setDisplayName(a.getName());
-    // a.setPhysicalDataType("String");
-    // t.addAttribute(a);
-    //
-    // Schema s = TableUtils.createSchema("scoringtable", t);
-    // dataFileWriter.create(s, new File("score_data.avro"));
-    // List<GenericRecord> records =
-    // AvroUtils.readFromLocalFile(url1.getPath());
-    // GenericRecordBuilder builder = new GenericRecordBuilder(s);
-    // for (GenericRecord r : records) {
-    // builder.set(ScoreResultField.ModelId.displayName, "ms__" + uuid +
-    // "-PLS_model");
-    // for (Field f : s.getFields()) {
-    // if (!f.name().equals(ScoreResultField.ModelId.displayName)) {
-    // builder.set(f, r.get(f.name()));
-    // }
-    // }
-    // dataFileWriter.append(builder.build());
-    // }
-    // dataFileWriter.close();
-    // }
 }
