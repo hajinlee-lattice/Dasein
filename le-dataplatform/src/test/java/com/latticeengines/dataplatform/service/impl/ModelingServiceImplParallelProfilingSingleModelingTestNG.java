@@ -11,10 +11,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -145,6 +147,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
             assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
+            Assert.assertNotNull(jobStatus.getResultDirectory(), JsonUtils.serialize(jobStatus));
             String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
             String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);

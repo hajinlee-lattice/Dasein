@@ -43,7 +43,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
         T configuration;
         if (shouldUseEmr()) {
             RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate( //
-                    5, 2000L, 2.0D, null);
+                    5, 5000L, 2.0D, null);
             String masterIp = retryTemplate.execute(context -> emrCacheService.getMasterIp(clusterName));
             if (StringUtils.isBlank(masterIp)) {
                 throw new RuntimeException("Cannot find the master IP for main EMR cluster.");

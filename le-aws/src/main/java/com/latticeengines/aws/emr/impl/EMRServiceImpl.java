@@ -194,7 +194,7 @@ public class EMRServiceImpl implements EMRService {
     public String getClusterId(String clusterName) {
         AmazonElasticMapReduce emr = getEmr();
         RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate( //
-                5, 2000L, 2.0D, null);
+                5, 5000L, 2.0D, null);
         ListClustersResult clustersResult = retryTemplate.execute(context -> {
             if (context.getRetryCount() > 0) {
                 log.info(String.format("(attempt=%d) list emr clusters", context.getRetryCount() + 1));
