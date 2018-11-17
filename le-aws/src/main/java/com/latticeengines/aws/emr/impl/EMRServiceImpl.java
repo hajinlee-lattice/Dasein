@@ -58,6 +58,8 @@ public class EMRServiceImpl implements EMRService {
     @Resource(name = "awsCredentials")
     private AWSCredentials awsCredentials;
 
+    private String mainClusterId;
+
     @Override
     public String getMasterIp() {
         return getMasterIp(clusterName);
@@ -65,7 +67,14 @@ public class EMRServiceImpl implements EMRService {
 
     @Override
     public String getClusterId() {
-        return getClusterId(clusterName);
+        if (StringUtils.isBlank(mainClusterId)) {
+            synchronized (this) {
+                if (StringUtils.isBlank(mainClusterId)) {
+                    mainClusterId = getClusterId(clusterName);
+                }
+            }
+        }
+        return mainClusterId;
     }
 
     @Override
