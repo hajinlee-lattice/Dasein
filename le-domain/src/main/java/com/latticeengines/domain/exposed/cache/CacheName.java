@@ -23,6 +23,8 @@ public enum CacheName {
     DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
     DataCloudVersionCache(Constants.DataCloudVersionCacheName), //
 
+    EMRClusterCache(Constants.EMRClusterCacheName), //
+
     SessionCache(Constants.SessionCacheName);//
 
     private String name;
@@ -71,11 +73,12 @@ public enum CacheName {
         public static final String SessionCacheName = "SessionCache";
         public static final String AttrRepoCacheName = "AttrRepoCache";
         public static final String TimeTranslatorCacheName = "TimeTranslatorCache";
-        public static final String DataCloudCMCacheName = "DataCloudCMCacheM19";
+        public static final String DataCloudCMCacheName = "DataCloudCMCache";
         public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
         public static final String ServingMetadataCacheName = "ServingMetadataCache";
         public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
         public static final String DantePreviewTokenCacheName = "DantePreviewTokenCache";
+        public static final String EMRClusterCacheName = "EMRClusterCache";
     }
 }

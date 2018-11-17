@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.hadoop.service.EMRCacheService;
 
 public abstract class HadoopConfigurationBeanFactory<T extends Configuration> implements FactoryBean<T> {
 
@@ -22,7 +22,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     protected abstract T getEmrConfiguration(String masterIp);
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -40,12 +40,12 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     public T getObject() {
         T configuration;
         if (shouldUseEmr()) {
-            String masterIp = emrService.getMasterIp();
+            String masterIp = emrCacheService.getMasterIp(clusterName);
             if (StringUtils.isBlank(masterIp)) {
                 throw new RuntimeException("Cannot find the master IP for main EMR cluster.");
             }
             configuration = getEmrConfiguration(masterIp);
-            if (emrService.isEncrypted(clusterName)) {
+            if (emrCacheService.isEncrypted(clusterName)) {
                 configuration.set("hadoop.rpc.protection", "privacy");
             }
         } else {

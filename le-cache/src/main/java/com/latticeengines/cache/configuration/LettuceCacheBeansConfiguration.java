@@ -84,6 +84,13 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.SessionCacheName));
 
+        RedisCacheConfiguration emrClusterCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofMinutes(10)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.EMRClusterCacheName));
+
         // =========================
         // BEGIN: datalake service
         // =========================
@@ -189,6 +196,8 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DantePreviewTokenCacheName, dantePreviewTokenCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
+
+        cacheConfigs.put(CacheName.Constants.EMRClusterCacheName, emrClusterCacheConfig);
 
         RedisCacheManager cacheManager = RedisCacheManager
                 .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory))//

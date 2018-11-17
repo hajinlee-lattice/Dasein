@@ -74,6 +74,18 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
+            <version>${le.common.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
+            <version>${le.common.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>tests</classifier>
