@@ -57,6 +57,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)")
     public String getMasterIp(String clusterName) {
         String clusterId = _impl.getClusterId(clusterName);
         return emrService.getMasterIp(clusterId);
