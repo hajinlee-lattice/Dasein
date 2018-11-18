@@ -23,6 +23,7 @@
         <jetty.use.test.cp>false</jetty.use.test.cp>
         <jetty.ks.path>/etc/ledp/tls/ledp_keystore.jks</jetty.ks.path>
         <jetty.ks.password>Lattice1</jetty.ks.password>
+        <jetty.xmx>2g</jetty.xmx>
         <alpn.version>8.1.11.v20170118</alpn.version>
     </properties>
 
@@ -95,7 +96,7 @@
                                     <scanIntervalSeconds>0</scanIntervalSeconds>
                                     <daemon>true</daemon>
                                     <waitForChild>false</waitForChild>
-                                    <jvmArgs>${jacoco.agent.itArgLine} -Xmx2g</jvmArgs>
+                                    <jvmArgs>${jacoco.agent.itArgLine} -Xmx${jetty.xmx}</jvmArgs>
                                 </configuration>
                             </execution>
                             <execution>
