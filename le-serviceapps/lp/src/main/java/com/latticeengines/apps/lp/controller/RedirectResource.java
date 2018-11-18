@@ -48,7 +48,7 @@ public class RedirectResource {
     public ModelAndView redirectRM() {
         String masterIp = emrCacheService.getMasterIp();
         if (StringUtils.isNotBlank(masterIp)) {
-            String url = String.format("http://%s:8080", masterIp);
+            String url = String.format("http://%s:8088", masterIp);
             return new ModelAndView("redirect:" + url);
         } else {
             return new ModelAndView("Cannot find the master ip of emr cluster in current stack.");
