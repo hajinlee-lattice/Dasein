@@ -35,9 +35,22 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 
 public class WorkflowJobUtils {
     private static final String CUSTOMER_SPACE = "CustomerSpace";
-    private static final Date MIGRATE_THRESHOLD = Date.from(ZonedDateTime.of(
-            2019, 2, 1, 0, 0, 0, 0, ZoneId.of("UTC-05:00"))
-            .toInstant());
+    private static final Date MIGRATE_THRESHOLD = getMigrateThreshold();
+
+    private static Date getMigrateThreshold() {
+        Date threshold;
+        String env = System.getenv("LE_ENVIRONMENT");
+        if ("prodcluster".equals(env)) {
+            threshold = Date.from(ZonedDateTime.of(
+                    2019, 2, 1, 0, 0, 0, 0, ZoneId.of("US/Eastern"))
+                    .toInstant());
+        } else {
+            threshold = Date.from(ZonedDateTime.of(
+                    2018, 11, 16, 13, 0, 0, 0, ZoneId.of("US/Eastern"))
+                    .toInstant());
+        }
+        return threshold;
+    }
 
     public static Job assembleJob(ReportService reportService, LEJobExecutionRetriever leJobExecutionRetriever,
                             String lpUrl, WorkflowJob workflowJob, Boolean includeDetails) {
