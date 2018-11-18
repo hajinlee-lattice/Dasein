@@ -3,8 +3,10 @@ package com.latticeengines.workflow.exposed.util;
 import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.LOG_REDIRECT_LINK;
 import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.REDIRECT_RESOURCE;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -14,13 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -103,7 +105,7 @@ public class WorkflowJobUtils {
         } else if (workflowStatus != null) {
             Date startTime = workflowStatus.getStartTime();
             if (startTime != null && startTime.compareTo(MIGRATE_THRESHOLD) < 0) {
-                startTime = adjustDate(startTime, "UTC-05:00", "UTC");
+                startTime = adjustDate(startTime, "US/Eastern", "UTC");
             }
             job.setStartTimestamp(startTime);
         } else {
@@ -114,7 +116,7 @@ public class WorkflowJobUtils {
             if (workflowStatus != null) {
                 Date endTime = workflowStatus.getEndTime();
                 if (endTime != null && endTime.compareTo(MIGRATE_THRESHOLD) < 0) {
-                    endTime = adjustDate(endTime, "UTC-05:00", "UTC");
+                    endTime = adjustDate(endTime, "US/Eastern", "UTC");
                 }
                 job.setEndTimestamp(endTime);
             } else {
@@ -128,9 +130,11 @@ public class WorkflowJobUtils {
     @VisibleForTesting
     public static Date adjustDate(Date dateToAdjust, String fromZone, String toZone) {
         if (dateToAdjust != null) {
+            LocalDateTime from = LocalDateTime.now(ZoneId.of(fromZone));
+            LocalDateTime to = LocalDateTime.now(ZoneId.of(toZone));
+            long zoneDiff = ChronoUnit.HOURS.between(from, to);
             ZonedDateTime fromDatetime = ZonedDateTime.ofInstant(dateToAdjust.toInstant(), ZoneId.of(fromZone));
-            ZonedDateTime toDateTime = fromDatetime.toInstant().atZone(ZoneId.of(toZone));
-            return Date.from(toDateTime.toInstant());
+            return Date.from(fromDatetime.toInstant().plus(zoneDiff, ChronoUnit.HOURS));
         } else {
             return null;
         }

@@ -4,13 +4,16 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,21 +59,27 @@ public class WorkflowJobUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testAdjustDate() {
-        String fromZone = "UTC-05:00";
+        String fromZone = "US/Eastern";
         String toZone = "UTC";
+        long zoneDiff = zoneDiff(fromZone, toZone);
         ZonedDateTime date1 = ZonedDateTime.of(2018, 10, 22,
                 2, 43, 40, 0, ZoneId.of(fromZone));
-        ZonedDateTime expectedDate = ZonedDateTime.of(2018, 10, 22,
-                7, 43, 40, 0, ZoneId.of(toZone));
         Date adjusted = WorkflowJobUtils.adjustDate(Date.from(date1.toInstant()), fromZone, toZone);
-        Assert.assertEquals(adjusted, Date.from(expectedDate.toInstant()));
+        long diff = adjusted.getTime() - Date.from(date1.toInstant()).getTime();
+        Assert.assertEquals(TimeUnit.HOURS.toMillis(zoneDiff), diff);
 
-        fromZone = "UTC+08:00";
+        fromZone = "US/Pacific";
         ZonedDateTime date2 = ZonedDateTime.of(2018, 5, 1,
                 4, 12, 13, 0, ZoneId.of(fromZone));
-        expectedDate = ZonedDateTime.of(2018, 4, 30,
-                20, 12, 13, 0, ZoneId.of(toZone));
         adjusted = WorkflowJobUtils.adjustDate(Date.from(date2.toInstant()), fromZone, toZone);
-        Assert.assertEquals(adjusted, Date.from(expectedDate.toInstant()));
+        zoneDiff = zoneDiff(fromZone, toZone);
+        diff = adjusted.getTime() - Date.from(date2.toInstant()).getTime();
+        Assert.assertEquals(TimeUnit.HOURS.toMillis(zoneDiff), diff);
+    }
+
+    private long zoneDiff(String fromZone, String toZone) {
+        LocalDateTime from = LocalDateTime.now(ZoneId.of(fromZone));
+        LocalDateTime to = LocalDateTime.now(ZoneId.of(toZone));
+        return ChronoUnit.HOURS.between(from, to);
     }
 }
