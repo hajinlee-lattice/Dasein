@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import com.latticeengines.hadoop.service.EMRCacheService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -83,6 +84,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Inject
     private EMRService emrService;
+
+    @Inject
+    private EMRCacheService emrCacheService;
 
     @Override
     public List<ApplicationReport> getJobReportsAll() {
@@ -197,7 +201,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         Configuration config = job.getConfiguration();
         log.info(String.format("Job %s Properties:", mrJobName));
         if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
-            config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
+            config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrCacheService.getWebHdfsUrl());
         }
         config.forEach(entry -> log.info(String.format("%s: %s", entry.getKey(), entry.getValue())));
         try {
@@ -327,7 +331,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Override
     public String getEmrClusterId() {
         if (Boolean.TRUE.equals(useEmr)) {
-            return emrService.getClusterId();
+            return emrCacheService.getClusterId();
         } else {
             return null;
         }

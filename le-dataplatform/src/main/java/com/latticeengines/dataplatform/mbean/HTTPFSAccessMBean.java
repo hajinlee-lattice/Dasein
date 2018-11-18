@@ -8,9 +8,9 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.hadoop.service.EMRCacheService;
 
 @Component("httpFSMBean")
 @ManagedResource(objectName = "Diagnostics:name=HttpFSCheck")
@@ -23,7 +23,7 @@ public class HTTPFSAccessMBean {
     private Boolean useEmr;
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     @Inject
     private VersionManager versionManager;
@@ -47,7 +47,7 @@ public class HTTPFSAccessMBean {
 
     private String getWebHdfs() {
         if (Boolean.TRUE.equals(useEmr)) {
-            return emrService.getWebHdfsUrl();
+            return emrCacheService.getWebHdfsUrl();
         } else {
             return webHDFS;
         }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
@@ -29,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.Field;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
@@ -50,7 +50,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     private EMREnvService emrEnvService;
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     public PythonClientCustomization() {
         super(null, null, null, null, null, null);
@@ -59,10 +59,12 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Inject
     public PythonClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
-            @Value("${dataplatform.hdfs.stack:}") String stackName, SoftwareLibraryService softwareLibraryService, //
+            @Value("${dataplatform.hdfs.stack:}") String stackName, //
+            SoftwareLibraryService softwareLibraryService, //
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
             @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, versionManager, stackName, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, stackName, softwareLibraryService, hdfsJobBaseDir,
+                webHdfs);
     }
 
     @Override
@@ -82,30 +84,39 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             String metadata = properties.getProperty(PythonContainerProperty.METADATA.name());
             Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
             log.info("Classifier in PythonContainerProperty is " + JsonUtils.pprint(classifier));
-            properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
+            properties.put(PythonContainerProperty.TRAINING.name(),
+                    classifier.getTrainingDataHdfsPath());
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
-            properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
+            properties.put(PythonContainerProperty.PYTHONSCRIPT.name(),
+                    classifier.getPythonScriptHdfsPath());
             String pipelineScript = classifier.getPythonPipelineScriptHdfsPath();
             String pipelineLibScript = classifier.getPythonPipelineLibHdfsPath();
             properties.put(PythonContainerProperty.PYTHONPIPELINESCRIPT.name(), pipelineScript);
             properties.put(PythonContainerProperty.PYTHONPIPELINELIBFQDN.name(), pipelineLibScript);
             String[] tokens = pipelineLibScript.split("/");
-            properties.put(PythonContainerProperty.PYTHONPIPELINELIB.name(), tokens[tokens.length - 1]);
+            properties.put(PythonContainerProperty.PYTHONPIPELINELIB.name(),
+                    tokens[tokens.length - 1]);
             properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
-            properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
-            properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
-            properties.put(PythonContainerProperty.PIPELINEDRIVER.name(), classifier.getPipelineDriver());
+            properties.put(PythonContainerProperty.DATAPROFILE.name(),
+                    classifier.getDataProfileHdfsPath());
+            properties.put(PythonContainerProperty.CONFIGMETADATA.name(),
+                    classifier.getConfigMetadataHdfsPath());
+            properties.put(PythonContainerProperty.PIPELINEDRIVER.name(),
+                    classifier.getPipelineDriver());
 
-            properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
+            properties.put(PythonContainerProperty.VERSION.name(),
+                    versionManager.getCurrentVersionInStack(stackName));
             setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
             File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
-            properties.put(PythonContainerProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
+            properties.put(PythonContainerProperty.CONDA_ENV.name(),
+                    emrEnvService.getLatticeCondaEnv());
             if (Boolean.TRUE.equals(useEmr)) {
-                properties.put(PythonContainerProperty.WEBHDFS_URL.name(), emrService.getWebHdfsUrl());
+                properties.put(PythonContainerProperty.WEBHDFS_URL.name(),
+                        emrCacheService.getWebHdfsUrl());
             } else {
                 properties.put(PythonContainerProperty.WEBHDFS_URL.name(), getWebHdfs());
             }
@@ -119,13 +130,15 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             return;
         }
         classifier.setProvenanceProperties(classifier.getProvenanceProperties() + //
-                " Lattice_Version=" + properties.getProperty(PythonContainerProperty.VERSION.name()));
+                " Lattice_Version="
+                + properties.getProperty(PythonContainerProperty.VERSION.name()));
     }
 
     @Override
     public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
         Collection<CopyEntry> copyEntries = super.getCopyEntries(containerProperties);
-        String metadataFilePath = containerProperties.getProperty(ContainerProperty.METADATA.name());
+        String metadataFilePath = containerProperties
+                .getProperty(ContainerProperty.METADATA.name());
         copyEntries.add(new LocalResourcesFactoryBean.CopyEntry("file:" + metadataFilePath,
                 getJobDir(containerProperties), false));
         return copyEntries;

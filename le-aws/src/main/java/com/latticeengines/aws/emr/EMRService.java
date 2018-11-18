@@ -4,28 +4,20 @@ import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 
 public interface EMRService {
 
-    String getMasterIp();
+    String getClusterId(String clusterName);
 
-    String getClusterId();
-
-    String getMasterIp(String clusterName);
-
-    String getMasterIpByClusterId(String clusterId);
+    String getMasterIp(String clusterId);
 
     boolean isActive(String clusterId);
 
-    boolean isEncrypted(String clusterName);
-
-    String getClusterId(String clusterName);
+    boolean isEncrypted(String clusterId);
 
     String getLogBucket(String clusterId);
 
-    String getWebHdfsUrl();
-
     String getSqoopHostPort();
 
-    InstanceGroup getTaskGroup(String clusterName);
+    InstanceGroup getTaskGroup(String clusterId);
 
-    void scaleTaskGroup(String clusterName, int targetCount);
+    void scaleTaskGroup(String clusterId, int targetCount);
 
 }

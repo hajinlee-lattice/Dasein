@@ -339,7 +339,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 boolean clusterIsActvie = emrService.isActive(emrClusterId);
                 if (clusterIsActvie) {
                     // if active, go to job history page or rm page
-                    String masterIp = emrService.getMasterIpByClusterId(emrClusterId);
+                    String masterIp = emrService.getMasterIp(emrClusterId);
                     JobStatus status = JobStatus.fromString(workflowJob.getStatus());
                     url = status.isTerminated() ? appHistoryUrl(masterIp, appId) : appMasterUrl(masterIp, appId);
                 } else {

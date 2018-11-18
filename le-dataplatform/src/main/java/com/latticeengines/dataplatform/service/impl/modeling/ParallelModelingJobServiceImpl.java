@@ -11,7 +11,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
@@ -63,7 +63,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     private VersionManager versionManager;
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     private void setDefaultValues(Classifier classifier) {
         RandomForestAlgorithm rf = new RandomForestAlgorithm();
@@ -114,7 +114,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(PythonMRProperty.PYTHONPATH.name(), ".:leframework.tar.gz:" + pipelineLibFile);
         properties.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
         if (Boolean.TRUE.equals(useEmr)) {
-            properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
+            properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), emrCacheService.getWebHdfsUrl());
         } else {
             properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
         }

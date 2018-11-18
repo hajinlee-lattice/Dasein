@@ -22,10 +22,10 @@ import org.springframework.yarn.client.YarnClientFactoryBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HeaderRequestInterceptor;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.hadoop.bean.HadoopConfigurationUtils;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Service("emrEnvService")
@@ -34,7 +34,7 @@ public class EMREnvServiceImpl implements EMREnvService {
     private static final Logger log = LoggerFactory.getLogger(EMREnvServiceImpl.class);
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     @Inject
     private ApplicationContext appCtx;
@@ -83,16 +83,16 @@ public class EMREnvServiceImpl implements EMREnvService {
     public YarnConfiguration getYarnConfiguration(String emrCluster) {
         String masterIp;
         if (StringUtils.isNotBlank(emrCluster)) {
-            masterIp = emrService.getMasterIp(emrCluster);
+            masterIp = emrCacheService.getMasterIp(emrCluster);
         } else {
-            masterIp = emrService.getMasterIp();
+            masterIp = emrCacheService.getMasterIp();
         }
 
         Properties properties = HadoopConfigurationUtils.loadPropsFromResource("emr.properties", //
                 masterIp, awsKey, awsSecret);
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
         properties.forEach((k, v) -> yarnConfiguration.set((String) k, (String) v));
-        if (emrService.isEncrypted(emrCluster)) {
+        if (emrCacheService.isEncrypted(emrCluster)) {
             yarnConfiguration.set("hadoop.rpc.protection", "privacy");
         }
         String fs = yarnConfiguration.get("fs.defaultFS");
@@ -125,7 +125,7 @@ public class EMREnvServiceImpl implements EMREnvService {
 
     @Override
     public ClusterMetrics getClusterMetrics(String emrCluster) {
-        String masterIp = emrService.getMasterIp(emrCluster);
+        String masterIp = emrCacheService.getMasterIp(emrCluster);
         String metricsUrl = String.format("http://%s:8088/ws/v1/cluster/metrics", masterIp);
         RestTemplate restTemplate = getRestTemplate();
         JsonNode json = restTemplate.getForObject(metricsUrl, JsonNode.class);

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 class EMRScalingCallable implements Callable<Boolean> {
@@ -24,6 +25,8 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private EMRService emrService;
 
+    private EMRCacheService emrCacheService;
+
     private EMREnvService emrEnvService;
 
     private void setScalingClusters(List<String> scalingClusters) {
@@ -32,6 +35,10 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private void setEmrService(EMRService emrService) {
         this.emrService = emrService;
+    }
+
+    public void setEmrCacheService(EMRCacheService emrCacheService) {
+        this.emrCacheService = emrCacheService;
     }
 
     private void setEmrEnvService(EMREnvService emrEnvService) {
@@ -44,8 +51,8 @@ class EMRScalingCallable implements Callable<Boolean> {
             if (CollectionUtils.isNotEmpty(scalingClusters)) {
                 log.info("Invoking EMRScalingCallable. Scaling clusters: " + StringUtils.join(scalingClusters));
                 List<Runnable> runnables = scalingClusters.stream() //
-                        .filter(emrCluster -> StringUtils.isNotBlank(emrService.getMasterIp(emrCluster))) //
-                        .map(emrCluster -> new EMRScalingRunnable(emrCluster, emrService, emrEnvService)) //
+                        .filter(emrCluster -> StringUtils.isNotBlank(emrCacheService.getClusterId(emrCluster))) //
+                        .map(emrCluster -> new EMRScalingRunnable(emrCluster, emrService, emrCacheService, emrEnvService)) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.size(runnables) == 1) {
                     runnables.get(0).run();
@@ -69,6 +76,8 @@ class EMRScalingCallable implements Callable<Boolean> {
 
         private EMRService emrService;
 
+        private EMRCacheService emrCacheService;
+
         private EMREnvService emrEnvService;
 
         Builder scalingClusters(String scalingClusters) {
@@ -83,6 +92,11 @@ class EMRScalingCallable implements Callable<Boolean> {
             return this;
         }
 
+        Builder emrCacheService(EMRCacheService emrCacheService) {
+            this.emrCacheService = emrCacheService;
+            return this;
+        }
+
         Builder emrEnvService(EMREnvService emrEnvService) {
             this.emrEnvService = emrEnvService;
             return this;
@@ -92,6 +106,7 @@ class EMRScalingCallable implements Callable<Boolean> {
             EMRScalingCallable callable = new EMRScalingCallable();
             callable.setScalingClusters(scalingClusters);
             callable.setEmrService(emrService);
+            callable.setEmrCacheService(emrCacheService);
             callable.setEmrEnvService(emrEnvService);
             return callable;
         }

@@ -8,7 +8,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -27,9 +26,6 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
-
-    @Inject
-    private EMRService emrService;
 
     private WorkflowJob workflowJob;
 

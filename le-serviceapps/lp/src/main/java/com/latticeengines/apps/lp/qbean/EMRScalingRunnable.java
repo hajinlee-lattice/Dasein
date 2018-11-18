@@ -27,6 +27,7 @@ import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public class EMRScalingRunnable implements Runnable {
@@ -62,21 +63,24 @@ public class EMRScalingRunnable implements Runnable {
             ), YarnApplicationState.class);
 
     private final String emrCluster;
+    private final String clusterId;
     private final EMRService emrService;
     private final EMREnvService emrEnvService;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
     private InstanceGroup taskGrp;
 
-    EMRScalingRunnable(String emrCluster, EMRService emrService, EMREnvService emrEnvService) {
+    EMRScalingRunnable(String emrCluster, EMRService emrService, EMRCacheService emrCacheService, //
+                       EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
         this.emrService = emrService;
         this.emrEnvService = emrEnvService;
+        this.clusterId = emrCacheService.getClusterId(emrCluster);
     }
 
     @Override
     public void run() {
-        log.debug("Start processing emr cluster " + emrCluster);
+        log.debug("Start processing emr cluster " + emrCluster + " : " + clusterId);
 
         try {
             RetryTemplate retry = RetryUtils.getRetryTemplate(5);
@@ -93,7 +97,7 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
-        taskGrp = emrService.getTaskGroup(emrCluster);
+        taskGrp = emrService.getTaskGroup(clusterId);
 
         if (needToScale()) {
             attemptScale();
@@ -258,7 +262,7 @@ public class EMRScalingRunnable implements Runnable {
 
     private boolean scale(int target) {
         try {
-            emrService.scaleTaskGroup(emrCluster, target);
+            emrService.scaleTaskGroup(clusterId, target);
             return true;
         } catch (Exception e) {
             log.error("Failed to scale " + emrCluster + " to " + target, e);

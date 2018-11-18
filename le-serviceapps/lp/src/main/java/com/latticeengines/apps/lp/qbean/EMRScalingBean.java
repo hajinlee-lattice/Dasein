@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -21,13 +22,17 @@ public class EMRScalingBean implements QuartzJobBean {
     private EMRService emrService;
 
     @Inject
-    private EMREnvService emrEnvServicel;
+    private EMRCacheService emrCacheService;
+
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         return EMRScalingCallable.builder() //
                 .scalingClusters(scalingClusters) //
-                .emrEnvService(emrEnvServicel) //
+                .emrEnvService(emrEnvService) //
+                .emrCacheService(emrCacheService)
                 .emrService(emrService) //
                 .build();
     }

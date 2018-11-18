@@ -22,10 +22,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.hadoop.service.EMRCacheService;
 
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -39,7 +39,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     private Configuration distCpConfiguration;
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     @Inject
     private S3Service s3Service;
@@ -83,7 +83,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "manual", enabled = false)
     public void testEmrYarnConfiguration() throws IOException {
         Assert.assertEquals(yarnConfiguration.get("fs.defaultFS"), //
-                String.format("hdfs://%s", emrService.getMasterIp()));
+                String.format("hdfs://%s", emrCacheService.getMasterIp()));
         InputStream is = getResourceStream();
         String hdfsPath = "/tmp/yarn-config-test/test.txt";
         HdfsUtils.isDirectory(yarnConfiguration, "/Pods/Default/Services/PropData/Sources/HGDataClean");

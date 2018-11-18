@@ -58,33 +58,8 @@ public class EMRServiceImpl implements EMRService {
     @Resource(name = "awsCredentials")
     private AWSCredentials awsCredentials;
 
-    private String mainClusterId;
-
     @Override
-    public String getMasterIp() {
-        return getMasterIp(clusterName);
-    }
-
-    @Override
-    public String getClusterId() {
-        if (StringUtils.isBlank(mainClusterId)) {
-            synchronized (this) {
-                if (StringUtils.isBlank(mainClusterId)) {
-                    mainClusterId = getClusterId(clusterName);
-                }
-            }
-        }
-        return mainClusterId;
-    }
-
-    @Override
-    public String getMasterIp(String clusterName) {
-        String clusterId = getClusterId(clusterName);
-        return getMasterIpByClusterId(clusterId);
-    }
-
-    @Override
-    public String getMasterIpByClusterId(String clusterId) {
+    public String getMasterIp(String clusterId) {
         String masterIp = null;
         AmazonElasticMapReduce emr = getEmr();
         if (StringUtils.isNotBlank(clusterId)) {
@@ -107,9 +82,8 @@ public class EMRServiceImpl implements EMRService {
     }
 
     @Override
-    public boolean isEncrypted(String clusterName) {
+    public boolean isEncrypted(String clusterId) {
         boolean encrypted = false;
-        String clusterId = getClusterId(clusterName);
         AmazonElasticMapReduce emr = getEmr();
         if (StringUtils.isNotBlank(clusterId)) {
             RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
@@ -139,13 +113,9 @@ public class EMRServiceImpl implements EMRService {
     }
 
     @Override
-    public String getWebHdfsUrl() {
-        return "http://" + getMasterIp() + ":50070/webhdfs/v1";
-    }
-
-    @Override
     public String getSqoopHostPort() {
-        return "http://" + getMasterIp() + ":8081";
+        String clusterId = getClusterId(clusterName);
+        return "http://" + getMasterIp(clusterId) + ":8081";
     }
 
     @Override
@@ -162,10 +132,9 @@ public class EMRServiceImpl implements EMRService {
     }
 
     @Override
-    public InstanceGroup getTaskGroup(String clusterName) {
-        String clusterId = getClusterId(clusterName);
+    public InstanceGroup getTaskGroup(String clusterId) {
         if (StringUtils.isBlank(clusterId)) {
-            log.info("Cannot find emrcluster named " + clusterName);
+            log.info("Cannot find emrcluster named " + clusterId);
             return null;
         }
         AmazonElasticMapReduce emr = getEmr();
@@ -181,9 +150,9 @@ public class EMRServiceImpl implements EMRService {
     }
 
     @Override
-    public void scaleTaskGroup(String clusterName, int targetCount) {
+    public void scaleTaskGroup(String clusterId, int targetCount) {
         if (targetCount > 0) {
-            InstanceGroup taskGrp = getTaskGroup(clusterName);
+            InstanceGroup taskGrp = getTaskGroup(clusterId);
             if (taskGrp != null) {
                 AmazonElasticMapReduce emr = getEmr();
                 InstanceGroupModifyConfig modifyConfig = new InstanceGroupModifyConfig()

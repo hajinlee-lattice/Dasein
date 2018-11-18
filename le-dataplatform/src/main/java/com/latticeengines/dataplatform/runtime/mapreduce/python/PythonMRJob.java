@@ -10,11 +10,11 @@ import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
@@ -27,7 +27,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     public static final String PYTHON_MR_JOB = "pythonMRJob";
 
     private VersionManager versionManager;
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
     private String stackName;
     private String condaEnv;
     private String condaEnvAmbari;
@@ -44,7 +44,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             Configuration config, //
             MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
             VersionManager versionManager, //
-            EMRService emrService, //
+            EMRCacheService emrCacheService, //
             String stackName, //
             String condaEnv, //
             String condaEnvAmbari, //
@@ -52,7 +52,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         setConf(config);
         mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
-        this.emrService = emrService;
+        this.emrCacheService = emrCacheService;
         this.stackName = stackName;
         this.condaEnv = condaEnv;
         this.condaEnvAmbari = condaEnvAmbari;
@@ -127,7 +127,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         config.set("mapreduce.reduce.maxattempts", "1");
         config.set(PythonContainerProperty.CONDA_ENV.name(), getCondaEnv());
         if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
-            config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrService.getWebHdfsUrl());
+            config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrCacheService.getWebHdfsUrl());
         }
     }
 

@@ -12,7 +12,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.hadoop.service.EMRCacheService;
 
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -23,12 +23,12 @@ public class MapReduceConfigurationTestNG extends AbstractTestNGSpringContextTes
     private Configuration hadoopConfiguration;
 
     @Inject
-    private EMRService emrService;
+    private EMRCacheService emrCacheService;
 
     @Test(groups = "functional", enabled = false)
     public void testEmrYarnConfiguration() throws IOException {
         Assert.assertEquals(hadoopConfiguration.get("fs.defaultFS"), //
-                String.format("hdfs://%s", emrService.getMasterIp()));
+                String.format("hdfs://%s", emrCacheService.getMasterIp()));
     }
 
 }
