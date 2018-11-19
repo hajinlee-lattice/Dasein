@@ -1,8 +1,10 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -12,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,7 +45,11 @@ public class ExportToS3Resource {
     @Inject
     private ExportToS3Service exportToS3Service;
 
+    @Value("${camille.zk.pod.id}")
+    private String podId;
+
     private ExecutorService workers = null;
+    private ConcurrentSkipListSet<String> inProcess = new ConcurrentSkipListSet<>();
 
     @NoCustomerSpace
     @RequestMapping(method = RequestMethod.POST)
@@ -53,7 +60,7 @@ public class ExportToS3Resource {
 
         List<String> inputTenants = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(request.getTenants())) {
-            request.getTenants().forEach(t -> inputTenants.add(CustomerSpace.parse(t.trim()).toString()));
+            request.getTenants().forEach(t -> inputTenants.add(CustomerSpace.parse(t.trim()).getTenantId()));
         }
 
         log.info("User input tenants=" + inputTenants);
@@ -62,59 +69,76 @@ public class ExportToS3Resource {
             return Collections.emptyList();
         }
 
-        List<CustomerSpace> customerSpaces = new ArrayList<>();
         List<String> resultCustomers = new ArrayList<>();
         for (String tenant: inputTenants) {
-            buildCustomers(tenant, resultCustomers, customerSpaces);
+            buildCustomers(tenant, resultCustomers);
         }
 
         if (CollectionUtils.isEmpty(resultCustomers)) {
             log.warn("There's not customers selected!");
         } else {
-            List<ExportRequest> requests = new ArrayList<>();
-            ExecutorService workers = getWorkers();
-            workers.submit(() -> {
-                log.info("Exporting to S3 for tenants: " + resultCustomers);
-                for (int i = 0, batchSize = 3; i < resultCustomers.size(); i++) {
-                    exportToS3Service.buildRequests(customerSpaces.get(i), requests);
-                    if ((i % batchSize) == (batchSize - 1) || (i == resultCustomers.size() - 1)) {
-                        exportToS3Service.executeRequests(requests);
-                        exportToS3Service.buildDataUnits(requests);
-                        requests.clear();
-                    }
+            int attempt = 0;
+            while (CollectionUtils.isNotEmpty(resultCustomers)) {
+                log.info("Attempt = " + (++attempt) + " Customers=" + StringUtils.join(resultCustomers));
+                submitRequests(resultCustomers);
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-                log.info("Finished Export To S3");
-            });
+            }
         }
-
         return resultCustomers;
     }
 
-    private void buildCustomers(String tenants, List<String> resultCustomers, List<CustomerSpace> customerSpaces) {
-        try {
-            tenants = "/user/s-analytics/customers/" + tenants;
-            List<String> tenantDirs = HdfsUtils.getFilesByGlob(yarnConfiguration, tenants);
-            if (CollectionUtils.isEmpty(tenantDirs)) {
-                log.warn("There's no tenants folder was selected");
-                return;
-            }
-            tenantDirs.forEach(dir -> {
-                String customer = StringUtils.substringAfterLast(dir, "/");
-                String tenantBase = StringUtils.substringBeforeLast(dir, "/");
-                CustomerSpace customerSpace = CustomerSpace.parse(customer);
-                try {
-                    if (HdfsUtils.fileExists(yarnConfiguration, tenantBase + "/" + customerSpace.toString())) {
-                        if (!resultCustomers.contains(customerSpaces)) {
-                            resultCustomers.add(customer);
-                            customerSpaces.add(customerSpace);
-                        }
+    private void submitRequests(Collection<String> customers) {
+        log.info("Exporting to S3 for tenants: " + customers);
+        ExecutorService workers = getWorkers();
+        customers.forEach(customer -> {
+            if (inProcess.contains(customer)) {
+                log.info("Exporting for " + customer + " is already in progress.");
+            } else if (inProcess.size() > 4) {
+                log.warn("Too many migration tasks in progress, let " + customer + " wait for next attempt.");
+            } else {
+                workers.submit(() -> {
+                    try {
+                        inProcess.add(customer);
+                        log.info("Exporting to S3 for " + customer + ", " + inProcess.size() + " in progress.");
+                        List<ExportRequest> requests = new ArrayList<>();
+                        exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests);
+                        exportToS3Service.executeRequests(requests);
+                        exportToS3Service.buildDataUnits(requests);
+                        log.info("Finished Export To S3 for " + customer);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to Export to S3");
+                    } finally {
+                        inProcess.remove(customer);
                     }
-                } catch (Exception ex) {
-                    log.warn("Can not find tenant dir for tenant=" + dir);
+                });
+            }
+        });
+        customers.removeAll(inProcess);
+    }
+
+    private void buildCustomers(String tenant, List<String> resultCustomers) {
+        try {
+            CustomerSpace customerSpace = CustomerSpace.parse(tenant);
+            String analyticTenant = customerSpace.toString();
+            analyticTenant = "/user/s-analytics/customers/" + analyticTenant;
+            String contract = customerSpace.getContractId();
+            contract = "/Pods/" + podId + "/Contracts/" + contract;
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, analyticTenant) //
+                        || HdfsUtils.fileExists(yarnConfiguration, contract)) {
+                    if (!resultCustomers.contains(tenant)) {
+                        resultCustomers.add(tenant);
+                    }
                 }
-            });
+            } catch (Exception ex) {
+                log.warn("Can not find contact dir for tenant=" + tenant);
+            }
         } catch (Exception ex) {
-            log.error("Can not get the list of files for tenants=" + tenants, ex);
+            log.error("Can not get the list of files for tenants=" + tenant, ex);
         }
     }
 
