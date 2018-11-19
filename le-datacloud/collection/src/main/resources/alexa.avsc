@@ -1,0 +1,246 @@
+{
+    "type": "record",
+    "name": "ALEXA",
+    "fields": [
+        {
+            "type": "string",
+            "name": "WebPageUrl"
+        },
+        {
+            "type": "long",
+            "name": "Creation_Date"
+        },
+        {
+            "type": "long",
+            "name": "Last_Modification_Date"
+        },
+        {
+            "type": "string",
+            "name": "Categories"
+        },
+        {
+            "type": "string",
+            "name": "Description"
+        },
+        {
+            "type": "string",
+            "name": "Domains"
+        },
+        {
+            "type": "string",
+            "name": "Keywords"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "LinksIn"
+        },
+        {
+            "type": "long",
+            "name": "OnlineSince"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "ReachPerMillion"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "ReachRank"
+        },
+        {
+            "type": "string",
+            "name": "RelatedLinks"
+        },
+        {
+            "type": "string",
+            "name": "Title"
+        },
+        {
+            "type": "string",
+            "name": "URL"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "ViewsPerMillion"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "ViewsPerUser"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "ViewsRank"
+        },
+        {
+            "type": "long",
+            "name": "LE_Last_Upload_Date"
+        },
+        {
+            "type": "string",
+            "name": "Language"
+        },
+        {
+            "type": "string",
+            "name": "Country1_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews1"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank1"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users1"
+        },
+        {
+            "type": "string",
+            "name": "Country2_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews2"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank2"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users2"
+        },
+        {
+            "type": "string",
+            "name": "Country3_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews3"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank3"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users3"
+        },
+        {
+            "type": "string",
+            "name": "Country4_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews4"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank4"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users4"
+        },
+        {
+            "type": "string",
+            "name": "Country5_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews5"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank5"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users5"
+        },
+        {
+            "type": "string",
+            "name": "Country6_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews6"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank6"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users6"
+        },
+        {
+            "type": "string",
+            "name": "Country7_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews7"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank7"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users7"
+        },
+        {
+            "type": "string",
+            "name": "Country8_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews8"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank8"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users8"
+        },
+        {
+            "type": "string",
+            "name": "Country9_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews9"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank9"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users9"
+        },
+        {
+            "type": "string",
+            "name": "Country10_Code"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "PageViews10"
+        },
+        {
+            "type": ["int", "null"],
+            "name": "Rank10"
+        },
+        {
+            "type": ["double", "null"],
+            "name": "Users10"
+        }
+    ]
+}

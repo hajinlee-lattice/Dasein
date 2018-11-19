@@ -65,6 +65,7 @@ public class AvroUtils {
 
     private static final String SQLSERVER_TYPE_INT = "int";
     private static final String SQLSERVER_TYPE_LONG = "long";
+    private static Schema NULL_SCHEMA = Schema.create(Schema.Type.NULL);
     private static Logger log = LoggerFactory.getLogger(AvroUtils.class);
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
@@ -1016,6 +1017,96 @@ public class AvroUtils {
     }
 
     public static Object checkTypeAndConvert(String column, Object value, Type avroType) {
+        if (value == null || avroType == null) {
+            return value;
+        }
+        try {
+            switch (avroType) {
+                case DOUBLE:
+                    if (!(value instanceof Double)) {
+                        return Double.valueOf(value.toString());
+                    }
+                    break;
+                case FLOAT:
+                    if (!(value instanceof Float)) {
+                        return Float.valueOf(value.toString());
+                    }
+                    break;
+                case INT:
+                    if (!(value instanceof Integer)) {
+                        return Integer.valueOf(value.toString());
+                    }
+                    break;
+                case LONG:
+                    if (!(value instanceof Long)) {
+                        return Long.valueOf(value.toString());
+                    }
+                    break;
+                case BOOLEAN:
+                    if (!(value instanceof Boolean)) {
+                        return Boolean.valueOf(value.toString());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception ex) {
+            log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value="
+                    + value);
+            value = null;
+        }
+        return value;
+    }
+
+    private static Type getFieldType(Field field)
+    {
+        Type fieldType = field.schema().getType();
+
+        // if the field is of type union, we must loop to get the correct type
+        // if not then there is only one definition
+        if(fieldType == Schema.Type.UNION)
+        {
+            for (Schema schema: field.schema().getTypes()) {
+
+                if (!schema.equals(NULL_SCHEMA)) {
+
+                    fieldType = schema.getType();
+                    break;
+                }
+
+            }
+        }
+
+        return fieldType;
+    }
+
+    private static boolean getFieldAllowsNull(Field field)
+    {
+        Type type = field.schema().getType();
+
+        boolean nullAllowed = false;
+
+        // the null is allowed we have two fields (maybe more): one for
+        // the field type and one defining null
+        if(type == Schema.Type.UNION)
+        {
+            for (Schema schema: field.schema().getTypes()) {
+
+                if (schema.equals(NULL_SCHEMA)) {
+
+                    nullAllowed = true;
+                    break;
+
+                }
+
+            }
+        }
+
+        return nullAllowed;
+    }
+
+    public static Object checkTypeAndConvertEx(String column, Object value, Field avroField) {
+        Type avroType = getFieldType(avroField);
         if (value == null || avroType == null) {
             return value;
         }

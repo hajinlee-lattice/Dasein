@@ -124,6 +124,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.ingestion.partion.period}")
     private int ingestionPartionPeriod;
 
+    @Value("${datacloud.collection.alexa.timestamp}")
+    private String alexaTimestampColumn;
+
     private long prevCollectMillis = 0;
     private int prevCollectTasks;
     private long prevIngestionMillis = 0;
@@ -599,8 +602,10 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private String getTimestampColumn(String vendor) throws Exception {
 
         switch (vendor) {
-            case "BUILTWITH":
+            case VendorConfig.VENDOR_BUILTWITH:
                 return bwTimestampColumn;
+            case VendorConfig.VENDOR_ALEXA:
+                return alexaTimestampColumn;
             default:
                 throw new Exception("not implemented");
         }
@@ -673,8 +678,10 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     private Schema getSchema(String vendor) throws Exception {
         switch (vendor) {
-            case "BUILTWITH":
+            case VendorConfig.VENDOR_BUILTWITH:
                 return new Schema.Parser().parse(AvroUtils.buildSchema("builtwith.avsc"));
+            case VendorConfig.VENDOR_ALEXA:
+                return new Schema.Parser().parse(AvroUtils.buildSchema("alexa.avsc"));
             default:
                 throw new Exception("not implemented");
         }
@@ -781,8 +788,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                         GenericRecord rec = new GenericData.Record(schema);
                         for (int i = 0; i < columnCount; ++i) {
 
-                            rec.put(csvIdx2Avro[i], AvroUtils.checkTypeAndConvert(avroIdx2Fields[i].name(), //
-                                    csvRec.get(i), avroIdx2Fields[i].schema().getType()));
+                            rec.put(csvIdx2Avro[i], AvroUtils.checkTypeAndConvertEx(avroIdx2Fields[i].name(), //
+                                    csvRec.get(i), avroIdx2Fields[i]));
 
                         }
 

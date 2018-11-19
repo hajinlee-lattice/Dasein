@@ -122,7 +122,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     public void testCollectionDBService() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
-        collectionDBService.addNewDomains(domains, "builtwith", UUID.randomUUID().toString().toUpperCase());
+        collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
 
 
         while (true)
