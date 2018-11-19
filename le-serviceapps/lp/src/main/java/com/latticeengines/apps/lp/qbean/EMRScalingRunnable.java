@@ -48,7 +48,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
 
     private static final AtomicLong lastScalingUp = new AtomicLong(0);
-    private static final AtomicInteger scalingDownCounter = new AtomicInteger(0);
+    private static final AtomicInteger scalingDownAttempt = new AtomicInteger(0);
 
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
             Sets.newEnumSet(Arrays.asList(//
@@ -68,7 +68,7 @@ public class EMRScalingRunnable implements Runnable {
     private InstanceGroup coreGrp = null;
 
     EMRScalingRunnable(String emrCluster, EMRService emrService, EMRCacheService emrCacheService, //
-                       EMREnvService emrEnvService) {
+            EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
         this.emrService = emrService;
         this.emrEnvService = emrEnvService;
@@ -90,7 +90,8 @@ public class EMRScalingRunnable implements Runnable {
         try {
             reqResource = getRequestingResources();
         } catch (Exception e) {
-            log.error("Failed to retrieve requesting resource submitted to emr cluster " + emrCluster);
+            log.error("Failed to retrieve requesting resource submitted to emr cluster "
+                    + emrCluster);
             return;
         }
 
@@ -131,7 +132,7 @@ public class EMRScalingRunnable implements Runnable {
             scale = true;
         } else if (availableMB >= getMaxAvailMemMb() && availableVCores >= getMaxAvailVcores()) {
             // too much mem and vcores
-            log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
+            log.info(scaleLogPrefix + "available mb " + availableMB + " and vcores " //
                     + availableVCores + " are both too high.");
             scale = true;
         } else if (requested < running) {
@@ -159,9 +160,11 @@ public class EMRScalingRunnable implements Runnable {
                 scale(target);
                 resetScalingDownCounter();
             } else {
-                log.info(String.format("Scale down %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                        emrCluster, scalingDownCounter.incrementAndGet(), running, requested, target));
-                if (requested < running && scalingDownCounter.get() >= 3) {
+                log.info(String.format(
+                        "Scale down %s, attempt=%d, running=%d, requested=%d, target=%d", //
+                        emrCluster, scalingDownAttempt.incrementAndGet(), running, requested,
+                        target));
+                if (requested <= running && scalingDownAttempt.get() >= 3) {
                     // be conservative about terminating machines
                     scale(target);
                     resetScalingDownCounter();
@@ -225,8 +228,8 @@ public class EMRScalingRunnable implements Runnable {
                 ApplicationResourceUsageReport usageReport = app
                         .getApplicationResourceUsageReport();
                 Resource used = usageReport.getUsedResources();
-                if (now - app.getStartTime() >= SLOW_START_THRESHOLD
-                        && used.getMemory() == 0 && used.getVirtualCores() == 0) {
+                if (now - app.getStartTime() >= SLOW_START_THRESHOLD && used.getMemory() == 0
+                        && used.getVirtualCores() == 0) {
                     // no resource usage after SLOW_START_THRESHOLD
                     // must be stuck
                     Resource asked = usageReport.getNeededResources();
@@ -256,7 +259,8 @@ public class EMRScalingRunnable implements Runnable {
             target += newNodes;
         }
         // to be removed to changed to debug
-        log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource + " Target=" + target);
+        log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource + " Target="
+                + target);
         return Math.min(target, MAX_TASK_NODES);
     }
 
@@ -265,9 +269,10 @@ public class EMRScalingRunnable implements Runnable {
         int avail = metrics.availableMB;
         int total = metrics.totalMB;
         int newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
-        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_MB * coreCount)) / UNIT_MB));
-        log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " +
-                "total=" + total + " avail=" + avail + " req=" + req);
+        int target = (int) Math.max(1,
+                Math.ceil((1.0 * (newTotal - CORE_MB * coreCount)) / UNIT_MB));
+        log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " + "total="
+                + total + " avail=" + avail + " req=" + req);
         return target;
     }
 
@@ -276,9 +281,10 @@ public class EMRScalingRunnable implements Runnable {
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
         int newTotal = total - avail + req + MIN_AVAIL_VCORES;
-        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_VCORES * coreCount)) / UNIT_VCORES));
-        log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: " +
-                "total=" + total + " avail=" + avail + " req=" + req);
+        int target = (int) Math.max(1,
+                Math.ceil((1.0 * (newTotal - CORE_VCORES * coreCount)) / UNIT_VCORES));
+        log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: "
+                + "total=" + total + " avail=" + avail + " req=" + req);
         return target;
     }
 
@@ -295,9 +301,9 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void resetScalingDownCounter() {
-        if (scalingDownCounter.get() > 0) {
-            log.info("Reset scaling down counter from " + scalingDownCounter.get());
-            scalingDownCounter.set(0);
+        if (scalingDownAttempt.get() > 0) {
+            log.info("Reset scaling down counter from " + scalingDownAttempt.get());
+            scalingDownAttempt.set(0);
         }
     }
 
@@ -341,6 +347,7 @@ public class EMRScalingRunnable implements Runnable {
         int maxMb = 0;
         int maxVCores = 0;
         int hangingApps = 0;
+
         @Override
         public String toString() {
             return String.format("[pendingApps=%d, reqMb=%d, reqVCores=%d, maxMb=%d, maxVCores=%d]",
