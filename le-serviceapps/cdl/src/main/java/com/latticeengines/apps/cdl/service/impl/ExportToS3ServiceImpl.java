@@ -243,7 +243,8 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                         String tgtPath = tgtDir + subFolder;
                         try {
                             if (HdfsUtils.fileExists(hadoopConfiguration, srcPath)) {
-                                HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
+                                Configuration distcpConfiguration = createConfiguration(subFolder);
+                                HdfsUtils.distcp(distcpConfiguration, srcPath, tgtPath, queueName);
                             } else {
                                 log.info(srcPath + " does not exist, skip copying.");
                             }
@@ -269,6 +270,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         private Configuration createConfiguration() {
             Configuration hadoopConfiguration = new Configuration(distCpConfiguration);
             String jobName = tenantId + "~" + name;
+            hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
+            return hadoopConfiguration;
+        }
+
+        private Configuration createConfiguration(String jobNameSuffix) {
+            Configuration hadoopConfiguration = new Configuration(distCpConfiguration);
+            String jobName = tenantId + "~" + name + "~" + jobNameSuffix;
             hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
             return hadoopConfiguration;
         }
