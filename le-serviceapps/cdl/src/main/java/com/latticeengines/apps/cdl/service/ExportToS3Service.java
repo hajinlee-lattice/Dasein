@@ -12,7 +12,8 @@ public interface ExportToS3Service {
 
     void buildDataUnits(List<ExportRequest> requests);
 
-    public static class ExportRequest {
+    class ExportRequest {
+        public String name;
         public String srcDir;
         public String tgtDir;
         public CustomerSpace customerSpace;
@@ -21,6 +22,13 @@ public interface ExportToS3Service {
         }
 
         public ExportRequest(String srcDir, String tgtDir, CustomerSpace customerSpace) {
+            this.srcDir = srcDir;
+            this.tgtDir = tgtDir;
+            this.customerSpace = customerSpace;
+        }
+
+        public ExportRequest(String name, String srcDir, String tgtDir, CustomerSpace customerSpace) {
+            this.name = name;
             this.srcDir = srcDir;
             this.tgtDir = tgtDir;
             this.customerSpace = customerSpace;

@@ -90,15 +90,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             return;
         }
         List<String> tenants = new ArrayList<>();
-        requests.forEach(r -> {
-            tenants.add(r.customerSpace.getTenantId());
-        });
+        requests.forEach(r -> tenants.add(r.customerSpace.getTenantId()));
 
         log.info(String.format("Starting to export from hdfs to s3. tenantIds=%s, size=%s",
                 StringUtils.join(tenants, ","), requests.size()));
         List<HdfsS3Exporter> exporters = new ArrayList<>();
-        for (int i = 0; i < requests.size(); i++) {
-            exporters.add(new HdfsS3Exporter(requests.get(i)));
+        for (ExportRequest request : requests) {
+            exporters.add(new HdfsS3Exporter(request));
         }
         int threadPoolSize = Math.min(6, requests.size());
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-export-history", threadPoolSize);
@@ -178,15 +176,28 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     }
 
     private void buildAtlasRequests(List<ExportRequest> requests, CustomerSpace customerSpace) {
-        String hdfsAtlasDir = pathBuilder.getHdfsAtlasDir(podId, customerSpace.getTenantId());
-        String s3AtlasDir = pathBuilder.getS3AtlasDir(s3Bucket, customerSpace.getTenantId());
-        requests.add(new ExportRequest(hdfsAtlasDir, s3AtlasDir, customerSpace));
+        String tenantId = customerSpace.getTenantId();
+        String hdfsMetadataDir = pathBuilder.getHdfsAtlasMetadataDir(podId, tenantId);
+        String s3MetadataDir = pathBuilder.getS3AtlasMetadataDir(podId, tenantId);
+        requests.add(new ExportRequest("metadata", hdfsMetadataDir, s3MetadataDir, customerSpace));
+
+        String hdfsFilesDir = pathBuilder.getHdfsAtlasFilesDir(podId, tenantId);
+        String s3FilesDir = pathBuilder.getS3AtlasFilesDir(podId, tenantId);
+        requests.add(new ExportRequest("files", hdfsFilesDir, s3FilesDir, customerSpace));
+
+        String hdfsTablesDir = pathBuilder.getHdfsAtlasTablesDir(podId, tenantId);
+        String s3TablesDir = pathBuilder.getS3AtlasTablesDir(podId, tenantId);
+        requests.add(new ExportRequest("tables", hdfsTablesDir, s3TablesDir, customerSpace));
+
+        String hdfsTableSchemasDir = pathBuilder.getHdfsAtlasTableSchemasDir(podId, tenantId);
+        String s3TableSchemasDir = pathBuilder.getS3AtlasTableSchemasDir(podId, tenantId);
+        requests.add(new ExportRequest("table-schemas", hdfsTableSchemasDir, s3TableSchemasDir, customerSpace));
     }
 
     private void buildAnalyticsRequests(List<ExportRequest> requests, CustomerSpace customerSpace) {
         String hdfsAnalyticDir = pathBuilder.getHdfsAnalyticsDir(customerSpace.toString());
         String s3AnalyticDir = pathBuilder.getS3AnalyticsDir(s3Bucket, customerSpace.getTenantId());
-        requests.add(new ExportRequest(hdfsAnalyticDir, s3AnalyticDir, customerSpace));
+        requests.add(new ExportRequest("analytics", hdfsAnalyticDir, s3AnalyticDir, customerSpace));
     }
 
     private class HdfsS3Exporter implements Runnable {
@@ -194,12 +205,14 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         private String tgtDir;
         private String customer;
         private String tenantId;
+        private String name;
 
         HdfsS3Exporter(ExportRequest request) {
             this.srcDir = request.srcDir;
             this.tgtDir = request.tgtDir;
             this.customer = request.customerSpace.toString();
             this.tenantId = request.customerSpace.getTenantId();
+            this.name = request.name;
         }
 
         @Override
@@ -225,12 +238,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
         private Configuration createConfiguration() {
             Configuration hadoopConfiguration = new Configuration(distCpConfiguration);
-            String jobName = tenantId;
-            if (srcDir.contains("s-analytics")) {
-                jobName += "~ s-analytics";
-            } else {
-                jobName += "~ Pods";
-            }
+            String jobName = tenantId + "~" + name;
             hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
             return hadoopConfiguration;
         }

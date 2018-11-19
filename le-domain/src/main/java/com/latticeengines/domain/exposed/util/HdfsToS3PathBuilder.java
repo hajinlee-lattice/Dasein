@@ -54,6 +54,10 @@ public class HdfsToS3PathBuilder {
         return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "Tables";
     }
 
+    public String getHdfsAtlasTableSchemasDir(String pod, String tenantId) {
+        return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "TableSchemas";
+    }
+
     public String getHdfsAtlasFilesDir(String pod, String tenantId) {
         return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "Files";
     }
@@ -114,6 +118,10 @@ public class HdfsToS3PathBuilder {
 
     public String getS3AtlasTablesDir(String s3Bucket, String tenantId) {
         return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Tables";
+    }
+
+    public String getS3AtlasTableSchemasDir(String s3Bucket, String tenantId) {
+        return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "TableSchemas";
     }
 
     public String getS3AtlasFilesDir(String s3Bucket, String tenantId) {
