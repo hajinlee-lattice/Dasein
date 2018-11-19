@@ -1,3 +1,5 @@
+@import '../colors.scss';
+
 .le-link-container {
   &.le-flex-h-panel {
     flex-wrap: nowrap;
@@ -14,8 +16,10 @@
  
   .le-link {
     overflow: hidden;
+    color: $saphire-four;
   }
   .le-link-icon {
     padding: 0 0.5em;
+    // border-bottom: 1px solid  $saphire-four;
   }
 }

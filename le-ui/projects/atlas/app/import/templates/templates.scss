@@ -15,11 +15,16 @@
 
       .le-table-row > .le-table-cell > .le-cell-template {
         .le-blu-link {
+          .le-link{
+            border-bottom: 0px solid white;
+            color: none;
+          }
           color: $blue-text;
           justify-content: center;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          
           &.edit-button > .wrapper,
           &.import-button > .wrapper {
             width: 100%;
@@ -42,6 +47,9 @@
             & > .wrapper {
               border: 1px solid $pearl-white;
               border-radius: 6px;
+              .le-link{
+                color: $pearl-white;
+              }
             }
           }
         }

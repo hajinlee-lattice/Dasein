@@ -6,14 +6,14 @@ import "./le-input-text.scss";
 class LeInputText extends Component {
   constructor(props) {
     super(props);
-    this.config = props.config ? props.config : {};
+    // this.config = props.config ? props.config : {};
     this.clearCallback = this.clearCallback.bind(this);
     this.typedCallback = this.typedCallback.bind(this);
     this.state = { value: "" };
   }
 
   getPlaceholder() {
-    return this.config.placeholder ? this.config.placeholder : "";
+    return this.props.config.placeholder ? this.props.config.placeholder : "";
   }
 
   getLabel() {
@@ -28,10 +28,10 @@ class LeInputText extends Component {
     }
   }
   getIcon() {
-    if (this.config.icon) {
+    if (this.props.config && this.props.config.icon) {
       return (
         <span className="input-icon">
-          <span className={this.config.icon} />
+          <span className={this.props.config.icon} />
         </span>
       );
     } else {
@@ -40,7 +40,7 @@ class LeInputText extends Component {
   }
 
   getClearIcon() {
-    if (this.config.clearIcon && this.state.value && this.state.value != '') {
+    if (this.props.config.clearIcon && this.state.value && this.state.value != '') {
       return (
         <span className="input-icon">
           <span
@@ -66,7 +66,7 @@ class LeInputText extends Component {
     if (this.props.callback) {
       debounce(() => {
         return this.props.callback(val);
-      }, this.config.debounce ? this.config.debounce : 0);
+      }, this.props.config.debounce ? this.props.config.debounce : 0);
     }
   }
 

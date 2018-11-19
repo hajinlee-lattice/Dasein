@@ -20,7 +20,7 @@ class TemplatesComponent extends Component {
     super(props);
     this.emailCredentialConfig = {
       lable: "Setup Automation",
-      classNames: ["button", "gray-button"]
+      classNames: "gray-button"
     };
     setAngularState(this.props.$state);
   }

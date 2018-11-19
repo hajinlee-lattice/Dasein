@@ -176,4 +176,14 @@ module.exports = [{
         '/widgetsdemo' : '/dist',
         '/dist': '/dist',
     }
+},{    
+    path: '/projects/uicomponents',
+    html5mode: true,
+    pages: {
+        '/uicomponents/': '/storybook-static/index.html',
+        '/uicomponents/index': '/storybook-static/index.html'
+    },
+    folders: {
+        '/uicomponents' : '/storybook-static'
+    }
 }];

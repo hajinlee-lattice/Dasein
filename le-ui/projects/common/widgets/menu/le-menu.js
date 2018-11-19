@@ -11,28 +11,38 @@ export default class LeMenu extends Component {
         this.mouseMenuEnterHandler = this.mouseMenuEnterHandler.bind(this);
         this.mouseMainLeaveHandler = this.mouseMainLeaveHandler.bind(this);
         this.mouseMenuLeaveHandler = this.mouseMenuLeaveHandler.bind(this);
+        this.mouseMainOverHandler = this.mouseMainOverHandler.bind(this);
     }
 
-    getImage(image) {
-        if (image) {
-            const classes = `${image} item-img`;
-            return <span className={classes}></span>
+    getContent() {
+        if (this.props.image) {
+            const classes = `${this.props.image} item-img`;
+            return <span className={classes}>{this.getLabel()}</span>
         } else {
-            return '';
+            return this.getLabel();
         }
     }
-    getLabel(label) {
-        if (label) {
-            return <span className="label">{label}</span>
+    getLabel() {
+        if (this.props.label) {
+            return <span className="label">{this.props.label}</span>
         } else {
             return null;
         }
     }
-    mouseMainEnterHandler() {
-
+    
+    mouseMainOverHandler(){
         this.setState({
-            outmain: false,
-            outmenu: true
+            outmain: false
+        }, () => {
+            if (this.state.opened) {
+                this.updateShowClass();
+            }
+        });
+    }
+
+    mouseMainEnterHandler() {
+        this.setState({
+            outmain: false
         }, () => {
             if (this.state.opened) {
                 this.updateShowClass();
@@ -42,7 +52,6 @@ export default class LeMenu extends Component {
     mouseMenuEnterHandler() {
         this.setState((prevState, props) => {
             return {
-                outmain: true,
                 outmenu: false
             }
         });
@@ -58,14 +67,14 @@ export default class LeMenu extends Component {
 
 
     mouseMenuLeaveHandler() {
-        this.setState({
-            outmenu: true
-        }, () => {
-            this.updateShowClass();
-        });
-
+        setTimeout(() => {
+            this.setState({
+                outmenu: true
+            }, () => {
+                this.updateShowClass();
+            });
+        }, 2000);
     }
-
 
     clickHandler(event) {
         this.setState((prevState, props) => {
@@ -81,8 +90,8 @@ export default class LeMenu extends Component {
             this.props.callback(event, this.props.name);
         }
     }
+
     showMenu(show) {
-        // console.log('show');
         if (show) {
             this.menuClass = `le-menu le-menu-show ${this.props.menuClass ? this.props.menuClass : ''}`;
         } else {
@@ -92,25 +101,24 @@ export default class LeMenu extends Component {
     }
 
     updateShowClass() {
-        // console.log('up', this.state);
         if (this.state.opened && (!this.state.outmain || !this.state.outmenu)) {
             this.showMenu(true);
-            this.setState({ opened: true });
+            this.setState({ opened: true, outmain:false, outmenu: true });
         } else {
             this.showMenu(false);
-            this.setState({ opened: false });
+            this.setState({ opened: false, outmain:true, outmenu: true });
         }
     }
 
     render() {
-
+        this.menuClass = `le-menu ${(this.state.opened && (!this.state.outmain || !this.state.outmenu)) ? 'le-menu-show' : ''} ${this.props.menuClass ? this.props.menuClass : ''}`;
         return (
             <div className={this.menuClass} onClick={(event) => { this.clickHandler(event) }}
                 onMouseEnter={this.mouseMainEnterHandler}
-                onMouseLeave={this.mouseMainLeaveHandler}>
+                onMouseLeave={this.mouseMainLeaveHandler}
+                onMouseOver={this.mouseMainOverHandler}>
                 <div className="menu-container">
-                    {this.getImage(this.props.image)}
-                    {this.getLabel(this.props.label)}
+                    {this.getContent()}
                 </div>
                 <div className={`menu-content ${this.props.menuClass ? this.props.menuClass : ''}`}
                     onMouseEnter={this.mouseMenuEnterHandler}

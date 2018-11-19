@@ -1,7 +1,7 @@
 @import '../colors.scss';
 .le-menu {
     position: relative;
-    display: flex;
+    display: inline-flex;
     cursor: pointer;
     box-sizing: border-box;
     padding: 0em .8em;
@@ -9,7 +9,13 @@
         box-sizing: border-box;
         padding: 0.5em;
         transition: 0s background-color, box-shadow 0s;
-        
+        display: inline-flex;
+        // border: 1px solid red;
+        justify-content: space-evenly;
+
+        .label {
+            padding: 0 0.8em;
+        }
     }
 }
 
@@ -64,9 +70,9 @@
 }
 
 .le-menu-show {
-    display: block;
     .menu-content {
         display: block;
+        margin-top: 30px;
     }
     .menu-container{
         background-color: $dark-gray;
