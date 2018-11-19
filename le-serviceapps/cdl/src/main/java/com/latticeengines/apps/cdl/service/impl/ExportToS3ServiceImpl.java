@@ -213,8 +213,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                 } catch (Exception ex) {
                     String msg = String.format("Failed to copy hdfs dir=%s to s3 dir=%s for tenant=%s", srcDir, tgtDir,
                             customer);
-                    log.error(msg, ex);
-                    throw new RuntimeException(msg);
+                    throw new RuntimeException(msg, ex);
                 }
             }
         }

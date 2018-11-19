@@ -77,16 +77,19 @@ public class ExportToS3Resource {
         if (CollectionUtils.isEmpty(resultCustomers)) {
             log.warn("There's not customers selected!");
         } else {
-            int attempt = 0;
-            while (CollectionUtils.isNotEmpty(resultCustomers)) {
-                log.info("Attempt = " + (++attempt) + " Customers=" + StringUtils.join(resultCustomers));
-                submitRequests(resultCustomers);
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+            getWorkers().submit(() -> {
+                log.info("Start exporting: " + StringUtils.join(resultCustomers));
+                int attempt = 0;
+                while (CollectionUtils.isNotEmpty(resultCustomers)) {
+                    log.info("Attempt = " + (++attempt) + " Customers=" + StringUtils.join(resultCustomers));
+                    submitRequests(resultCustomers);
+                    try {
+                        Thread.sleep(5000L);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
+            });
         }
         return resultCustomers;
     }
