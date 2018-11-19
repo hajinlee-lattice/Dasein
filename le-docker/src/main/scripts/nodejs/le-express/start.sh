@@ -35,6 +35,10 @@ else
     sed -i "s|{{NODE_APPS}}|leui,leadmin|g" ${APP_ROOT}/ENV_VARS
 fi
 
+if [ "${LE_ENVIRONMENT}" == "prodcluster" ] && [ -d "${APP_ROOT}/projects/uicomponents" ]; then
+    rm -rf ${APP_ROOT}/projects/uicomponents
+fi
+
 sed -i "/export LOGGING=/d" ${APP_ROOT}/ENV_VARS
 
 source ${APP_ROOT}/ENV_VARS
