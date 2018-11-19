@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.opensaml.saml1.core.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,11 +117,13 @@ public class SamlLoginResource {
             }
 
             if (!samlLoginResp.isValidated()) {
-                throw new LedpException(LedpCode.LEDP_18170);
+                log.warn(LedpCode.LEDP_18170.toString() + " Info: " + samlLoginResp.toString());
+                redirectView.setUrl(String.format("%s/login/saml/%s/error", baseLoginURL, tenantDeploymentId));
+                return redirectView;
             }
-            
+
             sessionService.validateSamlLoginResponse(samlLoginResp);
-            
+
             /*
             //TODO: Commenting part of PLS-7954. Need to be enabled after we fix the allowed domains check/
             // Check whether User already exists in the system and other attributes are up to date too.
