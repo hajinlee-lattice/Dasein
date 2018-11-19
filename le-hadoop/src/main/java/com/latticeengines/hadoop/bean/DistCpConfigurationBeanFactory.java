@@ -18,6 +18,9 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
     @Value("${hadoop.use.ambari}")
     private boolean useAmbari;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Value("${hadoop.ambari.yarn.cp}")
     private String ambariYarnCp;
 
@@ -36,7 +39,7 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
 
     @Override
     protected YarnConfiguration getBaseConfiguration() {
-        if (useAmbari) {
+        if (!Boolean.TRUE.equals(useEmr) && useAmbari) {
             Properties properties = new Properties();
             properties.setProperty("yarn.application.classpath", ambariYarnCp);
             properties.setProperty("mapreduce.application.classpath", ambariMrCp);
