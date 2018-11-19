@@ -267,12 +267,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-prospectdiscovery</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-cdl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

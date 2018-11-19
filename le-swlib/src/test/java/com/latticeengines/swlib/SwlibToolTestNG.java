@@ -12,8 +12,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 
 public class SwlibToolTestNG {
-    
-    private static final String INITIALIZER_CLASS = "com.latticeengines.serviceflows.prospectdiscovery.Initializer";
+
+    private static final String INITIALIZER_CLASS = "com.latticeengines.serviceflows.leadprioritization.Initializer";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -24,7 +24,7 @@ public class SwlibToolTestNG {
     @Test(groups = "functional")
     public void main() throws Exception {
         String jarFile = ClassLoader
-                .getSystemResource("com/latticeengines/swlib/le-serviceflows-prospectdiscovery.jar").getPath();
+                .getSystemResource("com/latticeengines/swlib/le-serviceflows-leadprioritization.jar").getPath();
         SwlibTool.main(new String[] { "-o", "install", //
                 "-m", "dataflow", //
                 "-g", "com.latticeengines", //

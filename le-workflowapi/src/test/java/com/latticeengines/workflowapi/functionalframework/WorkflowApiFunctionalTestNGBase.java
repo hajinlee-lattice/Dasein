@@ -138,9 +138,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
                 PathBuilder.buildCustomerSpacePath("Production", WFAPITEST_CUSTOMERSPACE);
         HdfsUtils.rmdir(yarnConfiguration, path.toString());
         HdfsUtils.mkdir(yarnConfiguration, path.toString());
-
-        // installServiceFlow("le-serviceflows-prospectdiscovery",
-        // Initializer.class.getName());
     }
 
     protected void setupYarnPlatform() {
