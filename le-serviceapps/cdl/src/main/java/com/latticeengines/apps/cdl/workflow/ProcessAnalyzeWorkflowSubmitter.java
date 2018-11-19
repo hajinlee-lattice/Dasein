@@ -305,6 +305,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
         TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
+        boolean cdlMatchEnabled = FeatureFlagUtils.isCDLMatchEnabled(flags);
+        log.info("CDL Match Enabled=" + cdlMatchEnabled);
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
@@ -338,6 +340,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dynamoSignature(signature) //
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
+                .cdlMatchEnabled(cdlMatchEnabled) //
                 .build();
     }
 

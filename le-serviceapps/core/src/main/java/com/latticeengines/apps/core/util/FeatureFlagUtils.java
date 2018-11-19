@@ -31,6 +31,16 @@ public class FeatureFlagUtils {
         }
     }
 
+    public static boolean isCDLMatchEnabled(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_CDL_MATCH.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_CDL_MATCH.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_CDL_MATCH.getName() + " feature flag!", e);
+            return false;
+        }
+    }
+
     @SuppressWarnings("deprecation")
     public static boolean isFuzzyMatchEnabled(FeatureFlagValueMap flags) {
         return flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())

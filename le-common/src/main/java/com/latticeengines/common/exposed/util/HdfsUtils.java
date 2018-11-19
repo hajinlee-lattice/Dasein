@@ -624,8 +624,8 @@ public class HdfsUtils {
 
     public static boolean copyFiles(Configuration configuration, String src, String dst)
             throws IllegalArgumentException, IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
-            return FileUtil.copy(fs, new Path(src), fs, new Path(dst), false, false, configuration);
+        try (FileSystem srcFS = getFileSystem(configuration, src); FileSystem dstFS = getFileSystem(configuration, dst)) {
+            return FileUtil.copy(srcFS, new Path(src), dstFS, new Path(dst), false, false, configuration);
         }
     }
 

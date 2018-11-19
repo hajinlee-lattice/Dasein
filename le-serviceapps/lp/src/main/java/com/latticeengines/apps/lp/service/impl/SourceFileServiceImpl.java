@@ -1,9 +1,12 @@
 package com.latticeengines.apps.lp.service.impl;
 
+import java.io.IOException;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.lp.entitymgr.SourceFileEntityMgr;
@@ -19,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 @Service("sourceFileService")
 public class SourceFileServiceImpl implements SourceFileService {
@@ -31,6 +35,12 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     @Override
     public SourceFile getByTableNameCrossTenant(String tableName) {
@@ -98,7 +108,8 @@ public class SourceFileServiceImpl implements SourceFileService {
                 CustomerSpace.parse(targetTenant.getId())).toString()
                 + "/" + outputFileName;
         try {
-            HdfsUtils.copyFiles(yarnConfiguration, originalSourceFile.getPath(), outputPath);
+            String srcFile = getS3Path(originalSourceFile.getTenant().getId(), originalSourceFile.getPath());
+            HdfsUtils.copyFiles(yarnConfiguration, srcFile, outputPath);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18118, e);
         }
@@ -111,5 +122,16 @@ public class SourceFileServiceImpl implements SourceFileService {
         file.setState(originalSourceFile.getState());
         file.setTableName(tableName);
         sourceFileEntityMgr.create(file, targetTenant);
+    }
+
+    private String getS3Path(String customerSpace, String hdfsPath) throws IOException {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, podId, space.toString(),
+                space.getTenantId(), s3Bucket);
+        if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
+            hdfsPath = s3Path;
+        }
+        return hdfsPath;
     }
 }
