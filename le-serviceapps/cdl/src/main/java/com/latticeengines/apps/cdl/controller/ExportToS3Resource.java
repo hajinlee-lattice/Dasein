@@ -95,7 +95,6 @@ public class ExportToS3Resource {
     }
 
     private Collection<String> submitRequests(Collection<String> customers) {
-        log.info("Exporting to S3 for tenants: " + customers);
         ExecutorService workers = getWorkers();
         customers.forEach(customer -> {
             if (inProcess.contains(customer)) {
@@ -106,6 +105,7 @@ public class ExportToS3Resource {
                 workers.submit(() -> {
                     try {
                         inProcess.add(customer);
+                        customers.remove(customer);
                         log.info("Exporting to S3 for " + customer + ", " + inProcess.size() + " in progress.");
                         List<ExportRequest> requests = new ArrayList<>();
                         exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests);
@@ -113,14 +113,13 @@ public class ExportToS3Resource {
                         exportToS3Service.buildDataUnits(requests);
                         log.info("Finished Export To S3 for " + customer);
                     } catch (Exception e) {
-                        throw new RuntimeException("Failed to Export to S3");
+                        throw new RuntimeException("Failed to Export to S3", e);
                     } finally {
                         inProcess.remove(customer);
                     }
                 });
             }
         });
-        customers.removeAll(inProcess);
         return customers;
     }
 

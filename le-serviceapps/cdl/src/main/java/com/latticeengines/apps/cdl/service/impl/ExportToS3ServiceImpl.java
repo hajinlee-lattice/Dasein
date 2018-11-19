@@ -195,9 +195,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     }
 
     private void buildAnalyticsRequests(List<ExportRequest> requests, CustomerSpace customerSpace) {
-        String hdfsAnalyticDir = pathBuilder.getHdfsAnalyticsDir(customerSpace.toString());
-        String s3AnalyticDir = pathBuilder.getS3AnalyticsDir(s3Bucket, customerSpace.getTenantId());
-        requests.add(new ExportRequest("analytics", hdfsAnalyticDir, s3AnalyticDir, customerSpace));
+        String hdfsDataDir = pathBuilder.getHdfsAnalyticsDataDir(customerSpace.toString());
+        String s3DataDir = pathBuilder.getS3AnalyticsDataDir(s3Bucket, customerSpace.getTenantId());
+        requests.add(new ExportRequest("analytics-data", hdfsDataDir, s3DataDir, customerSpace));
+
+        String hdfsModelsDir = pathBuilder.getHdfsAnalyticsDataDir(customerSpace.toString());
+        String s3ModelsDir = pathBuilder.getS3AnalyticsDataDir(s3Bucket, customerSpace.getTenantId());
+        requests.add(new ExportRequest("analytics-models", hdfsModelsDir, s3ModelsDir, customerSpace));
     }
 
     private class HdfsS3Exporter implements Runnable {
@@ -217,16 +221,42 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
         @Override
         public void run() {
-            try (PerformanceTimer timer = new PerformanceTimer("Copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
+            try (PerformanceTimer timer = new PerformanceTimer("Finished copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
+                log.info("Start copying from hdfs dir=" + srcDir + " to s3 dir=" + tgtDir);
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
-                    HdfsUtils.getFilesByGlob(hadoopConfiguration, srcDir).forEach(path -> {
-                        log.info("Found a sub-folder for " + tenantId + " : " + path);
-                    });
-                    if (HdfsUtils.fileExists(hadoopConfiguration, srcDir)) {
-                        HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
-                    } else {
-                        log.info(srcDir + " does not exist, skip copying.");
+                    List<String> subFolders = new ArrayList<>();
+                    if ("analytics-data".equals(name) || "analytics-models".equals(name) || "tables".equals(name)) {
+                        HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
+                            String subFolder = path.substring(path.lastIndexOf("/"));
+                            log.info("Found a " + name + " sub-folder for " + tenantId + " : " + subFolder);
+                        });
+                    }
+                    if (CollectionUtils.isEmpty(subFolders)) {
+                        subFolders.add("");
+                    }
+                    int count = 1;
+                    List<String> failedFolders = new ArrayList<>();
+                    for (String subFolder: subFolders) {
+                        log.info(tenantId + ": start copying " + count + "/" + subFolders.size() + " sub-folder " + subFolder);
+                        String srcPath = srcDir + subFolder;
+                        String tgtPath = tgtDir + subFolder;
+                        try {
+                            if (HdfsUtils.fileExists(hadoopConfiguration, srcPath)) {
+                                HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
+                            } else {
+                                log.info(srcPath + " does not exist, skip copying.");
+                            }
+                        } catch (Exception e) {
+                            if (StringUtils.isNotBlank(name)) {
+                                log.warn("Failed copy sub-folder " + subFolder + " in " + name);
+                                failedFolders.add(subFolder);
+                            }
+                        }
+                        log.info(tenantId + ": finished copying " + count + "/" + subFolders.size() + " sub-folder " + subFolder);
+                    }
+                    if (CollectionUtils.isNotEmpty(failedFolders)) {
+                        throw new RuntimeException("Failed to copy sub-folders: " + StringUtils.join(failedFolders));
                     }
                 } catch (Exception ex) {
                     String msg = String.format("Failed to copy hdfs dir=%s to s3 dir=%s for tenant=%s", srcDir, tgtDir,
