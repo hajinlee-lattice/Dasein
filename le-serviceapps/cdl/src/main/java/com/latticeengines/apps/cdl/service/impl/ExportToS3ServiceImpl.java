@@ -178,19 +178,19 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     private void buildAtlasRequests(List<ExportRequest> requests, CustomerSpace customerSpace) {
         String tenantId = customerSpace.getTenantId();
         String hdfsMetadataDir = pathBuilder.getHdfsAtlasMetadataDir(podId, tenantId);
-        String s3MetadataDir = pathBuilder.getS3AtlasMetadataDir(podId, tenantId);
+        String s3MetadataDir = pathBuilder.getS3AtlasMetadataDir(s3Bucket, tenantId);
         requests.add(new ExportRequest("metadata", hdfsMetadataDir, s3MetadataDir, customerSpace));
 
         String hdfsFilesDir = pathBuilder.getHdfsAtlasFilesDir(podId, tenantId);
-        String s3FilesDir = pathBuilder.getS3AtlasFilesDir(podId, tenantId);
+        String s3FilesDir = pathBuilder.getS3AtlasFilesDir(s3Bucket, tenantId);
         requests.add(new ExportRequest("files", hdfsFilesDir, s3FilesDir, customerSpace));
 
         String hdfsTablesDir = pathBuilder.getHdfsAtlasTablesDir(podId, tenantId);
-        String s3TablesDir = pathBuilder.getS3AtlasTablesDir(podId, tenantId);
+        String s3TablesDir = pathBuilder.getS3AtlasTablesDir(s3Bucket, tenantId);
         requests.add(new ExportRequest("tables", hdfsTablesDir, s3TablesDir, customerSpace));
 
         String hdfsTableSchemasDir = pathBuilder.getHdfsAtlasTableSchemasDir(podId, tenantId);
-        String s3TableSchemasDir = pathBuilder.getS3AtlasTableSchemasDir(podId, tenantId);
+        String s3TableSchemasDir = pathBuilder.getS3AtlasTableSchemasDir(s3Bucket, tenantId);
         requests.add(new ExportRequest("table-schemas", hdfsTableSchemasDir, s3TableSchemasDir, customerSpace));
     }
 
