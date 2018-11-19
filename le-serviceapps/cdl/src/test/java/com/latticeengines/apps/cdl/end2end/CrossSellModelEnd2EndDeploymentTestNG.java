@@ -108,7 +108,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.PROPENSITY);
         setupAndRunRemodel(PredictionType.PROPENSITY);
     }
 

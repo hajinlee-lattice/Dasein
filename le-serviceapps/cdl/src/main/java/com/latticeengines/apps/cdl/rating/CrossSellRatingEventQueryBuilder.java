@@ -91,8 +91,11 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
             }
 
             // Not Purchased In Past X Periods
-            crossSellRestriction = new TransactionRestriction(productIds,
-                    TimeFilter.priorOnly(configFilter.getValue() - 1, periodTypeName), false, null, null);
+            crossSellRestriction = (configFilter.getValue() == null || configFilter.getValue() < 1)
+                    ? null
+                    : new TransactionRestriction(productIds,
+                            TimeFilter.priorOnly(configFilter.getValue() - 1, periodTypeName),
+                            false, null, null);
             break;
         case CROSS_SELL_FIRST_PURCHASE:
             // Never Purchased Including Current Period
