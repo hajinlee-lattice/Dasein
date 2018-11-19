@@ -192,7 +192,6 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     private class HdfsS3Exporter implements Runnable {
         private String srcDir;
         private String tgtDir;
-        private String tableName;
         private String customer;
         private String tenantId;
 
@@ -208,6 +207,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             try (PerformanceTimer timer = new PerformanceTimer("Copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
+                    HdfsUtils.getFilesByGlob(hadoopConfiguration, srcDir).forEach(path -> {
+                        log.info("Found a sub-folder for " + tenantId + " : " + path);
+                    });
                     if (HdfsUtils.fileExists(hadoopConfiguration, srcDir)) {
                         HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
                     } else {
@@ -223,7 +225,12 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
         private Configuration createConfiguration() {
             Configuration hadoopConfiguration = new Configuration(distCpConfiguration);
-            String jobName = StringUtils.isNotBlank(tableName) ? tenantId + "~" + tableName : tenantId;
+            String jobName = tenantId;
+            if (srcDir.contains("s-analytics")) {
+                jobName += "~ s-analytics";
+            } else {
+                jobName += "~ Pods";
+            }
             hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
             return hadoopConfiguration;
         }
