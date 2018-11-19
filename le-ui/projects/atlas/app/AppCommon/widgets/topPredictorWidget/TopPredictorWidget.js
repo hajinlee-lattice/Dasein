@@ -75,6 +75,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.externalCategories = externalCategoryObj.categories;
         $scope.showExternalCategories = externalCategoryObj.total > 0;
     }
+
     // Calculate total
     var totalPredictors = data.TotalPredictors;
     $scope.topPredictorTitle = totalPredictors + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
@@ -293,7 +294,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
     $scope.categoryClicked = function (category) {
 
-        if($scope.hasAccountAttributes && category.name === 'My Attributes'){
+        if(category.name === 'My Attributes'){
             category.name = 'ACCOUNT_ATTRIBUTES';
             category.categoryName = 'ACCOUNT_ATTRIBUTES';
         }
@@ -306,7 +307,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.backToSummaryView = true;
         var prefix = categoryList.length >= 50 ? ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER_PREFIX") : "";
 
-        if($scope.hasAccountAttributes && category.name === 'ACCOUNT_ATTRIBUTES'){
+        if(category.name === 'ACCOUNT_ATTRIBUTES'){
             category.name = 'My Attributes';
             category.categoryName = 'My Attributes';
         }
