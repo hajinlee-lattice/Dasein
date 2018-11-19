@@ -99,6 +99,7 @@ public class ExportToS3Resource {
         customers.forEach(customer -> {
             if (inProcess.contains(customer)) {
                 log.info("Exporting for " + customer + " is already in progress.");
+                customers.remove(customer);
             } else if (inProcess.size() > 4) {
                 log.warn("Too many migration tasks in progress, let " + customer + " wait for next attempt.");
             } else {
