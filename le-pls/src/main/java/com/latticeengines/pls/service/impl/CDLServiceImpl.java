@@ -107,6 +107,19 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
+    public ApplicationId submitS3ImportOnlyData(String customerSpace, String taskId, String dataFileName) {
+        String email = MultiTenantContext.getEmailAddress();
+        log.info(String.format("The email of the s3 file upload initiator is %s", email));
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
+        if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
+            throw new IllegalArgumentException(String.format("Cannot find DataFeedTask %s or template is null!", taskId));
+        }
+        CSVImportConfig metaData = generateDataOnlyImportConfig(customerSpace, dataFeedTask.getImportTemplate().getName(),
+                dataFileName, email);
+        return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
+    }
+
+    @Override
     public void importFileToS3(String customerSpace, String templateFileName, String s3Path) {
         SourceFile sourceFile = getSourceFile(templateFileName);
         if (sourceFile == null) {
@@ -230,6 +243,28 @@ public class CDLServiceImpl implements CDLService {
         }
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         importConfig.setTemplateName(templateSourceFile.getTableName());
+        importConfig.setFilePath(dataSourceFile.getPath());
+        importConfig.setFileSource("HDFS");
+        CSVImportFileInfo importFileInfo = new CSVImportFileInfo();
+        importFileInfo.setFileUploadInitiator(email);
+        importFileInfo.setReportFileDisplayName(dataSourceFile.getDisplayName());
+        importFileInfo.setReportFileName(dataSourceFile.getName());
+        CSVImportConfig csvImportConfig = new CSVImportConfig();
+        csvImportConfig.setCsvToHdfsConfiguration(importConfig);
+        csvImportConfig.setCSVImportFileInfo(importFileInfo);
+
+        return csvImportConfig;
+    }
+
+    private CSVImportConfig generateDataOnlyImportConfig(String customerSpace, String templateTableName,
+                                                         String dataFileName, String email) {
+        CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
+        SourceFile dataSourceFile = getSourceFile(dataFileName);
+        if (StringUtils.isEmpty(templateTableName)) {
+            throw new RuntimeException("Template table name cannot be empty!");
+        }
+        importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        importConfig.setTemplateName(templateTableName);
         importConfig.setFilePath(dataSourceFile.getPath());
         importConfig.setFileSource("HDFS");
         CSVImportFileInfo importFileInfo = new CSVImportFileInfo();

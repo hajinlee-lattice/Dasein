@@ -22,6 +22,8 @@ public interface CDLService {
 
     ApplicationId submitS3ImportWithTemplateData(String customerSpace, String taskId, String templateFileName);
 
+    ApplicationId submitS3ImportOnlyData(String customerSpace, String taskId, String dataFileName);
+
     void importFileToS3(String customerSpace, String templateFileName, String s3Path);
 
     UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
