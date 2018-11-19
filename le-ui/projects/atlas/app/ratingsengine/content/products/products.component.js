@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.wizard.products', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineProducts', function (
-    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products) {
+    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products, PeriodType) {
         var vm = this;
         angular.extend(vm, {
             products: Products,
@@ -15,7 +15,8 @@ angular.module('lp.ratingsengine.wizard.products', [
             selectedAll: false,
             engineType: $stateParams.engineType,
             configFilters: {},
-            purchasedBeforePeriod: getPurchasedBeforePeriod()
+            timePeriod: getPurchasedBeforePeriod(),
+            periodType: PeriodType.ApsRollingPeriod + '(s)'
         });
 
         $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -127,7 +128,7 @@ angular.module('lp.ratingsengine.wizard.products', [
         vm.configFilters.PURCHASED_BEFORE_PERIOD = {
             "configName": "PURCHASED_BEFORE_PERIOD",
             "criteria": "PRIOR_ONLY",
-            "value": parseInt(vm.purchasedBeforePeriod)
+            "value": parseInt(vm.timePeriod)
         };
 
         RatingsEngineStore.setConfigFilters(vm.configFilters);

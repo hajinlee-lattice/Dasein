@@ -17,13 +17,8 @@
                 ng-if="vm.engineType === 'CROSS_SELL_REPEAT_PURCHASE'"
                 form-on-change="vm.resellFormOnChange()">
                 <p>Only sell to accounts that have not purchased the selected products in the last</p>
-                <select 
-                    class="form-control"
-                    ng-model="vm.purchasedBeforePeriod">
-                    <option value="6">6 months</option>
-                    <option value="12">12 months</option>
-                    <option value="24">24 months</option>
-                </select>
+                <input type="text" ng-model="vm.timePeriod" class="form-control period-input" min="1">
+                <p> {{vm.periodType|lowercase}} </p>
             </form>
 
             <div class="filters">

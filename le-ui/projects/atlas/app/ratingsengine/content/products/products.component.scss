@@ -45,5 +45,18 @@
             height: 30px;
             width: auto;
         }
+
+        .form-control.period-input {
+            height: 30px;
+            width: 40px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 3px;
+            display: inline-block;
+            vertical-align: middle;
+            overflow: hidden;
+        }
+
+
     }
 }

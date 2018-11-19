@@ -1196,6 +1196,14 @@ angular
                             deferred.resolve(result);
                         });
                         return deferred.promise;
+                    },
+                    PeriodType: function($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
                     }
                 },
                 views: {
