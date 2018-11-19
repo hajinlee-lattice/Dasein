@@ -294,7 +294,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
     $scope.categoryClicked = function (category) {
 
-        if(category.name === 'My Attributes'){
+        if($scope.hasAccountAttributes && category.name === 'My Attributes'){
             category.name = 'ACCOUNT_ATTRIBUTES';
             category.categoryName = 'ACCOUNT_ATTRIBUTES';
         }

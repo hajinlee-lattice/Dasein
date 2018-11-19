@@ -699,7 +699,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
 
             // Use variables to combine and create a new "Other, Less Popular" bucket
-            let newCombinedBucket = {
+            var newCombinedBucket = {
                 name: otherLessPopular.name,
                 lift: otherLessPopular.lift + zeroPercentTotal.lift,
                 percentTotal: parseInt(otherLessPopular.percentTotal) + parseInt(zeroPercentTotal.percentTotal),
