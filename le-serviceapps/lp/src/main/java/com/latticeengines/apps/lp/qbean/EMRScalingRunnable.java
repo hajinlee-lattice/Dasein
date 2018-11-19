@@ -168,6 +168,8 @@ public class EMRScalingRunnable implements Runnable {
                     // be conservative about terminating machines
                     scale(target);
                     resetScalingDownCounter();
+                } else {
+                    log.info("Skip scaling down: " + (requested <= running) + " and " + (scalingDownAttempt.get() >= 3));
                 }
             }
         }
