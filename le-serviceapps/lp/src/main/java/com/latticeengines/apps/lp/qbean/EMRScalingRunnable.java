@@ -35,8 +35,8 @@ public class EMRScalingRunnable implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
     private static final int MAX_TASK_NODES = 32;
 
-    private static final int CORE_MB = 24 * 3 * 1024;
-    private static final int CORE_VCORES = 4 * 3;
+    private static final int CORE_MB = 24 * 1024;
+    private static final int CORE_VCORES = 4;
 
     private static final int UNIT_MB = 56 * 1024;
     private static final int UNIT_VCORES = 8;
@@ -44,12 +44,8 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MIN_AVAIL_MEM_MB = UNIT_MB;
     private static final int MIN_AVAIL_VCORES = 2;
 
-    private static final int MAX_AVAIL_MEM_MB = 2 * UNIT_MB + CORE_MB;
-    private static final int MAX_AVAIL_VCORES = 2 * UNIT_VCORES + CORE_VCORES;
-
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
-    private static final long SCALE_UP_COOLING_PERIOD = TimeUnit.MINUTES.toMillis(40);
 
     private static final AtomicLong lastScalingUp = new AtomicLong(0);
     private static final AtomicInteger scalingDownCounter = new AtomicInteger(0);
@@ -69,6 +65,7 @@ public class EMRScalingRunnable implements Runnable {
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
     private InstanceGroup taskGrp;
+    private InstanceGroup coreGrp = null;
 
     EMRScalingRunnable(String emrCluster, EMRService emrService, EMRCacheService emrCacheService, //
                        EMREnvService emrEnvService) {
@@ -132,7 +129,7 @@ public class EMRScalingRunnable implements Runnable {
             // low vcores
             log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
             scale = true;
-        } else if (availableMB >= MAX_AVAIL_MEM_MB && availableVCores >= MAX_AVAIL_VCORES) {
+        } else if (availableMB >= getMaxAvailMemMb() && availableVCores >= getMaxAvailVcores()) {
             // too much mem and vcores
             log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
                     + availableVCores + " are both too high.");
@@ -173,100 +170,11 @@ public class EMRScalingRunnable implements Runnable {
         }
     }
 
-    private boolean needToScaleUp() {
-        String scaleLogPrefix = "Might need to scale up " + emrCluster + ": ";
-        String noScaleLogPrefix = "No need to scale up " + emrCluster + ": ";
-
-        int availableMB = metrics.availableMB;
-        int availableVCores = metrics.availableVirtualCores;
-        int running = taskGrp.getRunningInstanceCount();
-        int requested = taskGrp.getRequestedInstanceCount();
-
-        boolean scale;
-        if (requested < running) {
-            log.info(scaleLogPrefix + "scaling down from " + running + " to " //
-                    + requested + ", might need to adjust.");
-            scale = true;
-        } else if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
-            log.info(scaleLogPrefix + "there are " + reqResource.reqMb + " mb and " //
-                    + reqResource.reqVCores + " pending requests.");
-            scale = true;
-        } else if (availableMB < MIN_AVAIL_MEM_MB) {
-            log.info(scaleLogPrefix + "available mb " + availableMB + " is not enough.");
-            scale = true;
-        } else if (availableVCores < MIN_AVAIL_VCORES) {
-            log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
-            scale = true;
-        } else {
-            log.debug(noScaleLogPrefix + "have enough available mb " + availableMB //
-                    + " and vcores " + availableVCores);
-            scale = false;
-        }
-        return scale;
-    }
-
-    private boolean needToScaleDown() {
-        String scaleLogPrefix = "Might need to scale down " + emrCluster + ": ";
-        String noScaleLogPrefix = "No need to scale down " + emrCluster + ": ";
-
-        boolean scale;
-        int availableMB = metrics.availableMB;
-        int availableVCores = metrics.availableVirtualCores;
-        if (availableMB < MAX_AVAIL_MEM_MB) {
-            log.debug(noScaleLogPrefix + "available mb " + availableMB + " is still reasonable.");
-            scale = false;
-        } else if (availableVCores < MAX_AVAIL_VCORES) {
-            log.debug(noScaleLogPrefix + "available vcores " + availableVCores + " is still reasonable.");
-            scale = false;
-        } else {
-            log.info(scaleLogPrefix + "available mb " + availableMB +  " and vcores " //
-                    + availableVCores + " are both too high.");
-            scale = true;
-        }
-        return scale;
-    }
-
-    private boolean scaleUp() {
-        // only scale up when insufficient resource
-        int running = taskGrp.getRunningInstanceCount();
-        int requested = taskGrp.getRequestedInstanceCount();
-        int target = getTargetTaskNodes();
-        if (target != requested) {
-            log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
-                    emrCluster, running, requested, target));
-            if (target > requested) {
-                lastScalingUp.set(System.currentTimeMillis());
-            }
-            return scale(target);
-        }
-        return false;
-    }
-
-    private void scaleDown() {
-        if (reqResource.reqMb < metrics.availableMB && reqResource.reqVCores < metrics.availableVirtualCores) {
-            // scale when there are excessive resource
-            int running = taskGrp.getRunningInstanceCount();
-            int requested = taskGrp.getRequestedInstanceCount();
-            int target = getTargetTaskNodes();
-            if (requested != target) {
-                if (System.currentTimeMillis() - lastScalingUp.get() < SCALE_UP_COOLING_PERIOD) {
-                    target = Math.max(running, target);
-                    log.info(emrCluster + " is still in the cool down period, change target to " + target);
-                }
-                log.info(String.format("Scale down %s, running=%d, requested=%d, target=%d", //
-                        emrCluster, running, requested, target));
-                scale(target);
-            }
-        }
-    }
-
-    private boolean scale(int target) {
+    private void scale(int target) {
         try {
             emrService.scaleTaskGroup(clusterId, target);
-            return true;
         } catch (Exception e) {
             log.error("Failed to scale " + emrCluster + " to " + target, e);
-            return false;
         }
     }
 
@@ -353,20 +261,22 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private int determineTargetByMb(int req) {
+        int coreCount = getCoreCount();
         int avail = metrics.availableMB;
         int total = metrics.totalMB;
         int newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
-        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_MB)) / UNIT_MB));
+        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_MB * coreCount)) / UNIT_MB));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " +
                 "total=" + total + " avail=" + avail + " req=" + req);
         return target;
     }
 
     private int determineTargetByVCores(int req) {
+        int coreCount = getCoreCount();
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
         int newTotal = total - avail + req + MIN_AVAIL_VCORES;
-        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_VCORES)) / UNIT_VCORES));
+        int target = (int) Math.max(1, Math.ceil((1.0 * (newTotal - CORE_VCORES * coreCount)) / UNIT_VCORES));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: " +
                 "total=" + total + " avail=" + avail + " req=" + req);
         return target;
@@ -389,6 +299,25 @@ public class EMRScalingRunnable implements Runnable {
             log.info("Reset scaling down counter from " + scalingDownCounter.get());
             scalingDownCounter.set(0);
         }
+    }
+
+    private int getCoreCount() {
+        return getCoreGrp().getRunningInstanceCount();
+    }
+
+    private int getMaxAvailMemMb() {
+        return 2 * UNIT_MB + getCoreCount() * CORE_MB;
+    }
+
+    private int getMaxAvailVcores() {
+        return 2 * UNIT_VCORES + getCoreCount() * CORE_VCORES;
+    }
+
+    private InstanceGroup getCoreGrp() {
+        if (coreGrp == null) {
+            coreGrp = emrService.getCoreGroup(clusterId);
+        }
+        return coreGrp;
     }
 
     private static class MinNodeResource {
