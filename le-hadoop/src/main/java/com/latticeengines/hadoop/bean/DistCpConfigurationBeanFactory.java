@@ -12,7 +12,7 @@ import org.springframework.yarn.configuration.ConfigurationUtils;
 
 public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFactory<YarnConfiguration> implements FactoryBean<YarnConfiguration> {
 
-    @Resource(name = "yarnConfiguration")
+    @Resource(name = "hadoopConfiguration")
     private YarnConfiguration baseConfiguration;
 
     @Value("${hadoop.use.ambari}")
