@@ -78,11 +78,11 @@ public class ExportToS3Resource {
             log.warn("There's not customers selected!");
         } else {
             getWorkers().submit(() -> {
-                log.info("Start exporting: " + StringUtils.join(resultCustomers));
+                List<String> customers = new ArrayList<>(resultCustomers);
                 int attempt = 0;
-                while (CollectionUtils.isNotEmpty(resultCustomers)) {
-                    log.info("Attempt = " + (++attempt) + " Customers=" + StringUtils.join(resultCustomers));
-                    submitRequests(resultCustomers);
+                while (CollectionUtils.isNotEmpty(customers)) {
+                    log.info("Attempt = " + (++attempt) + " Customers=" + StringUtils.join(customers));
+                    customers = new ArrayList<>(submitRequests(customers));
                     try {
                         Thread.sleep(5000L);
                     } catch (InterruptedException e) {
@@ -94,7 +94,7 @@ public class ExportToS3Resource {
         return resultCustomers;
     }
 
-    private void submitRequests(Collection<String> customers) {
+    private Collection<String> submitRequests(Collection<String> customers) {
         log.info("Exporting to S3 for tenants: " + customers);
         ExecutorService workers = getWorkers();
         customers.forEach(customer -> {
@@ -121,6 +121,7 @@ public class ExportToS3Resource {
             }
         });
         customers.removeAll(inProcess);
+        return customers;
     }
 
     private void buildCustomers(String tenant, List<String> resultCustomers) {
