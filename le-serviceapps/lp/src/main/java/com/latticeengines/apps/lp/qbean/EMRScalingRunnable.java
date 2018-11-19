@@ -165,6 +165,7 @@ public class EMRScalingRunnable implements Runnable {
                         emrCluster, scalingDownAttempt.incrementAndGet(), running, requested,
                         target));
                 if (requested <= running && scalingDownAttempt.get() >= 3) {
+                    log.info("Going to scale down " + emrCluster + " from " + requested + " to " + target);
                     // be conservative about terminating machines
                     scale(target);
                     resetScalingDownCounter();
