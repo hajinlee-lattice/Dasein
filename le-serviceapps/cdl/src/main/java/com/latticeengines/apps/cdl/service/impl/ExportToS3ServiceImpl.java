@@ -208,8 +208,11 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             try (PerformanceTimer timer = new PerformanceTimer("Copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
-                    HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
-
+                    if (HdfsUtils.fileExists(hadoopConfiguration, srcDir)) {
+                        HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
+                    } else {
+                        log.info(srcDir + " does not exist, skip copying.");
+                    }
                 } catch (Exception ex) {
                     String msg = String.format("Failed to copy hdfs dir=%s to s3 dir=%s for tenant=%s", srcDir, tgtDir,
                             customer);
