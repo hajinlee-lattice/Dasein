@@ -102,10 +102,10 @@ public class ExportToS3Resource {
             } else if (inProcess.size() > 4) {
                 log.warn("Too many migration tasks in progress, let " + customer + " wait for next attempt.");
             } else {
+                customers.remove(customer);
                 workers.submit(() -> {
                     try {
                         inProcess.add(customer);
-                        customers.remove(customer);
                         log.info("Exporting to S3 for " + customer + ", " + inProcess.size() + " in progress.");
                         List<ExportRequest> requests = new ArrayList<>();
                         exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests);
