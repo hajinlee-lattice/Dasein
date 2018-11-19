@@ -194,6 +194,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder cdlMatchEnabled(boolean cdlMatchEnabled) {
+            // TODO:
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

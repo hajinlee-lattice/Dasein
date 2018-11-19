@@ -171,6 +171,11 @@ public class HdfsToS3PathBuilderUnitTestNG {
                         "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export/file2.csv",
                         "pod2", "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
                 "s3n://bucket2/tenantId2/atlas/Metadata/Export/file2.csv");
+        Assert.assertEquals(
+                builder.exploreS3FilePath(
+                        "/Pods/pod2//Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export", "pod2",
+                        "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
+                "s3n://bucket2/tenantId2/atlas/Metadata/Export");
     }
 
     @Test(groups = "unit")

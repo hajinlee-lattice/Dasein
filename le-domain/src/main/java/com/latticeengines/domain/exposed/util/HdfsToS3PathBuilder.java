@@ -201,21 +201,22 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
-    public String exploreS3FilePath(String inputFileDir, String pod, String customer, String tenantId,
+    public String exploreS3FilePath(String filePath, String pod, String customer, String tenantId,
             String s3Bucket) {
+        filePath = FilenameUtils.normalize(filePath);
         StringBuilder builder = new StringBuilder();
         String hdfsFilesDir = getHdfsAnalyticsDir(customer);
-        if (inputFileDir.startsWith(hdfsFilesDir)) {
+        if (filePath.startsWith(hdfsFilesDir)) {
             return builder.append(getS3AnalyticsDir(s3Bucket, tenantId))
-                    .append(inputFileDir.substring(hdfsFilesDir.length())).toString();
+                    .append(filePath.substring(hdfsFilesDir.length())).toString();
         }
 
         hdfsFilesDir = getHdfsAtlasDir(pod, tenantId);
-        if (inputFileDir.startsWith(hdfsFilesDir)) {
+        if (filePath.startsWith(hdfsFilesDir)) {
             return builder.append(getS3AtlasDir(s3Bucket, tenantId))
-                    .append(inputFileDir.substring(hdfsFilesDir.length())).toString();
+                    .append(filePath.substring(hdfsFilesDir.length())).toString();
         }
-        return inputFileDir;
+        return filePath;
     }
 
     public String toParentDir(String dir) {
