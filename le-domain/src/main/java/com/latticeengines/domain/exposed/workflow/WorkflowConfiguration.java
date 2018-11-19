@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfigu
 import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.BaseLPWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.BaseModelingWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.BasePDWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflowConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
@@ -26,8 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflo
         @Type(value = BaseDataCloudWorkflowConfiguration.class, name = "BaseDataCloudWorkflowConfiguration"),
         @Type(value = BaseLPWorkflowConfiguration.class, name = "BaseLPWorkflowConfiguration"),
         @Type(value = BaseModelingWorkflowConfiguration.class, name = "BaseModelingWorkflowConfiguration"),
-        @Type(value = BaseScoringWorkflowConfiguration.class, name = "BaseScoringWorkflowConfiguration"),
-        @Type(value = BasePDWorkflowConfiguration.class, name = "BasePDWorkflowConfiguration"), })
+        @Type(value = BaseScoringWorkflowConfiguration.class, name = "BaseScoringWorkflowConfiguration") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class WorkflowConfiguration extends BasePayloadConfiguration {

@@ -24,14 +24,13 @@
         <module>datacloud</module>
         <module>modeling</module>
         <module>scoring</module>
-        <module>prospectdiscovery</module>
         <module>leadprioritization</module>
         <module>cdl</module>
     </modules>
 
     <build>
         <plugins>
-            <!-- Override parent pom to exclude svn revision number. For 
+            <!-- Override parent pom to exclude svn revision number. For
                 some reason it's failing for certain developers. -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -371,7 +370,7 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
-        </dependency>        
+        </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>

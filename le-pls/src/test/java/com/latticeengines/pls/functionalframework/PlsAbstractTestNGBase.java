@@ -5,9 +5,6 @@ import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +14,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -35,17 +31,7 @@ import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
-import com.latticeengines.domain.exposed.pls.Quota;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
-import com.latticeengines.domain.exposed.query.ExistsRestriction;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
@@ -57,45 +43,6 @@ import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListen
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
-
-    protected static final Quota QUOTA = new Quota();
-    protected static final String TEST_QUOTA_ID = "TEST_QUOTA_ID";
-    protected static final Integer BALANCE = 100;
-    protected static final Integer BALANCE_1 = 200;
-
-    protected static final TargetMarket TARGET_MARKET = new TargetMarket();
-    protected static final String TEST_TARGET_MARKET_NAME = "TEST_TARGET_MARKET_NAME";
-    protected static final DateTime CREATION_DATE = DateTime.now();
-    protected static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    protected static final String DESCRIPTION = "The Target Market For Functional Tests";
-    protected static final Integer NUM_PROPSPECTS_DESIRED = 100;
-    protected static final Integer NUM_PROPSPECTS_DESIRED_1 = 200;
-    protected static final Integer NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS = 10;
-    protected static final IntentScore INTENT_SCORE_THRESHOLD = IntentScore.LOW;
-    protected static final Double FIT_SCORE_THRESHOLD = 0.3;
-    protected static final String MODEL_ID = "MODEL_ID";
-    protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
-    protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
-    protected static final Boolean IS_DEFAULT = false;
-    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(SchemaInterpretation.Account,
-            false);
-    protected static final Restriction CONTACT_FILTER = new ExistsRestriction(SchemaInterpretation.Contact,
-            false);
-    protected static final Integer OFFSET = 1;
-    protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
-    protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;
-
-    protected static final List<TargetMarketReportMap> TARGET_MARKET_REPORTS = new ArrayList<>();
-
-    protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
-    protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_2 = new ProspectDiscoveryOption();
-    protected static final ProspectDiscoveryOptionName OPTION_1 = ProspectDiscoveryOptionName.ProspectDeliveryObject;
-    protected static final ProspectDiscoveryOptionName OPTION_2 = ProspectDiscoveryOptionName.IntentPercentage;
-    protected static final String STRING_VALUE = "VALUE";
-    protected static final String STRING_VALUE_1 = "VALUE_1";
-    protected static final String DOUBLE_VALUE = "2.5";
-    protected static final ProspectDiscoveryProperty PROSPECT_DISCOVERY_PROPERTIES = new ProspectDiscoveryProperty(
-            Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
 
     protected GlobalAuthTestBed testBed;
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();

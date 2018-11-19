@@ -22,30 +22,7 @@
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
-    <security:http use-expressions="true"
-                   pattern="/pls/targetmarkets/**"
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint"
-                   create-session="stateless">
-        <security:csrf disabled="true"/>
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-    </security:http>
-    <security:http use-expressions="true"
-                   pattern="/pls/quotas/**"
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint"
-                   create-session="stateless">
-        <security:csrf disabled="true"/>
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-    </security:http>
-    <security:http use-expressions="true"
-                   pattern="/pls/prospectdiscoveryconfigs/**"
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint"
-                   create-session="stateless">
-        <security:csrf disabled="true"/>
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-    </security:http>
+
     <security:http use-expressions="true"
                    pattern="/pls/jobs/**"
                    authentication-manager-ref="authenticationManager"
@@ -54,6 +31,7 @@
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
+
     <security:http use-expressions="true"
                    pattern="/pls/datafiles/**"
                    authentication-manager-ref="authenticationManager"
@@ -172,15 +150,6 @@
 
     <security:http use-expressions="true"
                    pattern="/pls/reports/**"
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint"
-                   create-session="stateless">
-        <security:csrf disabled="true"/>
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-    </security:http>
-
-    <security:http use-expressions="true"
-                   pattern="/pls/amattributes/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">

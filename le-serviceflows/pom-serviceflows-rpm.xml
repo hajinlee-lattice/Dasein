@@ -28,11 +28,6 @@
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
-                                    <location>
-                                        prospectdiscovery/target/le-serviceflows-prospectdiscovery-${project.version}-shaded.jar
-                                    </location>
-                                </source>
-                                <source>
                                     <location>leadprioritization/target/le-serviceflows-leadprioritization-${project.version}-shaded.jar
                                     </location>
                                 </source>

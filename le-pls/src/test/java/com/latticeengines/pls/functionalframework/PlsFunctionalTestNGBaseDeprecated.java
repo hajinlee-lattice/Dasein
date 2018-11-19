@@ -13,17 +13,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
-import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
-import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
-import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -34,9 +28,6 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
 
     protected static boolean usersInitialized = false;
 
-    protected static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
-    protected static final String passwordTesterPwd = "Lattice123";
-
     protected static final String BISAP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000WjNY";
     protected static final String BISLP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000Kk28";
 
@@ -46,22 +37,7 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
     private InternalTestUserService internalTestUserService;
 
     @Autowired
-    private PdSegmentEntityMgr segmentEntityMgr;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
     private ModelSummaryParser modelSummaryParser;
-
-    @Autowired
-    private QuotaEntityMgr quotaEntityMgr;
-
-    @Autowired
-    private TargetMarketEntityMgr targetMarketEntityMgr;
-
-    @Autowired
-    private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
 
     @Autowired
     private TenantService tenantService;
@@ -75,10 +51,6 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
 
     protected void createUser(String username, String email, String firstName, String lastName, String password) {
         internalTestUserService.createUser(username, email, firstName, lastName, password);
-    }
-
-    protected void deleteUserWithUsername(String username) {
-        internalTestUserService.deleteUserWithUsername(username);
     }
 
     protected boolean createTenantByRestCall(String tenantName) {
@@ -104,15 +76,6 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
         ModelSummary summary = modelSummaryParser.parse(fakePath, contents);
         summary.setTenant(tenant);
         return summary;
-    }
-
-    protected void setupUsers() throws Exception {
-        if (usersInitialized) {
-            return;
-        }
-        setTestingTenants();
-        loginTestingUsersToMainTenant();
-        usersInitialized = true;
     }
 
     protected User getTheTestingUserAtLevel(AccessLevel level) {
@@ -152,15 +115,5 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
 
     protected void setupSecurityContext(Segment segment) {
         setupSecurityContext(segment.getTenant());
-    }
-
-    protected void cleanupTargetMarketDB() {
-        setupSecurityContext(mainTestTenant);
-        List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.findAllTargetMarkets();
-        for (TargetMarket targetMarket : targetMarkets) {
-            if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
-                this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
-            }
-        }
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -13,9 +14,7 @@ import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
@@ -39,64 +38,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     @Override
     public String getRestApiHostPort() {
         return internalResourceHostPort;
-    }
-
-    public TargetMarket createDefaultTargetMarket(String tenantId) {
-        try {
-            return restTemplate.postForObject(
-                    constructUrl("pls/internal/targetmarkets/default", tenantId), null,
-                    TargetMarket.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createDefaultTargetMarket: Remote call failure", e);
-        }
-    }
-
-    public TargetMarket findTargetMarketByName(String targetMarketName, String tenantId) {
-        try {
-            return restTemplate.getForObject(
-                    constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId),
-                    TargetMarket.class);
-        } catch (Exception e) {
-            throw new RuntimeException("findTargetMarketByName: Remote call failure", e);
-        }
-    }
-
-    public void updateTargetMarket(TargetMarket targetMarket, String tenantId) {
-        try {
-            restTemplate.put(
-                    constructUrl("pls/internal/targetmarkets/", targetMarket.getName(), tenantId),
-                    targetMarket);
-        } catch (Exception e) {
-            throw new RuntimeException("updateTargetMarket: Remote call failure", e);
-        }
-    }
-
-    public void deleteTargetMarketByName(String targetMarketName, String tenantId) {
-        try {
-            restTemplate.delete(
-                    constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId));
-        } catch (Exception e) {
-            throw new RuntimeException("deleteTargetMarketByName: Remote call failure", e);
-        }
-    }
-
-    public void deleteAllTargetMarkets(String tenantId) {
-        try {
-            restTemplate.delete(constructUrl("pls/internal/targetmarkets/", tenantId));
-        } catch (Exception e) {
-            throw new RuntimeException("deleteAllTargetMarkets: Remote call failure", e);
-        }
-    }
-
-    public void registerReport(String targetMarketName, Report report, String tenantId) {
-        try {
-            String url = constructUrl("pls/internal/targetmarkets", targetMarketName, "reports",
-                    tenantId);
-            log.info(String.format("Posting to %s", url));
-            restTemplate.postForObject(url, report, Void.class);
-        } catch (Exception e) {
-            throw new RuntimeException("registerReport: Remote call failure", e);
-        }
     }
 
     public void registerReport(Report report, String tenantId) {

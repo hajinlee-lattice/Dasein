@@ -22,7 +22,6 @@ public enum SoftwareLibrary {
     Modeling("modeling"), //
     Scoring("scoring"), //
     LeadPrioritization("leadprioritization"), //
-    ProspectDiscovery("prospectdiscovery"), //
     CDL("cdl");
 
     private static final Map<String, SoftwareLibrary> nameMap = new HashMap<>();
@@ -46,9 +45,6 @@ public enum SoftwareLibrary {
         LeadPrioritization.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
         CDL.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
-
-        ProspectDiscovery.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
-        ProspectDiscovery.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
     }
 
     private final String name;

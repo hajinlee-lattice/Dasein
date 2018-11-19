@@ -21,14 +21,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -240,32 +238,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public TargetMarket findTargetMarketByName(String targetMarketName, String tenantId) {
-        try {
-            return restTemplate.getForObject(constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId),
-                    TargetMarket.class);
-        } catch (Exception e) {
-            throw new RuntimeException("findTargetMarketByName: Remote call failure", e);
-        }
-    }
-
-    public void deleteTargetMarketByName(String targetMarketName, String tenantId) {
-        try {
-            restTemplate.delete(constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId));
-        } catch (Exception e) {
-            throw new RuntimeException("deleteTargetMarketByName: Remote call failure", e);
-        }
-    }
-
-    public TargetMarket createDefaultTargetMarket(String tenantId) {
-        try {
-            return restTemplate.postForObject(constructUrl("pls/internal/targetmarkets/default", tenantId), null,
-                    TargetMarket.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createDefaultTargetMarket: Remote call failure", e);
-        }
-    }
-
     public void updateSourceFile(SourceFile sourceFile, String tenantId) {
         try {
             String url = constructUrl("pls/internal/sourcefiles", sourceFile.getName(), tenantId);
@@ -410,7 +382,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             throw new RuntimeException("retrieveScoringRequestConfigContext: Remote call failure: " + e.getMessage(), e);
         }
     }
-    
+
     @VisibleForTesting
     String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
             ActionType actionType) {

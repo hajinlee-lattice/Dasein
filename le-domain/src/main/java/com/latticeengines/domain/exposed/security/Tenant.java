@@ -2,22 +2,18 @@ package com.latticeengines.domain.exposed.security;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.TimeZone;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -30,7 +26,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -87,10 +82,6 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @JsonProperty("Contract")
     @Column(name = "CONTRACT")
     private String contract;
-
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
-    private List<TargetMarket> targetMarkets;
 
     public Tenant() {
     }
@@ -185,15 +176,6 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     public void setContract(String contract) {
         this.contract = contract;
-    }
-
-    // TODO: Note - this is a terrible hack to avoid DP-2243
-    public List<TargetMarket> getTargetMarkets() {
-        return targetMarkets;
-    }
-
-    public void setTargetMarkets(List<TargetMarket> targetMarkets) {
-        this.targetMarkets = targetMarkets;
     }
 
     @Override

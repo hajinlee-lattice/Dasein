@@ -20,20 +20,16 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPyt
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ChooseModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RTSScoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({ @Type(value = AWSBatchConfiguration.class, name = "AWSBatchConfiguration"),
         @Type(value = AWSPythonBatchConfiguration.class, name = "AWSPythonBatchConfiguration"),
         @Type(value = BaseReportStepConfiguration.class, name = "BaseReportStepConfiguration"),
-        @Type(value = ChooseModelStepConfiguration.class, name = "ChooseModelStepConfiguration"),
         @Type(value = DataFlowStepConfiguration.class, name = "DataFlowStepConfiguration"),
         @Type(value = ExportToRedshiftStepConfiguration.class, name = "ExportDataToRedshiftConfiguration"),
         @Type(value = ExportToDynamoStepConfiguration.class, name = "ExportToDynamoStepConfiguration"),
@@ -50,10 +46,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = ProcessStepConfiguration.class, name = "ProcessStepConfiguration"),
         @Type(value = ResolveMetadataFromUserRefinedAttributesConfiguration.class, name = "ResolveMetadataFromUserRefinedAttributesConfiguration"),
         @Type(value = RTSScoreStepConfiguration.class, name = "RTSScoreStepConfiguration"),
-        @Type(value = RunAttributeLevelSummaryDataFlowsConfiguration.class, name = "RunAttributeLevelSummaryDataFlowsConfiguration"),
         @Type(value = ScoreStepConfiguration.class, name = "ScoreStepConfiguration"),
         @Type(value = StartMaintenanceConfiguration.class, name = "StartMaintenanceConfiguration"),
-        @Type(value = TargetMarketStepConfiguration.class, name = "TargetMarketStepConfiguration"),
         @Type(value = SetConfigurationForScoringConfiguration.class, name = "SetConfigurationForScoringConfiguration"),
         @Type(value = MatchCdlStepConfiguration.class, name = "MatchCdlStepConfiguration"),
         @Type(value = LdcOnlyAttributesConfiguration.class, name = "LdcOnlyAttributesConfiguration"),

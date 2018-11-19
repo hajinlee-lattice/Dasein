@@ -11,14 +11,13 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.service.ReportService;
 
 public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
@@ -35,16 +34,13 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Autowired
     private TenantService tenantService;
 
-    @Autowired
-    private TargetMarketEntityMgr targetMarketEntityMgr;
-
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         deleteReports();
     }
 
     @AfterClass(groups = "functional")
-    public void tearDown() throws Exception {
+    public void tearDown() {
         deleteReports();
     }
 
@@ -64,11 +60,10 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
         };
     }
 
-    private Tenant setupTenant(String t) throws Exception {
+    private Tenant setupTenant(String t) {
         Tenant tenant = tenantService.findByTenantId(t);
         if (tenant != null) {
             setupSecurityContext(tenant);
-            targetMarketEntityMgr.deleteAll();
             tenantService.discardTenant(tenant);
         }
         tenant = new Tenant();

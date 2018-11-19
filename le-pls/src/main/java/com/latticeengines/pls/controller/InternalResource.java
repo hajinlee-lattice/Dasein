@@ -1,9 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,19 +24,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
-import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -69,12 +64,12 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -84,14 +79,12 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -104,6 +97,10 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "internal", description = "REST resource for internal operations")
 @RestController
@@ -145,9 +142,6 @@ public class InternalResource extends InternalResourceBase {
     private InternalTestUserService internalTestUserService;
 
     @Inject
-    private TargetMarketService targetMarketService;
-
-    @Inject
     private TenantService tenantService;
 
     @Inject
@@ -167,9 +161,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private MetadataSegmentExportService metadataSegmentExportService;
-
-    @Inject
-    private DataLakeService dataLakeService;
 
     @Inject
     private WorkflowJobService workflowJobService;
@@ -194,77 +185,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
-
-    @RequestMapping(value = "/targetmarkets/default/"
-            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create default target market")
-    public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        targetMarketService.createDefaultTargetMarket();
-    }
-
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Find target market by name")
-    public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return targetMarketService.findTargetMarketByName(targetMarketName);
-    }
-
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update target market")
-    public void updateTargetMarket(@PathVariable("targetMarketName") String targetMarketName,
-            @PathVariable("tenantId") String tenantId, @RequestBody TargetMarket targetMarket,
-            HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
-    }
-
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
-            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Delete a target market")
-    public void deleteTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        targetMarketService.deleteTargetMarketByName(targetMarketName);
-    }
-
-    @RequestMapping(value = "/targetmarkets/"
-            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Delete a target market")
-    public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        targetMarketService.deleteAll();
-    }
-
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/"
-            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Register a target market report")
-    public void registerReport(@PathVariable("targetMarketName") String targetMarketName,
-            @PathVariable("tenantId") String tenantId, @RequestBody Report report, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        targetMarketService.registerReport(targetMarketName, report);
-    }
 
     @RequestMapping(value = "/reports/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")

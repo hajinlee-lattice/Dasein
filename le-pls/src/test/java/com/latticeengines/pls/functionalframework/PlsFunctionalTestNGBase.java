@@ -1,6 +1,7 @@
 package com.latticeengines.pls.functionalframework;
 
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,21 +10,11 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
-import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
-import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
-import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
-
-    @Autowired
-    private QuotaEntityMgr quotaEntityMgr;
-
-    @Autowired
-    private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
 
     @Autowired
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
@@ -54,7 +45,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
      *
      * @throws Exception
      */
-    protected void setupTestEnvironmentWithOneGATenant() throws Exception {
+    protected void setupTestEnvironmentWithOneGATenant() {
         setupTestEnvironmentWithGATenants(1);
     }
 
@@ -63,35 +54,16 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
      *
      * @throws Exception
      */
-    protected void setupTestEnvironmentWithGATenants(int numTenants) throws Exception {
+    protected void setupTestEnvironmentWithGATenants(int numTenants) {
         testBed.bootstrap(numTenants);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
-    }
-
-    protected void cleanupQuotaDB() {
-        setupSecurityContext(mainTestTenant);
-        List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
-        for (Quota quota : quotas) {
-            if (quota.getId().startsWith("TEST")) {
-                this.quotaEntityMgr.delete(quota);
-            }
-        }
     }
 
     protected void cleanupMarketoCredentialsDB() {
         List<MarketoCredential> marketoCredentials = marketoCredentialEntityMgr.findAll();
         for (MarketoCredential marketoCredential : marketoCredentials) {
             marketoCredentialEntityMgr.delete(marketoCredential);
-        }
-    }
-
-    protected void cleanupProspectDiscoveryOptionDB() {
-        setupSecurityContext(mainTestTenant);
-        List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr
-                .findAllProspectDiscoveryOptions();
-        for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
-            this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
         }
     }
 

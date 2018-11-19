@@ -7,7 +7,7 @@
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
-      http://www.springframework.org/schema/data/jpa 
+      http://www.springframework.org/schema/data/jpa
       http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
     <bean id="dataSourceAccountMaster" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -19,7 +19,7 @@
 
 
     <!-- Hibernate session factory -->
-    <!-- 
+    <!--
     <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceAccountMaster"/>
         <property name="packagesToScan"
@@ -79,18 +79,5 @@
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactoryReader"
                       transaction-manager-ref="transactionManagerReader"  />
-
-    <!--  DAOs for AccountMaster database  -->
-    <bean id="companyDao" class="com.latticeengines.pls.dao.impl.CompanyDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryAccountMaster"/>
-    </bean>
-
-    <bean id="contactDao" class="com.latticeengines.pls.dao.impl.ContactDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryAccountMaster"/>
-    </bean>
-
-    <bean id="amAttributeDao" class="com.latticeengines.pls.dao.impl.AmAttributeDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryAccountMaster"/>
-    </bean>
 
 </beans>
