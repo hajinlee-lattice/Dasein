@@ -109,7 +109,9 @@ public class SourceFileServiceImpl implements SourceFileService {
                 + "/" + outputFileName;
         try {
             String srcFile = getS3Path(originalSourceFile.getTenant().getId(), originalSourceFile.getPath());
-            HdfsUtils.copyFiles(yarnConfiguration, srcFile, outputPath);
+            if (!HdfsUtils.fileExists(yarnConfiguration, outputPath)) {
+                HdfsUtils.copyFiles(yarnConfiguration, srcFile, outputPath);
+            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18118, e);
         }
