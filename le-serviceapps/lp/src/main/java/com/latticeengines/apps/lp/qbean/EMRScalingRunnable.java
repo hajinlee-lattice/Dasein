@@ -303,7 +303,7 @@ public class EMRScalingRunnable implements Runnable {
 
     private void resetScalingDownCounter() {
         if (scalingDownAttempt.get() > 0) {
-            log.info("Reset scaling down counter from " + scalingDownAttempt.get());
+            log.info("Reset " + emrCluster +" scaling down counter from " + scalingDownAttempt.get());
             scalingDownAttempt.set(0);
         }
     }
