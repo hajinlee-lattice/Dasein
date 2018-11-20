@@ -1,9 +1,9 @@
 angular.module('lp.segments.segments', [
-    'mainApp.segments.modals.DeleteSegmentModal',
+    'common.modal',
     'lp.tile.edit'
 ])
 .controller('SegmentationListController', function ($q, $scope, $rootScope, $element, $state, $stateParams,
-    SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
+    SegmentsList, Enrichments, Cube, Modal, Banner, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
     DataCloudStore, LookupResponse, LookupStore, PercentStore, AttrConfigStore
 ) {
     var vm = this;
@@ -208,11 +208,47 @@ angular.module('lp.segments.segments', [
         createOrUpdateSegment(segment);
     };
 
+    vm.callbackModalWindow = function(args) {
+        
+        var modal = Modal.get('deleteSegmentWarning');
+
+        if (args.action === 'cancel') {
+
+            console.log("cancel");            
+            Modal.modalRemoveFromDOM(modal, args);
+
+        } else if (args.action === 'ok') {
+
+            var segmentName = vm.segment.name;
+            if(modal){
+                modal.waiting(true);
+            }
+
+            SegmentService.DeleteSegment(segmentName).then(function(result) {
+                if (result != null && result.success === true) {
+                    
+                    Modal.modalRemoveFromDOM(modal, args);
+
+                    $state.go('home.segments', {}, { reload: true } );
+                } else {
+                    Banner.error({ message: result.errorMessage });
+                }
+            });
+        }
+    }
+
     vm.showDeleteSegmentModalClick = function($event, segment){
         $event.preventDefault();
         $event.stopPropagation();
 
-        DeleteSegmentModal.show(segment, !!vm.modelId);
+        vm.segment = segment;
+
+        Modal.warning({
+            name: 'deleteSegmentWarning',
+            title: "Delete Segment",
+            message: "Are you sure you want to delete this segment?",
+            confirmtext: "Delete Segment"
+        }, vm.callbackModalWindow);
     };
 
     vm.isValid = function(segmentDisplayName){
