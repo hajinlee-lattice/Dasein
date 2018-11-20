@@ -230,6 +230,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                         HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
                             String subFolder = path.substring(path.lastIndexOf("/"));
                             log.info("Found a " + name + " sub-folder for " + tenantId + " : " + subFolder);
+                            subFolders.add(subFolder);
                         });
                     }
                     if (CollectionUtils.isEmpty(subFolders)) {

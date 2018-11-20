@@ -264,8 +264,7 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                 lookupIdDecorator, //
                 ratingDisplayDecorator, //
                 derivedAttrsDecorator, //
-                postRenderDecorator
-
+                postRenderDecorator //
         );
 
         return new ChainedDecoratorFactory<Namespace2<BusinessEntity, DataCollection.Version>>("ServingStoreChain",

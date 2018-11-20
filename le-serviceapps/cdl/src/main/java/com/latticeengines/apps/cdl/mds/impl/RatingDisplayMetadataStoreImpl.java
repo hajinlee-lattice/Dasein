@@ -89,7 +89,6 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             if (summary.getDeleted()) {
                 reAttr.setAttrState(AttrState.Inactive);
             } else if (RatingEngineStatus.INACTIVE.equals(summary.getStatus())) {
-                reAttr.setAttrState(AttrState.Deprecated);
                 reAttr.setShouldDeprecate(true);
             }
             reAttr.setCanSegment(true);
