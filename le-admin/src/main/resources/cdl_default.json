@@ -11,7 +11,7 @@
     },
     {
       "Node": "DefaultAPSRollupPeriod",
-      "Data": "Business Month"
+      "Data": "Business Quarter"
     },
     { 
       "Node": "ModelingProfilingVersion",
