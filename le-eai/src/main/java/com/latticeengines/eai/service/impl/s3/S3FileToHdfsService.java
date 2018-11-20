@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -44,6 +45,8 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfiguration> {
 
     private static Logger log = LoggerFactory.getLogger(S3FileToHdfsService.class);
+
+    private static final String S3_FILE_SUFFIX = ".csv";
 
     @Inject
     private Configuration yarnConfiguration;
@@ -81,7 +84,14 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
         try {
             String s3nPath = getS3nPath(config.getS3Bucket(), config.getS3FilePath());
             Path hdfsPath = PathBuilder.buildS3FilePath(CamilleEnvironment.getPodId(), config.getCustomerSpace());
-            hdfsFilePath = getHdfsFilePath(hdfsPath, String.valueOf(new Date().getTime()), config.getS3FileName());
+            String fileName = config.getS3FileName();
+            if (StringUtils.isNotEmpty(fileName) && fileName.endsWith(S3_FILE_SUFFIX)) {
+                fileName = fileName.substring(0, fileName.length() - S3_FILE_SUFFIX.length());
+                fileName = fileName.replaceAll("[^A-Za-z0-9_]", "_") + S3_FILE_SUFFIX;
+            } else {
+                throw new RuntimeException("Filename from s3 is empty or not a csv file!");
+            }
+            hdfsFilePath = getHdfsFilePath(hdfsPath, String.valueOf(new Date().getTime()), fileName);
             String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
             String overwriteQueue = LedpQueueAssigner.overwriteQueueAssignment(queue,
                     emrEnvService.getYarnQueueScheme());
