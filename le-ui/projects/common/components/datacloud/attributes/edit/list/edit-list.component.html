@@ -60,7 +60,9 @@
             </div>
 
             <div class="edit-attribute-description">
-                <textarea 
+                <textarea
+                        ng-init="maxlength = 63;"
+                        maxlength="{{maxlength}}"
                         name="attrDescription_{{$index}}" 
                         id="attrDescription_{{$index}}" 
                         class="form-control"
@@ -68,6 +70,7 @@
                         ng-blur="$ctrl.onBlur(item, 'attrDescription_' + $index)"
                         ng-disabled="$ctrl.isStartsDisabled()">
                 </textarea>
+                <em ng-class="{'low': item.Description.length < maxlength/3, 'medium': item.Description.length > maxlength/3 && item.Description.length < maxlength/3*2, 'high': item.Description.length > maxlength/3*2}">({{item.Description.length}})</em>
             </div>
 
         </li>

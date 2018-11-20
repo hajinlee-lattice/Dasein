@@ -58,11 +58,28 @@
             }    
         
             &.edit-attribute-displayname {
-                max-width: 25%;            
+                max-width: 25%;
             }
 
             &.edit-attribute-description {
-                max-width: 50%;            
+                max-width: 50%;
+                position: relative;
+                padding-right: 2em;
+                em {
+                    position: absolute;
+                    right: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    &.low {
+                        color: green;
+                    }
+                    &.medium {
+                        color: orange;
+                    }
+                    &.high {
+                        color: red;
+                    }
+                }
             }
         }
     }
