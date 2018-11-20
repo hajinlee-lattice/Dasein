@@ -19,7 +19,7 @@ class TemplatesComponent extends Component {
   constructor(props) {
     super(props);
     this.emailCredentialConfig = {
-      lable: "Setup Automation",
+      label: "Setup Automation",
       classNames: "gray-button"
     };
     setAngularState(this.props.$state);
@@ -40,6 +40,7 @@ class TemplatesComponent extends Component {
           <LeToolBar>
             <div className="right">
               <LeButton
+                name="credentials"
                 config={this.emailCredentialConfig}
                 callback={() => {
                   httpService.get(

@@ -9,7 +9,10 @@ import {
   number
 } from "@storybook/addon-knobs";
 import "../../../common/assets/css/font-awesome.min.css";
-import LeButton, {LEFT, RIGHT} from "../../../common/widgets/buttons/le-button";
+import LeButton, {
+  LEFT,
+  RIGHT
+} from "../../../common/widgets/buttons/le-button";
 
 const stories = storiesOf("Buttons", module);
 
@@ -24,25 +27,30 @@ const defaultStateValue = false;
 
 stories.add("rich button", () => (
   <LeButton
+    name="rich-button"
     callback={action("button-click")}
     disabled={boolean(labelState, defaultStateValue)}
     config={{
-      lable: text("config.lable", "Lattice Engines"),
+      label: text("config.label", "Lattice Engines"),
       classNames: select(labelColors, options, defaultColorValue),
       icon: text("config.icon", "fa fa-check"),
-      iconside: select('config.iconside', [LEFT, RIGHT], LEFT)
+      iconside: select("config.iconside", [LEFT, RIGHT], LEFT)
     }}
   />
 ));
 
 stories.add("borderless button", () => (
   <LeButton
+    name="borderless"
     callback={action("button-click")}
     disabled={boolean(labelState, defaultStateValue)}
     config={{
-      classNames: select(labelColors, ["borderless-button"], "borderless-button"),
+      classNames: select(
+        labelColors,
+        ["borderless-button"],
+        "borderless-button"
+      ),
       icon: text("config.icon", "fa fa-cloud-upload")
     }}
   />
 ));
-

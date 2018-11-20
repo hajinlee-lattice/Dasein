@@ -1,5 +1,5 @@
 import React, { Component } from "../../react-vendor";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import "./buttons.scss";
 
 export const LEFT = "left";
@@ -13,7 +13,7 @@ export default class LeButton extends Component {
   }
 
   clickHandler() {
-    this.props.callback(this.state);
+    this.props.callback(this.props.name, this.state);
   }
 
   createIcon() {
@@ -44,8 +44,8 @@ export default class LeButton extends Component {
     }
   }
   getLabel() {
-    if (this.props.config.lable && this.props.config.lable !== "") {
-      return <span className="le-button-title">{this.props.config.lable}</span>;
+    if (this.props.config.label && this.props.config.label !== "") {
+      return <span className="le-button-title">{this.props.config.label}</span>;
     } else {
       return "";
     }
@@ -73,7 +73,8 @@ export default class LeButton extends Component {
   }
 }
 LeButton.propTypes = {
-  lable: PropTypes.string,
-  classNames: PropTypes.array,
-  callback: PropTypes.func
+  name: propTypes.string.isRequired,
+  label: propTypes.string,
+  classNames: propTypes.array,
+  callback: propTypes.func
 };
