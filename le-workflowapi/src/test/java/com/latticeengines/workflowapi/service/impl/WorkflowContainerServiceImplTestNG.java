@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBat
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
@@ -59,8 +60,8 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
     @Test(groups = "mannual")
     public void testGetWorkflowLogLink() {
         long workflowPid = 2L;
-        String url = workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
-        System.out.println(url);
+        WorkflowLogLinks logLinks = workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
+        System.out.println(logLinks);
     }
 
 }
