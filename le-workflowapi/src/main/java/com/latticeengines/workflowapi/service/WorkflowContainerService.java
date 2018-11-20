@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.service;
 
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -13,5 +14,5 @@ public interface WorkflowContainerService {
 
     JobStatus getJobStatus(String applicationId);
 
-    String getLogUrlByWorkflowPid(Long workflowPid);
+    WorkflowLogLinks getLogUrlByWorkflowPid(Long workflowPid);
 }

@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
@@ -303,9 +304,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    public String getLogLinkByWorkflowPid(long workflowPid) {
+    public WorkflowLogLinks getLogLinkByWorkflowPid(long workflowPid) {
         String url = constructUrl("/log-link/pid/{pid}", workflowPid);
-        return get("get log link", url, String.class);
+        return get("get log links", url, WorkflowLogLinks.class);
     }
 
     private void checkCustomerSpace(String customerSpace) {

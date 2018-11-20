@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
@@ -321,7 +322,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public String getLogUrlByWorkflowPid(Long workflowPid) {
+    public WorkflowLogLinks getLogUrlByWorkflowPid(Long workflowPid) {
         if (workflowPid == null) {
             throw new IllegalArgumentException("Cannot use null workflow pid");
         }
@@ -333,7 +334,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         String appId = workflowJob.getApplicationId();
         if (StringUtils.isNotBlank(appId)) {
-            String url;
+            WorkflowLogLinks logLinks = new WorkflowLogLinks();
+            String amUrl = null;
             String emrClusterId = workflowJob.getEmrClusterId();
             if (StringUtils.isNotBlank(emrClusterId)) {
                 boolean clusterIsActvie = emrService.isActive(emrClusterId);
@@ -341,21 +343,22 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                     // if active, go to job history page or rm page
                     String masterIp = emrService.getMasterIp(emrClusterId);
                     JobStatus status = JobStatus.fromString(workflowJob.getStatus());
-                    url = status.isTerminated() ? appHistoryUrl(masterIp, appId) : appMasterUrl(masterIp, appId);
+                    amUrl = status.isTerminated() ? appHistoryUrl(masterIp, appId) : appMasterUrl(masterIp, appId);
+                }
+                // for all emr, try to give s3 address
+                String bucket = emrService.getLogBucket(emrClusterId);
+                if (StringUtils.isNotBlank(bucket)) {
+                    String s3LogDir = s3LogUrl(bucket, emrClusterId, appId);
+                    logLinks.setS3LogDir(s3LogDir);
                 } else {
-                    // for inactive emr, try to give s3 address
-                    String bucket = emrService.getLogBucket(emrClusterId);
-                    if (StringUtils.isNotBlank(bucket)) {
-                        url = s3LogUrl(bucket, emrClusterId, appId);
-                    } else {
-                        throw new IllegalStateException("Cannot find log bucket for emr cluster " + emrClusterId);
-                    }
+                    log.warn("Cannot find log bucket for emr cluster " + emrClusterId);
                 }
             } else {
                 JobStatus status = JobStatus.fromString(workflowJob.getStatus());
-                url = status.isTerminated() ? ambariAppHistoryUrl(appId) : ambariAppMasterUrl(appId);
+                amUrl = status.isTerminated() ? ambariAppHistoryUrl(appId) : ambariAppMasterUrl(appId);
             }
-            return url;
+            logLinks.setAppMasterUrl(amUrl);
+            return logLinks;
         } else {
             throw new IllegalStateException("Workflow with pid " + workflowPid + " does not have an app id, " //
                     + "therefore cannot find the log link.");

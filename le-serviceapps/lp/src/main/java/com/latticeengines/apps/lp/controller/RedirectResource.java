@@ -3,6 +3,9 @@ package com.latticeengines.apps.lp.controller;
 import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.LOG_REDIRECT_LINK;
 import static com.latticeengines.domain.exposed.workflow.WorkflowConstants.REDIRECT_RESOURCE;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -29,17 +33,18 @@ public class RedirectResource {
     @Inject
     private EMRCacheService emrCacheService;
 
+    /***
+     * This is not a redirect api anymore, because we are not sure if we should redirect to AM or S3
+     */
     @RequestMapping(LOG_REDIRECT_LINK + "{workflowPid}")
-    @ApiOperation("Redirect to the link of workflow logs")
+    @ApiOperation("The links of workflow logs")
     @NoCustomerSpace
-    public ModelAndView redirectWorkflowLog(@PathVariable long workflowPid) {
-        String url = workflowProxy.getLogLinkByWorkflowPid(workflowPid);
-        if (StringUtils.isNotBlank(url)) {
-            return new ModelAndView("redirect:" + url);
-        } else {
-            return new ModelAndView("Cannot find the log link for workflow pid=" //
-                    + String.valueOf(workflowPid));
-        }
+    public String redirectWorkflowLog(@PathVariable long workflowPid) {
+        WorkflowLogLinks logLinks = workflowProxy.getLogLinkByWorkflowPid(workflowPid);
+        List<String> messages = Arrays.asList( //
+                "AppMaster URL: " + String.valueOf(logLinks.getAppMasterUrl()), //
+                "S3 Log Folder: " + String.valueOf(logLinks.getS3LogDir()));
+        return StringUtils.join(messages, "\n");
     }
 
     @RequestMapping("/emr/rm")

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
@@ -230,7 +231,7 @@ public class WorkflowResource {
 
     @GetMapping("/log-link/pid/{workflowPid}")
     @ApiOperation("Get log url for a workflow by pid.")
-    public String getLogLinkByWorkflowPid(@PathVariable long workflowPid) {
+    public WorkflowLogLinks getLogLinkByWorkflowPid(@PathVariable long workflowPid) {
         return workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
     }
 }
