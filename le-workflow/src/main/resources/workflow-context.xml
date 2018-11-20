@@ -15,5 +15,6 @@
     <import resource="classpath:aws-context.xml"/>
     <import resource="classpath:workflow-aspect-context.xml"/>
     <import resource="classpath:workflow-persistence-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml" />
 
 </beans>

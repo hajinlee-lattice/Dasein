@@ -137,6 +137,11 @@
             <artifactId>zt-exec</artifactId>
             <version>${zt.exec.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-hadoop</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

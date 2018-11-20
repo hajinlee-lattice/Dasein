@@ -23,6 +23,7 @@ import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
+import com.latticeengines.hadoop.service.EMRCacheService;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfiguration> extends AbstractStep<T>
@@ -39,6 +40,12 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
 
     @Inject
     private VersionManager versionManager;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Inject
+    private EMRCacheService emrCacheService;
 
     protected ApplicationContext applicationContext;
 
@@ -148,9 +155,13 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         envs.put(WorkflowProperty.STEPFLOWCONFIG, config.toString());
         envs.put("CONDA_ENV", getCondaEnv());
         envs.put("PYTHON_APP", getPythonScript());
-        envs.put("SHDP_HD_FSWEB", webHdfs);
-        // envs.put("SHDP_HD_FSWEB",
-        // "http://webhdfs.lattice.local:14000/webhdfs/v1");
+
+        if (Boolean.TRUE.equals(useEmr)) {
+            envs.put("SHDP_HD_FSWEB", emrCacheService.getWebHdfsUrl());
+        } else {
+            envs.put("SHDP_HD_FSWEB", webHdfs);
+        }
+
         return envs;
     }
 
