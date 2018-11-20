@@ -69,6 +69,8 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
     private HdfsToS3PathBuilder pathBuilder;
 
+    private ExecutorService distCpWorkers;
+
     @PostConstruct
     public void init() {
         String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
@@ -89,7 +91,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             log.info("There's no tenant dir found.");
             return;
         }
-        List<String> tenants = new ArrayList<>();
+        Set<String> tenants = new HashSet<>();
         requests.forEach(r -> tenants.add(r.customerSpace.getTenantId()));
 
         log.info(String.format("Starting to export from hdfs to s3. tenantIds=%s, size=%s",
@@ -98,10 +100,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         for (ExportRequest request : requests) {
             exporters.add(new HdfsS3Exporter(request));
         }
-        int threadPoolSize = Math.min(6, requests.size());
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-export-history", threadPoolSize);
-        ThreadPoolUtils.runRunnablesInParallel(executorService, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
-        executorService.shutdown();
+        ThreadPoolUtils.runRunnablesInParallel(getDistCpWorkers(), exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
         log.info(String.format("Finished to export from hdfs to s3. tenantIds=%s", StringUtils.join(tenants, ",")));
     }
 
@@ -112,11 +111,11 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             return;
         }
         Set<CustomerSpace> spaceSet = new HashSet<>();
-        for (int i = 0; i < requests.size(); i++) {
-            if (!spaceSet.add(requests.get(i).customerSpace)) {
+        for (ExportRequest request : requests) {
+            if (!spaceSet.add(request.customerSpace)) {
                 continue;
             }
-            CustomerSpace customerSpace = requests.get(i).customerSpace;
+            CustomerSpace customerSpace = request.customerSpace;
             String customer = customerSpace.toString();
             String tenantId = customerSpace.getTenantId();
             try {
@@ -204,6 +203,17 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         requests.add(new ExportRequest("analytics-models", hdfsModelsDir, s3ModelsDir, customerSpace));
     }
 
+    private ExecutorService getDistCpWorkers() {
+        if (distCpWorkers == null) {
+            synchronized (this) {
+                if (distCpWorkers == null) {
+                    distCpWorkers = ThreadPoolUtils.getFixedSizeThreadPool("s3-dist-cp", 16);
+                }
+            }
+        }
+        return distCpWorkers;
+    }
+
     private class HdfsS3Exporter implements Runnable {
         private String srcDir;
         private String tgtDir;
@@ -227,19 +237,19 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
                     List<String> subFolders = new ArrayList<>();
-                    if ("analytics-data".equals(name) || "analytics-models".equals(name)) {
+                    if ("analytics-data".equals(name) || "analytics-models".equals(name) || "tables".equals(name)) {
                         HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
                             String subFolder = path.substring(path.lastIndexOf("/"));
                             log.info("Found a " + name + " sub-folder for " + tenantId + " : " + subFolder);
                             subFolders.add(subFolder);
                         });
-                        if (CollectionUtils.size(subFolders) < 200) {
-                            subFolders.clear();
-                        }
                     }
-                    if ("tables".equals(name)) {
-                        Set<String> tableNames = getTablesInCollection();
-                        subFolders.addAll(tableNames);
+                    if (CollectionUtils.size(subFolders) > 1000) {
+                        throw new IllegalStateException(tenantId + " has " + CollectionUtils.size(subFolders) //
+                                + " " + name + " sub-folders. Not allowed to be migrated automatically.");
+                    }
+                    if (CollectionUtils.size(subFolders) < 200) {
+                        subFolders.clear();
                     }
                     if (CollectionUtils.isEmpty(subFolders)) {
                         subFolders.add("");
@@ -286,16 +296,6 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     throw new RuntimeException(msg, ex);
                 }
             }
-        }
-
-        private Set<String> getTablesInCollection() {
-            Set<String> tableNames = new HashSet<>();
-            DataCollection.Version version = dataCollectionService.getActiveVersion(customer);
-            for (TableRoleInCollection role: TableRoleInCollection.values()) {
-                List<String> tblsForRole = dataCollectionService.getTableNames(customer, null, role, version);
-                tableNames.addAll(tblsForRole);
-            }
-            return tableNames;
         }
 
         private Configuration createConfiguration() {

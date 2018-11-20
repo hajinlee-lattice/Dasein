@@ -3,7 +3,9 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 
@@ -96,14 +98,15 @@ public class ExportToS3Resource {
 
     private Collection<String> submitRequests(Collection<String> customers) {
         ExecutorService workers = getWorkers();
+        Set<String> remaining = new HashSet<>();
         customers.forEach(customer -> {
             if (inProcess.contains(customer)) {
                 log.info("Exporting for " + customer + " is already in progress.");
-                customers.remove(customer);
             } else if (inProcess.size() > 4) {
                 log.warn("Too many migration tasks in progress, let " + customer + " wait for next attempt.");
+                remaining.add(customer);
             } else {
-                customers.remove(customer);
+                log.info("Kick off export process for " + customer);
                 workers.submit(() -> {
                     try {
                         inProcess.add(customer);
@@ -121,7 +124,7 @@ public class ExportToS3Resource {
                 });
             }
         });
-        return customers;
+        return remaining;
     }
 
     private void buildCustomers(String tenant, List<String> resultCustomers) {
@@ -136,6 +139,8 @@ public class ExportToS3Resource {
                         || HdfsUtils.fileExists(yarnConfiguration, contract)) {
                     if (!resultCustomers.contains(tenant)) {
                         resultCustomers.add(tenant);
+                    } else {
+                        log.info("Skip " + tenant + " as it does not have analytics or contract folder in hdfs.");
                     }
                 }
             } catch (Exception ex) {
