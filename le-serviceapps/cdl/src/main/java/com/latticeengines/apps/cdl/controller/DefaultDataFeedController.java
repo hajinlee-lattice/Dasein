@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Date;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
+import java.util.Date;
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +22,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * This controller assumes operation on the default datafeed in default
@@ -111,7 +110,7 @@ public class DefaultDataFeedController {
     @PostMapping(value = "/updatenextinvoketime")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
-    public void updateDataFeedNextInvokeTime(@PathVariable String customerSpace, @RequestBody Date time) {
+    public void updateDataFeedNextInvokeTime(@PathVariable String customerSpace, @RequestBody(required = false) Date time) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         datafeedService.updateDataFeedNextInvokeTime(customerSpace, time);
     }

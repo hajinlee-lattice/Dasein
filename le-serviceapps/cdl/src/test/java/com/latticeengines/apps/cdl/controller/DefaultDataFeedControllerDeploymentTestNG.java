@@ -41,5 +41,10 @@ public class DefaultDataFeedControllerDeploymentTestNG extends CDLDeploymentTest
 
         dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
         Assert.assertNotNull(dataFeed.getNextInvokeTime());
+
+        dataFeedProxy.updateDataFeedNextInvokeTime(mainCustomerSpace, null);
+
+        dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
+        Assert.assertNull(dataFeed.getNextInvokeTime());
     }
 }
