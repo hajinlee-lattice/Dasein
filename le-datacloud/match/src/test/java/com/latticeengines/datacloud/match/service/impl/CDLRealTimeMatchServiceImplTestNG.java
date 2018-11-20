@@ -73,7 +73,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
 
     private static String[] accountAttrs = { "Website", "AlexaRank",
             "BmbrSurge_HumanResourceManagement_Intent" };
-    private static Object[] accountAttrVals = { "aboitiz.com", 575412, "Normal" };
+    private static Object[] accountAttrVals = { "aboitiz.com", 575412, null };
     private static String[] ratingAttrs = { "engine_mc7o9gwpq8gfw0wzkvekmw_score",
             "engine_zsujpzaatkoogxwx2zz8pa_score", "engine_mc7o9gwpq8gfw0wzkvekmw", "engine_zsujpzaatkoogxwx2zz8pa" };
     private static Object[] ratingAttrVals = { 5, 37, "D", "D" };
