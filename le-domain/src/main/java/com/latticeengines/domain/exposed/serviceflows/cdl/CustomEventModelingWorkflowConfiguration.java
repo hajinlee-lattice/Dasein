@@ -149,8 +149,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            customEventMatchWorkflowConfigurationBuilder
-                    .internalResourceHostPort(internalResourceHostPort);
+            customEventMatchWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             importData.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
             modelDataValidationWorkflow.internalResourceHostPort(internalResourceHostPort);
@@ -213,8 +212,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder modelingType(CustomEventModelingType customEventModelingType) {
             customEventMatchWorkflowConfigurationBuilder.modelingType(customEventModelingType);
             generateAIRating.modelingType(customEventModelingType);
-            String scoreField = CustomEventModelingType.LPI == customEventModelingType
-                    ? InterfaceName.Event.name() : ScoreResultField.RawScore.name();
+            String scoreField = CustomEventModelingType.LPI == customEventModelingType ? InterfaceName.Event.name()
+                    : ScoreResultField.RawScore.name();
             generateAIRating.scoreField(scoreField);
             setConfigForScoring.setCustomEventModelingType(customEventModelingType);
             modelImportExportS3.setCustomEventModelingType(customEventModelingType);
@@ -277,8 +276,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
-            customEventMatchWorkflowConfigurationBuilder
-                    .setRetainLatticeAccountId(retainLatticeAccountId);
+            customEventMatchWorkflowConfigurationBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
@@ -314,8 +312,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            customEventMatchWorkflowConfigurationBuilder
-                    .sourceSchemaInterpretation(sourceSchemaInterpretation);
+            customEventMatchWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             modelWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             generateAIRating.sourceSchemaInterpretation(sourceSchemaInterpretation);
@@ -408,8 +405,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder skipLdcAttributesOnly(boolean skipLdcAttributesOnly) {
             ldcOnlyAttributes.setSkipStep(skipLdcAttributesOnly);
             useConfiguredModelingAttributesBuilder.excludeCDLAttributes(!skipLdcAttributesOnly);
-            attributeCategoryModifierConfigurationBuilder
-                    .excludeCDLAttributes(!skipLdcAttributesOnly);
+            attributeCategoryModifierConfigurationBuilder.excludeCDLAttributes(!skipLdcAttributesOnly);
             return this;
         }
 
@@ -444,7 +440,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder modelIteration(Integer modelIteration) {
             useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
-            if (modelIteration != null && modelIteration.intValue() == 1) {
+            if (ModelWorkflowConfigurationUtils.skipUseConfiguredModelingAttributesStep(modelIteration)) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
             return this;
@@ -461,13 +457,12 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public CustomEventModelingWorkflowConfiguration build() {
-            customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.RTS,
-                    "1.0");
+            customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.RTS, "1.0");
             exportBucketTool.setUsingDisplayName(false);
             generateAIRating.saveBucketMetadata();
 
-            configuration.setContainerConfiguration("customEventModelingWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());

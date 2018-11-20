@@ -397,7 +397,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
 
         public Builder modelIteration(Integer modelIteration) {
             useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
-            if (modelIteration != null && modelIteration.intValue() == 1) {
+            if (ModelWorkflowConfigurationUtils.skipUseConfiguredModelingAttributesStep(modelIteration)) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
             return this;

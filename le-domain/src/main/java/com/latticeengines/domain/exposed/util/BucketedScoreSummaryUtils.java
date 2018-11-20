@@ -90,6 +90,9 @@ public class BucketedScoreSummaryUtils {
         }
 
         double totalLift = cumulativeNumConverted / cumulativeNumLeads;
+        if (isEV) {
+            totalLift = totalExpectedRevenue / cumulativeNumLeads;
+        }
 
         bucketedScoreSummary.setTotalNumLeads(cumulativeNumLeads);
         bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);
@@ -105,6 +108,11 @@ public class BucketedScoreSummaryUtils {
                 bucketedScoreSummary.getBarLifts()[32 - i] = 0;
             } else {
                 bucketedScoreSummary.getBarLifts()[32 - i] = (totalLeadsConvertedInBar / totalLeadsInBar) / totalLift;
+                if (isEV) {
+                    bucketedScoreSummary.getBarLifts()[32 - i] = ((bucketedScores[i * 3 + 1].getExpectedRevenue()
+                            + bucketedScores[i * 3 + 2].getExpectedRevenue()
+                            + bucketedScores[i * 3 + 3].getExpectedRevenue()) / totalLeadsInBar) / totalLift;
+                }
             }
         }
         return bucketedScoreSummary;

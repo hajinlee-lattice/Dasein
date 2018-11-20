@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
@@ -13,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -57,8 +59,7 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
         });
     }
 
-    // todo - anoop - it is just the test data issue, will fix it in next checkin
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit", enabled = true)
     public void testParseBucketedScoreEV() throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream is = classLoader.getResourceAsStream(RESOURCE_ROOT + "ev-part-00000.avro");
@@ -70,6 +71,10 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
         Assert.assertEquals(notNullBuckets.size(), 96);
         Assert.assertEquals(notNullBuckets.stream().map(BucketedScore::getNumLeads).reduce(0, (a, b) -> a + b),
                 new Integer(summary.getTotalNumLeads()));
+        AtomicDouble totalExpectedRevenue = new AtomicDouble(0D);
+        AtomicInteger totalLeads = new AtomicInteger(0);
+        AtomicDouble totalConvertedLeads = new AtomicDouble(0D);
+
         notNullBuckets.stream().forEach(bucket -> {
             Assert.assertNotNull(bucket.getAverageExpectedRevenue());
             Assert.assertNotNull(bucket.getExpectedRevenue());
@@ -85,11 +90,44 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
                 Assert.assertTrue(bucket.getLeftExpectedRevenue() > 0D);
                 Assert.assertTrue(bucket.getLeftNumConverted() > 0D);
             }
+            totalExpectedRevenue.set(totalExpectedRevenue.get() + bucket.getExpectedRevenue());
+            totalLeads.set(totalLeads.get() + bucket.getNumLeads());
+            totalConvertedLeads.set(totalConvertedLeads.get() + bucket.getNumConverted());
         });
-        Assert.assertEquals(summary.getTotalNumLeads(), 9465);
-        Assert.assertEquals(summary.getTotalNumConverted(), 94.71663841982246);
-        Assert.assertEquals(summary.getOverallLift(), 0.010007040509225828);
-        Assert.assertEquals(summary.getTotalExpectedRevenue(), 364241.36234563857);
+        Assert.assertEquals(summary.getTotalNumLeads(), 301);
+        Assert.assertEquals(summary.getTotalNumConverted(), 3.0411567093153087);
+        Assert.assertEquals(summary.getOverallLift(), 684.8308990536539);
+        Assert.assertEquals(summary.getTotalExpectedRevenue(), 206134.1006151498);
+        Assert.assertTrue(Math.abs(summary.getTotalExpectedRevenue() - totalExpectedRevenue.get()) > 1 / 100000);
+        Assert.assertEquals(summary.getTotalNumLeads(), totalLeads.get());
+        Assert.assertTrue(Math.abs(summary.getTotalNumConverted() - totalConvertedLeads.get()) > 1 / 100000);
+        Assert.assertTrue(
+                Math.abs(summary.getOverallLift() - totalExpectedRevenue.get() / totalLeads.get()) > 1 / 100000);
+
+        Assert.assertNotNull(summary.getBarLifts());
+        Assert.assertTrue(summary.getBarLifts().length > 0);
+        double previousBarLift = Double.MAX_VALUE;
+        int nonZeroBarLiftCount = 0;
+        for (int barLiftIdx = 0; barLiftIdx < summary.getBarLifts().length; barLiftIdx++) {
+            Assert.assertTrue(previousBarLift >= summary.getBarLifts()[barLiftIdx]);
+            if (summary.getBarLifts()[barLiftIdx] > 0) {
+                nonZeroBarLiftCount++;
+            }
+            previousBarLift = summary.getBarLifts()[barLiftIdx];
+        }
+        Assert.assertTrue(nonZeroBarLiftCount > 0);
+        Assert.assertTrue(Math.abs(summary.getBarLifts()[0] //
+                - ((summary.getBucketedScores()[97].getExpectedRevenue() //
+                        + summary.getBucketedScores()[98].getExpectedRevenue() //
+                        + summary.getBucketedScores()[99].getExpectedRevenue()) //
+                        / summary.getOverallLift())) //
+        > 1 / 100000);
+        Assert.assertTrue(Math.abs(summary.getBarLifts()[1] //
+                - ((summary.getBucketedScores()[94].getExpectedRevenue() //
+                        + summary.getBucketedScores()[95].getExpectedRevenue() //
+                        + summary.getBucketedScores()[96].getExpectedRevenue()) //
+                        / summary.getOverallLift())) //
+        > 1 / 100000);
     }
 
     @Test(groups = "unit")
@@ -166,6 +204,7 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
         }
         Integer sumCount = bucketMetadataList.stream().map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b);
         Assert.assertEquals(sumCount, new Integer(summary.getTotalNumLeads()));
+        System.out.println(JsonUtils.serialize(summary.getBarLifts()));
     }
 
     private static List<BucketMetadata> getBucketMetadata() {
