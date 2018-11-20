@@ -12,7 +12,6 @@
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:workflowapi-context.xml"/>
     <import resource="classpath:common-testclient-env-context.xml"/>
-    <import resource="classpath:serviceflows-prospectdiscovery-workflow-context.xml"/>
     <import resource="classpath:serviceflows-leadprioritization-workflow-context.xml"/>
     <import resource="classpath:serviceflows-datacloud-workflow-context.xml"/>
     <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
