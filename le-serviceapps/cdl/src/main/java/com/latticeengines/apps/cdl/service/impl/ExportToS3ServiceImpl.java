@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ExportToS3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -33,7 +34,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -63,7 +63,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     private Configuration distCpConfiguration;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     private String queueName;
 
@@ -120,12 +120,12 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             String customer = customerSpace.toString();
             String tenantId = customerSpace.getTenantId();
             try {
-                DataCollection dc = dataCollectionProxy.getDefaultDataCollection(customer);
+                DataCollection dc = dataCollectionService.getDefaultCollection(customer);
                 if (dc == null) {
                     log.info("There's no data collection for tenantId=" + tenantId);
                     continue;
                 }
-                DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customer);
+                DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customer);
                 for (TableRoleInCollection role : TableRoleInCollection.values()) {
                     addDataUnitsForRole(customer, tenantId, activeVersion, role);
                 }
@@ -137,7 +137,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
     private void addDataUnitsForRole(String customer, String tenantId, DataCollection.Version activeVersion,
             TableRoleInCollection role) {
-        List<String> activeTableNames = dataCollectionProxy.getTableNames(customer, role, activeVersion);
+        List<String> activeTableNames = dataCollectionService.getTableNames(customer, null, role, activeVersion);
         if (CollectionUtils.isNotEmpty(activeTableNames)) {
             log.info("Start to add active tables for tenant=" + customer + " role=" + role.name());
             activeTableNames.forEach(t -> {
@@ -221,17 +221,25 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
         @Override
         public void run() {
-            try (PerformanceTimer timer = new PerformanceTimer("Finished copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
+            try (PerformanceTimer timer = new PerformanceTimer( //
+                    "Finished copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
                 log.info("Start copying from hdfs dir=" + srcDir + " to s3 dir=" + tgtDir);
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
                     List<String> subFolders = new ArrayList<>();
-                    if ("analytics-data".equals(name) || "analytics-models".equals(name) || "tables".equals(name)) {
+                    if ("analytics-data".equals(name) || "analytics-models".equals(name)) {
                         HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
                             String subFolder = path.substring(path.lastIndexOf("/"));
                             log.info("Found a " + name + " sub-folder for " + tenantId + " : " + subFolder);
                             subFolders.add(subFolder);
                         });
+                        if (CollectionUtils.size(subFolders) < 200) {
+                            subFolders.clear();
+                        }
+                    }
+                    if ("tables".equals(name)) {
+                        Set<String> tableNames = getTablesInCollection();
+                        subFolders.addAll(tableNames);
                     }
                     if (CollectionUtils.isEmpty(subFolders)) {
                         subFolders.add("");
@@ -239,9 +247,20 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     int count = 1;
                     List<String> failedFolders = new ArrayList<>();
                     for (String subFolder: subFolders) {
-                        log.info(tenantId + ": start copying " + count + "/" + subFolders.size() + " sub-folder " + subFolder);
+                        log.info(tenantId + ": start copying " + count + "/" + subFolders.size() //
+                                + " sub-folder " + subFolder);
                         String srcPath = srcDir + subFolder;
                         String tgtPath = tgtDir + subFolder;
+                        if ("tables".equals(name) && StringUtils.isNotBlank(subFolder)) {
+                            Table table = metadataProxy.getTable(customer, subFolder);
+                            if (table == null || CollectionUtils.isEmpty(table.getExtracts())) {
+                                log.info(tenantId + ": finished copying " + (count++) + "/" + subFolders.size() //
+                                        + " table " + subFolder + " as it is not part of the data collection.");
+                                continue;
+                            }
+                            srcPath = table.getExtracts().get(0).getPath();
+                            tgtPath = tgtDir + "/" + subFolder;
+                        }
                         try {
                             if (HdfsUtils.fileExists(hadoopConfiguration, srcPath)) {
                                 Configuration distcpConfiguration = createConfiguration(subFolder);
@@ -255,7 +274,8 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                                 failedFolders.add(subFolder);
                             }
                         }
-                        log.info(tenantId + ": finished copying " + (count++) + "/" + subFolders.size() + " sub-folder " + subFolder);
+                        log.info(tenantId + ": finished copying " + (count++) + "/" + subFolders.size() //
+                                + " " + name + " sub-folder " + subFolder);
                     }
                     if (CollectionUtils.isNotEmpty(failedFolders)) {
                         throw new RuntimeException("Failed to copy sub-folders: " + StringUtils.join(failedFolders));
@@ -266,6 +286,16 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     throw new RuntimeException(msg, ex);
                 }
             }
+        }
+
+        private Set<String> getTablesInCollection() {
+            Set<String> tableNames = new HashSet<>();
+            DataCollection.Version version = dataCollectionService.getActiveVersion(customer);
+            for (TableRoleInCollection role: TableRoleInCollection.values()) {
+                List<String> tblsForRole = dataCollectionService.getTableNames(customer, null, role, version);
+                tableNames.addAll(tblsForRole);
+            }
+            return tableNames;
         }
 
         private Configuration createConfiguration() {
