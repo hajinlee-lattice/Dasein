@@ -177,7 +177,7 @@ angular.module('lp.jobs.import.row', [
             var allCompleted = true;
             if (subJobs) {
                 for (var i = 0; i < subJobs.length; i++) {
-                    if (subJobs[i].jobStatus === 'Running') {
+                    if (subJobs[i].jobStatus != 'Completed') {
                         allCompleted = false;
                         break;
                     }
