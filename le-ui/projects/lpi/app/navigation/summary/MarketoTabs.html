@@ -1,0 +1,34 @@
+<section class="tabs navigation">
+	<ul class="nav" ng-if="!isCreateForm">
+		<li ui-sref-active="active">
+	        <a ui-sref="home.marketosettings.edit({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_CREDENTIALS')}}</span></a>
+	    </li>
+		<li ui-sref-active="active">
+            <a ui-sref="home.marketosettings.enrichment({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_ENRICHMENT')}}</span></a>
+
+	    </li>
+		<li ui-sref-active="active" ng-if="!useMarketoLatticeIntegration">
+            <a ui-sref="home.marketosettings.models({id:id})" >
+            	<span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span>
+            </a>
+	    </li>
+		<li ng-class="{'active': useMarketoLatticeIntegration}" ng-if="useMarketoLatticeIntegration">
+            <a ui-sref="home.marketosettings.scoring({credentialId:id})">
+            	<span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span>
+            </a>
+	    </li>
+	</ul>
+
+	<ul class="nav" ng-if="isCreateForm">
+		<li class="active">
+			<a ui-sref="home.marketosettings.apikey"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_CREDENTIALS')}}</span></a>	        
+	    </li>
+		<li class="disabled">
+            <a><span class="angled-link"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_ENRICHMENT')}}</span></span></a>
+
+	    </li>
+		<li class="disabled">
+            <a><span class="angled-link"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span></span></a>
+	    </li>
+	</ul>
+</section>

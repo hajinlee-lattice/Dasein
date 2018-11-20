@@ -1,0 +1,45 @@
+<div>
+    <section id="userManagementContainer" class="container row">
+        <div class="row">
+            <div class="ten columns offset-one box-outline user-management-list" novalidate>
+                <div class="section-header table-header">
+                    <h4>Tenant Users</h4>
+                    <div class="pull-left number-of-items" ng-if="users.length > 0">
+                        Users: <span class="badge blue-badge">{{ users.length }}</span>&nbsp;
+                        Active: <span class="badge gray-badge">{{( users | filter: { Active: true }).length }}</span>
+                    </div>
+                </div><br>
+                <div class="section-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_FIRST_NAME')}}</th>
+                                <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_LAST_NAME')}}</th>
+                                <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_EMAIL')}}</th>
+                                <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_ACCESS_LEVEL')}}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-ng-repeat="user in users" data-ng-class="{shaded: $index % 2}">
+                                <td>{{user.FirstName}}</td>
+                                <td>{{user.LastName}}</td>
+                                <td>{{user.Email}}</td>
+                                <td>{{manipulateAccessLevel(user.AccessLevel)}}</td>
+                                <td class="edit-icons">
+                                    <a class="js-edit-user-link delete-user-link" data-ng-show="showEditButton(user, 1)" data-ng-click="editUserClicked(user)" href="javascript:void(0)" analytics-on="click" analytics-event="Edit User"><i class="fa fa-pencil"></i></a>
+                                    <a class="js-delete-user-link delete-user-link" data-ng-show="showEditButton(user, 2)" data-ng-click="deleteUserClicked(user)" href="javascript:void(0)" analytics-on="click" analytics-event="Edit User"><i class="fa fa-trash-o"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="container section-actions">
+                    <button class="pull-right button orange-button" id="usermgmt-btn-add-user" data-ng-if="mayAddUsers" data-ng-click="addUserClicked($event)" analytics-on="click" analytics-event="{{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}">
+                        {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

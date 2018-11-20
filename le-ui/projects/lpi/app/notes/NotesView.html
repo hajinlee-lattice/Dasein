@@ -1,0 +1,113 @@
+<section id="NotesView" class="notes-list">
+    <div class="container row">
+        <div class="ten columns offset-one">
+
+            <!-- Error Messaging -->
+            <div class="messaging error-messaging" ng-if="vm.showAddNoteError">
+                You're note could not be added at this time.
+            </div>
+            <!-- Form & Button States -->
+            <form name="addNoteForm">
+                <textarea 
+                    rows="4"
+                    ng-model="note"
+                    autofocus></textarea>
+            </form>
+            <button 
+                type="button" 
+                class="button orange-button"
+                ng-click="vm.addNote(note)"
+                ng-if="!vm.saveInProgress"
+                ng-disabled="addNoteForm.$pristine || note.length > 250">{{vm.ResourceUtility.getString('NOTES_ADD_NOTE')}}</button>
+            <button
+                type="button"
+                disabled="disabled"
+                ng-if="vm.saveInProgress"
+                class="button orange-button"
+                >
+                <i class="fa fa-spinner fa-spin"></i> {{vm.ResourceUtility.getString('BUTTON_SAVING_LABEL')}}
+            </button>
+
+
+            <!-- If no notes exist, show this -->
+            <h3 class="no-notes" ng-if="vm.notes.length == 0">{{vm.ResourceUtility.getString('NOTES_NO_NOTES')}}</h3>
+
+
+            <!-- If notes exist, show a list of notes -->
+            <ul ng-if="vm.notes.length != 0">
+                <li ng-repeat="note in vm.notes | orderBy: '-CreationTimestamp'">
+
+
+                    <!-- If the note was a clone from another model -->
+                    <h4 ng-if="note.ParentModelId != null && !vm.isRating">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{vm.referModelName}}</h4>
+
+                    <!-- Note content -->
+                    <div class="note-header">
+                        <h3><strong>{{note.Origin}}</strong> by <span>{{note.CreatedByUser}}</span> on <span>{{note.CreationTimestamp | date:'MMMM dd, yyyy'}} at {{note.CreationTimestamp | date:'hh:mm'}}</span></h3>
+                        <button 
+                            type="button" 
+                            class="button icon-button white-button"
+                            ng-click="vm.deleteNote($event, note.Id)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button 
+                            type="button" 
+                            class="button icon-button white-button"
+                            ng-click="vm.refreshEditingContents(note); editingNote = !editingNote"
+                            ng-show="!editingNote">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                        <button 
+                            type="button" 
+                            class="button icon-button white-button"
+                            ng-click="editingNote = !editingNote"
+                            ng-show="editingNote">
+                            <i class="fa fa-remove"></i>
+                        </button>
+                    </div>
+                    <div 
+                        class="note-body"
+                        ng-show="!editingNote">
+                        <p>{{note.NotesContents}}</p>
+                    </div>
+
+                    <!-- Edit note form -->
+                    <div 
+                        class="edit-note"
+                        ng-show="editingNote">
+                        <form name="editNoteForm">
+                            <textarea ng-model="note.editContents"></textarea>
+                        </form>
+
+                        <button 
+                            type="button" 
+                            class="button white-button"
+                            ng-click="editingNote = !editingNote">
+                            {{vm.ResourceUtility.getString('BUTTON_CANCEL_CHANGES_LABEL')}}
+                        </button>
+                        <button 
+                            type="button"
+                            class="button orange-button pull-right"
+                            ng-show="!vm.saveInProgress"
+                            ng-click="vm.updateNote(note)"
+                            ng-disabled="editNoteForm.$pristine || note.editContents.length > 250">{{vm.ResourceUtility.getString('BUTTON_SAVE_CHANGES_LABEL')}}</button>
+                        <button
+                            type="button"
+                            disabled="disabled"
+                            ng-show="vm.saveInProgress"
+                            class="button orange-button pull-right"
+                            >
+                            <i class="fa fa-spinner fa-spin"></i> {{vm.ResourceUtility.getString('BUTTON_SAVING_LABEL')}}
+                        </button>
+                    </div>
+
+                    <p class="author" ng-if="note.CreationTimestamp != note.LastModificationTimestamp">Edited by <span>{{note.LastModifiedByUser}}</span> on <span>{{note.LastModificationTimestamp | date:'MMMM dd, yyyy'}} at {{note.LastModificationTimestamp | date:'hh:mm'}}</span></p>
+
+
+                </li>
+            </ul>
+
+
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
+</section>

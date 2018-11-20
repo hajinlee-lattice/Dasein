@@ -1,0 +1,211 @@
+<section id="ModelRatingsView" class="model-ratings container">
+
+    <div class="row">
+        <div class="ten columns offset-one">
+
+            <ul 
+                class="tabs_" 
+                ng-if="vm.section !== 'dashboard.scoring'">
+                <li class="active">Rating Setup</li>
+                <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })"  ui-sref-opts="{reload: true}">History</li>
+            </ul>
+
+            <div ng-if="vm.section === 'dashboard.ratings'" class="iteration-selection-header">
+                <h2>
+                    Iteration
+                    <select
+                        ng-model="vm.activeIteration"
+                        ng-options="iteration.iteration for iteration in vm.activeIterations"
+                        ng-change="vm.changeIterationData()"
+                        class="iteration-selection"
+                    ></select>
+                    <span ng-if="vm.ratingsSummary.total_expected_revenue">
+                        &nbsp;Past Average Weighted Revenue: ${{(vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads) | number: 2}}
+                    </span>
+                </h2>
+                <h2 ng-if="vm.hasRatingsAvailable">
+                    How do you want to configure your ratings?
+                    <span class="more-info show-tooltip top delay">
+                        i
+                        <div class="tooltip_ small">
+                            <div class="cover">
+                                <p>Use the sliders below to determine what scores should be rated as A, B, C, etc.... You may also change a rating name. Once activated, the particular model iteration will be available for scoring until deactivated or changed.</p>
+                                <!-- <p>The top of the chart shows the {propensity|revenue} lift for accounts between the threshold sliders. The bottom chart shows the lift of accounts for every 3 points. Below the chart, you can see the percentage of accounts for each rating bracket.</p> -->
+                            </div>
+                        </div>
+                    </span>
+                </h2>
+            </div>
+
+            <div 
+                class="chart-header">
+                <div class="list-data pull-left">
+                    All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number }}</strong>
+                </div>
+                <div class="actions pull-right">
+                	<button 
+                		type="button" 
+                		class="button orange-button"
+                		ng-mousedown="vm.publishConfiguration($event)"
+                		ng-disabled="vm.chartNotUpdated">
+                        Publish Configuration
+                    </button>
+                </div>
+            </div><!-- End .chart-header -->
+
+            <!-- <div 
+                ng-if="!vm.hasRatingsAvailable && vm.section === 'dashboard.ratings'"
+                class="no-ratings-header">
+                <h2>No Ratings Available for Iteration {{vm.activeIteration.iteration}}</h2>
+            </div> --><!-- End .no-ratings-header -->
+
+            <div 
+                id="ratingsChart"
+                class="ratings-chart"
+                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
+
+                <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
+                
+                <div 
+                    id="sliders" 
+                    class="sliders-container"
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}"
+                    ng-click="vm.addBucket($event)"
+                    ng-disabled="!vm.canAddBucket"
+                    ng-class="vm.canAddBucket ? 'can-add-bucket' : ''">
+                    <div 
+                        class="slider"
+                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px; right: '+ bucket.right_bound_score +'%'}}"
+                        ng-repeat="bucket in vm.workingBuckets"
+                        ng-mousedown="vm.eleMouseDown($event, bucket, $index)">
+                        
+                        <div class="value" ng-show="bucket.isMoving">{{vm.right}}</div>
+                        <div class="handle">&nbsp;</div>
+                    </div>
+                </div><!-- End .sliders-container -->
+                <ul id="verticalAxis" class="vertical-axis" ng-attr-class="vertical-axis">
+                    <li 
+                        ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index"
+                        ng-attr-style="{{'height: '+ vm.axisItemHeight +'px;'}}">
+                        <span>{{$index+1}}x</span>
+                    </li>
+                </ul>
+                <ul class="data">
+                    <li 
+                        ng-repeat="data in vm.ratingsSummary.bar_lifts track by $index"
+                        ng-attr-style="{{'height: '+ vm.Math.round(vm.barMultiplier * data) +'px;'}}"
+                        ng-attr-title="{{data}}">&nbsp;
+                    </li>
+                </ul>
+                <div 
+                    id="barColors" 
+                    class="bar-colors buckets-{{vm.workingBuckets.length}}" 
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
+                    <div 
+                        class="overlay bucket-{{$index}}"
+                        ng-attr-style="
+                            {{
+                                $index === 0 && '
+                                height: '+ vm.dugoutHeight +'px;
+                                right: '+ bucket.right_bound_score +'%;
+                                width: '+ (bucket.left_bound_score - bucket.right_bound_score) +'%;' || 
+
+                                $index != 0 && '
+                                height: '+ vm.dugoutHeight +'px;
+                                right: '+ bucket.right_bound_score +'%;
+                                width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'
+                            }} 
+                            "
+                        ng-repeat="bucket in vm.workingBuckets"
+                        ng-mouseover="vm.bucketHover($event)">
+                    </div>  
+                </div><!-- End .bar-colors -->
+                <ul class="horizontal-axis">
+                    <li class="hidden"></li>
+                    <li class="mark"><span>99</span></li>
+                    <li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>90</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>80</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>70</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>60</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>50</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>40</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>30</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>20</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>10</span></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark five"><span>5</span></li>
+                    <li class="hidden"></li><li class="hidden"></li><li class="hidden"></li><li class="hidden"></li><li class="hidden"></li>
+                </ul><!-- End .horizontal-axis -->
+            </div><!-- End .ratings-chart -->
+
+            <ul 
+                id="bucketTiles" 
+                class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}">
+            	<li ng-repeat="bucket in vm.workingBuckets">
+            		<div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{bucket.bucket_name}}</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift"><span ng-if="bucket.lift === 0.1010101">&lt;</span>{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+                        
+            			<dt>{{vm.modelType}}</dt>
+                        <dd>{{bucket.num_leads | number}} ({{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%)</dd>
+
+                        <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.bucketAvgRevenue">Average<br>Weighted Revenue</dt>
+                        <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.bucketAvgRevenue">${{bucket.bucketAvgRevenue | number: 2}}</dd>
+
+                        <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.bucketAvgRevenue">Conversion Rate</dt>
+                        <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.bucketAvgRevenue">{{ bucket.conversionRate | number: 2 }}%</dd>
+                    </dl>
+                </li>
+            </ul><!-- End .bucket-tiles -->
+
+            <div ng-if="(vm.section === 'dashboard.ratings' && vm.dashboard.summary.bucketMetadata) || vm.section != 'dashboard.ratings'">
+                <hr/>
+                <h3>Currently published configuration</h3>
+                <refresher condition="vm.updateContent">
+                
+                <ul class="bucket-tiles published buckets-{{::vm.currentConfiguration.length}}">
+                    <li ng-repeat="bucket in ::vm.currentConfiguration">
+                        <div 
+                            class="bucket-label">{{::bucket.bucket_name}}</div>
+                        <dl>
+                            <dt>Lift</dt>
+                            <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+                            
+                            <dt>{{vm.modelType}}</dt>
+                            <dd>{{::bucket.num_leads | number}} ({{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%)</dd>
+
+                            <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.avg_expected_revenue">Average<br>Weighted Revenue</dt>
+                            <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.avg_expected_revenue">${{bucket.avg_expected_revenue | number: 2}}</dd>
+
+                            <!-- <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">Conversion Rate</dt> -->
+                            <!-- <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">{{ (bucket.num_leads / vm.ratingsSummary.total_num_leads) * 100 | number: 2 }}%</dd> -->
+                        </dl>
+                    </li>
+                </ul>
+                
+                </refresher>
+            </div><!-- End Currently Published Configuration -->
+            
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
+
+</section>

@@ -1,0 +1,115 @@
+<section class="ratings-engine-ai-refine container">
+    <div class="header-container">
+        <div class="title-container">
+            <h2>Refine what history the model will learn from</h2>
+        </div>
+    </div>
+
+    <div class="results-target">
+        <div class="customer-rate" title="Customers">
+            <i class="fa fa-users fa-2x" aria-hidden="true"></i>
+            <spa class="result-target-value">{{vm.customersCount}}</spa>
+        </div>
+        <div class="learn-from" title="Successes">
+            <i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i>
+            <spa class="result-target-value">{{vm.prospectsCount}}</spa>
+        </div>
+        <div class="historical-records" title="Historical">
+            <i class="fa fa-history fa-2x" aria-hidden="true" title="Historical"></i>
+            <spa class="result-target-value">{{vm.historicalCount}}</spa>
+        </div>
+    </div>
+
+
+    <div class="options-container">
+        <div class="flex-grid">
+            <div class="col col-bordered">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Only use success where spend in the quarter was</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.spent">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.spent">
+                        <option-spinner label="$" options="vm.getSpentOptions()" hide-options="false"></option-spinner>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Only use success where quantity bought in the quarter was</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.bought">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.bought">
+                        <option-spinner label="Units" options="vm.getBoughtOptions()" hide-options="false"></option-spinner>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grid">
+            <div class="col col-bordered">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">When modeling, only use historical records for the last</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.historical">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.historical">
+                        <option-spinner options="vm.getHistoricalOptions()" hide-options="false"></option-spinner>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Let me model on a similar Product, but not exacly the one I want to sell into</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.similarProducts" ng-checked="vm.similarProductsChecked()">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.similarProducts">
+                        <chips placeholder="Choose similar Products" datasource="vm.productsDataSource" callback-function="vm.productsCallback(args)"
+                            single-selection="false"></chips>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grid">
+            <div class="col col-bordered">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Let me model on a similar Segment, but not exacly the one I want to sell into</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.similarSegments">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.similarSegments">
+                        <chips placeholder="Choose similar Segment" datasource="vm.segmentsDatasource" callback-function="vm.callbackSegments(args)"
+                            single-selection="true"></chips>
+                    </div>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+</section>

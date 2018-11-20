@@ -1,0 +1,38 @@
+<p class="products">
+    Upload a CSV file containing one row for each product with its attributes in separate columns.
+    You can always update and add new products later.
+</p>
+
+<div>
+    <a href="assets/downloads/product-bundle-sample.csv" target="_self" class="download-link"><i class="fa fa-download"></i> Download a sample CSV file that has all of the required fields.</a>
+
+    <p>{{$ctrl.ResourceUtility.getString('IMPORT_SAMPLE_FILE_LABEL')}}:</p>
+    <div class="table example-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>122</td>
+                    <td>Dedicated</td>
+                    <td>Dedicated servers</td>
+                </tr>
+                <tr>
+                    <td>324</td>
+                    <td>Cloud Hosting</td>
+                    <td>Cloud servers</td>
+                </tr>
+                <tr>
+                    <td>453</td>
+                    <td>Managed Security Products</td>
+                    <td>Security products and services&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

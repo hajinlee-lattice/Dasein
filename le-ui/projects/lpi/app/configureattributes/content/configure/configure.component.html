@@ -1,0 +1,74 @@
+<section class="container" ng-class="{'_no-data': !vm.PurchaseHistory.length}">
+    <div class="row">
+        <le-modal-window config="vm.modalConfig" callback-function="vm.modalCallback(args)">
+            <br />
+            <p>
+                Exiting the configuration flow will reset all changes made. Do you want to continue?
+            </p>
+            <br />
+        </le-modal-window>
+
+        <div class="columns twelve box-outline">
+            <div class="section-header">
+                <h4>Configure Attributes</h4>
+            </div>
+            <hr />
+            <div class="section-body with-padding row">
+                <div class="columns full wizard-content">
+
+                    <div class="configure-attributes-content {{vm.step}}">
+                        <div class="configuration">
+                            <div class="header">
+                                <h2>
+                                    You have configured <em>{{vm.completed.length}}</em> of <strong>{{vm.steps_count}}</strong> of available attributes.
+                                </h2>
+                            </div>
+                            <ul class="steps">
+                                <li ng-click="vm.goto(name, item)" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name, completed: item.completed, disabled: item.disabled}" class="{{name}} show-tooltip bottom middle delay">
+                                    <strong>
+                                        {{item.label}}
+                                    </strong> 
+                                    <div class="tooltip_" ng-if="item.description && vm.step !== 'done' && !item.disabled">
+                                        <div class="cover">
+                                            <h3>
+                                                {{item.label}}
+                                            </h3>
+                                            <div ng-bind-html="item.description"></div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <form name="form">
+                                <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'" ng-init="vm.checkValidDelay(form)"></div>
+                                <div class="save-button" ng-if="['done'].indexOf(vm.step) === -1">
+                                    <button type="button" class="button blue-button" ng-click="vm.save(form)" ng-disabled="!vm.enableSave(form)">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <hr />
+            <div class="container section-actions row form-actions">
+                <div>
+                    <div class="pull-left">
+                    </div>
+                    <div class="pull-right">
+                        <button ng-if="vm.step !== 'done'" type="button" class="button blue-button" ng-click="vm.submit()" ng-disabled="!vm.enableSubmit()">
+                            Submit
+                        </button>
+                        <button ng-if="vm.step === 'done'" type="button" class="button blue-button" ui-sref="home.jobs.data">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+

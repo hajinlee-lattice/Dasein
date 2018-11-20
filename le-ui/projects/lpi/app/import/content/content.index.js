@@ -1,0 +1,11 @@
+import './accountids/accountids.component';
+import './calendar/calendar.component';
+import './contactids/contactids.component';
+import './customfields/customfields.component';
+import './jobstatus/jobstatus.component';
+import './latticefields/latticefields.component';
+import './producthierarchy/producthierarchy.component';
+import './producthierarchyids/producthierarchyids.component';
+import './productids/productids.component';
+import './thirdpartyids/thirdpartyids.component';
+import './transactionids/transactionids.component';

@@ -1,0 +1,75 @@
+<section class="container marketo-container">
+
+  <div class="row">
+  		<div class="header">
+  			<h2> Lattice Import Field Mapping </h2>
+  			<label> Only models which you have activated can score. Models can be activated from My Models. </label>
+  		</div>
+  		<div class="body">
+			<table class="marketo-default-table">
+				<thead>
+					<tr>
+						<th class="right-adjusted">
+							Model Fields
+						</th>
+						<th>
+							Marketo Fields
+						</th>
+					</tr>
+					<tr>
+				</thead>
+			  	<tbody>
+			  		<tr ng-repeat="primaryField in $ctrl.primaryFields.primaryFields| orderBy: 'displayName'" ng-if="$ctrl.isRequiredField(primaryField)">
+			  			<td class="right-adjusted">
+			  				{{primaryField.displayName}}
+		  				</td>
+		  				<td>
+							<select class="form-control" ng-class="{'required': true && !$ctrl.fieldsMapping[primaryField.fieldName]}" ng-options="field.apiName as field.displayName for field in $ctrl.marketoFields" ng-model="$ctrl.fieldsMapping[primaryField.fieldName]" ng-change="$ctrl.checkEnableSave()">
+								<option value=""></option>
+                   			</select>
+		  				</td>
+			  		</tr>
+			  		<tr class="info-row">
+			  			<td></td>
+			  			<td></td>
+			  		</tr>
+			  		<tr ng-repeat="primaryField in $ctrl.primaryFields.primaryFields" ng-if="!$ctrl.isRequiredField(primaryField)">
+			  			<td class="right-adjusted">
+			  				{{primaryField.displayName}}
+		  				</td>
+		  				<td>
+							<select class="form-control" ng-options="field.apiName as field.displayName for field in $ctrl.marketoFields" ng-model="$ctrl.fieldsMapping[primaryField.fieldName]" ng-change="$ctrl.checkEnableSave()">
+								<option value=""></option>
+                   			</select>
+		  				</td>
+			  		</tr>
+			  		<tr class="info-row large">
+			  			<td class="info"> Mapping fields below will result in better scoring. </td>
+			  			<td></td>
+			  		</tr> 
+			  		<tr ng-repeat="scoringField in $ctrl.scoringFields.fields | orderBy:[$ctrl.orderFieldNames, 'fieldName']" ng-if="!scoringField.isPrimary">
+			  			<td class="right-adjusted">
+			  				{{scoringField.displayName}}
+		  				</td>
+		  				<td>
+							<select class="form-control" ng-class="{'required': false}" ng-options="field.apiName as field.displayName for field in $ctrl.marketoFields" ng-model="$ctrl.fieldsMapping[scoringField.fieldName]" ng-change="$ctrl.checkEnableSave()">
+								<option value=""></option>
+                   			</select>
+		  				</td>
+			  		</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="marketo-footer">
+			<a class="pull-left" ui-sref="home.marketosettings.scoring({credentialId: $ctrl.credentialId})">
+				<button class="button blue-button"> 
+					Back
+				</button>
+			</a>
+			<button class="pull-right button orange-button" ng-click="$ctrl.createOrUpdateScoringRequest()" ng-disabled="$ctrl.enableSave == false"> 
+				Save & Continue
+			</button>
+		</div>
+  </div>
+
+</section>

@@ -1,0 +1,143 @@
+<section id="ModelRatingsView" class="model-ratings container">
+
+    <div class="row">
+        <div class="ten columns offset-one">
+
+            <div class="chart-header">
+                <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong></div>
+                <div class="actions pull-right">
+                    <button 
+                        type="button" 
+                        class="button white-button"
+                        ui-sref="home.ratingsengine.dashboard({rating_id: vm.stateParams.rating_id, modelId: vm.stateParams.modelId})"
+                        ui-sref-opts="{reload: true, notify: true}">
+                        Back to Dashboard</button>
+                    <button 
+                        type="button" 
+                        class="button orange-button"
+                        data-ng-click="vm.publishConfiguration($event)"
+                        ng-disabled="vm.chartNotUpdated">
+                        Publish Configuration</button>
+                </div>
+            </div><!-- End .chart-header -->
+
+            <!--
+            <model-ratings-chart workingBuckets="vm.workingBuckets" ratingsSummary="vm.ratingsSummary" />
+            -->
+
+            <div 
+                id="ratingsChart"
+                class="ratings-chart"
+                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
+
+                <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
+                <div class="remove-text" ng-show="vm.showSuccess">Your new ratings configuration has been published.</div>
+                
+                <div 
+                    id="sliders" 
+                    class="sliders-container"
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}"
+                    ng-click="vm.addBucket($event)"
+                    ng-disabled="!vm.canAddBucket"
+                    ng-class="vm.canAddBucket ? 'can-add-bucket' : ''">
+                    <div 
+                        class="slider"
+                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px; right: '+ bucket.right_bound_score +'%'}}"
+                        ng-repeat="bucket in vm.workingBuckets"
+                        ng-mousedown="vm.eleMouseDown($event, bucket, $index)">
+                        
+                        <div class="value" ng-show="bucket.isMoving">{{vm.right}}</div>
+                        <div class="handle">&nbsp;</div>
+                    </div>
+                </div><!-- End .sliders-container -->
+                <ul id="verticalAxis" class="vertical-axis" ng-attr-class="vertical-axis">
+                    <li 
+                        ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index"
+                        ng-attr-style="{{'height: '+ vm.axisItemHeight +'px;'}}">
+                        <span>{{$index+1}}x</span>
+                    </li>
+                </ul>
+                <ul class="data">
+                    <li 
+                        ng-repeat="data in vm.ratingsSummary.bar_lifts track by $index"
+                        ng-attr-style="{{'height: '+ vm.Math.round(vm.barMultiplier * data) +'px;'}}"
+                        ng-attr-title="{{data}}">&nbsp;
+                    </li>
+                </ul>
+                <div 
+                    id="barColors" 
+                    class="bar-colors buckets-{{vm.workingBuckets.length}}" 
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
+                    <div 
+                        class="overlay bucket-{{$index}}"
+                        ng-attr-style="
+                            {{
+                                $index === 0 && '
+                                height: '+ vm.dugoutHeight +'px;
+                                right: '+ bucket.right_bound_score +'%;
+                                width: '+ (bucket.left_bound_score - bucket.right_bound_score) +'%;' || 
+
+                                $index != 0 && '
+                                height: '+ vm.dugoutHeight +'px;
+                                right: '+ bucket.right_bound_score +'%;
+                                width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'
+                            }} 
+                            "
+                        ng-repeat="bucket in vm.workingBuckets"
+                        ng-mouseover="vm.bucketHover($event)">
+                    </div>  
+                </div><!-- End .bar-colors -->
+                <ul class="horizontal-axis">
+                    <li class="hidden"></li>
+                    <li class="mark"><span>99</span></li>
+                    <li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>90</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>80</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>70</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>60</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>50</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>40</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>30</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>20</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark"><span>10</span></li>
+                    <li></li><li></li><li></li><li></li>
+                    <li class="mark five"><span>5</span></li>
+                    <li class="hidden"></li><li class="hidden"></li><li class="hidden"></li><li class="hidden"></li><li class="hidden"></li>
+                </ul><!-- End .horizontal-axis -->
+            </div><!-- End .ratings-chart -->
+
+            <ul id="bucketTiles" class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}">
+                <li ng-repeat="bucket in vm.workingBuckets">
+                    <div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{bucket.bucket_name}}</div>
+                    <dl>
+                        <dt>Lift</dt>
+                        <dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+                        <dt>{{vm.modelType}} %</dt>
+                        <dd>{{vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
+                        <dt>{{vm.modelType}}</dt>
+                        <dd>{{bucket.num_leads | number}}</dd>
+                    </dl>
+                </li>
+            </ul><!-- End .bucket-tiles -->
+            
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
+
+</section>

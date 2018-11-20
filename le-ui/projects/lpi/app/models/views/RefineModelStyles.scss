@@ -1,0 +1,48 @@
+.review-model {	
+	table {
+		th:nth-child(1), td:nth-child(1) {
+			width: 72px;
+			input[type="checkbox"] {
+				margin-top: 0;
+			}
+		}
+		th:nth-child(2), td:nth-child(2) {
+			& > div {
+				width: 200px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+		th:nth-child(3), td:nth-child(3) {
+			width: 360px;
+		}
+		th:nth-child(5), td:nth-child(5) {
+			width: 35px;
+		}
+	}
+	textarea {
+		min-height: 50px;
+		font-size: 14px;
+	}
+	.custom[type="checkbox"]:not(:checked) + label,
+	.custom[type="checkbox"]:checked + label {
+		position: relative;
+		padding-left: 0px;
+		cursor: pointer;
+	}
+	/* checkbox aspect */
+	.custom[type="checkbox"]:not(:checked) + label:before,
+	.custom[type="checkbox"]:checked + label:before {
+		top: 4px;
+		width: 16px; 
+		height: 16px;
+	}
+	/* checked mark aspect */
+	.custom[type="checkbox"]:not(:checked) + label:after,
+	.custom[type="checkbox"]:checked + label:after {
+		top: 4px;
+		left: 1px;
+		font-size: 16px;
+	}
+}

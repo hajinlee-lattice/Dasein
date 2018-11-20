@@ -1,0 +1,91 @@
+
+     <div ng-if="vm.hasErrorMessage" class="tile-error-header">
+        <span class="error-header-text">
+            {{vm.report['ERROR_MESSAGE']}}
+        </span>
+    </div>
+
+    <div class="jobs-tile-body columns two panel" ng-class="{'left-align-tile': vm.hasErrorMessage}">
+        <h2> {{vm.format(vm.entity)}} </h2>
+        <h2> 
+            <img ng-src="{{vm.entityIcon(vm.entity)}}"/>
+        </h2>
+        <h2> {{ vm.count }} </h2>
+    </div>
+    <div class="tile-body wrap-body columns ten panel">
+        <div class="row">
+            <ul class="jobs-tiles">
+                <li class="mini-tile" ng-if="vm.config['new']">
+                    <div class="jobs-tile-header">
+                        <h2 class="title"> New </h2>
+                        <h2 class="title new-count"> {{vm.newRecords}} </h2>
+                        <span class="fa fa-plus fa-lg pull-right"></span>
+                    </div> 
+                </li>
+                <li class="mini-tile" ng-if="vm.config['updated']">
+                    <div class="jobs-tile-header">
+                        <h2 class="title"> Updated </h2>
+                        <h2 class="title update-count"> {{vm.updatedRecords}} </h2> 
+                        <span class="fa fa-refresh fa-lg pull-right"></span>
+                        
+                    </div> 
+                </li>
+                <li class="mini-tile" ng-if="vm.config['deleted']">
+                    <div class="jobs-tile-header">
+                        <h2 class="title">Deleted
+                        </h2>
+                        <h2 class="title delete-count"> {{vm.deletedRecords}} </h2>
+                        <span class="fa fa-trash-o fa-lg pull-right"></span>
+                    </div> 
+                </li>
+                <li class="extended-tile" ng-if="vm.config['unmatched']">
+                    <div class="jobs-tile-header">
+                        <h2 class="title">Unmatched to the Datacloud
+                        </h2>
+                        <h2 class="title unmatched-count"> {{vm.unmatchedRecords}} </h2>
+                        <span class="fa fa-cloud fa-lg pull-right"></span>
+                    </div> 
+                </li>
+                <li class="extended-tile" ng-if="vm.config['product_hierarchy']">
+                    <div class="jobs-tile-header">
+                        <h2 class="title">Updated Product Hierarchy
+                        </h2>
+                        <h2 class="title update-count"> {{vm.updatedProductHierarchy}} </h2>
+                        <span class="fa fa-refresh fa-lg pull-right"></span>
+                    </div> 
+                </li>
+                <li class="extended-tile" ng-if="vm.config['product_bundle']">
+                    <div class="jobs-tile-header">
+                        <h2 class="title">Updated Product Bundle
+                        </h2>
+                        <h2 class="title update-count"> {{vm.updatedProductBundle}} </h2>
+                        <span class="fa fa-refresh fa-lg pull-right"></span>
+                    </div> 
+                </li>
+            </ul>
+        </div>
+
+        <import-job-row-sub-jobs subjobs="vm.filteredActions" ng-if="vm.showActionsTable"></import-job-row-sub-jobs>
+
+        <div class="job-subactions le-row" ng-if="vm.showCuratedAttributesTable">
+            <div class="le-col-start-1 le-col-span-12 le-grid">
+                <div class="le-header le-header-expand le-row">
+                    <div class="le-cell le-col-start-1 le-col-span-2">Start Time</div>
+                    <div class="le-cell le-col-start-3 le-col-span-5">Actions</div>
+                    <div class="le-cell le-col-start-8 le-col-span-3">User</div>
+                </div>
+                
+                <div class="le-row" ng-repeat="curatedAttribute in vm.curatedAttributes | orderBy:'-startTimestamp'">
+                    <div class="le-cell le-col-start-1 le-col-span-2">
+                        {{curatedAttribute.TIME}}
+                    </div>
+                    <div class="le-cell le-col-start-3 le-col-span-5">
+                        {{curatedAttribute.ACTION}}
+                    </div>
+                    <div class="le-cell le-col-start-8 le-col-span-3">
+                        {{curatedAttribute.USER}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

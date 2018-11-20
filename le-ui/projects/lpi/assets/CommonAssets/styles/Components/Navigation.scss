@@ -1,0 +1,982 @@
+/*START: MainHeader.ejs styles*/
+.main.header.row
+{
+    min-width:          900px;
+    z-index:            500;
+    overflow:           visible;
+    min-width:          1000px;
+    @include main-navigation-gradient;
+}
+
+.main-header-logo
+{
+    float:              left;
+    padding-left:       10px;
+    max-width:          140px;
+    max-height:         40px;
+    overflow:           hidden;
+    padding-right:      10px;
+}
+
+.impersonation-indicator
+{
+    vertical-align:     middle;
+    padding-top:        2px;
+    width:              16px;
+}
+
+.system-error-indicator
+{
+    vertical-align:     middle;
+    padding-top:        2px;
+    width:              16px;
+}
+
+
+.main-header-link-section-left
+{
+    display:            inline-block;
+    float:              left;
+    border-left:        1px solid #356286;
+    border-right:       1px solid #1c3145;
+}
+
+.main-header-link-section-right
+{
+    display:            inline-block;
+    float:              right;
+}
+
+/*These styles are for the links with a single link*/
+a.main-header-link:link,
+a.main-header-link:visited,
+a.main-header-link:hover,
+a.main-header-link:active,
+a.main-header-down-arrow-link:link,
+a.main-header-down-arrow-link:visited,
+a.main-header-down-arrow-link:hover,
+a.main-header-down-arrow-link:active
+{
+    font-size:          13px;
+    padding:            10px 14px;
+    color:              $main-navigation-text-color;
+    text-decoration:    none;
+    text-shadow:        0 2px 1px #333;
+
+}
+
+a.main-header-link:hover,
+a.main-header-link:active
+{
+    color:              $main-navigation-selected-text-color;
+}
+
+a.main-header-down-arrow-link:hover,
+a.main-header-down-arrow-link:active
+{
+    color:              $main-navigation-selected-text-color;
+}
+
+/*These styles are for the SELECTED link*/
+a.main-header-selected-link:link,
+a.main-header-selected-link:visited,
+a.main-header-selected-link:hover,
+a.main-header-selected-link:active,
+a.main-header-down-arrow-selected-link:link,
+a.main-header-down-arrow-selected-link:visited,
+a.main-header-down-arrow-selected-link:hover,
+a.main-header-down-arrow-selected-link:active
+{
+    color:              $main-navigation-selected-text-color;
+    text-decoration:    none;
+    box-shadow:         inset 0 2px 4px rgba(0,0,0,.6);
+    border:             none;
+    @include            linear-gradient(top,  #034158 0%, #00141c 100%);
+}
+
+/*BEGIN:Styles used for the main header drop down menus*/
+.dropdown-navigation
+{ 
+    margin:             0px;
+    padding:            0px;
+    list-style-type:    none;
+}
+
+.dropdown-navigation>li 
+{ 
+    margin:             0px;
+    padding:            0px;
+    float:              left; 
+    position:           relative;
+    border-right:       1px solid #356286;
+    border-left:        1px solid #1c3145;
+}
+
+// removing borders in the first link in a row and last link a row
+.dropdown-navigation li.first-link
+{
+    border-left:        none;
+}
+
+.dropdown-navigation li.last-link
+{
+    border-right:       none;
+}
+
+.dropdown-navigation li a,
+.settings-export-menu li a,
+.settings-menu li a
+{ 
+    display:            block; 
+    padding:            0px; 
+    line-height:        20px; 
+}
+
+.dropdown-navigation li ul 
+{ 
+    list-style-type:    none;
+    display:            none; 
+    margin:             0px;
+    padding:            0px;
+    position:           absolute;
+    top:                40px;
+    background:         $main-navigation-text-color; 
+    border:             1px solid #9B9EA0;
+    @include            dropdown-menu-shadow;
+}
+
+.dropdown-navigation li ul li 
+{ 
+    float:              none;
+    width:              190px;
+}
+
+.dropdown-navigation li ul li:hover,
+.settings-export-menu li:hover,
+.export-submenu li:hover,
+.settings-menu li:hover,
+.settings-submenu li:hover
+{ 
+    background:         $list-hover-bg-color; 
+}
+
+.dropdown-navigation li ul li a 
+{ 
+    // DEF- : ensure width + padding = width from .dropdown-navigation li ul li
+    padding:            1px 15px 1px 15px;
+    width:              160px; 
+    color:              $header-text-color;
+    text-decoration:    none;
+    display:            inline-block; 
+}
+
+.menuHorizontalRule
+{
+    width:              98%;
+    color:              $menu-separator-color;
+    height:             1px;
+    border:             $menu-separator-color;
+    background-color:   #999999;
+}
+
+.reportLink
+{
+    display:            list-item;
+}
+
+.settings-link > a,
+.settings-link > a:link
+{
+    background:         url(../CommonAssets/images/ic_profile_sprite.png);
+    background-repeat:  no-repeat;
+    background-position: 3px 3px;
+    height:             27px;
+    width:              30px;
+    padding:            0px;
+    float:              right;
+    margin-top:         6px;
+    margin-right:       10px;
+    margin-left:        10px;
+    border-radius:      3px;
+    background-color:   $user-icon-bg-color;
+    border:             1px solid $user-icon-border-color;
+    border-color:       $user-icon-border-color;
+    color:              $user-icon-border-color;
+}
+
+.settings-link > a:hover
+{
+    color:              $user-icon-bg-hover-color;
+    background-color:   $user-icon-bg-hover-color;
+    border-color:       $user-icon-border-hover-color;
+}
+
+.settings-link > a:active
+{
+    color:              $user-icon-bg-active-color;
+    background-color:   $user-icon-bg-active-color;
+    border-color:       $user-icon-border-active-color;
+}
+
+.privacy-policy-link > a:link
+{
+    color:              #14ccff;
+    font-size:          1em;
+}
+
+.privacy-policy-link > a:hover,
+.privacy-policy-link > a:active
+{
+    color:              $main-navigation-selected-text-color;
+}
+
+div.impersonation-in-progress 
+{
+    padding:           4px 0px 0px 10px;
+    font-size:         1em;
+    text-align:        center;
+    max-width:         115px;
+    text-overflow:     ellipsis;
+    white-space:       nowrap;
+    overflow:          hidden;
+    height:            36px;
+    float:             left;
+    color:             $main-navigation-text-color;
+}
+
+.impersonation-label
+{
+    font-size:        0.75em;
+    color:            #ffefbf;
+}
+
+.settings-link > a:link.impersonation-in-progress 
+{
+    color:              $user-icon-bg-impersonate-color;
+    background-color:   $user-icon-bg-impersonate-color;
+    border-color:       $user-icon-border-impersonate-color;
+    background-position: 3px -25px;
+}
+
+.settings-link > a:hover.impersonation-in-progress 
+{
+    background-color:   $user-icon-bg-impersonate-hover-color; 
+    border-color:       $user-icon-border-impersonate-hover-color;
+}
+
+.settings-link > a:active.impersonation-in-progress 
+{
+    background-color:   $user-icon-bg-impersonate-active-color;
+    border-color:       $user-icon-border-impersonate-active-color;
+}
+/*END:Styles used for the main header drop down menus*/
+
+/*START: Styles used for Export drop down menus */
+.settings-export-menu,
+.settings-menu
+{
+    list-style-type:    none;
+    padding:            1px 0px;
+}
+
+.export-submenu,
+.settings-submenu
+{
+    overflow:           hidden;
+    position:           absolute;
+    background:         #fff;
+    z-index:            1001;
+    list-style-type:    none;
+    padding-left:       0;
+    @include            dropdown-menu-shadow;
+}
+
+.settings-export-menu li,
+.export-submenu li,
+.settings-menu li,
+.settings-submenu li
+{
+    display:            list-item;
+    padding:            2px 0;
+    margin:             0;
+    font-size:          12px;
+}
+
+.settings-export-menu li.is-hidden,
+.export-submenu li.is-hidden,
+.settings-menu li.is-hidden,
+.settings-submenu li.is-hidden
+{
+    display:            none;
+}
+
+.settings-submenu li,
+.export-submenu li
+{
+    padding:            3px 0;
+}
+
+.settings-export-menu li a,
+.export-submenu li a,
+.settings-menu li a,
+.settings-submenu li a
+{
+    color:              $primary-text-color;
+    padding:            0px 10px;
+}
+/*END: Styles used for Export drop down menus */
+
+/*This will position the drop down so that it won't go off the screen to the right*/
+.dropdown-navigation li ul.settings-submenu
+{
+    right:              0px;
+}
+
+/* This style defines the orange bullet that indicated Groupodex is enabled*/
+.groupodex-enabled
+{
+    width:              16px;
+    vertical-align:     text-bottom;
+    border:             none;
+}
+/*END: MainHeader.ejs styles*/
+
+/* Overriding jQuery UI tab styling */ 
+.salesprism-tabs 
+{
+    padding:            0px;
+    margin:             0px;
+    border:             0px;
+    width:              100%;
+    height:             100%;
+    min-height:         100%;
+}
+
+.salesprism-tabs .ui-tabs-nav 
+{
+    background:         $app-bg-color;
+    border-width:       0px 0px 1px 0px;
+    border-color:       $primary-border-color;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    border-radius:      0px;
+}
+
+.salesprism-tabs .ui-tabs-nav li 
+{
+    margin-top:         5px;
+}
+
+.salesprism-tabs .ui-tabs-nav li.is-hidden
+{
+    display:           none;
+}
+
+.salesprism-tabs .ui-tabs-nav li a
+{
+    padding:            5px 30px 5px 30px;
+}
+
+.salesprism-tabs .ui-tabs-panel 
+{
+    margin:             0;
+    padding:            0;
+}
+
+.salesprism-tabs .ui-state-default 
+{
+    background:         #E9E9E9;
+    border-color:       $primary-border-color;
+    border-top-right-radius:    5px;
+    border-top-left-radius:     5px;
+}
+
+.salesprism-tabs .ui-state-active 
+{
+    background:         #FFFFFF;
+}
+
+.salesprism-tabs .ui-state-default a 
+{
+    color:              #545454;
+    font-weight:        bold;
+}
+
+.salesprism-tabs .ui-state-active a 
+{
+    color:              #545454;
+    font-weight:        bold;
+}
+/*END: jQuery UI styling tab overrides*/
+
+.salesprism-min-tabs 
+{
+    padding:            0px;
+    margin:             0px;
+    border:             0px;
+    width:              100%;
+    background:         transparent;
+    border: none;
+}
+.salesprism-min-tabs .ui-tabs-nav 
+{
+    background:         $app-bg-color;
+    border-width:       0px 0px 1px 0px;
+    border-color:       $primary-border-color;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    border-radius:      0px;
+}
+
+.salesprism-min-tabs .ui-widget-header 
+{
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+}
+
+.salesprism-min-tabs .ui-state-default 
+{
+    background: transparent;
+    border: none;
+    height: 30px;
+}
+
+.ui-tabs.salesprism-min-tabs .ui-tabs-nav .ui-state-active 
+{
+    border: none;
+    top:    1px;
+}
+
+.salesprism-min-tabs .ui-state-default a 
+{
+    color: #c0c0c0;
+}
+
+.salesprism-min-tabs .ui-state-active a 
+{
+    color: #000000;
+}
+
+.fillSpace.inPlayMakerTabs
+{
+    top: 71px;
+}
+
+.playmaker-tabs-loading
+{
+    float:              right;
+    margin:             5px 8px 0px -24px;
+}
+
+.playmaker-tabs > .ui-tabs-nav 
+{
+    padding:            0px 0px 0px 10px;
+    height:             auto;
+    left:               auto;
+    right:              5px;
+    padding-left:       0;
+    top:                0px;
+    background:         #fafafa;
+    border:             1px solid #ccc;
+    border-radius:      0 0 3px 3px;
+    border-top:         0 none;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li 
+{
+    margin-left:        0px;
+    margin-right:       0px;
+    border:             0 none !important;
+    background:         transparent; 
+    margin-top:         0 !important;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li.ui-state-default.ui-tabs-active.ui-state-active
+{
+    padding-bottom:     0px;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li > a
+{
+    padding:            10px 30px 10px 30px;
+    text-transform:     uppercase;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li > a:hover 
+{
+    color:              #3F709C;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li.ui-tabs-selected 
+{
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.playmaker-tabs > .ui-tabs-panel 
+{
+    margin:             0;
+    padding:            0;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li.ui-state-default 
+{
+    border:             0 none !important;
+    background:         transparent; 
+    margin-top:         0 !important;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li.ui-state-active > a 
+{
+    text-shadow:        1px 1px 1px #333;
+    background:         transparent !important;
+    color:              #518C9D !important;
+    font-weight:        600 !important;
+}
+
+.playmaker-tabs > .ui-tabs-nav > li.ui-state-default > a 
+{
+    font-weight:        normal;
+    padding:            7px;
+    background:         transparent;
+    text-transform:     none;
+    border:             0 none;
+    text-shadow:        none;
+    color:              #67B0C5 !important;
+
+}
+
+.playmaker-tabs > .ui-tabs-nav > li.ui-state-default > a:after {
+    content:            '\203A';
+    margin-left:        8px;
+    color:              #67B0C5 !important;
+}
+
+#playContentTabLink:after {
+    content:            '';
+}
+
+.playmaker-tabs > .ui-tabs-nav li.ui-state-disabled {
+    opacity:            1;
+}
+
+.playmaker-tabs > .ui-tabs-nav li.ui-state-disabled >a { 
+    color:              #ccc !important;
+    opacity:            1;
+}
+.playmaker-tabs > .ui-tabs-nav li.ui-state-disabled >a:after { 
+    color:              #ccc !important;
+}
+
+
+#playTemplateTab,
+#playSummaryTab,
+#playTargetsTab,
+#playRulesTab,
+#playScoreTab,
+#playContentTab
+{
+    border-left:        0px;
+    border-right:       1px solid #D3D3D3;
+    padding:            5px 10px 5px 10px;
+}
+
+#playContentTab,
+#playTargetsTab,
+#playRulesTab,
+#playSummaryTab,
+#playScoreTab
+{
+    top:                37px;
+}
+
+#playScoreTab
+{
+    top:                31px;
+}
+
+#playScoreTab > ul 
+{
+    margin-left:        -10px;
+}
+
+#playTargetUploadTabLinks 
+{
+    margin-top:         -4px;
+    margin-left:        -10px;
+}
+
+#playScoreTab > div 
+{
+    top:                75px;
+}
+
+#playScoreTab > div.play-detail-sub-header
+{ 
+    margin-top:          35px;
+    margin-left:        -10px;
+    margin-right:       -10px;
+}
+
+#playScoreTab > div.play-score-graph-header
+{
+    top:                40px;
+}
+
+#playSummaryContent #playSummaryBody 
+{
+    top:                74px;
+    bottom:             1px;
+}
+
+#playTemplateTab  
+{
+    background:         #fff;
+}
+
+#playSummaryTab  
+{
+    overflow:           hidden;
+}
+
+.play-content-tab .ui-tabs-nav,
+.play-targets-tab .ui-tabs-nav,
+.play-rules-tab .ui-tabs-nav,
+.play-summary-tab .ui-tabs-nav,
+.play-score-tab .ui-tabs-nav
+{
+    padding:            0px;
+    background:         transparent;
+    border:             0 none;
+}
+
+.play-content-tab .ui-state-default a.ui-tabs-anchor,
+.play-targets-tab .ui-state-default a.ui-tabs-anchor,
+.play-rules-tab .ui-state-default a.ui-tabs-anchor,
+.play-summary-tab .ui-state-default a.ui-tabs-anchor,
+.play-score-tab .ui-state-default a.ui-tabs-anchor
+{
+    padding:            4px 10px 3px 10px;
+    margin:             0px 1px 0px 11px;
+    color:              #545454;
+    font-weight:        normal;
+}
+
+.play-content-tab .ui-tabs-active a.ui-tabs-anchor,
+.play-targets-tab .ui-tabs-active a.ui-tabs-anchor,
+.play-rules-tab .ui-tabs-active a.ui-tabs-anchor,
+.play-summary-tab .ui-tabs-active a.ui-tabs-anchor,
+.play-score-tab .ui-tabs-active a.ui-tabs-anchor
+{
+    padding:            3px 10px;
+    margin:             -1px 0px 0px 10px;
+    border:             1px solid #ccc;
+    border-radius:      10px;
+    box-shadow:         inset 0px 1px 2px rgba(0,0,0,.1);
+    background-color:   #fff;
+    color:              #000;
+    font-weight:        normal;
+}
+
+.bare-tabs.ui-tabs-nav
+{
+    padding:            0px;
+    background:         transparent;
+    border-width:       0px;
+}
+
+.bare-tabs .ui-state-default a.ui-tabs-anchor
+{
+    padding:            4px 10px 3px 10px;
+    margin:             0px 1px 0px 11px;
+    color:              $link-color;
+    font-weight:        normal;
+    border-width:       0px;
+    background:         transparent;
+}
+
+//active tab
+.bare-tabs .ui-tabs-active a.ui-tabs-anchor
+{
+    color:              $text-color;
+    font-weight:        bold;
+    box-shadow:         none;
+}
+/*END: PlayMaker tab styling */
+
+// START Play List Navigation styling
+
+#playListNavigation 
+{
+    width:              120px;
+    color:              $primary-text-color;
+    @include            play-navigation-gradient;
+}
+
+.playNavTitle, .playNavLink
+{
+    padding-top:        5px;
+    padding-bottom:     5px;
+    padding-left:       8px;
+    font-size:          13px;
+    font-family:        Helvetica,sans-serif;
+}
+
+.playNavTitle
+{
+    color:              $label-text-color;
+    font-weight:        400;
+    margin-bottom:      5px;
+    margin-top:         11px;
+}
+
+.playNavLink
+{
+    cursor:             pointer;
+    width:              97px;
+	margin:             0 5px 5px 5px;
+	font-size:          12px;
+}
+
+.playNavLink:hover, .playNavLinkSelected
+{
+    color:              $play-nav-selected-color;   /* white */
+    @include            nav-selected-shadow;
+    text-shadow:        0px 1px 5px #000000;
+}
+
+.playNavLink:hover
+{
+	background:         $play-nav-selected-color;
+	border-radius:      10px;
+	color:              $primary-text-color;
+	text-shadow:        none;
+	font-weight:        400;
+}
+
+.playNavLink:active
+{
+    @include            nav-selected-shadow;
+}
+
+.playNavLinkSelected
+{
+	background:         $secondary-bg-color;
+	border-radius:      10px;
+	color:              $primary-text-color;
+	text-shadow:        none;
+	font-weight:        600;
+    @include            nav-selected-shadow;
+	border:             1px solid $primary-border-color;
+}
+
+.playNavLinkSelected:hover
+{
+	font-weight:        600;
+	background:         $secondary-bg-color;
+    @include            nav-selected-hover-shadow;
+}
+
+// Need to override the padding for the Privacy link on the Login page
+a.main-header-link.login-privacy-link
+{
+    padding:          0px;
+}
+
+// END Play List Navigation styling
+
+
+.nav {
+  margin-bottom: 0;
+  padding-left: 0;
+  list-style: none;
+}
+.nav > li {
+  position: relative;
+  display: block;
+}
+.nav > li > a {
+  position: relative;
+  display: block;
+  padding: 10px 15px;
+}
+.nav > li > a:hover,
+.nav > li > a:focus {
+  text-decoration: none;
+  background-color: #eeeeee;
+}
+.nav > li.disabled > a {
+  color: #999999;
+}
+.nav > li.disabled > a:hover,
+.nav > li.disabled > a:focus {
+  color: #999999;
+  text-decoration: none;
+  background-color: transparent;
+  cursor: not-allowed;
+}
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+  background-color: #eeeeee;
+  border-color: #428bca;
+}
+.nav .nav-divider {
+  height: 1px;
+  margin: 9px 0;
+  overflow: hidden;
+  background-color: #e5e5e5;
+}
+.nav > li > a > img {
+  max-width: none;
+}
+.nav-tabs {
+  border-bottom: 1px solid #dddddd;
+  overflow: hidden;
+}
+.nav-tabs > li {
+  float: left;
+  margin-bottom: -1px;
+}
+.nav-tabs > li > a {
+  margin-right: 2px;
+  line-height: 1.42857143;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+}
+.nav-tabs > li > a:hover {
+  border-color: #eeeeee #eeeeee #dddddd;
+}
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  color: #555555;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-bottom-color: transparent;
+  cursor: default;
+}
+.nav-tabs.nav-justified {
+  width: 100%;
+  border-bottom: 0;
+}
+.nav-tabs.nav-justified > li {
+  float: none;
+}
+.nav-tabs.nav-justified > li > a {
+  text-align: center;
+  margin-bottom: 5px;
+}
+.nav-tabs.nav-justified > .dropdown .dropdown-menu {
+  top: auto;
+  left: auto;
+}
+@media (min-width: 768px) {
+  .nav-tabs.nav-justified > li {
+    display: table-cell;
+    width: 1%;
+  }
+  .nav-tabs.nav-justified > li > a {
+    margin-bottom: 0;
+  }
+}
+.nav-tabs.nav-justified > li > a {
+  margin-right: 0;
+  border-radius: 4px;
+}
+.nav-tabs.nav-justified > .active > a,
+.nav-tabs.nav-justified > .active > a:hover,
+.nav-tabs.nav-justified > .active > a:focus {
+  border: 1px solid #dddddd;
+}
+@media (min-width: 768px) {
+  .nav-tabs.nav-justified > li > a {
+    border-bottom: 1px solid #dddddd;
+    border-radius: 4px 4px 0 0;
+  }
+  .nav-tabs.nav-justified > .active > a,
+  .nav-tabs.nav-justified > .active > a:hover,
+  .nav-tabs.nav-justified > .active > a:focus {
+    border-bottom-color: #ffffff;
+  }
+}
+.nav-pills > li {
+  float: left;
+}
+.nav-pills > li > a {
+  border-radius: 4px;
+}
+.nav-pills > li + li {
+  margin-left: 2px;
+}
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:hover,
+.nav-pills > li.active > a:focus {
+  color: #ffffff;
+  background-color: #428bca;
+}
+.nav-stacked > li {
+  float: none;
+}
+.nav-stacked > li + li {
+  margin-top: 2px;
+  margin-left: 0;
+}
+.nav-justified {
+  width: 100%;
+}
+.nav-justified > li {
+  float: none;
+}
+.nav-justified > li > a {
+  text-align: center;
+  margin-bottom: 5px;
+}
+.nav-justified > .dropdown .dropdown-menu {
+  top: auto;
+  left: auto;
+}
+@media (min-width: 768px) {
+  .nav-justified > li {
+    display: table-cell;
+    width: 1%;
+  }
+  .nav-justified > li > a {
+    margin-bottom: 0;
+  }
+}
+.nav-tabs-justified {
+  border-bottom: 0;
+}
+.nav-tabs-justified > li > a {
+  margin-right: 0;
+  border-radius: 4px;
+}
+.nav-tabs-justified > .active > a,
+.nav-tabs-justified > .active > a:hover,
+.nav-tabs-justified > .active > a:focus {
+  border: 1px solid #dddddd;
+}
+@media (min-width: 768px) {
+  .nav-tabs-justified > li > a {
+    border-bottom: 1px solid #dddddd;
+    border-radius: 4px 4px 0 0;
+  }
+  .nav-tabs-justified > .active > a,
+  .nav-tabs-justified > .active > a:hover,
+  .nav-tabs-justified > .active > a:focus {
+    border-bottom-color: #ffffff;
+  }
+}
+.tab-content > .tab-pane {
+  display: none;
+}
+.tab-content > .active {
+  display: block;
+}
+.nav-tabs .dropdown-menu {
+  margin-top: -1px;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}

@@ -1,0 +1,12 @@
+<div class="tp-attribute-pane">
+    <h5>Attributes</h5>
+    <div class="control">
+        <select ng-model="selected" class="form-control" ng-options="item for item in entities" ng-change="changeEntity()"></select>
+        <select ng-model="search.category" ng-if="selected == 'account'" class="form-control" ng-options="category for category in categories"> </select>
+        <input type="text" placeholder="Search" class="form-control" ng-model="search.name" />
+    </div>
+    <ul ng-class="{'account': selected == 'account'}">
+        <attribute-draggable ng-repeat="a in getAttributes() | filter: search" attribute="a"></attribute-draggable>
+    </ul>
+    <div class="resize-handle" ng-mousedown="eleMouseDown($event)"></div>
+</div>

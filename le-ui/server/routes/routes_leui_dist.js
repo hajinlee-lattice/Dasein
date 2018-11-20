@@ -61,6 +61,24 @@ module.exports = [{
         '/atlas/lib/js': '/lib/js',
     }
 },{
+    path: '/projects/lpi',
+    html5mode: true,
+    pages: {
+        '/lpi/': '/dist/indexwp.html',
+        '/lpi/index': '/dist/indexwp.html',
+        '/lpi/old': 'assets/index.html',
+        '/lpi/old/index': 'assets/index.html'
+    },
+    folders: {
+        '/lpi' : '/dist',
+        '/dist': '/dist',
+        '/lpi/app': '/app',
+        '/lpi/assets': '/assets',
+        '/lpi/lib': '/lib',
+        '/lpi/assets': '/assets',
+        '/lpi/lib/js': '/lib/js',
+    }
+},{
     path: '/projects/insights',
     html5mode: true,
     xframe_allow: [

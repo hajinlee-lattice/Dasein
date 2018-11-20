@@ -1,0 +1,47 @@
+<div class="container">
+    <section id="main-content" class="container lp-model-list">
+
+        <div class="row">
+            <div class="list-header">
+                <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
+                    <menu-filter-by config="vm.header.filter" store="models.filter" current="vm.currentPage"></menu-filter-by>
+                    <menu-sort-by config="vm.header.sort" store="models.sort"></menu-sort-by>
+                    <search-filter query="vm.query.DisplayName" current="vm.currentPage"></search-filter> 
+                </div>
+                <div class="create-model-menu pull-right">
+                    <menu-dropdown config="vm.header.create"></menu-dropdown>
+                </div> 
+            </div>
+        </div>
+
+        <div class="row twelve columns">        
+            <div class="no-models text-center" ng-if="vm.models.length == 0">
+                <h2>{{::vm.ResourceUtility.getString('MODEL_LIST_NO_MODELS')}}</h2>
+            </div>
+        </div>
+
+        <div class="row" ng-if="vm.models.length > 0">
+            <ul class="twelve columns model-list">
+                <li 
+                    data-model-list-tile-widget
+                    class="model"
+                    ng-repeat="
+                        model in vm.header.filter.filtered |
+                        filter: vm.query |
+                        orderBy: vm.header.sort.order + vm.header.sort.property |
+                        startFrom: (vm.currentPage - 1) * pagesize |
+                        limitTo: pagesize" 
+                    data="model">
+                </li>
+            </ul>
+        </div>
+
+        <div class="row" ng-init="pagesize = 12" ng-show="max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls current="vm.currentPage" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
+                </pd-pagination-controls>
+            </div>
+        </div>
+
+    </section>
+</div>

@@ -1,0 +1,46 @@
+<section id="main-content" class="container review-model">
+
+    <div class="row">
+        <div class="twelve columns list-header">
+            <div class="pull-left number-of-items">{{vm.interface.totalExcludedColumnCount}} of {{vm.totalWarnedColumnCount}} attributes excluded</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns list-header">
+            <ul class="link-tabs">
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayNonLatticeWarningsClicked()" data-ng-class="vm.showCustomAttr ? 'selected' : ''">Company Attributes ({{vm.totalCustomColumnCount}})</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Attributes ({{vm.totalLatticeColumnCount}})</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All ({{vm.totalWarnedColumnCount}})</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="" class="twelve columns model-list">
+            <table>
+                <thead>
+                  <tr>
+                    <th>Exclude</th>
+                    <th>Attributes</th>
+                    <th>Issue</th>
+                    <th>Recommendation</th>
+                    <th>&nbsp;</th>
+                    <!-- <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th> -->
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        data-model-review-column-warning
+                        data-ng-repeat="columnWarning in vm.columnWarningsToDisplay"
+                        column="columnWarning"
+                        interface="vm.interface"
+                        rules="vm.ruleNameToDataRules"
+                        data="vm.ReviewData">
+                    </tr>
+                 </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>

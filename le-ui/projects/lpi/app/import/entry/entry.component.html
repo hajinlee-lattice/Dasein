@@ -1,0 +1,62 @@
+<section class="container setup-import data-import" ng-controller="ImportEntry as vm">
+  <div class="row">
+    <div class="global-error local-error" data-ng-show="vm.showImportError">
+        <i data-ng-click="vm.showImportError = false;" class="fa fa-times fa-inverse close"></i>
+        {{vm.importErrorMsg}}
+    </div>
+    <div class="columns eight offset-two box-outline">
+      <div class="section-header">
+        <h4 ng-if="vm.formType != 'Import'">{{vm.formType}} {{vm.displayType}} Template</h4>
+        <h4 ng-if="vm.formType == 'Import'">{{vm.displayType}} Data Import</h4>
+      </div>
+      <hr />
+      <div class="section-body with-padding">
+        <div 
+          class="import-additional-info {{vm.goState}}" 
+          ui-view="entry_content"></div>
+
+        <div ng-if="vm.invalidcolumns.length > 0" class="invalid-columns-container">
+            <div>
+                <i class="fa fa-exclamation-triangle"></i>
+                <p> The uploaded file containes a reserved character (^/). Please check and upload again.</p>
+            </div>
+            <span ng-click="vm.closeWarning()">x</span>
+        </div>
+        <div
+            file-uploader-container
+            label="Select and Upload File"
+            params="vm.params"
+            input-name="csvFileName"
+            file-select="vm.fileSelect(fileName)"
+            file-load="vm.fileLoad(headers)"
+            file-done="vm.fileDone(result)"
+            file-cancel="vm.fileCancel()"
+            class="form-group file-upload" 
+            default-message-fn="vm.getDefaultMessage()"
+            ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
+        </div>
+      </div>
+      <hr />
+      <div class="container section-actions row form-actions">
+        <div class="pull-left">
+            <button 
+                type="button" 
+                class="button white-button block-button"
+                ui-sref="home.importtemplates">
+              Back
+            </button>
+        </div>
+
+        <div class="pull-right">
+            <button 
+                type="button" 
+                class="button blue-button"
+                ng-disabled="!vm.next"
+                ng-click="vm.click()">
+                {{ vm.nextButtonText }}
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

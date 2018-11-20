@@ -1,0 +1,101 @@
+.setup-import.data-import {
+    .local-error {
+        position: relative;
+        margin-bottom: 20px;
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    }
+    .columns.box-outline .section-body.with-padding {
+        margin: 1.5em 3em;
+    }
+    .import-additional-info {
+        margin: 2em 0;
+        font-size: 15px;
+        .account, .contact, .eloqua, .products, .purchases, .product_hierarchy {
+            background-position: left 7px;
+            padding-left: 52px;
+            background-repeat: no-repeat;
+        }
+        .account {
+            background-image: url('/assets/images/ico-accounts-dark.png');
+        }
+        .contact {
+            background-image: url('/assets/images/ico-contacts-dark.png');
+        }
+        .eloqua {
+            background-image: url('/assets/images/ico-eloqua-dark.png');
+        }
+        .products {
+            background-image: url('/assets/images/ico-products-dark.png');
+        }
+        .purchases {
+            background-image: url('/assets/images/ico-purchases-dark.png');
+        }
+        .product_hierarchy {
+            background-image: url('/assets/images/ico-product_hierarchy-dark.png');
+        }
+        
+    }
+    .download-link {
+        display: inline-block;
+        margin: 20px 0;
+    }
+    .example-table {
+        overflow-x: scroll;
+        table {
+            width: 100%;
+        }
+        thead th {
+            background: #f2f1f1;
+            color: #333 !important;
+            font-size: 12px;
+            font-weight: bold;
+            padding-left: 8px;
+        }
+        tbody td {
+            background: #fafbfb;
+            font-size: 12px;
+            font-weight: normal;
+            padding: 4px;
+            padding-left: 8px;
+            &:last-child {
+                width: auto;
+            }
+        }
+    }
+    .form-group {
+        margin-bottom: 60px;
+    }
+
+    .invalid-columns-container {
+        margin-bottom: 10px;        
+        padding: 10px;
+        width: 100%;
+        display: flex;
+        font-size: 14px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffa500;
+        max-height: 150px;
+        overflow-y: auto;
+        color: white;
+
+        &>div{
+            
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            &>p {
+                padding-left: 10px;
+            }
+        }
+        &>span{
+            cursor: pointer;
+            padding: 4px;
+        }
+    }
+}

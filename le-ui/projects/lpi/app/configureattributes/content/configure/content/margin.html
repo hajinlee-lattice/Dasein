@@ -1,0 +1,38 @@
+<div class="configured-message" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.Margin) || vm.precheck.disableMargin}">
+    Cost is <em ng-if="!vm.dataCheckWrapper(vm.steps[vm.step].data.Margin)">not</em> provided
+
+    <span class="more-info show-tooltip top middle delay" ng-if="!vm.steps[vm.step].data.Margin">&#105;
+        <div class="tooltip_">
+            <div class="cover">
+                <p>
+                    To configure this attribute, upload the transaction costs in your transactions file.
+                </p>
+            </div>
+        </div>
+    </span>
+</div>
+
+<ul class="fields" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.Margin) || vm.precheck.disableMargin}">
+    <li>
+        <label for="options">% Margin in last</label>
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['Margin']['WITHIN']['Val']"
+            ng-init="vm.initValue('Margin.WITHIN.Val', vm.getVals('WITHIN', vm.steps[vm.step].data.Margin))" 
+            ng-model="vm.options['Margin']['WITHIN']['Val']" 
+            ng-change="vm.setOptions()"
+            ng-disabled="!(vm.options['Margin']['WITHIN']['Period'])"
+            ng-options="option for option in vm.newArray(vm.periods[vm.options['Margin']['WITHIN']['Period']])">
+                <option value="" hidden disabled>Select</option>
+            </select>
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['Margin']['WITHIN']['Period']"
+            ng-init="vm.initValue('Margin.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.Margin))" 
+            ng-model="vm.options['Margin']['WITHIN']['Period']" 
+            ng-change="vm.setOptions()"
+            ng-options="period.value as period.label for period in vm.periodsOptions">
+                <option value="" hidden disabled> -- </option>
+            </select>
+    </li>
+</ul>

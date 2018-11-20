@@ -1,0 +1,7 @@
+<ul >
+        <li class="header-back-name-container" title="{{$ctrl.getBackLabel()}}" ng-if="!$ctrl.isHidden()">
+                <a  
+                	ui-sref="{{$ctrl.getBackState()}} ({{$ctrl.getBackParams()}})"
+                	class="header-back-name">{{ $ctrl.getBackLabel() }}</a>
+        </li>
+</ul>

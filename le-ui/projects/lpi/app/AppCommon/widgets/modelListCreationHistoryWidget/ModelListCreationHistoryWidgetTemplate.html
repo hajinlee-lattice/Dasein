@@ -1,0 +1,43 @@
+<div data-ng-controller="ModelListCreationHistoryWidgetController" class="model-list-creation-history">
+    <div class="row">
+        <div class="ten columns offset-one box-outline">
+            <div class="section-header" data-ng-if="showUploadModel">
+                <h4>Modeling Log</h4>
+                <div class="pull-left number-of-items" ng-if="models.length > 0">
+                    Total: <span class="badge blue-badge">{{ models.length }}</span>&nbsp;
+                    Active: <span class="badge gray-badge">{{ (models | filter: { Status: 'Active' }: true).length }}</span>
+                </div>
+                <!--button class="pull-right button orange-button" id="model-mgmt-import-model-btn" data-ng-click="importClicked()">
+                    {{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}
+                </button-->
+                <div class="pull-right" ng-if="showUploadSummaryJson">
+                    <a href="javascript:void(0)" ng-click="importJSON()">Import a JSON File</a>
+                    <i class="fa fa-file-text-o"></i>
+                </div>
+            </div><br>
+            <div class="section-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_INTERNAL_ID')}}</th>
+                            <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_CREATION_DATE')}}</th>
+                            <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-ng-repeat="model in models">
+                            <td>{{model.DisplayName}}</td>
+                            <td>{{model.Id}}</td>
+                            <td>{{model.CreatedDate}}</td>
+                            <td>{{model.Status}}&nbsp;
+                                <a data-ng-show="model.Status == 'Deleted' && showUploadModel"
+                                 href="javascript:void(0)" data-ng-click="undoDeleteModel(model.Id)">{{ResourceUtility.getString('MODEL_LIST_MODEL_DELETED_UNDO_LABEL')}}</a>
+                             </td>
+                        </tr>
+                     </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

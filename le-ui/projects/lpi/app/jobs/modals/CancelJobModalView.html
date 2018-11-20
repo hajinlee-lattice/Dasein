@@ -1,0 +1,31 @@
+<div class="modal-dialog"  data-ng-controller="CancelJobController">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ResourceUtility.getString('JOB_CANCEL_TITLE')}}</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="twelve columns">
+              <p>{{ResourceUtility.getString('JOB_CANCEL_MESSAGE')}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="row">
+            <div class="six columns">
+              <button class="button gray-button block-button" type="button" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
+            </div>
+            <div class="six columns" ng-if="jobId">
+              <a class="button orange-button block-button" href="#" data-ng-click="cancelJobClickConfirm($event)">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+            </div>
+            <div class="six columns" ng-if="!jobId && opts.sref">
+              <a class="button orange-button block-button" ui-sref="{{ opts.sref }}" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+            </div>
+            <div class="six columns" ng-if="!jobId && opts.resetImport">
+              <a class="button orange-button block-button" href="{{ opts.sref || '#' }}" data-ng-click="resetImport()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>

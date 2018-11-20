@@ -1,0 +1,59 @@
+<div id="edit-user-modal">
+    <div class="modal-dialog" data-ng-controller="EditUserController">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">{{ResourceUtility.getString('EDIT_USER_TITLE')}}</h4>
+            </div>
+            <form novalidate name="form">
+                <div class="modal-body">
+                    <div data-ng-show="saveInProgress">
+                        <div class="loader"> </div>
+                        <h2 class="text-center">{{ResourceUtility.getString('EDIT_USERS_WAIT')}}</h2>
+                    </div>
+                    <div class="row" data-ng-hide="saveInProgress">
+                        <div class="col-sm-12 text-center">
+                            <div class="form-group">
+                                <label class="control-label">{{ResourceUtility.getString('EDIT_USER_FIRST_NAME_LABEL')}}</label>
+                                <input type="text" class="form-control" data-ng-model="user.FirstName" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">{{ResourceUtility.getString('EDIT_USER_LAST_NAME_LABEL')}}</label>
+                                <input type="text" class="form-control" data-ng-model="user.LastName" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">{{ResourceUtility.getString('EDIT_USER_EMAIL_LABEL')}}</label>
+                                <input type="text" class="form-control" data-ng-model="user.Email" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">{{ResourceUtility.getString('EDIT_USER_ACCESS_LEVEL_LABEL')}}</label>
+                                <select data-ng-options="ResourceUtility.getString('ACCESS_LEVEL_' + level) for level in levelsToSelect"
+                                        class="form-control" data-ng-model="targetLevel.AccessLevel"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  <pre>{{ user | json }}</pre>-->
+                    <div class="global-error local-error" data-ng-show="showEditUserError">
+                        <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{editUserErrorMessage}}</span>
+                        <button class="close btn btn-link" data-ng-click="showEditUserError = false;"><i class="fa fa-times fa-inverse"></i></button>
+                    </div>
+                    <div class="alert alert-success" data-ng-show="showEditUserSuccess">
+                        <span><i class="fa fa-exclamation-circle"></i> {{editUserSuccessMessage}}</span>
+                        <button class="close btn btn-link" data-ng-click="showEdirUserSuccess = false;"><i class="fa fa-times fa-inverse"></i></button>
+                    </div>
+                </div>
+                <div class="modal-footer" data-ng-hide="saveInProgress">
+                    <div class="row">
+                        <div class="six columns">
+                            <button id="edit-user-btn-cancel" class="button gray-button block-button" type="button" data-ng-click="cancelClick()" data-ng-hide="showEditUserSuccess">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                        </div>
+                        <div class="six columns">
+                            <button id="edit-user-btn-save" class="button orange-button block-button" data-ng-click="editUserClick($event)" data-ng-hide="showEditUserSuccess">{{ResourceUtility.getString('BUTTON_UPDATE_LABEL')}}</button>
+                            <button id="edit-user-btn-ok" class="button orange-button block-button" data-ng-click="refreshClick()" data-ng-show="showEditUserSuccess">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

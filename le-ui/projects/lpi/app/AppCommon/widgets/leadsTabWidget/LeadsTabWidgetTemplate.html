@@ -1,0 +1,16 @@
+
+<section class="container">
+	<div class="twelve columns">
+		<div data-ng-controller="LeadsTabWidgetController">
+		    <data-leads-table id="topSampleTable" leads="data.TopSample" title="{{sourceType=='SalesforceLead'
+		    	? ResourceUtility.getString('SAMPLE_LEAD_GRID_TOP_TITLE') : ResourceUtility.getString('SAMPLE_LEAD_GRID_TOP_TITLE_ACCOUNTS')}}" source="sourceType"></data-leads-table>
+		    <data-leads-table id="bottomSampleTable" leads="data.BottomSample" title="{{sourceType=='SalesforceLead'
+		    	? ResourceUtility.getString('SAMPLE_LEAD_GRID_BOTTOM_TITLE') : ResourceUtility.getString('SAMPLE_LEAD_GRID_BOTTOM_TITLE_ACCOUNTS')}}" source="sourceType"></data-leads-table>
+<!--
+		    <div class="wrapper model-admin-link">
+		        <a href="javascript:void(0)" id="adminLink" data-ng-show="showAdminLink" class="hidden-link" data-ng-click="adminLinkClick($event)">{{ResourceUtility.getString('MODEL_ADMIN_LINK_LABEL')}}</a>
+		    </div>
+-->
+		</div>
+	</div>
+</section>

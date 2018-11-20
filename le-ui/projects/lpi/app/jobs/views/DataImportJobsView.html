@@ -1,0 +1,96 @@
+<!-- <div class="jobs-page container">
+
+    <div class="row">
+        <div class="twelve columns">
+            <div ng-if="successMsg" class="job-success-message">
+                <div>Success Message<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" ng-click="clearMessages()"></i></a></div>
+                <span>Sucess Message Sub</span>
+            </div>
+            <div ng-if="queuedMsg" class="job-success-message">
+                <div>Queued job<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" ng-click="clearMessages()"></i></a></div>
+                <span>It will start running shortly, which will allow you to track the progress</span>
+            </div>
+            <div ng-if="errorMsg" class="job-creation-failed">
+                <div>Error Message<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" ng-click="clearMessages()"></i></a></div>
+                <span>Please retry or wait for a fix</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-header">
+        <div class="row list-header">
+            <div class="pull-left">
+                <menu-dropdown config="header.maxperpage"></menu-dropdown>
+                <menu-filter-by config="header.filter"></menu-filter-by>
+                <menu-sort-by config="header.sort"></menu-sort-by>
+                <search-filter query="query"></search-filter>
+            </div>
+            <div class="row jobs-pagination-controls" ng-init="current = 1" ng-show="max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row jobs-table">
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="section-body">
+                <table class="unstyled">
+                    <thead>
+                        <tr class="row">
+                            <th class="columns two">Timestamp</th>
+                            <th class="columns four">File Name</th>
+                            <th class="columns two">Job Type</th>
+                            <th class="columns two">Status</th>
+                            <th class="columns two">&nbsp;</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="jobs-table-content">
+                <div class="job-list-item job-td-row"
+                    ng-repeat="job in header.filter.filtered |
+                        filter: query |
+                        orderBy: header.sort.order + header.sort.property |
+                        startFrom: (current - 1) * pagesize |
+                        limitTo: pagesize">
+                        <div class="clearfix">
+                            <span class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+                            <span class="columns four">
+                                <span data-stooltip="{{job.fileName}}">{{job.fileName | limitTo: 36 }}{{job.fileName.length > 36 ? '&hellip;' : ''}}</span>
+                            </span>
+                            <span class="columns two">{{job.jobType}}</span>
+                            <span class="columns two {{job.status}}">{{job.status}}</span>
+                            <span class="columns two">
+                                <span>
+                                    <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button">
+                                        <a href="javascript:void(0)">
+                                            <i class="fa fa-list-alt"></i>Report
+                                        </a>
+                                    </span>
+                                </span>
+                                &nbsp;
+                            </span>
+                        </div>
+                </div>
+            </div>
+            <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
+                There are no jobs to show at the moment
+            </div>
+            <div class="section-actions" ng-if="loadingJobs && header.filter.filtered.length == 0">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-init="current = 1" ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
+
+</div> -->

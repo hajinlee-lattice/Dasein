@@ -1,0 +1,16 @@
+<div class="container file-import-content">
+    <div class="header">
+        <h2>Save Template</h2>
+        <p>
+            Your template is ready to be used. You can view and edit it in the Import Template page.
+        </p>
+        <div class="form-group">
+            <input 
+                type="checkbox"
+                class="form-control"
+                ng-model="vm.autoImport"
+                ng-change="vm.checkForAutoImport()" />
+            <label>Automatically import data from the uploaded file after saving the template.</label>
+        </div>
+    </div>
+</div>

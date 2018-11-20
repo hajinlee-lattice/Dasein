@@ -1,0 +1,72 @@
+.ratingengine-creation {
+    .header {
+        h2 {
+            padding-left: 0;
+            margin-bottom: 0px;
+            font-weight: bold;
+            // background-image: url('/assets/images/ico-ratings.png');
+        }
+    }
+    .content-body {
+        h3 {
+            border-bottom: #ddd solid 1px;
+            text-transform: none;
+            font-size: 18px;
+            font-weight: normal;
+            margin-top: 20px;
+            padding-bottom: 2px;
+            margin-bottom: 12px;
+        }
+        .summary-data {
+            &:after {
+                clear: both;
+                content: "";
+                display: table;
+            }
+            dl {
+                width: 50%;
+                float: left;
+                padding-right: 6px;
+            }
+        }
+        dl:after {
+            clear: both;
+            content: "";
+            display: table;
+        }
+        dt, dd {
+            font-size: 14px;
+            font-weight: normal;
+        }
+        dt {
+            width: 140px;
+            font-weight: bold;
+        }
+        dd {
+            margin-left: 140px;
+        }
+        .summary-data dl:nth-child(2) { 
+            dt {
+                width: 100%;
+            }
+            dd {
+                margin-left: 0;
+            }
+        }
+    }
+    .step-progression {
+        margin: 10px 0;
+        dt {
+            width: auto;
+            float: left;
+            color: #ddd;
+            &.started {
+                color: #333;
+            }
+        }
+        dd {
+            float: right;
+            margin-left: 0;
+        }
+    }
+}

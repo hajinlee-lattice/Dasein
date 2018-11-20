@@ -1,0 +1,62 @@
+.ratingengine-products {
+    .header {
+        h2 {
+            padding-left: 0;
+            margin-bottom: 0;
+            // background-image: url('/assets/images/ico-segments.png');
+        }
+    }
+    table {
+        margin-top: 20px;
+        thead th:nth-child(2), tbody td:nth-child(2) {
+            padding-left: 0;
+        }
+        thead th:nth-child(3), tbody td:nth-child(3) {
+            text-align: right;
+        }
+        tbody {
+            td:first-child {
+                width: 38px;
+                padding: 7px 0px 7px 10px;
+            }
+            td.centered-info-message {
+                font-size: 15px;
+                text-align: center;
+                background-color: #fff;
+                padding-top: 18px;
+            }
+        }
+    } 
+    input:hover, label:hover {
+        cursor: pointer;
+    }
+    .selected-total {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #717171;
+    }
+    .resell-product-option {
+        margin-bottom: 20px;
+        p, .form-control {
+            display: inline-block;
+        }
+        .form-control {
+            display: inline-block;
+            height: 30px;
+            width: auto;
+        }
+
+        .form-control.period-input {
+            height: 30px;
+            width: 40px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 3px;
+            display: inline-block;
+            vertical-align: middle;
+            overflow: hidden;
+        }
+
+
+    }
+}

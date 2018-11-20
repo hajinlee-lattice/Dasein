@@ -1,0 +1,44 @@
+<section id="main-content" class="container review-model">
+
+    <div class="row">
+        <div class="twelve columns list-header">
+            <div class="pull-left number-of-items">{{vm.rowsExcluded}} of {{vm.totalRecords}} rows excluded</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="" class="twelve columns model-list">
+        	
+        	<table>
+                <thead>
+                  <tr>
+                    <th>Exclude</th>
+                    <th>Rows</th>
+                    <th>Issue</th>
+                    <th>Recommendation</th>
+                    <!-- <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th> -->
+                  </tr>
+                </thead>
+
+                <tbody>
+                    <tr data-ng-repeat="rowWarning in vm.rowWarnings">
+                        <td>
+                            <input type="checkbox" id="" data-ng-click="vm.warningExcludeToggled($event, rowWarning)"
+                                   data-ng-checked="vm.ruleNameToDataRules[rowWarning.dataRuleName].enabled"/>
+                        </td>
+                        <td>{{rowWarning.flaggedItemCount}}</td>
+                        <td>
+                            {{vm.ruleNameToDataRules[rowWarning.dataRuleName].displayName}}
+                        </td>
+                        <td>
+                            {{vm.ruleNameToDataRules[rowWarning.dataRuleName].description}}<br/>
+                            <textarea id="" class="form-control" data-ng-if="vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains != null">{{vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains}}</textarea>
+                        </td>
+                    </tr>
+                 </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</section>

@@ -1,0 +1,19 @@
+<div class="talking-point-editor" ng-class="{'expanded':vm.expanded}" ng-disabled="vm.lockTalkingPoints">
+    <i class="saving-spinner fa fa-spinner fa-spin" ng-if="vm.lockTalkingPoints"></i>
+    <div class="row">
+        <button ng-click="vm.expand()" class="button white-button expand-button" ng-class="{'rotate': vm.expanded}"><i class="fa fa-chevron-down"></i></button>
+        <!-- order of input and textarea need to be preseved for tabbing order -->
+        <input ng-focus="vm.titleFocus(tp)" ng-blur="vm.saveTitle()" type="text" class="form-control" placeholder="Section Heading (required)" ng-model="tp.title" ng-class="{'required': !tp.title}" maxlength="255"/>
+        <div class="tinymce-container" data-name="{{tp.name}}">
+            <textarea class="form-control" data-name="{{tp.name}}" ng-model="tp.content" ui-tinymce="vm.tinyMceConfig"></textarea>
+        </div>
+        <div class="tp-delete">
+            <button class="button white-button delete-button" ng-click="vm.deleteClick($event,true)">&times;</button>
+            <div ng-if="vm.deleteClicked" class="tp-delete-confirm">
+                Delete Talking Point? 
+                <button class="button blue-button" ng-click="onDelete(); vm.setDeleteClicked(false);">Delete</button>
+                <button class="button white-button" ng-click="vm.deleteClick($event,false)">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

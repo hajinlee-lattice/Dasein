@@ -1,0 +1,17 @@
+<div class="file-upload-container fillSpace scroll-y">
+    <div class="js-file-upload-stack file-upload-stack-element">
+        <h2>
+            <%= title %>
+        </h2>
+        <p class="file-upload-stack-sub-heading">
+            <%= description %>
+        </p>
+        <p class="js-format-instructions file-upload-stack-sub-heading">
+            <!-- This content will be replaced by FileUploadControl.formatInstructionTemplate -->
+        </p>
+        
+    <%== $.View('//../assets/CommonAssets/views/upload/FileUpload.ejs', this) %>
+    </div>
+    <div class="js-file-upload-success-stack file-upload-stack-element is-hidden"> </div>
+    <div class="js-file-upload-error-stack file-upload-stack-element is-hidden"> </div>
+</div>

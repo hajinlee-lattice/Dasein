@@ -1,0 +1,45 @@
+<p class="purchases">
+    Upload a CSV file containing one row for each transaction with its attributes in separate columns.
+</p>
+
+<div>
+    <a href="assets/downloads/transaction-sample.csv" target="_self" class="download-link"><i class="fa fa-download"></i> Download a sample CSV file that has all of the required fields.</a>
+
+    <p>{{$ctrl.ResourceUtility.getString('IMPORT_SAMPLE_FILE_LABEL')}}:</p>
+    <div class="table example-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Account ID</th>
+                    <th>Amount</th>
+                    <th>TransactionTime</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>3277</td>
+                    <td>4/1/17 0:00</td>
+                    <td>Purchase</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>359</td>
+                    <td>11/1/15 0:00</td>
+                    <td>Purchase</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>1</td>
+                    <td>167</td>
+                    <td>8/1/15 0:00</td>
+                    <td>Purchase</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

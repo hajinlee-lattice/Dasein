@@ -1,0 +1,22 @@
+<!-- a "stack" to display any success or error messages -->
+<div class="file-upload-response-stack-title" >
+  <div class="file-upload-response-stack-image">
+    <img src="<%=imageSource%>"></img>
+  </div>
+  <h2 class="file-upload-response-stack-heading"><%=headline%></h2>
+</div>
+<p class="file-upload-stack-sub-heading">
+  <% for(var i=0; i<subHeading.length; i++) {%>
+        <%=subHeading[i]%><br />
+    <% } %>
+ 
+</p>
+<div class="file-upload-response-stack-errors">
+  <ul>
+      <% for(var i=0; i<errors.length; i++) {%>
+        <li>
+          <span class="bold"><%=errors[i].title%></span> <%=errors[i].details%>
+        </li>
+      <% } %>
+  </ul>
+</div>

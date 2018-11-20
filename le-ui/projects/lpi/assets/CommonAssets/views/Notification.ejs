@@ -1,0 +1,11 @@
+<div class="notification alert hiddenComponent <%=severity%>">
+
+  <%# only show dismiss button when duration is 0 (i.e. no autohide) %>
+  <%# non-0 durations have additional callback logic in NotificationControl.js %>
+  <% if (duration == 0) { %>
+    <div class="js-notification-dismiss notification-dismiss-button standardDeleteButton button-transition"> </div>
+  <% } %>
+
+  <p><%=message%></p>
+
+</div>

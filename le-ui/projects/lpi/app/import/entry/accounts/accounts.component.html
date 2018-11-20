@@ -1,0 +1,46 @@
+<p class="account">
+	Upload a CSV file containing one row for each account with its attributes in separate columns.
+	You can always update and add new accounts later.
+</p>
+
+<div>
+	<a href="assets/downloads/account-example.csv" target="_self" class="download-link"><i class="fa fa-download"></i> Download a sample CSV file that has all of the required fields.</a>
+
+	<p>{{$ctrl.ResourceUtility.getString('IMPORT_SAMPLE_FILE_LABEL')}}:</p>
+	<div class="table example-table">
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Account Name</th>
+					<th>Website</th>
+					<th>City</th>
+					<th>State&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>1</td>
+					<td>Intel</td>
+					<td>www.intel.com</td>
+					<td>Santa Clara</td>
+					<td>CA</td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>Edge Communications</td>
+					<td>www.edgecomm.com</td>
+					<td>Austin</td>
+					<td>TX</td>
+				</tr>
+				<tr>
+					<td>3</td>
+					<td>Burlington Textiles Corp</td>
+					<td>www.burlington.com</td>
+					<td>Burlington</td>
+					<td>NC</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

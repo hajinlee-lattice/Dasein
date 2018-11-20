@@ -1,0 +1,87 @@
+<section id="remodelView" class="remodel-model container">
+    <div class="row container" ng-if="vm.message || vm.messageTitle">
+        <div class="twelve columns">
+            <div ng-class="{'job-success-message': vm.success, 'job-creation-failed': vm.error}">
+                <div>{{vm.messageTitle}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="vm.closeMessage()"></i></a></div>
+                <span>{{vm.message}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="container row">
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="section-header remodel-header">
+                <h4>Remodel</h4>
+                <p>Lattice recommends <i class="fa fa-exclamation-triangle"></i> attributes be removed from your model. These recommendations are based on intelligent data analysis that will likely improve your model quality and stability.</p>
+            </div>
+        </div>
+    </div>
+    <div class="container row">
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="remodel-table-title">
+                <p>Lattice recommendations based on your attributes <span class="header-count">({{filteredAttributes.length}})</span></p>
+            </div>
+            <div class="section-body attribute-table">
+                <table >
+                    <thead>
+                        <tr>
+                            <th>
+                                <span class="sortable"
+                                    ng-class="{'sort-asc':vm.sortAsc && vm.sortBy === 'name', 'sort-desc':!vm.sortAsc && vm.sortBy === 'name'}"
+                                    ng-click="vm.sort('name')">Attribute Name</span>
+                            </th>
+                            <th></th>
+                            <th>Include / Exclude</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="attribute in vm.attributes | filter:{attribute:{Tags:'Internal'}}:true | orderBy:vm.sortBy:!vm.sortAsc as filteredAttributes">
+                            <td>{{attribute.name}}</td>
+                            <td>
+                                <div ng-if="attribute.warning"
+                                    ng-mouseenter="vm.showTooltip($event, attribute)"
+                                    ng-mouseleave="vm.hideTooltip()"><i class="fa"
+                                    ng-class="{'fa-exclamation-triangle':attribute.warning === 'optional', 'fa-exclamation-circle': attribute.warning === 'mandatory'}"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="attribute-toggle"
+                                    type="button"
+                                    ng-class="{'selected': attribute.value}"
+                                    ng-disabled="attribute.disabled"
+                                    ng-click="vm.toggle(attribute)"><span>{{attribute.value ? 'included' : 'excluded'}}</span></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="remodel-tooltip" class="remodel-tooltip"></div>
+            </div>
+        </div>
+    </div>
+    <div class="container row">
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="container">
+                <div class="section-actions button-container">
+                    <form name="newModelname">
+                        <span ng-class="{'has-error': !vm.newModelName || vm.newModelName.length > 50}">
+                            <label for="newModelName">New Model Name</label>
+                            <input type="text" class="form-control" name="newModelName" ng-model="vm.newModelName" ng-disabled="vm.remodeling || vm.disableRemodelOnError" value="vm.newModelName"/>
+                            <p class="help-block">* Model Name cannot be empty, must be less than 50 characters.</p>
+                        </span>
+                        <label>Note</label>
+                        <textarea 
+                            rows="2" 
+                            class="form-control"
+                            name="notesContent"
+                            ng-model="vm.notesContent"
+                        ></textarea>
+                
+                    </form>
+                    <hr class="row-divider">
+                    <button class="button gray-button" type="button" ng-click="vm.cancel()" ng-disabled="vm.remodeling">Cancel</button>
+                    <button class="button orange-button pull-right" ng-click="vm.checkStatusBeforeRemodel()" ng-disabled="!vm.newModelName || vm.newModelName.length > 50  || vm.remodeling || vm.disableRemodelOnError"><i class="fa fa-spinner fa-spin fa-fw" ng-if="vm.remodeling"></i>Remodel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>

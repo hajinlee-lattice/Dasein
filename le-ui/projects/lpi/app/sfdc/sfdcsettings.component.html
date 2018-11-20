@@ -1,0 +1,92 @@
+<div class="container salesforce-settings">
+
+    <le-modal-window 
+        config="$ctrl.config" 
+        callback-function="$ctrl.modalCallback(args)">
+        <p>The changes you made won't apply to the system until you save them. Are you sure you want to leave the page without saving?</p>
+    </le-modal-window>
+
+    <div class="status-alert-box saved fade-element-in" ng-if="$ctrl.showSuccess">
+        <div class="icon"></div>
+        <div class="message">{{$ctrl.successMessage}}</div>
+        <i class="close fa fa-times" ng-click="$ctrl.closeStatusMessage()"></i>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns">
+            <div class="global-error local-error" data-ng-show="showTokenMessage && !tokenSucceeded">
+                <div><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;Failed to Generate Salesforce Access Token<a href="javascript:void(0)" style="padding-left: 50px"><i class="fa fa-times fa-inverse" data-ng-click="closeSFDCMessage()"></i></a></div>
+            </div>
+            <div data-ng-if="showTokenMessage && tokenSucceeded" class="job-success-message">
+                <div>We have sent you an email with an access token and instructions for authenticating with Salesforce.<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeSFDCMessage()" style="top: 5px"></i></a></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns">
+            <h2>{{$ctrl.cdlIsEnabled ? 'System Org Authentication' : 'Salesforce Authentication' }}</h2>
+            <p>Generate a token to connect the BIS application with Lattice platform.</p>
+            <button 
+                class="button orange-button" 
+                ng-click="$ctrl.generateAuthToken()"
+                ng-disabled="loading">
+                {{ $ctrl.generateAuthTokenButtonLabel }}
+            </button>
+        </div>
+    </div>
+
+    <div class="row" ng-if="$ctrl.cdlIsEnabled">
+        <div class="twelve columns">
+            <h2>System Org ID to Account ID Mapping</h2>
+            <p>Map your authenticated application IDs to your imported Account IDs.</p>
+
+            <form name="salesforceOrgsForm" novalidate>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>System Org ID</th>
+                            <th>System Org Name</th>
+                            <th>Account ID</th>
+                        </tr>
+                    </thead>
+                    <tbody ng-if="$ctrl.orgs.length === 0 || $ctrl.orgs === undefined">
+                        <tr>
+                            <td colspan="3">Each time you authenticate a System Org, it will be listed here.</td>
+                        </tr>
+                    </tbody>
+                    <tbody ng-if="$ctrl.orgs.length > 0">
+                        <tr ng-repeat="org in $ctrl.orgs"
+                            ng-class="{disabled: org.isRegistered === false}">
+                            <td>{{ org.orgId }}</td>
+                            <td>{{ org.orgName }} <span class="unregisterd"> - Unregistered Org</span></td>
+                            <td>
+                                <select
+                                    class="form-control"
+                                    name="accountId"
+                                    ng-init="value = ($ctrl.accountids[org.accountId]) ? $ctrl.accountids[org.accountId] : null" 
+                                    ng-model="org.accountId" 
+                                    ng-required="org.accountId == null || org.accountId == ''"
+                                    ng-disabled="org.isRegistered === false"
+                                    ng-change="$ctrl.saveOrg(org); salesforceOrgsForm.$setPristine()">
+                                        <option value="">Select</option>
+                                        <option ng-repeat="accountid in $ctrl.accountids" value="{{accountid.fieldName}}">{{$ctrl.accountIDMap[accountid.fieldName]}}: {{accountid.displayName}}</option>
+                                    </select>
+                                    <!-- ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids" -->
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+<!-- 
+                <button
+                    type="button"
+                    class="button blue-button"
+                    ng-click="$ctrl.saveOrgs(); salesforceOrgsForm.$setPristine()"
+                    ng-disabled="salesforceOrgsForm.$pristine">Save</button> -->
+
+            </form>
+        </div>
+    </div>
+
+
+</div>

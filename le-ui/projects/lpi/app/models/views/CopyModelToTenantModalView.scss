@@ -1,0 +1,194 @@
+[data-ng-controller="CopyModelToTenantModalController"] {
+    &.modal-dialog {
+        width: auto;
+        text-align: center;
+    }
+    .modal-content {
+        width: auto;
+        display: inline-block;
+        text-align: left;
+    }
+    .modal-body {
+        padding-top: 20px;
+    }
+    #close-button {
+        margin-top: -2px;
+        opacity: .8;
+        font-size: 24px;
+        border: none;
+        background: transparent;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+    }
+    .model-copy-dialog {
+        width: auto;
+        &.error {
+            .lists-container {
+                max-width: 500px;
+            }
+        }
+        .list-container {
+            @include flex-container();
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            position: relative;
+            ul.filters {
+                @include flex-item(0 1 auto);
+                text-align: right;
+                margin-bottom: 10px;
+                li {
+                    &.query {
+                        float: left;
+                        padding-bottom: 5px;
+                        .ng-search {
+                            .form-control {
+                                width: 140px;
+                                padding-left: 0;
+                            }
+                            .button {
+//                                 padding: 11px 8px;
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
+        .confirm {
+            min-width: 500px;
+            strong {
+                font-weight: bold;
+            }
+            & > div > ul {
+                @include flex-container();
+                margin: 0;
+                margin-bottom: 10px;
+                width: 100%;
+                & > li {
+                    @include flex-item(1 1 auto);
+                    margin-right: 5px;
+                    &:nth-child(even) {
+                        margin-right: 0;
+                    }
+                    .label {
+                        @include text-ellipsis();
+                        padding: 0;
+                    }
+                    .name {
+                        @include text-ellipsis();
+                        border-radius: 4px;
+                        padding: 15px;
+                        border: 1px solid #d0d0d0;
+                        font-weight: bold;
+                        .ico {
+                            height: 20px;
+                            width: 20px;
+                            margin-right: 10px;
+                            vertical-align: middle;
+                        }
+                    }
+                }
+                &.tenants > li {
+                    width: 50%;
+                    position: relative;
+                    .name {
+                        border-color: #f16a22;
+                    }
+                    &:first-child {
+                        margin-right: 37px;
+                        &:after {
+                            @include font-awesome-inline("\f061");
+                            position: absolute;
+                            right: -30px;
+                            bottom: 10px;
+                            font-size: 26px;
+                        }
+                    }
+                }
+            }
+            .loader {
+                font-size: 50px;
+            }
+        }
+        .modal-footer {
+            @include flex-container();
+            -webkit-justify-content: flex-end;
+            -ms-flex-pack: end;
+            justify-content: flex-end;
+            p {
+                @include flex-item(1 1 auto);
+                width: 300px;
+            }
+            button {
+                @include flex-item(0 1 auto);
+                margin-left: 10px;
+            }
+        }
+        &.copied {
+            .modal-footer {
+                -webkit-justify-content: center;
+                -ms-flex-pack: center;
+                justify-content: center;
+                text-align: center;
+            }
+            .confirm {
+                width: 550px;
+            }
+        }
+        &.error {
+            h4 {
+                position: relative;
+                padding-left: 45px;
+                &:after {
+                    @include font-awesome-inline("\f00d");
+                    position: absolute;
+                    top: 50%;
+                    left: 20px;
+                    margin-top: -1px;
+                    transform: translateY(-50%);
+                    font-size: 12px;
+                    color: white;
+                    background: #f16a22;
+                    padding: 2px 5px;
+                }
+            }
+        }
+    }
+    .list {
+        @include flex-item(1 1 auto);
+        overflow: hidden;
+        overflow-y: auto;
+        border: 1px solid #e0e3e6;
+        height: 200px;
+        & > li {
+            @include text-ellipsis();
+            position: relative;
+            cursor: pointer;
+            padding: 2px;
+            &:nth-child(even) {
+                background: rgba(69, 125, 186, 0.05);
+            }
+            &.selected {
+                background: #f1f1f1;
+                padding-left: 20px;
+                font-weight: bold;
+                &:nth-child(even) {
+                    background: rgba(69, 125, 186, 0.2);
+                }
+                &:after {
+                    @include font-awesome-inline("\f00c");
+                    position: absolute;
+                    top: 0;
+                    left: 2px;
+                    color: #129e4e;
+                }
+            }
+        }
+    }
+    .loader {
+        font-size: 30px;
+    }
+}

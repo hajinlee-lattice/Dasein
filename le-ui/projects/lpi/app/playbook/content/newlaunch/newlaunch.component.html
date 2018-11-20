@@ -1,0 +1,28 @@
+<div class="playbook-content newlaunch container">
+    <h2>
+        Launch
+    </h2>
+
+    <ul class="recommendationCounts">
+        <li class="selected">
+            <h3>Selected recommendation</h3>
+            <strong>{{$ctrl.recommendationCounts.selected}}</strong>
+        </li>
+        <li class="suppressed">
+            <h3>Suppressed</h3>
+            <strong>{{$ctrl.recommendationCounts.suppressed}}</strong>
+        </li>
+        <li class="launching">
+            <h3>Recommendations to be launched</h3>
+            <strong>{{$ctrl.recommendationCounts.launched}}</strong>
+        </li>
+        <li class="contacts">
+            <h3>Contacts within recommendation</h3>
+            <strong>{{$ctrl.recommendationCounts.contacts}}</strong>
+        </li>
+    </ul>
+
+    <p>Click {{$ctrl.status}} for recommendation list to be generated and transferred to your Sales or marketing application.</p>
+
+    <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()" ng-disabled="$ctrl.launching">{{$ctrl.status}}</button>
+</div>

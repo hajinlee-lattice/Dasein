@@ -1,0 +1,31 @@
+<div class="select-menu white-select-menu sort-select">
+    <button 
+            type="button"
+            class="button icon-button white-button select-label"
+            title="Sort Property"
+            ng-click="toggle($event)"
+            ng-class="{ 'open': visible }">
+        {{ label }}
+    </button
+    ><button 
+            type="button"
+            class="button icon-button white-button select-more"
+            title="Sort Direction"
+            ng-click="clickOrder()" 
+            ng-class="{ 'open': visible }">
+        <span class="fa fa-sort-{{ icon || 'amount' }}-{{ order == '' ? 'asc' : 'desc' }}"></span>
+    </button>
+    <ul class="model-menu" ng-show="visible" ng-click="visible = !visible">
+        <li 
+            class="{{ item.class }}"  
+            ng-repeat="item in items"
+            ng-click="clickProperty(item)"
+            ng-if="item.if == undefined ? true : item.if"
+        >
+            <a href="javascript:void(0)">
+                {{ item.label }}
+            </a>
+            <i class="fa fa-sort-{{ item.icon }}-{{ order == '' ? 'asc' : 'desc' }}" ng-if="item.icon"></i>
+        </li>
+    </ul>
+</div>

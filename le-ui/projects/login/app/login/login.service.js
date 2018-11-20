@@ -22,7 +22,7 @@ angular.module('login')
     this.redirectToLP = function(Tenant) {
         var pathMap = {
                 "4.0": "/atlas/",
-                "3.0": "/atlas/",
+                "3.0": "/lpi/",
                 "2.0": "/lp2/"
             },
             ClientSession, UIVersion;

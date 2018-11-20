@@ -1,0 +1,27 @@
+<section class="tabs interior containerx">
+    <ul>
+        <li 
+            ui-sref="home.models" 
+            ui-sref-active-eq="active">
+            <div class="tab-container">
+                <h2>{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{ vm.models.length }}</span> total
+                    <span class="count">{{ vm.count('Active', true) }}</span> active
+                </div>
+            </div>
+        </li>
+        <li 
+            ui-sref="home.models.history"
+            ui-sref-active="active" 
+            ng-if="vm.showModelCreationHistory">
+            <div class="tab-container">
+                <h2>{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{ vm.modelsIncludingDeletedLength }}</span> total
+                    <span class="count">{{ vm.count('Active', true) }}</span> active
+                </div>
+            </div>
+        </li>
+    </ul>
+</section>

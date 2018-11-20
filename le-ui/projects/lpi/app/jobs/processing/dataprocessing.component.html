@@ -1,0 +1,66 @@
+<section class="import-jobs">
+    <div class="jobs-page container import-jobs-container">
+        <div class="table-header">
+            <div class="row list-header">
+                <div class="pull-left">
+                    <menu-dropdown config="vm.header.maxperpage"></menu-dropdown>
+                    <menu-filter-by config="vm.header.filter" store="jobs.dataprocessing.filter" current="vm.currentPage"></menu-filter-by>
+                    <menu-sort-by config="vm.header.sort" store="jobs.dataprocessing.sort"></menu-sort-by>
+                    <search-filter query="vm.query" current="vm.currentPage"></search-filter>
+                </div>
+                <div class="pull-right" ng-show="max > 1">
+                    <pd-pagination-controls current="vm.currentPage" max="max = (vm.header.filter.filtered | filter: vm.query).length / vm.pagesize">
+                </div>
+                </pd-pagination-controls>
+            </div>
+        </div>
+
+        <div class="le-grid" on-finish-render>
+            <div class="le-header le-row">
+                <div class="le-cell le-col-start-1 le-col-span-2">
+                    <span>Creation Timestamp</span>
+                </div>
+                <div class="le-cell le-col-start-3 le-col-span-2">Type</div>
+                <div class="le-cell le-col-start-5 le-col-span-1">Actions</div>
+                <div class="le-cell le-col-start-6 le-col-span-1">Status</div>
+                <div class="le-cell le-col-start-7 le-col-span-2"></div>
+                <div class="le-cell le-col-start-9 le-col-span-3"></div>
+                <div class="le-cell le-col-start-10 le-col-span-1"></div>
+
+            </div>
+            <import-job-row class="le-row" ng-if="!vm.loading" ng-repeat="job in vm.header.filter.filtered |
+                                        filter: vm.query | orderBy:'-startTimestamp' | jobEmpty |
+                                        orderBy: vm.header.sort.order + vm.header.sort.property |
+                                        startFrom: (vm.currentPage - 1) * vm.pagesize |
+                                        limitTo: vm.pagesize" class="le-row" job="job" vm="vm" index="$index"
+                                        ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
+
+            </import-job-row>
+            <div class="le-row info-row" ng-if="vm.loading">
+                <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+                    <span>
+                        <span class="loading-small"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="le-row info-row" ng-if="vm.header.filter.filtered.length === 0 && !vm.loading">
+                <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+                    <span>
+                        There are no jobs to show at the moment
+                    </span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="le-grid grid-footer" ng-show="max > 1">
+            <div class="le-row">
+                <div class="le-col-span-12">
+                    <pd-pagination-controls current="vm.currentPage" max="max = (vm.header.filter.filtered | filter: vm.query).length / vm.pagesize">
+
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

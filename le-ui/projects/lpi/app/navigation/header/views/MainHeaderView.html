@@ -1,0 +1,77 @@
+<header style="display: flex; justify-content:space-between">
+    <div class="left-container secondary-nav noselect-children">
+        <span class="back-container" ui-view="back"></span>
+        <ul class="secondary-nav-grid" >
+            <li class="page-icon-container">
+                <span ng-if="pageDisplayIcon" class="page-icon ico-container">
+                    <span class="ico {{ pageDisplayIcon }}"></span>
+                </span>
+            </li>
+            <li class="page-name-container">
+                <span ng-if="pageDisplayName" class="page-name">{{ pageDisplayName }}</span>
+            </li>
+        </ul>
+    </div>
+    <div class="secondary-nav noselect-children" ng-class="{'model-details-page': isModelDetailsPage}">
+        
+        <ul class="secondary-nav-grid">
+            <li class="jobs-nav-container">
+                <a class="jobs-nav-gear" ui-sref="{{getJobSRef()}}" title="Jobs [{{RunningJobs.length + RunningImportJobs.length + RunningSubJubsDataCount}} Running]">
+<!--                     <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0 || 
+                                                    (RunningImportJobs = (importJobs | filter: statusImportFilter)).length > 0 ||
+                                                    (RunningSubJubsDataCount =  getRunningSubJobsDataCount()) ||
+                                                    (RunningExportJobs = (exportJobs | filter: statusFilter)).length > 0}" class="ico-container">
+                        <span class="ico ico-cog ico-black"></span>
+                    </span>
+                    <span class="jobs-nav-number badge green-badge" ng-if="RunningJobs.length || RunningImportJobs.length || RunningSubJubsDataCount > 0 || RunningExportJobs.length > 0">
+                        {{ RunningJobs.length + RunningImportJobs.length+ SubJobsDataProcessing.length + RunningSubJubsDataCount+ RunningExportJobs.length}}
+                    </span> -->
+                    <span ng-class="{'fa fa-spin': (RunningJobs = (getActiveJobs())).length > 0 }" class="ico-container">
+                        <span class="ico ico-cog ico-black"></span>
+                    </span>
+                    <span class="jobs-nav-number badge green-badge" ng-if="RunningJobs.length">
+                        {{ RunningJobs.length }}
+                    </span>
+                </a>
+            </li>
+
+            <li class="profile-nav-container">
+                <div class="profile-nav dropdown">
+                    <a ng-click="headerClicked($event)" ng-class="{'active' : showProfileNav}" class="profile-user-icon" href="javascript:void(0)">
+                        <span class="ico-container">
+                            <span class="fa fa-user"></span>
+                        </span>
+                        <ul class="profile-nav-info">
+                            <li class="pd-header-username" title="{{userDisplayName}}">{{userDisplayName}}</li>
+                            <li class="tenant-name" title="{{tenantName}}">{{tenantName}}</li>
+                        </ul>
+                        <span class="fa fa-chevron-down"></span>
+                    </a>
+                    <ul class="profile-nav-dropdown-menu" ng-show="showProfileNav" ng-click="headerClicked($event)">
+                        <li ng-if="showUserManagement">
+                            <a ui-sref="home.users" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}">
+                                {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}
+                            </a>
+                        </li>
+                        <li ng-if="tenants.length > 1">
+                            <a href="/login/#/tenants" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_SWITCH_TENANT')}}">
+                                {{ResourceUtility.getString('HEADER_SWITCH_TENANT')}}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/login/#/update" data-ng-if="mayChangePassword" data-ng-hide="mandatePasswordChange" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}">
+                                {{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}
+                            </a>
+                        </li>
+                        <li ng-if="mayViewSSOConfig">
+                            <a ui-sref="home.ssoconfig">
+                                SSO Settings
+                            </a>
+                        </li>
+                        <li><a ui-sref="home.signout" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_LOGOUT')}}">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+</header>

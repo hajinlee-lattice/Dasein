@@ -1,0 +1,31 @@
+<div class="select-menu white-select-menu filter-select">
+    <button 
+            if="label"
+            type="button"
+            class="button icon-button white-button select-label"
+            ng-click="toggle($event)" 
+            ng-class="{ 'open': visible }">
+        {{ label }}
+    </button
+    ><button 
+            type="button"
+            class="button icon-button white-button select-more"
+            ng-click="toggle($event)" 
+            ng-class="{ 'open': visible }">
+        <span class="{{ icon || 'fa fa-filter' }}" ng-class="{ 'fa-rotate-180': visible && iconrotate }"></span>
+    </button>
+    <ul class="model-menu" ng-show="visible" ng-click="toggle()">
+        <li 
+            class="{{ item.class }}"  
+            ng-repeat="item in items"
+            ng-click="click(item)"
+            ng-if="item.if == undefined ? true : item.if"
+        >
+            <a href="javascript:void(0)">
+                {{ item.label }}
+            </a>
+            <i class="{{ item.icon }}" ng-if="item.icon"></i>
+            <span class="badge blue-badge" ng-if="item.total != undefined">{{ item.total }}</span>
+        </li>
+    </ul>
+</div> 

@@ -67,6 +67,20 @@ module.exports = [{
         '/atlas/lib': '/lib'
     }
 },{
+    path: '/projects/lpi',
+    html5mode: true,
+    pages: {
+        '/lpi/': '/dist/indexwp.html',
+        '/lpi/index': '/dist/indexwp.html'
+    },
+    folders: {
+        '/lpi' : '/dist',
+        '/dist': '/dist',
+        '/lpi/app': '/app',
+        '/lpi/assets': '/assets',
+        '/lpi/lib': '/lib'
+    }
+},{
     path: '/projects/insights',
     html5mode: true,
     xframe_allow: [

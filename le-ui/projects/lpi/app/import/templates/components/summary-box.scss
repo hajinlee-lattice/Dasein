@@ -1,0 +1,9 @@
+@import "../../../../../common/widgets/layout/layout.scss";
+@import "../../../../../common/widgets/colors.scss";
+.le-summary-box{
+    // border: 5px solid green;
+    flex: 1;
+    background: rgba(28, 56, 75, 0.5);
+    padding: 0.8em;
+    text-transform: uppercase;
+}

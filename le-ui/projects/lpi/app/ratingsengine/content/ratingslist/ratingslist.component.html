@@ -1,0 +1,202 @@
+<section id="main-content" class="container rating-list">
+
+    <div class="row">
+        
+        <div class="list-header">
+            <div class="pull-left number-of-items" ng-if="vm.current.ratings.length > 0">
+                <menu-filter-by config="vm.header.filter" store="ratings.filter" current="vm.currentPage"></menu-filter-by>
+                <menu-sort-by config="vm.header.sort" store="ratings.sort"></menu-sort-by>
+                <search-filter query="vm.query" current="vm.currentPage"></search-filter>
+            </div>
+            <div class="pull-right">
+                <a
+                    class="button blue-button"
+                    ui-sref="{{vm.createRatingState}}">
+                    Create Model
+                </a>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+
+        <div class="twelve columns">
+            <ul class="tiles">
+                <li ng-if="vm.isRatingsSet == false" class="loading-tile">
+                    <div class="tile-header">
+                        <h2><span></span></h2>
+                        <div class="edit">
+                            <button type="button">
+                                <span class="fa fa-ellipsis-v"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tile-metadata">
+                        <ul>
+                            <li>Created By: <span></span></li>
+                            <li>Created On: <span></span></li>
+                            <li>Segment: <span></span></li>
+                            <li>Last Data Refresh: <span></span></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tile-body">
+                        <div>
+                            <i class="fa fa-spinner fa-pulse fw"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="tile-footer">
+                        <span class="pull-right">Loading ...</span>
+                    </div>
+
+                </li>
+
+                <li
+                    ng-repeat="
+                        rating in vm.current.ratings |
+                        filter: vm.query | 
+                        filter: vm.header.filter.value : true | 
+                        orderBy: vm.header.sort.order + vm.header.sort.property |
+                        startFrom: (vm.currentPage - 1) * pagesize |
+                        limitTo: pagesize"
+                    data="rating"
+                    ng-click="vm.tileClick($event, rating)"
+                    ng-mouseleave="vm.current.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
+                    ng-if="vm.current.ratings.length > 0"
+                    class="{{ rating.tileClass }}"
+                    ng-class="{editing: vm.current.tileStates[rating.id].editRating, noRatings: (rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0) || !rating.isPublished }">
+
+                    <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
+                        <h2 title="{{rating.displayName}}">{{rating.displayName}}</h2>
+                        <div class="edit">
+                            <button
+                                    type="button"
+                                    ng-click="vm.customMenuClick($event, rating)"
+                                    ng-class="{ 'open': vm.current.tileStates[rating.id].showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.current.tileStates[rating.id].showCustomMenu }"></span>
+                            </button>
+                            <ul class="model-menu" ng-show="vm.current.tileStates[rating.id].showCustomMenu">
+                                <li 
+                                    ng-if="vm.canBeActivated(rating) == true"
+                                    data-ng-click="vm.editStatusClick($event, rating, false)">
+                                    <a href="javascript:void(0)">
+                                        <span>Activate</span>
+                                        <!-- <span ng-if="rating.status === 'INACTIVE' && !vm.hasRules(rating)" title="Apply bucket rules to Activate ratings">Activate</span> -->
+                                        <!-- <span ng-if="rating.status === 'ACTIVE'">Deactivate</span> -->
+                                    </a>
+                                    <i class="fa fa-power-off"></i>
+                                </li>
+                                <li data-ng-click="vm.editRatingClick($event, rating)">
+                                    <a href="javascript:void(0)">Rename</a>
+                                    <i class="fa fa-edit"></i>
+                                </li>
+                                <li 
+                                    data-ng-click="vm.showDeleteRatingModalClick($event, rating)"
+                                    ng-if="rating.status === 'INACTIVE' && vm.enableDelete(rating.id)">
+                                    <a href="javascript:void(0)">Delete</a>
+                                    <i class="fa fa-trash"></i>
+                                </li>
+                                <li 
+                                    data-ng-click="vm.cancelJobClickConfirm($event, rating.id)"
+                                    ng-if="rating.status === 'INACTIVE' && !vm.enableDelete(rating.id) && !vm.disableCancelJob(rating.id)">
+                                    <a href="javascript:void(0)">Cancel Job</a>
+                                    <i class="fa fa-times"></i>
+                                </li>
+                                <li
+                                    ng-if="rating.status === 'INACTIVE' && vm.isCancellingJob(rating.id)"
+                                    ng-disabled="true">
+                                    <a href="javascript:void(0)">Cancelling Job</a>
+                                    <i class="fa fa-spinner fa-spin fa-fw"></i>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div><!-- End .tile-header -->
+                    <div 
+                        class="tile-metadata"
+                        ng-if="!vm.current.tileStates[rating.id].editRating">
+                        
+                        <ul>
+                            <li>Created By: <span>{{rating.createdBy}}</span></li>
+                            <li>Created On: <span>{{rating.created | date}}</span></li>
+                            <li class="text-ellipsis">
+                                Segment: 
+                                <span ng-if="rating.segmentDisplayName != null" title="{{rating.segmentDisplayName}}">{{rating.segmentDisplayName}}</span>
+                                <span ng-if="rating.segmentDisplayName == null" class="gray-text">Segment not selected</span>
+                            </li>
+                            <li>
+                                Last Data Refresh: 
+                                <span>{{rating.lastRefreshedDate | date}}</span>
+                            </li>
+                        </ul>
+                    </div><!-- End .tile-metadata -->
+                    <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
+                        <h4 ng-if="rating.bucketMetadata === undefined || rating.bucketMetadata === null || rating.bucketMetadata.length === 0 || rating.isPublished == false">No Ratings Available</h4>
+                        <bar-chart ng-if="rating.isPublished === true"
+                            ng-hide="rating.bucketMetadata === undefined || rating.bucketMetadata === null || rating.bucketMetadata.length === 0"
+                            config="rating.chartConfig" 
+                            bktlist="rating.bucketMetadata">
+                        </bar-chart>
+                    </div><!-- End .tile-body -->
+                    <div class="tile-footer">
+                        <span 
+                            ng-if="rating.status === 'ACTIVE'"
+                            class="active-icon pull-right">
+                            Model is active
+                            <span class="ico ico-check"></span>
+                        </span>
+                        <span 
+                            ng-if="rating.status === 'INACTIVE'"
+                            class="inactive pull-right">
+                            Model is inactive
+                        </span>
+                        <button 
+                            class="launch button blue-button pull-right" 
+                            ng-click="vm.launchPlay()"
+                            ng-if="play.launchHistory.playLaunch == null && play.segment != null"
+                            ng-disabled="
+                                vm.showLaunchSpinner || 
+                                vm.invalid.length || 
+                                vm.launchButton.state == 'Launching'">
+                            <span ng-if="vm.showLaunchSpinner">
+                                <i class="fa fa-spinner fa-spin fa-fw"></i>
+                            </span>
+                            <span>{{vm.launchButton.label}}</span>
+                        </button>
+
+
+                    </div><!-- End .tile-footer -->
+                        <edit-form ng-if="vm.current.tileStates[rating.id].editRating" 
+                            config="vm.editConfig"
+                            dataobj="rating" 
+                            saving="vm.saveInProgress"
+                            callback="vm.saveName(obj, newData)">
+                        </edit-form>
+                </li>
+                <li class="create-tile" ng-if="vm.current.ratings.length < 12">
+                    <a
+                        class="button new-tile-button"
+                        ui-sref="{{vm.createRatingState}}">
+                        <span>&#43;</span>
+                        Create Model
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div><!-- End .row -->
+    <div 
+        class="row pull-right" 
+        ng-init="pagesize = 12" 
+        ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls 
+                current="vm.currentPage" 
+                max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
+
+            </pd-pagination-controls>
+        </div>
+    </div>
+
+</section>

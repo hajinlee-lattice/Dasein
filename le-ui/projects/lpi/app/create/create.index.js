@@ -1,0 +1,10 @@
+import './buildprogress/BuildProgressController';
+import './csvform/CSVFormController';
+import './customfields/CustomFieldsController';
+import './fileuploader/FileUploaderDirective';
+import './jobreport/JobReportController';
+import './pmmlform/PMMLFormController';
+import './scorefields/ScoreFieldsController';
+import './scorefile/ScoreFileController';
+import './CreateRoutes';
+import './CreateService';

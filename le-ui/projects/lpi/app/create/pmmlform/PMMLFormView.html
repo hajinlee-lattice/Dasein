@@ -1,0 +1,109 @@
+<section class="container setup-import pmml-import">
+<form name="uploadForm" ng-controller="pmmlImportController as vm" novalidate>
+  <div class="row">
+    <div class="columns eight offset-two box-outline">
+      <div class="section-header">
+        <h4>PMML Import</h4>
+        <h5>Create a model from an uploaded PMML file.</h5>
+      </div>
+
+      <hr />
+      
+      <div class="section-body with-padding">
+        <div 
+            file-uploader-container
+            label="PMML File"
+            params="vm.pmmlParams"
+            input-name="pmmlFileName"
+            info-template="vm.pmmlParams.infoTemplate"
+            tooltip-config="{{vm.pmmlParams.tooltipConfiguration}}"
+            default-message="vm.pmmlParams.defaultMessage"
+            file-accept=".pmml,.xml"
+            file-select="vm.pmmlSelect(fileName)"
+            file-done="vm.pmmlDone(result)"
+            file-cancel="vm.pmmlCancel()"
+            class="form-group file-upload" 
+            ng-class="{ 
+              'has-error' : uploadForm.pmmlFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 
+              'is-pristine' : uploadForm.pmmlFileName.$pristine 
+            }">
+        </div>
+
+        <div 
+            file-uploader-container
+            label="Mapping File"
+            params="vm.pivotParams"
+            input-name="pivotFileName"
+            default-message="vm.pivotParams.defaultMessage"
+            file-required="false"
+            file-accept=".csv,.txt"
+            file-select="vm.pivotSelect(fileName)"
+            file-done="vm.pivotDone()"
+            file-cancel="vm.pivotCancel()"
+            class="form-group file-upload" 
+            ng-class="{ 
+              'disabled': !vm.moduleName,
+              'has-error': uploadForm.pivotFileName.$invalid && !uploadForm.modelDisplayName.$pristine
+            }">
+        </div>
+        
+        <div class="form-group">
+          <label>Model Type</label>
+          <div class="toggle-check">
+            <div>
+              <label>
+                <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required />
+                {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_ACCOUNT')}} <span ng-if="vm.accountLeadCheck == 'SalesforceAccount' && vm.showTypeDefault">(default)</span>
+              </label>
+            </div>
+            <div>
+              <label>
+                <input type="radio" value="SalesforceLead" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required />
+                {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_LEAD')}} <span ng-if="vm.accountLeadCheck == 'SalesforceLead' && vm.showTypeDefault">(default)</span>
+              </label>
+            </div>
+          </div>          
+        </div>
+        
+        <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+          <label>{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_MODELNAME')}}</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="modelDisplayName"
+            name="modelDisplayName"
+            ng-change="vm.changeName()"
+            ng-model="vm.modelDisplayName"
+            ng-value="vm.modelDisplayName"
+            ng-minlength="2"
+            ng-maxlength="50"
+            placeholder="Example: US-Enterprise-model"
+            required />
+          <p class="help-block">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_MODELNAME')}}</p>
+        </div>
+      </div>
+        
+      <hr />
+
+      <div class="row section-actions">
+        <div class="pull-left">
+            <button 
+                type="button" 
+                class="button white-button block-button"
+                ng-click="vm.cancelJob()">
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
+        </div>
+        <div class="pull-right">
+            <button 
+                type="button" 
+                class="button orange-button block-button"
+                ng-disabled="uploadForm.$invalid || !vm.pmmlUploaded"
+                ng-click="vm.clickNext(vm_uploader.choosenFileName)">
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+            </button>
+        </div>
+      </div>
+    </div><!-- End .six.columns -->
+  </div><!-- End .container.row -->
+</form>
+</section>

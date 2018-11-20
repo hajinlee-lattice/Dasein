@@ -1,0 +1,61 @@
+<div class="summary blue-fire">
+    <div class="headers">
+        <h2 class="summary-header">
+            Summary of Data
+        </h2>
+        <button class="button blue-button" ng-click="vm.downloadReport()">
+            Download Report
+        </button>
+    </div>
+</div>
+
+<section class="jobs-page container import-jobs-container">
+  <div class="row">
+        <div class="twelve columns">
+             <ul class="jobs-tiles">
+                <li jobs-summary-tile 
+                    ng-repeat="entity in vm.entities" class="{{entity | lowercase}}-summary-tile"
+                    report="vm.summaries[entity]" entity="entity" count="vm.counts[entity]" actions="vm.actions"
+                    ng-if="entity != 'PurchaseHistory' || (entity == 'PurchaseHistory' && vm.counts[entity] > 0)" >
+                </li>
+
+                <li class="system-action-summary-tile" ng-if="vm.systemActions.length">
+                    <div class="jobs-tile-body columns two panel ">
+                        <h2> System Actions </h2>
+                        <h2> 
+                            <img ng-src="/assets/images/ico-system-actions.png"/>
+                        </h2>
+                    </div>
+                    <div class="tile-body wrap-body columns ten panel">
+                        <div class="job-subactions le-row">
+                            <div class="le-col-start-1 le-col-span-12 le-grid">
+                                <div class="le-header le-header-expand le-row">
+                                    <div class="le-cell le-col-start-1 le-col-span-2">Start Time</div>
+                                    <div class="le-cell le-col-start-3 le-col-span-4">Type</div>
+                                </div>
+                                
+                                <div class="le-row" ng-repeat="systemAction in vm.systemActions">
+                                    <div class="le-cell le-col-start-1 le-col-span-2">
+                                        {{vm.systemActionTimestamp | date : 'MM/dd/yyyy h:mma'}}
+                                    </div>
+                                    <div class="le-cell le-col-start-3 le-col-span-10">
+                                        {{systemAction}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li> 
+
+
+            </ul>
+        </div>
+    </div>
+    <a class="button gray-button pull-left" ui-sref="home.jobs.data">
+        Back
+    </a>
+
+
+
+
+</section>

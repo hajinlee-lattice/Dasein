@@ -1,0 +1,26 @@
+<section class="tabs interior containerx">
+    <ul>
+        <li
+            ui-sref="home.playbook.plays.list"
+            ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Campaigns</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{ vm.current.plays.length }}</span> total
+                    <span class="count">{{ vm.count('Launched', true) }}</span> currently launched
+                </div>
+            </div>
+        </li>
+        <li 
+            ui-sref="home.playbook.plays.launchhistory"
+            ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Launch History</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{ vm.count('Launching') + vm.count('Launched') + vm.count('Failed') }}</span> {{ vm.count('Launching') + vm.count('Launched') + vm.count('Failed') == 1 ? "campaign" : "campaigns"}}
+                    <span class="count">{{ vm.count('Launching') }}</span> launching
+                </div>
+            </div>
+        </li>
+    </ul>
+</section>

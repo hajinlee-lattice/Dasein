@@ -1,0 +1,259 @@
+<div class="ratingengine-training playbook-content container">
+    <div class="inner-container">
+        <ng-form name="trainingForm" form-on-change="$ctrl.formOnChange()" ng-model-options="{ debounce: 800 }" novalidate>
+        
+            <div class="header">
+                <h2>{{ $ctrl.pageTitle }}</h2>
+                <p ng-if="$stateParams.section != 'wizard.ratingsengine_segment'">Changing these settings will probably result in a different set of attributes.</p>
+            </div>
+
+            <div class="content-body">
+
+                <div ng-if="$ctrl.engineType == 'custom_event'">
+
+                    <p>What attributes will be available for scoring?</p>
+                    <ul class="checkbox-list full-width">
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.datacloud"
+                                ng-change="$ctrl.checkForDisable()" />
+                            <div>Your matched 3rd-Party Attributes provided through Lattice</div>
+                        </li>
+                        <li class="form-group" ng-if="$ctrl.filters.customEventModelingType == 'CDL'">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.cdl"
+                                ng-change="$ctrl.checkForDisable()" />
+                            <div>Your Imported 1st-Party Attributes (My Data Attributes)</div>
+                        </li>
+                        <li class="form-group" ng-if="$ctrl.filters.customEventModelingType == 'LPI'">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.customFile"
+                                ng-change="$ctrl.checkForDisable()" />
+                            <div>Attributes in the Training File</div>
+                        </li>
+                    </ul>
+
+                    <p>Training Options</p>
+                    <ul class="checkbox-list full-width">
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.deduplicationType" />
+                            <div>One record per account</div>
+                        </li>
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.excludePublicDomains" />
+                            <div>Include personal email domains</div>
+                        </li>
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="$ctrl.checkboxModel.transformationGroup" />
+                            <div>Use curated attributes</div>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <ul ng-if="$ctrl.engineType == 'cross_sell'" class="checkbox-list">
+                    <li ng-if="$ctrl.repeatPurchaseRemodel" class="form-group purchased-before-period">
+                        <p>
+                            Only sell to accounts that have not purchased the selected products in the last
+                            <select 
+                                class="form-control"
+                                ng-model="$ctrl.purchasedBeforePeriod"
+                                ng-change="$ctrl.getPurchasedBeforeValue($event.target.value)">
+                                <option value="6">6 months</option>
+                                <option value="12">12 months</option>
+                                <option value="24">24 months</option>
+                            </select>
+                        </p>
+                    </li>
+                    <li class="form-group">
+                        <input 
+                            type="checkbox"
+                            class="form-control"
+                            ng-model="$ctrl.checkboxModel.spend" />
+                        <div>
+                            <p>Only use successes where spend in the quarter was</p>
+                            <select 
+                                class="form-control"
+                                ng-disabled="!$ctrl.checkboxModel.spend"
+                                ng-model="$ctrl.spendCriteria">
+                                <option value="GREATER_OR_EQUAL">At least</option>
+                                <option value="LESS_OR_EQUAL">At most</option>
+                            </select>
+                            <div class="input-group prepend" >
+                                    <numerical-range-directive
+                                        mainconfig="{{ $ctrl.getNumericalConfig() }}"
+                                        config="{{ $ctrl.getSpendConfigString() }}"
+                                        showfrom="true"
+                                        fromlabel="$"
+                                        fromdisabled="!$ctrl.checkboxModel.spend" 
+                                        initialvalidation="false"
+                                        showto="false"
+                                        vm="$ctrl"
+                                        form="trainingForm"
+                                        type="" 
+                                        bucketrestriction=""
+                                        invalidcallback="true"
+                                        showmessage="true"
+                                        changed="$ctrl.callbackSpend(type, position, value)">
+                                    </numerical-range-directive>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="form-group">
+                        <input 
+                            type="checkbox"
+                            class="form-control"
+                            ng-model="$ctrl.checkboxModel.quantity" />
+                        <div>
+                            <p>Only use successes where quantity bought in the quarter was</p>
+                            <select 
+                                class="form-control"
+                                ng-disabled="!$ctrl.checkboxModel.quantity"
+                                ng-model="$ctrl.quantityCriteria">
+                                <option value="GREATER_OR_EQUAL">At least</option>
+                                <option value="LESS_OR_EQUAL">At most</option>
+                            </select>
+                            <div class="input-group append">
+                                <numerical-range-directive 
+                                    mainconfig="{{ $ctrl.getNumericalConfig() }}"
+                                    config="{{ $ctrl.getQuantityConfigString() }}"
+                                    fromdisabled="!$ctrl.checkboxModel.quantity" 
+                                    initialvalidation="false"
+                                    showfrom="true"
+                                    showtolabel="true"
+                                    tolabel="Units"
+                                    showto="false"
+                                    vm="$ctrl" 
+                                    form="trainingForm"
+                                    type="" 
+                                    bucketrestriction=""
+                                    invalidcallback="true"
+                                    changed="$ctrl.callbackQuantity(type, position, value)">
+                                </numerical-range-directive>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="form-group">
+                        <input 
+                            type="checkbox"
+                            class="form-control"
+                            ng-model="$ctrl.checkboxModel.periods" />
+                        <div>
+                            <p>When modeling, only use historical records from the last</p>
+                            <div class="input-group append">
+                                <numerical-range-directive 
+                                    mainconfig="{{ $ctrl.getNumericalConfig() }}"
+                                    config ="{{ $ctrl.getPeriodConfigString() }}"
+                                    initialvalidation="false"
+                                    fromdisabled="!$ctrl.checkboxModel.periods" 
+                                    showfrom="true"
+                                    showtolabel="true"
+                                    tolabel="months"
+                                    showto="false"
+                                    vm="$ctrl"
+                                    form="trainingForm"
+                                    type="" 
+                                    bucketrestriction=""
+                                    invalidcallback="true"
+                                    changed="$ctrl.callbackPeriod(type, position, value)">
+                                </numerical-range-directive>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="form-group auto-select-group">
+                        <div>
+                            <p>Let me model on a similar segment, not exactly the one I want to sell into</p>
+                            
+                            <!-- {{$ctrl.trainingSegment}} -->
+
+                            <chips
+                                placeholder="Search for a similar segment"
+                                datasource="$ctrl.segments" 
+                                callback-function="$ctrl.segmentCallback(args)"
+                                single-selection="true"
+                                initialvalue="$ctrl.trainingSegment"
+                                id="name"
+                                displayname="display_name"
+                                queryscope="display_name"
+                                ng-model="$ctrl.trainingSegment"
+                                showicon="true"></chips>
+                        </div>
+                    </li>
+                    <li class="form-group auto-select-group">
+                        <div>
+                            <p>Let me model on similar products, not exactly the ones I want to sell</p>
+                            
+                            <!-- {{$ctrl.trainingProducts}} -->
+
+                            <chips
+                                placeholder="Search for similar products" 
+                                datasource="$ctrl.products"
+                                callback-function="$ctrl.productsCallback(args)"
+                                single-selection="false"
+                                initialvalue="$ctrl.trainingProducts"
+                                id="ProductId"
+                                displayname="ProductName"
+                                queryscope="ProductName"
+                                ng-model="$ctrl.trainingProducts"
+                                showicon="true"></chips>
+                        </div>
+                    </li>
+                </ul><!-- End .checkbox-list -->
+
+
+
+                <ul class="data" ng-if="$ctrl.engineType == 'cross_sell'">
+                    <li>
+                        <h3 class="training-data-set">Size of Training Data Set</h3>
+                        <div class="stats-group">
+                            <dl class="stats">
+                                <dt>Records Selected</dt>
+                                <dd>
+                                    <span ng-if="!$ctrl.recordsCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.recordsCountReturned">{{ $ctrl.recordsCount | number }}</span>
+                                </dd>  
+                            </dl>
+                            <dl class="stats">
+                                <dt ng-if="$ctrl.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">First Purchases</dt>
+                                <dt ng-if="$ctrl.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Repeat Purchases</dt>
+                                <dd>
+                                    <span ng-if="!$ctrl.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.purchasesCountReturned">{{ $ctrl.purchasesCount | number }}</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </li>
+                    <li>
+                        <h3 class="scoring-set">Scoring</h3>
+                        <div class="stats-group">
+                            <dl class="stats">
+                                <dt>Accounts to be scored</dt>
+                                <dd>
+                                    <span ng-if="!$ctrl.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.scoringCountReturned">{{ $ctrl.scoringCount | number }}</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </li>
+                </ul>
+
+            </div><!-- End .content-body -->
+
+        </ng-form>
+    </div>
+</div>

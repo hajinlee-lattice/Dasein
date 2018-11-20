@@ -1,0 +1,232 @@
+.container.MarketoEnrichmentController {
+    padding: 10px;
+    section.step {
+        background-color: white;
+        padding: 18px 0;
+        border-radius: 4px;
+        border: solid 1px #d0d0d0;
+        box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
+        opacity: .5;
+        & > h2 {
+            margin: 0 50px;
+            padding: 0;
+            position: relative;
+            &:after {
+                @include font-awesome-inline("\f103");
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+            strong {
+                font-weight: bold;
+            }
+            em {
+                color: #d22027;
+            }
+        }
+        .body {
+                display: none;
+                h3 {
+                    text-transform: none;
+                    font-weight: normal;
+                    font-size: 16px;
+                    margin: 0 50px;
+                    margin-top: 20px;
+                    margin-bottom: 16px;
+                    color: #6d6d6d;
+                    strong {
+                        font-weight: bold;
+                    }
+                }
+                p {
+                    margin: 20px 0;
+                }
+                hr {
+                    position: relative;
+                    top: 0;
+                    margin: 0 auto;
+                    width: 50%;
+                    border: 0;
+                    height: 0;
+                    border-top: 1px solid #bbb;
+                }
+                .settings {
+                    @include flex-container;
+                    //border-top: 1px solid #f1f1f1;
+                    //border-bottom: 1px solid #f1f1f1;
+                    margin-top: -1px;
+                    .setting {
+                        &.col {
+                            @include flex-item(0 1 50%);
+                            min-width: 50%;
+                        }
+                        padding: 0 50px;
+                        padding-top: 16px;
+                        padding-bottom: 33px;
+                        background: #f7f7f7;
+                        &:nth-child(2) {
+                            background: #f1f1f1;
+                        }
+                        h4 {
+                            margin-bottom: 20px;
+                        }
+                        h5 {
+                            margin-top: 15px;
+                            font-size: 16px;
+                        }
+                        .attribute {
+                            padding: 5px 10px;
+                            border: 1px solid #3989c4;
+                            font-size: 15px;
+                            background: #fff;
+                            max-width: 447px;
+                            overflow: auto;
+                            &.dashed {
+                                border-style: dashed;
+                            }
+                        }
+                        .webhook-url {
+                            .attribute {
+                                white-space: nowrap;
+                                overflow: auto;
+                            }
+                        }
+                        .instructions-image {
+                            background-position: center center;
+                            background-repeat: no-repeat;
+                            background-size: contain;
+                            &.step-2-1 {
+                                width: 480px;
+                                height: 554px;
+                                background-image: url(/assets/images/enrichments/marketo/step-2-instructions-1.png);
+                            }
+                            &.step-2-2 {
+                                width: 480px;
+                                height: 173px;
+                                background-image: url(/assets/images/enrichments/marketo/step-2-instructions-2.png);
+                            }
+                            &.step-3-1 {
+                                width: 480px;
+                                height: 358px;
+                                background-image: url(/assets/images/enrichments/marketo/step-3-instructions-1.png);
+                            }
+                        }
+                        .enrichments {
+                            .box {
+                                background-color: #fff;
+                                border: solid 1px #3989c4;
+                                font-size: 15px;
+                                margin-bottom: 15px;
+                                h6 {
+                                    background: #f6f6f6;
+                                    padding: 5px 10px;
+                                    color: #747474;
+                                    pointer-events: none;
+                                    @include user-select(none);
+                                    em {
+                                        float: right;
+                                    }
+                                }
+                                p {
+                                    @include text-ellipsis;
+                                    max-width: 447px;
+                                    margin: 0;
+                                    padding: 5px 10px;
+                                }
+                            }
+                        }
+                        .custom-headers {
+                            @include flex-container;
+                            .custom-header {
+                                @include flex-item(0 1 50%);
+                                padding: 5px;
+                                .custom-header-value {
+                                    padding: 7px 15px;
+                                    background: #fff;
+                                    border: 1px solid #3989c4;
+                                    font-size: 15px;
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+        &.active {
+            h2 {
+                cursor: auto;
+                &:after {
+                    @include font-awesome-inline("\f102");
+                }
+            }
+            &.ready {
+                h2 {
+                    cursor: auto;
+                }
+            }
+            .body {
+                display: block;
+            }
+        }
+        &.ready {
+            opacity: 1;
+            h2 {
+                cursor: pointer;
+            }
+        }
+        .buttons {
+            margin: 0 50px;
+            margin-top: 33px;
+            min-height: 40px;
+            button:last-child {
+                float: right;
+            }
+        }
+        .match-fields {
+            .field {
+                @include flex-container;
+                padding: 0 40px;
+                border-top: 1px solid #f1f1f1;
+                &:nth-child(even) {
+                    background: #fafafa;
+                }
+                &:last-child {
+                    border-bottom: 1px solid #f1f1f1;
+                }
+                &:first-child {
+                    color: #bbb;
+                    border-top: 0;
+                }
+                label {
+                    border-right: 1px solid #f1f1f1;
+                    padding: 10px;
+                    margin: 0;
+                }
+                select {
+                    margin: 10px;
+                }
+                span {
+                    margin: 10px;
+                    &:first-child {
+                        padding: 10px;
+                        margin: 0;
+                    }
+                }
+                .col {
+                    @include flex-item(1 1 auto);
+                    width: 50%;
+                    &:nth-child(odd) {
+                        text-align: right;
+                    }
+                }
+                &.required {
+                    .match {
+                        font-weight: bold;
+                        &:after {
+                            content: '*';
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

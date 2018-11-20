@@ -1,0 +1,40 @@
+<section class="container marketo-container">
+
+  <div class="row">
+  		<div class="header">
+  			<h2> Active Models </h2>
+  			<label> Only models which you have activated can score. Models can be activated from My Models. </label>
+  		</div>
+  		<div class="body" >
+			<table class="marketo-default-table">
+				<thead>
+					<tr>
+						<th>
+							Model Name
+						</th>
+						<th>
+							Webhook
+						</th>
+					</tr>
+					<tr>
+				</thead>
+			  	<tbody>
+				  <tr ng-repeat="model in $ctrl.activeModels">
+				    <td> 
+				    	{{model.name}}
+				    </td>
+				    <td>
+				    	<a ui-sref="home.marketosettings.setup({credentialId: $ctrl.credentialId, modelUuid: model.modelId})"> 
+				    		<button class="button blue-button"> Setup Model </button>
+				    	</a>
+				    	<a ui-sref="home.marketosettings.webhook({credentialId: $ctrl.credentialId, configId: $ctrl.getConfigId(model.modelId)})" ng-if="$ctrl.scoringRequestSummaryIds.has(model.modelId)">
+				    		<button class="button blue-button" > View Webhook </button>
+				    	</a>
+				    </td>
+				  </tr>
+				</tbody>
+			</table>
+		</div>
+  </div>
+
+</section>

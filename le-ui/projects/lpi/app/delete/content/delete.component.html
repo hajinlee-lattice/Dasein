@@ -1,0 +1,213 @@
+<section class="container delete-container setup-import">
+  <ng-form name="delete_form" novalidate>
+
+  <div class="row">
+    <div class="columns eight offset-two box-outline">
+      <div class="section-header">
+        <h4>Delete Data</h4>
+      </div>
+      <hr />
+      <div class="section-body with-padding" >
+        <div class="button-tabs">
+          <div class="button {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Account', 'account');">
+            <span>Accounts</span>
+            <img src="{{$ctrl.getEntityImage('account')}}"/>
+            <span>{{$ctrl.counts.accounts}}</span>
+          </div>
+          <div class="button {{ $ctrl.currentTab == 'contact' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Contact', 'contact');">
+            <span>Contacts</span>
+            <img src="{{$ctrl.getEntityImage('contact')}}"/>
+            <span>{{$ctrl.counts.contacts}}</span>
+          </div>
+          <div class="button {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Transaction', 'transaction');">
+            <span>Transactions</span>
+            <img src="{{$ctrl.getEntityImage('transaction', 'purchase')}}"/>
+            <span>{{$ctrl.counts.transactions}}</span>
+          </div>
+        </div>
+
+        <div ng-if="$ctrl.counts[$ctrl.currentTab + 's'] == 0" style="text-align: center; padding-bottom: 20px;">
+              There is no {{$ctrl.currentTab}} data in the system.
+        </div>
+
+        <div ng-if="($ctrl.currentTab == 'account' || $ctrl.currentTab == 'contact') && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text" >
+              <ul class="checkbox-list">
+                <li>
+                    <input  type="radio"
+                            data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID'"
+                            ng-click="$ctrl.setCleanupType('BYUPLOAD_ID', 'DeleteAccountTemplate')" />
+                      <div 
+                        ng-if="$ctrl.currentTab == 'account' "
+                        file-uploader-container
+                        params="$ctrl.uploadParams['BYUPLOAD_ID']"
+                        label="{{$ctrl.uploadParams['BYUPLOAD_ID'].accountLabel}}"
+                        info-template="$ctrl.uploadParams['BYUPLOAD_ID'].accountInfoTemplate"
+                        tooltip-config="{{$ctrl.uploadParams['BYUPLOAD_ID'].tooltipConfiguration}}"
+                        input-name="csvFileName"
+                        file-select="$ctrl.fileSelect(fileName)"
+                        file-load="$ctrl.fileLoad(headers)"
+                        file-done="$ctrl.fileDone(result)"
+                        file-cancel="$ctrl.fileCancel()"
+                        class="form-group file-upload file-upload-with-padding" 
+                        ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$pristine && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID' }"
+                        ng-click="$ctrl.setCleanupType('BYUPLOAD_ID')"
+                        >
+                    </div>
+                      <div 
+                        ng-if="$ctrl.currentTab == 'contact' "
+                        file-uploader-container
+                        params="$ctrl.uploadParams['BYUPLOAD_ID']"
+                        label="{{$ctrl.uploadParams['BYUPLOAD_ID'].contactLabel}}"
+                        info-template="$ctrl.uploadParams['BYUPLOAD_ID'].contactInfoTemplate"
+                        tooltip-config="{{$ctrl.uploadParams['BYUPLOAD_ID'].tooltipConfiguration}}"
+                        input-name="csvFileName"
+                        file-select="$ctrl.fileSelect(fileName)"
+                        file-load="$ctrl.fileLoad(headers)"
+                        file-done="$ctrl.fileDone(result)"
+                        file-cancel="$ctrl.fileCancel()"
+                        class="form-group file-upload file-upload-with-padding" 
+                        ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$pristine && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID' }"
+                        ng-click="$ctrl.setCleanupType('BYUPLOAD_ID')"
+                        >
+                    </div>
+
+                </li>
+                <li>
+                  <label>
+                    <input  type="radio"
+                            name="name"
+                            data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'ALLDATA'"
+                            ng-click="$ctrl.setCleanupType('ALLDATA')"/>
+                    All {{$ctrl.currentTab == 'account' ? 'Accounts' : 'Contacts'}}</label>
+                </li>
+              </ul>
+        </div>
+        <div ng-if="$ctrl.currentTab == 'transaction' && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text"> 
+                <ul>
+                  <li>
+                      <label>
+                        <input  type="radio" 
+                                data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYDATERANGE'"
+                                ng-click="$ctrl.setCleanupType('BYDATERANGE')" />
+                        Select start and end date </label>
+                      <date-range-directive   
+                                              config="{{$ctrl.getPeriodTimeConfString()}}"
+                                              vm="$ctrl" 
+                                              showfrom="$ctrl.showFromTime"
+                                              showto="$ctrl.showToTime"
+                                              form="delete_form"
+                                              type="TimeSeries" 
+                                              bucketrestriction="$ctrl.bucketRestriction"
+                                              showinline="{{true}}"
+                                              tolabel="To"
+                                              fromlabel="Date Range: From "
+                                              changed="$ctrl.callbackChangedValue(type, position, value)"
+                                              startplaceholder="Start Date"
+                                              endplaceholder="End Date"
+                                              hidepristineerror="true"
+                                              ng-click="$ctrl.setCleanupType('BYDATERANGE')"
+                                              >
+                      </date-range-directive>
+                  </li>
+                  <li>
+                      <input  type="radio" 
+                              data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT'"
+                              ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')" />
+                        <div 
+                          file-uploader-container
+                          label="Upload a single csv file with Account IDs and Transaction Start Dates"
+                          params="$ctrl.uploadParams['BYUPLOAD_MINDATEANDACCOUNT']"
+                          input-name="csvFileName"
+                          info-template="$ctrl.uploadParams['BYUPLOAD_MINDATEANDACCOUNT'].infoTemplate"
+                          tooltip-config="{{$ctrl.uploadParams['BYUPLOAD_MINDATEANDACCOUNT'].tooltipConfiguration}}"
+                          file-select="$ctrl.fileSelect(fileName)"
+                          file-load="$ctrl.fileLoad(headers)"
+                          file-done="$ctrl.fileDone(result)"
+                          file-cancel="$ctrl.fileCancel()"
+                          class="form-group file-upload file-upload-with-padding" 
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT' && $ctrl.fileName == '' }"
+                          ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')"
+                          >
+                      </div>
+                  </li>
+                  <li>
+                      <input  type="radio" 
+                              data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1'"
+                              ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')" style="position: relative;"/>
+                        <div 
+                          file-uploader-container
+                          label="Upload a single csv file with Account IDs, Product IDs, and Transaction Start Dates"
+                          params="$ctrl.uploadParams['BYUPLOAD_ACPD_1']"
+                          info-template="$ctrl.uploadParams['BYUPLOAD_ACPD_1'].infoTemplate"
+                          tooltip-config="{{$ctrl.uploadParams['BYUPLOAD_ACPD_1'].tooltipConfiguration}}"
+                          input-name="csvFileName"
+                          file-select="$ctrl.fileSelect(fileName)"
+                          file-load="$ctrl.fileLoad(headers)"
+                          file-done="$ctrl.fileDone(result)"
+                          file-cancel="$ctrl.fileCancel()"
+                          class="form-group file-upload file-upload-with-padding" 
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' && $ctrl.fileName == ''}"
+                          ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')"
+
+                          >
+                      </div>
+                  </li>
+                  <li>
+                      <input  type="radio" 
+                              data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2'"
+                              ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')" />
+                        <div 
+                          file-uploader-container
+                          label="Upload a single csv file with Account IDs, Product IDs, Contact IDs, and Transaction Start Dates"
+                          params="$ctrl.uploadParams['BYUPLOAD_ACPD_2']"
+                          info-template="$ctrl.uploadParams['BYUPLOAD_ACPD_2'].infoTemplate"
+                          tooltip-config="{{$ctrl.uploadParams['BYUPLOAD_ACPD_2'].tooltipConfiguration}}"
+                          input-name="csvFileName"
+                          file-select="$ctrl.fileSelect(fileName)"
+                          file-load="$ctrl.fileLoad(headers)"
+                          file-done="$ctrl.fileDone(result)"
+                          file-cancel="$ctrl.fileCancel()"
+                          class="form-group file-upload file-upload-with-padding" 
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2' && $ctrl.fileName == '' }"
+                          ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')"
+                          >
+                      </div>
+                  </li>
+                <li>
+                  <label>
+                    <input  type="radio" 
+                            data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'ALLDATA'"
+                            ng-click="$ctrl.setCleanupType('ALLDATA')" />
+                    All Transactions </label>
+                </li>
+              </ul>
+          </div>
+      </div>
+      <hr />
+      <div class="container section-actions row form-actions">
+        <div class="pull-left">
+            <button 
+                type="button" 
+                class="button white-button block-button"
+                ui-sref="home.segment.explorer.attributes({segment:'Create'})">
+              Cancel
+            </button>
+        </div>
+
+        <div class="pull-right">
+            <button 
+                type="button" 
+                class="button blue-button"
+                ng-disabled="$ctrl.disableSubmit()"
+                ng-click="$ctrl.click()">
+              Delete
+              <i class="fa fa-spinner fa-spin fa-fw" ng-if="$ctrl.submittingJob"></i>
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </ng-form>
+
+</section>

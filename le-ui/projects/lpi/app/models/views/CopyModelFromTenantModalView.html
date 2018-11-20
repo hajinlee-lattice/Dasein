@@ -1,0 +1,79 @@
+<div class="modal-dialog" data-ng-controller="CopyModelFromTenantModalController">
+    <div class="modal-content">
+        <div class="model-copy-dialog" ng-show="!vm.model_copied">
+            <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <div class="modal-body">
+                <div class="lists-container">
+                    <div class="tenants" ng-class="{'active': vm.tenants.length}">
+                        <h4>1. Choose Tenant</h4>
+                        <div class="list-container">
+                            <ul class="filters" ng-show="vm.tenants.length">
+                                <li class="query">
+                                    <div class="ng-search">
+                                        <input type="text" class="form-control" placeholder="Search" ng-model="vm._tenants.search" />
+                                        <a class="button icon-button white-button" ng-click="vm._tenants.search.length ? vm._tenants.search = '' : ''">
+                                            <span class="fa fa-search" ng-show="!vm._tenants.search.length"></span>
+                                            <span class="fa fa-times" ng-show="vm._tenants.search.length"></span>
+                                        </a>
+                                    </div>
+                                </li>
+                                <li class="sort" ng-init="vm._tenants.sort = ''">
+                                    <button class="button white-button icon-button" 
+                                            ng-click="vm._tenants.sort = (vm._tenants.sort == '' ? '-' : '')">
+                                        <span class="fa fa-sort-alpha-{{vm._tenants.sort == '' ? 'asc' : 'desc'}}"></span>
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="loader" ng-show="!vm.tenants.length"> </div>
+                            <ul class="list" ng-show="vm.tenants.length">
+                                <li ng-repeat="tenant in vm.tenants | filter: {'UIVersion': '3.0', 'DisplayName': vm._tenants.search} | orderBy: vm._tenants.sort + 'DisplayName'"
+                                    ng-click="vm.selectTenant($event, tenant)" 
+                                    title="{{tenant.DisplayName}}">{{tenant.DisplayName}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="models" ng-class="{'active': vm.models.length}">
+                        <h4>2. Choose Model</h4>
+                        <div class="list-container">
+                            <ul class="filters" ng-show="vm.models.length">
+                                <li class="query">
+                                    <div class="ng-search">
+                                        <input type="text" class="form-control" placeholder="Search" ng-model="vm._models.search" />
+                                        <a class="button icon-button white-button" ng-click="vm._models.search.length ? vm._models.search = '' : ''">
+                                            <span class="fa fa-search" ng-show="!vm._models.search.length"></span>
+                                            <span class="fa fa-times" ng-show="vm._models.search.length"></span>
+                                        </a>
+                                    </div>
+                                </li>
+                                <li class="sort" ng-init="vm._models.sort = ''">
+                                    <button class="button white-button icon-button" 
+                                            ng-click="vm._models.sort = (vm._models.sort == '' ? '-' : '')">
+                                        <span class="fa fa-sort-alpha-{{vm._models.sort == '' ? 'asc' : 'desc'}}"></span>
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="loader" ng-show="vm.gettingModels && !vm.models.length"> </div>
+                            <ul class="list" ng-show="vm.models.length">
+                                <li ng-repeat="model in vm.models | filter: {'DisplayName': vm._models.search} | orderBy: vm._models.sort + 'DisplayName'"
+                                    ng-click="vm.selectModel($event, model)" 
+                                    title="{{model.DisplayName}}">{{model.DisplayName}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <p><strong>It may take up to 10 minutes to for the model to appear in your tenant.</strong></p>
+                <button class="button gray-button" data-dismiss="modal">Cancel</button>
+                <button class="button orange-button" ng-disabled="!vm.model_selected" ng-click="vm.copyModel()">Copy Model</button>
+            </div>
+        </div>
+        <div class="model-copy-success" ng-show="vm.model_copied">
+            <h4>Your model is being copied</h4>
+            <p>The model is being copied to your tenant. Allow up to 10 minutes for it to appear in your model list.</p>
+            <div class="button-container">
+                <button class="button orange-button" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>

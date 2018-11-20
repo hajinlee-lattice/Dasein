@@ -1,0 +1,16 @@
+import './content/name/name.component';
+import './content/crmselection/crmselection.component';
+import './content/dashboard/dashboard.index';
+import './content/insights/insights.component';
+import './content/launch/launch.component';
+import './content/launchhistory/launchhistory.component';
+import './content/playlist/playlist.index';
+import './content/preview/preview.component';
+import './content/rating/rating.component';
+import './content/segment_create/segment_create.component';
+import './content/segment/segment.component';
+import './content/settings/settings.component';
+import './content/targets/targets.component';
+import './content/newlaunch/newlaunch.component';
+import './playbook.routes';
+import './playbook.service';

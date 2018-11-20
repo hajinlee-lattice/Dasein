@@ -1,0 +1,398 @@
+body.not-ie .playbook-dashboard .container-body .dashboard-section {
+    height: 100%;
+}
+.dashboard-layout {
+    .container-body {
+        .dashboard-section {
+            .dashboard-section-container {
+                .dashboard-section-content {
+                    .dashboard-section-content-subsection {
+                        &.rating_ {
+                            background-image: url(/assets/images/ico-model-black.png);
+                        }
+                        &.segment {
+                            background-image: url(/assets/images/ico-segments.png);
+                            button {
+                                padding: 0 .5em;
+                            }
+                        }
+                        &.campaign-type {
+                            background-image: url(/assets/images/ico-campaign-type.png);
+                             background-size: 24px 24px;
+                            select {
+                                margin-top: .5em;
+                            }
+                        }
+                        &.talking-points {
+                            background-image: url('/assets/images/ico-insights.png');
+                        }
+                        &.launches {
+                            .dashboard-subsection-header {
+                                margin-top: 20px;
+                                margin-bottom: 50px;
+                            }
+                        }
+                        &.ratings {
+                            .dashboard-subsection-header {
+                                margin-top: 20px;
+                            }
+                            &.CROSS_SELL_FIRST_PURCHASE {
+                                .bar-graph {
+                                    background-color: #4BAEB5 !important;   
+                                }
+                            }
+                            &.CROSS_SELL_REPEAT_PURCHASE {
+                                .bar-graph {
+                                    background-color: #218F73 !important;   
+                                }           
+                            }
+                            &.CUSTOM_EVENT {
+                                .bar-graph {
+                                    background-color: #5EA83D !important;   
+                                }
+                            }
+                            &.RULE_BASED {
+                                .bar-graph {
+                                    background-color: #8166A3 !important;   
+                                }
+                            }
+                            &.padded-lift-chart {
+                                padding-bottom: 20px;
+                            }
+                        }
+                    }
+                }
+            }
+            &.play {
+                .dashboard-section-header {
+                    border-bottom: 0;
+                    h2 {
+                        padding: 0;
+                        background: none;
+                    }
+                }
+            }
+            &.talking-points {
+                .dashboard-section-header {
+                    h2 {
+                        background-image: url('/assets/images/ico-insights.png');
+                    }
+                }
+                .dashboard-section-footer {
+                    button {
+                        margin-left: 20px;
+                    }
+                }
+            }
+            &.launch-history {
+                .dashboard-section-header {
+                    h2 {
+                        background-image: url('/assets/images/ico-launch.png');
+                    }
+                }
+                .dashboard-section-footer {
+                    button {
+                        margin-left: 20px;
+                    }
+                }
+            }
+        }
+        .playbook-ratings.graph {
+            height: 200px;
+        }
+        .playbook-launch-history.graph {
+            .launch-history-graph {
+                @include flex-container;
+                height: 36px;
+                margin: 0 30px;
+                margin-bottom: 24px;
+                .history-count,
+                .history-label {
+                    @include flex-item(0 1 auto);
+                    width: 50px;
+                    strong {
+                        font-weight: bold;
+                        text-transform: capitalize;
+                        display: block;
+                        position: relative;
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
+                }
+                .history-count {
+                    width: 30px;
+                }
+                .history-bar {
+                    margin: 0 20px;
+                    @include flex-item(1 1 auto);
+                    @include flex-container;
+                    .history-bar-current {
+                        @include flex-item(1 1 auto);
+                        background-color: #457eba;
+                        height: 100%;
+                        margin-right: 5px;
+                    }
+                    .history-bar-new {
+                        @include flex-item(1 1 auto);
+                        background-color: #70bf4a;
+                        height: 100%;
+                        position: relative;
+                        &:after {
+                            content: 'New';
+                            position: absolute;
+                            bottom: -19px;
+                            right: 0;
+                            font-size: 12px;
+                            color: #70bf4a;
+                        }
+                    }
+                }
+                &:last-child {
+                    .history-bar-current {
+                        position: relative;
+                        &:after {
+                            content: 'Last Launched';
+                            position: absolute;
+                            bottom: -19px;
+                            left: 0;
+                            font-size: 12px;
+                            color: #457eba;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+/**
+ * styles for generic dashboard-content
+ */
+.dashboard-content.container {
+    .inner-container {
+        border-radius: 4px;
+        border: solid 1px #d0d0d0;
+        padding: 30px;
+        margin-top: 30px;
+        padding-bottom: 100px;
+        position: relative;
+    }
+    .header {
+        h2 {
+            background: none;
+            margin: 16px 0 20px;
+            padding: 5px 0px 2px 0px;
+        }
+    }
+    .footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-top: 1px solid #d0d0d0;
+        height: auto;
+        padding: 20px;
+        //text-align: right;
+    }
+}
+.dashboard-layout {
+    .container-body {
+        @include flex-container;
+        width: 100%;
+        .dashboard-column {
+            @include flex-container;
+            flex-direction: column;
+            @include flex-item(1 1 auto);
+            width: 50%;
+            max-width: 50%;
+        }
+        .dashboard-section {
+            @include flex-item(1 1 auto);
+            width: 100%;
+            padding-right: 10px;
+            padding-bottom: 10px;
+            .dashboard-section-container {
+                @include flex-container;
+                flex-direction: column;
+                height: 100%;
+                background-color: white;
+                border-radius: 4px;
+                border: solid 1px #d0d0d0;
+                .dashboard-section-header,
+                .dashboard-section-content,
+                .dashboard-section-footer {
+                    padding: 10px 30px;
+                }
+                .dashboard-section-header {
+                    @include flex-item(0 1 auto);
+                    border-bottom: 1px solid #d0d0d0;
+                    h2 {
+                        background-repeat: no-repeat;
+                        background-image: url('/assets/images/ico-settings.png');
+                        background-position: left center;
+                        padding-left: 35px;
+                        @include flex-container;
+                        div.column {
+                            @include flex-item(1 1 auto);
+                            &:last-child {
+                                text-align: right;
+                                font-size: .7em;
+                                strong {
+                                    display: block;
+                                    @include vertical-center-anything;
+                                }
+                            }
+                        }
+                    }
+                }
+                .dashboard-subsection-header {
+                    h3 {
+                        font-weight: bold;
+                        text-align: center;
+                        font-size: 16px;
+                        text-transform: none;
+                    }
+                }
+                .dashboard-section-content {
+                    @include flex-item(1 1 auto);
+                    p {
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    .dashboard-section-content-subsection {
+                        position: relative;
+                        border-radius: 4px;
+                        border: solid 1px #d0d0d0;
+                        padding: 10px;
+                        margin: 10px 0;
+                        background-repeat: no-repeat;
+                        background-position: 20px;
+                        &.has-icon {
+                            padding-left: 60px;
+                        }
+                        h4 {
+                            font-weight: bold;
+                            text-transform: uppercase;
+                        }
+                        h5 {
+                            font-weight: bold;
+                        }
+                        h4, h5 {
+                            font-size: 15px;
+                            margin-right: 85px;
+                            overflow: hidden;
+                        }
+                        select.form-control {
+                            display: inline-block;
+                            width: auto;
+                            min-width: 40%;
+                        }
+                        .controls {
+                            position: absolute;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            right: 10px;
+                            li {
+                                display: inline-block;
+                                padding: 0 5px;
+                                position: relative;
+                                .confirmModal {
+                                    position: absolute;
+                                    top: 0;
+                                    right: 0;
+                                    background-color: white;
+                                    border-radius: 4px;
+                                    border: solid 1px #d0d0d0;
+                                    padding: 10px;
+                                    min-width: 200px;
+                                    white-space: nowrap;
+                                    button {
+                                        padding: 8px 10px;
+                                        margin-left: 6px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .dashboard-section-footer {
+                    @include flex-item(0 1 auto);
+                    border-top: 1px solid #d0d0d0;
+                    text-align: right;
+                    .dashboard-section-footer-columns {
+                        @include flex-container;
+                        align-items: center;
+                        .dashboard-section-footer-column {
+                            @include flex-item(1 1 auto);
+                        }
+                    }
+                }
+            }
+            time {
+                text-transform: lowercase;
+            }
+        }
+    }
+    .contenteditable,
+    *[contenteditable] {
+        position: relative;
+        margin-right: 20px;
+        // border: 1px dashed transparent;
+        min-height: 24px;
+        max-width: 96%;
+        &.editing {
+            width: 100%;
+        }
+        &.empty {
+        // border: 1px dashed #f1f1f1;
+        }
+        &:after {
+            @include font-awesome-inline("\f040");
+            font-size: 12px;
+            position: absolute;
+            top: 5px;
+            right: -20px;
+            border: none;
+            outline:none;
+        }
+        &.description {
+            &:after {
+                top: 5px;
+            }
+        }
+        &:active,
+        &:focus {
+            border: none;
+            outline: none;
+            //border: 1px dashed #d0d0d0;
+        }
+        &[contenteditable="false"] {
+            opacity: .3;
+        }
+        input,
+        textarea {
+            padding: 0;
+            margin: 0;
+            font-size: inherit;
+            display: block;
+            width: 100%;
+            border: 1px dashed rgba(0,0,0,0.15);
+            resize: vertical;
+        }
+        input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 0 5px;
+        }
+        textarea {
+            padding: 5px;
+        }
+        span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: inherit;
+        }
+    }
+}

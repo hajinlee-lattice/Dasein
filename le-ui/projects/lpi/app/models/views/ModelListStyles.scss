@@ -1,0 +1,451 @@
+/*
+Model List
+================================================================== */
+.no-models {
+    padding: 10em 0 6em;
+    margin-bottom: 10em;
+    background: url('/atlas/assets/images/bg_no_models.png') no-repeat center center;
+}
+.home #main-content {
+    margin-top: 20px;
+}
+
+.select-more {
+    margin-right: 1%;
+}
+
+@keyframes colorShift {
+  0% {
+    -webkit-filter: saturate(100%);
+    -moz-filter: saturate(100%);
+    filter: saturate(100%);
+  }
+  100% {
+    -webkit-filter: saturate(166%);
+    -moz-filter: saturate(166%);
+    filter: saturate(166%);
+  }
+}
+.model {
+    position: relative;
+    margin: 0 0 3px;
+    padding: 0;
+    display: block;
+    width: 100%;
+
+    .model-tile {
+        min-height: 300px;
+        background-color: #fff;
+        border: #d0d0d0 solid 1px;
+        border-radius: 6px;
+        
+        &:hover {
+            box-shadow: 0px 0px 11px 2px rgba(180,180,180,0.33);
+            border-color: #aaa;
+            transition: none;
+        }
+        &:active {
+            box-shadow: 0px 0px 11px 2px rgba(128,128,128,0.5);
+            border-color: #d0d0d0;
+            transition: none;
+        }
+    }
+    .model-image {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 100px;
+
+        &.SalesforceLead, &.SalesforceAccount {
+            background-size: 150px;
+        }
+        &.SalesforceLead {
+            background-image: url(/assets/images/bkg-active-model-lead.png);
+        }
+        &.SalesforceAccount {
+            background-image: url(/assets/images/bkg-active-model-account.png);
+        }
+        &.PmmlModel {
+            background-image: url(/assets/images/bkg-active-model-pmml.png);
+        }
+        &.PmmlModel.SalesforceLead {
+            background-image: url(/assets/images/bkg-active-model-pmml-lead.png);
+        }
+        &.PmmlModel.SalesforceAccount {
+            background-image: url(/assets/images/bkg-active-model-pmml-account.png);
+        }
+    }
+
+    &.inactive .model-image {
+        -webkit-filter: grayscale(100%);
+        -moz-filter: grayscale(100%);
+        filter: grayscale(100%);
+    }
+
+    &:hover {
+        transition: all 0ms ease 0s;
+        border-color: #87AAD2;
+
+        .model-image {
+            cursor: pointer;
+            transition: all 0ms ease 0s;
+            animation-iteration-count: 1;
+            animation-duration: 1.2s;
+            animation-delay: 0s;
+            animation-name: colorShift;
+            -webkit-filter: grayscale(0%) saturate(133%);
+            -moz-filter: grayscale(0%) saturate(133%);
+            filter: grayscale(0%) saturate(133%);
+        }
+
+        &.inactive .model-image {
+            animation-duration: 0s;
+            -webkit-filter: grayscale(66%);
+            -moz-filter: grayscale(66%);
+            filter: grayscale(66%);
+        }
+    }
+}
+@media (min-width: 640px) and (max-width: 799px) {
+    .model{
+        display: inline-block;
+        width: 50%;
+        & > div {
+        	margin: 0 0.3em;
+        	position: relative;
+        }
+		&:nth-child(2n+1) {
+			& > div {
+				margin-left: 0;
+			}
+		}
+		&:nth-child(2n) {
+			& > div {
+				margin-right: 0;
+			}
+		}
+    }
+}
+@media (min-width: 800px) and (max-width: 1023px) {
+    .model{
+        display: inline-block;
+        width: 33.333333%;
+        & > div {
+        	margin: 0 0.4em;
+        	position: relative;
+        }
+		&:nth-child(3n+1) {
+			& > div {
+				margin-left: 0;
+			}
+		}
+		&:nth-child(3n) {
+			& > div {
+				margin-right: 0;
+			}
+		}
+    }
+}
+@media (min-width: 1024px) {
+    .model{
+        display: inline-block;
+        width: 25%;
+        & > div {
+         	margin: 0 0.5em;
+        	position: relative;
+        }
+		&:nth-child(4n+1) {
+			& > div {
+				margin-left: 0;
+			}
+		}
+		&:nth-child(4n) {
+			& > div {
+				margin-right: 0;
+			}
+		}
+    }
+}
+.model-title {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    padding: 13px;
+    word-wrap: break-word;
+    h2 {
+        margin: 0;
+        color: #333333;
+        font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+        padding-right: 1.75em;
+        font-size: 18px;
+        background: url('/atlas/assets/images/ico-pencil.png') no-repeat top right;
+        text-align: left;
+        &:hover {
+            background: url('/atlas/assets/images/ico-pencil-hover.png') no-repeat top right;
+        }
+        &:after {
+            color: #bfbfbf;
+            font-style: normal;
+            font-weight: normal;
+            top: 1em;
+            right: 1em;
+            position: absolute;
+        }
+    }
+    h2.editable-click:hover {
+        padding-right: 1.75em;
+        cursor: pointer;
+    }
+    .editable-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        width: 100%;
+        height: 296px;
+        background: rgba(48, 102, 165, 0.6);
+        & > div {
+            background: #fff;
+            padding: 10px 16px;
+        }
+        .form-control {
+            padding: 0;
+            font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+            height: 30px;
+            font-size: 18px;
+            color: #333;
+            border: none;
+        }
+    }
+    .editable-cancel {
+        float: left;
+        width: 48.5%;
+        font-size: 1.25em;
+    }
+    .editable-submit {
+        float: right;
+        width: 47.5%;
+        font-size: 1.25em;
+    }
+}
+.editableform > div {
+    width: 100%;
+}
+.editable-buttons {
+    margin-top:1.5em;
+    &:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
+    button {
+        width: 48%;
+    }
+}
+.model-title:hover h2:after {
+    color: #477cba;
+}
+.model-title .edit {
+    top: 0;
+    right: 0;
+    position: absolute;
+}
+
+.meta-data {
+    position: absolute;
+    bottom: 8px;
+    left: 13px;
+    width: 90%;
+    .stats, .status {
+        display: inline-block;
+    }
+    div.stats {
+        font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+        div {
+          text-transform: uppercase;
+          font-size: 1em;
+          &.small {
+            font-size: 0.8em;
+            margin-bottom: -2px;
+          }
+        }
+    }
+    .status {
+        padding-left: 14px;
+        vertical-align: text-bottom;
+        margin-left: 14px;
+        border-left: #ddd solid 1px;
+        font-size: 1.45em;
+        .orange-text {
+            font-size: 16px;
+        }
+    }
+}
+
+.model-rec {
+    position: absolute;
+    display: inline;
+    right: 16px;
+    bottom: 18px;
+    .fa-exclamation-triangle {
+        font-size: 16px;
+        color: #fdbc54;
+    }
+    [data-stooltip]:after{
+        left: inherit;
+        right: 100%;
+        margin-right: 10px;
+    }
+
+}
+.delete-model {
+    position: absolute;
+    bottom: 0px;
+    right: 8px;
+    z-index: 1;
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: #bfbfbf;
+    font-size: 2em;
+}
+.delete-model:hover {
+    color: #477cba;
+}
+
+.model-title h2 {
+  background: transparent;
+}
+
+.model-title h2:hover {
+    background: transparent;
+}
+
+.model-title h2.model-name-editable {
+  background: url('../images/ico-pencil.png') no-repeat top right;
+}
+
+.model-title h2.model-name-editable:hover {
+    background: url('../images/ico-pencil-hover.png') no-repeat top right;
+}
+
+.model-title h2.edit {
+  right: 0px;
+  top: 0px;
+  padding-right: 0;
+}
+
+/* Model Tile Actions Menu */
+
+.model-menu {
+  position: absolute;
+  right: 0;
+  z-index: 200;
+  background: #222;
+  padding: 10px 0;
+  font-size: 16px;
+  -webkit-border-bottom-left-radius: 6px;
+  -moz-border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  -moz-border-top-left-radius: 6px;
+  border-top-left-radius: 6px;
+  font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+  li {
+    list-style: none;
+    padding: 0.3em 1em;
+    text-align: right;
+    color: #eee;
+    white-space: nowrap;
+    font-size: 12px;
+    &:hover {
+      background: #444;
+      transition: none;
+      color: #f16a22;
+    }
+    i {
+      color: #999;
+      margin-left: .5em;
+      width: 1em;
+      text-align: center;
+      vertical-align: middle;
+      &.ico-ratings {
+        background-size: 11px;
+        opacity: 0.5;
+      }
+    }
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+    &[disabled] {
+        opacity: .5;
+        &:hover {
+            background: transparent;
+            color: inherit;
+        }
+    }
+  }
+  a:link, a:visited {
+    color: #fff;
+  }
+}
+
+.model-title .edit button {
+    padding: 0.5em 0.75em 0.35em 0.8em;
+    margin-right: 0;
+    font-size: larger;
+    transition: all 0s linear;
+    background-color: transparent;
+    border: 0;
+    border-bottom-width: 1px;
+
+  &:hover {
+    * {
+      color: #f16a22;
+    }
+  }
+
+  span, span:after, span:before {
+    transition: background 0s linear, color 0s linear;
+  }
+}
+
+.model-title .edit button.open {
+    background: #222;
+    color: #fff;
+    border-radius: 4px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+
+    &:hover * {
+      color: #fff;
+    }
+}
+
+.model-title .editableform {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+.model-title .editableform .control-group {
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+  border: #486d99 solid 2px;
+}
+
+.model-title .popover-title {
+  margin: -10px -16px 8px -16px;
+}
+
+
+.model-error {
+  border-radius: 4px 4px 4px 4px;
+  margin-top: 0.5em;
+}

@@ -1,0 +1,186 @@
+section.import-jobs {
+    .le-grid{
+        min-width: 650px; 
+    }
+    .info-row {
+        border: 1px solid rgba(0, 0, 0, 0.22);
+        font-size: 16px;
+    }
+    import-job-row {
+        border: 1px solid rgba(0, 0, 0, 0.22);
+        .icon-failed {
+            padding: 10px;
+            color: #F16A24;
+        }
+        .partial {
+            color: #F16A24;
+            ;
+        }
+        .failed{
+            color: red;
+        }
+    }
+    .chevron-container {
+        padding: 10px;
+        padding-right: 0px;
+        
+    }
+
+    .step-container{
+        display: flex;
+        flex-direction: column;
+        max-width: 300px;
+        .end-time{
+            color: rgb(175, 175, 175);
+        }
+        &>span{
+            max-height: 22px;
+            word-wrap: break-word;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+        }
+    }
+   
+    .job-info{
+        padding-left: 18px;
+    }
+    .import-jobs-container {
+        max-width: 1500px;
+    }
+    .job-subactions {
+        padding: 0px;
+        padding-left: 4px;
+        padding-bottom: 21px;
+    }
+    .le-header-expand {
+        border-top: 0px solid gray;
+        border-bottom: 0px solid gray;
+    }
+    .chevron-element {
+        max-height: 72px;
+        padding-bottom: 2px;
+        .fa.fa-check {
+            margin-top: -5px;
+        }
+    }
+    .grid-footer {
+        margin-top: 20px;
+    }
+    @media screen and (max-width: 1100px){
+        
+        .step-container{
+            &>span{
+                display: inline;
+                max-width: 150px;
+                overflow: hidden;
+                // border: 1px solid red;
+            }
+        }
+    }
+    @media screen and (max-width: 990px){
+        
+        .step-container{
+            &>span{
+                display: inline;
+                max-width: 100px;
+                overflow: hidden;
+                // border: 1px solid green;
+            }
+        }
+    }
+    @media screen and (max-width: 800px){
+       
+        .step-container{
+            // border: 1px solid red;
+            &>span{
+                display: inline;
+                max-width: 80px;
+                overflow: hidden;
+            }
+        }
+    }
+    @media screen and (max-width: 600px){
+       
+        .step-container{
+            &>span{
+                display: inline;
+                max-width: 200px;
+                overflow: hidden;
+            }
+        }
+    }
+}
+
+.text-ellipsis {
+    word-wrap: break-word;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+.word-break {
+    word-break: break-word;
+}
+.le-tooltip {
+    position:absolute;
+}
+
+.le-tooltip .tooltip-content {
+    display:none;
+    visibility: hidden;
+    opacity: 0;  
+    border-radius: 10px;
+    padding: 18px;
+    transition: visibility 1s ease-in;
+}
+.le-tooltip:hover .tooltip-content {
+    visibility: visible;
+    opacity: 1;
+    display:block;
+    position:absolute;
+    overflow:hidden;
+    z-index: 999;
+    background-color: #4A4A4A;
+    color: white;
+    margin-top: -20px;
+    margin-left: 20px;
+    min-width: 250px;
+    width: 250px;
+    max-width: 250px;
+    min-height: 150px;
+    height: 150px;
+    max-height: 150px;
+    transform: translate(-40%, -103%);
+    h3{
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        padding-bottom: 5px;
+
+    }
+    p{
+        color: white;
+        padding-bottom: 8px;
+        font-size: 12px;
+    }
+    li {
+        font-size: 11px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+   
+}
+.le-tooltip:hover:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-top: 13px solid #4A4A4A;
+    transform: translate(-10%, -160%);
+  }

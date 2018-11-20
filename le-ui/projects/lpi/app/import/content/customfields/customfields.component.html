@@ -1,0 +1,81 @@
+<div class="import-customfields container file-import-content">
+    <div class="header">
+        <h2>Custom Fields</h2>
+        <p>
+            You can add custom fields by adding columns in your CSV file with whatever data you wish to provide. All unmapped fields (non-ID and non-Lattice fields) are considered Custom Fields unless you choose to ignore them. You can always add more Custom Fields later.
+        </p>
+    </div>
+    <div class="alert">
+        <p> New Custom Field(s) found: {{filtered.length - vm.getNumberDroppedFields()}}</p>
+        <p ng-if="vm.getNumberDroppedFields() > 0"> Field(s) dropped by default: {{vm.getNumberDroppedFields()}}</p>
+    </div>
+    <form name="form">
+        <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}" ng-show="filtered.length">
+            <li class="customfield customfield-header">
+                <ul class="field">
+                    <li class="field-name">
+                        Custom Field
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Unmapped fields are shown here and will be treated as Custom Fields unless Ignored.
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
+                    </li>
+                    <li class="type">
+                        Type
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Type is important for our databases to function correctly.  If you aren't sure what to choose just leave it as "Text".
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
+                    </li>
+                    <li class="ignore">
+                        <input type="checkbox" name="ignore_all" id="toggleIgnore" ng-model="checked" ng-change="vm.toggleIgnores(checked, fieldMapping)"/> <label for="toggleIgnore">Ignore</label>
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Ignore will supress the field from appearing in the system, useful when you have excess columns in your CSV file.
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
+                    </li>
+                </ul>
+            </li>
+            <li ng-repeat="field in vm.AvailableFields | filter: vm.filterStandardList as filtered" class="customfield">
+                <ul class="field">
+                    <li class="field-name">{{field.userField}}</li>
+                    <li class="type">
+                        <select ng-disabled="fieldMapping[field.userField].ignore === true"
+    							class="form-control"
+    							name="columnType_{{ ::field.userField }}"
+    							ng-model="fieldMapping[field.userField].fieldType"
+    							ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
+    							ng-change="vm.changeType(fieldMapping)"
+    							value="{{field.fieldType}}">
+    						<option value="TEXT" selected>Text</option>
+                            <option value="NUMBER">Number</option>
+    						<option value="INTEGER">Integer</option>
+    						<option value="BOOLEAN">Boolean</option>
+    						<option value="DATE">Date</option>
+    					</select>
+                    </li>
+                    <li class="ignore">
+                        <input type="checkbox" id="{{field.userField}}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)" ng-disabled="field.defaultIgnored === true"/> 
+                        <label for="{{field.userField}}">Ignore</label>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </form>
+
+</div>

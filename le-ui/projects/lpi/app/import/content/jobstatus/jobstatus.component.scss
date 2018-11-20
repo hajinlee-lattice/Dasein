@@ -1,0 +1,21 @@
+.wizard-job-status {
+
+	h2 {
+		background-image: url('/assets/images/ico-data-import-dark.png');
+	}
+
+	p {
+		font-size: 18px;
+	}
+
+}
+
+.file-import-content {
+	.form-group {
+		margin-top: 12px;
+		display: flex;
+		input {
+			width: 20px;
+		}
+	}
+}

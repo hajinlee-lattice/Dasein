@@ -1,0 +1,66 @@
+<div class="third-party-ids container file-import-content">
+    <div class="header">
+        <h2>Other IDs</h2>
+        <p>
+            Provide CRM/MAP IDs to reference your {{vm.entityType.toLowerCase()}} records via Lattice APIs. These are not used to de-duplicate your {{vm.entityType.toLowerCase() + 's' }}. 
+        </p>
+    </div>
+
+    <form name="form">
+        <ul class="field-mapping" ng-if="vm.fields.length">
+            <li class="header">
+                <ul>
+                    <li class="system-name">External System Name</li>
+                    <li class="system-type">External System Type</li>
+                    <li class="fields-in-file">Fields in the uploaded file</li>
+                </ul>
+            </li>
+            <li class="field" ng-repeat="field in vm.fields track by $index" ng-init="vm.fieldMapping[$index] = vm.fieldMapping[$index] || {}">
+                <ul>
+                    <li class="system-name">
+                        <input 
+                            class="form-control"
+                            type="text" 
+                            ng-model="vm.fieldMapping[$index].mappedField" 
+                            ng-blur="vm.changeLatticeField(vm.fieldMapping, form)" 
+                            ng-init="vm.checkValidDelay(form)"
+                            ng-required="true" />
+                    </li>
+                    <li class="system-type">
+                        <select
+                            class="form-control"
+                            ng-model="vm.fieldMapping[$index].cdlExternalSystemType"
+                            ng-required="true"
+                            ng-class="{'required': true}"
+                            ng-change="vm.changeLatticeField(vm.fieldMapping, form)">
+                            <option value="" hidden disabled>--</option>
+                            <option ng-repeat="type in field.types" value="{{type}}">
+                                {{type}}
+                            </option>
+                        </select>
+                    </li>
+                    <li class="fields-in-file">
+                        <select 
+                            class="form-control"
+                            ng-model="vm.fieldMapping[$index].userField" 
+                            ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+                            ng-required="true"
+                            ng-class="{'required': true}"
+                            ng-options="item disable when (vm.unavailableFields.indexOf(item) !== -1) for item in vm.availableFields | filter: vm.hiddenFilter">
+                        </select>
+                    </li>
+                    <li class="remove-button">
+                        <span ng-click="vm.removeIdentifier($index, form)"i title="remove mapping"><i class="fa fa-times"></i></span>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </form>
+ 	<button 
+		class="button gray-button" 
+		type="button"
+		ng-click="vm.addIdentifier($event)">
+            Add An{{vm.fields.length ? 'other' : ''}} ID
+    </button>
+
+</div>

@@ -1,0 +1,56 @@
+<div class="modal-dialog" data-ng-controller="ScoreLeadEnrichmentController">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">{{ResourceUtility.getString('LEAD_ENRICHMENT_SCORING_TITLE')}}</h4>
+        </div>
+
+        <div data-ng-show="saveInProgress">
+            <div class="modal-body">
+                <h2>{{ResourceUtility.getString('LEAD_ENRICHMENT_SCORING_IN_PROGRESS')}}</h2>
+                <div class="meter bar">
+                    <span class="indeterminate"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="messaging error-messaging" ng-show="scoringFailed">
+            <ico class="fa fa-warning"></ico>
+            <span class="">
+                Scoring Failed
+            </span>
+            <button id="close-button" type="button" class="close" ng-click="scoringFailed = false">×</button>
+        </div>
+
+        <div data-ng-hide="saveInProgress">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="six columns">
+                        <form action="">
+                            <input type="radio" name="enableLeadEnrichment" checked data-ng-click="disableLeadEnrichmentClicked()"> Score <br>
+                            <input type="radio" name="enableLeadEnrichment" data-ng-click="enableLeadEnrichmentClicked()" data-ng-disabled="noEnrichmentsSelected"> <span data-ng-class="{ 'gray-text': noEnrichmentsSelected}">Score &amp; Enrich</span>
+                        </form>
+                    </div>
+                    <div class="six columns" ng-if="noEnrichmentsSelected">
+                        You can't score using Score & Enrich until you enable at least one attribute on the <a ui-sref="home.data-cloud" data-ng-click="cancelClicked(true)">Data Cloud Explorer</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div data-ng-hide="saveInProgress">
+            <div class="modal-footer">
+
+                <div class="row">
+                    <div class="six columns">
+                        <button class="button gray-button block-button" type="button" data-ng-click="cancelClicked()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                    </div>
+                    <div class="six columns">
+                        <button class="button orange-button block-button" href="#" data-ng-click="scoreClicked($event)">{{ResourceUtility.getString('LEAD_ENRICHMENT_SCORE_BUTTON')}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

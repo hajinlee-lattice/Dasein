@@ -45,8 +45,8 @@
   "scripts": {
     "install": "npm run InstallDev",
     "postinstall": "npm run build",
-    "InstallProduction": "concurrently \"npm run InstallCommon\" \"npm run InstallLogin\" \"npm run InstallAtlas\" \"npm run InstallInsights\" \"npm run InstallDante\" \"npm run InstallPD\" \"npm run InstallAdmin\" \"npm run InstallLP2\"",
-    "InstallDev": "concurrently \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevAtlas\" \"npm run InstallDevInsights\"  \"npm run InstallDevDante\" \"npm run InstallDevPD\" \"npm run InstallDevAdmin\" \"npm run InstallDevLP2\"",
+    "InstallProduction": "concurrently \"npm run InstallCommon\" \"npm run InstallLogin\" \"npm run InstallAtlas\" \"npm run InstallLPI\" \"npm run InstallInsights\" \"npm run InstallDante\" \"npm run InstallPD\" \"npm run InstallAdmin\" \"npm run InstallLP2\"",
+    "InstallDev": "concurrently \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevAtlas\" \"npm run InstallDevLPI\" \"npm run InstallDevInsights\"  \"npm run InstallDevDante\" \"npm run InstallDevPD\" \"npm run InstallDevAdmin\" \"npm run InstallDevLP2\"",
     "dev": "npm run sass && concurrently -kr \"grunt dev\" \"npm run sentry\"",
     "dev_pd": "npm run pdsass && concurrently -kr \"grunt dev\" \"npm run pdsentry\"",
     "dev_admin": "npm run adminless && concurrently -kr \"grunt dev_admin\" \"npm run adminsentry\"",
@@ -71,6 +71,7 @@
     "InstallCommon": "cd projects/common/ && npm install --production",
     "InstallPD": "cd projects/prospectdiscovery/ && npm install --production",
     "InstallAtlas": "cd projects/atlas/ && npm install --production",
+    "InstallLPI": "cd projects/lpi/ && npm install --production",
     "InstallLP2": "cd projects/lp2/ && npm install --production",
     "InstallInsights": "cd projects/insights/ && npm install --production",
     "InstallDante": "cd projects/dante/ && npm install --production",
@@ -79,6 +80,7 @@
     "InstallDevCommon": "cd projects/common/ && npm install",
     "InstallDevPD": "cd projects/prospectdiscovery/ && npm install",
     "InstallDevAtlas": "cd projects/atlas/ && npm install",
+    "InstallDevLPI": "cd projects/lpi/ && npm install",
     "InstallDevLP2": "cd projects/lp2/ && npm install",
     "InstallDevInsights": "cd projects/insights/ && npm install",
     "InstallDevDante": "cd projects/dante/ && npm install",
@@ -101,11 +103,14 @@
     "wp-atlasdev": "cd projects/atlas/ && npm run watch",
     "wp-atlasprod": "cd projects/atlas/ && npm run build",
     "wp-atlasbuilddev": "cd projects/atlas/ && npm run builddev",
+    "wp-lpidev": "cd projects/lpi/ && npm run watch",
+    "wp-lpiprod": "cd projects/lpi/ && npm run build",
+    "wp-lpibuilddev": "cd projects/lpi/ && npm run builddev",
     "wp-insightsbuild": "cd projects/insights/ && npm run build",
     "wp-insightsbuilddev": "cd projects/insights/ && npm run builddev",
     "wp-insightsdev": "cd projects/insights/ && npm run watch",
-    "wpdeva": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-insightsdev\" \"node bin/devsetup env=a\"",
-    "wpdevb": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"node bin/devsetup env=b\"",
+    "wpdeva": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"npm run wp-insightsdev\" \"node bin/devsetup env=a\"",
+    "wpdevb": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"node bin/devsetup env=b\"",
     "dev-uicomponents": "cd projects/uicomponents/ && npm run dev-uicomponents",
     "build-dev-uicomponents": "cd projects/uicomponents/ && npm run build-uicomponents",
     "build-uicomponents": "cd projects/uicomponents/ && npm install && npm run build-uicomponents",
@@ -117,7 +122,7 @@
     "nodeb": "node bin/devsetup env=b",
     "nodeproduction": "node bin/devsetup env=production",
     "nodeproductiondev": "node bin/devsetup env=proddev",
-    "wpbuilddev": "concurrently \"npm run wp-loginbuilddev\" \"npm run wp-atlasbuilddev\" \"npm run wp-insightsbuilddev\"",
-    "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-atlasprod\" \"npm run wp-insightsbuild\""
+    "wpbuilddev": "concurrently \"npm run wp-loginbuilddev\" \"npm run wp-atlasbuilddev\" \"npm run wp-lpibuilddev\" \"npm run wp-insightsbuilddev\"",
+    "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-atlasprod\" \"npm run wp-lpiprod\" \"npm run wp-insightsbuild\""
   }
 }

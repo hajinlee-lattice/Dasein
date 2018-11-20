@@ -1,0 +1,97 @@
+.file-upload-container
+{
+    background-color:   $primary-bg-color;
+}
+
+.file-uploader
+{
+    width:              500px;
+    padding:            10px 0 20px 0;
+}
+
+.file-upload-buttons
+{
+    float:              right;
+    padding:            43px 0px 0px 5px;
+}
+
+.file-uploader-input
+{
+    overflow:           hidden;
+}
+
+.file-upload-format-message
+{
+    position:           relative;
+    left:               240px;
+    top:                24px;
+    font-style:         italic;
+    color:              $label-text-color;
+}
+
+.file-upload-notification,
+.file-download-notification
+{
+    min-width:          280px;
+    position:           absolute;
+    top:                25px;
+    right:              25px;
+    box-shadow:         0px 2px 10px #7E7E7E;
+}
+
+.file-upload-notification h3,
+.file-upload-notification p
+{
+    margin:             0px 0px 4px 0px;
+}
+
+.file-download-notification
+{
+    min-width:          180px;
+}
+
+.file-download-button-container
+{
+    text-align:         center;
+    margin:             10px 0px;
+}
+
+.file-upload-stack-element
+{
+    margin:             15px;
+    border-bottom:      1px solid $primary-border-color;
+}
+
+.file-upload-response-stack-title
+{
+    height: 2.2em;
+}
+
+.file-upload-response-stack-image
+{
+    float: left;
+    height: 100%;
+    padding-right: 7px;
+}
+
+.file-upload-response-stack-heading
+{
+    line-height: 2em;
+}
+
+.file-upload-stack-sub-heading
+{
+    color: $label-text-color;
+    margin-top: 5px;
+}
+
+.file-upload-response-stack-errors ul 
+{
+    list-style-image: none;
+    list-style-type: none;
+    padding-left: 0px;
+}
+.file-upload-response-stack-errors li
+{
+    margin-top: 2px;
+}

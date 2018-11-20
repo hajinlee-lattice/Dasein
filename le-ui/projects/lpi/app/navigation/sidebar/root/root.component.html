@@ -1,0 +1,41 @@
+<ul class="menu no-collapse-children" ng-controller="SidebarRootController as vm">
+    <li role="presentation" ui-sref-active="active" ng-if="vm.back">
+        <a ui-sref="{{ vm.back }}" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK')}}">
+                <span class="ico ico-back no-svg"></span>
+            </span>
+            <span class="label">Back</span>
+        </a>
+        <a ng-if="vm.IsRatingEngine" ng-click="vm.goToRatingEngineRoute()">
+            <span 
+                class="ico-container" 
+                data-stooltip="Back to Models">
+                <span class="ico ico-back no-svg"></span>
+            </span>
+            <span class="label">Back to Models</span>
+        </a>
+    </li>
+    <li role="presentation"
+        ui-sref-active="{'active': item.srefactive || item.sref)}"
+        ng-repeat="item in vm.items"
+        ng-if="item.if"
+        ng-disabled="item.disabled"
+        ng-class="{activate: item.active(), transitioning: item.transitioning()}">
+        
+        <a  ui-sref="{{ ::item.sref }}"
+            ui-sref-opts="{reload: true}"
+            href="{{ ::item.href }}"
+            target="{{ ::item.target }}"
+            analytics-on="click"
+            analytics-event="{{ ::item.label }}">
+
+            <span class="ico-container" data-stooltip="{{ ::item.label }}">
+                <span class="ico {{ ::item.icon }}"></span>
+            </span>
+
+            <span class="label">
+                {{ ::item.label }}
+            </span>
+        </a>
+    </li>
+</ul>

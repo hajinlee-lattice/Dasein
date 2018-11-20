@@ -1,0 +1,89 @@
+<section class="container marketo-container">
+
+  <div class="row">
+  		<div class="header">
+  			<h2> Webhook Summary </h2>
+  			<label> Use these fields when creating a webhook in Marketo </label>
+  		</div>
+  		<div class="body">
+			<table class="marketo-default-table">
+			  	<tbody>
+			  	<tr>
+				    <td class="webhook-header"> Webhook Name </td>
+				    <td> {{$ctrl.webhookName}} </td>
+				</tr>
+		  		<tr>
+				    <td class="webhook-header"> URL </td>
+				    <td> {{$ctrl.url}} </td>
+		  		</tr>
+			  	<tr>
+				    <td class="webhook-header"> Request Type </td>
+				    <td> POST </td>
+			  	</tr>
+				<tr>
+				    <td class="webhook-header"> Template </td>
+				    <td>
+<pre>
+{
+<span>"rule": {{$ctrl.rule}}, </span>
+"record": {
+<span ng-repeat="(key, value) in $ctrl.template">	"{{key}}": {{value || 'null'}}<span ng-if="!$last">,</span>
+</span>  }
+}
+</pre>
+				     </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> Request Token Encoding </td>
+				    <td> JSON </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> Response Type </td>
+				    <td> JSON </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> Custom Headers </td>
+				    <td> 
+				    	<span> Content-Type: application/json </span> </br>
+				    	<span> Lattice-Secret-Key: {{$ctrl.secretKey || 'null'}} </span>
+				    </td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="header add-margin">
+  			<h2> Response Mappings </h2>
+  			<label> You can edit response mappings by going to Admin > Webhooks > Response Mappings > Edit </label>
+  		</div>
+  		<div class="body">
+			<table class="marketo-default-table">
+				<thead>
+						<th class="webhook-header"> Lattice Response Attributes </th>
+						<th> Marketo Field </th>
+				</thead>
+			  	<tbody>
+				<tr>
+				    <td class="webhook-header"> rating </td>
+				    <td> {{$ctrl.responseMappingText}} </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> score </td>
+				    <td> {{$ctrl.responseMappingText}} </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> timestamp </td>
+				    <td> {{$ctrl.responseMappingText}} </td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="marketo-footer">
+			<a class="pull-left" ui-sref="home.marketosettings.scoring({credentialId: $ctrl.credentialId})">
+				<button class="button gray-button"> 
+					Back
+				</button>
+			</a>
+		</div>
+  </div>
+
+</section>

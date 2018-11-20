@@ -1,0 +1,38 @@
+<div class="configured-message" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet) || vm.precheck.disableShareOfWallet}">
+    Spend analytics segment type is <em ng-if="!vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet)">not</em> provided
+
+    <span class="more-info show-tooltip top middle delay" ng-if="!vm.steps[vm.step].data.ShareOfWallet">&#105;
+        <div class="tooltip_">
+            <div class="cover">
+                <p>
+                    To configure this attribute, upload the spend analytics segments in your accounts file.
+                </p>
+            </div>
+        </div>
+    </span>
+</div>
+
+<ul class="fields" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet) || vm.precheck.disableShareOfWallet}">
+    <li>
+        <label for="options">% Share of Wallet in last</label>
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['ShareOfWallet']['WITHIN']['Val']"
+            ng-init="vm.initValue('ShareOfWallet.WITHIN.Val', vm.getVals('WITHIN', vm.steps[vm.step].data.ShareOfWallet))" 
+            ng-model="vm.options['ShareOfWallet']['WITHIN']['Val']" 
+            ng-change="vm.setOptions()"
+            ng-disabled="!(vm.options['ShareOfWallet']['WITHIN']['Period'])"
+            ng-options="option for option in vm.newArray(vm.periods[vm.options['ShareOfWallet']['WITHIN']['Period']])">
+                <option value="" hidden disabled>Select</option>
+            </select>
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['ShareOfWallet']['WITHIN']['Period']"
+            ng-init="vm.initValue('ShareOfWallet.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet))" 
+            ng-model="vm.options['ShareOfWallet']['WITHIN']['Period']" 
+            ng-change="vm.setOptions()"
+            ng-options="period.value as period.label for period in vm.periodsOptions">
+                <option value="" hidden disabled> -- </option>
+            </select>
+    </li>
+</ul>

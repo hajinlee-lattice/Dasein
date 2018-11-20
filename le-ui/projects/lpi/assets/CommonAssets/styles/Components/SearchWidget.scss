@@ -1,0 +1,33 @@
+﻿.search-widget 
+{
+    margin-top: 7px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius:      2px;
+    border:             1px solid $input-border-color;
+    position:           relative;
+}
+
+.search-close
+{
+    position:           absolute; 
+    line-height:        1.1; 
+    cursor:             pointer; 
+    right:              6px; 
+    font-size:          1.4em;
+    font-weight:        400;
+    top:                2px;
+}
+
+input.search-input
+{
+    background:         $primary-bg-color url('../images/search.png') no-repeat 3% center;
+    padding-left:       25px;
+    margin:             0;
+    width:              200px;
+    color:              $primary-text-color;
+    border:             0 none;
+    padding-top:        5px;
+    padding-bottom:     5px;
+    padding-right:      25px;
+}

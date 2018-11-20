@@ -11,6 +11,7 @@ module.exports = function (grunt) {
         dir: {
             common: './projects/common',
             atlas: './projects/atlas',
+            lpi: './projects/lpi',
             pd: './projects/prospectdiscovery',
             login: './projects/login',
             ng2: './projects/ng2',
@@ -339,6 +340,13 @@ module.exports = function (grunt) {
                     ]
                 }
             },
+            lpi:     {
+                files: {
+                    '<%= dir.lpi %>/<%= dir.assets %>/styles/production.css': [
+                        '<%= dir.lpi %>/<%= dir.assets %>/styles/main.scss'
+                    ]
+                }
+            },
             pd:     {
                 files: {
                     '<%= dir.pd %>/<%= dir.assets %>/styles/production.css': [
@@ -369,6 +377,13 @@ module.exports = function (grunt) {
                 ],
                 tasks: ['sass:atlas']
             },
+            lpi: {
+                files: [
+                    '<%= dir.lpi %>/<%= dir.app %>/**/*.scss',
+                    '<%= dir.lpi %>/<%= dir.assets %>/styles/**/*.scss'
+                ],
+                tasks: ['sass:lpi']
+            },
             pd: {
                 files: [
                     '<%= dir.pd %>/<%= dir.assets %>/styles/**/*.scss'
@@ -379,10 +394,10 @@ module.exports = function (grunt) {
 
         concurrent: {
             sass: {
-                tasks: [ 'sass:common', 'sass:login', 'sass:atlas' ]
+                tasks: [ 'sass:common', 'sass:login', 'sass:atlas', 'sass:lpi' ]
             },
             watch: {
-                tasks: [ 'watch:common', 'watch:login', 'watch:atlas'/*, 'run:ng2'*/ ],
+                tasks: [ 'watch:common', 'watch:login', 'watch:atlas', 'watch:lpi'/*, 'run:ng2'*/ ],
                 options: {
                     logConcurrentOutput: true
                 }

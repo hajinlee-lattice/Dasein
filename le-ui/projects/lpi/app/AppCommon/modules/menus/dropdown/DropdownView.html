@@ -1,0 +1,37 @@
+<div class="select-menu" title="{{ tooltip }}">
+    <button
+            ng-if="label"
+            type="button"
+            class="button icon-button {{ class }}"
+            ng-click="click($event)"
+            ui-sref="{{ sref || '.' }}"
+            ng-class="{ 'open': visible, 'no-label': !label }">
+        <span ng-if="labelIcon" class="label-icon fa {{ labelIcon }}"></span>
+        {{ label }}
+    </button
+    ><button
+            type="button"
+            class="button {{ iconclass }}"
+            ng-click="toggle($event)"
+            ng-disabled="config.icondisabled"
+            ng-class="{ 'open': visible }">
+            {{ iconlabel }}<span ng-if="iconlabel">&nbsp;&nbsp;</span>
+        <span ng-if="!config.showSpinner" class="{{ icon || 'fa fa-chevron-down' }}" ng-class="{ 'fa-flip-vertical': visible && iconrotate }"></span>
+        <span ng-if="config.showSpinner" class="fa fa-spinner fa-spin fa-fw"></span>
+    </button>
+    <ul class="model-menu" ng-show="visible" ng-click="visible = !visible">
+        <li
+            class="{{ item.class }}"
+            ng-repeat="item in items"
+            ui-sref="{{ item.sref || '.' }}"
+            ng-click="(item.disabledif == undefined ? false : item.disabledif) ? $event.preventDefault() : item.click($event) "
+            ng-if="item.if == undefined ? true : item.if"
+            ng-disabled="item.disabledif == undefined ? false : item.disabledif"
+        >
+            <a href="{{ item.href || 'javascript:void(0)' }}" ng-if="item.label">
+                {{ item.label }}
+                <i class="{{ item.icon }}" ng-if="item.icon"></i>
+            </a>
+        </li>
+    </ul>
+</div>

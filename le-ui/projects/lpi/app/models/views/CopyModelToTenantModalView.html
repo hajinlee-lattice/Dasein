@@ -1,0 +1,126 @@
+<div class="modal-dialog" data-ng-controller="CopyModelToTenantModalController">
+    <div class="modal-content">
+        <div class="model-copy-dialog choosing" ng-show="vm.modal_state.choosing">
+
+
+            <div class="modal-header">
+                <h4>Choose tenant</h4>
+                <p>Choose tenant to which you want to send your model.</p>
+                <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="list-container">
+                    <ul class="filters">
+                        <li class="query">
+                            <div class="ng-search">
+                                <input type="text" class="form-control" placeholder="Search" ng-model="vm._tenants.search" />
+                                <a class="button icon-button white-button" ng-click="vm._tenants.search.length ? vm._tenants.search = '' : ''">
+                                    <span class="fa fa-search" ng-show="!vm._tenants.search.length"></span>
+                                    <span class="fa fa-times" ng-show="vm._tenants.search.length"></span>
+                                </a>
+                            </div>
+                        </li>
+                        <li class="sort" ng-init="vm._tenants.sort = ''">
+                            <button class="button white-button icon-button" 
+                                    ng-click="vm._tenants.sort = (vm._tenants.sort == '' ? '-' : '')">
+                                <span class="fa fa-sort-alpha-{{vm._tenants.sort == '' ? 'asc' : 'desc'}}"></span>
+                            </button>
+                        </li>
+                    </ul>
+                    
+                </div>
+                <div class="loader" ng-show="!vm.tenants.length"> </div>
+                <ul class="list" ng-show="vm.tenants.length">
+                    <li ng-repeat="tenant in vm.tenants | filter: {'UIVersion': '3.0', 'DisplayName': vm._tenants.search} | orderBy: vm._tenants.sort + 'DisplayName'"
+                        ng-click="vm.selectTenant($event, tenant)" 
+                        title="{{tenant.DisplayName}}">{{tenant.DisplayName}}</li>
+                </ul>
+            </div>            
+            <div class="modal-footer">
+                <button class="button gray-button" data-dismiss="modal">Cancel</button>
+                <button class="button orange-button" ng-disabled="!vm.tenant_selected" ng-click="vm.copyingModel()">Copy Model</button>
+            </div>
+
+        </div>
+        <div class="model-copy-dialog copying" ng-show="vm.modal_state.copying">
+            <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <div class="modal-body">
+                <div class="lists-container">
+                    <h4 ng-show="vm.copying">Your selection is copying</h4>
+                    <h4 ng-show="!vm.copying">Confirm your selection</h4>
+                    <div class="confirm">
+                        <div class="loader" ng-show="vm.copying"></div>
+                        <div ng-show="!vm.copying">
+                            <ul class="model">
+                                <li>
+                                    <div class="label">
+                                        <strong>Model:</strong>
+                                    </div>
+                                    <div class="name">
+                                        <span class="ico ico-model ico-black"></span>
+                                        {{vm.current_model.DisplayName}}
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class="tenants">
+                                <li>
+                                    <div class="label">
+                                        <strong>From</strong> Tenant:
+                                    </div>
+                                    <div class="name">
+                                        {{vm.asTenantName}}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="label">
+                                        <strong>To</strong> Tenant:
+                                    </div>
+                                    <div class="name">
+                                        {{vm.current_tenant.DisplayName}}
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <p>
+                        It may take up to 10 minutes for the model to appear in another tenant.
+                    </p>
+                    <button class="button gray-button" ng-disabled="vm.copying" ng-click="vm.modal_change_state('choosing')">Back</button>
+                    <button class="button orange-button" ng-disabled="!vm.tenant_selected || vm.copying" ng-click="vm.copyModel()">Copy Model</button>
+                </div>
+            </div>
+        </div>
+        <div class="model-copy-dialog copied" ng-show="vm.modal_state.copied">
+            <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <div class="modal-body">
+                <div class="lists-container">
+                    <h4>Confirm your selection</h4>
+                    <div class="confirm">
+                        Model <strong>{{vm.current_model.DisplayName}}</strong> is being copied to <strong>{{vm.current_tenant.DisplayName}}</strong>. Please allow up to 10 minutes for it to appear in the model list.
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button class="button orange-button" data-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+        <div class="model-copy-dialog error" ng-show="vm.modal_state.error">
+            <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <div class="modal-body">
+                <div class="lists-container">
+                    <h4>Error</h4>
+                    <div class="confirm">
+                        {{vm.copying_error}}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="button gray-button" ng-click="vm.modal_change_state('choosing')">Back</button>
+                    <button class="button gray-button" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
