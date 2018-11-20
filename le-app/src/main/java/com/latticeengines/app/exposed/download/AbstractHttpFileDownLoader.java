@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -136,16 +137,17 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     private List<String> getDateAttributes() {
         List<String> dateAttributes = new ArrayList<>();
-        DataCollection.Version activeVersion = dataCollectionProxy
-                .getActiveVersion(MultiTenantContext.getShortTenantId());
-        String accountTableName = dataCollectionProxy.getTableName(MultiTenantContext.getShortTenantId(),
+        String shortTenantId = MultiTenantContext.getShortTenantId();
+        if (StringUtils.isBlank(shortTenantId)) {
+            return Collections.emptyList();
+        }
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(shortTenantId);
+        String accountTableName = dataCollectionProxy.getTableName(shortTenantId,
                 TableRoleInCollection.ConsolidatedAccount, activeVersion);
-        String contactTableName = dataCollectionProxy.getTableName(MultiTenantContext.getShortTenantId(),
+        String contactTableName = dataCollectionProxy.getTableName(shortTenantId,
                 TableRoleInCollection.ConsolidatedContact, activeVersion);
-        List<ColumnMetadata> accountMetadata = metadataProxy.getTableColumns(MultiTenantContext.getShortTenantId(),
-                accountTableName);
-        List<ColumnMetadata> contactMetadata = metadataProxy.getTableColumns(MultiTenantContext.getShortTenantId(),
-                contactTableName);
+        List<ColumnMetadata> accountMetadata = metadataProxy.getTableColumns(shortTenantId, accountTableName);
+        List<ColumnMetadata> contactMetadata = metadataProxy.getTableColumns(shortTenantId, contactTableName);
         List<ColumnMetadata> metadatas = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(accountMetadata)) {
             metadatas.addAll(accountMetadata);
