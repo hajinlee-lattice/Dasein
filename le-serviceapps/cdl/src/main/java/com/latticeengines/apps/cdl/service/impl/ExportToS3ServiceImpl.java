@@ -255,7 +255,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                                 failedFolders.add(subFolder);
                             }
                         }
-                        log.info(tenantId + ": finished copying " + count + "/" + subFolders.size() + " sub-folder " + subFolder);
+                        log.info(tenantId + ": finished copying " + (count++) + "/" + subFolders.size() + " sub-folder " + subFolder);
                     }
                     if (CollectionUtils.isNotEmpty(failedFolders)) {
                         throw new RuntimeException("Failed to copy sub-folders: " + StringUtils.join(failedFolders));
