@@ -96,20 +96,23 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
         CustomerSpace space = CustomerSpace.parse(customer);
         List<Extract> extracts = table.getExtracts();
         if (CollectionUtils.isNotEmpty(extracts)) {
-            Extract extract = extracts.get(0);
-            if (StringUtils.isNotBlank(extract.getPath())) {
-                String hdfsPath = pathBuilder.getFullPath(extract.getPath());
-                try {
-                    if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
-                        log.info("Hdfs file does not exist, copy from S3. file=" + hdfsPath);
-                        String s3Dir = pathBuilder.convertAtlasTableDir(hdfsPath, podId, space.getTenantId(), s3Bucket);
-                        Configuration hadoopConfiguration = createConfiguration(space.getTenantId(), table.getName());
-                        HdfsUtils.distcp(hadoopConfiguration, s3Dir, hdfsPath, queueName);
-
+            for (Extract extract : extracts) {
+                if (StringUtils.isNotBlank(extract.getPath())) {
+                    String hdfsPath = pathBuilder.getFullPath(extract.getPath());
+                    try {
+                        if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
+                            log.info(
+                                    "Hdfs file does not exist, copy from S3. file=" + hdfsPath + " tenant=" + customer);
+                            String s3Dir = pathBuilder.convertAtlasTableDir(hdfsPath, podId, space.getTenantId(),
+                                    s3Bucket);
+                            Configuration hadoopConfiguration = createConfiguration(space.getTenantId(),
+                                    table.getName());
+                            HdfsUtils.distcp(hadoopConfiguration, s3Dir, hdfsPath, queueName);
+                        }
+                    } catch (Exception ex) {
+                        log.error("Failed to copy from S3, file=" + hdfsPath + " tenant=" + customer, ex);
+                        throw new RuntimeException("Failed to copy from S3, file=" + hdfsPath);
                     }
-                } catch (Exception ex) {
-                    log.error("Failed to copy from S3, file=" + hdfsPath, ex);
-                    throw new RuntimeException("Failed to copy from S3, file=" + hdfsPath);
                 }
             }
         }
