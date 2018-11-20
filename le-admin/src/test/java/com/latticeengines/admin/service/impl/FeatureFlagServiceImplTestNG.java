@@ -62,6 +62,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.DANTE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
+                LatticeFeatureFlag.ENABLE_CDL_MATCH, //
                 LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
