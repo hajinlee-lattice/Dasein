@@ -7,10 +7,12 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,6 +36,7 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @ContextConfiguration(locations = { "classpath:test-scoring-deployment-context.xml" })
 public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
@@ -42,6 +45,9 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private final static String LEAD_INPUT_BASE_TABLE_NAME = "ScoringDeploymentTestNG_Base_LeadsTable";
     private final static String LEAD_INPUT_TABLE_NAME = "ScoringDeploymentTestNG_LeadsTable";
+
+    // (YSong - M25) This is hacky, but since it is a retiring test, I think it is OK.
+    private final static String QUARTZ_EMR = "quartz";
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
@@ -64,8 +70,14 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
+    @Inject
+    private EMREnvService emrEnvService;
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBaseDir;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
 
     private String outputTable;
     private String customer;
@@ -74,13 +86,14 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     private String modelDirectory;
     private ScoringCommand scoringCommand;
     private ScoringCommandResult scoringCommandResult;
+    private Configuration emrConfiguration;
 
     public ScoringDeploymentTestNG() {
     }
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        customer = getClass().getSimpleName().toString();
+        customer = getClass().getSimpleName();
         tenant = CustomerSpace.parse(customer).toString();
         if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
             dbMetadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
@@ -97,6 +110,11 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
             throw new Exception("Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
         }
 
+        emrConfiguration = yarnConfiguration;
+        if ("qacluster".equals(leEnv)) {
+            emrConfiguration = emrEnvService.getYarnConfiguration(QUARTZ_EMR);
+        }
+
         path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.mkdir(yarnConfiguration, path);
         URL modelSummaryUrl = ClassLoader
@@ -104,8 +122,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         modelDirectory = customerBaseDir + "/" + tenant + "/models/" + LEAD_INPUT_TABLE_NAME
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1425511391553_3007";
         String modelPath = modelDirectory + "/" + "1_model.json";
-        HdfsUtils.mkdir(yarnConfiguration, modelDirectory);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), modelPath);
+        HdfsUtils.mkdir(emrConfiguration, modelDirectory);
+        HdfsUtils.copyLocalToHdfs(emrConfiguration, modelSummaryUrl.getFile(), modelPath);
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
@@ -119,8 +137,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
             scoringCommandStateEntityMgr.delete(scoringCommand);
             scoringCommandResultEntityMgr.delete(scoringCommandResult);
         }
-        HdfsUtils.rmdir(yarnConfiguration, path);
-        HdfsUtils.rmdir(yarnConfiguration, modelDirectory);
+        HdfsUtils.rmdir(emrConfiguration, path);
+        HdfsUtils.rmdir(emrConfiguration, modelDirectory);
     }
 
     @Test(groups = "deployment")

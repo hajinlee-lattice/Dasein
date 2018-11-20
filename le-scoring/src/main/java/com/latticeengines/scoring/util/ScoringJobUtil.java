@@ -48,19 +48,16 @@ public class ScoringJobUtil {
     public static List<String> findAllModelPathsInHdfs(Configuration yarnConfiguration, String tenant,
             String customerBaseDir) {
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
-        List<String> modelFilePaths = Collections.emptyList();
+        List<String> modelFilePaths;
         try {
             modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath,
-                    new HdfsFileFilter() {
-                        @Override
-                        public boolean accept(FileStatus fileStatus) {
-                            if (fileStatus == null) {
-                                return false;
-                            }
-                            Pattern p = Pattern.compile(".*model" + ScoringDaemonService.JSON_SUFFIX);
-                            Matcher matcher = p.matcher(fileStatus.getPath().getName());
-                            return matcher.matches();
+                    fileStatus -> {
+                        if (fileStatus == null) {
+                            return false;
                         }
+                        Pattern p = Pattern.compile(".*model" + ScoringDaemonService.JSON_SUFFIX);
+                        Matcher matcher = p.matcher(fileStatus.getPath().getName());
+                        return matcher.matches();
                     });
         } catch (Exception e) {
             throw new RuntimeException("Customer " + tenant + "'s scoring job failed due to: " + e.getMessage(), e);
