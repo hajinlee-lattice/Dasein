@@ -8,11 +8,11 @@
 @import "models/views/CopyModelToTenantModalView.scss";
 @import "models/views/ModelRatingsStyles.scss";
 @import "models/views/ModelCreationHistoryStyles.scss";
-@import "segments/views/SegmentationListView.scss";
+// @import "segments/views/SegmentationListView.scss";
 @import "notes/NotesStyles.scss";
-@import "campaigns/views/CampaignListStyles.scss";
-@import "campaigns/views/DeleteCampaignModal.scss";
-@import "campaigns/views/CampaignModelsStyles.scss";
+// @import "campaigns/views/CampaignListStyles.scss";
+// @import "campaigns/views/DeleteCampaignModal.scss";
+// @import "campaigns/views/CampaignModelsStyles.scss";
 @import "create/CreateStyles.scss";
 @import "jobs/JobsStyles.scss";
 @import "apiConsole/views/APIConsoleStyle.scss";
@@ -20,9 +20,9 @@
 @import "marketo/views/MarketoStyles.scss";
 @import "login/views/UpdatePasswordSuccessView.scss";
 @import "import/import.component.scss";
-@import "playbook/playbook.component.scss";
+// @import "playbook/playbook.component.scss";
 @import "cgtalkingpoint/cgtalkingpoint.scss";
-@import "ratingsengine/ratingsengine.component.scss";
+// @import "ratingsengine/ratingsengine.component.scss";
 @import "configureattributes/configureattributes.component.scss";
 @import "delete/delete.component.scss";
 @import "sfdc/sfdcsettings.component.scss";
