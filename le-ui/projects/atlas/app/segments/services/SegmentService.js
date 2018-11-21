@@ -207,19 +207,22 @@ angular
     }
 
     this.sanitizeSegmentRestriction = function(tree) {
-        tree.forEach(function(branch) {
-            if (branch && typeof branch.labelGlyph !== undefined) {
-                delete branch.labelGlyph;
-            }
+        if(tree && tree.length> 0){
+            tree.forEach(function(branch) {
+                if (branch && typeof branch.labelGlyph !== undefined) {
+                    delete branch.labelGlyph;
+                }
+    
+                if (branch && typeof branch.collapsed !== undefined) {
+                    delete branch.collapsed;
+                }
+    
+                if (branch && branch.logicalRestriction) {
+                    SegmentStore.sanitizeSegmentRestriction(branch.logicalRestriction.restrictions);
+                }
+            });
+        }
 
-            if (branch && typeof branch.collapsed !== undefined) {
-                delete branch.collapsed;
-            }
-
-            if (branch && branch.logicalRestriction) {
-                SegmentStore.sanitizeSegmentRestriction(branch.logicalRestriction.restrictions);
-            }
-        });
         return tree;
     }
 
