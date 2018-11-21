@@ -7,14 +7,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +32,8 @@ import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.util.FeatureImportanceUtil;
+import com.latticeengines.camille.exposed.locks.LockManager;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -39,6 +44,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -54,6 +60,7 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -101,6 +108,15 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Resource(name = "distCpConfiguration")
+    private Configuration distCpConfiguration;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     @Inject
     private FeatureImportanceUtil featureImportanceUtil;
@@ -177,6 +193,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             String sourceFileName = modelingConfig.getSourceFileName();
             String trainingTableName = sourceFileProxy.findByName(customerSpace, modelingConfig.getSourceFileName())
                     .getTableName();
+
+            importFromS3IfNeeded(trainingTableName);
             Table clonedTable = metadataProxy.cloneTable(customerSpace, trainingTableName);
             sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
             SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
@@ -346,6 +364,45 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                         }
                     }
                 });
+    }
+
+    private void importFromS3IfNeeded(String trainingTableName) {
+        String tenantId = MultiTenantContext.getTenant().getId();
+        CustomerSpace space = CustomerSpace.parse(tenantId);
+        Table trainingTable = metadataProxy.getTable(space.toString(), trainingTableName);
+        String lockName = tenantId + "_" + trainingTableName;
+        try {
+            LockManager.registerCrossDivisionLock(lockName);
+            copyTableFromS3(trainingTable, space);
+            LockManager.acquireWriteLock(lockName, 360, TimeUnit.MINUTES);
+        } catch (Exception ex) {
+            LockManager.releaseWriteLock(lockName);
+        }
+    }
+
+    private void copyTableFromS3(Table table, CustomerSpace space) {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        List<Extract> extracts = table.getExtracts();
+        if (CollectionUtils.isNotEmpty(extracts)) {
+            for (Extract extract : extracts) {
+                if (StringUtils.isNotBlank(extract.getPath())) {
+                    String hdfsPath = pathBuilder.getFullPath(extract.getPath());
+                    try {
+                        if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
+                            log.info("Hdfs file does not exist, copy from S3. file=" + hdfsPath + " tenant="
+                                    + space.toString());
+                            String s3Dir = pathBuilder.convertAtlasTableDir(hdfsPath, podId, space.getTenantId(),
+                                    s3Bucket);
+                            HdfsUtils.copyFiles(distCpConfiguration, s3Dir, hdfsPath);
+                        }
+                    } catch (Exception ex) {
+                        log.error("Failed to copy from S3, file=" + hdfsPath + " tenant=" + space.toString(), ex);
+                        throw new RuntimeException("Failed to copy from S3, file=" + hdfsPath);
+                    }
+                }
+            }
+        }
+
     }
 
 }
