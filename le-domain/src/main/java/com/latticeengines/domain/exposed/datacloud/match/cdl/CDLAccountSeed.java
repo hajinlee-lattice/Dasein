@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match.cdl;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,12 +18,12 @@ import java.util.stream.Collectors;
  * Class to represent seed for CDL account.
  */
 public class CDLAccountSeed {
-    private static final CDLMatchEntity ENTITY = CDLMatchEntity.ACCOUNT;
+    private static final BusinessEntity ENTITY = BusinessEntity.Account;
     private static final String KEY_LATTICE_ACCOUNT_ID = "latticeAccountId";
 
     private final String id;
     private final String latticeAccountId;
-    private final Map<String, String> externalSystemIdMap; // System name => System ID
+    private final Map<String, String> externalSystemIdMap; // System name => Entity ID in that System
     private final String duns;
     private final Set<Pair<String, String>> domainCountries; // Pair<Domain, Country>
     private final Set<Pair<String, String>> nameCountries; // Pair<Name, Country>
@@ -104,7 +105,7 @@ public class CDLAccountSeed {
      * Create a new instance of {@link CDLAccountSeed} from given {@link CDLRawSeed}
      *
      * @param rawSeed raw seed to transform from, should not be {@literal null} and
-     *                should have the correct {@link CDLMatchEntity}
+     *                should have the correct {@link BusinessEntity}
      * @return generated {@link CDLAccountSeed}
      */
     public static CDLAccountSeed fromRawSeed(@NotNull CDLRawSeed rawSeed) {

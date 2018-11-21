@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.match.cdl;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -21,7 +22,7 @@ public class CDLLookupEntryConverter {
     }
 
     public static CDLLookupEntry fromDomainCountry(
-            @NotNull CDLMatchEntity entity, @NotNull String domain, String country) {
+            @NotNull BusinessEntity entity, @NotNull String domain, String country) {
         return new CDLLookupEntry(
                 CDLLookupEntry.Type.DOMAIN_COUNTRY, entity, new String[0], new String[] { domain, country });
     }
@@ -38,7 +39,7 @@ public class CDLLookupEntryConverter {
         return Pair.of(values[0], values[1]);
     }
 
-    public static CDLLookupEntry fromNameCountry(@NotNull CDLMatchEntity entity, @NotNull String name, String country) {
+    public static CDLLookupEntry fromNameCountry(@NotNull BusinessEntity entity, @NotNull String name, String country) {
         return new CDLLookupEntry(
                 CDLLookupEntry.Type.NAME_COUNTRY, entity, new String[0], new String[] { name, country });
     }
@@ -54,7 +55,7 @@ public class CDLLookupEntryConverter {
         String[] values = entry.getValues();
         return Pair.of(values[0], values[1]);
     }
-    public static CDLLookupEntry fromDuns(@NotNull CDLMatchEntity entity, @NotNull String duns) {
+    public static CDLLookupEntry fromDuns(@NotNull BusinessEntity entity, @NotNull String duns) {
         return new CDLLookupEntry(
                 CDLLookupEntry.Type.DUNS, entity, new String[0], new String[] { duns });
     }
@@ -68,7 +69,7 @@ public class CDLLookupEntryConverter {
      * systemId is the ID in that external system. e.g., SFDC ID
      */
     public static CDLLookupEntry fromExternalSystem(
-            @NotNull CDLMatchEntity entity, @NotNull String systemName, @NotNull String systemId) {
+            @NotNull BusinessEntity entity, @NotNull String systemName, @NotNull String systemId) {
         return new CDLLookupEntry(
                 CDLLookupEntry.Type.EXTERNAL_SYSTEM, entity, new String[] { systemName }, new String[] { systemId });
     }

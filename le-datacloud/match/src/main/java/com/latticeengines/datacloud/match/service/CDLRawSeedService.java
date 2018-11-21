@@ -1,9 +1,9 @@
 package com.latticeengines.datacloud.match.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEntity;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public interface CDLRawSeedService {
      */
     boolean createIfNotExists(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLMatchEntity entity, @NotNull String seedId);
+            @NotNull BusinessEntity entity, @NotNull String seedId);
 
     /**
      * Retrieve the seed with the specified into.
@@ -37,7 +37,7 @@ public interface CDLRawSeedService {
      */
     CDLRawSeed get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLMatchEntity entity, @NotNull String seedId);
+            @NotNull BusinessEntity entity, @NotNull String seedId);
 
     /**
      * Retrieve a list of seeds with the specified into.
@@ -51,7 +51,7 @@ public interface CDLRawSeedService {
      */
     List<CDLRawSeed> get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLMatchEntity entity, @NotNull List<String> seedIds);
+            @NotNull BusinessEntity entity, @NotNull List<String> seedIds);
 
     /**
      * Update all {@link com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry} and attributes in the

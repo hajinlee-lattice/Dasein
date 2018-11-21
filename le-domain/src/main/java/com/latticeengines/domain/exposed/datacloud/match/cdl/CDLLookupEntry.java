@@ -3,19 +3,20 @@ package com.latticeengines.domain.exposed.datacloud.match.cdl;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /**
  * Lookup entry for a specific entity
  */
 public class CDLLookupEntry {
     private final Type type;
-    private final CDLMatchEntity entity;
+    private final BusinessEntity entity;
     // store serialized form since internal operation only need these
     private final String serializedKeys;
     private final String serializedValues;
 
     public CDLLookupEntry(
-            @NotNull Type type, @NotNull CDLMatchEntity entity, @NotNull String[] keys, @NotNull String[] values) {
+            @NotNull Type type, @NotNull BusinessEntity entity, @NotNull String[] keys, @NotNull String[] values) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(entity);
         type.checkKeys(keys);
@@ -30,7 +31,7 @@ public class CDLLookupEntry {
         return type;
     }
 
-    public CDLMatchEntity getEntity() {
+    public BusinessEntity getEntity() {
         return entity;
     }
 
