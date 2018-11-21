@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -236,25 +237,27 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
                     List<String> subFolders = new ArrayList<>();
-                    if ("analytics-data".equals(name) || "analytics-models".equals(name) || "tables".equals(name)) {
-                        if ("tables".equals(name) && onlyAtlas) {
-                            Set<String> tableNames = getTablesInCollection();
-                            subFolders.addAll(tableNames);
-                        } else {
-                            HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
-                                String subFolder = path.substring(path.lastIndexOf("/"));
-                                log.info("Found a " + name + " sub-folder for " + tenantId + " : " + subFolder);
-                                subFolders.add(subFolder);
-                            });
-                            if (CollectionUtils.size(subFolders) > 1000) {
-                                throw new IllegalStateException(tenantId + " has " + CollectionUtils.size(subFolders) //
-                                        + " " + name + " sub-folders. Not allowed to be migrated automatically.");
-                            }
-                            if (CollectionUtils.size(subFolders) < 200) {
-                                subFolders.clear();
-                            }
-                        }
+                    if ("analytics-data".equals(name) || "analytics-models".equals(name)) {
+                        HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
+                            String subFolder = path.substring(path.lastIndexOf("/"));
+                            log.info("Found a " + name + " sub-folder for " + tenantId + " : " + subFolder);
+                            subFolders.add(subFolder);
+                        });
+                    } else if ("tables".equals(name)) {
+                        Set<String> tableNames = getTablesInCollection();
+                        subFolders.addAll(tableNames);
+                        subFolders.addAll(getAllEventTables());
                     }
+
+                    if (CollectionUtils.size(subFolders) > 1000) {
+                        throw new IllegalStateException(tenantId + " has " + CollectionUtils.size(subFolders) //
+                                + " " + name + " sub-folders. Not allowed to be migrated automatically.");
+                    }
+
+                    if (CollectionUtils.size(subFolders) < 200) {
+                        subFolders.clear();
+                    }
+
                     if (CollectionUtils.isEmpty(subFolders)) {
                         subFolders.add("");
                     }
@@ -310,6 +313,23 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                 tableNames.addAll(tblsForRole);
             }
             return tableNames;
+        }
+
+        private Set<String> getAllEventTables() {
+            Set<String> eventTables = new HashSet<>();
+            String hdfsModelsDir = pathBuilder.getHdfsAnalyticsModelDir(customer);
+            try {
+                if (HdfsUtils.fileExists(distCpConfiguration, hdfsModelsDir)) {
+                    HdfsUtils.getFilesForDir(distCpConfiguration, srcDir).forEach(path -> {
+                        String eventTable = path.substring(path.lastIndexOf("/") + 1);
+                        log.info("Found an event table for " + tenantId + " : " + eventTable);
+                        eventTables.add(eventTable);
+                    });
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to find all event tables from hdfs models folder");
+            }
+            return eventTables;
         }
 
         private Configuration createConfiguration() {
