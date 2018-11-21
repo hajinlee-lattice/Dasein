@@ -1,11 +1,15 @@
 package com.latticeengines.matchapi.controller;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,18 +31,37 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/internal")
 public class InternalResource extends InternalResourceBase {
 
-    @Autowired
+    @Inject
     private DataCloudYarnService yarnService;
 
-    @PostMapping(value = "/yarnjobs", produces = "application/json")
+    @Resource(name = "yarnConfiguration")
+    private Configuration yarnConfiguration;
+
+    private Map<String, String> props = null;
+
+    @PostMapping(value = "/yarnjobs")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Match a block of input data in yarn container")
-    public AppSubmission submitYarnJob(@RequestBody DataCloudJobConfiguration jobConfiguration,
-            HttpServletRequest request) {
-        checkHeader(request);
+    public AppSubmission submitYarnJob(@RequestBody DataCloudJobConfiguration jobConfiguration) {
         ApplicationId applicationId = yarnService.submitPropDataJob(jobConfiguration);
         return new AppSubmission(Collections.singletonList(applicationId));
+    }
+
+    @GetMapping(value = "/yarn-config")
+    @ResponseBody
+    @ApiIgnore
+    @ApiOperation(value = "Match a block of input data in yarn container")
+    public Map<String, String> getEMRConfiguration() {
+        if (props == null) {
+            synchronized (this) {
+                if (props == null) {
+                    props = new HashMap<>();
+                    yarnConfiguration.forEach(entry -> props.put(entry.getKey(), entry.getValue()));
+                }
+            }
+        }
+        return props;
     }
 
 }
