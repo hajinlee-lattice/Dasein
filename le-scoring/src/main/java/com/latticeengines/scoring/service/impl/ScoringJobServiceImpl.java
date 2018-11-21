@@ -56,9 +56,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Inject
     private S3Service s3Service;
 
-    @Resource(name = "distCpConfiguration")
-    private Configuration distCpConfiguration;
-
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 

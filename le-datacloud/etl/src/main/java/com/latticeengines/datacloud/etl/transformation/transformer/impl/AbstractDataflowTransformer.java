@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
@@ -99,7 +99,30 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             }
         }
 
-        parameters.setTimestampField(targetTemplate.getTimestampField());
+        if (baseSources.length > 0) {
+            parameters.setTimestampField(targetTemplate.getTimestampField());
+            parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(targetTemplate.getSourceName()));
+            List<String> baseTables = new ArrayList<String>();
+            for (Source baseSource : baseSources) {
+                baseTables.add(baseSource.getSourceName());
+            }
+            parameters.setBaseTables(baseTables);
+            String[] primaryKey = targetTemplate.getPrimaryKey();
+            if (primaryKey == null) {
+                parameters.setPrimaryKeys(new ArrayList<>());
+            } else {
+                parameters.setPrimaryKeys(Arrays.asList(targetTemplate.getPrimaryKey()));
+            }
+
+            Map<String, String> templateSourceMap = new HashMap<>();
+
+            for (int i = 0; i < baseTemplates.length; i++) {
+                templateSourceMap.put(baseTemplates[i].getSourceName(), baseSources[i].getSourceName());
+            }
+
+            parameters.setTemplateSourceMap(templateSourceMap);
+        }
+
         try {
             log.info("Progress version " + progress.getVersion());
             parameters.setTimestamp(HdfsPathBuilder.dateFormat.parse(progress.getVersion()));
@@ -107,27 +130,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             throw new LedpException(LedpCode.LEDP_25012, e, new String[] { targetTemplate.getSourceName(),
                     e.getMessage() });
         }
-        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(targetTemplate.getSourceName()));
 
-        List<String> baseTables = new ArrayList<String>();
-        for (Source baseSource : baseSources) {
-            baseTables.add(baseSource.getSourceName());
-        }
-        parameters.setBaseTables(baseTables);
-        String[] primaryKey = targetTemplate.getPrimaryKey();
-        if (primaryKey == null) {
-            parameters.setPrimaryKeys(new ArrayList<>());
-        } else {
-            parameters.setPrimaryKeys(Arrays.asList(targetTemplate.getPrimaryKey()));
-        }
-
-        Map<String, String> templateSourceMap = new HashMap<>();
-
-        for (int i = 0; i < baseTemplates.length; i++) {
-            templateSourceMap.put(baseTemplates[i].getSourceName(), baseSources[i].getSourceName());
-        }
-
-        parameters.setTemplateSourceMap(templateSourceMap);
         updateParameters(parameters, baseTemplates, targetTemplate, configuration, baseVersions);
         return parameters;
     }

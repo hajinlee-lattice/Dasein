@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -243,13 +246,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                             subFolders.add(subFolder);
                         });
                     }
-                    log.info(tenantId + " has " + CollectionUtils.size(subFolders) + " " + name + " sub-folders.");
-                    if (CollectionUtils.size(subFolders) > 2000) {
-                        String msg = tenantId + " has " + CollectionUtils.size(subFolders) //
-                                + " " + name + " sub-folders. Not allowed to be migrated automatically.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
+//                    log.info(tenantId + " has " + CollectionUtils.size(subFolders) + " " + name + " sub-folders.");
+//                    if (CollectionUtils.size(subFolders) > 2000) {
+//                        String msg = tenantId + " has " + CollectionUtils.size(subFolders) //
+//                                + " " + name + " sub-folders. Not allowed to be migrated automatically.";
+//                        log.error(msg);
+//                        throw new IllegalStateException(msg);
+//                    }
 
                     if (CollectionUtils.size(subFolders) < 2000) {
                         subFolders.clear();
@@ -258,40 +261,47 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     if (CollectionUtils.isEmpty(subFolders)) {
                         subFolders.add("");
                     }
-                    int count = 1;
+                    AtomicInteger count = new AtomicInteger(0);
                     List<String> failedFolders = new ArrayList<>();
+                    List<Callable<String>> callables = new ArrayList<>();
                     for (String subFolder: subFolders) {
-                        log.info(tenantId + ": start copying " + count + "/" + subFolders.size() //
-                                + " " + name + " sub-folder " + subFolder);
-                        String srcPath = srcDir + subFolder;
-                        String tgtPath = tgtDir + subFolder;
-//                        if ("tables".equals(name) && StringUtils.isNotBlank(subFolder)) {
-//                            Table table = metadataProxy.getTable(customer, subFolder);
-//                            if (table == null || CollectionUtils.isEmpty(table.getExtracts())) {
-//                                log.info(tenantId + ": finished copying " + (count++) + "/" + subFolders.size() //
-//                                        + " table " + subFolder + " as it is not part of the data collection.");
-//                                continue;
-//                            }
-//                            srcPath = table.getExtracts().get(0).getPath();
-//                            if (!subFolder.startsWith("/")) {
-//                                tgtPath = tgtDir + "/" + subFolder;
-//                            }
-//                        }
-                        try {
-                            if (HdfsUtils.fileExists(hadoopConfiguration, srcPath)) {
-                                Configuration distcpConfiguration = createConfiguration(subFolder);
-                                HdfsUtils.distcp(distcpConfiguration, srcPath, tgtPath, queueName);
-                            } else {
-                                log.info(srcPath + " does not exist, skip copying.");
+                        callables.add(() -> {
+                            int idx = count.getAndIncrement();
+                            log.info(tenantId + ": start copying " + idx + "/" + subFolders.size() //
+                                    + " " + name + " sub-folder " + subFolder);
+                            String srcPath = srcDir + subFolder;
+                            String tgtPath = tgtDir + subFolder;
+                            try {
+                                if (HdfsUtils.fileExists(hadoopConfiguration, srcPath)) {
+                                    Configuration distcpConfiguration = createConfiguration(subFolder);
+                                    HdfsUtils.distcp(distcpConfiguration, srcPath, tgtPath, queueName);
+                                } else {
+                                    log.info(srcPath + " does not exist, skip copying.");
+                                }
+                            } catch (Exception e) {
+                                if (StringUtils.isNotBlank(name)) {
+                                    log.warn("Failed copy sub-folder " + subFolder + " in " + name);
+                                    return subFolder;
+                                }
                             }
-                        } catch (Exception e) {
-                            if (StringUtils.isNotBlank(name)) {
-                                log.warn("Failed copy sub-folder " + subFolder + " in " + name);
-                                failedFolders.add(subFolder);
-                            }
+                            log.info(tenantId + ": finished copying " + idx + "/" + subFolders.size() //
+                                    + " " + name + " sub-folder " + subFolder);
+                            return "";
+                        });
+                        if (CollectionUtils.size(callables) >= 4) {
+                            List<String> returns = ThreadPoolUtils.runCallablesInParallel(getDistCpWorkers(), callables, //
+                                    (int) TimeUnit.DAYS.toMinutes(1), 10);
+                            failedFolders.addAll(returns.stream() //
+                                    .filter(StringUtils::isNotBlank).collect(Collectors.toList()));
+                            callables.clear();
                         }
-                        log.info(tenantId + ": finished copying " + (count++) + "/" + subFolders.size() //
-                                + " " + name + " sub-folder " + subFolder);
+                    }
+                    if (CollectionUtils.isNotEmpty(callables)) {
+                        List<String> returns = ThreadPoolUtils.runCallablesInParallel(getDistCpWorkers(), callables, //
+                                (int) TimeUnit.DAYS.toMinutes(1), 10);
+                        failedFolders.addAll(returns.stream() //
+                                .filter(StringUtils::isNotBlank).collect(Collectors.toList()));
+                        callables.clear();
                     }
                     if (CollectionUtils.isNotEmpty(failedFolders)) {
                         throw new RuntimeException("Failed to copy sub-folders: " + StringUtils.join(failedFolders));

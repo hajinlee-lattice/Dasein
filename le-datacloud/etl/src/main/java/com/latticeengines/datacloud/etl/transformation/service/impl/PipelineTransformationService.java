@@ -358,12 +358,15 @@ public class PipelineTransformationService extends AbstractTransformationService
                 targetTemplate = sourceService.findBySourceName(targetTemplateName);
             }
             if (targetTemplate == null) {
-                targetTemplate = baseTemplates[0];
+                if (baseTemplates.length > 0) {
+                    targetTemplate = baseTemplates[0];
+                } else {
+                    targetTemplate = target;
+                }
             }
 
             sourceVersions.put(target, targetVersion);
-            log.info("Step " + stepIdx + " target " + target.getSourceName() + " template "
-                    + targetTemplate.getSourceName());
+            log.info("Step " + stepIdx + " target " + target.getSourceName());
 
             String confStr = config.getConfiguration();
             TransformStep step;

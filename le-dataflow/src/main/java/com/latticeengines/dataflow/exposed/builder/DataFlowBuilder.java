@@ -190,11 +190,15 @@ public abstract class DataFlowBuilder {
 
         for (Field field : fieldMap.values()) {
             Type avroType = Type.NULL;
-            for (Schema schema : field.schema().getTypes()) {
-                avroType = schema.getType();
-                if (!Type.NULL.equals(avroType)) {
-                    break;
+            if (Type.UNION.equals(field.schema().getType())) {
+                for (Schema schema : field.schema().getTypes()) {
+                    avroType = schema.getType();
+                    if (!Type.NULL.equals(avroType)) {
+                        break;
+                    }
                 }
+            } else {
+                avroType = field.schema().getType();
             }
             FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
             fm.setTableName(table.getName());

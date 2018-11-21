@@ -83,9 +83,6 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Inject
     private VendorConfigService vendorConfigService;
 
-    @Inject
-    private S3PathBuilder s3PathBuilder;
-
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
 
@@ -895,7 +892,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
             if (CollectionUtils.isNotEmpty(bucketFiles)) {
 
-                Path ingestLocation = s3PathBuilder.constructIngestionDir(vendor + "_RAW");
+                Path ingestLocation = S3PathBuilder.constructIngestionDir(vendor + "_RAW");
                 String ingestDir = ingestLocation.toString();
 
                 for (File bucketFile : bucketFiles) {
