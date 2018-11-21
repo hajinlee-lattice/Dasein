@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.slf4j.Logger;
@@ -17,10 +16,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
-
 
 public class LifecycleValidatorUnitTestNG {
 
@@ -37,7 +36,9 @@ public class LifecycleValidatorUnitTestNG {
     @Test(groups = "unit")
     private void testLifeCycle() {
         AttrConfig lDCPremium = AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true);
-        ((AttrConfigProp<AttrState>) lDCPremium.getProperty(ColumnMetadataKey.State)).setSystemValue(AttrState.Deprecated);
+        lDCPremium.setShouldDeprecate(true);
+        ((AttrConfigProp<AttrState>) lDCPremium.getProperty(ColumnMetadataKey.State))
+                .setSystemValue(AttrState.Deprecated);
         List<AttrConfig> attrList = Arrays.asList(lDCPremium);
 
         lifecycleValidator.validate(new ArrayList<>(), attrList);

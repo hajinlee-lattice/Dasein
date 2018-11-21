@@ -135,10 +135,28 @@ public class AbstractAttrConfigServiceUnitTestNG {
                 Category.INTENT, Arrays.asList(ColumnSelection.Predefined.usageProperties), true);
         log.info("generatePropertyListWithAllInactive is " + overview);
         Assert.assertNull(overview.getTotalAttrs());
+        propSummary = overview.getPropSummary();
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Model.getName()));
         // For model usage, the number is not impacted by the state
         map = propSummary.get(ColumnSelection.Predefined.Model.getName());
         Assert.assertEquals(map.get(Boolean.FALSE).longValue(), 5);
+
+        // check PLS-11145 For Enable/Disable page, hide attributes that
+        // are: disabled and Deprecated
+        overview = cdlAttrConfigServiceImpl
+                .getAttrConfigOverview(
+                        AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false,
+                                false, true),
+                        Category.INTENT, Arrays.asList(ColumnSelection.Predefined.usageProperties), true);
+        log.info("generatePropertyListWithAllInactive when testing deprecation is " + overview);
+        Assert.assertNull(overview.getTotalAttrs());
+        propSummary = overview.getPropSummary();
+        Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.Model.getName()));
+        // For model usage, even the state is inactive, since it should be
+        // deprecated, it will not be part of the final overview
+        map = propSummary.get(ColumnSelection.Predefined.Model.getName());
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue(), 4);
+
     }
 
     @Test(groups = "unit")
@@ -154,7 +172,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
             cdlAttrConfigServiceImpl.render(generateMetadataList(Category.FIRMOGRAPHICS),
                     Arrays.asList(config, config));
         } catch (Exception e) {
-            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40023);
+            Assert.fail("Should not have thrown exception");
         }
         // system don't render internal attributes
         List<AttrConfig> renderedConfig = cdlAttrConfigServiceImpl.render(
@@ -162,7 +180,6 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(renderedConfig.size(), 0);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "unit")
     public void testRender() {
         // default column metadata don't set flag canSegment, canEnrich,

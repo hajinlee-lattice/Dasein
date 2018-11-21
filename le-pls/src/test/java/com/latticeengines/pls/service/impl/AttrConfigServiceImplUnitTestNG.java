@@ -344,6 +344,34 @@ public class AttrConfigServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testGetDetailAttrForUsageOfModelingInCaseOfDeprecation() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        // The total number of attribute should not be impacted by the state
+        request.setAttrConfigs(
+                Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.TECHNOLOGY_PROFILE, false),
+                        AttrConfigServiceImplTestUtils.getAttr2(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr3(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr4(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr5(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr6(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
+                        AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
+                .thenReturn(request);
+        // the first AttrConfig is set to be deprecated
+        request.getAttrConfigs().get(0).setShouldDeprecate(true);
+        AttrConfigSelectionDetail selectionDetail = attrConfigService
+                .getAttrConfigSelectionDetailForUsage(Category.TECHNOLOGY_PROFILE.getName(), "Modeling");
+        log.info("testGetDetailAttrForUsageOfModelingInCaseOfDeprecation selectionDetail is " + selectionDetail);
+        Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 8L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 8);
+        Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
+                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 8);
+    }
+
+    @Test(groups = "unit")
     public void testGetDetailAttrForUsageWithPremiumCategory() {
         AttrConfigRequest request = new AttrConfigRequest();
         request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.INTENT, true, true),

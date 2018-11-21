@@ -1155,7 +1155,8 @@ public class AttrConfigTestUtils {
     }
 
     public static List<AttrConfig> generatePropertyList(Category category, boolean state, boolean useForSegment,
-            boolean useForEnrichment, boolean useForCompanyProfile, boolean useForTalkingPoint) {
+            boolean useForEnrichment, boolean useForCompanyProfile, boolean useForTalkingPoint,
+            boolean deprecateLDCNonPremiumAttr) {
         List<AttrConfig> renderedList = Arrays.asList(
                 AttrConfigTestUtils.getLDCNonPremiumAttr(category, state, useForSegment, useForEnrichment,
                         useForCompanyProfile, useForTalkingPoint),
@@ -1175,7 +1176,14 @@ public class AttrConfigTestUtils {
                         useForCompanyProfile, useForTalkingPoint), //
                 AttrConfigTestUtils.getCDLRatingAttr(category, state, useForSegment, useForEnrichment,
                         useForCompanyProfile, useForTalkingPoint));
+        renderedList.get(0).setShouldDeprecate(deprecateLDCNonPremiumAttr);
         return renderedList;
+    }
+
+    public static List<AttrConfig> generatePropertyList(Category category, boolean state, boolean useForSegment,
+            boolean useForEnrichment, boolean useForCompanyProfile, boolean useForTalkingPoint) {
+        return generatePropertyList(category, state, useForSegment, useForEnrichment, useForCompanyProfile,
+                useForTalkingPoint, false);
     }
 
     public static int getErrorNumber(List<AttrConfig> configs) {

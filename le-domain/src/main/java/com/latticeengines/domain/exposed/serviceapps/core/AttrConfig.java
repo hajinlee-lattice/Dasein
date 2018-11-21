@@ -42,6 +42,9 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     @JsonProperty("DataLicense")
     private String dataLicense;
 
+    @JsonProperty("ShouldDeprecate")
+    private Boolean shouldDeprecate = Boolean.FALSE;
+
     @JsonProperty("Props")
     private Map<String, AttrConfigProp<?>> attrProps;
 
@@ -65,6 +68,14 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
 
     public void setAttrType(AttrType attrType) {
         this.attrType = attrType;
+    }
+
+    public Boolean getShouldDeprecate() {
+        return this.shouldDeprecate;
+    }
+
+    public void setShouldDeprecate(Boolean shouldDeprecate) {
+        this.shouldDeprecate = shouldDeprecate;
     }
 
     public AttrSubType getAttrSubType() {

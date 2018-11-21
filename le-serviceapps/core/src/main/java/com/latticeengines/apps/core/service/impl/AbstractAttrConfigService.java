@@ -173,6 +173,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                      * For Enable/Disable page, hide attributes that are:
                      * disabled and AllowCustomization=FALSE.
                      * 
+                     * PLS-11145 For Enable/Disable page, hide attributes that
+                     * are: disabled and Deprecated
+                     * 
                      * 'onlyActivateAttrs=false' indicates it is
                      * Activate/Deactivate page, otherwise it is Usage
                      * Enable/Disable page
@@ -220,10 +223,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             /*
                              * For Enable/Disable page, hide attributes that
                              * are: disabled and AllowCustomization=FALSE.
+                             *
+                             * For Enable/Disable page, hide attributes that
+                             * are: disabled and Deprecated
                              */
                             totalAttrs++;
                             if (onlyActiveAttrs) {
-                                if (!configProp.isAllowCustomization() && Boolean.FALSE.equals(actualValue)) {
+                                if (Boolean.FALSE.equals(actualValue) && (!configProp.isAllowCustomization()
+                                        || Boolean.TRUE.equals(attrConfig.getShouldDeprecate()))) {
                                     continue;
                                 }
                             }
@@ -649,7 +656,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }
         // make sure the system metadata include the customer config
         if (CollectionUtils.isNotEmpty(renderedAttrNames)) {
-            throw new LedpException(LedpCode.LEDP_40023, new String[] { renderedAttrNames.toString() });
+            log.warn("Wrong customer config, system can't render these attributes " + renderedAttrNames.toString());
         }
         return new ArrayList<>(map.values());
     }
@@ -698,6 +705,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         boolean deprecate = Boolean.TRUE.equals(metadata.getShouldDeprecate());
         AttrState finalVal = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
         if (deprecate) {
+            attrConfig.setShouldDeprecate(true);
             if (AttrState.Active.equals(finalVal)) {
                 // allow customer to deactivate it
                 stateProp.setAllowCustomization(true);
@@ -727,7 +735,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         for (AttrConfig config : customConfig) {
             config.setImpactWarnings(null);
             config.setValidationErrors(null);
-
+            config.setShouldDeprecate(null);
             AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) config
                     .getProperty(ColumnMetadataKey.State);
             if (AttrState.Deprecated.equals(stateProp.getCustomValue())) {

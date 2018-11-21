@@ -636,6 +636,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                      * For Enable/Disable page, hide attributes that are:
                      * disabled and AllowCustomization=FALSE.
                      * 
+                     * PLS-11145 For Enable/Disable page, hide attributes that
+                     * are: disabled and Deprecated
+                     * 
                      * 'onlyActivateAttrs=false' indicates it is
                      * Activate/Deactivate page, otherwise it is Usage
                      * Enable/Disable page
@@ -688,10 +691,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             /*
                              * For Enable/Disable page, hide attributes that
                              * are: disabled and AllowCustomization=FALSE.
+                             * 
+                             * For Enable/Disable page, hide attributes that
+                             * are: disabled and Deprecated
                              */
                             if (applyActivationFilter) {
-                                if (!configProp.isAllowCustomization()
-                                        && Boolean.FALSE.equals((Boolean) getActualValue(configProp))) {
+                                if (Boolean.FALSE.equals((Boolean) getActualValue(configProp))
+                                        && (!configProp.isAllowCustomization()
+                                                || Boolean.TRUE.equals(attrConfig.getShouldDeprecate()))) {
                                     continue;
                                 }
                             }
