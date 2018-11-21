@@ -49,14 +49,14 @@ export default class LeTable extends Component {
     switch (this.state.sortingDirection) {
       case DIRECTION_ASC: {
         if (
-          a[this.state.sortingName].toLowerCase() <
-          b[this.state.sortingName].toLowerCase()
+          ((a[this.state.sortingName])+'').toLowerCase() <
+          ((b[this.state.sortingName])+'').toLowerCase()
         ) {
           return -1;
         }
         if (
-          a[this.state.sortingName].toLowerCase() >
-          b[this.state.sortingName].toLowerCase()
+          ((a[this.state.sortingName])+'').toLowerCase() >
+          ((b[this.state.sortingName])+'').toLowerCase()
         ) {
           return 1;
         }
@@ -64,14 +64,14 @@ export default class LeTable extends Component {
       }
       case DIRECTION_DESC:
         if (
-          a[this.state.sortingName].toLowerCase() >
-          b[this.state.sortingName].toLowerCase()
+          ((a[this.state.sortingName])+'').toLowerCase() >
+          ((b[this.state.sortingName])+'').toLowerCase()
         ) {
           return -1;
         }
         if (
-          a[this.state.sortingName].toLowerCase() <
-          b[this.state.sortingName].toLowerCase()
+          ((a[this.state.sortingName])+'').toLowerCase() <
+          ((b[this.state.sortingName])+'').toLowerCase()
         ) {
           return 1;
         }

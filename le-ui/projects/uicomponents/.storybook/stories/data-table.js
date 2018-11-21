@@ -127,7 +127,7 @@ let configSorting = {
     {
       name: "Object",
       displayName: "Object",
-      sortable: true
+      sortable: false
     },
     {
       name: "Path",
@@ -137,7 +137,7 @@ let configSorting = {
     {
       name: "LastEditedDate",
       displayName: "Edited",
-      sortable: false
+      sortable: true
     }
   ],
   columns: [

@@ -19,7 +19,7 @@ export const getData = api => {
       Object: "Contacts",
       Path: "Templates/ContactSchema",
       TemplateName: "Contact Schema",
-      LastEditedDate: 1541193886000,
+      LastEditedDate: 1641193886000,
       Exist: true,
       FeedType: "ContactSchema"
     },
@@ -27,7 +27,8 @@ export const getData = api => {
       Object: "Accounts",
       Path: "path/s3",
       TemplateName: "Account Schema",
-      Exist: false
+      LastEditedDate: 1541193886000,
+      Exist: true
     },
     {
       Object: "Product Purchases",
@@ -39,11 +40,12 @@ export const getData = api => {
       Object: "Product Bundles",
       Path: "b/path",
       TemplateName: "Product Bundles Schema",
-      Exist: false
+      LastEditedDate: 1941193886000,
+      Exist: true
     },
     {
       Object: "Product Hierarchy",
-      Path: "s/s3/path",
+      Path: "N/A",
       TemplateName: "Product Hierarchy Schema",
       Exist: false
     }];
