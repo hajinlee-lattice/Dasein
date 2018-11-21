@@ -23,15 +23,9 @@ angular
     vm.init = function() {
 
         vm.IsPmml = IsPmml,
-        vm.IsRatingEngine = IsRatingEngine,
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
-        vm.isDashboardRatings = ($stateParams.section == 'dashboard.ratings') ? true : false;
-        
-        if(vm.IsRatingEngine) {
-            vm.viewingIteration = $stateParams.viewingIteration ? true : false;
-        }
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
             vm.HasRatingsAvailable = true;
@@ -51,21 +45,6 @@ angular
             vm.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
             vm.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
             vm.showSampleLeads = FeatureFlagService.FlagIsEnabled(flags.VIEW_SAMPLE_LEADS);
-        });
-    }
-
-    vm.goToRatingEngineRoute = function() {
-        $state.go('home.ratingsengine.dashboard', { "rating_id": vm.stateParams.rating_id, "modelId": vm.stateParams.modelId, viewingIteration: false });
-    }
-
-    vm.remodelIteration = function() {
-        var engineId = vm.ratingEngine.id,
-            modelId = vm.model.ModelDetails.Name;
-
-        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-            AtlasRemodelStore.setRemodelIteration(result);
-            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-            $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
         });
     }
 

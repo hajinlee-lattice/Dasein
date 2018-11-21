@@ -1,103 +1,12 @@
 <div 
     ng-controller="ModelDetailsWidgetController"
     class="summary"
-    ng-class="[modelingStrategy, modelType]">
+    ng-class="modelType">
 
     <div class="container row">
         <div class="twelve columns">
 
-            <div class="summary-info" ng-if="IsRatingEngine || IsRuleBased">
-                <h2>
-                    <span ng-if="modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Repeat Cross-Sell</span>
-                    <span ng-if="modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">New Cross-Sell</span>
-                    <span ng-if="type === 'RULE_BASED'">Rule Based</span>
-                    <span ng-if="type === 'CUSTOM_EVENT'">Custom Event</span>
-                </h2>
-                <h1>{{ displayName }} <span ng-if="viewingIteration">| Iteration {{ iteration.iteration }}</span></h1>
-                <p>Created by {{ createdBy }} on {{ created | date }}</p>
-            </div>
-
-            
-            <!-- Dashboard of CDL Model -->
-            <div class="data" ng-if="(IsRatingEngine && !viewingIteration) || IsRuleBased">
-                <div class="stats stats-group">
-                    <h3>Segment</h3>
-                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
-                </div>
-                <div class="stats stats-group">
-                    <h3>Accounts</h3>
-                    <h4>{{ totalAccounts | number }}</h4>
-                </div>
-                <div class="stats stats-group" ng-if="!IsRuleBased">
-                    <h3>Iterations Created</h3>
-                    <h4>{{ totalIterations }}</h4>
-                </div>
-                <div class="stats stats-group">
-                    <h3>
-                        Scoring
-                        <span class="more-info show-tooltip top delay">
-                            i
-                            <div class="tooltip_ small">
-                                <div class="cover">
-                                    <p>
-                                        Shows if scoring has been activated and which iteration was selected for it. You can continue to create new iterations while scoring with this iteration until you are ready to switch to a newer one.
-                                    </p>
-                                </div>
-                            </div>
-                        </span>
-                    </h3>
-                    <h4>{{ activeStatus }} <span ng-if="!IsRuleBased && activeStatus == 'ACTIVE' ">( Iteration {{ activeIteration }} )</span></h4>
-                    <p>Last data refresh {{ lastRefreshedDate | date }}</p>
-                </div>
-            </div>
-
-            <!-- Viewing an Iteration -->
-            <div class="data" ng-if="(IsRatingEngine && viewingIteration) && !IsRuleBased">
-                <div class="stats stats-group">
-                    <h3>Segment</h3>
-                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
-                </div>
-                <div class="stats stats-group flex-content-half">
-                    <div>
-                        <h3>Accounts</h3>
-                        <h4>{{ totalAccounts }}</h4>
-                    </div>
-                    <div class="text-right">
-                        <p>
-                            {{::trainingSet}} used for<br/>
-                            training and<br/>
-                            {{::testSet}} for testing
-                        </p>
-                    </div>
-                </div>
-                <div class="stats stats-group flex-content-half" ng-if="!IsRuleBased">
-                    <div>
-                        <h3>Total Conversions</h3>
-                        <h4>{{::totalSuccessEvents }} ({{::conversionRate}}%)</h4>
-                    </div>
-                    <div 
-                        class="text-right"
-                        ng-if="expectedValueModel && averageRevenue">
-                        <p>
-                            ${{averageRevenue}}<br/>
-                            Average Revenue
-                        </p>
-                    </div>
-                </div>
-                <div class="stats stats-group">
-                    <h3>Attribute Source</h3>
-                    <dl>
-                        <dt>{{ externalAttributeCount }} Lattice</dt>
-                    </dl>
-                    <dl>
-                        <dt>{{ internalAttributeCount }} Your Company</dt>
-                    </dl>
-                </div>
-            </div>
-
-
-            <!-- LPI Model Details -->
-            <div class="data" ng-if="!IsRatingEngine && !IsRuleBased">
+            <div class="data">
                 <div class="stats stats-group">
                     <h3>Overview</h3>
                     <dl>

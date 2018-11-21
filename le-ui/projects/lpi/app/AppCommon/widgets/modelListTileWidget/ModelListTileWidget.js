@@ -148,7 +148,6 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                 if ($event != null) {
                     $event.stopPropagation();
                 }
-
                 if ($scope.mayChangeModelNames) {
                     //Changing the name of the model
                     $scope.nameStatus.editing = true;
@@ -156,9 +155,6 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             };
 
             $scope.tileClick = function ($event) {
-
-                console.log($scope.data, data);
-
                 if ($event != null && $scope.nameStatus.editing) {
                     $event.preventDefault();
                 }

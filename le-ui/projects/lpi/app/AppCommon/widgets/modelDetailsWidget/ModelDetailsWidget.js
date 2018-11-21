@@ -17,80 +17,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
     if (data === undefined) {
 
-        var ratingEngine = $scope.RatingEngine;
-        var dashboard = ModelStore.getDashboardData();
-
-        $scope.IsRatingEngine = true;
-        $scope.viewingIteration = false;
-        $scope.type = ratingEngine.type;
-        $scope.displayName = ratingEngine.displayName;
-        $scope.createdBy = ratingEngine.createdBy;
-        $scope.created = ratingEngine.created;
-        $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
-
-
-
-        if (ratingEngine.segment) {
-            $scope.segmentName = ratingEngine.segment.display_name;
-            $scope.totalAccounts = ratingEngine.segment.accounts;
-        } else {
-            $scope.segmentName = 'No segment selected';
-            $scope.totalAccounts = '0';
-        }
-
-        $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
-        $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
-        if($scope.IsRuleBased || $scope.IsCustomEvent) {
-            if($scope.IsRuleBased) {
-                $scope.typeContext = 'rule';
-            } else {
-                $scope.typeContext = 'AI';
-            }
-            $scope.modelingStrategy = ratingEngine.type;
-        } else {
-            var type = ratingEngine.type.toLowerCase();
-            $scope.typeContext = 'AI';
-
-            $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
-        }
-
-        if($scope.typeContext == 'AI'){
-
-            $scope.totalIterations = dashboard.iterations.length;
-
-            if(ratingEngine.published_iteration || ratingEngine.scoring_iteration) {
-                $scope.model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
-            } else {
-                $scope.model = ratingEngine.latest_iteration.AI;
-            }
-
-            $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
-
-
-            $scope.expectedValueModel = $scope.model.predictionType === 'EXPECTED_VALUE' ? true : false;
-            if($scope.expectedValueModel){
-                $scope.averageRevenue = data.ModelDetails.AverageRevenue ? data.ModelDetails.AverageRevenue : false;
-            }
-
-            var engineId = $stateParams.rating_id,
-                ratingModelId = $scope.model.id;
-
-            RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
-                $scope.iteration = iteration.AI;
-
-                if($scope.viewingIteration) {
-                    $scope.createdBy = iteration.AI.createdBy;
-                    $scope.created = iteration.AI.created;
-                }
-            });
-
-            
-        }
-
-        $scope.activeIteration = ratingEngine.scoring_iteration ? ratingEngine.scoring_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
-        $scope.modelIsReady = ratingEngine.scoring_iteration ? ((ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== undefined)) : ((ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
-        $scope.activeStatus = ratingEngine.status;
-
         $scope.$on('statusChange', function(event, args) {
             $scope.activeStatus = args.activeStatus;
             $scope.activeIteration = args.activeIteration;
@@ -100,89 +26,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         var widgetConfig = ModelStore.widgetConfig;
         var metadata = ModelStore.metadata;
-        var dashboard = ModelStore.getDashboardData();
         var modelDetails = data.ModelDetails;
 
         $scope.displayName = modelDetails[widgetConfig.NameProperty];
         $scope.IsPmml = data.IsPmml;
-        $scope.IsRatingEngine = (modelDetails.Name.substring(0,2) === 'ai');
-
-        if($scope.IsRatingEngine){
-            var engineId = $stateParams.rating_id,
-                ratingEngine = RatingsEngineStore.getRatingEngine();
-
-            var type = ratingEngine.type.toLowerCase();
-
-            $scope.$on('statusChange', function(event, args) {
-                $scope.activeStatus = args.activeStatus;
-                $scope.activeIteration = args.activeIteration;
-            });
-
-            $scope.totalIterations = dashboard.iterations.length;
-            $scope.externalAttributeCount = data.ExternalAttributes.total;
-            $scope.internalAttributeCount = data.InternalAttributes.total;
-            $scope.displayName = ratingEngine.displayName;
-            $scope.createdBy = ratingEngine.createdBy;
-            $scope.created = ratingEngine.created;
-
-            $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
-            $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
-            if($scope.IsRuleBased || $scope.IsCustomEvent) {
-                if($scope.IsRuleBased) {
-                    $scope.typeContext = 'rule';
-                } else {
-                    $scope.typeContext = 'AI';
-                }
-                $scope.modelingStrategy = ratingEngine.type;
-            } else {
-                var type = ratingEngine.type.toLowerCase();
-                $scope.typeContext = 'AI';
-
-                $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
-            }
-
-            if($scope.typeContext == 'AI'){
-
-                var engineId = $stateParams.rating_id,
-                    ratingModelId = data.ModelDetails.Name;
-
-                if(ratingEngine.published_iteration || ratingEngine.scoring_iteration) {
-                    $scope.model = ratingEngine.published_iteration ? ratingEngine.published_iteration.AI : ratingEngine.scoring_iteration.AI;
-                } else {
-                    $scope.model = ratingEngine.latest_iteration.AI;
-                }
-
-                $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
-
-                $scope.expectedValueModel = $scope.model.predictionType === 'EXPECTED_VALUE' ? true : false;
-                if($scope.expectedValueModel){
-                    $scope.averageRevenue = data.ModelDetails.AverageRevenue ? data.ModelDetails.AverageRevenue : false;
-                }
-
-                RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
-                    $scope.iteration = iteration.AI;
-
-                    if($scope.viewingIteration) {
-                        $scope.createdBy = iteration.AI.createdBy;
-                        $scope.created = iteration.AI.created;
-                    }
-                });
-            }
-            
-            $scope.activeIteration = ratingEngine.scoring_iteration ? ratingEngine.scoring_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
-            $scope.modelIsReady = ratingEngine.scoring_iteration ? ((ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== undefined)) : ((ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
-            $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
-            $scope.activeStatus = ratingEngine.status;
-
-            if(ratingEngine.segment) {
-                $scope.segmentName = ratingEngine.segment.display_name;
-                $scope.totalAccounts = ratingEngine.segment.accounts;    
-            } else {
-                $scope.segmentName = 'No segment selected';
-                $scope.totalAccounts = '0';
-            }
-        
-        }
 
         var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
 
@@ -193,7 +40,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         }
 
         $scope.modelType = modelDetails[widgetConfig.TypeProperty];
-
 
         // LPI "Model" modelType options
         // ----------------------
