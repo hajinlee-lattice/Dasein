@@ -18,7 +18,6 @@ export default class LeTableHeader extends Component {
 
     return(
       <LeTableRow
-      jsonConfig={true}
       columnsMapping={this.props.headerMapping}
       rowIndex={0}
       rowData={this.data}

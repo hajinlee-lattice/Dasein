@@ -21,32 +21,27 @@ const stories = storiesOf("Data Table", module);
 stories.addDecorator(withKnobs);
 let data = getData("--");
 
-let config = {
+let configSimple = {
   name: "import-templates",
   header: [
     {
       name: "TemplateName",
-      displayName: "Name",
-      sortable: false
+      displayName: "Name"
     },
     {
       name: "Object",
-      displayName: "Object",
-      sortable: false
+      displayName: "Object"
     },
     {
       name: "Path",
-      displayName: "Automated Import Location",
-      sortable: false
+      displayName: "Automated Import Location"
     },
     {
       name: "LastEditedDate",
-      displayName: "Edited",
-      sortable: false
+      displayName: "Edited"
     },
     {
-      name: "actions",
-      sortable: false
+      name: "actions"
     }
   ],
   columns: [
@@ -131,14 +126,14 @@ let config = {
       template: cell => {
         return (
           <LeButton
-            name="action"
-            callback={action("button-click")}
-            config={{
-              classNames: 'orange-button',
-              label: 'Action',
-              icon: "fa fa-cloud-upload"
-            }}
-          />
+          name="borderless"
+          callback={action("button-click")}
+          disabled={false}
+          config={{
+            classNames:  "borderless-button",
+            icon: text("configSimple.icon", "fa fa-cloud-upload")
+          }}
+        />
         );
       }
     }
@@ -147,7 +142,128 @@ let config = {
 stories.add("table", () => (
   <LeTable
     name="lattice-simple"
-    config={config}
+    config={configSimple}
+    showLoading={boolean("showLoading", false)}
+    showEmpty={boolean("showEmpty", false)}
+    data={data}
+  />
+));
+
+// Sorting table
+
+
+let configSorting = {
+  name: "sorting-table",
+  sorting:{
+    initial: 'none',
+    direction: 'none'
+  },
+  header: [
+    {
+      name: "TemplateName",
+      displayName: "Name",
+      sortable: true
+    },
+    {
+      name: "Object",
+      displayName: "Object",
+      sortable: true
+    },
+    {
+      name: "Path",
+      displayName: "Automated Import Location",
+      sortable: true
+    },
+    {
+      name: "LastEditedDate",
+      displayName: "Edited",
+      sortable: false
+    }
+  ],
+  columns: [
+    {
+      colSpan: 3,
+      template: cell => {
+        if (!cell.state.saving && !cell.state.editing) {
+          if (cell.props.rowData.Exist) {
+            return (
+              <EditControl
+                icon="fa fa-pencil-square-o"
+                title="Edit Name"
+                toogleEdit={cell.toogleEdit}
+                classes="initially-hidden"
+              />
+            );
+          } else {
+            return null;
+          }
+        }
+        if (cell.state.editing && !cell.state.saving) {
+          if (cell.props.rowData.Exist) {
+            return (
+              <EditorText
+                initialValue={cell.props.rowData.TemplateName}
+                cell={cell}
+                applyChanges={this.saveTemplateNameHandler}
+                cancel={cell.cancelHandler}
+              />
+            );
+          } else {
+            return null;
+          }
+        }
+      }
+    },
+    {
+      colSpan: 3
+    },
+    {
+      colSpan: 3,
+      template: cell => {
+        if (cell.props.rowData.Exist) {
+          return (
+            <CopyComponent
+              title="Copy Link"
+              data={cell.props.rowData[cell.props.colName]}
+              callback={() => {
+                messageService.sendMessage(
+                  new Message(
+                    null,
+                    NOTIFICATION,
+                    "success",
+                    "",
+                    "Copied to Clipboard"
+                  )
+                );
+              }}
+            />
+          );
+        } else {
+          return null;
+        }
+      }
+    },
+    {
+      colSpan: 3,
+      mask: value => {
+        var options = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        };
+        var formatted = new Date(value);
+        return formatted.toLocaleDateString("en-US", options);
+      }
+    }
+  ]
+};
+
+stories.add("sorting table", () => (
+  <LeTable
+    name={configSorting.name}
+    config={configSorting}
     showLoading={boolean("showLoading", false)}
     showEmpty={boolean("showEmpty", false)}
     data={data}

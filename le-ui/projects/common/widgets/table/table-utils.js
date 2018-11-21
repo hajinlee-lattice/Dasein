@@ -17,38 +17,38 @@ export const getData = api => {
       console.log('======= OK ======');
     return [{
       Object: "Contacts",
-      Path: "/Templates/ContactSchema",
-      TemplateName: "ContactSchema Renamed kjjsdf",
+      Path: "Templates/ContactSchema",
+      TemplateName: "Contact Schema",
       LastEditedDate: 1541193886000,
       Exist: true,
       FeedType: "ContactSchema"
     },
     {
       Object: "Accounts",
-      Path: "N/A",
-      TemplateName: "N/A",
+      Path: "path/s3",
+      TemplateName: "Account Schema",
       Exist: false
     },
     {
       Object: "Product Purchases",
-      Path: "N/A",
-      TemplateName: "N/A",
+      Path: "a/path",
+      TemplateName: "Product Purchases Schema",
       Exist: false
     },
     {
       Object: "Product Bundles",
-      Path: "N/A",
-      TemplateName: "N/A",
+      Path: "b/path",
+      TemplateName: "Product Bundles Schema",
       Exist: false
     },
     {
       Object: "Product Hierarchy",
-      Path: "N/A",
-      TemplateName: "N/A",
+      Path: "s/s3/path",
+      TemplateName: "Product Hierarchy Schema",
       Exist: false
     }];
   } else {
-    console.log('======= NOPE ======');
+    // console.log('======= NOPE ======');
     return [];
   }
 };
