@@ -195,8 +195,8 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         String s3DataDir = pathBuilder.getS3AnalyticsDataDir(s3Bucket, customerSpace.getTenantId());
         requests.add(new ExportRequest("analytics-data", hdfsDataDir, s3DataDir, customerSpace));
 
-        String hdfsModelsDir = pathBuilder.getHdfsAnalyticsDataDir(customerSpace.toString());
-        String s3ModelsDir = pathBuilder.getS3AnalyticsDataDir(s3Bucket, customerSpace.getTenantId());
+        String hdfsModelsDir = pathBuilder.getHdfsAnalyticsModelDir(customerSpace.toString());
+        String s3ModelsDir = pathBuilder.getS3AnalyticsModelDir(s3Bucket, customerSpace.getTenantId());
         requests.add(new ExportRequest("analytics-models", hdfsModelsDir, s3ModelsDir, customerSpace));
     }
 
