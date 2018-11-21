@@ -41,16 +41,7 @@ public class RedirectResource {
     @ApiOperation("The links of workflow logs")
     @NoCustomerSpace
     public ModelAndView redirectWorkflowLog(@PathVariable long workflowPid, HttpServletResponse response) {
-        // WorkflowLogLinks logLinks = workflowProxy.getLogLinkByWorkflowPid(workflowPid);
-        WorkflowLogLinks logLinks = new WorkflowLogLinks();
-        if (workflowPid > 0) {
-            if (workflowPid < 3) {
-                logLinks.setAppMasterUrl("https://www.google.com");
-            }
-            if (workflowPid > 1) {
-                logLinks.setS3LogDir("https://www.bing.com");
-            }
-        }
+        WorkflowLogLinks logLinks = workflowProxy.getLogLinkByWorkflowPid(workflowPid);
         String amUrl = logLinks.getAppMasterUrl();
         String s3Dir = logLinks.getS3LogDir();
         if (StringUtils.isNotBlank(amUrl) && StringUtils.isNotBlank(s3Dir)) {
