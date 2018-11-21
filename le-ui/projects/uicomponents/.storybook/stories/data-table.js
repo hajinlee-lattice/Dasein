@@ -46,37 +46,7 @@ let configSimple = {
   ],
   columns: [
     {
-      colSpan: 2,
-      template: cell => {
-        if (!cell.state.saving && !cell.state.editing) {
-          if (cell.props.rowData.Exist) {
-            return (
-              <EditControl
-                icon="fa fa-pencil-square-o"
-                title="Edit Name"
-                toogleEdit={cell.toogleEdit}
-                classes="initially-hidden"
-              />
-            );
-          } else {
-            return null;
-          }
-        }
-        if (cell.state.editing && !cell.state.saving) {
-          if (cell.props.rowData.Exist) {
-            return (
-              <EditorText
-                initialValue={cell.props.rowData.TemplateName}
-                cell={cell}
-                applyChanges={this.saveTemplateNameHandler}
-                cancel={cell.cancelHandler}
-              />
-            );
-          } else {
-            return null;
-          }
-        }
-      }
+      colSpan: 2
     },
     {
       colSpan: 2
@@ -89,17 +59,7 @@ let configSimple = {
             <CopyComponent
               title="Copy Link"
               data={cell.props.rowData[cell.props.colName]}
-              callback={() => {
-                messageService.sendMessage(
-                  new Message(
-                    null,
-                    NOTIFICATION,
-                    "success",
-                    "",
-                    "Copied to Clipboard"
-                  )
-                );
-              }}
+              callback={action("copy link")}
             />
           );
         } else {
@@ -182,6 +142,80 @@ let configSorting = {
   ],
   columns: [
     {
+      colSpan: 3
+    },
+    {
+      colSpan: 3
+    },
+    {
+      colSpan: 3,
+      template: cell => {
+        if (cell.props.rowData.Exist) {
+          return (
+            <CopyComponent
+              title="Copy Link"
+              data={cell.props.rowData[cell.props.colName]}
+              callback={action("copy link")}
+            />
+          );
+        } else {
+          return null;
+        }
+      }
+    },
+    {
+      colSpan: 3,
+      mask: value => {
+        var options = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        };
+        var formatted = new Date(value);
+        return formatted.toLocaleDateString("en-US", options);
+      }
+    }
+  ]
+};
+
+stories.add("sorting table", () => (
+  <LeTable
+    name={configSorting.name}
+    config={configSorting}
+    showLoading={boolean("showLoading", false)}
+    showEmpty={boolean("showEmpty", false)}
+    data={data}
+  />
+));
+
+// Edit table
+
+
+let configEdit = {
+  name: "sorting-table",
+ 
+  header: [
+    {
+      name: "TemplateName",
+      displayName: "Name"
+    },
+    {
+      name: "Object",
+      displayName: "Object"
+    },
+    {
+      name: "Path",
+      displayName: "Automated Import Location"
+    },
+    {
+      name: "LastEditedDate",
+      displayName: "Edited"
+    }
+  ],
+  columns: [
+    {
       colSpan: 3,
       template: cell => {
         if (!cell.state.saving && !cell.state.editing) {
@@ -225,17 +259,7 @@ let configSorting = {
             <CopyComponent
               title="Copy Link"
               data={cell.props.rowData[cell.props.colName]}
-              callback={() => {
-                messageService.sendMessage(
-                  new Message(
-                    null,
-                    NOTIFICATION,
-                    "success",
-                    "",
-                    "Copied to Clipboard"
-                  )
-                );
-              }}
+              callback={action("copy link")}
             />
           );
         } else {
@@ -260,10 +284,10 @@ let configSorting = {
   ]
 };
 
-stories.add("sorting table", () => (
+stories.add("edit table", () => (
   <LeTable
-    name={configSorting.name}
-    config={configSorting}
+    name={configEdit.name}
+    config={configEdit}
     showLoading={boolean("showLoading", false)}
     showEmpty={boolean("showEmpty", false)}
     data={data}

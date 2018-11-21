@@ -4,7 +4,11 @@ import propTypes from "prop-types";
 import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
 import "./table.scss";
-import Sort, { DIRECTION_ASC, DIRECTION_DESC, DIRECTION_NONE } from "./controlls/sort";
+import Sort, {
+  DIRECTION_ASC,
+  DIRECTION_DESC,
+  DIRECTION_NONE
+} from "./controlls/sort";
 
 export default class LeTable extends Component {
   constructor(props) {
@@ -163,8 +167,14 @@ export default class LeTable extends Component {
       return null;
     }
   }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.forceReload) {
+      return{ data: nextProps.data };
+    }
+  }
+
   render() {
-    console.log("Table render");
     return (
       <div className={`le-table ${this.props.name}`}>
         <LeTableHeader headerMapping={this.headerMapping} />

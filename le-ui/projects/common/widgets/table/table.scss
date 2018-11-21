@@ -69,6 +69,23 @@ $font-size: 12px;
 
   .le-table-row:hover {
     background-color: $blue-text;
+    & > .le-table-cell{
+      color: $pearl-white;
+      *{
+        color: $pearl-white;
+      }
+    }
+    
+  }
+  .le-table-header:hover {
+    background-color: $pearl-white;
+    & > .le-table-cell{
+      color: $black;
+      *{
+        color: $black;
+      }
+    }
+    
   }
 
   .le-table-body:hover {
@@ -84,6 +101,7 @@ $font-size: 12px;
     color: $black;
     opacity: 1;
   }
+ 
 
   .le-table-col-span-1 {
     -ms-grid-column-span: 1;
@@ -191,6 +209,10 @@ $font-size: 12px;
       flex-wrap: nowrap;
       margin-right: 1em;
      
+    }
+    .flex-1{
+      @extend .le-cell-template;
+      flex: 1;
     }
     
   }

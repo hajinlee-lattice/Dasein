@@ -43,7 +43,7 @@ export default class Sort extends Component {
     let direction = this.getDirection();
     let className = "fa fa-sort";
     if (direction != DIRECTION_NONE) {
-      return `${className}-amount-${direction}`;
+      return `${className}-${direction}`;
     } else {
       return className;
     }

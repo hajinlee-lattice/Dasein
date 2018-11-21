@@ -91,11 +91,12 @@ export default class GridContainer extends Component {
       response => {
         if (response.status == SUCCESS) {
           this.setState({
-            forceReload: false,
+            forceReload: true,
             showEmpty: response.data && response.data.length == 0,
             showLoading: false,
             data: response.data
           });
+          this.setState({forceReload:false});
         } else {
           this.setState({
             forceReload: false,
@@ -270,6 +271,7 @@ export default class GridContainer extends Component {
       <LeTable
         name="import-templates"
         config={this.getConfig()}
+        forceReload={this.state.forceReload}
         showLoading={this.state.showLoading}
         showEmpty={this.state.showEmpty}
         data={this.state.data}

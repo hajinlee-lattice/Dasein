@@ -8,7 +8,6 @@ class CopyComponent extends Component {
 
   clickHandler(){
     // copyPath(text) {
-      console.log(this.props.column, ' -- ',this.props.data);
         let text = this.props.data;
         window.navigator.clipboard.writeText(text).then(
           () => {
