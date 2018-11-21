@@ -37,7 +37,15 @@ angular.module('lp.ratingsengine.remodel.training', [])
                     });
                     return deferred.promise;
 
-                }]
+                }],
+                datacollectionstatus: ['$q', 'QueryStore', function ($q, QueryStore) {
+                    var deferred = $q.defer();
+                    QueryStore.getCollectionStatus().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }],
             },
             views: {
                 'wizard_content@home.ratingsengine.remodel': 'ratingsEngineAITraining'

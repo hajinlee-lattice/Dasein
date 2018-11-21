@@ -70,14 +70,8 @@
                     <li ng-if="$ctrl.repeatPurchaseRemodel" class="form-group purchased-before-period">
                         <p>
                             Only sell to accounts that have not purchased the selected products in the last
-                            <select 
-                                class="form-control"
-                                ng-model="$ctrl.purchasedBeforePeriod"
-                                ng-change="$ctrl.getPurchasedBeforeValue($event.target.value)">
-                                <option value="6">6 months</option>
-                                <option value="12">12 months</option>
-                                <option value="24">24 months</option>
-                            </select>
+                            <input type="number" ng-model="$ctrl.purchasedBeforePeriod" class="form-control" min="0" ng-class="{'invalid': $ctrl.purchasedBeforePeriod == undefined || $ctrl.purchasedBeforePeriod == null || $ctrl.purchasedBeforePeriod < 0}">
+                            {{$ctrl.periodType|lowercase}}(s)
                         </p>
                     </li>
                     <li class="form-group">

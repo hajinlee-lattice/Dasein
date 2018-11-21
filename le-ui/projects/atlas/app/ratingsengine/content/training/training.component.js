@@ -9,6 +9,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         ratingEngine: '<',
         segments: '<',
         products: '<',
+        datacollectionstatus: '<',
         iteration: '<'
     },
     controller: function (
@@ -33,7 +34,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             purchasesCountReturned: false,
             pageTitle: ($stateParams.section === 'wizard.ratingsengine_segment') ? 'How do you want to train the model?' : 'Do you want to change the way the model is trained?',
             checkboxModel: {},
-            repeatPurchaseRemodel: false
+            repeatPurchaseRemodel: false,
         });
 
         vm.getNumericalConfig = function(){
@@ -48,6 +49,7 @@ angular.module('lp.ratingsengine.wizard.training', [
 
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
+            vm.periodType = vm.datacollectionstatus.ApsRollingPeriod ? vm.datacollectionstatus.ApsRollingPeriod : 'month';
 
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){
@@ -56,7 +58,7 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
                     if(vm.repeatPurchase){
-                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value.toString();
+                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value;
                         vm.repeatPurchaseRemodel = true;
                     }
 
@@ -275,12 +277,10 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.purchasesCountReturned = false;
 
                 if(vm.repeatPurchaseRemodel) {
-
-                    vm.purchasedBeforePeriodNum = Number(vm.purchasedBeforePeriod);
                     vm.configFilters.PURCHASED_BEFORE_PERIOD = {
                         "configName": "PURCHASED_BEFORE_PERIOD",
                         "criteria": "PRIOR_ONLY",
-                        "value": vm.purchasedBeforePeriodNum
+                        "value": vm.purchasedBeforePeriod
                     };
                     vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
                 }

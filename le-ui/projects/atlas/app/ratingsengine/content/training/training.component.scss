@@ -72,6 +72,16 @@
                     display: inline-block;
                     width: auto;
                 }
+                input {
+                    display: inline-block;
+                    max-width: 50px;
+                    width: auto;
+
+                    &.invalid {
+                        border-left-color: #d22027;
+                        border-left-width: 3px;
+                    }
+                }
             }
         }
         &.full-width {

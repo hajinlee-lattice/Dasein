@@ -48,15 +48,18 @@
 
         .form-control.period-input {
             height: 30px;
-            width: 40px;
+            max-width: 45px;
             border-width: 1px;
             border-style: solid;
             border-radius: 3px;
             display: inline-block;
             vertical-align: middle;
             overflow: hidden;
+
+            &.invalid {
+                border-left-color: #d22027;
+                border-left-width: 5px;
+            }
         }
-
-
     }
 }

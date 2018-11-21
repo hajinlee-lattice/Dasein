@@ -113,7 +113,7 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.validateNextStep = function () {
-        if (Object.keys(vm.productsSelected).length > 0) {
+        if (Object.keys(vm.productsSelected).length > 0 && vm.timePeriod >= 0) {
             vm.setValidation('products', true);
         } else {
             vm.setValidation('products', false);
@@ -128,7 +128,7 @@ angular.module('lp.ratingsengine.wizard.products', [
         vm.configFilters.PURCHASED_BEFORE_PERIOD = {
             "configName": "PURCHASED_BEFORE_PERIOD",
             "criteria": "PRIOR_ONLY",
-            "value": parseInt(vm.timePeriod)
+            "value": vm.timePeriod
         };
 
         RatingsEngineStore.setConfigFilters(vm.configFilters);
@@ -141,9 +141,9 @@ angular.module('lp.ratingsengine.wizard.products', [
     function getPurchasedBeforePeriod() {
         var configFilters = RatingsEngineStore.getConfigFilters() 
         if (configFilters && configFilters.PURCHASED_BEFORE_PERIOD && configFilters.PURCHASED_BEFORE_PERIOD.value) {
-            return configFilters.PURCHASED_BEFORE_PERIOD.value.toString();
+            return configFilters.PURCHASED_BEFORE_PERIOD.value;
         } else {
-            return '6';
+            return 6;
         }
     }
 
