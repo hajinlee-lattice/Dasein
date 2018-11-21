@@ -79,6 +79,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         this.importFromS3Service = importFromS3Service;
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
         this.dataCollectionProxy = new DataCollectionProxy();
+        this.metadataProxy = new MetadataProxy();
     }
 
     @Override
