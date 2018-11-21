@@ -36,7 +36,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,13 +46,12 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.ecs.ECSService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.collection.service.CollectionDBService;
 import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
@@ -86,10 +84,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private VendorConfigService vendorConfigService;
 
     @Inject
-    private YarnConfiguration yarnConfiguration;
-
-    @Inject
-    private HdfsPathBuilder hdfsPathBuilder;
+    private S3PathBuilder s3PathBuilder;
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
@@ -126,6 +121,12 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     @Value("${datacloud.collection.alexa.timestamp}")
     private String alexaTimestampColumn;
+
+    @Value("${datacloud.ingestion.column.id}")
+    private String ingestionIdCol;
+
+    @Value("${datacloud.ingestion.column.pid}")
+    private String ingestionPidCol;
 
     private long prevCollectMillis = 0;
     private int prevCollectTasks;
@@ -336,7 +337,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    private boolean handleFinishedTask(CollectionWorker worker) throws Exception {
+    private List<File> downloadWorkerOutput(CollectionWorker worker) throws Exception {
 
         String workerId = worker.getWorkerId();
 
@@ -345,7 +346,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         List<S3ObjectSummary> itemDescs = s3Service.listObjects(s3Bucket, prefix);
         if (itemDescs.size() < 1) {
 
-            return false;
+            return null;
 
         }
 
@@ -366,7 +367,18 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             s3Service.downloadS3File(itemDesc, tmpFile);
 
         }
-        if (tmpFiles.size() == 0) {
+
+        return tmpFiles;
+
+    }
+
+    private boolean handleFinishedTask(CollectionWorker worker) throws Exception {
+
+        String workerId = worker.getWorkerId();
+
+        //download worker output
+        List<File> tmpFiles = downloadWorkerOutput(worker);
+        if (CollectionUtils.isEmpty(tmpFiles)) {
 
             return false;
 
@@ -374,6 +386,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         String vendor = worker.getVendor();
 
+        /*
         //copy to hdfs
         String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, workerId).toString();
         log.info("about to upload collected data to hdfs: " + hdfsDir);
@@ -383,7 +396,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, tmpFile.getPath(), hdfsDir);
 
-        }
+        }*/
 
         //parse csv
         HashSet<String> domains = new HashSet<>();
@@ -759,7 +772,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                     //calculate col mapping
                     int[] csvIdx2Avro = new int[columnCount];
                     Schema.Field[] avroIdx2Fields = new Schema.Field[columnCount];
-                    if (fields.size() != columnCount) {
+                    if (fields.size() != columnCount + 2) {//avro has two extra id column
 
                         throw new Exception("avro column count != csv column count");
 
@@ -767,12 +780,20 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                     for (Schema.Field field: fields) {
 
-                        int csvIdx = csvColName2Idx.get(field.name());
+                        int csvIdx = csvColName2Idx.getOrDefault(field.name(), -1);
+                        if (csvIdx == -1) {
+
+                            continue;
+
+                        }
+
                         csvIdx2Avro[csvIdx] = field.pos();
                         avroIdx2Fields[csvIdx] = field;
 
                     }
                     int tsAvroCol = csvIdx2Avro[csvColName2Idx.get(tsColName)];
+                    Schema.Field avroIdField = schema.getField(ingestionIdCol);
+                    Schema.Field avroPidField = schema.getField(ingestionPidCol);
 
                     //iterate csv, generate avro
                     for (CSVRecord csvRec : parser) {
@@ -792,6 +813,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                                     csvRec.get(i), avroIdx2Fields[i]));
 
                         }
+                        rec.put(avroIdField.pos(), UUID.randomUUID().toString());
+                        rec.put(avroPidField.pos(), null);
 
                         int bucketIdx = (int) (((Long) rec.get(tsAvroCol) - minTs) / periodInMS);
                         List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
@@ -858,37 +881,22 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             String vendor = worker.getVendor();
 
-            //hdfs path contain the collection result
-            String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, worker.getWorkerId()).toString();
-            log.info("handling collected data in hdfs: " + hdfsDir);
-            List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, ".+\\.csv");
-            if (CollectionUtils.isEmpty(hdfsFiles)) {
+            List<File> tmpFiles = downloadWorkerOutput(worker);
+            if (CollectionUtils.isEmpty(tmpFiles)) {
 
                 log.error(worker.getVendor() + " worker " + worker.getWorkerId() //
-                        + "\'s output dir on hdfs does not contain csv files");
+                        + "\'s output dir on s3 does not contain any files");
                 return;
-
-            }
-
-            //copy hdfs file to local for processing
-            List<File> tmpFiles = new ArrayList<>();
-            for (String hdfsFile : hdfsFiles) {
-
-                File file = File.createTempFile("ingest", "csv");
-                file.deleteOnExit();
-                tmpFiles.add(file);
-
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFile, file.getPath());
 
             }
 
             //bucketing
             List<File> bucketFiles = doBucketing(tmpFiles, vendor);
+            List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
             if (CollectionUtils.isNotEmpty(bucketFiles)) {
 
-                Path hdfsIngestLocation = hdfsPathBuilder.constructIngestionDir(vendor + "_RAW");
-                String hdfsIngestDir = hdfsIngestLocation.toString();
-                HdfsUtils.mkdir(yarnConfiguration, hdfsIngestDir);
+                Path ingestLocation = s3PathBuilder.constructIngestionDir(vendor + "_RAW");
+                String ingestDir = ingestLocation.toString();
 
                 for (File bucketFile : bucketFiles) {
 
@@ -899,22 +907,26 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                     }
 
-                    String hdfsFilePath = hdfsIngestLocation.append(bucketFile.getName()).toString();
+                    String remoteFilePath = ingestLocation.append(bucketFile.getName()).toString();
 
-                    if (HdfsUtils.fileExists(yarnConfiguration, hdfsFilePath)) {
+                    if (s3Service.objectExist(s3Bucket, remoteFilePath)) {
 
-                        AvroUtils.appendToHdfsFile(yarnConfiguration, hdfsFilePath,
-                                AvroUtils.readFromLocalFile(bucketFile.getPath()), true);
+                        File tmpFile = File.createTempFile("temp", ".avro");
+                        tmpFile.deleteOnExit();
+                        tmpBucketFiles.add(tmpFile);
 
-                        log.info("appending to hdfs file: " + hdfsFilePath);
+                        s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
 
-                    } else {
+                        AvroUtils.appendToLocalFile(AvroUtils.readFromLocalFile(tmpFile.getPath()),
+                                bucketFile.getPath(), true);
 
-                        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, bucketFile.getPath(), hdfsIngestDir);
-
-                        log.info("creating hdfs file: " + hdfsFilePath);
+                        log.info("appending to local file: " + bucketFile);
 
                     }
+
+                    s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
+
+                    log.info("uploaded s3 file in bucket " + s3Bucket + ": " + remoteFilePath);
 
                 }
 
@@ -935,6 +947,11 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                 }
 
+                for (File tmpBucketFile: tmpBucketFiles) {
+
+                    FileUtils.deleteQuietly(tmpBucketFile);
+
+                }
             }
 
             //update worker status

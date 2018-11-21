@@ -4,6 +4,14 @@
     "fields": [
         {
             "type": "string",
+            "name": "LEInternalID"
+        },
+        {
+            "type": ["string", "null"],
+            "name": "LEParentInternalID"
+        },
+        {
+            "type": "string",
             "name": "WebPageUrl"
         },
         {

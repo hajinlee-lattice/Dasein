@@ -3,8 +3,11 @@ package com.latticeengines.datacloud.core.util;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.camille.Path;
 
+@Component("s3PathBuilder")
 public final class S3PathBuilder {
 
     public static final String SUCCESS_FILE = "_SUCCESS";
@@ -70,4 +73,12 @@ public final class S3PathBuilder {
         return defaultPodDir().append(COLLECTORS).append(vendor).append(workerId);
     }
 
+    private String constructPartialPath(String name) {
+        return name.endsWith(PATH_SEPARATOR) ? name.substring(0, name.lastIndexOf(PATH_SEPARATOR)) : name;
+    }
+
+    public Path constructIngestionDir(String ingestionName) {
+        String partialPath = constructPartialPath(ingestionName);
+        return propDataDir().append(INGESTION).append(partialPath);
+    }
 }
