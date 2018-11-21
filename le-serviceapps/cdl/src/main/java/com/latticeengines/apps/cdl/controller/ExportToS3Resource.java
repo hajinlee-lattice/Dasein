@@ -84,7 +84,7 @@ public class ExportToS3Resource {
                 int attempt = 0;
                 while (CollectionUtils.isNotEmpty(customers)) {
                     log.info("Attempt = " + (++attempt) + " Customers=" + StringUtils.join(customers));
-                    customers = new ArrayList<>(submitRequests(customers));
+                    customers = new ArrayList<>(submitRequests(customers, Boolean.TRUE.equals(request.getOnlyAtlas())));
                     try {
                         Thread.sleep(5000L);
                     } catch (InterruptedException e) {
@@ -96,7 +96,7 @@ public class ExportToS3Resource {
         return resultCustomers;
     }
 
-    private Collection<String> submitRequests(Collection<String> customers) {
+    private Collection<String> submitRequests(Collection<String> customers, boolean onlyAtlas) {
         ExecutorService workers = getWorkers();
         Set<String> remaining = new HashSet<>();
         customers.forEach(customer -> {
@@ -113,8 +113,8 @@ public class ExportToS3Resource {
                         log.info("Exporting to S3 for " + customer + ", " + inProcess.size() + " in progress.");
                         List<ExportRequest> requests = new ArrayList<>();
                         exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests);
-                        exportToS3Service.executeRequests(requests);
-                        exportToS3Service.buildDataUnits(requests);
+                        exportToS3Service.executeRequests(requests, onlyAtlas);
+                        // exportToS3Service.buildDataUnits(requests);
                         log.info("Finished Export To S3 for " + customer);
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to Export to S3", e);

@@ -8,7 +8,7 @@ public interface ExportToS3Service {
 
     void buildRequests(CustomerSpace customerSpace, List<ExportRequest> requests);
 
-    void executeRequests(List<ExportRequest> requests);
+    void executeRequests(List<ExportRequest> requests, boolean onlyAtlas);
 
     void buildDataUnits(List<ExportRequest> requests);
 

@@ -16,11 +16,22 @@ public class ExportToS3Request {
     @JsonProperty("Tenants")
     private List<String> tenants = new ArrayList<>();
 
+    @JsonProperty("OnlyAtlas")
+    private Boolean onlyAtlas;
+
     public List<String> getTenants() {
         return tenants;
     }
 
     public void setTenants(List<String> tenants) {
         this.tenants = tenants;
+    }
+
+    public Boolean getOnlyAtlas() {
+        return onlyAtlas;
+    }
+
+    public void setOnlyAtlas(Boolean onlyAtlas) {
+        this.onlyAtlas = onlyAtlas;
     }
 }
