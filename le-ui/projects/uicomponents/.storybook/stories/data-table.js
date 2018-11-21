@@ -14,6 +14,7 @@ import "../../../common/widgets/layout/layout.scss";
 import LeTable from "../../../common/widgets/table/table";
 import CopyComponent from "../../../common/widgets/table/controlls/copy-controll";
 import EditControl from "../../../common/widgets/table/controlls/edit-controls";
+import EditorText from "../../../common/widgets/table/editors/editor-text";
 import LeButton from '../../../common/widgets/buttons/le-button';
 import { getData } from "../../../common/widgets/table/table-utils";
 const stories = storiesOf("Data Table", module);
@@ -238,7 +239,9 @@ let configEdit = {
               <EditorText
                 initialValue={cell.props.rowData.TemplateName}
                 cell={cell}
-                applyChanges={this.saveTemplateNameHandler}
+                applyChanges={(cell, value) => {
+                  cell.toogleEdit();
+                }}
                 cancel={cell.cancelHandler}
               />
             );

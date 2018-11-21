@@ -171,6 +171,8 @@ export default class LeTable extends Component {
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.forceReload) {
       return{ data: nextProps.data };
+    }else{
+      return null;
     }
   }
 

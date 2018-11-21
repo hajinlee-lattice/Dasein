@@ -17,6 +17,7 @@ export default class EditorText extends Component {
   render() {
     return (
       <input
+        className="le-grid-text-editor"
         type="text"
         ref={(input) => { this.nameInput = input; }} 
         value={this.state.value}
