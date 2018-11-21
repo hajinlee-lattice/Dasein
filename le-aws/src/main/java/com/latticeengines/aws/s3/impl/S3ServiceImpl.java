@@ -123,8 +123,6 @@ public class S3ServiceImpl implements S3Service {
                 .withBucketName(bucket) //
                 .withPrefix(prefix) //
                 .withMaxKeys(Integer.MAX_VALUE);
-        // ListObjectsRequest request = new ListObjectsRequest(bucket, prefix,
-        // null, null, Integer.MAX_VALUE);
         return s3Client.listObjectsV2(request).getObjectSummaries();
     }
 
@@ -134,13 +132,15 @@ public class S3ServiceImpl implements S3Service {
         return summaries.stream() //
                 .map(obj -> {
                     String absolutePath = obj.getKey();
-                    return absolutePath.replace(parentDir + "/", "");
+                    String relativePath = absolutePath.replace(parentDir + "/", "");
+                    if (StringUtils.isNotBlank(relativePath) && relativePath.contains("/")) {
+                        return relativePath.substring(0, relativePath.indexOf("/"));
+                    } else {
+                        return "";
+                    }
                 }) //
-                .filter(path -> StringUtils.isNotBlank(path) //
-                        && path.endsWith("/") //
-                        && path.indexOf("/") == path.lastIndexOf("/")) //
-                .map(path -> path.substring(0, path.lastIndexOf("/"))) //
-                .collect(Collectors.toList());
+                .filter(StringUtils::isNotBlank) //
+                .distinct().collect(Collectors.toList());
     }
 
     @SuppressWarnings("deprecation")

@@ -1,9 +1,7 @@
 package com.latticeengines.scoring.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,12 +9,8 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,16 +19,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 public class ScoringJobUtil {
@@ -169,25 +160,6 @@ public class ScoringJobUtil {
         attribute.setPhysicalDataType(field.physicalDataType);
         attribute.setSourceLogicalDataType(field.sourceLogicalDataType);
         return attribute;
-    }
-
-    public static void writeScoreResultToAvroRecord(DataFileWriter<GenericRecord> dataFileWriter,
-            List<ScoreOutput> resultList, File outputFile, String uniqueKeyColumn) throws IOException {
-        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, false, false);
-        Schema schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
-
-        dataFileWriter.create(schema, outputFile);
-        for (ScoreOutput scoreOutput : resultList) {
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
-                builder.set(uniqueKeyColumn, Long.valueOf(scoreOutput.getLeadID()));
-            } else {
-                builder.set(uniqueKeyColumn, String.valueOf(scoreOutput.getLeadID()));
-            }
-            builder.set(ScoreResultField.Percentile.displayName, scoreOutput.getPercentile());
-            builder.set(ScoreResultField.RawScore.name(), scoreOutput.getRawScore());
-            dataFileWriter.append(builder.build());
-        }
     }
 
     public static List<String> getCacheFiles(Configuration yarnConfiguration, String currentVersionInStack)

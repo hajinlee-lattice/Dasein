@@ -1,27 +1,32 @@
 package com.latticeengines.scoring.service.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.base.Joiner;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
@@ -34,14 +39,25 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Component("scoringJobService")
 public class ScoringJobServiceImpl implements ScoringJobService {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(ScoringJobServiceImpl.class);
+
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
+
+    @Inject
+    private EMREnvService emrEnvService;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Resource(name = "distCpConfiguration")
+    private Configuration distCpConfiguration;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -70,8 +86,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Value("${dataplatform.python.conda.env.ambari}")
     private String condaEnvAmbari;
 
-    @Inject
-    private EMREnvService emrEnvService;
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
@@ -137,12 +153,13 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(), String.valueOf(scoringConfig.readModelIdFromRecord()));
         properties.setProperty(ScoringProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
 
-        List<String> cacheFiles = new ArrayList<>();
+        List<String> cacheFiles;
         try {
+            syncModelsFromS3ToHdfs(tenant);
             cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
                     versionManager.getCurrentVersionInStack(stackName));
             cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                    scoringConfig.getModelGuids(), Boolean.TRUE.booleanValue()));
+                    scoringConfig.getModelGuids(), Boolean.TRUE));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -157,6 +174,33 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     public void setConfiguration(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
+    }
+
+    public void syncModelsFromS3ToHdfs(String tenant) {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String customer = CustomerSpace.parse(tenant).toString();
+        String tenantId = CustomerSpace.parse(tenant).getTenantId();
+        String s3ModelsDir = pathBuilder.getS3AnalyticsModelDir(s3Bucket, tenantId);
+        String hdfsModelDir = pathBuilder.getHdfsAnalyticsModelDir(customer);
+        final String s3Prefix = s3ModelsDir.replace("s3n://" + s3Bucket + "/", "");
+        List<S3ObjectSummary> summaries = s3Service.listObjects(s3Bucket, s3Prefix);
+        summaries.forEach(summary -> {
+            String key = summary.getKey();
+            if (key.endsWith("model.json")) {
+                log.info("S3 Object: " + summary.getKey());
+                String relativePath = key.replace(s3Prefix, "");
+                String hdfsPath = hdfsModelDir + relativePath;
+                log.info("Hdfs Path: " + hdfsPath);
+                try {
+                    if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+                        InputStream is = s3Service.readObjectAsStream(s3Bucket, key);
+                        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, hdfsPath);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to copy from " + key + " to " + hdfsPath);
+                }
+            }
+        });
     }
 
     private String getCondaEnv() {

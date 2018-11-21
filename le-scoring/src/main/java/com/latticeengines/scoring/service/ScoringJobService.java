@@ -12,4 +12,6 @@ public interface ScoringJobService {
 
     ApplicationId score(Properties properties);
 
+    void syncModelsFromS3ToHdfs(String tenant);
+
 }

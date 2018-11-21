@@ -2,20 +2,20 @@ package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -54,14 +54,32 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringStepYarnProcessorImpl.class);
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private VersionManager versionManager;
+
+    @Inject
+    private JdbcTemplate scoringJdbcTemplate;
+
+    @Inject
+    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
+
+    @Inject
+    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
+
+    @Inject
+    private DbCreds scoringCreds;
+
+    @Inject
+    private ScoringJobService scoringJobService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -82,25 +100,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private String minInputSplitSize;
 
     @Value("${dataplatform.hdfs.stack:}")
-    protected String stackName;
-
-    @Autowired
-    private VersionManager versionManager;
-
-    @Autowired
-    private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Autowired
-    private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
-
-    @Autowired
-    private DbCreds scoringCreds;
-
-    @Autowired
-    private ScoringJobService scoringJobService;
+    private String stackName;
 
     private static final String OUTPUT_TABLE_PREFIX = "Leads_";
 
@@ -226,12 +226,13 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String tableName = scoringCommand.getTableName();
         List<String> modelGuids = dbMetadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName,
                 ScoringDaemonService.MODEL_GUID);
-        List<String> cacheFiles = new ArrayList<>();
+        List<String> cacheFiles;
         try {
+            scoringJobService.syncModelsFromS3ToHdfs(tenant);
             cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
                     versionManager.getCurrentVersionInStack(stackName));
             cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                    modelGuids, Boolean.FALSE.booleanValue()));
+                    modelGuids, Boolean.FALSE));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
