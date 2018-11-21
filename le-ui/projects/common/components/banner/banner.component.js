@@ -43,7 +43,22 @@ angular.module('common.banner', [])
             banner.timestamp = [ new Date().getTime() ];
             this.banners.push(banner);
         }
+        banner.message = wrapMessage(banner.message);
     };
+
+    function wrapMessage(message) {
+        var parts = message.split(' '),
+            messageAr = [];
+
+        parts.forEach(function(part) {
+            if(part.length > 100) {
+                part = '<div class="long-word">' + part + '</div>';
+            }
+            messageAr.push(part);
+        });
+
+        return messageAr.join(' ');
+    }
 
     this.reset = function(lifetime) {
         var now = Date.now();
@@ -101,7 +116,7 @@ angular.module('common.banner', [])
 })
 .component('bannerMessage', {
     templateUrl: '/components/banner/banner.component.html',
-    controller: function(Banner) {
+    controller: function(Banner, $timeout) {
         var vm = this;
 
         vm.$onInit = function() {
@@ -147,5 +162,19 @@ angular.module('common.banner', [])
 
             return preface + times.join('\n');
         };
+
+        vm.resizeBanner = function() {
+            var $_banner_message = angular.element('banner-message .messaging-message'),
+                initialWidth = $_banner_message.parent().innerWidth() - 20;
+
+            $timeout(function() {
+                var $banner_message = angular.element('banner-message .messaging-message'),
+                    hasLongWord = $banner_message.find('.long-word').length;
+
+                if(hasLongWord) {
+                    $banner_message.width(initialWidth);
+                }
+            });
+        }
     }
 });

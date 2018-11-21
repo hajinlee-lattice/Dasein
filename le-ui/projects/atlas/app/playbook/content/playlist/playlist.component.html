@@ -66,6 +66,7 @@
                         <ul>
                             <li>Last Edited by: <span class="blue-text">{{play.updatedBy}}</span></li>
                             <li>Last Edited: <span class="blue-text">{{play.updated | date}}</span></li>
+                            <li>Segment: <span class="blue-text">{{play.targetSegment.display_name}}</span></li>
                             <li>Model: <span class="blue-text">{{play.ratingEngine.displayName}}</span></li>
 <!--
                              <li class="text-ellipsis">
@@ -112,12 +113,22 @@
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
+<!--                         
                          <button 
                             type="button"
                             class="button blue-button pull-right"
                             ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
                             ui-sref="home.playbook.dashboard({play_name: play.name})">
                             Continue
+                        </button>
+
+ -->                     
+                        <button 
+                            type="button"
+                            class="button blue-button pull-right"
+                            ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
+                            ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
+                            Launch
                         </button>
                          <button 
                             type="button"

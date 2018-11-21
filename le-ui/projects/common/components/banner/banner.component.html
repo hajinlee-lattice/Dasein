@@ -17,7 +17,7 @@
 
             <div class="messaging-content">
                 <div class="messaging-title" ng-if="banner.title">{{banner.title}}</div>
-                <div class="messaging-message" ng-if="banner.message" ng-html-compile="banner.message"></div>
+                <div class="messaging-message" ng-if="banner.message" ng-html-compile="banner.message" ng-init="$ctrl.resizeBanner()"></div>
             </div>
             
             <div class="messaging-controls" ng-click="banner.show = !banner.show">
