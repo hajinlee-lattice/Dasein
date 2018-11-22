@@ -105,13 +105,6 @@ public class EMRCacheServiceImpl implements EMRCacheService {
         return masterIp;
     }
 
-    @Override
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|encrypted\", #clusterName)")
-    public Boolean isEncrypted(String clusterName) {
-        String clusterId = getClusterId(clusterName);
-        return emrService.isEncrypted(clusterId);
-    }
-
     private String getClusterIdFromConsul(String clusterName) {
         String consulKey = "emr/" + clusterName + "/ClusterId";
         return getValueFromConsul(consulKey);

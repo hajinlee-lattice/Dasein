@@ -49,9 +49,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
                 throw new RuntimeException("Cannot find the master IP for main EMR cluster.");
             }
             configuration = getEmrConfiguration(masterIp);
-            if (emrCacheService.isEncrypted(clusterName)) {
-                configuration.set("hadoop.rpc.protection", "privacy");
-            }
+            configuration.set("hadoop.rpc.protection", "privacy");
         } else {
             configuration = getBaseConfiguration();
         }

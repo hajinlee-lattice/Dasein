@@ -92,9 +92,7 @@ public class EMREnvServiceImpl implements EMREnvService {
                 masterIp, awsKey, awsSecret);
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
         properties.forEach((k, v) -> yarnConfiguration.set((String) k, (String) v));
-        if (emrCacheService.isEncrypted(emrCluster)) {
-            yarnConfiguration.set("hadoop.rpc.protection", "privacy");
-        }
+        yarnConfiguration.set("hadoop.rpc.protection", "privacy");
         String fs = yarnConfiguration.get("fs.defaultFS");
         log.info(String.format("Created a YarnConfiguration (%d): %s", //
                 System.identityHashCode(yarnConfiguration), fs));

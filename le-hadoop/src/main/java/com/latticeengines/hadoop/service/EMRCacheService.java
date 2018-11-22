@@ -12,6 +12,4 @@ public interface EMRCacheService {
 
     String getWebHdfsUrl();
 
-    Boolean isEncrypted(String clusterName);
-
 }
