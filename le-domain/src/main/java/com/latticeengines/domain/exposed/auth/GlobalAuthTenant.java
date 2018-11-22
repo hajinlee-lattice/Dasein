@@ -38,8 +38,8 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject
     @Column(name = "Display_Name", nullable = true)
     private String name;
 
-    @JsonProperty("create_user")
-    @Column(name = "Create_User", nullable = true)
+    @JsonProperty("created_by_user")
+    @Column(name = "Created_By_User", nullable = true)
     private String user;
 
     @Id

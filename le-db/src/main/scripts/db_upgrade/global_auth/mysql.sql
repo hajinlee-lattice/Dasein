@@ -21,7 +21,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE `UpdateGlobalTenantConfig`()
   BEGIN
-      ALTER TABLE `GlobalAuthentication`.`GlobalTenant` ADD COLUMN `Create_User` varchar(255);
+      ALTER TABLE `GlobalAuthentication`.`GlobalTenant` ADD COLUMN `Created_By_User` varchar(255);
   END;
 //
 DELIMITER ;
