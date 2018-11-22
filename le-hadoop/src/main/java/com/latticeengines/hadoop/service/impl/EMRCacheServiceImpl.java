@@ -104,7 +104,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     private String getClusterIdFromConsul(String clusterName) {
         String clusterId = "";
         String consul = "http://internal-consul-1214146536.us-east-1.elb.amazonaws.com:8500";
-        String emrKvUrl = consul + "/v1/kv/emr/" + clusterName;
+        String emrKvUrl = consul + "/v1/kv/emr/" + clusterName + "/ClusterId";
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         JsonNode json = restTemplate.getForObject(emrKvUrl, JsonNode.class);
         if (json != null && json.size() >= 1) {
