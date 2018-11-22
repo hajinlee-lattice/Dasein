@@ -1,21 +1,14 @@
 pipeline {
   agent {
     node {
-      label "general"
+      label "cd"
     }
   }
   stages {
     stage('build') {
       steps {
         script {
-          jobs = [:]
-          jobs['cdl'] = {
-            build job: '../trunk_health_cdl'
-          }
-          jobs['lpi'] = {
-            build job: '../trunk_health_lpi'
-          }
-          parallel jobs
+          build job: 'trunk_health_trigger'
         }
       }
     }
