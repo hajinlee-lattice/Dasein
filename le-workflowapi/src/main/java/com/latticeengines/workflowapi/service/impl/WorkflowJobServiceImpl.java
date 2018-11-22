@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -475,6 +476,27 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         jobUpdate.setLastUpdateTime(currentTime);
         workflowJobUpdateEntityMgr.create(jobUpdate);
 
+        return workflowJob.getPid();
+    }
+
+    @Override
+    @WithCustomerSpace
+    public Long createFailedWorkflowJob(String customerSpace, Job failedJob) {
+        log.info("Creating failed workflowJob with customerSpace=" + customerSpace);
+        Long currentTime = System.currentTimeMillis();
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setTenant(MultiTenantContext.getTenant());
+        workflowJob.setStatus(JobStatus.FAILED.name());
+        workflowJob.setStartTimeInMillis(currentTime);
+        workflowJob.setType(failedJob.getJobType());
+        workflowJob.setUserId(failedJob.getUser());
+        workflowJob.setInputContext(failedJob.getInputs());
+        ErrorDetails errorDetails = new ErrorDetails(failedJob.getErrorCode(), failedJob.getErrorMsg(), "");
+        workflowJob.setErrorDetails(errorDetails);
+        workflowJobEntityMgr.create(workflowJob);
+
+        workflowJob.setWorkflowId(workflowJob.getPid());
+        workflowJobEntityMgr.update(workflowJob);
         return workflowJob.getPid();
     }
 

@@ -25,6 +25,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -67,7 +69,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -455,6 +456,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         } catch (LedpException e) {
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
+            cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
+                    DEFAULT_S3_USER, importConfig, e.getErrorDetails());
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         } catch (IOException e) {
@@ -462,6 +465,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         } catch (IllegalArgumentException e) {
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
+            ErrorDetails details = new ErrorDetails(LedpCode.LEDP_00002, e.getMessage(), ExceptionUtils.getStackTrace(e));
+            cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
+                    DEFAULT_S3_USER, importConfig, details);
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             log.error(e.getMessage());
             throw e;
@@ -469,6 +475,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             log.error("Unknown Exception when validate S3 import! " + e.toString());
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
+            ErrorDetails details = new ErrorDetails(LedpCode.LEDP_00002, e.getMessage(), ExceptionUtils.getStackTrace(e));
+            cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
+                    DEFAULT_S3_USER, importConfig, details);
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         }

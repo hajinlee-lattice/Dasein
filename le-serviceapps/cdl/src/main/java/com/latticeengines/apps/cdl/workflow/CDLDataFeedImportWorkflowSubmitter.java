@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,13 +23,17 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
@@ -39,6 +46,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
@@ -79,6 +89,42 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         }
         log.info(String.format("Action=%s", action));
         return actionService.create(action);
+    }
+
+    public void registerFailedAction(String customerSpace, String taskId, String actionInitiator,
+                                     S3FileToHdfsConfiguration importConfig, ErrorDetails errorDetails) {
+        log.info(String.format("Registering an import action for datafeedTask=%s, tenant=%s",
+                taskId, customerSpace));
+        Action action = new Action();
+        ImportActionConfiguration config = new ImportActionConfiguration();
+        config.setDataFeedTaskId(taskId);
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        Job failedJob = new Job();
+        failedJob.setJobType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
+        failedJob.setUser(actionInitiator);
+        Map<String, String> inputs = new HashMap<>();
+        inputs.put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, importConfig.getS3FileName());
+        inputs.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, importConfig.getS3FileName());
+        inputs.put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, importConfig.getS3FilePath());
+        failedJob.setInputs(inputs);
+        failedJob.setErrorCode(errorDetails.getErrorCode());
+        failedJob.setErrorMsg(errorDetails.getErrorMsg());
+        Long failedWorkflowId = workflowProxy.createFailedWorkflowJob(customerSpace, failedJob);
+        action.setTrackingPid(failedWorkflowId);
+        action.setActionInitiator(actionInitiator);
+        Tenant tenant = tenantService.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new NullPointerException(
+                    String.format("Tenant with id=%s cannot be found", customerSpace));
+        }
+        action.setTenant(tenant);
+        action.setActionConfiguration(config);
+        if (tenant.getPid() != null) {
+            MultiTenantContext.setTenant(tenant);
+        } else {
+            log.warn("The tenant in action does not have a pid: " + tenant);
+        }
+        actionService.create(action);
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,

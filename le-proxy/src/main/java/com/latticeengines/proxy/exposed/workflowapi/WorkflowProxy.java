@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
@@ -93,6 +94,14 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         url = constructUrl(url);
         return post("createWorkflowJob", url, null, Long.class);
+    }
+
+    public Long createFailedWorkflowJob(String customerSpace, Job failedJob) {
+        checkCustomerSpace(customerSpace);
+        String baseUrl = "/jobs/createfail";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
+        url = constructUrl(url);
+        return post("createWorkflowJob", url, failedJob, Long.class);
     }
 
     public AppSubmission restartWorkflowExecution(String workflowId, String customerSpace) {

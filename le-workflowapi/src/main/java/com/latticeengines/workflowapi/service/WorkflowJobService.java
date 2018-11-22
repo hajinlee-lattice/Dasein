@@ -3,7 +3,6 @@ package com.latticeengines.workflowapi.service;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 
@@ -70,6 +69,8 @@ public interface WorkflowJobService {
     String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration);
 
     Long createWorkflowJob(String customerSpace);
+
+    Long createFailedWorkflowJob(String customerSpace, Job failedJob);
 
     void stopWorkflow(String customerSpace, Long workflowId);
 

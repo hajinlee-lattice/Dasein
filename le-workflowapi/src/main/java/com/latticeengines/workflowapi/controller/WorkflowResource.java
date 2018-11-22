@@ -200,6 +200,12 @@ public class WorkflowResource {
         return workflowJobService.createWorkflowJob(customerSpace);
     }
 
+    @PostMapping(value = "/jobs/createfail", headers = "Accept=application/json")
+    @ApiOperation(value = "Create a failed workflow job record")
+    public Long createFailedWorkflowJob(@RequestParam String customerSpace, @RequestBody Job failedJob) {
+        return workflowJobService.createFailedWorkflowJob(customerSpace, failedJob);
+    }
+
 
     @GetMapping(value = "/yarnapps/id/{applicationId}", headers = "Accept=application/json")
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
