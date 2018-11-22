@@ -51,13 +51,13 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
+            <artifactId>le-common-web</artifactId>
             <version>${le.common.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
+            <artifactId>le-common-web</artifactId>
             <version>${le.common.version}</version>
             <scope>runtime</scope>
         </dependency>
