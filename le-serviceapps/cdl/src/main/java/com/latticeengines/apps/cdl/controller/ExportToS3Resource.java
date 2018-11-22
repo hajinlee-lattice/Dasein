@@ -114,7 +114,7 @@ public class ExportToS3Resource {
                         List<ExportRequest> requests = new ArrayList<>();
                         exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests);
                         exportToS3Service.executeRequests(requests, onlyAtlas);
-                        // exportToS3Service.buildDataUnits(requests);
+                        exportToS3Service.buildDataUnits(requests);
                         log.info("Finished Export To S3 for " + customer);
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to Export to S3", e);

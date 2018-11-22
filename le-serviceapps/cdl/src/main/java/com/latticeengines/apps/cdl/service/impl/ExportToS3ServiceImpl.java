@@ -118,18 +118,22 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             CustomerSpace customerSpace = request.customerSpace;
             String customer = customerSpace.toString();
             String tenantId = customerSpace.getTenantId();
-            try {
-                DataCollection dc = dataCollectionService.getDefaultCollection(customer);
-                if (dc == null) {
-                    log.info("There's no data collection for tenantId=" + tenantId);
-                    continue;
+            try (PerformanceTimer timer = new PerformanceTimer( //
+                    "Finished adding data units for active data collection for " + tenantId)) {
+                log.info("Start adding data units for active data collection for " + tenantId);
+                try {
+                    DataCollection dc = dataCollectionService.getDefaultCollection(customer);
+                    if (dc == null) {
+                        log.info("There's no data collection for tenantId=" + tenantId);
+                        continue;
+                    }
+                    DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customer);
+                    for (TableRoleInCollection role : TableRoleInCollection.values()) {
+                        addDataUnitsForRole(customer, tenantId, activeVersion, role);
+                    }
+                } catch (Exception ex) {
+                    log.warn("Failed to get tables for tenantId=" + tenantId + " msg=" + ex.getMessage());
                 }
-                DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customer);
-                for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                    addDataUnitsForRole(customer, tenantId, activeVersion, role);
-                }
-            } catch (Exception ex) {
-                log.warn("Failed to get tables for tenantId=" + tenantId + " msg=" + ex.getMessage());
             }
         }
     }
