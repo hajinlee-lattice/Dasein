@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -246,15 +245,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                             subFolders.add(subFolder);
                         });
                     }
-//                    log.info(tenantId + " has " + CollectionUtils.size(subFolders) + " " + name + " sub-folders.");
-//                    if (CollectionUtils.size(subFolders) > 2000) {
-//                        String msg = tenantId + " has " + CollectionUtils.size(subFolders) //
-//                                + " " + name + " sub-folders. Not allowed to be migrated automatically.";
-//                        log.error(msg);
-//                        throw new IllegalStateException(msg);
-//                    }
-
-                    if (CollectionUtils.size(subFolders) < 2000) {
+                    String msg = tenantId + " has " + CollectionUtils.size(subFolders) + " " + name + " sub-folders.";
+                    log.info(msg);
+                    if (CollectionUtils.size(subFolders) < 1000) {
                         subFolders.clear();
                     }
 
@@ -312,36 +305,6 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     throw new RuntimeException(msg, ex);
                 }
             }
-        }
-
-        private Set<String> getTablesInCollection() {
-            log.info("Getting all tables in collection for " + tenantId);
-            Set<String> tableNames = new HashSet<>();
-            DataCollection.Version version = dataCollectionService.getActiveVersion(customer);
-            for (TableRoleInCollection role: TableRoleInCollection.values()) {
-                List<String> tblsForRole = dataCollectionService.getTableNames(customer, null, role, version);
-                tableNames.addAll(tblsForRole);
-                log.info(tenantId + ": added " + CollectionUtils.size(tblsForRole) + " " + role + " tables at version " + version);
-            }
-            return tableNames;
-        }
-
-        private Set<String> getAllEventTables() {
-            log.info("Getting all event tables for " + tenantId);
-            Set<String> eventTables = new HashSet<>();
-            String hdfsModelsDir = pathBuilder.getHdfsAnalyticsModelDir(customer);
-            try {
-                if (HdfsUtils.fileExists(distCpConfiguration, hdfsModelsDir)) {
-                    HdfsUtils.getFilesForDir(distCpConfiguration, srcDir).forEach(path -> {
-                        String eventTable = path.substring(path.lastIndexOf("/") + 1);
-                        log.info("Found an event table for " + tenantId + " : " + eventTable);
-                        eventTables.add(eventTable);
-                    });
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to find all event tables from hdfs models folder");
-            }
-            return eventTables;
         }
 
         private Configuration createConfiguration() {
