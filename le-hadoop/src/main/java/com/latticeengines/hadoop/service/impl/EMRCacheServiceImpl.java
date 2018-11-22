@@ -74,11 +74,10 @@ public class EMRCacheServiceImpl implements EMRCacheService {
         String clusterId = "";
         try {
             if (StringUtils.isNotBlank(consul)) {
-                RetryTemplate retry = RetryUtils.getRetryTemplate(5);
-                clusterId = retry.execute(context -> getClusterIdFromConsul(clusterName));
+                clusterId = getClusterIdFromConsul(clusterName);
             }
         } catch (Exception e) {
-            log.info("Failed to get cluster id from consul.", e);
+            log.info("Failed to get cluster id for " + clusterName + "from consul.", e);
             clusterId = "";
         }
         if (StringUtils.isBlank(clusterId)) {
@@ -90,8 +89,20 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     @Override
     @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)")
     public String getMasterIp(String clusterName) {
-        String clusterId = getClusterId(clusterName);
-        return emrService.getMasterIp(clusterId);
+        String masterIp = "";
+        try {
+            if (StringUtils.isNotBlank(consul)) {
+                masterIp = getMasterIpFromConsul(clusterName);
+            }
+        } catch (Exception e) {
+            log.info("Failed to get master ip for " + clusterName + " from consul.", e);
+            masterIp = "";
+        }
+        if (StringUtils.isBlank(masterIp)) {
+            String clusterId = getClusterId(clusterName);
+            masterIp = emrService.getMasterIp(clusterId);
+        }
+        return masterIp;
     }
 
     @Override
@@ -102,16 +113,25 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     }
 
     private String getClusterIdFromConsul(String clusterName) {
-        String clusterId = "";
-        String consul = "http://internal-consul-1214146536.us-east-1.elb.amazonaws.com:8500";
-        String emrKvUrl = consul + "/v1/kv/emr/" + clusterName + "/ClusterId";
+        String consulKey = "emr/" + clusterName + "/ClusterId";
+        return getValueFromConsul(consulKey);
+    }
+
+    private String getMasterIpFromConsul(String clusterName) {
+        String consulKey = "emr/" + clusterName + "/MasterIp";
+        return getValueFromConsul(consulKey);
+    }
+
+    private String getValueFromConsul(String key) {
+        String kvUrl = consul + "/v1/kv/" + key;
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-        JsonNode json = restTemplate.getForObject(emrKvUrl, JsonNode.class);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        JsonNode json = retry.execute(context -> restTemplate.getForObject(kvUrl, JsonNode.class));
         if (json != null && json.size() >= 1) {
             String data = json.get(0).get("Value").asText();
-            clusterId = new String(Base64Utils.decodeBase64(data));
+            return new String(Base64Utils.decodeBase64(data));
         }
-        return clusterId;
+        return null;
     }
 
 }
