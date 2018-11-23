@@ -3,7 +3,7 @@
     "name": "ALEXA",
     "fields": [
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "LEInternalID"
         },
         {
@@ -11,31 +11,31 @@
             "name": "LEParentInternalID"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "WebPageUrl"
         },
         {
-            "type": "long",
+            "type": ["long", "null"],
             "name": "Creation_Date"
         },
         {
-            "type": "long",
+            "type": ["long", "null"],
             "name": "Last_Modification_Date"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Categories"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Description"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Domains"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Keywords"
         },
         {
@@ -43,7 +43,7 @@
             "name": "LinksIn"
         },
         {
-            "type": "long",
+            "type": ["long", "null"],
             "name": "OnlineSince"
         },
         {
@@ -59,15 +59,15 @@
             "name": "ReachRank"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "RelatedLinks"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Title"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "URL"
         },
         {
@@ -83,15 +83,15 @@
             "name": "ViewsRank"
         },
         {
-            "type": "long",
+            "type": ["long", "null"],
             "name": "LE_Last_Upload_Date"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Language"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country1_Code"
         },
         {
@@ -107,7 +107,7 @@
             "name": "Users1"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country2_Code"
         },
         {
@@ -123,7 +123,7 @@
             "name": "Users2"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country3_Code"
         },
         {
@@ -139,7 +139,7 @@
             "name": "Users3"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country4_Code"
         },
         {
@@ -155,7 +155,7 @@
             "name": "Users4"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country5_Code"
         },
         {
@@ -171,7 +171,7 @@
             "name": "Users5"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country6_Code"
         },
         {
@@ -187,7 +187,7 @@
             "name": "Users6"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country7_Code"
         },
         {
@@ -203,7 +203,7 @@
             "name": "Users7"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country8_Code"
         },
         {
@@ -219,7 +219,7 @@
             "name": "Users8"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country9_Code"
         },
         {
@@ -235,7 +235,7 @@
             "name": "Users9"
         },
         {
-            "type": "string",
+            "type": ["string", "null"],
             "name": "Country10_Code"
         },
         {

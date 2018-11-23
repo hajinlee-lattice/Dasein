@@ -143,6 +143,20 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
+    @Test(groups = "avro_avsc")
+    public void testAvroSchema() throws Exception {
+        String schemaStr = AvroUtils.buildSchema("builtwith.avsc");
+        Assert.assertNotNull(schemaStr);
+        Schema schema = new Schema.Parser().parse(schemaStr);
+        Assert.assertNotNull(schema);
+
+        String schemaStr1 = AvroUtils.buildSchema("alexa.avsc");
+        Assert.assertNotNull(schemaStr1);
+        Schema schema1 = new Schema.Parser().parse(schemaStr1);
+        Assert.assertNotNull(schema1);
+
+    }
+
     @Test(groups = "avro_test")
     public void testAvro() throws Exception {
 
