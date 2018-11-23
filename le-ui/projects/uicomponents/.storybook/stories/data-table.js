@@ -302,7 +302,7 @@ stories.add("edit table", () => (
 let configPagination = {
   name: "import-templates",
   pagination:{
-    perPage: 10,
+    perPage: 2,
     startPage: 1
   },
   header: [

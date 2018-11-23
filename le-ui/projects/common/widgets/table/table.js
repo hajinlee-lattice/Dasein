@@ -5,8 +5,6 @@ import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
 import "./table.scss";
 import Sort, {
-  DIRECTION_ASC,
-  DIRECTION_DESC,
   DIRECTION_NONE,
   SortUtil
 } from "./controlls/sort";
@@ -56,7 +54,6 @@ export default class LeTable extends Component {
     this.setState({ data: data });
   }
   sortHandler(colName, direction) {
-    // console.log('DIRECTION', direction);
     this.setState(
       {
         sortingName: colName,
