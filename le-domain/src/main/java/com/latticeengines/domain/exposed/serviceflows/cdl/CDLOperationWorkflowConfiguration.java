@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.Clea
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.DeleteFileUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.OperationExecuteConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -34,6 +35,7 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         private StartMaintenanceConfiguration startMaintenanceConfiguration = new StartMaintenanceConfiguration();
         private OperationExecuteConfiguration operationExecuteConfiguration = new OperationExecuteConfiguration();
         private CleanupByUploadWrapperConfiguration cleanupByUploadWrapperConfiguration = new CleanupByUploadWrapperConfiguration();
+        private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlOperationWorkflow", customerSpace,
@@ -42,6 +44,7 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             startMaintenanceConfiguration.setCustomerSpace(customerSpace);
             operationExecuteConfiguration.setCustomerSpace(customerSpace);
             cleanupByUploadWrapperConfiguration.setCustomerSpace(customerSpace);
+            importExportS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -49,8 +52,8 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             deleteFileUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             startMaintenanceConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             operationExecuteConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            cleanupByUploadWrapperConfiguration
-                    .setInternalResourceHostPort(internalResourceHostPort);
+            cleanupByUploadWrapperConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            importExportS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -58,15 +61,14 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             deleteFileUploadStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             startMaintenanceConfiguration.setMicroServiceHostPort(microServiceHostPort);
             operationExecuteConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            importExportS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder maintenanceOperationConfiguration(
                 MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
-            operationExecuteConfiguration
-                    .setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
-            cleanupByUploadWrapperConfiguration
-                    .setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
+            operationExecuteConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
+            cleanupByUploadWrapperConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
             configuration.setUserId(maintenanceOperationConfiguration.getOperationInitiator());
             return this;
         }
@@ -104,6 +106,7 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             configuration.add(startMaintenanceConfiguration);
             configuration.add(operationExecuteConfiguration);
             configuration.add(cleanupByUploadWrapperConfiguration);
+            configuration.add(importExportS3);
             return configuration;
         }
     }

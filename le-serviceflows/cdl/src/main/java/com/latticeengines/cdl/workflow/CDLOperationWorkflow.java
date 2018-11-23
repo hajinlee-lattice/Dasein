@@ -12,6 +12,8 @@ import com.latticeengines.cdl.workflow.steps.maintenance.DeleteFileUploadStep;
 import com.latticeengines.cdl.workflow.steps.maintenance.OperationExecuteStep;
 import com.latticeengines.cdl.workflow.steps.maintenance.StartMaintenanceStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportCleanupToS3;
+import com.latticeengines.serviceflows.workflow.export.ImportCleanupFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -36,13 +38,21 @@ public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowC
     @Inject
     private MaintenanceOperationListener maintenanceOperationListener;
 
+    @Inject
+    private ImportCleanupFromS3 importCleanupFromS3;
+
+    @Inject
+    private ExportCleanupToS3 exportCleanupToS3;
+
     @Override
     public Workflow defineWorkflow(CDLOperationWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config)//
-                .next(deleteFileUploadStep)//
                 .next(startMaintenanceStep)//
+                .next(importCleanupFromS3) //
+                .next(deleteFileUploadStep)//
                 .next(cleanupByUploadWrapper)//
                 .next(operationExecuteStep)//
+                .next(exportCleanupToS3)
                 .listener(maintenanceOperationListener)//
                 .build();
     }

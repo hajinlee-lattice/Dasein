@@ -107,6 +107,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String INACTIVE_ENGINES = "INACTIVE_ENGINES";
     public static final String ITERATION_RATING_MODELS = "ITERATION_RATING_MODELS";
     public static final String RATING_MODELS_BY_ITERATION = "RATING_MODELS_BY_ITERATION";
+    protected static final String IMPACTED_ENTITIES = "IMPACTED_ENTITIES";
     protected static final String ITERATION_INACTIVE_ENGINES = "ITERATION_INACTIVE_ENGINES";
     protected static final String INACTIVE_RATINGS_TABLE_NAME = "INACTIVE_RATINGS_TABLE_NAME";
     protected static final String RATING_ENGINE_ID_TO_ACTIVATE = "RATING_ENGINE_ID_TO_ACTIVATE";
@@ -117,6 +118,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
     protected static final String PA_TIMESTAMP = "PA_TIMESTAMP";
+    protected static final String CLEANUP_TIMESTAMP = "CLEANUP_TIMESTAMP";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";

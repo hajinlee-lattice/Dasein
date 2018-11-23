@@ -9,14 +9,18 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -26,6 +30,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -53,6 +58,15 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
     @Inject
     private RedshiftService redshiftService;
 
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    protected String podId;
+
     @Override
     public Map<String, Long> invoke(CleanupAllConfiguration config) {
         Map<String, Long> report;
@@ -76,6 +90,16 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                     Arrays.asList(DataCollection.Version.Blue,
                         DataCollection.Version.Green));
 
+            cleanupS3(config.getCustomerSpace(),
+                    Arrays.asList(BusinessEntity.Account.getBatchStore(),
+                            BusinessEntity.Contact.getBatchStore(),
+                            BusinessEntity.Product.getBatchStore(),
+                            TableRoleInCollection.ConsolidatedRawTransaction,
+                            TableRoleInCollection.ConsolidatedDailyTransaction,
+                            TableRoleInCollection.ConsolidatedPeriodTransaction),
+                    Arrays.asList(DataCollection.Version.Blue,
+                            DataCollection.Version.Green));
+
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Account.getBatchStore());
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Contact.getBatchStore());
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Product.getBatchStore());
@@ -92,6 +116,12 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                             TableRoleInCollection.ConsolidatedPeriodTransaction),
                     Arrays.asList(DataCollection.Version.Blue,
                             DataCollection.Version.Green));
+            cleanupS3(config.getCustomerSpace(),
+                    Arrays.asList(TableRoleInCollection.ConsolidatedRawTransaction,
+                            TableRoleInCollection.ConsolidatedDailyTransaction,
+                            TableRoleInCollection.ConsolidatedPeriodTransaction),
+                    Arrays.asList(DataCollection.Version.Blue,
+                            DataCollection.Version.Green));
             dataCollectionProxy.resetTable(config.getCustomerSpace(), TableRoleInCollection.ConsolidatedRawTransaction);
             dataCollectionProxy.resetTable(config.getCustomerSpace(),
                     TableRoleInCollection.ConsolidatedDailyTransaction);
@@ -101,6 +131,10 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         } else if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact
                 || entity == BusinessEntity.Product) {
             cleanupRedshift(config.getCustomerSpace(),
+                    Arrays.asList(config.getEntity().getBatchStore()),
+                    Arrays.asList(DataCollection.Version.Blue,
+                            DataCollection.Version.Green));
+            cleanupS3(config.getCustomerSpace(),
                     Arrays.asList(config.getEntity().getBatchStore()),
                     Arrays.asList(DataCollection.Version.Blue,
                             DataCollection.Version.Green));
@@ -205,6 +239,29 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             });
         } catch (Exception e) {
             log.error(String.format("Cannot cleanup redshift tables for %s", customSpace));
+        }
+    }
+
+    private void cleanupS3(String customSpace, List<TableRoleInCollection> roles,
+                                 List<DataCollection.Version> versions) {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        try {
+            versions.forEach(version -> {
+                roles.forEach(role -> {
+                    Table table = dataCollectionProxy.getTable(customSpace, role, version);
+                    List<Extract> extracts = table.getExtracts();
+                    if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
+                        log.warn("Can not find extracts of the table=" + table.getName() + " for tenant=" + customSpace);
+                        return;
+                    }
+                    String srcDir = pathBuilder.getFullPath(extracts.get(0).getPath());
+                    String tenantId = CustomerSpace.parse(customSpace).getTenantId();
+                    String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
+                    s3Service.cleanupPrefix(s3Bucket, tgtDir);
+                });
+            });
+        } catch (Exception e) {
+            log.error(String.format("Cannot cleanup s3 tables for %s", customSpace));
         }
     }
 
