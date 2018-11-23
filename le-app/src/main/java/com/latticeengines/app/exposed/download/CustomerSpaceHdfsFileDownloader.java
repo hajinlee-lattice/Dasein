@@ -8,6 +8,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader {
 
@@ -19,7 +21,7 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
     private String customer;
 
     public CustomerSpaceHdfsFileDownloader(FileDownloadBuilder builder) {
-        super(builder.mimeType, builder.importFromS3Service);
+        super(builder.mimeType, builder.importFromS3Service, builder.cdlAttrConfigProxy, builder.batonService);
         this.yarnConfiguration = builder.yarnConfiguration;
         this.filePath = builder.filePath;
         this.fileName = builder.fileName;
@@ -51,6 +53,8 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
         private String fileName;
         private String customer;
         private ImportFromS3Service importFromS3Service;
+        private CDLAttrConfigProxy cdlAttrConfigProxy;
+        private BatonService batonService;
 
         public FileDownloadBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -79,6 +83,16 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
 
         public FileDownloadBuilder setImportFromS3Service(ImportFromS3Service importFromS3Service) {
             this.importFromS3Service = importFromS3Service;
+            return this;
+        }
+
+        public FileDownloadBuilder setCDLAttrConfigProxy(CDLAttrConfigProxy cdlAttrConfigProxy) {
+            this.cdlAttrConfigProxy = cdlAttrConfigProxy;
+            return this;
+        }
+
+        public FileDownloadBuilder setBatonService(BatonService batonService) {
+            this.batonService = batonService;
             return this;
         }
 

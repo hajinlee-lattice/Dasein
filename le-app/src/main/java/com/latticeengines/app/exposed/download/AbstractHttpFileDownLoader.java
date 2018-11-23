@@ -36,9 +36,12 @@ import org.springframework.util.FileCopyUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -58,6 +61,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     private CDLAttrConfigProxy cdlAttrConfigProxy;
     private DataCollectionProxy dataCollectionProxy;
     private MetadataProxy metadataProxy;
+    private BatonService batonService;
 
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpFileDownLoader.class);
 
@@ -65,19 +69,12 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     protected abstract InputStream getFileInputStream() throws Exception;
 
-    protected AbstractHttpFileDownLoader(String mimeType, ImportFromS3Service importFromS3Service) {
-        this.mimeType = mimeType;
-        this.importFromS3Service = importFromS3Service;
-        this.cdlAttrConfigProxy = null;
-        this.dataCollectionProxy = new DataCollectionProxy();
-        this.metadataProxy = new MetadataProxy();
-    }
-
     protected AbstractHttpFileDownLoader(String mimeType, ImportFromS3Service importFromS3Service,
-            CDLAttrConfigProxy cdlAttrConfigProxy) {
+            CDLAttrConfigProxy cdlAttrConfigProxy, BatonService batonService) {
         this.mimeType = mimeType;
         this.importFromS3Service = importFromS3Service;
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
+        this.batonService = batonService;
         this.dataCollectionProxy = new DataCollectionProxy();
         this.metadataProxy = new MetadataProxy();
     }
@@ -141,6 +138,10 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         List<String> dateAttributes = new ArrayList<>();
         String shortTenantId = MultiTenantContext.getShortTenantId();
         if (StringUtils.isBlank(shortTenantId)) {
+            return Collections.emptyList();
+        }
+
+        if (batonService != null && !batonService.hasProduct(CustomerSpace.parse(shortTenantId), LatticeProduct.CG)) {
             return Collections.emptyList();
         }
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(shortTenantId);

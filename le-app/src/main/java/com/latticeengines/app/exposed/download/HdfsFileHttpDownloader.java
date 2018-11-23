@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -45,11 +46,12 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
     // for test purpose
     protected HdfsFileHttpDownloader() {
-        super(null, null);
+        super(null, null, null, null);
     }
 
     public HdfsFileHttpDownloader(DownloadRequestBuilder requestBuilder) {
-        super(requestBuilder.mimeType, requestBuilder.importFromS3Service, requestBuilder.cdlAttrConfigProxy);
+        super(requestBuilder.mimeType, requestBuilder.importFromS3Service, requestBuilder.cdlAttrConfigProxy,
+                requestBuilder.batonService);
         this.filter = requestBuilder.filter;
         this.modelId = requestBuilder.modelId;
         this.yarnConfiguration = requestBuilder.yarnConfiguration;
@@ -222,6 +224,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         private ModelSummaryProxy modelSummaryProxy;
         protected ImportFromS3Service importFromS3Service;
         private CDLAttrConfigProxy cdlAttrConfigProxy;
+        private BatonService batonService;
 
         public DownloadRequestBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -260,6 +263,11 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
         public DownloadRequestBuilder setCDLAttrConfigProxy(CDLAttrConfigProxy cdlAttrConfigProxy) {
             this.cdlAttrConfigProxy = cdlAttrConfigProxy;
+            return this;
+        }
+
+        public DownloadRequestBuilder setBatonService(BatonService batonService) {
+            this.batonService = batonService;
             return this;
         }
     }

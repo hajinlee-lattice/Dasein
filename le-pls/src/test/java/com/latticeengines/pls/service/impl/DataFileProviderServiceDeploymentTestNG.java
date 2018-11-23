@@ -34,6 +34,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -73,6 +74,9 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
     private ImportFromS3Service importFromS3Service;
 
     @Autowired
+    private BatonService batonService;
+
+    @Autowired
     private ModelSummaryProxy modelSummaryProxy;
 
     private String modelId;
@@ -92,6 +96,7 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
         dataFileProviderService.setModelSummaryProxy(modelSummaryProxy);
         dataFileProviderService.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
         dataFileProviderService.setImportFromS3Service(importFromS3Service);
+        dataFileProviderService.setBatonService(batonService);
 
         testBed.bootstrap(1);
         Tenant tenant1 = testBed.getMainTestTenant();

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader;
 import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader.DownloadRequestBuilder;
 import com.latticeengines.app.exposed.download.HttpFileDownLoader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -53,6 +55,9 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
+
+    @Autowired
+    private BatonService batonService;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
@@ -155,7 +160,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         String customer = MultiTenantContext.getTenant().getId();
         customer = customer != null ? customer : new HdfsToS3PathBuilder().getCustomerFromHdfsPath(filePath);
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service);
+                .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service)
+                .setBatonService(batonService);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 
@@ -171,7 +177,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         requestBuilder.setMimeType(mimeType).setFilter(filter).setModelId(modelId)
                 .setYarnConfiguration(yarnConfiguration).setModelSummaryProxy(modelSummaryProxy);
         requestBuilder.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
-                .setImportFromS3Service(importFromS3Service).setCDLAttrConfigProxy(cdlAttrConfigProxy);
+                .setImportFromS3Service(importFromS3Service).setCDLAttrConfigProxy(cdlAttrConfigProxy)
+                .setBatonService(batonService);
         return new HdfsFileHttpDownloader(requestBuilder);
     }
 
@@ -201,15 +208,18 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         this.importFromS3Service = importFromS3Service;
     }
 
+    @VisibleForTesting
+    void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
+    }
+
     @Override
     public void downloadS3File(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName, String filePath) throws IOException {
         log.info(String.format("Download file with fileName %s and filePath %s.", fileName, filePath));
         CustomerSpaceS3FileDownloader.S3FileDownloadBuilder builder = new CustomerSpaceS3FileDownloader.S3FileDownloadBuilder();
-        builder.setMimeType(mimeType)
-                .setFilePath(filePath)
-                .setFileName(fileName)
-                .setImportFromS3Service(importFromS3Service);
+        builder.setMimeType(mimeType).setFilePath(filePath).setFileName(fileName)
+                .setImportFromS3Service(importFromS3Service).setBatonService(batonService);
         CustomerSpaceS3FileDownloader customerSpaceS3FileDownloader = new CustomerSpaceS3FileDownloader(builder);
         customerSpaceS3FileDownloader.downloadFile(request, response);
 

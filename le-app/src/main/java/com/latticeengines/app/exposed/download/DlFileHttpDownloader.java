@@ -10,7 +10,7 @@ public class DlFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String fileContent;
 
     public DlFileHttpDownloader(String mimeType, String fileName, String fileContent) {
-        super(mimeType, null);
+        super(mimeType, null, null, null);
         this.fileName = fileName;
         this.fileContent = fileContent;
     }

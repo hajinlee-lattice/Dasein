@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -53,6 +54,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Inject
     private ImportFromS3Service importFromS3Service;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
@@ -174,7 +178,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         String customer = MultiTenantContext.getTenant().getId();
         customer = customer != null ? customer : new HdfsToS3PathBuilder().getCustomerFromHdfsPath(filePath);
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
-                .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service);
+                .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service)
+                .setBatonService(batonService);
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 

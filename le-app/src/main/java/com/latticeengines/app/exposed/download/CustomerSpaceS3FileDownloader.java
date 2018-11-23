@@ -2,8 +2,9 @@ package com.latticeengines.app.exposed.download;
 
 import java.io.InputStream;
 
-
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
 
@@ -11,7 +12,7 @@ public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
     private String filePath;
 
     public CustomerSpaceS3FileDownloader(S3FileDownloadBuilder builder) {
-        super(builder.mimeType, builder.importFromS3Service);
+        super(builder.mimeType, builder.importFromS3Service, builder.cdlAttrConfigProxy, builder.batonService);
         this.fileName = builder.fileName;
         this.filePath = builder.filePath;
     }
@@ -32,6 +33,8 @@ public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
         private String fileName;
         private String filePath;
         private ImportFromS3Service importFromS3Service;
+        private CDLAttrConfigProxy cdlAttrConfigProxy;
+        private BatonService batonService;
 
         public S3FileDownloadBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -53,5 +56,14 @@ public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
             return this;
         }
 
+        public S3FileDownloadBuilder setCDLAttrConfigProxy(CDLAttrConfigProxy cdlAttrConfigProxy) {
+            this.cdlAttrConfigProxy = cdlAttrConfigProxy;
+            return this;
+        }
+
+        public S3FileDownloadBuilder setBatonService(BatonService batonService) {
+            this.batonService = batonService;
+            return this;
+        }
     }
 }
