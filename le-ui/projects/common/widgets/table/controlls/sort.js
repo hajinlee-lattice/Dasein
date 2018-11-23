@@ -5,6 +5,50 @@ export const DIRECTION_ASC = 'asc';
 export const DIRECTION_DESC = 'desc';
 export const DIRECTION_NONE = 'none';
 
+let sortingName = '';
+let sortingDirection = '';
+const compare = (a, b) => {
+    switch (sortingDirection) {
+      case DIRECTION_ASC: {
+        if (
+          ((a[sortingName])+'').toLowerCase() <
+          ((b[sortingName])+'').toLowerCase()
+        ) {
+          return -1;
+        }
+        if (
+          ((a[sortingName])+'').toLowerCase() >
+          ((b[sortingName])+'').toLowerCase()
+        ) {
+          return 1;
+        }
+        return 0;
+      }
+      case DIRECTION_DESC:
+        if (
+          ((a[sortingName])+'').toLowerCase() >
+          ((b[sortingName])+'').toLowerCase()
+        ) {
+          return -1;
+        }
+        if (
+          ((a[sortingName])+'').toLowerCase() <
+          ((b[sortingName])+'').toLowerCase()
+        ) {
+          return 1;
+        }
+        return 0;
+    }
+}
+
+export const SortUtil = {
+    sortAray : (array, name, direction) => {
+      sortingName = name;
+      sortingDirection = direction;
+      return array.sort(compare);
+    }
+};
+
 export default class Sort extends Component {
   constructor(props) {
     super(props);

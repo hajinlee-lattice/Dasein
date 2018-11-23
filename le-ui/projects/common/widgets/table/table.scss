@@ -22,10 +22,10 @@ $font-size: 12px;
   *:before {
     transition: none;
   }
-  ul{
+  ul {
     list-style-type: none;
   }
-  .indicator-row{
+  .indicator-row {
     border-top: 1px solid $silver;
     border-bottom: 1px solid $silver;
   }
@@ -69,21 +69,19 @@ $font-size: 12px;
 
   .le-table-row:hover {
     background-color: $blue-text;
-    & > .le-table-cell{
+    & > .le-table-cell {
       color: $pearl-white;
-     
     }
-    
   }
-  .le-table-header:hover {
+  .le-table-header:hover,
+  .le-table-footer:hover {
     background-color: $pearl-white;
-    & > .le-table-cell{
+    & > .le-table-cell {
       color: $black;
-      *{
+      * {
         color: $black;
       }
     }
-    
   }
 
   .le-table-body:hover {
@@ -99,7 +97,6 @@ $font-size: 12px;
     color: $black;
     opacity: 1;
   }
- 
 
   .le-table-col-span-1 {
     -ms-grid-column-span: 1;
@@ -159,7 +156,7 @@ $font-size: 12px;
     align-items: center;
     padding: 0.2em;
     justify-content: space-between;
-   
+
     & > div {
       @extend .le-flex-h-panel;
       // padding-left: 8px;
@@ -184,7 +181,6 @@ $font-size: 12px;
         text-overflow: ellipsis;
         margin-left: 1em;
       }
-      
     }
     .le-table-cell-icon {
       margin-left: 1em;
@@ -206,13 +202,11 @@ $font-size: 12px;
       width: 100%;
       flex-wrap: nowrap;
       margin-right: 1em;
-     
     }
-    .flex-1{
+    .flex-1 {
       @extend .le-cell-template;
       flex: 1;
     }
-    
   }
 
   .le-table-cell-centered {
@@ -220,5 +214,13 @@ $font-size: 12px;
   }
   .le-table-cell-right-align {
     justify-content: flex-end;
+  }
+
+  .le-table-footer {
+    @extend .le-table-header;
+    border-top: 0px;
+    .table-pagination {
+      justify-content: flex-end;
+    }
   }
 }

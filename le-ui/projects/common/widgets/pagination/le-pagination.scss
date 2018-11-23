@@ -1,0 +1,55 @@
+.pd-pagination-container-margin {
+    margin: 1em 0;
+}
+.pd-pagination-container-margin-top {
+    margin: 1em 0 0;
+}
+.pd-pagination-container-margin-bottom {
+    margin: 0 0 1em;
+}
+pd-pagination-controls .pd-pagination {
+    text-align: center;
+    //margin: .5em 0;
+    border: 1px solid green;
+    font-size: 1em;
+    span {
+    }
+    
+    span.pd-pagination-center {
+        margin: 0 .5em;
+
+        .pd-pagination-pagenum,
+        .pd-pagination-pagetotal {
+            font-style: italic;
+        }
+        .pd-pagination-pagetotal {
+            display: inline-block;
+            margin-left: -3px;
+        }
+    }
+
+    button.white-button {
+        padding: 0em .8em;
+        color: #467dba;
+        -webkit-transition: all 0s linear;
+        -moz-transition: all 0s linear;
+        -ms-transition: all 0s linear;
+        transition: all 0s linear;
+    }
+    
+    button[disabled],
+    button.active {
+        pointer-events: none;
+        cursor: default;
+        outline: 0;
+    }
+    
+    button[disabled] {
+        // background-color: #f9f9f9;
+        color: #ccc;
+    }
+
+    .active {
+        color: red;
+    }
+}

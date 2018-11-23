@@ -296,3 +296,80 @@ stories.add("edit table", () => (
     data={data}
   />
 ));
+
+// Pagination table
+
+let configPagination = {
+  name: "import-templates",
+  pagination:{
+    perPage: 10,
+    startPage: 1
+  },
+  header: [
+    {
+      name: "TemplateName",
+      displayName: "Name"
+    },
+    {
+      name: "Object",
+      displayName: "Object"
+    },
+    {
+      name: "Path",
+      displayName: "Automated Import Location"
+    },
+    {
+      name: "LastEditedDate",
+      displayName: "Edited"
+    }
+  ],
+  columns: [
+    {
+      colSpan: 2
+    },
+    {
+      colSpan: 3
+    },
+    {
+      colSpan: 4,
+      template: cell => {
+        if (cell.props.rowData.Exist) {
+          return (
+            <CopyComponent
+              title="Copy Link"
+              data={cell.props.rowData[cell.props.colName]}
+              callback={action("copy link")}
+            />
+          );
+        } else {
+          return null;
+        }
+      }
+    },
+    {
+      colSpan: 3,
+      mask: value => {
+        var options = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        };
+        var formatted = new Date(value);
+        return formatted.toLocaleDateString("en-US", options);
+      }
+    }
+  ]
+};
+stories.add("table pagination", () => (
+  <LeTable
+    name="lattice-pagination"
+    config={configPagination}
+    showLoading={boolean("showLoading", false)}
+    showEmpty={boolean("showEmpty", false)}
+    data={data}
+  />
+));
+
+

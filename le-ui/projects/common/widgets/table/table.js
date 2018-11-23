@@ -7,17 +7,18 @@ import "./table.scss";
 import Sort, {
   DIRECTION_ASC,
   DIRECTION_DESC,
-  DIRECTION_NONE
+  DIRECTION_NONE,
+  SortUtil
 } from "./controlls/sort";
+import LeTableFooter from "./table-footer";
 
 export default class LeTable extends Component {
   constructor(props) {
     super(props);
-
+    this.allData = this.props.data;
     this.state = {
       showLoading: this.props.showLoading,
-      showEmpty: this.props.showEmpty,
-      data: this.props.data
+      showEmpty: this.props.showEmpty
     };
     if (props.config.sorting) {
       this.state.sortingName = this.props.config.sorting
@@ -30,7 +31,7 @@ export default class LeTable extends Component {
 
     this.sortHandler = this.sortHandler.bind(this);
     this.setColumnSorting = this.setColumnSorting.bind(this);
-    this.compare = this.compare.bind(this);
+    this.loadPage = this.loadPage.bind(this);
     this.columnsMapping = {};
     this.headerMapping = {};
     this.props.config.header.forEach((header, index) => {
@@ -43,43 +44,17 @@ export default class LeTable extends Component {
       newItem.colIndex = index;
       this.columnsMapping[header.name] = newItem;
     });
-  }
 
-  compare(a, b) {
-    switch (this.state.sortingDirection) {
-      case DIRECTION_ASC: {
-        if (
-          ((a[this.state.sortingName])+'').toLowerCase() <
-          ((b[this.state.sortingName])+'').toLowerCase()
-        ) {
-          return -1;
-        }
-        if (
-          ((a[this.state.sortingName])+'').toLowerCase() >
-          ((b[this.state.sortingName])+'').toLowerCase()
-        ) {
-          return 1;
-        }
-        return 0;
-      }
-      case DIRECTION_DESC:
-        if (
-          ((a[this.state.sortingName])+'').toLowerCase() >
-          ((b[this.state.sortingName])+'').toLowerCase()
-        ) {
-          return -1;
-        }
-        if (
-          ((a[this.state.sortingName])+'').toLowerCase() <
-          ((b[this.state.sortingName])+'').toLowerCase()
-        ) {
-          return 1;
-        }
-        return 0;
+    if (this.props.config.pagination) {
+      this.state.perPage = this.props.config.pagination.perPage;
+      this.state.startPage = this.props.config.pagination.startPage;
     }
   }
 
-  // objs.sort(compare);
+
+  loadPage(data) {
+    this.setState({ data: data });
+  }
   sortHandler(colName, direction) {
     // console.log('DIRECTION', direction);
     this.setState(
@@ -89,7 +64,11 @@ export default class LeTable extends Component {
         showLoading: true
       },
       () => {
-        let newData = this.state.data.sort(this.compare);
+        let newData = SortUtil.sortAray(
+          this.state.data,
+          this.state.sortingName,
+          this.state.sortingDirection
+        );
         this.setColumnsSorting();
         this.setState({ data: newData, showLoading: false });
       }
@@ -168,10 +147,26 @@ export default class LeTable extends Component {
     }
   }
 
+  getFooter() {
+    if (this.props.config.pagination) {
+      return (
+        <LeTableFooter
+          data={this.allData}
+          perPage={this.props.config.pagination.perPage}
+          callback={this.loadPage}
+          perPage={this.state.perPage}
+          start={this.state.startPage}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.forceReload) {
-      return{ data: nextProps.data };
-    }else{
+      return { data: nextProps.data };
+    } else {
       return null;
     }
   }
@@ -183,6 +178,7 @@ export default class LeTable extends Component {
         {this.getBody()}
         {this.getEmptyMsg()}
         {this.getLoading()}
+        {this.getFooter()}
       </div>
     );
   }
