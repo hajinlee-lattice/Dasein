@@ -229,7 +229,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             queueMetric.setQueue(capacitySchedulerLeafQueueInfo.getQueueName());
             queueMetric.setActiveApplications(capacitySchedulerLeafQueueInfo.getNumActiveApplications());
             queueMetric.setContainersUsed(capacitySchedulerLeafQueueInfo.getNumContainers());
-            queueMetric.setMemoryUsed(capacitySchedulerLeafQueueInfo.getResourcesUsed().getMemory());
+            queueMetric.setMemoryUsed((int) capacitySchedulerLeafQueueInfo.getResourcesUsed().getMemorySize());
             queueMetric.setPendingApplications(capacitySchedulerLeafQueueInfo.getNumPendingApplications());
             queueMetric.setvCoresUsed(capacitySchedulerLeafQueueInfo.getResourcesUsed().getvCores());
             QueueMeasurement queueMeasurement = new QueueMeasurement(queueMetric);
