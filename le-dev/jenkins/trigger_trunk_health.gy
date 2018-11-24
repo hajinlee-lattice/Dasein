@@ -8,7 +8,7 @@ pipeline {
     stage('build') {
       steps {
         script {
-          build job: 'trunk_health_trigger'
+          build job: '../trunk_health_trigger'
         }
       }
     }
