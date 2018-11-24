@@ -8,7 +8,6 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     bash $WSHOME/le-dev/scripts/stop-cluster.sh || true
 
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
-    # HDP_VERSION="2.7.1.2.4.3.0-227"
     HDP_VERSION=2.8.5
 
     sudo rm -rf ${HADOOP_HOME} || true
@@ -39,6 +38,9 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         echo "You are on ${UNAME}"
         ln -s ${HADOOP_HOME}/lib/native-linux ${HADOOP_HOME}/lib/native
     fi
+
+    #mvn dependency:get -Dtransitive=false -Dartifact=com.amazonaws:aws-java-sdk-s3:1.11.433
+    #mvn dependency:copy -DoutputDirectory=${HADOOP_HOME}/share/hadoop/common/lib -Dartifact=com.amazonaws:aws-java-sdk-s3:1.11.433
 
     mkdir -p $HADOOP_NAMENODE_DATA_DIR
     mkdir -p $HADOOP_DATANODE_DATA_DIR

@@ -19,6 +19,7 @@ public class HdfsToS3PathBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(HdfsToS3PathBuilder.class);
 
+    // use s3a whenever possible, e.g. in emr
     private String protocol = "s3n";
 
     private static final String PATH_SEPARATOR = "/";

@@ -54,17 +54,19 @@ fi
 export JAVA_OPTS="-Dfile.encoding=UTF8"
 if [ "${ENVIRONMENT}" = "prodcluster" ]; then
     export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=US/Eastern"
+else
+    export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=UTC"
 fi
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"
+export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
-export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
 if [ "${DISABLE_JMXTRANS}" != "true" ] && [ -f "/var/lib/jmxtrans-agent.jar" ]; then
     echo "Found jmxtrans-agent.jar, setting its java agent"

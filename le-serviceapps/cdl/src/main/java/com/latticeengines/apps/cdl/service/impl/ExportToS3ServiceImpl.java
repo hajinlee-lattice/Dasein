@@ -245,7 +245,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     List<String> subFolders = new ArrayList<>();
                     if ("analytics-data".equals(name) || "analytics-models".equals(name) || "tables".equals(name)) {
                         HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
-                            String subFolder = path.substring(path.lastIndexOf("/"));
+                            String subFolder = path.replace(srcDir, "");
                             subFolders.add(subFolder);
                         });
                     }
