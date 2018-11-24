@@ -52,12 +52,14 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
     private S3Service s3Service;
 
     private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+    private String s3FsProtocol = "s3n";
 
     @PostConstruct
     public void postConstruct() {
         if (Boolean.TRUE.equals(useEmr)) {
-            pathBuilder.setProtocol("s3a");
+            s3FsProtocol = "s3a";
         }
+        pathBuilder.setProtocol(getS3FsProtocol());
     }
 
     @Override
@@ -171,6 +173,10 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
     public InputStream getS3FileInputStream(String key) {
         InputStream in = s3Service.readObjectAsStream(getS3Bucket(), key);
         return in;
+    }
+
+    public String getS3FsProtocol() {
+        return s3FsProtocol;
     }
 
 }

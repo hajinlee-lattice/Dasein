@@ -53,11 +53,7 @@ public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
         sis = new StringInputStream("fileB");
         s3Service.uploadInputStream(s3Bucket, tenantId + "/analytics/data/folder1/folder2/fileB.csv", sis, true);
 
-        if (Boolean.TRUE.equals(useEmr)) {
-            protocol = "s3a";
-        } else {
-            protocol = "s3n";
-        }
+        protocol = importFromS3Service.getS3FsProtocol();
     }
 
     @AfterClass(groups = "functional")

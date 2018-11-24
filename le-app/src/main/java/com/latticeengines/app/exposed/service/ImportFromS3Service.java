@@ -22,4 +22,6 @@ public interface ImportFromS3Service {
 
     String getPodId();
 
+    String getS3FsProtocol();
+
 }
