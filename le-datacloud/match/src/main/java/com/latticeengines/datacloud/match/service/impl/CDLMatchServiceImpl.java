@@ -80,7 +80,12 @@ public class CDLMatchServiceImpl implements CDLMatchService {
         @SuppressWarnings("unused")
         DataCollection.Version version = input.getDataCollectionVersion();
         // TODO: get metadata by version
-        BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Rating, BusinessEntity.PurchaseHistory };
+        BusinessEntity[] entities = { //
+                BusinessEntity.Account, //
+                BusinessEntity.CuratedAccount, //
+                BusinessEntity.Rating, //
+                BusinessEntity.PurchaseHistory //
+        };
         List<ColumnMetadata> cms = new ArrayList<>();
         for (BusinessEntity entity : entities) {
             List<ColumnMetadata> list = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);

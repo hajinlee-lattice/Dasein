@@ -3,6 +3,9 @@ package com.latticeengines.domain.exposed.util;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class HdfsToS3PathBuilderUnitTestNG {
 
     @Test(groups = "unit")
@@ -116,25 +119,34 @@ public class HdfsToS3PathBuilderUnitTestNG {
     @Test(groups = "unit")
     public void convertAtlasTableDir() {
         HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        builder.setProtocol("s3a");
+
         Assert.assertEquals(builder.convertAtlasTableDir(
                 "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2", "pod2",
-                "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
+                "tenantId2", "bucket2"), "s3a://bucket2/tenantId2/atlas/Data/Tables/table2");
         Assert.assertEquals(builder.convertAtlasTableDir(
                 "hdfs://QACLUSTER2/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2/*.avro",
-                "pod2", "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
+                "pod2", "tenantId2", "bucket2"), "s3a://bucket2/tenantId2/atlas/Data/Tables/table2");
         Assert.assertEquals(builder.convertAtlasTableDir(
                 "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2/", "pod2",
-                "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
+                "tenantId2", "bucket2"), "s3a://bucket2/tenantId2/atlas/Data/Tables/table2");
         Assert.assertEquals(builder.convertAtlasTableDir(
                 "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2/*.avro", "pod2",
-                "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
+                "tenantId2", "bucket2"), "s3a://bucket2/tenantId2/atlas/Data/Tables/table2");
 
         Assert.assertEquals(
                 builder.convertAtlasTableDir(
                         "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/File/table2/table3/*.avro",
                         "pod2", "tenantId2", "bucket2"),
-                "s3n://bucket2/tenantId2/atlas/Data/Tables/File/table2/table3");
+                "s3a://bucket2/tenantId2/atlas/Data/Tables/File/table2/table3");
+
+        Assert.assertEquals(
+                builder.convertAtlasTableDir(
+                        "/Pods/QA/Contracts/QA_LPI_Auto_Refine/Tenants/QA_LPI_Auto_Refine/Spaces/Production/Data/Tables/File/SourceFile_file_1477293584451_csv/Extracts/2016-10-24-03-20-35",
+                        "QA", "LPI_QA_Auto_ReBuild2", "bucket2"),
+                "s3a://bucket2/QA_LPI_Auto_Refine/atlas/Data/Tables/File/SourceFile_file_1477293584451_csv/Extracts/2016-10-24-03-20-35");
     }
+
 
     @Test(groups = "unit")
     public void convertAtlasFile() {

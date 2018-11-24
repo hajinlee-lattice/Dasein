@@ -143,7 +143,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
             s3Service.cleanupPrefix(s3Bucket, tgtDir);
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
-        String s3Uri = "s3n://" + s3Bucket + tgtDir;
+        String s3Uri = "s3a://" + s3Bucket + tgtDir;
         HdfsUtils.distcp(distCpConfiguration, srcDir, s3Uri, queue);
 
         // assert HDFS to S3 copy

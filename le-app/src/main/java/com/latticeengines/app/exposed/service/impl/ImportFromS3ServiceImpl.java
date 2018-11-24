@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -38,6 +39,9 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
@@ -48,6 +52,13 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
     private S3Service s3Service;
 
     private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+
+    @PostConstruct
+    public void postConstruct() {
+//        if (Boolean.TRUE.equals(useEmr)) {
+//            pathBuilder.setProtocol("s3a");
+//        }
+    }
 
     @Override
     public String exploreS3FilePath(String inputFile, String customer) {
@@ -101,10 +112,10 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
                     String hdfsPath = pathBuilder.getFullPath(extract.getPath());
                     try {
                         if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
-                            log.info(
-                                    "Hdfs file does not exist, copy from S3. file=" + hdfsPath + " tenant=" + customer);
                             String s3Dir = pathBuilder.convertAtlasTableDir(hdfsPath, podId, space.getTenantId(),
                                     s3Bucket);
+                            log.info("Hdfs file does not exist, copy from S3. " +
+                                    "file=" + hdfsPath + " s3Dir=" + s3Dir + " tenant=" + customer);
                             Configuration hadoopConfiguration = createConfiguration(space.getTenantId(),
                                     table.getName());
                             HdfsUtils.distcp(hadoopConfiguration, s3Dir, hdfsPath, queueName);
