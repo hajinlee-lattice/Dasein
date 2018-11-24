@@ -70,6 +70,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
     private String queueName;
     private HdfsToS3PathBuilder pathBuilder;
+    private ExecutorService s3ExportWorkers;
     private ExecutorService distCpWorkers;
 
     @PostConstruct
@@ -100,7 +101,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         for (ExportRequest request : requests) {
             exporters.add(new HdfsS3Exporter(request, onlyAtlas));
         }
-        ThreadPoolUtils.runRunnablesInParallel(getDistCpWorkers(), exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
+        ThreadPoolUtils.runRunnablesInParallel(getS3ExportWorkers(), exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
         log.info(String.format("Finished to export from hdfs to s3. tenantIds=%s", StringUtils.join(tenants, ",")));
     }
 
@@ -218,6 +219,17 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         return distCpWorkers;
     }
 
+    private ExecutorService getS3ExportWorkers() {
+        if (s3ExportWorkers == null) {
+            synchronized (this) {
+                if (s3ExportWorkers == null) {
+                    s3ExportWorkers = ThreadPoolUtils.getFixedSizeThreadPool("s3-export", 8);
+                }
+            }
+        }
+        return s3ExportWorkers;
+    }
+
     private class HdfsS3Exporter implements Runnable {
         private String srcDir;
         private String tgtDir;
@@ -245,7 +257,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                     List<String> subFolders = new ArrayList<>();
                     if ("analytics-data".equals(name) || "analytics-models".equals(name) || "tables".equals(name)) {
                         HdfsUtils.getFilesForDir(hadoopConfiguration, srcDir).forEach(path -> {
-                            String subFolder = path.replace(srcDir, "");
+                            String subFolder = path.substring(path.lastIndexOf("/"));
                             subFolders.add(subFolder);
                         });
                     }
@@ -277,7 +289,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                                 }
                             } catch (Exception e) {
                                 if (StringUtils.isNotBlank(name)) {
-                                    log.warn("Failed copy sub-folder " + subFolder + " in " + name);
+                                    log.warn("Failed copy sub-folder " + subFolder + " in " + name, e);
                                     return subFolder;
                                 }
                             }
