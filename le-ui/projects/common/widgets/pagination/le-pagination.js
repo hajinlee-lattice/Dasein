@@ -32,6 +32,15 @@ export default class LePagination extends Component {
     }
   }
 
+  getFormTo(page){
+    let from = (page - 1) * this._perPage;
+    let to = page * this._perPage;
+    if(to > this._data.length){
+        to = this._data.length;
+    }
+    return {from : from, to: to};
+  }
+
   componentDidMount(){
     this.clickHandler('first');
   }
@@ -40,13 +49,13 @@ export default class LePagination extends Component {
     switch (direction) {
         case "first": 
         this.setState({ current: 1 }, () => {
-            this.props.callback(this.getSubset(this.state.current));
+            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
           });
         break;
       case "next":
         if (this.state.current < this._numPages) {
           this.setState({ current: this.state.current + 1 }, () => {
-            this.props.callback(this.getSubset(this.state.current));
+            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
           });
         }
         break;
@@ -54,14 +63,14 @@ export default class LePagination extends Component {
       case "prev":
         if (this.state.current > 1) {
           this.setState({ current: this.state.current - 1 }, () => {
-            this.props.callback(this.getSubset(this.state.current));
+            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
           });
         }
 
         break;
         case 'last':
         this.setState({ current: this._numPages }, () => {
-            this.props.callback(this.getSubset(this.state.current));
+            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
           });
         break;
     }

@@ -4,21 +4,22 @@ import propTypes from "prop-types";
 import LeTableHeader from "./table-header";
 import LeTableBody from "./table-body";
 import "./table.scss";
-import Sort, {
-  DIRECTION_NONE,
-  SortUtil
-} from "./controlls/sort";
+import Sort, { DIRECTION_NONE, SortUtil } from "./controlls/sort";
 import LeTableFooter from "./table-footer";
 
 export default class LeTable extends Component {
   constructor(props) {
     super(props);
-    this.allData = this.props.data;
+    // this.allData = this.props.data;
     this.state = {
       showLoading: this.props.showLoading,
       showEmpty: this.props.showEmpty,
-      perPage : this.props.config.pagination ? this.props.config.pagination.perPage : 10,
-      startPage : this.props.config.pagination ? this.props.config.pagination.startPage : 1,
+      perPage: this.props.config.pagination
+        ? this.props.config.pagination.perPage
+        : 10,
+      startPage: this.props.config.pagination
+        ? this.props.config.pagination.startPage
+        : 1
     };
     if (props.config.sorting) {
       this.state.sortingName = this.props.config.sorting
@@ -46,13 +47,15 @@ export default class LeTable extends Component {
     });
 
     // if (this.props.config.pagination) {
-      
+
     // }
   }
 
-
-  loadPage(data) {
-    this.setState({ data: data });
+  loadPage(data, fromToObj) {
+    // this.setState({ data: data });
+    if (fromToObj) {
+      this.setState({ data: this.props.data.slice(fromToObj.from, fromToObj.to) });
+    }
   }
   sortHandler(colName, direction) {
     this.setState(
@@ -147,16 +150,16 @@ export default class LeTable extends Component {
 
   getFooter() {
     // if (this.props.config.pagination) {
-      return (
-        <LeTableFooter
-          data={this.allData}
-          callback={this.loadPage}
-          perPage={this.state.perPage}
-          start={this.state.startPage}
-        />
-      );
+    return (
+      <LeTableFooter
+        data={this.props.data}
+        callback={this.loadPage}
+        perPage={this.state.perPage}
+        start={this.state.startPage}
+      />
+    );
     // } else {
-      // return null;
+    // return null;
     // }
   }
 
