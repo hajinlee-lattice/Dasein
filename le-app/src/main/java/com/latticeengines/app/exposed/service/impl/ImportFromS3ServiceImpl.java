@@ -55,9 +55,9 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
 
     @PostConstruct
     public void postConstruct() {
-//        if (Boolean.TRUE.equals(useEmr)) {
-//            pathBuilder.setProtocol("s3a");
-//        }
+        if (Boolean.TRUE.equals(useEmr)) {
+            pathBuilder.setProtocol("s3a");
+        }
     }
 
     @Override
