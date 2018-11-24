@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -47,8 +49,8 @@ public class EMRScalingRunnable implements Runnable {
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
 
-    private static final AtomicLong lastScalingUp = new AtomicLong(0);
-    private static final AtomicInteger scalingDownAttempt = new AtomicInteger(0);
+    private static final ConcurrentMap<String, AtomicLong> lastScalingUpMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, AtomicInteger> scalingDownAttemptMap = new ConcurrentHashMap<>();
 
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
             Sets.newEnumSet(Arrays.asList(//
@@ -156,15 +158,15 @@ public class EMRScalingRunnable implements Runnable {
             if (target > requested) {
                 log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
-                lastScalingUp.set(System.currentTimeMillis());
+                getLastScalingUp().set(System.currentTimeMillis());
                 scale(target);
                 resetScalingDownCounter();
             } else {
                 log.info(String.format(
                         "Scale down %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                        emrCluster, scalingDownAttempt.incrementAndGet(), running, requested,
+                        emrCluster, getScalingDownAttempt().incrementAndGet(), running, requested,
                         target));
-                if (requested <= running && scalingDownAttempt.get() >= 3) {
+                if (requested <= running && getScalingDownAttempt().get() >= 3) {
                     log.info("Going to scale down " + emrCluster + " from " + requested + " to " + target);
                     // be conservative about terminating machines
                     scale(target);
@@ -302,10 +304,20 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void resetScalingDownCounter() {
-        if (scalingDownAttempt.get() > 0) {
-            log.info("Reset " + emrCluster +" scaling down counter from " + scalingDownAttempt.get());
-            scalingDownAttempt.set(0);
+        if (getScalingDownAttempt().get() > 0) {
+            log.info("Reset " + emrCluster +" scaling down counter from " + getScalingDownAttempt().get());
+            getScalingDownAttempt().set(0);
         }
+    }
+
+    private AtomicLong getLastScalingUp() {
+        lastScalingUpMap.putIfAbsent(clusterId, new AtomicLong(0L));
+        return lastScalingUpMap.get(clusterId);
+    }
+
+    private AtomicInteger getScalingDownAttempt() {
+        scalingDownAttemptMap.putIfAbsent(clusterId, new AtomicInteger(0));
+        return scalingDownAttemptMap.get(clusterId);
     }
 
     private int getCoreCount() {
