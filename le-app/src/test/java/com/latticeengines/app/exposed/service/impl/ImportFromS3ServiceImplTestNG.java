@@ -18,7 +18,6 @@ import com.amazonaws.util.StringInputStream;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
@@ -35,11 +34,14 @@ public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     private String tenantId;
+    private String protocol;
 
     @BeforeClass(groups = "functional")
     private void setUp() throws IOException {
-
         tenantId = CUSTOMER_SPACE.getTenantId();
         if (!s3Service.objectExist(s3Bucket, tenantId + "/analytics/data/folder1/folder2")) {
             s3Service.createFolder(s3Bucket, tenantId + "/analytics/data/folder1/folder2");
@@ -50,10 +52,16 @@ public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
         s3Service.uploadInputStream(s3Bucket, tenantId + "/analytics/data/folder1/folder2/fileA.csv", sis, true);
         sis = new StringInputStream("fileB");
         s3Service.uploadInputStream(s3Bucket, tenantId + "/analytics/data/folder1/folder2/fileB.csv", sis, true);
+
+        if (Boolean.TRUE.equals(useEmr)) {
+            protocol = "s3a";
+        } else {
+            protocol = "s3n";
+        }
     }
 
     @AfterClass(groups = "functional")
-    public void cleanUp() throws IOException {
+    public void cleanUp() {
         s3Service.cleanupPrefix(s3Bucket, tenantId + "/");
     }
 
@@ -63,35 +71,32 @@ public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
                 "/user/s-analytics/customers/ImportFromS3ServiceImplTestNG.ImportFromS3ServiceImplTestNG.Production/data/folder1/fileA.csv",
                 tenantId);
         Assert.assertEquals(s3File,
-                "s3n://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv");
+                protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv");
 
         s3File = importFromS3Service.exploreS3FilePath(
                 "hdfs://localhost/user/s-analytics/customers/ImportFromS3ServiceImplTestNG.ImportFromS3ServiceImplTestNG.Production/data/folder1/fileA.csv",
                 CUSTOMER_SPACE.getTenantId());
         Assert.assertEquals(s3File,
-                "s3n://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv");
+                protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv");
     }
 
     @Test(groups = "functional")
     public void getFilesForDir() {
         final String filter = ".*.csv";
         List<String> files = importFromS3Service.getFilesForDir(
-                "s3n://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1",
-                new HdfsFilenameFilter() {
-                    @Override
-                    public boolean accept(String filename) {
-                        String name = FilenameUtils.getName(filename);
-                        return name.matches(filter);
-                    }
+                protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1",
+                filename -> {
+                    String name = FilenameUtils.getName(filename);
+                    return name.matches(filter);
                 });
         Assert.assertEquals(files.size(), 3);
         Set<String> fileSet = new HashSet<>(files);
         Assert.assertTrue(fileSet
-                .contains("s3n://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv"));
+                .contains(protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv"));
         Assert.assertTrue(fileSet.contains(
-                "s3n://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/folder2/fileA.csv"));
+                protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/folder2/fileA.csv"));
         Assert.assertTrue(fileSet.contains(
-                "s3n://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/folder2/fileB.csv"));
+                protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/folder2/fileB.csv"));
 
     }
 
