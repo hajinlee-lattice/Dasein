@@ -2,10 +2,10 @@ angular.module('lp.ratingsengine.wizard.products', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineProducts', function (
-    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products, PeriodType) {
+    $scope, $stateParams, $timeout, $filter, RatingsEngineStore, RatingsEngineService, Products, PeriodType, SegmentName) {
         var vm = this;
         angular.extend(vm, {
-            products: Products,
+            products: $filter('orderBy')(Products, 'ProductName'),
             currentPage: 1,
             pageSize: 10,
             productsCount: 0,
@@ -16,15 +16,26 @@ angular.module('lp.ratingsengine.wizard.products', [
             engineType: $stateParams.engineType,
             configFilters: {},
             timePeriod: getPurchasedBeforePeriod(),
-            periodType: PeriodType.ApsRollingPeriod + '(s)'
+            periodType: PeriodType.ApsRollingPeriod + '(s)',
+            segmentName: SegmentName,
+            productCoverage: {}
         });
 
         $scope.$watch('vm.search', function(newValue, oldValue) {
-        if(vm.search || oldValue) {
-            vm.currentPage = 1;
-        }
+            if(vm.search || oldValue) {
+                vm.currentPage = 1;
+                var products = vm.filteredProductsList.slice(0, 10);
+                vm.getProductCoverage(vm.segmentName, products);
+            }
+        });
 
-    });
+        $scope.$watch('vm.currentPage', function(newValue, oldValue) {
+            var start = (vm.currentPage - 1) * vm.pageSize;
+            var end = start + vm.pageSize;
+
+            var products = vm.filteredProductsList ? vm.filteredProductsList : vm.products;
+            vm.getProductCoverage(vm.segmentName, products.slice(start, end));
+        });
 
     vm.init = function () {
 
@@ -145,6 +156,16 @@ angular.module('lp.ratingsengine.wizard.products', [
         } else {
             return 6;
         }
+    }
+
+    vm.getProductCoverage = function(segmentName, filteredProducts) {
+        RatingsEngineStore.getProductCoverage(vm.segmentName, filteredProducts).then(function (result) {
+            for (var productId in result.ratingModelsCoverageMap) {
+                if (!vm.productCoverage.hasOwnProperty(productId)) {
+                    vm.productCoverage[productId] = result.ratingModelsCoverageMap[productId].unscoredAccountCount;
+                }
+            }
+        })
     }
 
     vm.init();

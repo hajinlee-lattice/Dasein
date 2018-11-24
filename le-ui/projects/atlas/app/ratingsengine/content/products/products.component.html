@@ -42,17 +42,19 @@
                         </th> -->
                         <th>&nbsp;</th>
                         <th>Product</th>
+                        <th>Accounts to be Scored * </th>
                         <!--<th>Accounts to be scored<sup>*</sup></th>-->
                     </tr>
                 </thead>
                 <tbody>
                     <tr 
-                        ng-repeat="product in (filteredList = (vm.products | filter: {'ProductName': vm.search})) 
+                        ng-repeat="product in (vm.filteredProductsList = (vm.products 
+                                | filter: {'ProductName': vm.search}))
                                 | orderBy: vm.sortBy
                                 | startFrom: (vm.currentPage - 1) * vm.pageSize 
                                 | limitTo: vm.pageSize"
                         class="item product"
-                        ng-if="filteredList.length">
+                        ng-if="vm.filteredProductsList.length">
                         <td>
                             <input 
                                 type="checkbox"
@@ -63,7 +65,11 @@
                                  />
                         </td>
                         <td>
-                            <label for="{{product.ProductId}}">{{product.ProductName}}</label>
+                            <label for="{{product.ProductId}}">{{product.ProductName}}, {{product.ProductId}}</label>
+                        </td>
+                        <td>
+                            <label for="{{product.ProductId}}" ng-if="vm.productCoverage.hasOwnProperty(product.ProductId)">{{vm.productCoverage[product.ProductId].toLocaleString()}}</label>
+                            <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverage.hasOwnProperty(product.ProductId)"></span>
                         </td>
                         <!--<td>
                             <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
@@ -71,7 +77,7 @@
                         </td>
                         -->
                     </tr>
-                    <tr ng-if="!filteredList.length">
+                    <tr ng-if="!vm.filteredProductsList.length">
                         <td class="centered-info-message">
                             &nbsp;
                         </td>
@@ -82,14 +88,18 @@
                 </tbody>
             </table>
 
-            <div class="selected-total pull-left" ng-if="vm.products.length">
+            <div class="selected-total" ng-if="vm.products.length">
                 Selected <strong>{{ vm.getSelectedCount() }}</strong> of {{ vm.getTotalProductsCount() }}
             </div>
 
-            <div class="pd-pagination-container-margin-top pull-right" ng-if="(filteredList.length/vm.pageSize) > 0">
+            <div ng-if="vm.products.length">
+                * Accounts that have not purchased this product yet
+            </div>
+
+            <div class="pd-pagination-container-margin-top pull-right" ng-if="(vm.filteredProductsList.length/vm.pageSize) > 0">
                 <pd-pagination-controls
                     current="vm.currentPage"
-                    max="filteredList.length / vm.pageSize"
+                    max="vm.filteredProductsList.length / vm.pageSize"
                     ng-if="vm.showPagination">
                 </pd-pagination-controls>
             </div>

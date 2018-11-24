@@ -1204,6 +1204,13 @@ angular
                         });
 
                         return deferred.promise;
+                    },
+                    SegmentName: function(CurrentRatingEngine, RatingsEngineStore) {
+                        if (RatingsEngineStore.currentRating && RatingsEngineStore.currentRating.segment) {
+                            return RatingsEngineStore.currentRating.segment.name;
+                        } else {
+                            return CurrentRatingEngine.segment.name;
+                        }
                     }
                 },
                 views: {

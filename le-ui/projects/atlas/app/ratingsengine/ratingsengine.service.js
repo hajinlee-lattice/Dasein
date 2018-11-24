@@ -822,15 +822,15 @@ angular.module('lp.ratingsengine')
             var model = rating.activeModel,
                 predictionType = RatingsEngineStore.getPredictionType(),
                 dataStores = RatingsEngineStore.getDataStores(),
-                customEventModelingType = RatingsEngineStore.getCustomEventModelingType();
-                var modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
-                var fileName = RatingsEngineStore.getCSVFileName();
-                var displayFileName = RatingsEngineStore.getDisplayFileName();
-                var obj = {};
+                customEventModelingType = RatingsEngineStore.getCustomEventModelingType(),
+                modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions(),
+                fileName = RatingsEngineStore.getCSVFileName(),
+                displayFileName = RatingsEngineStore.getDisplayFileName(),
+                obj = {};
 
             obj = {
                 AI: {
-                    id: rating.activeModel.AI.id,
+                    id: model.AI.id,
                     predictionType: predictionType,
                     advancedModelingConfig: {
                         'custom_event': {
@@ -954,7 +954,7 @@ angular.module('lp.ratingsengine')
 
             obj = {
                 AI: {
-                    id: rating.activeModel.AI.id,
+                    id: model.id,
                     predictionType: predictionType,
                     trainingSegment: trainingSegment,
                     advancedModelingConfig: {
@@ -1094,6 +1094,21 @@ angular.module('lp.ratingsengine')
         });
         return deferred.promise;
     };
+
+    this.getProductCoverage = function(segmentName, productsList) {
+        var deferred = $q.defer();
+
+        var productIds = productsList.map(function(product) {
+            return product.ProductId;
+        });
+
+        RatingsEngineService.getProductCoverage(segmentName, productIds).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+
+    }
 
 })
 .service('RatingsEngineService', function($q, $http, $state) {
@@ -1501,5 +1516,27 @@ angular.module('lp.ratingsengine')
             }
         );
         return deferred.promise;
+    }
+
+        this.getProductCoverage = function(segmentName, productIds){
+            var deferred = $q.defer();
+            $http({
+                method: 'POST',
+                url:  '/pls/ratingengines/coverage/segment/' + segmentName + '/products',
+                data: productIds
+            }).then(
+                function onSuccess(response) {
+                    var result = response.data;
+                    deferred.resolve(result);
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
+            return deferred.promise;
     }
 });
