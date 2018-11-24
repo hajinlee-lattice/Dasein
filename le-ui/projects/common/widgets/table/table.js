@@ -16,7 +16,9 @@ export default class LeTable extends Component {
     this.allData = this.props.data;
     this.state = {
       showLoading: this.props.showLoading,
-      showEmpty: this.props.showEmpty
+      showEmpty: this.props.showEmpty,
+      perPage : this.props.config.pagination ? this.props.config.pagination.perPage : 10,
+      startPage : this.props.config.pagination ? this.props.config.pagination.startPage : 1,
     };
     if (props.config.sorting) {
       this.state.sortingName = this.props.config.sorting
@@ -43,10 +45,9 @@ export default class LeTable extends Component {
       this.columnsMapping[header.name] = newItem;
     });
 
-    if (this.props.config.pagination) {
-      this.state.perPage = this.props.config.pagination.perPage;
-      this.state.startPage = this.props.config.pagination.startPage;
-    }
+    // if (this.props.config.pagination) {
+      
+    // }
   }
 
 
@@ -145,19 +146,18 @@ export default class LeTable extends Component {
   }
 
   getFooter() {
-    if (this.props.config.pagination) {
+    // if (this.props.config.pagination) {
       return (
         <LeTableFooter
           data={this.allData}
-          perPage={this.props.config.pagination.perPage}
           callback={this.loadPage}
           perPage={this.state.perPage}
           start={this.state.startPage}
         />
       );
-    } else {
-      return null;
-    }
+    // } else {
+      // return null;
+    // }
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
