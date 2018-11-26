@@ -227,10 +227,10 @@ public class Node {
      * USE CASE: Group by and buffer. Able to track dataflow operation logs if
      * withOptLog = true and in output there will be an additional field
      * LE_OperationLogs
-     * 
+     *
      * ATTENTION: If withOptLog = true, in Buffer constructor, should call
      * BaseGroupbyBuffer(fieldDeclaration, withOptLog).
-     * 
+     *
      * @param groupByFieldList:
      *            fields to group by
      * @param buffer
@@ -238,7 +238,7 @@ public class Node {
      *            field metadatas for output
      * @param withOptLog:
      *            whether to append log in LE_OperationLogs field
-     * 
+     *
      * @return
      */
     @SuppressWarnings("rawtypes")
@@ -279,12 +279,6 @@ public class Node {
     }
 
     @SuppressWarnings("rawtypes")
-    public Node groupByAndAggregate(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
-            boolean descending) {
-        return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
-    }
-
-    @SuppressWarnings("rawtypes")
     public Node groupByAndAggregate(FieldList groupByFieldList, FieldList sortFieldList, Aggregator aggregator,
             boolean descending, boolean caseInsensitive) {
         return new Node(builder.register(new GroupByAndAggOperation(opInput(identifier), groupByFieldList,
@@ -311,10 +305,10 @@ public class Node {
      * USE CASE: Group by and aggregate. Able to track dataflow operation logs
      * if withOptLog = true and in output there will be an additional field
      * LE_OperationLogs
-     * 
+     *
      * ATTENTION: If withOptLog = true, in Aggregator constructor, should call
      * BaseAggregator(fieldDeclaration, withOptLog).
-     * 
+     *
      * @param groupByFieldList:
      *            fields to group by
      * @param aggregator
@@ -624,9 +618,9 @@ public class Node {
 
     /**
      * Append pre-defined log message to LE_OperationLog field.
-     * 
+     *
      * If LE_OperationLog does not exist yet, create it
-     * 
+     *
      * @param log:
      *            pre-defined log message
      * @return
@@ -644,9 +638,9 @@ public class Node {
 
     /**
      * Copy log from fromField and append to LE_OperationLog field.
-     * 
+     *
      * If LE_OperationLog does not exist yet, create it
-     * 
+     *
      * @param fromField
      * @return
      */

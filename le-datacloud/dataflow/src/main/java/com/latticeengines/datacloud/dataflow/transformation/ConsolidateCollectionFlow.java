@@ -11,8 +11,6 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 
-import cascading.operation.buffer.FirstNBuffer;
-
 @Component(BEAN_NAME)
 public class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<ConsolidateCollectionParameters> {
 
@@ -24,9 +22,8 @@ public class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<Consolida
         Node input = addSource(parameters.getBaseTables().get(0));
         List<String> groupByKeys = parameters.getGroupBy();
         String sortByKey = parameters.getSortBy();
-        Node mostRecent = input.groupByAndBuffer(new FieldList(groupByKeys), new FieldList(sortByKey), //
-                new FirstNBuffer(1), true);
-        return mostRecent;
+        return input.groupByAndLimit(new FieldList(groupByKeys), new FieldList(sortByKey), //
+                1, true, false);
     }
 
 }
