@@ -24,7 +24,7 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
     public void onConfigurationInitialized() {
         AddStandardAttributesConfiguration configuration = getConfiguration();
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
-        configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
+        configuration.setTargetTableName(eventTable.getName() + "_std_attrs");
         AddStandardAttributesParameters parameters = DataFlowFactory.getAddStandardAttributesParameters( //
                 eventTable.getName(), configuration.getTransforms(), configuration.getRuntimeParams(),
                 configuration.getSourceSchemaInterpretation());

@@ -1,6 +1,6 @@
 package com.latticeengines.modeling.workflow.steps;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -107,20 +107,18 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
 
     public Set<String> updateApprovedUsageForAttributes(List<ColumnMetadata> userSelectedAttributesForModeling,
             Table eventTable) {
-        eventTable.setName(eventTable.getName() + "_With_UserSelectedAttributesForModeling");
+        eventTable.setName(eventTable.getName() + "_sel_attrs");
         eventTable.setDisplayName("EventTable_With_UserSelectedAttributesForModeling");
 
         Map<String, ColumnMetadata> userSelectedAttributesMap = new HashMap<>();
-        userSelectedAttributesForModeling.stream() //
-                .forEach(attr -> //
-        userSelectedAttributesMap.put(attr.getAttrName(), attr));
+        userSelectedAttributesForModeling.forEach(attr -> userSelectedAttributesMap.put(attr.getAttrName(), attr));
         Set<String> attributesWithModelAndAllInsights = new HashSet<>();
 
         for (Attribute eventTableAttribute : eventTable.getAttributes()) {
             if (Category.PRODUCT_SPEND.getName().equals(eventTableAttribute.getCategory())
                     && doSpecialHandlingForProductSpent) {
                 if (typesUsingProductSpent.contains(ratingEngineType)) {
-                    List<ApprovedUsage> approvedUsage = Arrays.asList(ApprovedUsage.MODEL_ALLINSIGHTS);
+                    List<ApprovedUsage> approvedUsage = Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS);
                     if (userSelectedAttributesMap.containsKey(eventTableAttribute.getName())) {
                         approvedUsage = userSelectedAttributesMap.get(eventTableAttribute.getName())
                                 .getApprovedUsageList();
@@ -131,7 +129,7 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
                             JsonUtils.serialize(approvedUsage)));
                     attributesWithModelAndAllInsights.add(eventTableAttribute.getName());
                     eventTableAttribute
-                            .setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[approvedUsage.size()]));
+                            .setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[0]));
                 } else {
                     log.info(String.format(
                             "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because %s attributes should not be used "
@@ -148,7 +146,7 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
                             .getApprovedUsageList();
                     attributesWithModelAndAllInsights.add(eventTableAttribute.getName());
                     eventTableAttribute
-                            .setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[approvedUsage.size()]));
+                            .setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[0]));
                 } else {
                     log.info(String.format(
                             "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because it is not part of user "
@@ -165,8 +163,7 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
             Set<String> attributesWithModelAndAllInsights) {
         for (Attribute eventTableAttribute : eventTable.getAttributes()) {
             if (CollectionUtils.isNotEmpty(eventTableAttribute.getParentAttributeNames())) {
-                if (eventTableAttribute.getParentAttributeNames().stream()
-                        .allMatch(atr -> attributesWithModelAndAllInsights.contains(atr))) {
+                if (attributesWithModelAndAllInsights.containsAll(eventTableAttribute.getParentAttributeNames())) {
                     log.info(String.format(
                             "Setting ApprovedUsage for curated Attribute %s (Category '%s') as %s because all of its parent attributes have approved usage as %s",
                             eventTableAttribute.getName(), eventTableAttribute.getCategory(),

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "StorageType")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "StorageType")
 @JsonSubTypes({ @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "Dynamo"),
         @JsonSubTypes.Type(value = RedshiftDataUnit.class, name = "Redshift"),
         @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"), })
@@ -18,6 +18,7 @@ public abstract class DataUnit {
 
     @JsonProperty("Tenant")
     private String tenant;
+
     @JsonProperty("Name")
     private String name;
 
