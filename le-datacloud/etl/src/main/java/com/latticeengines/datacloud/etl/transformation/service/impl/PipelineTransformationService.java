@@ -190,7 +190,7 @@ public class PipelineTransformationService extends AbstractTransformationService
         for (int i = steps.length - 1; i >= 0; i--) {
             log.info("Clean up temp source for step " + i);
             Source source = steps[i].getTarget();
-            if (isTempSource(source)) {
+            if (source != null && isTempSource(source)) {
                 sourceService.deleteSource(source);
             }
         }
