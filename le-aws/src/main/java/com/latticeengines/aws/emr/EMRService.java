@@ -22,4 +22,6 @@ public interface EMRService {
 
     void scaleTaskGroup(String clusterId, int targetCount);
 
+    void scaleTaskGroup(InstanceGroup taskGrp, int targetCount);
+
 }

@@ -146,18 +146,23 @@ public class EMRServiceImpl implements EMRService {
         if (targetCount > 0) {
             InstanceGroup taskGrp = getTaskGroup(clusterId);
             if (taskGrp != null) {
-                AmazonElasticMapReduce emr = getEmr();
-                InstanceGroupModifyConfig modifyConfig = new InstanceGroupModifyConfig()
-                        .withInstanceGroupId(taskGrp.getId())
-                        .withInstanceCount(targetCount);
-                ModifyInstanceGroupsRequest request = //
-                        new ModifyInstanceGroupsRequest().withInstanceGroups(modifyConfig);
-                ModifyInstanceGroupsResult result = emr.modifyInstanceGroups(request);
-                log.info("Sent emr scaling request, got response: " + result);
+                scaleTaskGroup(taskGrp, targetCount);
             }
         } else {
             log.info("Illegal target count " + targetCount);
         }
+    }
+
+    @Override
+    public void scaleTaskGroup(InstanceGroup taskGrp, int targetCount) {
+        AmazonElasticMapReduce emr = getEmr();
+        InstanceGroupModifyConfig modifyConfig = new InstanceGroupModifyConfig()
+                .withInstanceGroupId(taskGrp.getId())
+                .withInstanceCount(targetCount);
+        ModifyInstanceGroupsRequest request = //
+                new ModifyInstanceGroupsRequest().withInstanceGroups(modifyConfig);
+        ModifyInstanceGroupsResult result = emr.modifyInstanceGroups(request);
+        log.info("Sent emr scaling request, got response: " + result);
     }
 
     @Override
@@ -221,7 +226,8 @@ public class EMRServiceImpl implements EMRService {
             return emr.listInstanceGroups(listGrpRequest);
         });
         return result.getInstanceGroups().stream() //
-                .filter(grp -> groupType.name().equals(grp.getInstanceGroupType())) //
+                .filter(grp -> //
+                        grp.getRequestedInstanceCount() > 0 && groupType.name().equals(grp.getInstanceGroupType())) //
                 .findFirst().orElse(null);
     }
 

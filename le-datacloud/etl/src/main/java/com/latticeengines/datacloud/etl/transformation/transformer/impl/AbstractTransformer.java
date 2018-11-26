@@ -38,10 +38,6 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     abstract protected boolean transformInternal(TransformationProgress progress, String workflowDir,
             TransformStep step);
 
-    protected Logger getLogger() {
-        return log;
-    }
-
     protected Class<? extends TransformerConfig> getConfigurationClass() {
         return TransformerConfig.class;
     }
@@ -140,7 +136,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     }
 
     protected void updateStatusToFailed(TransformationProgress progress, String errorMsg, Exception e) {
-        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, getLogger());
+        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, log);
     }
 
 }

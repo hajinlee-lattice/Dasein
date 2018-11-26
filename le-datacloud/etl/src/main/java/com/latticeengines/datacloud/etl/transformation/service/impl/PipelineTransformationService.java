@@ -775,7 +775,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                     }
                 }
             }
-            if (transformer.validateConfig(config, sourceNames) == false) {
+            if (!transformer.validateConfig(config, sourceNames)) {
                 error = String.format("Invalid configuration for step %s", currentStep);
                 log.error(error);
                 RequestContext.logError(error);
