@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -255,13 +256,21 @@ public class BomboraSurgePivotedServiceImplTestNG
     }
 
     private void prepareBitCodeBook() {
+        List<SourceColumn> srcCols = sourceColumnEntityMgr.getSourceColumns(targetSourceName);
+        Map<String, Integer> bitsPosMap = srcCols.stream()
+                .filter(srcCol -> SourceColumn.Calculation.BIT_ENCODE.equals(srcCol.getCalculation()))
+                .collect(Collectors.toMap(srcCol -> srcCol.getColumnName(),
+                        srcCol -> {
+                            try {
+                                return om.readTree(srcCol.getArguments()).get("BitPosition").asInt();
+                            } catch (IOException e) {
+                                throw new RuntimeException("Fail to parse " + srcCol.getArguments());
+                            }
+                        }));
+
         compoScoreCodeBook = new BitCodeBook();
         compoScoreDecodeFields = new ArrayList<>();
         compoScoreCodeBook.setDecodeStrategy(DecodeStrategy.NUMERIC_UNSIGNED_INT);
-        Map<String, Integer> bitsPosMap = new HashMap<>();
-        bitsPosMap.put("BmbrSurge_2in1PCs_CompScore", 0);
-        bitsPosMap.put("BmbrSurge_3DPrinting_CompScore", 8);
-        bitsPosMap.put("BmbrSurge_401k_CompScore", 16);
         compoScoreCodeBook.setBitsPosMap(bitsPosMap);
         compoScoreDecodeFields.add("BmbrSurge_2in1PCs_CompScore");
         compoScoreDecodeFields.add("BmbrSurge_3DPrinting_CompScore");
@@ -271,10 +280,6 @@ public class BomboraSurgePivotedServiceImplTestNG
         bucketScoreCodeBook = new BitCodeBook();
         bucketScoreDecodeFields = new ArrayList<>();
         bucketScoreCodeBook.setDecodeStrategy(DecodeStrategy.ENUM_STRING);
-        bitsPosMap = new HashMap<>();
-        bitsPosMap.put("BmbrSurge_2in1PCs_BuckScore", 0);
-        bitsPosMap.put("BmbrSurge_3DPrinting_BuckScore", 2);
-        bitsPosMap.put("BmbrSurge_401k_BuckScore", 4);
         bucketScoreCodeBook.setBitsPosMap(bitsPosMap);
         bucketScoreDecodeFields.add("BmbrSurge_2in1PCs_BuckScore");
         bucketScoreDecodeFields.add("BmbrSurge_3DPrinting_BuckScore");
@@ -289,10 +294,6 @@ public class BomboraSurgePivotedServiceImplTestNG
         intentCodeBook = new BitCodeBook();
         intentDecodeFields = new ArrayList<>();
         intentCodeBook.setDecodeStrategy(DecodeStrategy.ENUM_STRING);
-        bitsPosMap = new HashMap<>();
-        bitsPosMap.put("BmbrSurge_2in1PCs_Intent", 0);
-        bitsPosMap.put("BmbrSurge_3DPrinting_Intent", 2);
-        bitsPosMap.put("BmbrSurge_401k_Intent", 4);
         intentCodeBook.setBitsPosMap(bitsPosMap);
         intentDecodeFields.add("BmbrSurge_2in1PCs_Intent");
         intentDecodeFields.add("BmbrSurge_3DPrinting_Intent");
