@@ -214,7 +214,7 @@ public class PipelineTransformationService extends AbstractTransformationService
 
         List<TransformationStepConfig> stepConfigs = transConf.getSteps();
         TransformStep[] steps = new TransformStep[stepConfigs.size()];
-        Map<Source, String> sourceVersions = new HashMap<Source, String>();
+        Map<Source, String> sourceVersions = new HashMap<>();
         String pipelineVersion = transConf.getVersion();
 
         for (int stepIdx = 0; stepIdx < steps.length; stepIdx++) {
@@ -599,7 +599,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             stepReport.addBaseSource(baseSource.getSourceName(), baseVersions.get(j));
         }
         stepReport.setElapsedTime(step.getElapsedTime());
-        if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
+        if (targetSource != null && hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
             stepReport.setExecuted(true);
             Long targetRecords = step.getCount();
             stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);
@@ -630,7 +630,7 @@ public class PipelineTransformationService extends AbstractTransformationService
 
         Source targetSource = step.getTarget();
         String targetVersion = step.getTargetVersion();
-        if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
+        if (targetSource != null && hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
             stepReport.setExecuted(true);
             Long targetRecords = step.getCount();
             stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);

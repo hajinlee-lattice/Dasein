@@ -80,12 +80,12 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
                 }
                 log.info("Scaling task group from " + taskGrp.getRequestedInstanceCount() + " to " + target);
                 emrService.scaleTaskGroup(taskGrp, target);
-                step.setTarget(null);
-                step.setCount(0L);
             }
         } else {
             log.info("This stack is not using emr, skip scaling operation.");
         }
+        step.setTarget(null);
+        step.setCount(0L);
         return true;
     }
 
