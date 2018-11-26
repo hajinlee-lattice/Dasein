@@ -23,7 +23,7 @@ import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfiguration> extends AbstractStep<T>
