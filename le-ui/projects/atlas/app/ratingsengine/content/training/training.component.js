@@ -49,7 +49,7 @@ angular.module('lp.ratingsengine.wizard.training', [
 
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
-            vm.periodType = vm.datacollectionstatus.ApsRollingPeriod ? vm.datacollectionstatus.ApsRollingPeriod : 'month';
+            vm.periodType = vm.datacollectionstatus.ApsRollingPeriod ? vm.datacollectionstatus.ApsRollingPeriod.toLowerCase() : 'quarter';
 
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){

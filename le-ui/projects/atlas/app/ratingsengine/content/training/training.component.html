@@ -80,7 +80,7 @@
                             class="form-control"
                             ng-model="$ctrl.checkboxModel.spend" />
                         <div>
-                            <p>Only use successes where spend in the quarter was</p>
+                            <p>Only use successes where spend in the {{$ctrl.periodType|lowercase}} was</p>
                             <select 
                                 class="form-control"
                                 ng-disabled="!$ctrl.checkboxModel.spend"
@@ -114,7 +114,7 @@
                             class="form-control"
                             ng-model="$ctrl.checkboxModel.quantity" />
                         <div>
-                            <p>Only use successes where quantity bought in the quarter was</p>
+                            <p>Only use successes where quantity bought in the {{$ctrl.periodType|lowercase}} was</p>
                             <select 
                                 class="form-control"
                                 ng-disabled="!$ctrl.checkboxModel.quantity"
@@ -157,7 +157,7 @@
                                     fromdisabled="!$ctrl.checkboxModel.periods" 
                                     showfrom="true"
                                     showtolabel="true"
-                                    tolabel="months"
+                                    tolabel="{{$ctrl.periodType}}s"
                                     showto="false"
                                     vm="$ctrl"
                                     form="trainingForm"

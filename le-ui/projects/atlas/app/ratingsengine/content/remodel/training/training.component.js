@@ -45,7 +45,7 @@ angular.module('lp.ratingsengine.remodel.training', [])
                     });
 
                     return deferred.promise;
-                }],
+                }]
             },
             views: {
                 'wizard_content@home.ratingsengine.remodel': 'ratingsEngineAITraining'

@@ -1272,6 +1272,15 @@ angular
                     }],
                     iteration: [function(){
                         return null;
+                    }],
+                    datacollectionstatus: ['$q', 'QueryStore', function ($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            console.log(result);
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
                     }]
                 },
                 views: {
