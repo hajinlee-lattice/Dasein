@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 
-public interface CDLMatchService {
+public interface CDLLookupService {
 
     List<ColumnMetadata> parseMetadata(MatchInput input);
 

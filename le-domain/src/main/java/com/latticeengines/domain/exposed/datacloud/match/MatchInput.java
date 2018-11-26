@@ -80,7 +80,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("DataCloudVersion")
     private String dataCloudVersion = DEFAULT_DATACLOUD_VERSION;
 
-    // only used by cdl match
+    // only used by cdl lookup
     @JsonProperty("DataCollectionVersion")
     private DataCollection.Version dataCollectionVersion;
 
@@ -162,6 +162,9 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("PartialMatchEnabled")
     private boolean partialMatchEnabled;
+
+    @JsonProperty("CDLMatch")
+    private boolean cdlMatch;
 
     // ====================
     // END FLAGS
@@ -453,6 +456,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setPartialMatchEnabled(boolean partialMatchEnabled) {
         this.partialMatchEnabled = partialMatchEnabled;
+    }
+
+    public boolean isCdlMatch() {
+        return cdlMatch;
+    }
+
+    public void setCdlMatch(boolean cdlMatch) {
+        this.cdlMatch = cdlMatch;
     }
 
     public Boolean getUseRealTimeProxy() {

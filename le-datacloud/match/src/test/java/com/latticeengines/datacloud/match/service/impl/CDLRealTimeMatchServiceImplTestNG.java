@@ -63,7 +63,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
     private TestMatchInputService testMatchInputService;
 
     @Inject
-    private CDLMatchServiceImpl cdlColumnSelectionService;
+    private CDLLookupServiceImpl cdlColumnSelectionService;
 
     private Map<String, ColumnMetadata> accountSchema;
 

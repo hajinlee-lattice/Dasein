@@ -31,7 +31,7 @@ public class MatchContext implements Fact, Dimension {
     private List<Map<String, Object>> resultSet;
     private List<InternalOutputRecord> internalResults;
     private boolean seekingIdOnly;
-    private boolean isCDLMatch;
+    private boolean cdlLookup;
     private DynamoDataUnit customAccountDataUnit;
     private List<DynamoDataUnit> customDataUnits;
     private MatchEngine matchEngine;
@@ -138,12 +138,12 @@ public class MatchContext implements Fact, Dimension {
         this.contextId = contextId;
     }
 
-    public boolean isCDLMatch() {
-        return isCDLMatch;
+    public boolean isCdlLookup() {
+        return cdlLookup;
     }
 
-    public void setCDLMatch(boolean CDLMatch) {
-        isCDLMatch = CDLMatch;
+    public void setCdlLookup(boolean cdlLookup) {
+        this.cdlLookup = cdlLookup;
     }
 
     public DynamoDataUnit getCustomAccountDataUnit() {

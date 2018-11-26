@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.datacloud.match.service.CDLMatchService;
+import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.GenericTableEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
@@ -40,10 +40,10 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
 
-@Service("CDLMatchService")
-public class CDLMatchServiceImpl implements CDLMatchService {
+@Service("CDLLookupService")
+public class CDLLookupServiceImpl implements CDLLookupService {
 
-    private static final Logger log = LoggerFactory.getLogger(CDLMatchServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CDLLookupServiceImpl.class);
 
     @Inject
     private ServingStoreProxy servingStoreProxy;

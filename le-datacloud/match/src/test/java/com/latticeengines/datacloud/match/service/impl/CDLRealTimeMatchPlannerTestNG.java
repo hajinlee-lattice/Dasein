@@ -56,7 +56,7 @@ public class CDLRealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestN
     private RealTimeMatchPlanner realTimeMatchPlanner;
 
     @Inject
-    private CDLMatchServiceImpl cdlMetadataService;
+    private CDLLookupServiceImpl cdlMetadataService;
 
     @Inject
     private TestMatchInputService testMatchInputService;

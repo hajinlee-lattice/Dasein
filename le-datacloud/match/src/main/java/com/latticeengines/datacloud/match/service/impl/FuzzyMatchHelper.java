@@ -26,7 +26,7 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
-import com.latticeengines.datacloud.match.service.CDLMatchService;
+import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -59,7 +59,7 @@ public class FuzzyMatchHelper implements DbHelper {
     private ZkConfigurationService zkConfigurationService;
 
     @Inject
-    private CDLMatchService cdlMatchService;
+    private CDLLookupService cdlLookupService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -92,7 +92,7 @@ public class FuzzyMatchHelper implements DbHelper {
             try {
                 updateDecisionGraph(context.getInput());
                 updateUseRemoteDnB(context.getInput());
-                if (Boolean.TRUE.equals(context.isCDLMatch())) {
+                if (Boolean.TRUE.equals(context.isCdlLookup())) {
                     preLookup(context);
                 }
                 if (isSync) {
@@ -113,9 +113,11 @@ public class FuzzyMatchHelper implements DbHelper {
             String lookupIdKey = record.getLookupIdKey();
             String lookupIdValue = record.getLookupIdValue();
             if (StringUtils.isNotBlank(lookupIdValue)) {
-                //DynamoDataUnit dynamoDataUnit = context.getCustomAccountDataUnit();
+                // DynamoDataUnit dynamoDataUnit =
+                // context.getCustomAccountDataUnit();
                 List<DynamoDataUnit> dynamoDataUnits = context.getCustomDataUnits();
-                Map<String, Object> customAccount = cdlMatchService.lookup(dynamoDataUnits, lookupIdKey, lookupIdValue);
+                Map<String, Object> customAccount = cdlLookupService.lookup(dynamoDataUnits, lookupIdKey,
+                        lookupIdValue);
                 if (MapUtils.isNotEmpty(customAccount)) {
                     record.setCustomAccount(customAccount);
                     String latticeAccountId = (String) customAccount.get(InterfaceName.LatticeAccountId.name());

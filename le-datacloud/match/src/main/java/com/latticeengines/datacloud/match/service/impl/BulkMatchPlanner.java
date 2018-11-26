@@ -35,7 +35,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         MatchOutput output;
         ColumnSelection columnSelection;
         if (isCdlMatch(input)) {
-            context.setCDLMatch(true);
+            context.setCdlLookup(true);
             if (metadatas == null) {
                 metadatas = parseCDLMetadata(input);
             }
@@ -48,7 +48,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             context.setCustomDataUnits(parseCustomDynamo(input));
             output = initializeMatchOutput(input, columnSelection, metadatas);
         } else {
-            context.setCDLMatch(false);
+            context.setCdlLookup(false);
             columnSelection = parseColumnSelection(input);
             output = initializeMatchOutput(input, columnSelection, null);
         }

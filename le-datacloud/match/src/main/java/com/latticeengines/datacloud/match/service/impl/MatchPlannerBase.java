@@ -28,7 +28,7 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
-import com.latticeengines.datacloud.match.service.CDLMatchService;
+import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
@@ -62,7 +62,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     private ZkConfigurationService zkConfigurationService;
 
     @Inject
-    private CDLMatchService cdlColumnSelectionService;
+    private CDLLookupService cdlColumnSelectionService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;

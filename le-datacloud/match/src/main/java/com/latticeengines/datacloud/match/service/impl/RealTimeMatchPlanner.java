@@ -52,7 +52,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         MatchOutput output;
 
         if (isCdlMatch(input)) {
-            context.setCDLMatch(true);
+            context.setCdlLookup(true);
             if (metadatas == null) {
                 metadatas = parseCDLMetadata(input);
             }
@@ -65,7 +65,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
             context.setCustomDataUnits(parseCustomDynamo(input));
             output = initializeMatchOutput(input, columnSelection, metadatas);
         } else {
-            context.setCDLMatch(false);
+            context.setCdlLookup(false);
             ColumnSelection columnSelection = parseColumnSelection(input);
             context.setColumnSelection(columnSelection);
             output = initializeMatchOutput(input, columnSelection, metadatas);

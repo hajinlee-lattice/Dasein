@@ -86,7 +86,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
-                matchRecord.setLatticeAccountId(result);
+                if (!traveler.getMatchInput().isCdlMatch()) {
+                    matchRecord.setLatticeAccountId(result);
+                } else {
+                    matchRecord.setCdlId(result);
+                }
                 if (StringUtils.isNotEmpty(result)) {
                     matchRecord.setMatched(true);
                 }
@@ -161,8 +165,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     debugValues.add(value);
                     value = matchContext.getConfidenceCode() != null ? matchContext.getConfidenceCode() + "" : "";
                     debugValues.add(value);
-                    value = matchContext.getMatchGrade() != null && matchContext.getMatchGrade().getRawCode() != null ? matchContext
-                            .getMatchGrade().getRawCode() : "";
+                    value = matchContext.getMatchGrade() != null && matchContext.getMatchGrade().getRawCode() != null
+                            ? matchContext.getMatchGrade().getRawCode() : "";
                     debugValues.add(value);
                     value = matchContext.getHitWhiteCache() != null ? matchContext.getHitWhiteCache() + "" : "";
                     debugValues.add(value);
@@ -207,12 +211,14 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     @MatchStep
-    private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords, MatchInput matchInput) {
+    private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
+            MatchInput matchInput) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            if (StringUtils.isNotEmpty(matchRecord.getLatticeAccountId()) || matchRecord.isFailed()) {
+            if (StringUtils.isNotEmpty(matchRecord.getLatticeAccountId())
+                    || StringUtils.isNotEmpty(matchRecord.getCdlId()) || matchRecord.isFailed()) {
                 matchFutures.add(null);
             } else {
                 MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
