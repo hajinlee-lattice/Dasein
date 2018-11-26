@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 @Service("emrCacheService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)

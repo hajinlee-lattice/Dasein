@@ -10,6 +10,22 @@ public class EMRScalingConfig extends TransformerConfig {
     @JsonProperty("Delta")
     private Integer delta;
 
+    // for jackson
+    private EMRScalingConfig() {
+    }
+
+    public static EMRScalingConfig scaleOut() {
+        EMRScalingConfig config = new EMRScalingConfig();
+        config.setOperation(Operation.ScaleOut);
+        return config;
+    }
+
+    public static EMRScalingConfig scaleIn() {
+        EMRScalingConfig config = new EMRScalingConfig();
+        config.setOperation(Operation.ScaleIn);
+        return config;
+    }
+
     public Operation getOperation() {
         return operation;
     }

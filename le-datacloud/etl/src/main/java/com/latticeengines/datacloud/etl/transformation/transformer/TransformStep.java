@@ -36,7 +36,7 @@ public class TransformStep {
         this.targetVersion = targetVersion;
         this.targetTemplate = targetTemplate;
     }
-    
+
     public TransformStep(String name) {
         this.name = name;
     }
@@ -113,4 +113,7 @@ public class TransformStep {
         this.baseTables = baseTables;
     }
 
+    public void setTarget(Source target) {
+        this.target = target;
+    }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 @Component("httpFSMBean")
 @ManagedResource(objectName = "Diagnostics:name=HttpFSCheck")

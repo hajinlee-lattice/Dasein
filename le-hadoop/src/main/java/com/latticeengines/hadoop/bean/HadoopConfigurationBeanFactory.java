@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 public abstract class HadoopConfigurationBeanFactory<T extends Configuration> implements FactoryBean<T> {
 

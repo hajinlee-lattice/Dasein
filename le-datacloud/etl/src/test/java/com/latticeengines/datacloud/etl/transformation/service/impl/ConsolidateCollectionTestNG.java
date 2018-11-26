@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation;
+package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -17,7 +17,6 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.S3PathBuilder;
-import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConsolidateCollectionTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateCollectionConfig;

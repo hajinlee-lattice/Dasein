@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;

@@ -19,9 +19,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.EMRScalingTransformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.EMRScalingConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -35,12 +37,12 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
     private GeneralSource contactBucket = new GeneralSource("ContactBucket");
     private GeneralSource source = new GeneralSource("ContactStats");
 
-    private static int profileStep = 0;
-    private static int bucketStep = 1;
+    private static int profileStep = 0 + 1;
+    private static int bucketStep = 1 + 1;
 
     @Override
-    @Test(groups = "functional", enabled = true)
-    public void testTransformation() throws Exception {
+    @Test(groups = "functional")
+    public void testTransformation() {
         prepareContact();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -61,9 +63,11 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
             TransformationStepConfig calc = calcStats();
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
+                    scaleOut(), //
                     profile, //
                     bucket, //
-                    calc //
+                    calc, //
+                    scaleIn()
             );
             // -----------
             steps.get(steps.size() - 1).setTargetSource(getTargetSourceName());
@@ -72,6 +76,24 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private TransformationStepConfig scaleOut() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(EMRScalingTransformer.TRANSFORMER_NAME);
+        EMRScalingConfig config = EMRScalingConfig.scaleOut();
+        config.setDelta(6);
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
+    }
+
+    private TransformationStepConfig scaleIn() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(EMRScalingTransformer.TRANSFORMER_NAME);
+        EMRScalingConfig config = EMRScalingConfig.scaleIn();
+        config.setDelta(6);
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
     }
 
     @Override
@@ -122,7 +144,7 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
         columns.add(Pair.of("ContactId", String.class));
         columns.add(Pair.of("Title", String.class));
 
-        Object[][] data = new Object[][] { 
+        Object[][] data = new Object[][] {
             { "Account1", "Contact1", "CEO" }, //
             { "Account1", "Contact2", "CEO" }, //
             { "Account2", "Contact3", "CEO" }, //

@@ -1,4 +1,4 @@
-package com.latticeengines.hadoop.service;
+package com.latticeengines.hadoop.exposed.service;
 
 public interface EMRCacheService {
 

@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;

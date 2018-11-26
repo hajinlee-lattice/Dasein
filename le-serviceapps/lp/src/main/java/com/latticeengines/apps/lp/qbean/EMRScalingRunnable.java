@@ -29,7 +29,7 @@ import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public class EMRScalingRunnable implements Runnable {

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HeaderRequestInterceptor;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.hadoop.bean.HadoopConfigurationUtils;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Service("emrEnvService")

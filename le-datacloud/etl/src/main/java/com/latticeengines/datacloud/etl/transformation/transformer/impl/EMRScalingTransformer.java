@@ -16,7 +16,7 @@ import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.EMRScalingConfig;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 
 @Component(TRANSFORMER_NAME)
@@ -80,6 +80,8 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
                 }
                 log.info("Scaling task group from " + taskGrp.getRequestedInstanceCount() + " to " + target);
                 emrService.scaleTaskGroup(taskGrp, target);
+                step.setTarget(null);
+                step.setCount(0L);
             }
         } else {
             log.info("This stack is not using emr, skip scaling operation.");

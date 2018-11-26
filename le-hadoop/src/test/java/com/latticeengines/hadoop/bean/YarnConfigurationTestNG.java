@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

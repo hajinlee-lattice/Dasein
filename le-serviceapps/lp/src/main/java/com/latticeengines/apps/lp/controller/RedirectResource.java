@@ -17,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 import io.swagger.annotations.Api;

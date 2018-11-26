@@ -14,7 +14,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;

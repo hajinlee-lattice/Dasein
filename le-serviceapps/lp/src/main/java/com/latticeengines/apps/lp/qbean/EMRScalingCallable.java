@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 class EMRScalingCallable implements Callable<Boolean> {

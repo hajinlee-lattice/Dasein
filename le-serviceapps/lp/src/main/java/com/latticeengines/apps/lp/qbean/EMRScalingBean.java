@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.emr.EMRService;
-import com.latticeengines.hadoop.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
