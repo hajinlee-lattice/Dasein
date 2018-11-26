@@ -27,6 +27,12 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
     @Value("${hadoop.ambari.mr.cp}")
     private String ambariMrCp;
 
+    @Value("${hadoop.emr.yarn.cp}")
+    private String emrYarnCp;
+
+    @Value("${hadoop.emr.mr.cp}")
+    private String emrMrCp;
+
     @Override
     public Class<?> getObjectType() {
         return YarnConfiguration.class;
@@ -39,14 +45,16 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
 
     @Override
     protected YarnConfiguration getBaseConfiguration() {
+        Properties properties = new Properties();
         if (!Boolean.TRUE.equals(useEmr) && useAmbari) {
-            Properties properties = new Properties();
             properties.setProperty("yarn.application.classpath", ambariYarnCp);
             properties.setProperty("mapreduce.application.classpath", ambariMrCp);
-            return (YarnConfiguration) ConfigurationUtils.createFrom((Configuration) baseConfiguration, properties);
+
         } else {
-            return baseConfiguration;
+            properties.setProperty("yarn.application.classpath", emrYarnCp);
+            properties.setProperty("mapreduce.application.classpath", emrMrCp);
         }
+        return (YarnConfiguration) ConfigurationUtils.createFrom((Configuration) baseConfiguration, properties);
     }
 
     @Override
