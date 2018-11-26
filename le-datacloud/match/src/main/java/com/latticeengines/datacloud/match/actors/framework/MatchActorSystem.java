@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
+import com.latticeengines.datacloud.match.actors.visitor.impl.CDLAssociateActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.CDLLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
@@ -75,6 +77,12 @@ public class MatchActorSystem {
 
     @Value("${datacloud.match.dunsGuideBookLookupActor.actor.cardinality:3}")
     private int dunsGuideBookLookupActorCardinality;
+
+    @Value("${datacloud.match.cdlLookupActor.actor.cardinality:3}")
+    private int cdlLookupActorCardinality;
+
+    @Value("${datacloud.match.cdlAssociateActor.actor.cardinality:2}")
+    private int cdlAssociateActorCardinality;
 
     @Value("${datacloud.match.metricActor.actor.cardinality:4}")
     private int metricActorCardinality;
@@ -206,6 +214,8 @@ public class MatchActorSystem {
         initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
         initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
         initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
+        initNamedActor(CDLLookupActor.class, true, cdlLookupActorCardinality);
+        initNamedActor(CDLAssociateActor.class, true, cdlAssociateActorCardinality);
 
         initMicroEngines();
 

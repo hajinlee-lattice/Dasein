@@ -11,7 +11,7 @@ import java.util.List;
  * Service to manipulate {@link CDLLookupEntry} in different environment (e.g., staging, serving) for the given tenant.
  * Note that lookup entries cannot be modified once created.
  */
-public interface CDLLookupKeyValueService {
+public interface CDLLookupEntryService {
 
     /**
      * Retrieve the seed ID allocated to the given entity under the given tenant.
