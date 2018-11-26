@@ -10,7 +10,6 @@ import LeTableFooter from "./table-footer";
 export default class LeTable extends Component {
   constructor(props) {
     super(props);
-    // this.allData = this.props.data;
     this.state = {
       showLoading: this.props.showLoading,
       showEmpty: this.props.showEmpty,
@@ -45,13 +44,9 @@ export default class LeTable extends Component {
       newItem.colIndex = index;
       this.columnsMapping[header.name] = newItem;
     });
-
-    // if (this.props.config.pagination) {
-
-    // }
   }
 
-  loadPage(data, fromToObj) {
+  loadPage(fromToObj) {
     // this.setState({ data: data });
     if (fromToObj) {
       this.setState({ data: this.props.data.slice(fromToObj.from, fromToObj.to) });
@@ -152,7 +147,7 @@ export default class LeTable extends Component {
     // if (this.props.config.pagination) {
     return (
       <LeTableFooter
-        data={this.props.data}
+        total={this.props.data.length}
         callback={this.loadPage}
         perPage={this.state.perPage}
         start={this.state.startPage}

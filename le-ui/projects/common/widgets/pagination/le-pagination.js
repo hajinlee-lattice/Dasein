@@ -1,61 +1,51 @@
 import React, { Component } from "../../react-vendor";
 import "./le-pagination.scss";
+import LeButton from "../buttons/le-button";
 
 export default class LePagination extends Component {
   constructor(props) {
     super(props);
-    
+
     this.clickHandler = this.clickHandler.bind(this);
-    this.getSubset = this.getSubset.bind(this);
     this.init();
     this.state = { current: props.start };
   }
 
-  init(){
-    this._data = this.props.data;
+  init() {
+    this._total = this.props.total;
     this._startPage = this.props.start;
     this._perPage = this.props.perPage;
-    this._numPages = this._data.length / this._perPage;
-    let tmp = this._data.length % this._perPage;
+    this._numPages = this._total / this._perPage;
+    let tmp = this._total % this._perPage;
     if (tmp > 0) {
       this._numPages = Math.ceil(this._numPages);
     }
   }
-  
-  getSubset(page){
+
+  getFormTo(page) {
     let from = (page - 1) * this._perPage;
     let to = page * this._perPage;
-    if (to <= this._data.length) {
-      return this._data.slice(from, to);
-    } else {
-      return this._data.slice(from, this._data.length);
+    if (to > this._total) {
+      to = this._total;
     }
+    return { from: from, to: to };
   }
 
-  getFormTo(page){
-    let from = (page - 1) * this._perPage;
-    let to = page * this._perPage;
-    if(to > this._data.length){
-        to = this._data.length;
-    }
-    return {from : from, to: to};
-  }
-
-  componentDidMount(){
-    this.clickHandler('first');
+  componentDidMount() {
+    this.clickHandler("first");
   }
 
   clickHandler(direction) {
     switch (direction) {
-        case "first": 
+      case "first":
         this.setState({ current: 1 }, () => {
-            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
-          });
+          this.props.callback(this.getFormTo(this.state.current));
+        });
         break;
       case "next":
         if (this.state.current < this._numPages) {
           this.setState({ current: this.state.current + 1 }, () => {
-            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
+            this.props.callback(this.getFormTo(this.state.current));
           });
         }
         break;
@@ -63,69 +53,81 @@ export default class LePagination extends Component {
       case "prev":
         if (this.state.current > 1) {
           this.setState({ current: this.state.current - 1 }, () => {
-            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
+            this.props.callback(this.getFormTo(this.state.current));
           });
         }
 
         break;
-        case 'last':
+      case "last":
         this.setState({ current: this._numPages }, () => {
-            this.props.callback(this.getSubset(this.state.current), this.getFormTo(this.state.current));
-          });
+          this.props.callback(this.getFormTo(this.state.current));
+        });
         break;
     }
   }
   render() {
-    return (
-      <div
-        className={`pd-pagination ${
-          this.props.classesName ? this.props.classesName : ""
-        }`}
-      >
-        <button
-          type="button"
-          className="button borderless-button pd-pagination-start"
-          onClick={() => {
-            this.clickHandler("first");
-          }}
+    if (this._numPages > 1) {
+      return (
+        <div
+          className={`pd-pagination ${
+            this.props.classesName ? this.props.classesName : ""
+          }`}
         >
-          <span className="fa fa-angle-double-left" />
-        </button>
-        <button
-          type="button"
-          className="button borderless-button pd-pagination-prev"
-          onClick={() => {
-            this.clickHandler("prev");
-          }}
-        >
-          <span className="fa fa-angle-left" />
-        </button>
+          <LeButton
+            name="borderless-former"
+            callback={() => {
+              this.clickHandler("first");
+            }}
+            disabled={false}
+            config={{
+              classNames: "borderless-button",
+              icon: "fa fa-angle-double-left"
+            }}
+          />
+          <LeButton
+            name="borderless-firts"
+            callback={() => {
+              this.clickHandler("prev");
+            }}
+            disabled={false}
+            config={{
+              classNames: "borderless-button",
+              icon: "fa fa-angle-left"
+            }}
+          />
+          <span className="pd-pagination-center">
+            <span className="pd-pagination-pagenum">{this.state.current}</span>
+            <span>/</span>
+            <span className="pd-pagination-pagetotal">{this._numPages}</span>
+          </span>
 
-        <span className="pd-pagination-center">
-          <span className="pd-pagination-pagenum">{this.state.current}</span>
-          <span>/</span>
-          <span className="pd-pagination-pagetotal">{this._numPages}</span>
-        </span>
+          <LeButton
+            name="borderless-next"
+            callback={() => {
+              this.clickHandler("next");
+            }}
+            disabled={false}
+            config={{
+              classNames: "borderless-button",
+              icon: "fa fa-angle-right"
+            }}
+          />
 
-        <button
-          type="button"
-          className="button borderless-button pd-pagination-next"
-          onClick={() => {
-            this.clickHandler("next");
-          }}
-        >
-          <span className="fa fa-angle-right" />
-        </button>
-        <button
-          type="button"
-          className="button borderless-button pd-pagination-end"
-          onClick={() => {
-            this.clickHandler("last");
-          }}
-        >
-          <span className="fa fa-angle-double-right" />
-        </button>
-      </div>
-    );
+          <LeButton
+            name="borderless-firts"
+            callback={() => {
+              this.clickHandler("last");
+            }}
+            disabled={false}
+            config={{
+              classNames: "borderless-button",
+              icon: "fa fa-angle-double-right"
+            }}
+          />
+        </div>
+      );
+    } else {
+      return null;
+    }
   }
 }
