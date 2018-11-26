@@ -11,7 +11,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
@@ -103,14 +102,6 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         log.info("getCustomDisplayNames url is " + url);
         Map<BusinessEntity, List<AttrConfig>> result = getKryo("get custom displayNames", url, Map.class);
         return result;
-    }
-
-    public List<AttrConfig> renderConfigs(String customerSpace, List<AttrConfig> configs) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/render", //
-                shortenCustomerSpace(customerSpace));
-        log.info("renderConfigs url is " + url);
-        List<?> result = post("render Configs ", url, configs, List.class);
-        return JsonUtils.convertList(result, AttrConfig.class);
     }
 
     public void removeAttrConfigByTenant(String customerSpace) {

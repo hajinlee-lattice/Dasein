@@ -23,8 +23,6 @@ public interface AttrConfigService {
 
     AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode);
 
-    List<AttrConfig> renderConfigs(List<AttrConfig> configList);
-
     Map<BusinessEntity, List<AttrConfig>> findAllHaveCustomDisplayNameByTenantId(String tenantId);
 
     void removeAttrConfig(String tenantId);

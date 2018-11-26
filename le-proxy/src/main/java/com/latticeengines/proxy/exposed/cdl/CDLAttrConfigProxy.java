@@ -27,8 +27,6 @@ public interface CDLAttrConfigProxy {
 
     Map<BusinessEntity, List<AttrConfig>> getCustomDisplayNames(String customerSpace);
 
-    List<AttrConfig> renderConfigs(String customerSpace, List<AttrConfig> configs);
-
     void removeAttrConfigByTenant(String customerSpace);
 
 }

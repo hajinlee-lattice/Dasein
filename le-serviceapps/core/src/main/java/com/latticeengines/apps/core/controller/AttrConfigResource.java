@@ -68,14 +68,6 @@ public class AttrConfigResource {
         return request;
     }
 
-    @PostMapping(value = "/render")
-    @ApiOperation("render configs given attribute configs")
-    @ResponseBody
-    public List<AttrConfig> renderConfigs(@PathVariable String customerSpace,
-            @RequestBody List<AttrConfig> configList) {
-        return attrConfigService.renderConfigs(configList);
-    }
-
     @PostMapping(value = "/overview")
     @ResponseBody
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,

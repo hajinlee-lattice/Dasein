@@ -279,7 +279,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     && CollectionUtils.isNotEmpty(customDisplayNameAttrs.get(BusinessEntity.Account))) {
                 customDisplayNameAttrs.get(BusinessEntity.Account).forEach(config -> {
                     nameToDisplayNameMap.put(config.getAttrName(),
-                            config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
+                            (String) config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue());
                 });
             }
         } catch (LedpException e) {

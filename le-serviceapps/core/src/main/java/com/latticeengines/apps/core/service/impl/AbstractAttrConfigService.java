@@ -402,12 +402,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }).collect(Collectors.toList());
     }
 
-    @Override
-    public List<AttrConfig> renderConfigs(List<AttrConfig> attrConfigs) {
-        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, new ArrayList<>());
-        return generateListFromMap(attrConfigGrpsForTrim);
-    }
-
     /*
      * split configs by entity, then distribute thread to render separately
      */

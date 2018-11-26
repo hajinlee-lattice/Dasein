@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.testng.Assert;
@@ -103,7 +102,6 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         attrs = attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenant1.getId());
         Assert.assertEquals(attrs.size(), 1);
         attrs.get(0).getProperty(ColumnMetadataKey.DisplayName).setAllowCustomization(true);
-        Mockito.doReturn(attrs).when(lpAttrConfigService).renderConfigs(Mockito.anyList());
     }
 
     @AfterClass(groups = "functional")
