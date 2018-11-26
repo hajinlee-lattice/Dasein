@@ -11,15 +11,6 @@ export default class LeTableFooter extends Component {
     super(props);
   }
 
-  //   getFooter(){
-
-  //     return(
-  //     //   <div className="le-table-cell le-table-col-span-12 le-table-footer-container">
-
-  //     //   </div>
-  //     )
-  //   }
-
   render() {
     return (
       <div className="le-table-footer">

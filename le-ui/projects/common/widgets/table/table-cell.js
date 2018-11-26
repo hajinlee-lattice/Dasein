@@ -61,7 +61,7 @@ export default class LeTableCell extends Component {
       this.props.columnsMapping[this.props.colName].template
     ) {
       return (
-      <div className="le-cell-template" >
+      <div className={`le-cell-template ${this.props.colName}`} >
         {this.props.columnsMapping[this.props.colName].template(
             this, this.props.rowData
           )}
