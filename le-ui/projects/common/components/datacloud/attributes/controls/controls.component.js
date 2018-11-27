@@ -35,7 +35,7 @@ angular.module('common.attributes.controls', [])
                 Modal.warning({
                     name: 'AttrAdmin_Warning',
                     title: "Activation",
-                    message: "Once you activate these premium attributes, you won't be able to deactivate.  Contact your lattice representative to upgrade.",
+                    message: "Once you activate these premium attributes, you won't be able to deactivate.  Contact your Lattice representative to upgrade your data licenses.",
                     confirmtext: "Yes, activate"
                 }, vm.store.modalCallback);
             } else {
