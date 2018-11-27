@@ -1,22 +1,25 @@
-.le-v-fill {
+.le-h-fill {
   height: 100%;
   min-height: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 
-  .le-v-box {
+  .le-h-box {
     padding: 0.5em;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex: 1;
+    
   }
 }
 
-.le-flex-v-panel {
+.le-flex-h-panel {
   width: 100%;
   display: flex;
   box-sizing: border-box;
   flex-wrap: wrap;
-  flex-direction: column;
-  padding: 0.5em;
+  padding: .5em;
+}
+
+.le-push-right{
 }
