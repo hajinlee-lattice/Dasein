@@ -36,20 +36,20 @@ angular.module('common.datacloud.tabs.subheader', [])
         QueryStore.setPublicProperty('enableSaveSegmentButton', false);
         this.header.exportSegment.items = [
             {
-                label: 'Accounts',
+                label: 'Enriched Accounts',
                 icon: 'fa fa-building-o',
                 click: checkStatusBeforeExport.bind(null, 'ACCOUNT'),
                 disabledif: !QueryStore.counts.accounts.loading && !QueryStore.counts.accounts.value
             },{
-                label: 'Contacts',
-                icon: 'fa fa-users',
-                click: checkStatusBeforeExport.bind(null, 'CONTACT'),
-                disabledif: !QueryStore.counts.contacts.loading && !QueryStore.counts.contacts.value
-            },{
-                label: 'Accounts and Contacts',
+                label: 'Enriched Contacts with Account Attributes',
                 icon: 'fa fa-briefcase',
                 click: checkStatusBeforeExport.bind(null, 'ACCOUNT_AND_CONTACT'),
                 disabledif: (!QueryStore.counts.accounts.loading && !QueryStore.counts.accounts.loading) && (QueryStore.counts.accounts.value == 0 || QueryStore.counts.contacts.value == 0)
+            },{
+                label: 'Enriched Contacts (No Account Attributes)',
+                icon: 'fa fa-users',
+                click: checkStatusBeforeExport.bind(null, 'CONTACT'),
+                disabledif: !QueryStore.counts.contacts.loading && !QueryStore.counts.contacts.value
             }
         ];
     }
