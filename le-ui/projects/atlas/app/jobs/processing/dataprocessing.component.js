@@ -48,7 +48,7 @@ angular.module('lp.jobs.import', [
         }
     }])
     .filter('jobEmpty', ['AuthorizationUtility', function (AuthorizationUtility) {
-        var right = AuthorizationUtility.checkAccessLevel(['INTERNAL_ADMIN', 'SUPER_ADMIN']);
+        var right = AuthorizationUtility.checkAccessLevel(['INTERNAL_ADMIN', 'SUPER_ADMIN', 'EXTERNAL_ADMIN']);
         return function (jobs){
             var ret = jobs.filter(function(job){
                 if((job && job.id == 0 && job.subJobs.length == 0 && right) || job.id != 0 || job.subJobs.length > 0 ){

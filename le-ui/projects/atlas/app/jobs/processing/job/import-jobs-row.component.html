@@ -1,6 +1,6 @@
 <div class="le-cell le-col-start-1 le-col-span-2">
 
-    <span ng-if="isJonInState(job, 'Completed') || isJonInState(job, 'Running') || isJonInState(job, 'Failed')">
+    <span ng-if="showScheduleTime(job)">
         {{job.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
     </span>
 </div>

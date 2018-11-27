@@ -376,6 +376,23 @@ angular.module('lp.jobs.import.row', [
             return AuthorizationUtility.checkAccessLevel(['INTERNAL_ADMIN', 'SUPER_ADMIN']);
         };
 
+        $scope.hasSubjobs = function(job){
+            if(job.subJobs != null && job.subJobs != undefined && job.subJobs.length > 0 ){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        $scope.showScheduleTime = function(job) {
+            if($scope.hasSubjobs(job) && ($scope.isJonInState(job, 'Completed') || $scope.isJonInState(job, 'Running') || $scope.isJonInState(job, 'Failed'))){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
         init();
 
     }];
