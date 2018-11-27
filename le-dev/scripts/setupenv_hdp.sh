@@ -15,9 +15,8 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo chown -R ${USER} ${HADOOP_HOME}
     if [ ! -f "${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz" ]; then
         echo 'downloading hadoop tar ball, this may take a long time (10 min) ...'
-        aws s3api get-object \
-            --bucket latticeengines-dev \
-            --key "artifacts/hadoop/common/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}.tar.gz" \
+        aws s3 cp \
+            s3://latticeengines-dev/artifacts/hadoop/common/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}.tar.gz \
             ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz
     fi
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION} || true
