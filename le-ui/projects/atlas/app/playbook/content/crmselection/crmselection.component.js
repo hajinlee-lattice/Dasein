@@ -38,9 +38,11 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     vm.savedSegment = crmselection;
                     vm.stored.crm_selection = crmselection;
 
-                    PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
-                    PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
-                    PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                    if(vm.stored && vm.stored.crm_selection) {
+                        PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
+                        PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
+                        PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                    }
 
                     if(crmselection) {
                         PlaybookWizardStore.setValidation('crmselection', true);
@@ -56,7 +58,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
         vm.checkValidDelay = function(form, accountId, orgId, isRegistered) {
             $timeout(function() {
-                if(vm.stored.crm_selection.orgId === orgId) {
+                if(vm.stored && vm.stored.crm_selection && vm.stored.crm_selection.orgId === orgId) {
                     vm.checkValid(form, accountId, orgId, isRegistered);
                 }
             }, 1);
@@ -71,7 +73,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.setExcludeItems(false);
             PlaybookWizardStore.setValidation('crmselection', false);
 
-            if(vm.stored.crm_selection) {
+            if(vm.stored && vm.stored.crm_selection) {
                 PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                 PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
                 PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);

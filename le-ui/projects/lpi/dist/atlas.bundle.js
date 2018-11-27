@@ -16648,18 +16648,22 @@ angular.module('common.datacloud.query.results', ['mainApp.core.utilities.Browse
                 var bucketsToLaunch = PlaybookWizardStore.currentPlay && PlaybookWizardStore.currentPlay.launchHistory && PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch && PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch ? PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : [];
 
                 // Get sum of non-suppressed buckets to calculate percentage for each bucket
-                var numAccounts = 0;
-                for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
-                    numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
-                }
+                // **Removed for below code**
+                // var numAccounts = 0;
+                // for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
+                //     numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
+                // }
+
+                // Now instead we get sum of scored and unscored accounts
+                var numAccounts = vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount;
+
                 vm.unscoredAccounts = {
                     total: vm.accountsCoverage.unscoredAccountCount,
                     percentage: NumberUtility.MakePercentage(vm.accountsCoverage.unscoredAccountCount, vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount, '%', 1)
-                };
-                console.log(vm.unscoredAccounts);
-                // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
-                // to be used when launching play, and assign percentage to the bucket for display purposes
-                vm.accountsCoverage.bucketCoverageCounts.forEach(function (bucket) {
+
+                    // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
+                    // to be used when launching play, and assign percentage to the bucket for display purposes
+                };vm.accountsCoverage.bucketCoverageCounts.forEach(function (bucket) {
                     if (bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
                         vm.selectedBuckets.push(bucket.bucket);
                     }

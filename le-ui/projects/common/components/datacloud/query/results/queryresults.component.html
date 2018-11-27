@@ -62,19 +62,33 @@
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
         </div>
 
-        <ul 
-            class="bucket-checkboxes"
-            ng-if="vm.accountsCoverage.bucketCoverageCounts.length > 1">
-            <li 
-                ng-class="vm.selectedBuckets.indexOf(bucket.bucket) !== -1 ? '' : 'unselected'"
-                ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
-                ng-click="vm.bucketClick(bucket); selectedBucket = !selectedBucket">
-                <h3>{{bucket.bucket}}</h3>
-                <h4>Accounts</h4>
-                <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 1 }})</p>
-            </li>
-        </ul>
-
+        <div ng-if="vm.accountsCoverage.bucketCoverageCounts.length > 1" class="buckets-container">
+            <div class="buckets-about">
+                Select the recommendations. Each one show how many <strong>accounts</strong> match each rating category (as of the last scoring job).
+            </div>
+            <ul class="bucket-checkboxes">
+                <li 
+                    ng-class="vm.selectedBuckets.indexOf(bucket.bucket) !== -1 ? '' : 'unselected'"
+                    ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
+                    ng-click="vm.bucketClick(bucket); selectedBucket = !selectedBucket">
+                    <h3>{{bucket.bucket}}</h3>
+                    <h4>Accounts</h4>
+                    <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 1 }})</p>
+                </li>
+                <!--
+                <li
+                    class="unscored"
+                    ng-class="vm.launchUnscored ? '' : 'unselected'"
+                    ng-click="vm.launchUnscored = !vm.launchUnscored; vm.launchUnscoredClick();">
+                    <h3>Unscored</h3>
+                    <p>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</p>
+                </li>
+                -->
+            </ul>
+            <div class="unscored-accounts">
+                <input type="checkbox" ng-model="vm.launchUnscored" ng-click="vm.launchUnscoredClick()" /> Include the <strong>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</strong> Unscored Accounts?
+            </div>
+        </div>
     </div><!-- End .targets-filters -->
 
     <div class="success-message" ng-if="vm.saved === true">

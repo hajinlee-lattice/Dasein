@@ -26,9 +26,24 @@
             padding-left: 22px;
         }
     }
-
+    .buckets-about {
+        margin-bottom: 10px;
+        strong {
+            font-weight: bold;
+        }
+    }
     .bucket-checkboxes li {
-        width: 19%;
+        // width: 19%; // replaced with flex-item
+    }
+    .unscored-accounts {
+        margin-top: 10px;
+        strong {
+            font-weight: bold;
+        }
+        input {
+            position: relative;
+            top: 2px;
+        }
     }
     .exclude-filter {
         margin-bottom: 10px;
@@ -40,7 +55,7 @@
     }
     .targets-filters {
         margin-bottom: 20px;
-        .bucket-checkboxes {
+        .buckets-container {
             margin-top: 30px;
         }
     }

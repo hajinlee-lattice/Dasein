@@ -19,6 +19,7 @@ angular.module('lp.playbook')
     this.destinationSysType = null;
     this.destinationAccountId = null;
     this.excludeItems = false;
+    this.launchUnscored = false;
 
     this.init = function() {
 
@@ -301,6 +302,7 @@ angular.module('lp.playbook')
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
+                launchUnscored: PlaybookWizardStore.getLaunchUnscored()
             },
             saveOnly = opts.saveOnly || false,
             lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),
@@ -398,7 +400,8 @@ angular.module('lp.playbook')
                 destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
-                excludeItems: PlaybookWizardStore.getExcludeItems()
+                excludeItems: PlaybookWizardStore.getExcludeItems(),
+                launchUnscored: PlaybookWizardStore.getLaunchUnscored()
             }
 
         PlaybookWizardStore.launchPlay(play, opts).then(function(data) {
@@ -743,6 +746,14 @@ angular.module('lp.playbook')
         return this.recommendationCounts;
     }
 
+    this.setLaunchUnscored = function(bool) {
+        this.launchUnscored = bool;
+    }
+
+    this.getLaunchUnscored = function(bool) {
+        return this.launchUnscored;
+    }
+
 
 })
 .service('PlaybookWizardService', function($q, $http, $state, $timeout) {
@@ -925,7 +936,6 @@ angular.module('lp.playbook')
     }
 
     this.launchPlay = function(play, opts) {
-
         var deferred = $q.defer(),
             play_name = play.name,
             bucketsToLaunch = opts.bucketsToLaunch,
@@ -934,7 +944,9 @@ angular.module('lp.playbook')
             destinationSysType = opts.destinationSysType,
             destinationAccountId = opts.destinationAccountId,
             excludeItems = opts.excludeItems;
+            launchUnscored = opts.launchUnscored;
 
+return false;
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
@@ -945,7 +957,8 @@ angular.module('lp.playbook')
                 destinationOrgId: destinationOrgId,
                 destinationSysType: destinationSysType,
                 destinationAccountId: destinationAccountId,
-                excludeItemsWithoutSalesforceId: excludeItems
+                excludeItemsWithoutSalesforceId: excludeItems,
+                launchUnscored: launchUnscored
             }
         }).then(
             function onSuccess(response) {

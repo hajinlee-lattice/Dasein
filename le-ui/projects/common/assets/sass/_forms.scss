@@ -843,7 +843,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 .bucket-checkboxes {
     @include flex-container;
     @include media('<930px') {
-      justify-content: space-between;  
+      justify-content: space-between;
     }
     li {
         /* 
@@ -852,7 +852,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
           has 5 buckets and this is the first instance, so it is set at 19%. 
           Change css within the context of your instance.
         */
-        width: 19%;
+        //width: 19%; // replaced with flex-item
         margin-right: 10px;
         padding: 20px 30px;
         background: #467dba;
@@ -861,6 +861,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
         @include media('<930px') {
           margin-right: 0;
         }
+        @include flex-item(0 1 auto);
         h3, h4, p {
             text-align: center;
             color: #fff;

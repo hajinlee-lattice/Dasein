@@ -3,7 +3,7 @@ angular.module('common.datacloud.query.results', [
 ])
 .controller('QueryResultsCtrl', function(
     $q, $scope, $state, $stateParams, $filter, $rootScope,
-    BrowserStorageUtility, QueryStore, QueryService, 
+    BrowserStorageUtility, NumberUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts,
     AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount
 ) {
@@ -44,7 +44,8 @@ angular.module('common.datacloud.query.results', [
         currentTargetTab: 'Accounts',
         tmpAccounts: [],
         tmpContacts: [],
-        recommendationCounts: {}
+        recommendationCounts: {},
+        launchUnscored: PlaybookWizardStore.getLaunchUnscored()
     });
 
     vm.init = function() {
@@ -62,10 +63,20 @@ angular.module('common.datacloud.query.results', [
                                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : []);
                 
                 // Get sum of non-suppressed buckets to calculate percentage for each bucket
-                var numAccounts = 0;
-                for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
-                    numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
+                // **Removed for below code**
+                // var numAccounts = 0;
+                // for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
+                //     numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
+                // }
+                
+                // Now instead we get sum of scored and unscored accounts
+                var numAccounts = (vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount);
+
+                vm.unscoredAccounts = {
+                    total: vm.accountsCoverage.unscoredAccountCount,
+                    percentage: NumberUtility.MakePercentage(vm.accountsCoverage.unscoredAccountCount, (vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount), '%', 1)
                 }
+
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
@@ -372,6 +383,10 @@ angular.module('common.datacloud.query.results', [
 
         updatePage();
         vm.makeRecommendationCounts();
+    }
+
+    vm.launchUnscoredClick = function() {
+        PlaybookWizardStore.setLaunchUnscored(vm.launchUnscored);
     }
 
     vm.showNoResultsText = function(accounts, contacts) {
