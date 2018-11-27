@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
@@ -786,6 +787,7 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .failImportValidator()
                 .build());
         table.addAttribute(attr(InterfaceName.Description.name()) //
                 .allowedDisplayNames(Sets.newHashSet("DESCRIPTION", "PRODUCT DESCRIPTION")) //
@@ -1491,6 +1493,11 @@ public class SchemaRepository {
         @SuppressWarnings("unused")
         public AttributeBuilder withValidator(String otherField) {
             attribute.addValidator(new RequiredIfOtherFieldIsEmpty(otherField));
+            return this;
+        }
+
+        public AttributeBuilder failImportValidator() {
+            attribute.addValidator(new FailImportIfFieldIsEmpty());
             return this;
         }
 

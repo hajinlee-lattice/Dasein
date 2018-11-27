@@ -51,14 +51,17 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.exception.CriticalImportException;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
+import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
@@ -100,6 +103,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private String avroFileName;
 
     private String id;
+
+    private boolean failMapper = false;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -161,6 +166,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 CSVFormat format = LECSVFormat.format.withHeader(headers);
                 String line = reader.readLine(); // skip header
                 for (; (line = reader.readLine()) != null; lineNum++) {
+                    if (failMapper) {
+                        throw new CriticalImportException("There's critical exception in import, will fail the job!");
+                    }
                     LOG.info("Start to processing line: " + lineNum);
                     try (CSVParser parser = CSVParser.parse(line, format)) {
                         beforeEachRecord();
@@ -253,9 +261,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     rowError = true;
                     LOG.warn(e.getMessage(), e);
                 }
-                List<InputValidator> validators = attr.getValidators();
                 try {
-                    validateAttribute(validators, csvRecord, attr, csvColumnName);
+                    validateAttribute(csvRecord, attr, csvColumnName);
                     if (!attr.isNullable() || !StringUtils.isEmpty(csvFieldValue)) {
                         if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                             csvFieldValue = attr.getDefaultValueStr();
@@ -276,6 +283,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                     }
                     avroRecord.put(attr.getName(), avroFieldValue);
+                } catch(CriticalImportException e) {
+                    LOG.error(String.format("Import will fail because of critical exception %s", e.getMessage()));
+                    errorMap.put(attr.getDisplayName(), e.getMessage());
+                    failMapper = true;
                 } catch (LedpException e) {
                     LOG.warn(e.getMessage(), e);
                     if (e.getCode().equals(LedpCode.LEDP_17017)) {
@@ -288,6 +299,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
+                try {
+                    validateAttribute(csvRecord, attr, csvColumnName);
+                } catch (CriticalImportException e) {
+                    LOG.error(String.format("Import will fail because of critical exception %s", e.getMessage()));
+                    errorMap.put(attr.getDisplayName(), e.getMessage());
+                    failMapper = true;
+                } catch (Exception e) {
+                    LOG.warn(e.getMessage(), e);
+                    errorMap.put(attr.getDisplayName(), e.getMessage());
+                }
                 if (attr.getRequired() || !attr.isNullable()) {
                     errorMap.put(attr.getName(), String.format("%s cannot be empty!", attr.getName()));
                 } else {
@@ -300,8 +321,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     }
 
-    private void validateAttribute(List<InputValidator> validators, CSVRecord csvRecord, Attribute attr,
-            String csvColumnName) {
+    private void validateAttribute(CSVRecord csvRecord, Attribute attr, String csvColumnName) {
         String attrKey = attr.getName();
         if (!attr.isNullable() && StringUtils.isEmpty(csvRecord.get(csvColumnName))) {
             if (attr.getDefaultValueStr() == null) {
@@ -309,13 +329,21 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
             }
         }
-        if (CollectionUtils.isNotEmpty(validators)) {
-            InputValidator validator = validators.get(0);
-            try {
-                validator.validate(attrKey, csvRecord.toMap(), table);
-            } catch (Exception e) {
-                missingRequiredColValue = true;
-                throw new RuntimeException(e.getMessage());
+        List<InputValidatorWrapper> validatorWrappers = attr.getValidatorWrappers();
+        if (CollectionUtils.isNotEmpty(validatorWrappers)) {
+            for (InputValidatorWrapper validatorWrapper : validatorWrappers) {
+                if (validatorWrapper.getType().equals(RequiredIfOtherFieldIsEmpty.class)) {
+                    try {
+                        validatorWrapper.getValidator().validate(attrKey, csvRecord.toMap(), table);
+                    } catch (Exception e) {
+                        missingRequiredColValue = true;
+                        throw new RuntimeException(e.getMessage());
+                    }
+                } else if (validatorWrapper.getType().equals(FailImportIfFieldIsEmpty.class)) {
+                    if (!validatorWrapper.getValidator().validate(attrKey, csvRecord.toMap(), table)) {
+                        throw new CriticalImportException(String.format("Field %s is empty from import file!", attrKey));
+                    }
+                }
             }
         }
     }
