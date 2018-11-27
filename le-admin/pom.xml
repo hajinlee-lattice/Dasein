@@ -127,6 +127,11 @@
             <artifactId>le-quartzclient</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-documentdb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

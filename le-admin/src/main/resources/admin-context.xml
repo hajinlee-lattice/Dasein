@@ -2,7 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/data/jpa  http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:camille-bootstrap-context.xml" />
@@ -13,6 +15,17 @@
     <import resource="classpath:encryption-context.xml"/>
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
+
+ 	<import resource="classpath:documentdb-persistence-context.xml" />
+    <jpa:repositories base-package="com.latticeengines.admin.document.repository.writer"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="documentEntityManagerFactory"
+                      transaction-manager-ref="documentTransactionManager"  />
+
+    <jpa:repositories base-package="com.latticeengines.admin.document.repository.reader"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="documentEntityManagerFactoryReader"
+                      transaction-manager-ref="documentTransactionManagerReader"  />
 
     <context:component-scan base-package="com.latticeengines.admin">
         <!-- Need to exclude instantiating the swagger config except for bringing up the API
