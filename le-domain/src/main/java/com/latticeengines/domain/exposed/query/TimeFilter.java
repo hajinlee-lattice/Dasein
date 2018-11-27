@@ -89,6 +89,14 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
+    public static TimeFilter withinInclude(int val, String period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.WITHIN_INCLUDE;
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
+        filter.values = Collections.singletonList(val);
+        return filter;
+    }
+
     public static TimeFilter inCurrent(String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.IN_CURRENT_PERIOD;

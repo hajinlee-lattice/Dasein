@@ -63,6 +63,8 @@ public class TimeFilterTranslator {
                 return null;
             case WITHIN:
                 return translateWithIn(timeFilter.getPeriod(), timeFilter.getValues());
+            case WITHIN_INCLUDE:
+                return translateWithInInclude(timeFilter.getPeriod(), timeFilter.getValues());
             case PRIOR:
                 return translatePrior(timeFilter.getPeriod(), timeFilter.getValues());
             case BETWEEN:
@@ -95,6 +97,20 @@ public class TimeFilterTranslator {
                 throw new UnsupportedOperationException(
                         "Operator " + operator + " is not supported for date queries.");
         }
+    }
+
+    private Pair<String, String> translateWithInInclude(String period, List<Object> vals) {
+        verifyPeriodIsValid(period);
+        int offset = parseSingleInteger(ComparisonType.WITHIN_INCLUDE, vals);
+
+        int currentPeriodId = currentPeriodIds.get(period);
+        int targetPeriod = currentPeriodId - offset;
+
+        PeriodBuilder builder = periodBuilders.get(period);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, currentPeriodId);
+        String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
+        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
+        return Pair.of(start, end);
     }
 
     private Pair<String, String> translateWithIn(String period, List<Object> vals) {

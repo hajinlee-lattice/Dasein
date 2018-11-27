@@ -41,6 +41,9 @@ public class TimeFilterTranslatorUnitTestNG {
         TimeFilter within2Quarter = new TimeFilter(//
                 ComparisonType.WITHIN, PeriodStrategy.Template.Quarter.name(),
                 Collections.singletonList(2));
+        TimeFilter within2QuarterIncludeCurrent = new TimeFilter(//
+                ComparisonType.WITHIN_INCLUDE, PeriodStrategy.Template.Quarter.name(),
+                Collections.singletonList(2));
         TimeFilter prior1Month = new TimeFilter(//
                 ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(),
                 Collections.singletonList(1));
@@ -64,6 +67,7 @@ public class TimeFilterTranslatorUnitTestNG {
                 { within1Month, Pair.of("2018-01-01", "2018-01-31") }, //
                 { within3Month, Pair.of("2017-11-01", "2018-01-31") }, //
                 { within2Quarter, Pair.of("2017-07-01", "2017-12-31") }, //
+                { within2QuarterIncludeCurrent, Pair.of("2017-07-01", "2018-03-31") }, //
                 { prior1Month, Pair.of(null, "2017-12-31") }, //
                 { prior3Month, Pair.of(null, "2017-10-31") }, //
                 { between1And3Month, Pair.of("2017-11-01", "2018-01-31") }, //
