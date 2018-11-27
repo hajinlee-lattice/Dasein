@@ -233,36 +233,36 @@ public class ModelSummaryParser {
         if (segmentations.size() == 0) {
             return;
         }
-        List<Map<String, Integer>> segments = (List<Map<String, Integer>>) segmentations.get(0).get("Segments");
+        List<Map<String, Object>> segments = (List<Map<String, Object>>) segmentations.get(0).get("Segments");
 
-        long totalRowCount = 0;
-        long totalConvertedCount = 0;
-        int i = 1;
-        double averageProbability = (double) summary.getTotalConversionCount() / (double) summary.getTotalRowCount();
-        double top10PctLift = 0;
-        double top20PctLift = 0;
-        double top30PctLift = 0;
-        for (Map<String, Integer> segment : segments) {
-            int rowCount = segment.get("Count");
-            int convertedCount = segment.get("Converted");
+        long cumulativeSegmentRowCountForTestSet = 0;
+        long cumulativeSegmentConvertedCountForTestSet = 0;
+        int index = 1;
+        double conversionRateForWholeTestSet = (double) summary.getTestConversionCount()
+                / (double) summary.getTestRowCount();
 
-            totalRowCount += rowCount;
-            totalConvertedCount += convertedCount;
+        List<Double> topNPctLift = new ArrayList<>();
+        for (Map<String, Object> segment : segments) {
+            double segmentRowCountForTestSet = Double.parseDouble(segment.get("Count").toString());
+            double segmentConvertedCountForTestSet = Double.parseDouble(segment.get("Converted").toString());
 
-            if (i == 10) {
-                top10PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
+            cumulativeSegmentRowCountForTestSet += segmentRowCountForTestSet;
+            cumulativeSegmentConvertedCountForTestSet += segmentConvertedCountForTestSet;
+
+            if (index % 10 == 0) {
+                double cumulativeConversionRate = (double) cumulativeSegmentConvertedCountForTestSet
+                        / (double) cumulativeSegmentRowCountForTestSet;
+                topNPctLift.add(cumulativeConversionRate / conversionRateForWholeTestSet);
             }
-            if (i == 20) {
-                top20PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
+
+            if (index == 30) {
+                break;
             }
-            if (i == 30) {
-                top30PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
-            }
-            i++;
+            index++;
         }
-        summary.setTop10PercentLift(top10PctLift);
-        summary.setTop20PercentLift(top20PctLift);
-        summary.setTop30PercentLift(top30PctLift);
+        summary.setTop10PercentLift(topNPctLift.get(0));
+        summary.setTop20PercentLift(topNPctLift.get(1));
+        summary.setTop30PercentLift(topNPctLift.get(2));
     }
 
     private List<Predictor> parsePredictors(JsonNode predictorsJsonNode, ModelSummary summary) {
