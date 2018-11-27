@@ -80,7 +80,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     private List<Predefined> filterByPredefinedSelection = //
             Collections.singletonList(Predefined.CompanyProfile);
 
-    private static final int MAX_ROWS = 250;
+    private static final int MAX_ROWS = 200;
 
     private final List<String> REQUIRED_FIELDS = Arrays.asList(InterfaceName.AccountId.name(),
             InterfaceName.SalesforceAccountID.name(), InterfaceName.CDLUpdatedTime.name());
