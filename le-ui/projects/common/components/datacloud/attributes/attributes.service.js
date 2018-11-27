@@ -323,7 +323,7 @@ angular.module('common.attributes')
         var deferred = $q.defer();
 
         Modal.warning({
-            title: "Save before leaving?",
+            title: "Warning",
             message: "The changes you have made won't apply to the system until you save them.  Are you sure you want to leave the page without saving?",
             confirmtext: 'Yes, discard changes'
         }, function(opts) {
