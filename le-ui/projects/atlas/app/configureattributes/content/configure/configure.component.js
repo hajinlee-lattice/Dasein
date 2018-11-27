@@ -84,7 +84,7 @@ angular.module('lp.configureattributes.configure', [])
                 return false;
             }
             var index = index || 0,
-                periods = data[index].periods,
+                periods = (data[index] ? data[index].periods : []),
                 valObj = periods.find(function(item) {
                     return item.Cmp === type;
                 }),
@@ -105,11 +105,11 @@ angular.module('lp.configureattributes.configure', [])
             }
 
             var index = index || 0,
-                periods = data[index].periods,
+                periods = (data[index] ? data[index].periods : []),
                 valObj = periods.find(function(item) {
                     return item.Cmp === type;
                 }),
-                period = valObj.Period;
+                period = (valObj ? valObj.Period : '');
 
             return period;
         }
@@ -377,7 +377,7 @@ angular.module('lp.configureattributes.configure', [])
         vm.validateSendOvertime = function(name, debug) {
             if(debug) {
                 console.group();
-                console.log('validateSendOvertime', 'start', name, vm.options[name]);
+                console.log('validateSendOvertime', 'start', {name: name, 'vm.options[name]': vm.options[name]});
             }
             var model = vm.options[name] || {},
                 spendOvertime = vm.spendOvertime[name] || [];
@@ -390,7 +390,7 @@ angular.module('lp.configureattributes.configure', [])
             }
             if(Object.keys(model).length !== spendOvertime.length) {
                 if(debug) {
-                    console.log('if(Object.keys(model).length !== spendOvertime.length)');
+                    console.log('if(Object.keys(model).length !== spendOvertime.length)', {model: model, spendOvertime: spendOvertime});
                     console.groupEnd();
                 }
                 return false;
@@ -403,7 +403,7 @@ angular.module('lp.configureattributes.configure', [])
                     }
                     if(model[i][j].Val && model[i][j].Period) {
                         if(debug) {
-                            console.log('validateSendOvertime', 'if(model[i][j].Val && model[i][j].Period)', model[i][j]);
+                            console.log('validateSendOvertime', 'if(model[i][j].Val && model[i][j].Period)', {'model[i][j]': model[i][j]});
                         }
                         valid.push(true);
                     } else {
@@ -415,7 +415,7 @@ angular.module('lp.configureattributes.configure', [])
                 }
             }
             if(debug) {
-                console.log('validateSendOvertime', 'completed', '(valid.indexOf(false) === -1)', (valid.indexOf(false) === -1), valid);
+                console.log('validateSendOvertime', 'completed', {'(valid.indexOf(false) === -1)': (valid.indexOf(false) === -1), valid: valid});
                 console.groupEnd();
             }
             return (valid.indexOf(false) === -1);
@@ -507,29 +507,59 @@ angular.module('lp.configureattributes.configure', [])
 
             vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
 
-            // I changed behavior with setting options and this now breaks Spend Over Time
-            // when you go switch to that page after setting options
-            // 
-            // if(vm.options.TotalSpendOvertime) {
-            //     totalSpendOvertimeOptionsAr = [];
-            //     for(var i in vm.options.TotalSpendOvertime) {
-            //         var option = angular.copy(vm.options.TotalSpendOvertime[i]);
-            //         totalSpendOvertimeOptionsAr.push(option);
-            //     }
-            // }
-            
-            // if(vm.options.AvgSpendOvertime) {
-            //     avgSpendOvertimeOptionsAr = [];
-            //     for(var i in vm.options.AvgSpendOvertime) {
-            //         var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
-            //         avgSpendOvertimeOptionsAr.push(option);
-            //     }
-            // }
+            if(vm.step === 'spend_over_time') {
+                
+                if(vm.options.TotalSpendOvertime) {
+                    totalSpendOvertimeOptionsAr = [];
+                    for(var i in vm.options.TotalSpendOvertime) {
+                        var option = angular.copy(vm.options.TotalSpendOvertime[i]);
+                        var timestamp = new Date().valueOf(),
+                            obj = {
+                                eol: false,
+                                IsEOL: false,
+                                type: "PurchaseHistory",
+                                created: timestamp,
+                                updated: timestamp,
+                                metrics: null,
+                                periods: [{
+                                    Cmp: Object.keys(option)[0],
+                                    Vals: [option[Object.keys(option)[0]].Val],
+                                    Period: option[Object.keys(option)[0]].Period
+                                }]
+                            };
 
-            vm.spendOvertime = {
-                TotalSpendOvertime: totalSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
-                AvgSpendOvertime: avgSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
-            };
+                        totalSpendOvertimeOptionsAr.push(obj);
+                    }
+                }
+
+                if(vm.options.AvgSpendOvertime) {
+                    avgSpendOvertimeOptionsAr = [];
+                    for(var i in vm.options.AvgSpendOvertime) {
+                        var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
+                        var timestamp = new Date().valueOf(),
+                            obj = {
+                                eol: false,
+                                IsEOL: false,
+                                type: "PurchaseHistory",
+                                created: timestamp,
+                                updated: timestamp,
+                                metrics: null,
+                                periods: [{
+                                    Cmp: Object.keys(option)[0],
+                                    Vals: [option[Object.keys(option)[0]].Val],
+                                    Period: option[Object.keys(option)[0]].Period
+                                }]
+                            };
+
+                        avgSpendOvertimeOptionsAr.push(obj);
+                    }
+                }
+            
+                vm.spendOvertime = {
+                    TotalSpendOvertime: totalSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
+                    AvgSpendOvertime: avgSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
+                };
+            }
         }
     }
 });
