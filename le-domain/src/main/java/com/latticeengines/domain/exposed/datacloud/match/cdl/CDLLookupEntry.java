@@ -27,6 +27,24 @@ public class CDLLookupEntry {
         this.serializedValues = type.serializeValues(values);
     }
 
+    /*
+     * serializedKeys and serializedValues must have the correct format
+     *
+     * NOTE not checking here for performance
+     */
+    public CDLLookupEntry(
+            @NotNull Type type, @NotNull BusinessEntity entity,
+            @NotNull String serializedKeys, @NotNull String serializedValues) {
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(entity);
+        Preconditions.checkNotNull(serializedKeys);
+        Preconditions.checkNotNull(serializedValues);
+        this.type = type;
+        this.entity = entity;
+        this.serializedKeys = serializedKeys;
+        this.serializedValues = serializedValues;
+    }
+
     public Type getType() {
         return type;
     }

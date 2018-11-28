@@ -7,6 +7,14 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import com.amazonaws.services.dynamodbv2.document.DeleteItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -59,9 +67,42 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     }
 
     @Override
+    public Item getItem(@NotNull String tableName, @NotNull PrimaryKey key) {
+        Preconditions.checkNotNull(tableName);
+        Preconditions.checkNotNull(key);
+        DynamoDB dynamoDB = dynamoService.getDynamo();
+        return dynamoDB.getTable(tableName).getItem(key);
+    }
+
+    @Override
     public void putItem(String tableName, Item item) {
         DynamoDB dynamoDB = dynamoService.getDynamo();
         dynamoDB.getTable(tableName).putItem(item);
+    }
+
+    @Override
+    public PutItemOutcome put(@NotNull String tableName, @NotNull PutItemSpec putItemSpec) {
+        Preconditions.checkNotNull(tableName);
+        Preconditions.checkNotNull(putItemSpec);
+        DynamoDB dynamoDB = dynamoService.getDynamo();
+        return dynamoDB.getTable(tableName).putItem(putItemSpec);
+    }
+
+    @Override
+    public UpdateItemOutcome update(@NotNull String tableName, @NotNull UpdateItemSpec updateItemSpec) {
+        Preconditions.checkNotNull(tableName);
+        Preconditions.checkNotNull(updateItemSpec);
+        DynamoDB dynamoDB = dynamoService.getDynamo();
+        return dynamoDB.getTable(tableName).updateItem(updateItemSpec);
+    }
+
+
+    @Override
+    public DeleteItemOutcome delete(@NotNull String tableName, @NotNull DeleteItemSpec deleteItemSpec) {
+        Preconditions.checkNotNull(tableName);
+        Preconditions.checkNotNull(deleteItemSpec);
+        DynamoDB dynamoDB = dynamoService.getDynamo();
+        return dynamoDB.getTable(tableName).deleteItem(deleteItemSpec);
     }
 
     @Override

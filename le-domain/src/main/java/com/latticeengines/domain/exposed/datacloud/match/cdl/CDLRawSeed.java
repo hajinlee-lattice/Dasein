@@ -18,17 +18,25 @@ import java.util.Map;
 public class CDLRawSeed {
     private final String id; // entity ID
     private final BusinessEntity entity; // CDL entity
+    private final int version; // internal version for optimistic locking
     private final List<CDLLookupEntry> lookupEntries; // list of lookup entry associated, sorted by entry priority, desc
     private final Map<String, String> attributes; // extra attributes to stored in the seed, cannot be used for lookup
 
     public CDLRawSeed(
             @NotNull String id, @NotNull BusinessEntity entity,
             @NotNull List<CDLLookupEntry> lookupEntries, Map<String, String> attributes) {
+        this(id, entity, -1, lookupEntries, attributes);
+    }
+
+    public CDLRawSeed(
+            @NotNull String id, @NotNull BusinessEntity entity, int version,
+            @NotNull List<CDLLookupEntry> lookupEntries, Map<String, String> attributes) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(lookupEntries);
         this.id = id;
         this.entity = entity;
+        this.version = version;
         // defensive copy, lookup key is immutable so no need to copy its fields
         this.lookupEntries = Collections.unmodifiableList(lookupEntries);
         this.attributes = attributes == null ? Collections.emptyMap() : Collections.unmodifiableMap(attributes);
@@ -42,6 +50,10 @@ public class CDLRawSeed {
         return entity;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     public List<CDLLookupEntry> getLookupEntries() {
         return lookupEntries;
     }
@@ -51,7 +63,7 @@ public class CDLRawSeed {
     }
 
     /*
-     * Generated equals and hashCode
+     * Generated equals and hashCode (version is internal and not used here)
      */
 
     @Override
