@@ -132,19 +132,19 @@ public class CDLResource {
             if (importData) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
+                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                             String.format(editS3TemplateAndImportMsg, entity));
                 } else {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
+                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                             String.format(createS3TemplateAndImportMsg, entity));
                 }
                 return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
+                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                             String.format(editS3TemplateMsg, entity));
                 } else {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
+                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                             String.format(createS3TemplateMsg, entity));
                 }
                 return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
@@ -170,7 +170,7 @@ public class CDLResource {
                 throw new RuntimeException("Cannot find template for S3 import!");
             }
             cdlService.submitS3ImportOnlyData(customerSpace.toString(), dataFeedTask.getUniqueId(), templateFileName);
-            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction(null, View.Notice, Status.Success,
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                     importUsingTemplateMsg);
             return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
         } catch (RuntimeException e) {
