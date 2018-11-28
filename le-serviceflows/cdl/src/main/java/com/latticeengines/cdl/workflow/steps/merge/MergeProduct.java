@@ -395,29 +395,29 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         if (StringUtils.isNotBlank(lineId)) {
             if (StringUtils.isBlank(familyId) || StringUtils.isBlank(categoryId)) {
                 String errMsg = String.format(
-                        "Product hierarchy has line but does not have family or category. ProductId=%s, ProductName=%s",
+                        "Product hierarchy has level-3 but does not have level-2 or level-1. ProductId=%s, ProductName=%s",
                         id, name);
                 mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
                 throw new RuntimeException(String.format(
-                        "Product hierarchy has line but does not have family or category. Product=%s",
+                        "Product hierarchy has level-3 but does not have level-2 or level-1. Product=%s",
                         JsonUtils.serialize(inputProduct)));
             }
         } else if (StringUtils.isNotBlank(familyId)) {
             if (StringUtils.isBlank(categoryId)) {
                 String errMsg = String.format(
-                        "Product hierarchy has family but does not have category. ProductId=%s, ProductName=%s",
+                        "Product hierarchy has level-2 but does not have level-1. ProductId=%s, ProductName=%s",
                         id, name);
                 mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
                 throw new RuntimeException(String.format(
-                        "Product hierarchy has family but does not have category. Product=%s",
+                        "Product hierarchy has level-2 but does not have level-1. Product=%s",
                         JsonUtils.serialize(inputProduct)));
             }
         } else if (StringUtils.isBlank(categoryId)) {
             String errMsg = String.format(
-                    "Product hierarchy does not have category. ProductId=%s, ProductName=%s",
+                    "Product hierarchy does not have level-1. ProductId=%s, ProductName=%s",
                     id, name);
             mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
-            throw new RuntimeException(String.format("Product hierarchy does not have category. Product=%s",
+            throw new RuntimeException(String.format("Product hierarchy does not have level-1. Product=%s",
                     JsonUtils.serialize(inputProduct)));
         }
 
