@@ -156,7 +156,8 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         Store store = session.getStore("imaps");
         try {
             String appCode = System.getProperty("GMAIL_APP_PASSWORD");
-            String password = StringUtils.isNotEmpty(appCode) ? appCode : EXTERNAL_USER_EMAIL_PASSWORD;
+            log.info("Found app code from system prop: " + appCode);
+            String password = StringUtils.isNotBlank(appCode) ? appCode : EXTERNAL_USER_EMAIL_PASSWORD;
             store.connect(receivingHost, EXTERNAL_USER_EMAIL, password);
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
