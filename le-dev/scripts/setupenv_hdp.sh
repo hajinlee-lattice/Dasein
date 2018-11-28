@@ -39,8 +39,8 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         ln -s ${HADOOP_HOME}/lib/native-linux ${HADOOP_HOME}/lib/native
     fi
 
-    #mvn dependency:get -Dtransitive=false -Dartifact=com.amazonaws:aws-java-sdk-s3:1.11.433
-    #mvn dependency:copy -DoutputDirectory=${HADOOP_HOME}/share/hadoop/common/lib -Dartifact=com.amazonaws:aws-java-sdk-s3:1.11.433
+    # mvn dependency:get -Dtransitive=false -Dartifact=com.amazonaws:aws-java-sdk-s3:1.11.433
+    # mvn dependency:copy -DoutputDirectory=${HADOOP_HOME}/share/hadoop/common/lib -Dartifact=com.amazonaws:aws-java-sdk-s3:1.11.433
 
     mkdir -p $HADOOP_NAMENODE_DATA_DIR
     mkdir -p $HADOOP_DATANODE_DATA_DIR

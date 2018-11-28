@@ -20,7 +20,6 @@ COPY conf/env/devcluster/latticeengines.properties /tmp/conf/env/devcluster/latt
 COPY conf/env/qacluster/latticeengines.properties /tmp/conf/env/qacluster/latticeengines.properties
 COPY conf/env/prodcluster/latticeengines.properties /tmp/conf/env/prodcluster/latticeengines.properties
 COPY catalina.sh $CATALINA_HOME/bin/catalina.sh
-COPY jacocoagent.jar /var/lib/jacocoagent.jar
 COPY start.sh /start.sh
 
 EXPOSE 8080 8443 1099

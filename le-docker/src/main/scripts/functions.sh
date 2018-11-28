@@ -8,16 +8,26 @@ function process_error() {
         exit -1
     fi
 }
+
 function build_docker() {
 	IMAGE=$1
     NO_CACHE=$2
-    sed -i.bak "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
-    if [ "${NO_CACHE}" == "--no-cache" ]; then
-	    docker build --no-cache -t ${IMAGE} . || true
+    echo "Building docker image ${IMAGE} in ${PWD}"
+    if [ -f "Dockerfile.tmp" ]; then
+        rm Dockerfile.tmp
+    fi
+	UNAME=`uname`
+	if [[ "${UNAME}" == 'Darwin' ]]; then
+	    sed '' "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile > Dockerfile.tmp
 	else
-	    docker build -t ${IMAGE} . || true
+	    sed "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile> Dockerfile.tmp
 	fi
-	mv Dockerfile.bak Dockerfile
+	if [ "${NO_CACHE}" == "--no-cache" ]; then
+	    docker build --no-cache -f Dockerfile.tmp -t ${IMAGE} . || true
+	else
+	    docker build -f Dockerfile.tmp -t ${IMAGE} . || true
+	fi
+	rm Dockerfile.tmp
 }
 
 function create_network() {

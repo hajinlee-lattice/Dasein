@@ -29,6 +29,11 @@ if [ -f "/etc/ledp/jmxtrans-agent.jar" ]; then
     cp -f /etc/ledp/jmxtrans-tomcat-query.xml ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml
 fi
 
+if [ -f "/etc/ledp/jacocoagent.jar" ]; then
+    echo "Copying /etc/ledp/jacocoagent.jar to /var/lib/jacocoagent.jar"
+    cp -f /etc/ledp/jacocoagent.jar /var/lib/jacocoagent.jar
+fi
+
 # mail config
 if [ "${LE_ENVIRONMENT}" = "prodcluster" ] && [ -f "/root/postfix/main.cf.production" ]; then
     echo "use production cf"
@@ -73,7 +78,7 @@ if [ "${DISABLE_JMXTRANS}" != "true" ] && [ -f "/var/lib/jmxtrans-agent.jar" ]; 
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
 fi
 
-if [ "${ENABLE_JACOCO}" == "true" ]; then
+if [ "${ENABLE_JACOCO}" == "true" ] && [ -f "/var/lib/jacocoagent.jar" ]; then
     JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jacocoagent.jar=destfile=${JACOCO_DEST_FILE},append=true,includes=com.latticeengines.*,jmx=true"
 fi
