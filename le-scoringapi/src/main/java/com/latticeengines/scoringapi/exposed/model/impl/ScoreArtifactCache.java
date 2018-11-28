@@ -3,6 +3,8 @@ package com.latticeengines.scoringapi.exposed.model.impl;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
@@ -22,6 +24,7 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import com.google.common.primitives.Ints;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -165,7 +168,10 @@ public class ScoreArtifactCache {
                     key.getValue(), defaultPmmlFileSize));
         }
         long weight = pmmlFileSize * scoreArtifactCachePMMLFileRatio;
-        log.info(String.format("model=%s, weight=%d.", key.getValue(), weight));
+        Map<String, Object> logMap = new TreeMap<>();
+        logMap.put("model", key.getValue());
+        logMap.put("weight", weight);
+        log.info(JsonUtils.serialize(logMap));
         return Ints.checkedCast(throttleLargePmmlFileBasedOnWeight(weight, key.getValue()));
     }
 
