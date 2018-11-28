@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,7 +90,8 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
         ApplicationId appId = testYarnJob(job.getClient(), job.getAppMasterPropertiesObject(),
                 job.getContainerPropertiesObject());
 
-        waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus finalStatus = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
         verify(configuration);
     }
 

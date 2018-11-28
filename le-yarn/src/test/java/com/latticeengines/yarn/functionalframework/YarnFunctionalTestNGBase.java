@@ -14,10 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.springframework.yarn.test.context.YarnCluster;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -91,8 +91,8 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     public FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis,
             FinalApplicationStatus... applicationStatuses) throws Exception {
-        Assert.notNull(yarnClient, "Yarn client must be set");
-        Assert.notNull(applicationId, "ApplicationId must not be null");
+        Assert.assertNotNull(yarnClient, "Yarn client must be set");
+        Assert.assertNotNull(applicationId, "ApplicationId must not be null");
         waitTimeInMillis = waitTimeInMillis == null ? MAX_MILLIS_TO_WAIT : waitTimeInMillis;
         log.info(String.format("Waiting on %s for at most %dms.", applicationId, waitTimeInMillis));
 
