@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,13 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.BusinessCalendarService;
 import com.latticeengines.apps.cdl.service.PeriodService;
-import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 import io.swagger.annotations.Api;
@@ -42,14 +37,10 @@ public class PeriodResource {
 
     private final BusinessCalendarService businessCalendarService;
 
-    private final ActionService actionService;
-
     @Inject
-    public PeriodResource(PeriodService periodService, BusinessCalendarService businessCalendarService,
-                          ActionService actionService) {
+    public PeriodResource(PeriodService periodService, BusinessCalendarService businessCalendarService) {
         this.periodService = periodService;
         this.businessCalendarService = businessCalendarService;
-        this.actionService = actionService;
     }
 
     @GetMapping(value = "/names")
@@ -89,12 +80,6 @@ public class PeriodResource {
         BusinessCalendar calender = businessCalendarService.delete();
         if (calender != null) {
             log.info(String.format("BusinessCalendar %s is deleted.", JsonUtils.serialize(calender)));
-            Action action = new Action();
-            action.setType(ActionType.BUSINESS_CALENDAR_CHANGE);
-            action.setActionInitiator(MultiTenantContext.getEmailAddress());
-            action.setCreated(new Date());
-            action = actionService.create(action);
-            log.info(String.format("Created action %s for deleting business calendar.", JsonUtils.serialize(action)));
         } else {
             log.info("Business calendar doesn't exist for customerSpace=" + customerSpace);
         }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,7 +42,7 @@ public class PeriodResource {
         this.actionService = actionService;
     }
 
-    @RequestMapping(value = "/names", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/names", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all period names defined in a tenant")
     public List<String> getPeriodNames() {
@@ -89,6 +88,7 @@ public class PeriodResource {
         try {
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             periodProxy.deleteBusinessCalendar(customerSpace);
+            createAction(MultiTenantContext.getTenant());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -118,10 +118,6 @@ public class PeriodResource {
         action.setType(ActionType.BUSINESS_CALENDAR_CHANGE);
         action.setTenant(tenant);
         action.setActionInitiator(MultiTenantContext.getEmailAddress());
-//        ActionConfiguration actionConfig = action.getActionConfiguration();
-//        if (actionConfig != null) {
-//            action.setDescription(actionConfig.serialize());
-//        }
         actionService.create(action);
     }
 }
