@@ -181,6 +181,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         String hdfsModelDir = pathBuilder.getHdfsAnalyticsModelDir(customer);
         final String s3Prefix = s3ModelsDir.replace("s3n://" + s3Bucket + "/", "");
         List<S3ObjectSummary> summaries = s3Service.listObjects(s3Bucket, s3Prefix);
+        log.info("Found " + CollectionUtils.size(summaries) + " objects in " + s3Prefix);
         summaries.forEach(summary -> {
             String key = summary.getKey();
             if (key.endsWith("model.json")) {

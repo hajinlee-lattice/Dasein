@@ -39,9 +39,17 @@ public class ScoringJobUtil {
     public static List<String> findAllModelPathsInHdfs(Configuration yarnConfiguration, String tenant,
             String customerBaseDir) {
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
+        List<String> modelFilePaths = getModelFiles(yarnConfiguration, customerModelPath);
+        if (CollectionUtils.isEmpty(modelFilePaths)) {
+            throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
+        }
+        return modelFilePaths;
+    }
+
+    private static List<String> getModelFiles(Configuration yarnConfiguration, String hdfsDir) {
         List<String> modelFilePaths;
         try {
-            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath,
+            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, hdfsDir,
                     fileStatus -> {
                         if (fileStatus == null) {
                             return false;
@@ -51,10 +59,7 @@ public class ScoringJobUtil {
                         return matcher.matches();
                     });
         } catch (Exception e) {
-            throw new RuntimeException("Customer " + tenant + "'s scoring job failed due to: " + e.getMessage(), e);
-        }
-        if (CollectionUtils.isEmpty(modelFilePaths)) {
-            throw new LedpException(LedpCode.LEDP_20008, new String[] { tenant });
+            throw new RuntimeException("Failed to check model.json in " + hdfsDir, e);
         }
         return modelFilePaths;
     }
