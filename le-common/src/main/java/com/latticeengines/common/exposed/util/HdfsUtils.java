@@ -662,9 +662,8 @@ public class HdfsUtils {
         }
     }
 
-    public static Long getFileSize(Configuration configuration, String filePath)
-            throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+    public static Long getFileSize(Configuration configuration, String filePath) throws IOException {
+        try (FileSystem fs = getFileSystem(configuration, filePath)) {
             FileStatus status = fs.getFileStatus(new Path(filePath));
             return status.getLen();
         }
