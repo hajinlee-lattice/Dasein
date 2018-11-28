@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,6 +19,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,11 +50,15 @@ public class ExportToS3Resource {
     @Inject
     private ExportToS3Service exportToS3Service;
 
+    @Resource(name = "commonTaskScheduler")
+    private ThreadPoolTaskScheduler scheduler;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
     private ExecutorService workers = null;
     private ConcurrentSkipListSet<String> inProcess = new ConcurrentSkipListSet<>();
+    private boolean schedulerStarted = false;
 
     @NoCustomerSpace
     @RequestMapping(method = RequestMethod.POST)
@@ -79,6 +86,7 @@ public class ExportToS3Resource {
         if (CollectionUtils.isEmpty(resultCustomers)) {
             log.warn("There's not customers selected!");
         } else {
+            startScheduler();
             getWorkers().submit(() -> {
                 List<String> customers = new ArrayList<>(resultCustomers);
                 int attempt = 0;
@@ -102,7 +110,7 @@ public class ExportToS3Resource {
         customers.forEach(customer -> {
             if (inProcess.contains(customer)) {
                 log.info("Exporting for " + customer + " is already in progress.");
-            } else if (inProcess.size() > 4) {
+            } else if (inProcess.size() > getInProgressParallism()) {
                 log.warn("Too many migration tasks in progress, let " + customer + " wait for next attempt.");
                 remaining.add(customer);
             } else {
@@ -160,6 +168,26 @@ public class ExportToS3Resource {
             }
         }
         return workers;
+    }
+
+    private int getInProgressParallism() {
+        if ("Production".equals(podId)) {
+            return 16;
+        } else {
+            return 4;
+        }
+    }
+
+    private void startScheduler() {
+        if (!schedulerStarted) {
+            scheduler.scheduleWithFixedDelay(this::scanInProgress, TimeUnit.MINUTES.toMillis(1));
+            schedulerStarted = true;
+        }
+    }
+
+    private void scanInProgress() {
+        log.info("There are " + CollectionUtils.size(inProcess) //
+                + " tenants in process: " + StringUtils.join(inProcess));
     }
 
 }

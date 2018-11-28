@@ -75,7 +75,12 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
     @PostConstruct
     public void init() {
-        String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        String queue;
+        if ("Production".equals(podId)) {
+            queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        } else {
+            queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        }
         queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         pathBuilder = new HdfsToS3PathBuilder();
     }
@@ -212,7 +217,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         if (distCpWorkers == null) {
             synchronized (this) {
                 if (distCpWorkers == null) {
-                    distCpWorkers = ThreadPoolUtils.getFixedSizeThreadPool("s3-dist-cp", 16);
+                    int poolSize;
+                    if ("Production".equals(podId)) {
+                        poolSize = 32;
+                    } else {
+                        poolSize = 16;
+                    }
+                    distCpWorkers = ThreadPoolUtils.getFixedSizeThreadPool("s3-dist-cp", poolSize);
                 }
             }
         }
@@ -223,7 +234,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         if (s3ExportWorkers == null) {
             synchronized (this) {
                 if (s3ExportWorkers == null) {
-                    s3ExportWorkers = ThreadPoolUtils.getFixedSizeThreadPool("s3-export", 8);
+                    int poolSize;
+                    if ("Production".equals(podId)) {
+                        poolSize = 16;
+                    } else {
+                        poolSize = 8;
+                    }
+                    s3ExportWorkers = ThreadPoolUtils.getFixedSizeThreadPool("s3-export", poolSize);
                 }
             }
         }
