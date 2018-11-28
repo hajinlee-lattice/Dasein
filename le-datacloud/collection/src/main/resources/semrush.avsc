@@ -1,0 +1,21 @@
+{
+    "type": "record",
+    "name": "SEMRUSH",
+    "fields": [
+      {"type": ["string", "null"], "name": "LEInternalID"},
+      {"type": ["string", "null"], "name": "LEParentInternalID"},
+      {"name": "WebPageUrl", "type": ["string", "null"]},
+      {"name": "Creation_Date", "type": ["long", "null"]},
+      {"name": "Last_Modification_Date", "type": ["long", "null"]},
+      {"name": "LE_Last_Upload_Date", "type": ["long", "null"]},
+      {"name": "Domain", "type": ["string", "null"]},
+      {"name": "Rank", "type": ["int", "null"]},
+      {"name": "Organic_Keywords", "type": ["int", "null"]},
+      {"name": "Organic_Traffic", "type": ["int", "null"]},
+      {"name": "Organic_Cost", "type": ["int", "null"]},
+      {"name": "Adwords_Keywords", "type": ["int", "null"]},
+      {"name": "Adwords_Traffic", "type": ["int", "null"]},
+      {"name": "Adwords_Cost", "type": ["int", "null"]}
+    ]
+
+}

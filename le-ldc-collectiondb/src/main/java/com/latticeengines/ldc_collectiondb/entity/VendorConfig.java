@@ -27,6 +27,7 @@ public class VendorConfig {
     static {
         EFFECTIVE_VENDOR_SET.add(VENDOR_BUILTWITH);
         EFFECTIVE_VENDOR_SET.add(VENDOR_ALEXA);
+        EFFECTIVE_VENDOR_SET.add(VENDOR_SEMRUSH);
     }
 
 

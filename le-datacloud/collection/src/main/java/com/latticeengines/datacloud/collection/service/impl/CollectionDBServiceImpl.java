@@ -119,6 +119,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.alexa.timestamp}")
     private String alexaTimestampColumn;
 
+    @Value("${datacloud.collection.semrush.timestamp}")
+    private String semrushTimestampColumn;
+
     @Value("${datacloud.ingestion.column.id}")
     private String ingestionIdCol;
 
@@ -616,6 +619,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 return bwTimestampColumn;
             case VendorConfig.VENDOR_ALEXA:
                 return alexaTimestampColumn;
+            case VendorConfig.VENDOR_SEMRUSH:
+                return semrushTimestampColumn;
             default:
                 throw new Exception("not implemented");
         }
@@ -692,6 +697,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 return new Schema.Parser().parse(AvroUtils.buildSchema("builtwith.avsc"));
             case VendorConfig.VENDOR_ALEXA:
                 return new Schema.Parser().parse(AvroUtils.buildSchema("alexa.avsc"));
+            case VendorConfig.VENDOR_SEMRUSH:
+                return new Schema.Parser().parse(AvroUtils.buildSchema("semrush.avsc"));
             default:
                 throw new Exception("not implemented");
         }
