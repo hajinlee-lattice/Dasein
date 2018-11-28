@@ -41,6 +41,11 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
     }
 
     @Override
+    protected Class<EMRScalingConfig> getConfigurationClass() {
+        return EMRScalingConfig.class;
+    }
+
+    @Override
     protected boolean validateConfig(EMRScalingConfig config, List<String> sourceNames) {
         boolean valid = true;
         if (config.getOperation() == null) {
