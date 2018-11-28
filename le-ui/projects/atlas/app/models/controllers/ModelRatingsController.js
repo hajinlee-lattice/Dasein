@@ -198,11 +198,8 @@ angular.module('lp.models.ratings', [
         }
 
         if (vm.predictionType === 'EXPECTED_VALUE'){
-            var array1 = vm.ratingsSummary.bucketed_scores.filter(item => item != null && item.avg_expected_revenue != null);
-            vm.avgRevenueTotal = array1.reduce(function(prev, cur) {
-                return prev + cur.avg_expected_revenue;
-            }, 0);
-        }
+            vm.avgRevenueTotal = (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads);
+        }        
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
@@ -255,7 +252,9 @@ angular.module('lp.models.ratings', [
 
             if (vm.predictionType === 'EXPECTED_VALUE'){
 
-                bucket.lift = (bucket.bucketAvgRevenue / vm.avgRevenueTotal) > 0.1 ? (bucket.bucketAvgRevenue / vm.avgRevenueTotal) : 0.1010101;
+                console.log(bucket.bucketAvgRevenue, vm.avgRevenueTotal);
+
+                bucket.lift = (bucket.bucketAvgRevenue / vm.avgRevenueTotal) >= 0.1 ? (bucket.bucketAvgRevenue / vm.avgRevenueTotal) : 0.1010101;
 
             } else {
 
