@@ -50,7 +50,7 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
             properties.setProperty("yarn.application.classpath", ambariYarnCp);
             properties.setProperty("mapreduce.application.classpath", ambariMrCp);
 
-        } else {
+        } else if (Boolean.TRUE.equals(useEmr)) {
             properties.setProperty("yarn.application.classpath", emrYarnCp);
             properties.setProperty("mapreduce.application.classpath", emrMrCp);
         }
