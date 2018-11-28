@@ -44,11 +44,11 @@ public class GenericValidator extends AttrValidator {
             return;
         }
         for (Map.Entry<String, AttrConfigProp<?>> attrProp : attrConfigPropMap.entrySet()) {
-            if (!attrProp.getValue().isAllowCustomization()) {
-                if (attrProp.getValue().getCustomValue() != null) {
-                    addErrorMsg(ValidationErrors.Type.INVALID_PROP_CHANGE,
-                            String.format(ValidationMsg.Errors.FORBID_CUSTOMIZATION, attrProp.getKey()), attrConfig);
-                }
+            if (!Boolean.TRUE.equals(attrProp.getValue().isAllowCustomization())
+                    && attrProp.getValue().getCustomValue() != null) {
+                addErrorMsg(ValidationErrors.Type.INVALID_PROP_CHANGE,
+                        String.format(ValidationMsg.Errors.FORBID_CUSTOMIZATION, attrProp.getKey()), attrConfig);
+
             }
         }
     }
