@@ -394,26 +394,34 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
 
         if (StringUtils.isNotBlank(lineId)) {
             if (StringUtils.isBlank(familyId) || StringUtils.isBlank(categoryId)) {
-                String errMsg = String.format("Found invalid product hierarchy with id = %s, name = %s", id, name);
+                String errMsg = String.format(
+                        "Product hierarchy has line but does not have family or category. ProductId=%s, ProductName=%s",
+                        id, name);
                 mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
-                throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
+                throw new RuntimeException(String.format(
+                        "Product hierarchy has line but does not have family or category. Product=%s",
                         JsonUtils.serialize(inputProduct)));
             }
         } else if (StringUtils.isNotBlank(familyId)) {
             if (StringUtils.isBlank(categoryId)) {
-                String errMsg = String.format("Found invalid product hierarchy with id = %s, name = %s", id, name);
+                String errMsg = String.format(
+                        "Product hierarchy has family but does not have category. ProductId=%s, ProductName=%s",
+                        id, name);
                 mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
-                throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
+                throw new RuntimeException(String.format(
+                        "Product hierarchy has family but does not have category. Product=%s",
                         JsonUtils.serialize(inputProduct)));
             }
         } else if (StringUtils.isBlank(categoryId)) {
-            String errMsg = String.format("Found invalid product hierarchy with id = %s, name = %s", id, name);
+            String errMsg = String.format(
+                    "Product hierarchy does not have category. ProductId=%s, ProductName=%s",
+                    id, name);
             mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
-            throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
+            throw new RuntimeException(String.format("Product hierarchy does not have category. Product=%s",
                     JsonUtils.serialize(inputProduct)));
         }
 
-        log.info(String.format("Create hierarchy product [productId=%s, line=%s, family=%s, category=%s, " +
+        log.info(String.format("Create hierarchical product [productId=%s, line=%s, family=%s, category=%s, " +
                         "lineId=%s, familyId=%s, categoryId=%s].",
                 id, inputProduct.getProductLine(), inputProduct.getProductFamily(),
                 inputProduct.getProductCategory(), lineId, familyId, categoryId));
