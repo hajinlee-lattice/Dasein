@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-// import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -38,7 +37,7 @@ public class TalkingPointAttributesResource {
     @ApiOperation(value = "get account attributes for this tenant")
     public List<TalkingPointAttribute> getAccountAttributes() {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant.getId() == null) {
+        if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
         return talkingPointsAttributesProxy.getAccountAttributes(tenant.getId());

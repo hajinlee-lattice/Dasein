@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-// import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
@@ -49,7 +48,7 @@ public class TalkingPointResource {
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public List<TalkingPointDTO> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant.getId() == null) {
+        if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
         return talkingPointProxy.createOrUpdate(tenant.getId(), talkingPoints);
