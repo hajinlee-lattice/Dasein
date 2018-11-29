@@ -23,9 +23,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.flink.util.CollectionUtil;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.Counter;
@@ -33,8 +36,10 @@ import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.Segment
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -51,9 +56,11 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -79,6 +86,9 @@ public abstract class SegmentExportProcessor {
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -122,8 +132,8 @@ public abstract class SegmentExportProcessor {
 
         MetadataSegmentExportType exportType = metadataSegmentExport.getType();
 
-        Map<BusinessEntity,List<Attribute>> configuredBusEntityAttrMap = new HashMap<>();
-        BusinessEntity.SEGMENT_ENTITIES.forEach(i -> configuredBusEntityAttrMap.put(i,new ArrayList<Attribute>()));
+        Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap = new HashMap<>();
+        BusinessEntity.SEGMENT_ENTITIES.forEach(i -> configuredBusEntityAttrMap.put(i, new ArrayList<Attribute>()));
 
         List<Attribute> configuredAccountAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Account);
         List<Attribute> configuredContactAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Contact);
@@ -161,10 +171,19 @@ public abstract class SegmentExportProcessor {
             configuredRatingAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Rating));
             configuredPurHistoryAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.PurchaseHistory));
             configuredCuratedAccAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.CuratedAccount));
+
+            Map<String, String> customizedNameMapping = getCustomizedDisplayNames(tenant.getId(),
+                    BusinessEntity.Account);
+            configuredAccountAttributes.stream().forEach(attr -> {
+                if (customizedNameMapping.containsKey(attr.getName())) {
+                    attr.setDisplayName(customizedNameMapping.get(attr.getName()));
+                }
+            });
         }
 
         if (exportType == MetadataSegmentExportType.CONTACT
-                || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT || exportType == MetadataSegmentExportType.ORPHAN_CONTACT) {
+                || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT
+                || exportType == MetadataSegmentExportType.ORPHAN_CONTACT) {
             configuredContactAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Contact));
 
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
@@ -189,6 +208,14 @@ public abstract class SegmentExportProcessor {
             if (MapUtils.isNotEmpty(defaultContactAttributesMap)) {
                 configuredContactAttributes.addAll(defaultContactAttributesMap.values());
             }
+
+            Map<String, String> customizedNameMapping = getCustomizedDisplayNames(tenant.getId(),
+                    BusinessEntity.Contact);
+            configuredAccountAttributes.stream().forEach(attr -> {
+                if (customizedNameMapping.containsKey(attr.getName())) {
+                    attr.setDisplayName(customizedNameMapping.get(attr.getName()));
+                }
+            });
         }
 
         registerTableForExport(customerSpace, metadataSegmentExport, configuredBusEntityAttrMap);
@@ -201,7 +228,8 @@ public abstract class SegmentExportProcessor {
 
         Schema schema = TableUtils.createSchema(metadataSegmentExport.getTableName(), segmentExportTable);
 
-        SegmentExportContext segmentExportContext = initSegmentExportContext(tenant, config, metadataSegmentExport, configuredBusEntityAttrMap);
+        SegmentExportContext segmentExportContext = initSegmentExportContext(tenant, config, metadataSegmentExport,
+                configuredBusEntityAttrMap);
 
         try {
             String csvFileName = metadataSegmentExport.getFileName();
@@ -237,7 +265,7 @@ public abstract class SegmentExportProcessor {
 
     private void registerTableForExport( //
             CustomerSpace customerSpace, MetadataSegmentExport metadataSegmentExportJob, //
-            Map<BusinessEntity,List<Attribute>> configuredBusEntityAttrMap) {
+            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
 
         Tenant tenant = new Tenant(customerSpace.toString());
         Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant, metadataSegmentExportJob,
@@ -250,7 +278,7 @@ public abstract class SegmentExportProcessor {
     private SegmentExportContext initSegmentExportContext(Tenant tenant, //
             SegmentExportStepConfiguration config, //
             MetadataSegmentExport metadataSegmentExport, //
-            Map<BusinessEntity,List<Attribute>> configuredBusEntityAttrMap) {
+            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
         SegmentExportContextBuilder segmentExportContextBuilder = new SegmentExportContextBuilder();
 
         CustomerSpace customerSpace = config.getCustomerSpace();
@@ -276,17 +304,17 @@ public abstract class SegmentExportProcessor {
             setSortField(BusinessEntity.Contact,
                     Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
                     contactFrontEndQuery);
-        }else if (metadataSegmentExport.getType() == MetadataSegmentExportType.ORPHAN_CONTACT){
+        } else if (metadataSegmentExport.getType() == MetadataSegmentExportType.ORPHAN_CONTACT) {
             Restriction restriction = Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                    .isNull()
-                    .build();
-            FrontEndRestriction frontEndRestriction = new FrontEndRestriction(Restriction.builder().or(restriction).build());
+                    .isNull().build();
+            FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+                    Restriction.builder().or(restriction).build());
             contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
             contactFrontEndQuery.setContactRestriction(frontEndRestriction);
             setSortField(BusinessEntity.Contact,
                     Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
                     contactFrontEndQuery);
-        }else {
+        } else {
             contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
             contactFrontEndQuery.setContactRestriction(metadataSegmentExport.getContactFrontEndRestriction());
             setSortField(BusinessEntity.Contact,
@@ -295,8 +323,7 @@ public abstract class SegmentExportProcessor {
         }
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
 
-        prepareLookupsForFrontEndQueries(accountFrontEndQuery,
-                contactFrontEndQuery, configuredBusEntityAttrMap);
+        prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, configuredBusEntityAttrMap);
 
         if (metadataSegmentExport.getType() == MetadataSegmentExportType.CONTACT) {
             Lookup specialHandlingForAccountNameLookupForContacts = new AttributeLookup(BusinessEntity.Account,
@@ -331,10 +358,34 @@ public abstract class SegmentExportProcessor {
         return frontEndRestriction;
     }
 
+    protected Map<String, String> getCustomizedDisplayNames(String tenantId, BusinessEntity business) {
+        Map<String, String> nameToDisplayNameMap = new HashMap<>();
+        try {
+            Map<BusinessEntity, List<AttrConfig>> customDisplayNameAttrs = cdlAttrConfigProxy
+                    .getCustomDisplayNames(tenantId);
+            if (customDisplayNameAttrs != null) {
+                List<AttrConfig> renderedConfigList = customDisplayNameAttrs.get(business);
+                if (!CollectionUtil.isNullOrEmpty(renderedConfigList)) {
+                    renderedConfigList.forEach(config -> {
+                        if (StringUtil.isNotBlank(
+                                config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class))) {
+                            nameToDisplayNameMap.put(business.name() + SEPARATOR + config.getAttrName(),
+                                    (String) (config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue()));
+                        }
+                    });
+                }
+            }
+        } catch (LedpException e) {
+            log.warn("Got LedpException " + ExceptionUtils.getStackTrace(e));
+            return new HashMap<>();
+        }
+        return nameToDisplayNameMap;
+    }
+
     private void prepareLookupsForFrontEndQueries( //
             FrontEndQuery accountFrontEndQuery, //
             FrontEndQuery contactFrontEndQuery, //
-            Map<BusinessEntity,List<Attribute>> configuredBusEntityAttrMap) {
+            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
         List<Lookup> accountLookups = new ArrayList<>();
         List<Attribute> configuredAccountAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Account);
         List<Attribute> configuredContactAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Contact);
@@ -356,9 +407,8 @@ public abstract class SegmentExportProcessor {
         }
 
         Set<BusinessEntity> segmentPartEntities = new HashSet<>(
-                Arrays.asList(BusinessEntity.Rating,BusinessEntity.PurchaseHistory,BusinessEntity.CuratedAccount)
-        );
-        for (BusinessEntity entity:segmentPartEntities){
+                Arrays.asList(BusinessEntity.Rating, BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount));
+        for (BusinessEntity entity : segmentPartEntities) {
             List<Attribute> configuredAttributes = configuredBusEntityAttrMap.get(entity);
             if (CollectionUtils.isNotEmpty(configuredAttributes)) {
                 configuredAttributes //
