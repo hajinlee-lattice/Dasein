@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.DataPage;
 
@@ -35,7 +36,7 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
     @Override
     protected void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext, File localFile)
             throws IOException {
-        long segmentContactsCount = contactFetcher.getCount(segmentExportContext);
+        long segmentContactsCount = contactFetcher.getCount(segmentExportContext, version);
         log.info("contactCount = ", segmentContactsCount);
 
         if (segmentContactsCount > 0) {
@@ -53,21 +54,21 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
                 for (int pageNo = 0; pageNo < pages; pageNo++) {
                     // fetch and process a single page
                     processedSegmentContactsCount = fetchAndProcessContactsPage(segmentExportContext,
-                            segmentContactsCount, processedSegmentContactsCount, pageNo, dataFileWriter, schema);
+                            segmentContactsCount, processedSegmentContactsCount, pageNo, dataFileWriter, schema, version);
                 }
             }
         }
     }
 
     protected long fetchAndProcessContactsPage(SegmentExportContext segmentExportContext, long segmentContactsCount,
-            long processedSegmentContactsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema)
+            long processedSegmentContactsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version)
             throws IOException {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch contacts in current page
         DataPage contactsPage = //
-                contactFetcher.fetch(//
-                        segmentExportContext, segmentContactsCount, processedSegmentContactsCount);
+                contactFetcher.fetch(segmentExportContext, segmentContactsCount,
+                        processedSegmentContactsCount, version);
 
         // process accounts in current page
         processedSegmentContactsCount += processContactsPage(segmentExportContext, contactsPage, dataFileWriter,

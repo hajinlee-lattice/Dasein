@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -51,6 +52,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -89,6 +91,9 @@ public class PlayLaunchProcessor {
 
     @Autowired
     private JobService jobService;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
 
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
@@ -131,7 +136,11 @@ public class PlayLaunchProcessor {
             log.info(String.format("Total available accounts available for Launch: %d",
                     totalAccountsAvailableForLaunch));
 
-            long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext);
+            DataCollection.Version version = dataCollectionProxy
+                    .getActiveVersion(playLaunchContext.getCustomerSpace().toString());
+            log.info(String.format("Using DataCollection.Version %s", version));
+
+            long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext, version);
 
             Long currentTimeMillis = System.currentTimeMillis();
 
@@ -154,7 +163,7 @@ public class PlayLaunchProcessor {
                     for (int pageNo = 0; pageNo < pages; pageNo++) {
                         // fetch and process a single page
                         processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
-                                processedSegmentAccountsCount, pageNo, dataFileWriter);
+                                processedSegmentAccountsCount, pageNo, dataFileWriter, version);
                     }
                 }
 
@@ -190,10 +199,10 @@ public class PlayLaunchProcessor {
         }
     }
 
-    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext) {
-        long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext);
+    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
+        long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
 
-        totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount);
+        totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount, version);
 
         totalAccountsCount = handleTopNLimit(playLaunchContext, totalAccountsCount);
 
@@ -201,10 +210,10 @@ public class PlayLaunchProcessor {
         return totalAccountsCount;
     }
 
-    private long handleBasicConfigurationAndBucketSelection(PlayLaunchContext playLaunchContext) {
+    private long handleBasicConfigurationAndBucketSelection(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
         // prepare account and contact front end queries
         frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
-        return accountFetcher.getCount(playLaunchContext);
+        return accountFetcher.getCount(playLaunchContext, version);
     }
 
     private long handleTopNLimit(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
@@ -292,7 +301,7 @@ public class PlayLaunchProcessor {
         return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
     }
 
-    private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
+    private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount, DataCollection.Version version) {
         // do handling of SFDC id based suppression
 
         long effectiveAccountCount = totalAccountsCount;
@@ -308,23 +317,24 @@ public class PlayLaunchProcessor {
                     .and(accountRestriction, nonNullLookupIdRestriction).build();
             accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
 
-            effectiveAccountCount = accountFetcher.getCount(playLaunchContext);
+            effectiveAccountCount = accountFetcher.getCount(playLaunchContext, version);
         }
 
         return effectiveAccountCount;
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
-            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter) {
+            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch accounts in current page
         DataPage accountsPage = //
                 accountFetcher.fetch(//
-                        playLaunchContext, segmentAccountsCount, processedSegmentAccountsCount);
+                        playLaunchContext, segmentAccountsCount, processedSegmentAccountsCount, version);
 
         // process accounts in current page
-        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage, dataFileWriter);
+        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage,
+                dataFileWriter, version);
 
         // update launch progress
         updateLaunchProgress(playLaunchContext, processedSegmentAccountsCount, segmentAccountsCount);
@@ -412,7 +422,7 @@ public class PlayLaunchProcessor {
     }
 
     private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage,
-            DataFileWriter<GenericRecord> dataFileWriter) {
+            DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
         List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
                 .getModifiableAccountIdCollectionForContacts();
 
@@ -430,7 +440,7 @@ public class PlayLaunchProcessor {
             // fetch corresponding contacts and prepare map of accountIs vs list
             // of contacts
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList = //
-                    contactFetcher.fetch(playLaunchContext);
+                    contactFetcher.fetch(playLaunchContext, version);
 
             // generate recommendations using list of accounts in page and
             // corresponding account/contacts map
@@ -520,6 +530,11 @@ public class PlayLaunchProcessor {
     @VisibleForTesting
     void setJobService(JobService jobService) {
         this.jobService = jobService;
+    }
+
+    @VisibleForTesting
+    void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
+        this.dataCollectionProxy = dataCollectionProxy;
     }
 
     @VisibleForTesting

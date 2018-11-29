@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -39,7 +40,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
     @Override
     protected void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext, File localFile)
             throws IOException {
-        long segmentAccountsCount = accountFetcher.getCount(segmentExportContext);
+        long segmentAccountsCount = accountFetcher.getCount(segmentExportContext, version);
         log.info(String.format("accountCount = %d", segmentAccountsCount));
 
         if (segmentAccountsCount > 0) {
@@ -57,7 +58,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                 for (int pageNo = 0; pageNo < pages; pageNo++) {
                     // fetch and process a single page
                     processedSegmentAccountsCount = fetchAndProcessPage(segmentExportContext, segmentAccountsCount,
-                            processedSegmentAccountsCount, pageNo, dataFileWriter, schema);
+                            processedSegmentAccountsCount, pageNo, dataFileWriter, schema, version);
                 }
             }
             log.info(String.format("processedSegmentAccountsCount = %d", processedSegmentAccountsCount));
@@ -65,23 +66,23 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
     }
 
     private long fetchAndProcessPage(SegmentExportContext segmentExportContext, long segmentAccountsCount,
-            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema)
+            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version)
             throws IOException {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch accounts in current page
         DataPage accountsPage = //
                 accountFetcher.fetch(//
-                        segmentExportContext, segmentAccountsCount, processedSegmentAccountsCount);
+                        segmentExportContext, segmentAccountsCount, processedSegmentAccountsCount, version);
 
         // process accounts in current page
         processedSegmentAccountsCount += processAccountsPage(segmentExportContext, accountsPage, dataFileWriter,
-                schema);
+                schema, version);
         return processedSegmentAccountsCount;
     }
 
     private long processAccountsPage(SegmentExportContext segmentExportContext, DataPage accountsPage,
-            DataFileWriter<GenericRecord> dataFileWriter, Schema schema) throws IOException {
+            DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version) throws IOException {
         List<Object> modifiableAccountIdCollectionForContacts = segmentExportContext
                 .getModifiableAccountIdCollectionForContacts();
 
@@ -102,7 +103,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                 // fetch corresponding contacts and prepare map of accountIs vs
                 // list of contacts
                 Map<Object, List<Map<String, String>>> mapForAccountAndContactList = //
-                        contactFetcher.fetch(segmentExportContext);
+                        contactFetcher.fetch(segmentExportContext, version);
 
                 if (CollectionUtils.isNotEmpty(accountList)) {
                     for (Map<String, Object> account : accountList) {

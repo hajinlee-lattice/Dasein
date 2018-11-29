@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -27,17 +28,17 @@ public class AccountFetcher {
     @Value("${playmaker.workflow.segment.pagesize:150}")
     private long pageSize;
 
-    public long getCount(PlayLaunchContext playLaunchContext) {
+    public long getCount(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
         log.info(String.format("Requesting count for payload: %s", //
                 playLaunchContext.getAccountFrontEndQuery() == null //
                         ? "null" : JsonUtils.serialize(playLaunchContext.getClonedAccountFrontEndQuery())));
         return entityProxy.getCountFromObjectApi( //
                 playLaunchContext.getCustomerSpace().toString(), //
-                playLaunchContext.getClonedAccountFrontEndQuery());
+                playLaunchContext.getClonedAccountFrontEndQuery(), version);
     }
 
     public DataPage fetch(PlayLaunchContext playLaunchContext, //
-            long segmentAccountsCount, long processedSegmentAccountsCount) {
+            long segmentAccountsCount, long processedSegmentAccountsCount, DataCollection.Version version) {
         long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getClonedAccountFrontEndQuery();
         accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
@@ -46,7 +47,7 @@ public class AccountFetcher {
 
         DataPage accountPage = entityProxy.getDataFromObjectApi(//
                 playLaunchContext.getCustomerSpace().toString(), //
-                accountFrontEndQuery);
+                accountFrontEndQuery, version);
 
         log.info(String.format("Got # %d elements in this loop", accountPage.getData().size()));
         return accountPage;

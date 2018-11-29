@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -26,17 +27,18 @@ public class ExportAccountFetcher {
     @Value("${playmaker.workflow.segment.pagesize:100}")
     private long pageSize;
 
-    public long getCount(SegmentExportContext segmentExportContext) {
+    public long getCount(SegmentExportContext segmentExportContext, DataCollection.Version version) {
         log.info(String.format("Requesting count for payload: %s", //
                 segmentExportContext.getAccountFrontEndQuery() == null //
                         ? "null" : JsonUtils.serialize(segmentExportContext.getClonedAccountFrontEndQuery())));
         return entityProxy.getCountFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                segmentExportContext.getClonedAccountFrontEndQuery());
+                segmentExportContext.getClonedAccountFrontEndQuery(), version);
     }
 
     public DataPage fetch(SegmentExportContext segmentExportContext, //
-            long segmentAccountsCount, long processedSegmentAccountsCount) {
+            long segmentAccountsCount, long processedSegmentAccountsCount,
+            DataCollection.Version version) {
         long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
         FrontEndQuery accountFrontEndQuery = segmentExportContext.getClonedAccountFrontEndQuery();
         accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
@@ -45,7 +47,7 @@ public class ExportAccountFetcher {
 
         DataPage accountPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                accountFrontEndQuery, null, true);
+                accountFrontEndQuery, version, true);
 
         log.info(String.format("Got # %d elements in this loop", accountPage.getData().size()));
         return accountPage;

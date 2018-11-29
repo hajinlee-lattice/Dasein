@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -34,16 +35,17 @@ public class ExportContactFetcher {
     @Value("${playmaker.workflow.segment.pagesize:100}")
     private long pageSize;
 
-    public long getCount(SegmentExportContext segmentExportContext) {
+    public long getCount(SegmentExportContext segmentExportContext, DataCollection.Version version) {
         log.info(String.format("Requesting count for payload: %s", //
                 segmentExportContext.getContactFrontEndQuery() == null //
                         ? "null" : JsonUtils.serialize(segmentExportContext.getClonedContactFrontEndQuery())));
         return entityProxy.getCountFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                segmentExportContext.getClonedContactFrontEndQuery());
+                segmentExportContext.getClonedContactFrontEndQuery(), version);
     }
 
-    public Map<Object, List<Map<String, String>>> fetch(SegmentExportContext segmentExportContext) {
+    public Map<Object, List<Map<String, String>>> fetch(SegmentExportContext segmentExportContext,
+            DataCollection.Version version) {
         Map<Object, List<Map<String, String>>> mapForAccountAndContactList = new HashMap<>();
 
         try {
@@ -54,7 +56,7 @@ public class ExportContactFetcher {
 
             Long contactsCount = entityProxy.getCountFromObjectApi( //
                     segmentExportContext.getCustomerSpace().toString(), //
-                    contactFrontEndQuery);
+                    contactFrontEndQuery, version);
             int pages = (int) Math.ceil((contactsCount * 1.0D) / pageSize);
 
             log.info("Number of required loops for fetching contacts: " + pages + ", with pageSize: " + pageSize);
@@ -62,7 +64,7 @@ public class ExportContactFetcher {
 
             for (int pageNo = 0; pageNo < pages; pageNo++) {
                 processedContactsCount = fetchContactsPage(segmentExportContext, mapForAccountAndContactList,
-                        contactsCount, processedContactsCount, pageNo);
+                        contactsCount, processedContactsCount, pageNo, version);
             }
 
         } catch (Exception ex) {
@@ -74,7 +76,7 @@ public class ExportContactFetcher {
 
     private long fetchContactsPage(SegmentExportContext segmentExportContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Long contactsCount,
-            long processedContactsCount, int pageNo) {
+            long processedContactsCount, int pageNo, DataCollection.Version version) {
         FrontEndQuery contactFrontEndQuery = segmentExportContext.getClonedContactFrontEndQuery();
 
         log.info(String.format("Contacts Loop #%d", pageNo));
@@ -86,7 +88,7 @@ public class ExportContactFetcher {
 
         DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                contactFrontEndQuery, null, true);
+                contactFrontEndQuery, version, true);
 
         log.info(String.format("Got # %d contact elements in this loop", contactPage.getData().size()));
         processedContactsCount += contactPage.getData().size();
@@ -121,7 +123,7 @@ public class ExportContactFetcher {
     }
 
     public DataPage fetch(SegmentExportContext segmentExportContext, long segmentContactsCount,
-            long processedSegmentContactsCount) {
+            long processedSegmentContactsCount, DataCollection.Version version) {
         long expectedPageSize = Math.min(pageSize, (segmentContactsCount - processedSegmentContactsCount));
         FrontEndQuery contactFrontEndQuery = segmentExportContext.getClonedContactFrontEndQuery();
         contactFrontEndQuery.setPageFilter(new PageFilter(processedSegmentContactsCount, expectedPageSize));
@@ -130,7 +132,7 @@ public class ExportContactFetcher {
 
         DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                contactFrontEndQuery, null, true);
+                contactFrontEndQuery, version, true);
 
         log.info(String.format("Got # %d elements in this loop", contactPage.getData().size()));
         return contactPage;

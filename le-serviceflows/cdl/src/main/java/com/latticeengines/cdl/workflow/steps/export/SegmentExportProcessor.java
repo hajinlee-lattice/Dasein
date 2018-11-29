@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -53,6 +54,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -78,6 +80,9 @@ public abstract class SegmentExportProcessor {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    protected DataCollectionProxy dataCollectionProxy;
+
     @Value("${playmaker.workflow.segment.pagesize:100}")
     protected long pageSize;
 
@@ -90,6 +95,8 @@ public abstract class SegmentExportProcessor {
 
     private List<Predefined> filterByPredefinedSelection = //
             Arrays.asList(ColumnSelection.Predefined.Enrichment);
+
+    protected DataCollection.Version version;
 
     @PostConstruct
     public void init() {
@@ -104,6 +111,9 @@ public abstract class SegmentExportProcessor {
     public void executeExportActivity(Tenant tenant, SegmentExportStepConfiguration config,
             Configuration yarnConfiguration) {
         CustomerSpace customerSpace = config.getCustomerSpace();
+        version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
+        log.info(String.format("Using DataCollection.Version", version.name()));
+
         MetadataSegmentExport metadataSegmentExport = config.getMetadataSegmentExport();
         if (metadataSegmentExport == null) {
             String exportId = config.getMetadataSegmentExportId();
@@ -434,4 +444,5 @@ public abstract class SegmentExportProcessor {
     public String getAvroFilePath() {
         return avroFilePath;
     }
+
 }
