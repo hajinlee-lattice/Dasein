@@ -38,7 +38,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         BusinessEntity entity = BusinessEntity.Account;
 
         AttrConfig attrConfig1 = new AttrConfig();
-        attrConfig1.setAttrName("Attr1");
+        attrConfig1.setAttrName("test_Attr1");
         attrConfig1.setAttrProps(new HashMap<>());
         AttrConfig attrConfig2 = new AttrConfig();
         attrConfig2.setAttrName("Attr2");
@@ -92,6 +92,12 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Assert.assertEquals(attrConfigs.size(), 4);
+
+        attrConfigEntityMgr.deleteByAttrNameStartingWith("Attr");
+        Thread.sleep(500); // wait for replication lag
+        attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
+        Assert.assertEquals(attrConfigs.size(), 1);
 
         attrConfigEntityMgr.deleteAllForEntity(tenantName, entity);
         Thread.sleep(500); // wait for replication lag

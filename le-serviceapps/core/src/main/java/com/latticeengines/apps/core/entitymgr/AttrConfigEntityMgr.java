@@ -26,4 +26,5 @@ public interface AttrConfigEntityMgr {
 
     List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId);
 
+    void deleteByAttrNameStartingWith(String attrName);
 }
