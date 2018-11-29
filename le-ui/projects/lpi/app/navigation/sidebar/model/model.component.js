@@ -6,7 +6,7 @@ angular
     'lp.ratingsengine'
 ])
 .controller('SidebarModelController', function(
-    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, RatingsEngineStore, AtlasRemodelStore,
+    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility,
     StateHistory, Model, IsPmml, IsRatingEngine, RatingEngine, HasRatingsAvailable
 ) {
     var vm = this;
