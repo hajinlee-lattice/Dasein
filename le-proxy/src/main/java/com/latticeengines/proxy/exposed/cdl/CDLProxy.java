@@ -128,11 +128,16 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-    @SuppressWarnings("unchecked")
     public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, CDLImportConfig importConfig) {
+        return submitImportJob(customerSpace, taskIdentifier, false, importConfig);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, boolean onlyData,
+                                         CDLImportConfig importConfig) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal" + "/{taskIdentifier}",
-                customerSpace, taskIdentifier);
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal/{taskIdentifier}?onlyData={onlyData}",
+                customerSpace, taskIdentifier, String.valueOf(onlyData));
         ResponseDocument<String> responseDoc = post("submitImportJob", url, importConfig, ResponseDocument.class);
         if (responseDoc == null) {
             return null;

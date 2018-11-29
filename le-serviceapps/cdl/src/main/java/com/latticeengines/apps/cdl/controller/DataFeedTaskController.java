@@ -17,6 +17,7 @@ import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
@@ -88,7 +89,7 @@ public class DataFeedTaskController {
             @PathVariable String taskIdentifier, @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
         VdbImportConfig vdbImportConfig = new VdbImportConfig();
         vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
-        return startImportJob(customerSpace, taskIdentifier, vdbImportConfig);
+        return startImportJob(customerSpace, taskIdentifier, false, vdbImportConfig);
     }
 
     @RequestMapping(value = "/import/internal/{taskIdentifier}", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -96,11 +97,19 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJob(@PathVariable String customerSpace,
-            @PathVariable String taskIdentifier, @RequestBody CDLImportConfig importConfig) {
+            @PathVariable String taskIdentifier,
+            @RequestParam(value = "onlyData", required = false, defaultValue = "false") boolean onlyData,
+            @RequestBody CDLImportConfig importConfig) {
         try {
-            String applicationId = dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier,
-                    importConfig);
-            return ResponseDocument.successResponse(applicationId);
+            if (onlyData) {
+                String applicationId = dataFeedTaskManagerService.submitDataOnlyImportJob(customerSpace, taskIdentifier,
+                        (CSVImportConfig) importConfig);
+                return ResponseDocument.successResponse(applicationId);
+            } else {
+                String applicationId = dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier,
+                        importConfig);
+                return ResponseDocument.successResponse(applicationId);
+            }
         } catch (Exception e) {
             return ResponseDocument.failedResponse(e);
         }

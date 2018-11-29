@@ -70,7 +70,7 @@ public enum EntityType {
     }
 
     public String getDefaultFeedTypeName() {
-        return this.subType == null ? entity.name() + "Schema" : entity.name() + subType.name();
+        return this.subType == null ? entity.name() + "Data" : entity.name() + subType.name();
     }
 
 }

@@ -51,6 +51,7 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -265,6 +266,30 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, false, null, new WorkflowPidWrapper(-1L));
+        return appId.toString();
+    }
+
+    @Override
+    public String submitDataOnlyImportJob(String customerSpaceStr, String taskIdentifier, CSVImportConfig importConfig) {
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
+        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
+        if (tenant == null) {
+            throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
+        }
+        MultiTenantContext.setTenant(tenant);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), taskIdentifier);
+        if (dataFeedTask == null) {
+            throw new RuntimeException("Cannot find the data feed task!");
+        }
+        S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(),
+                importConfig.getCSVImportFileInfo().getReportFileName(), dataFeedTask, new Date());
+        DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(dataFeedTask.getSource());
+        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
+        CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
+        log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
+        ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
+                csvImportFileInfo, false, null, new WorkflowPidWrapper(-1L));
+        sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
         return appId.toString();
     }
 

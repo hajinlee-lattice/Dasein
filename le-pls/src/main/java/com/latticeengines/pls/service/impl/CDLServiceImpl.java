@@ -116,7 +116,7 @@ public class CDLServiceImpl implements CDLService {
         }
         CSVImportConfig metaData = generateDataOnlyImportConfig(customerSpace, dataFeedTask.getImportTemplate().getName(),
                 dataFileName, email);
-        return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
+        return cdlProxy.submitImportJob(customerSpace, taskId, true, metaData);
     }
 
     @Override
