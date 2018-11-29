@@ -20,7 +20,7 @@
                         class="iteration-selection"
                     ></select>
                     <span ng-if="vm.ratingsSummary.total_expected_revenue">
-                        &nbsp;Past Average Weighted Revenue: ${{(vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads) | number: 2}}
+                        &nbsp;Past Average Weighted Revenue: ${{vm.model.ModelDetails.AverageRevenue | number: 2}}
                     </span>
                 </h2>
                 <h2 ng-if="vm.hasRatingsAvailable">

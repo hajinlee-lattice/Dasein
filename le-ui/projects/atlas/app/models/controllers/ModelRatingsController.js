@@ -69,6 +69,8 @@ angular.module('lp.models.ratings', [
                 }
             });
 
+
+
             vm.currentConfiguration = angular.copy(vm.dashboard.summary.bucketMetadata);
 
             // Set active iteration (default value for iteration select menu) 
@@ -251,11 +253,7 @@ angular.module('lp.models.ratings', [
             // bucket.lift = ( bucketAvgRevenue / total average expected revenue across all buckets);
 
             if (vm.predictionType === 'EXPECTED_VALUE'){
-
-                console.log(bucket.bucketAvgRevenue, vm.avgRevenueTotal);
-
                 bucket.lift = (bucket.bucketAvgRevenue / vm.avgRevenueTotal) >= 0.1 ? (bucket.bucketAvgRevenue / vm.avgRevenueTotal) : 0.1010101;
-
             } else {
 
                 if (vm.totalLeads === 0 || vm.ratingsSummary.total_num_converted === 0 || vm.ratingsSummary.total_num_leads === 0) {
