@@ -5,45 +5,34 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
 
 public class TimeStampConvertUtilsUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtilsUnitTestNG.class);
 
-    // Uses the system default timezone to match results from convertToLong(date).
-    long computeTimestamp(String dateTime, String javaDateTimeFormatStr, boolean includeTime) {
-        LocalDateTime localDateTime;
-        if (includeTime) {
-            localDateTime = LocalDateTime.parse(dateTime,
-                    java.time.format.DateTimeFormatter.ofPattern(javaDateTimeFormatStr));
-        } else {
-            localDateTime = LocalDate.parse(dateTime,
-                    java.time.format.DateTimeFormatter.ofPattern(javaDateTimeFormatStr)).atStartOfDay();
-        }
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
-
     @Test(groups = { "unit", "functional" })
     public void testConvertToLong() throws Exception {
         String str = "4/13/2016";
-        long expectedTimestamp = computeTimestamp(str, "M/d/yyyy", false);
+        long expectedTimestamp = computeTimestamp(str, false, "M/d/yyyy", "");
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), expectedTimestamp);
-        // Compare with result for two digit year.
+        // Compare with result for two digit year.  From https://solutions.lattice-engines.com/browse/PLS-11080.
         String str2 = "4/13/16";
-        expectedTimestamp = computeTimestamp(str2, "M/d/yy", false);
+        expectedTimestamp = computeTimestamp(str2, false, "M/d/yy", "");
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str2), expectedTimestamp);
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), TimeStampConvertUtils.convertToLong(str2));
 
+        // Test backup Natty Date Parser on date string that includes time.
         str = "2/22/2017 1:01:00 AM";
-        expectedTimestamp = computeTimestamp(str, "M/d/yyyy h:m:s a", true);
+        expectedTimestamp = computeTimestamp(str, true, "M/d/yyyy h:m:s a", "");
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), expectedTimestamp);
+
+        str = "2017-7-27";
+        expectedTimestamp = computeTimestamp(str, false, "yyyy-M-d", "");
+        Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), expectedTimestamp);
+
+        // Test backup Natty Date Parser on date string that includes time.
         str = "2017/7/27 16:57:39";
-        expectedTimestamp = computeTimestamp(str, "yyyy/M/d H:m:s", true);
+        expectedTimestamp = computeTimestamp(str, true, "yyyy/M/d H:m:s", "");
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), expectedTimestamp);
 
         // TODO(jwinter): Empty input string not handled.
@@ -127,8 +116,29 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "MM-DD-YYYY 00:00:00 12H", "XXX");
         Assert.assertEquals(actualTime, 1522718625000L);
 
+        // Test Case 14: Date in format DD/MM/YYYY with timezone.  Testing timezone correlation between different
+        // formats.
+        // Case 14a: EDT is not supported and equals GMT.
+        actualTime = TimeStampConvertUtils.convertToLong("27/7/2017",
+                "DD/MM/YYYY", "EDT");
+        long expectedTime = TimeStampConvertUtils.computeTimestamp("27/7/2017", false,
+                "d/M/yyyy", "GMT");
+        Assert.assertEquals(actualTime, expectedTime);
+        // Case 14b: EST does not equal America/New_York in the summer.
+        actualTime = TimeStampConvertUtils.convertToLong("27/7/2017",
+                "DD/MM/YYYY", "EST");
+        expectedTime = TimeStampConvertUtils.computeTimestamp("27/7/2017", false,
+                "d/M/yyyy", "America/New_York");
+        Assert.assertNotEquals(actualTime, expectedTime);
+        // Case 14c: EST equals America/New_York in the winter.
+        actualTime = TimeStampConvertUtils.convertToLong("27/1/2017",
+                "DD/MM/YYYY", "EST");
+        expectedTime = TimeStampConvertUtils.computeTimestamp("27/1/2017", false,
+                "d/M/yyyy", "America/New_York");
+        Assert.assertEquals(actualTime, expectedTime);
+
         // TODO(jwinter): Add support to handle empty date/time string.
-        // Test Case 14: Empty string with format MM/DD/YYYY, default timezone (UTC).
+        // Test Case 15: Empty string with format MM/DD/YYYY, default timezone (UTC).
         //     long actualTime = TimeStampConvertUtils.convertToLong("",
         //             "MM/DD/YYYY", "");
         //     Assert.assertEquals(actualTime, 1517443200000L);

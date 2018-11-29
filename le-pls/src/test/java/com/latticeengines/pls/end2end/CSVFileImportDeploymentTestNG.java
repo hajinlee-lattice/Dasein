@@ -30,7 +30,6 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -69,6 +68,8 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
+import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
 
 public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
@@ -205,7 +206,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                         feedType);
 
         String dateTimeFormatString1 = "DD/MM/YYYY";
-        String timezone1 = "PST";
+        String timezone1 = "America/New_York";
         String dateTimeFormatString2 = "MM.DD.YY 00:00:00 24H";
         String timezone2 = "GMT+8";
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
@@ -258,12 +259,19 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(schema.getField(fieldName1).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName1).getProp("DateTimeFormatString"), dateTimeFormatString1);
         Assert.assertEquals(schema.getField(fieldName1).getProp("Timezone"), timezone1);
-        long expected1a = TimeStampConvertUtils.convertToLong("2017-7-27");
-        long expected1b = TimeStampConvertUtils.convertToLong("2018-7-27");
-        long expected1c = TimeStampConvertUtils.convertToLong("2019-7-27");
+        // Check first three values of column.
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
+        long expected1a = computeTimestamp("27/7/2017", false, "d/M/yyyy",
+                "UTC-4");
+        Assert.assertEquals(expected1a, 1501128000000L);
         Assert.assertEquals(records.get(0).get(fieldName1).toString(), Long.toString(expected1a));
+        long expected1b = computeTimestamp("27/7/2018", false, "d/M/yyyy",
+                "UTC-4");
+        Assert.assertEquals(expected1b, 1532664000000L);
         Assert.assertEquals(records.get(1).get(fieldName1).toString(), Long.toString(expected1b));
+        long expected1c = computeTimestamp("27/7/2019", false, "d/M/yyyy",
+                "UTC-4");
+        Assert.assertEquals(expected1c, 1564200000000L);
         Assert.assertEquals(records.get(2).get(fieldName1).toString(), Long.toString(expected1c));
 
         // Validate TestDate2
@@ -271,17 +279,18 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(schema.getField(fieldName2).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName2).getProp("DateTimeFormatString"), dateTimeFormatString2);
         Assert.assertEquals(schema.getField(fieldName2).getProp("Timezone"), timezone2);
-        long expected2a = 1514826061000L;
-        //log.info("Library gave: " + TimeStampConvertUtils.convertToLong("1.2.18 1:1:1",
-        //        "MM.DD.YY 00:00:00 24H", "GMT+8"));
-        long expected2b = 1546271999000L;
-        //log.info("Library gave: " + TimeStampConvertUtils.convertToLong("12.31.18 23:59:59",
-        //        "MM.DD.YY 00:00:00 24H", "GMT+8"));
-        long expected2c = 4081725296000L;
-        //log.info("Library gave: " + TimeStampConvertUtils.convertToLong("5.6.99 12:34:56",
-        //        "MM.DD.YY 00:00:00 24H", "GMT+8"));
+        // Check first three values of column.
+        long expected2a = computeTimestamp("1.2.18 1:1:1", true,
+                "M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2a, 1514826061000L);
         Assert.assertEquals(records.get(0).get(fieldName2).toString(), Long.toString(expected2a));
+        long expected2b = computeTimestamp("12.31.18 23:59:59", true,
+                "M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2b, 1546271999000L);
         Assert.assertEquals(records.get(1).get(fieldName2).toString(), Long.toString(expected2b));
+        long expected2c = computeTimestamp("5.6.99 12:34:56", true,
+                "M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2c, 4081725296000L);
         Assert.assertEquals(records.get(2).get(fieldName2).toString(), Long.toString(expected2c));
     }
 

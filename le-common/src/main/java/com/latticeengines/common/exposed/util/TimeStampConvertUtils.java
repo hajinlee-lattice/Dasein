@@ -17,11 +17,11 @@ import java.util.regex.Pattern;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -80,15 +80,30 @@ public class TimeStampConvertUtils {
                             DateTimeFormat.forPattern("MM/dd/yyyy").getParser(),
                             DateTimeFormat.forPattern("yyyy-MM-dd").getParser(),
                             DateTimeFormat.forPattern("yyyy/MM/dd").getParser()})
-                    .toFormatter();
+                    .toFormatter()
+                    .withZoneUTC();  // Set default timezone to UTC.
 
-    // Simple method for date conversion which assumes one of four basic date only formats.
+    // Simple method for date conversion which assumes one of five basic date only formats.
     public static long convertToLong(String date) {
         try {
-            return DATE_FORMATTER.parseLocalDate(date).toDate().getTime();
+            return DATE_FORMATTER.parseMillis(date);
         } catch (Exception e) {
+            /* Possible Errors
+            java.lang.IllegalArgumentException
+            java.lang.IllegalStateException
+             */
+
+            log.warn("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
+            log.warn(e.toString());
+            // Uncomment the three lines below if needed for debugging.
+            //StringWriter sw = new StringWriter();
+            //e.printStackTrace(new PrintWriter(sw));
+            //log.warn("Stack Trace is:\n" + sw.toString());
+            log.warn("Attempting to use Natty Date Parser to process the date/time.");
+
             LogManager.getLogger(Parser.class).setLevel(Level.OFF);
-            Parser parser = new Parser();
+            // Create date/time parser with default timezone UTC.
+            Parser parser = new Parser(TimeZone.getTimeZone("UTC"));
             List<DateGroup> groups = parser.parse(date);
             List<Date> dates = groups.get(0).getDates();
             return dates.get(0).getTime();
@@ -164,26 +179,43 @@ public class TimeStampConvertUtils {
         } catch (Exception e) {
             /* Possible Errors
             java.time.format.DateTimeParseException:
+            java.lang.IllegalArgumentException
             java.lang.IllegalStateException
              */
 
-            log.error("Exception is being thrown: " + e.toString());
+            log.error("Caught Exception thrown: " + e.toString());
             // Uncomment the three lines below if needed for debugging.
             //StringWriter sw = new StringWriter();
             //e.printStackTrace(new PrintWriter(sw));
             //log.error("Stack Trace is:\n" + sw.toString());
 
-            LogManager.getLogger(Parser.class).setLevel(Level.OFF);
-            Parser parser = new Parser();
-            List<DateGroup> groups = parser.parse(dateTime);
-            List<Date> dates = groups.get(0).getDates();
-            return dates.get(0).getTime();
+            log.error("Using original convertToLong(date)");
+            return convertToLong(dateTime);
         }
     }
 
+    // Helper method for validating the results of convertToLong().
+    public static long computeTimestamp(String dateTime, boolean includesTime, String javaDateTimeFormatStr,
+                                        String timezone) {
+        if (timezone.isEmpty()) {
+            timezone = "UTC";
+        }
+        LocalDateTime localDateTime;
+        if (includesTime) {
+            localDateTime = LocalDateTime.parse(dateTime,
+                    java.time.format.DateTimeFormatter.ofPattern(javaDateTimeFormatStr));
+        } else {
+            localDateTime = LocalDate.parse(dateTime,
+                    java.time.format.DateTimeFormatter.ofPattern(javaDateTimeFormatStr)).atStartOfDay();
+        }
+        return localDateTime.atZone(ZoneId.of(timezone)).toInstant().toEpochMilli();
+    }
+
     public static String convertToDate(long timeStamp){
-        SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
-        String date = sim.format(new Date(timeStamp));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        // Use UTC timezone for conversions.
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String date = sdf.format(new Date(timeStamp));
         return date;
     }
 }
