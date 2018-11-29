@@ -154,6 +154,11 @@
             <artifactId>libthrift</artifactId>
             <version>${libthrift.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-component</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

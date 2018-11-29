@@ -49,6 +49,11 @@ public class MetadataComponent extends LatticeComponent {
     }
 
     @Override
+    public boolean hasV2Api() {
+        return true;
+    }
+
+    @Override
     public void setName(String name) {
         throw new UnsupportedOperationException();
     }

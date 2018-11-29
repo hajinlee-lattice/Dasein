@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -62,6 +64,7 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -183,6 +186,89 @@ public class TenantServiceImpl implements TenantService {
             }
         });
         return true;
+    }
+
+    @Override
+    public boolean createTenantV2(String contractId, String tenantId, TenantRegistration tenantRegistration,  String userName) {
+        final ContractInfo contractInfo = tenantRegistration.getContractInfo();
+        final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
+        final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
+        final SpaceConfiguration spaceConfig = tenantRegistration.getSpaceConfig();
+
+        try {
+            if (TenantLifecycleManager.exists(contractId, tenantId)) {
+                log.error(String.format("Error! tenant %s already exists in Zookeeper", tenantId));
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("Error checking tenant", e);
+        }
+
+        tenantInfo.properties.userName = userName;
+        boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo,
+                spaceInfo);
+
+        tenantCreationSuccess = tenantCreationSuccess && setupSpaceConfiguration(contractId, tenantId, spaceConfig);
+
+        if (!tenantCreationSuccess) {
+            tenantEntityMgr.deleteTenant(contractId, tenantId);
+            return false;
+        }
+
+        List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
+        if (configSDirs == null) {
+            return true;
+        }
+        Map<String, String> tenantProps = getTenantProps(tenantInfo, spaceConfig);
+        Map<String, Map<String, String>> props = new HashMap<>();
+        for (SerializableDocumentDirectory configSDir : configSDirs) {
+            String serviceName = configSDir.getRootPath().substring(1);
+            Map<String, String> flatDir = configSDir.flatten();
+            props.put(serviceName, flatDir);
+        }
+
+        boolean allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenantId),
+                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        serviceConfigService.verifyInvokeTime(allowAutoSchedule, props);
+        preinstall(spaceConfig, configSDirs);
+
+        // change components in orchestrator based on selected product
+        // retrieve mappings from Camille
+        final Map<String, Map<String, String>> orchestratorProps = props;
+        executorService.submit(() -> {
+            orchestrator.orchestrateForInstallV2(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                    orchestratorProps, tenantProps, prodAndExternalAminInfo);
+            // record tenant status after being created
+//            TenantDocument tenantDoc = getTenant(contractId, tenantId);
+//            if (tenantDoc != null && !BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state)) {
+//                tenantInfo.properties.status = TenantStatus.INACTIVE.name();
+//                updateTenantInfo(contractId, tenantId, tenantInfo);
+//            }
+        });
+        return true;
+    }
+
+    private Map<String, String> getTenantProps(TenantInfo tenantInfo, SpaceConfiguration spaceConfiguration) {
+        Map<String, String> tenantProps = new HashMap<>();
+        if (StringUtils.isNotEmpty(tenantInfo.properties.contract)) {
+            tenantProps.put(ComponentConstants.Install.CONTRACT, tenantInfo.properties.contract);
+        }
+        if (StringUtils.isNotEmpty(tenantInfo.properties.status)) {
+            tenantProps.put(ComponentConstants.Install.TENANT_STATUS, tenantInfo.properties.status);
+        }
+        if (StringUtils.isNotEmpty(tenantInfo.properties.tenantType)) {
+            tenantProps.put(ComponentConstants.Install.TENANT_TYPE, tenantInfo.properties.tenantType);
+        }
+        if (StringUtils.isNotEmpty(tenantInfo.properties.userName)) {
+            tenantProps.put(ComponentConstants.Install.USER_NAME, tenantInfo.properties.userName);
+        }
+        if (StringUtils.isNotEmpty(tenantInfo.properties.displayName)) {
+            tenantProps.put(ComponentConstants.Install.TENANT_DISPLAY_NAME, tenantInfo.properties.displayName);
+        }
+        if (CollectionUtils.isNotEmpty(spaceConfiguration.getProducts())) {
+            tenantProps.put(ComponentConstants.Install.PRODUCTS, JsonUtils.serialize(spaceConfiguration.getProducts()));
+        }
+        return tenantProps;
     }
 
     private void preinstall(SpaceConfiguration spaceConfig, List<SerializableDocumentDirectory> configDirectories) {

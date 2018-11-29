@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-component</artifactId>
+    <packaging>jar</packaging>
+    <name>le-${component-name}</name>
+    <description>LE Component</description>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-web-parent</artifactId>
+        <version>4.13.0-SNAPSHOT</version>
+        <relativePath>../le-parent/web-pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <component-name>component</component-name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+
+</project>

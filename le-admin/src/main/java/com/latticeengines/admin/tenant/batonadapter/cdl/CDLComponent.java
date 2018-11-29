@@ -51,6 +51,11 @@ public class CDLComponent extends LatticeComponent {
     }
 
     @Override
+    public boolean hasV2Api() {
+        return true;
+    }
+
+    @Override
     public String getName() {
         return componentName;
     }

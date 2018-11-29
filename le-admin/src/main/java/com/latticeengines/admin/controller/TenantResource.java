@@ -65,6 +65,22 @@ public class TenantResource {
         return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName);
     }
 
+    @RequestMapping(value = "/{tenantId}/V2", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a Lattice tenant")
+    public boolean createTenantV2(@PathVariable String tenantId, //
+                                @RequestParam(value = "contractId") String contractId, //
+                                @RequestBody TenantRegistration registration, HttpServletRequest request) {
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        String userName = "_defaultUser";
+        if (!StringUtils.isEmpty(ticket)) {
+            String decrypted = CipherUtils.decrypt(ticket);
+            String[] tokens = decrypted.split("\\|");
+            userName = tokens[0];
+        }
+        return tenantService.createTenantV2(contractId.trim(), tenantId.trim(), registration, userName);
+    }
+
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Bootstrap a Lattice tenant service")

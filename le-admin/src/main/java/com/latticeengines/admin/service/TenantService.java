@@ -15,6 +15,8 @@ public interface TenantService {
 
     boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration, String userName);
 
+    boolean createTenantV2(String contractId, String tenantId, TenantRegistration tenantRegistration,  String userName);
+
     Collection<TenantDocument> getTenants(String contractId);
 
     Collection<TenantDocument> getTenantsInCache(String contractId);

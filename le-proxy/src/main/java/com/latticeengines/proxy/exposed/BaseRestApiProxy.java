@@ -154,7 +154,7 @@ public abstract class BaseRestApiProxy {
         return combine(hostport, end);
     }
 
-    private String combine(Object... parts) {
+    protected String combine(Object... parts) {
         List<String> toCombine = new ArrayList<>();
         for (int i = 0; i < parts.length; ++i) {
             String part = parts[i].toString();

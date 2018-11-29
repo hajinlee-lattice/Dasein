@@ -59,6 +59,10 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     public abstract Set<LatticeProduct> getAssociatedProducts();
 
+    public boolean hasV2Api() {
+        return false;
+    }
+
     public final boolean register() {
         if (doRegistration()) {
             ServiceProperties serviceProps = new ServiceProperties();

@@ -82,5 +82,6 @@
         <module>le-redis</module>
         <module>le-ldc-collectiondb</module>
         <module>le-graph</module>
+        <module>le-component</module>
     </modules>
 </project>
