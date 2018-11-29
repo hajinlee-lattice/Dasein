@@ -21,6 +21,7 @@ public final class DataCloudConstants {
     // CDL match constants
     public static final String CDL_PREFIX_LOOKUP = "LOOKUP";
     public static final String CDL_PREFIX_SEED = "SEED";
+    public static final String CDL_PREFIX_VERSION = "VERSION"; // cdl match version prefix
     public static final String CDL_PREFIX_SEED_ATTRIBUTES = "ATTRS_";
     public static final String CDL_DELIMITER = "_";
     // CDL match attribute names
