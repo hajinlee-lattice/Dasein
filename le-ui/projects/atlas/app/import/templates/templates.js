@@ -83,7 +83,18 @@ angular
           break;
       }
     };
-
+    this.txtFormat = (htmlFormat) => {
+      if(htmlFormat){
+        let ret = htmlFormat.replace(/<p>/g, '\r\n');
+        ret = ret.replace(/<\/p>/g, '\r\n');
+        ret = ret.replace(/<br>/g, '\r\n');
+        ret = ret.replace(/<strong>/g, '');
+        ret = ret.replace(/<\/strong>/g, '');
+      return ret;
+      }else{
+        return 'Please contact your Admin';
+      }
+    };
     this.regenerate = () => {
       $http({
         method: "PUT",
@@ -108,12 +119,13 @@ angular
     this.download = response => {
       if (response && response.action != "closedForced") {
         let toDownload = Modal.data;
+        toDownload = TemplatesStore.txtFormat(toDownload);
         var element = document.createElement("a");
         element.setAttribute(
           "href",
           "data:text/plain;charset=utf-8," + encodeURIComponent(toDownload)
         );
-        element.setAttribute("download", "atlas_credentials.html");
+        element.setAttribute("download", "atlas_credentials.txt");
         element.style.display = "none";
         document.body.appendChild(element);
         element.click();
