@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -54,6 +55,7 @@ public class S3ImportJmsConsumer {
 
     private static Map<String, Integer> messageIdMap = new HashMap<>();
     private static Queue<String> messageIdQueue = new LinkedList<>();
+    private static LinkedHashMap<String, Long> keyMap;
 
     private static final String PS_SHARE = "PS_SHARE";
 
@@ -78,6 +80,9 @@ public class S3ImportJmsConsumer {
 
     @Value("${cdl.sqs.buffer.message.count:30000}")
     private int bufferedMessageIdCount;
+
+    @Value("${cdl.sqs.key.idle.frame:60}")
+    private int idleFrame;  //Same key in this time frame won't trigger import.
 
     @JmsListener(destination = "${cdl.s3.file.import.sqs.name}")
     public void processMessage(@Payload String message) {
@@ -146,8 +151,17 @@ public class S3ImportJmsConsumer {
                 String tenantId = tenant.getId();
                 tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
                 if (shouldRun(tenantId)) {
-                    log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
-                    submitApplication(tenantId, bucket, feedType, key);
+                    synchronized (this) {
+                        if (keyMap.containsKey(key) && System.currentTimeMillis() - keyMap.get(key) <= idleFrame * 1000L) {
+                            log.warn(String.format("Already processed file %s in less then %d seconds, skip import!",
+                                    key, idleFrame));
+                            return;
+                        } else {
+                            keyMap.put(key, System.currentTimeMillis());
+                            log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
+                            submitApplication(tenantId, bucket, feedType, key);
+                        }
+                    }
                 }
             }
         }
@@ -171,7 +185,16 @@ public class S3ImportJmsConsumer {
         if (bufferedMessageIdCount <= 0) {
             bufferedMessageIdCount = 30000;
         }
+        if (idleFrame <= 0) {
+            idleFrame = 60;
+        }
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        keyMap = new LinkedHashMap<String, Long>() {
+            protected boolean removeEldestEntry(Map.Entry<String, Long> eldest)
+            {
+                return System.currentTimeMillis() - eldest.getValue() > idleFrame * 1000L;
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")
