@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,19 +12,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
-import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+// import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
+import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
+import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
+import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
-import com.latticeengines.proxy.exposed.dante.TalkingPointsAttributesProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-
+import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.cdl.TalkingPointsAttributesProxy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -50,53 +48,54 @@ public class TalkingPointResource {
     @ApiOperation(value = "Create a Talking Point")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public List<TalkingPointDTO> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant.getId() == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return talkingPointProxy.createOrUpdate(talkingPoints, customerSpace.toString());
+        return talkingPointProxy.createOrUpdate(tenant.getId(), talkingPoints);
     }
 
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
     public TalkingPointDTO findByName(@PathVariable String name) {
-        return talkingPointProxy.findByName(name);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return talkingPointProxy.findByName(tenant.getId(), name);
     }
 
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
     public List<TalkingPointDTO> findAllByPlayName(@PathVariable String playName) {
-        return talkingPointProxy.findAllByPlayName(playName);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return talkingPointProxy.findAllByPlayName(tenant.getId(), playName);
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
     public DantePreviewResources getPreviewResources() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return talkingPointProxy.getPreviewResources(customerSpace.toString());
+        return talkingPointProxy.getPreviewResources(tenant.getId());
     }
 
     @RequestMapping(value = "/preview", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Talking Point Preview Data for a given Play")
     public TalkingPointPreview preview(@RequestParam("playName") String playName) {
-        CustomerSpace customerSpace = null;
         try {
-            customerSpace = MultiTenantContext.getCustomerSpace();
-            if (customerSpace == null) {
+            Tenant tenant = MultiTenantContext.getTenant();
+            if (tenant == null) {
                 throw new LedpException(LedpCode.LEDP_38008);
             }
-            return talkingPointProxy.getTalkingPointPreview(playName, customerSpace.toString());
+            return talkingPointProxy.getTalkingPointPreview(tenant.getId(), playName);
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace.toString() });
+            throw new LedpException(LedpCode.LEDP_38015, e, new String[] {playName, null});
         }
     }
 
@@ -105,23 +104,24 @@ public class TalkingPointResource {
     @ApiOperation(value = "Publish given play's Talking Points to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public void publish(@RequestParam("playName") String playName) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        playProxy.publishTalkingPoints(customerSpace.toString(), playName);
+        playProxy.publishTalkingPoints(tenant.getId(), playName);
     }
 
     @RequestMapping(value = "/revert", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Revert the given play's talking points to the version last published to dante")
+    @ApiOperation(
+            value = "Revert the given play's talking points to the version last published to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public List<TalkingPointDTO> revert(@RequestParam("playName") String playName) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return talkingPointProxy.revert(playName, customerSpace.toString());
+        return talkingPointProxy.revert(tenant.getId(), playName);
     }
 
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
@@ -129,7 +129,8 @@ public class TalkingPointResource {
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public void delete(@PathVariable String talkingPointName) {
-        talkingPointProxy.delete(talkingPointName);
+        Tenant tenant = MultiTenantContext.getTenant();
+        talkingPointProxy.delete(tenant.getId(), talkingPointName);
     }
 
     @RequestMapping(value = "/attributes", method = RequestMethod.POST)
@@ -137,10 +138,10 @@ public class TalkingPointResource {
     @ApiOperation(value = "Get attributes for given notions")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public TalkingPointNotionAttributes getAttributesByNotions(@RequestBody List<String> notions) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return talkingPointsAttributesProxy.getAttributesByNotions(notions, customerSpace.toString());
+        return talkingPointsAttributesProxy.getAttributesByNotions(tenant.getId(), notions);
     }
 }

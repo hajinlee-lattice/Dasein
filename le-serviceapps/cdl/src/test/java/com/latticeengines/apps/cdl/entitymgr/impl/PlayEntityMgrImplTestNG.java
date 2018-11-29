@@ -65,6 +65,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
 
+        log.info("yohohoho");
         setupTestEnvironmentWithDummySegment();
 
         ratingEngine1 = new RatingEngine();

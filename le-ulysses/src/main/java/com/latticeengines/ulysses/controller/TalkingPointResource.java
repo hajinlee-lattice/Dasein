@@ -1,9 +1,7 @@
 package com.latticeengines.ulysses.controller;
 
 import java.util.List;
-
 import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,16 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 import com.latticeengines.ulysses.utils.DanteFormatter;
 import com.latticeengines.ulysses.utils.TalkingPointDanteFormatter;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -38,48 +36,59 @@ public class TalkingPointResource {
     @Qualifier(TalkingPointDanteFormatter.Qualifier)
     private DanteFormatter<TalkingPointDTO> talkingPointDanteFormatter;
 
-    @RequestMapping(value = "/{talkingPointId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{talkingPointId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get an account by of attributes in a group")
     public TalkingPointDTO getTalkingPointById(@PathVariable String talkingPointId) {
-        return talkingPointProxy.findByName(talkingPointId);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return talkingPointProxy.findByName(tenant.getId(), talkingPointId);
     }
 
-    @RequestMapping(value = "/playid/{playId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/playid/{playId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get published talking points for the given play")
     public List<TalkingPointDTO> getTalkingPointByPlayId(@PathVariable String playId) {
-        return talkingPointProxy.findAllByPlayName(playId, true);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return talkingPointProxy.findAllByPlayName(tenant.getId(), playId, true);
     }
 
-    @RequestMapping(value = "/{talkingPointId}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{talkingPointId}/danteformat", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get an account by of attributes in a group")
-    public FrontEndResponse<String> getTalkingPointByIdInDanteFormat(@PathVariable String talkingPointId) {
+    public FrontEndResponse<String> getTalkingPointByIdInDanteFormat(
+            @PathVariable String talkingPointId) {
         try {
-            return new FrontEndResponse<>(talkingPointDanteFormatter.format(getTalkingPointById(talkingPointId)));
+            return new FrontEndResponse<>(
+                    talkingPointDanteFormatter.format(getTalkingPointById(talkingPointId)));
         } catch (LedpException le) {
             log.error("Failed to get talking point data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
             log.error("Failed to get talking point data", e);
-            return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
+            return new FrontEndResponse<>(
+                    new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
 
-    @RequestMapping(value = "/playid/{playId}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/playid/{playId}/danteformat", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get published talking points for the given play")
-    public FrontEndResponse<List<String>> getTalkingPointByPlayIdInDanteFormat(@PathVariable String playId) {
+    public FrontEndResponse<List<String>> getTalkingPointByPlayIdInDanteFormat(
+            @PathVariable String playId) {
         try {
-            return new FrontEndResponse<>(talkingPointDanteFormatter
-                    .format(JsonUtils.convertList(getTalkingPointByPlayId(playId), TalkingPointDTO.class)));
+            return new FrontEndResponse<>(talkingPointDanteFormatter.format(
+                    JsonUtils.convertList(getTalkingPointByPlayId(playId), TalkingPointDTO.class)));
         } catch (LedpException le) {
             log.error("Failed to get talking point data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
             log.error("Failed to get talking point data", e);
-            return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
+            return new FrontEndResponse<>(
+                    new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
 }

@@ -3,24 +3,21 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.PlayType;
@@ -28,16 +25,18 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 
 public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final String SEGMENT_NAME = "segment";
     private static final String PLAY_SEGMENT_NAME = "Play Segment for Service DeployTests";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
-    private static final String TALKINGPOINT_CONTENT = "<p>Space={!Space}</p> <p>Hello&nbsp;{!PlaySolutionName}, I am&nbsp;{!ExpectedValue}</p> <p>Let's checkout&nbsp;{!Account.Website}, and DUNS={!Account.DUNS},</p> <p>in&nbsp;{!Account.LDC_City},&nbsp;{!Account.LDC_State}, {!Account.LDC_Country}</p>";
+    private static final String TALKINGPOINT_CONTENT =
+            "<p>Space={!Space}</p> <p>Hello&nbsp;{!PlaySolutionName}, I am&nbsp;{!ExpectedValue}</p> <p>Let's checkout&nbsp;{!Account.Website}, and DUNS={!Account.DUNS},</p> <p>in&nbsp;{!Account.LDC_City},&nbsp;{!Account.LDC_State}, {!Account.LDC_Country}</p>";
 
-    private static final Logger log = LoggerFactory.getLogger(PlayServiceImplDeploymentTestNG.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(PlayServiceImplDeploymentTestNG.class);
 
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
@@ -69,13 +68,15 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace,
                 constructSegment(SEGMENT_NAME));
-        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainCustomerSpace,
-                createdSegment.getName());
+        MetadataSegment retrievedSegment =
+                segmentProxy.getMetadataSegmentByName(mainCustomerSpace, createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         log.info(String.format("Segment is %s", retrievedSegment));
 
-        playSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace, constructSegment(PLAY_SEGMENT_NAME));
-        playSegment = segmentProxy.getMetadataSegmentByName(mainCustomerSpace, playSegment.getName());
+        playSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace,
+                constructSegment(PLAY_SEGMENT_NAME));
+        playSegment =
+                segmentProxy.getMetadataSegmentByName(mainCustomerSpace, playSegment.getName());
         Assert.assertNotNull(playSegment);
         log.info(String.format("Play Segment is %s", playSegment));
 
@@ -112,17 +113,18 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreateAndGet" })
+    @Test(groups = "deployment", dependsOnMethods = {"testCreateAndGet"})
     public void testFindDependingAttributes() {
         createTalkingPoints();
-        List<AttributeLookup> attributes = playService.findDependingAttributes(playService.getAllPlays());
+        List<AttributeLookup> attributes =
+                playService.findDependingAttributes(playService.getAllPlays());
 
         Assert.assertNotNull(attributes);
         Assert.assertEquals(attributes.size(), 5);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testFindDependingAttributes" })
-    public void testFindDependingPalys() {
+    @Test(groups = "deployment", dependsOnMethods = {"testFindDependingAttributes"})
+    public void testFindDependingPlays() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Account.DUNS");
         List<Play> plays = playService.findDependingPalys(attributes);
@@ -132,7 +134,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertPlay(plays.get(0));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testFindDependingPalys" })
+    @Test(groups = "deployment", dependsOnMethods = {"testFindDependingPalys"})
     public void testDelete() {
         Play retrievedPlay = playService.getPlayByName(playName, false);
         Assert.assertNotNull(retrievedPlay);
@@ -210,7 +212,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
+    @Test(groups = "deployment", dependsOnMethods = {"testDelete"})
     public void testDeleteViaRatingEngine() {
         Play newPlay = playService.createOrUpdate(createDefaultPlay(), mainTestTenant.getId());
         assertPlay(newPlay);
@@ -237,7 +239,8 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         try {
             ratingEngineService.deleteById(ratingEngine1.getId(), false, CREATED_BY);
             if (shouldPropagateDelete != Boolean.TRUE) {
-                Assert.fail("Should not be able to delete rating engine if non-deleted play exists");
+                Assert.fail(
+                        "Should not be able to delete rating engine if non-deleted play exists");
             } else {
                 retrievedPlay = playService.getPlayByName(playName, false);
                 Assert.assertNull(retrievedPlay);
@@ -272,7 +275,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDeleteViaRatingEngine" })
+    @Test(groups = "deployment", dependsOnMethods = {"testDeleteViaRatingEngine"})
     public void testDeleteViaSegment() {
         Play newPlay = playService.getPlayByName(playName, true);
         assertPlay(newPlay);
@@ -379,6 +382,6 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         talkingPointDTO.setUpdated(new Date());
         List<TalkingPointDTO> talkingPointDTOS = new ArrayList<>();
         talkingPointDTOS.add(talkingPointDTO);
-        talkingPointProxy.createOrUpdate(talkingPointDTOS, mainCustomerSpace);
+        talkingPointProxy.createOrUpdate(mainCustomerSpace, talkingPointDTOS);
     }
 }

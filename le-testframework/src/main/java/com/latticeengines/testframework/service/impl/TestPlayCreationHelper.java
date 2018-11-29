@@ -14,9 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
-
 import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
-
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,10 +38,10 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -74,7 +71,7 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.proxy.objectapi.EntityProxyImpl;
@@ -85,7 +82,8 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 @Component
 public class TestPlayCreationHelper {
 
-    private static final String ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = "PREMIUM_MARKETING_PRESCREEN";
+    private static final String ACT_ATTR_PREMIUM_MARKETING_PRESCREEN =
+            "PREMIUM_MARKETING_PRESCREEN";
 
     private static final Logger log = LoggerFactory.getLogger(TestPlayCreationHelper.class);
 
@@ -145,8 +143,8 @@ public class TestPlayCreationHelper {
     }
 
     protected String getDeployedRestAPIHostPort() {
-        return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
-                : deployedHostPort;
+        return deployedHostPort.endsWith("/")
+                ? deployedHostPort.substring(0, deployedHostPort.length() - 1) : deployedHostPort;
     }
 
     public Map<String, String> getOrgInfo() {
@@ -240,7 +238,8 @@ public class TestPlayCreationHelper {
             setupTenantAndData();
         }
         setupPlayTestEnv();
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(),
+                null);
         testCrud();
         createPlayLaunch();
 
@@ -249,8 +248,8 @@ public class TestPlayCreationHelper {
     }
 
     public void setupPlayTestEnv() throws Exception {
-        Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL, BusinessEntity.Account,
-                ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL,
+                BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
         RatingRule ratingRule = createRatingRule();
@@ -312,16 +311,18 @@ public class TestPlayCreationHelper {
     }
 
     public void createPlayLaunch() {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch());
+        playLaunch =
+                playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch());
         assertPlayLaunch(playLaunch);
     }
 
     public void createPlayLaunch(boolean isDryRunMode, Set<RatingBucketName> bucketsToLaunch,
             Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
-                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount));
+        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch(
+                bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount));
         assertPlayLaunch(playLaunch);
-        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(), isDryRunMode);
+        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(),
+                isDryRunMode);
         if (isDryRunMode) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {
@@ -330,7 +331,8 @@ public class TestPlayCreationHelper {
     }
 
     private PlayLaunch createDefaultPlayLaunch() {
-        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
+        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())),
+                false, null);
 
     }
 
@@ -362,7 +364,8 @@ public class TestPlayCreationHelper {
 
     private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
         Assert.assertNotNull(playLaunch.getBucketsToLaunch());
-        Set<RatingBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
+        Set<RatingBucketName> defaultBucketsToLaunch =
+                new TreeSet<>(Arrays.asList(RatingBucketName.values()));
         Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
         for (RatingBucketName bucket : bucketsToLaunch) {
             Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
@@ -376,23 +379,25 @@ public class TestPlayCreationHelper {
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
-        Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
-                ratingEngine.getId());
+        Map<String, List<String>> dependencies =
+                ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
         Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play.getObjectType()));
         Assert.assertEquals(dependencies.get(CDLObjectTypes.Play.getObjectType()).size(), 1);
-        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play.getObjectType()).get(0), play.getDisplayName());
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play.getObjectType()).get(0),
+                play.getDisplayName());
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(playName);
-        List<TalkingPointDTO> createTPResponse = talkingPointProxy.createOrUpdate(tps,
-                CustomerSpace.parse(tenant.getId()).toString());
+        List<TalkingPointDTO> createTPResponse = talkingPointProxy
+                .createOrUpdate(CustomerSpace.parse(tenant.getId()).toString(), tps);
         Assert.assertNotNull(createTPResponse);
 
         Play createdPlay2 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
         Assert.assertNotNull(createdPlay2);
 
-        dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
+        dependencies =
+                ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
         Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play.getObjectType()));
@@ -445,11 +450,12 @@ public class TestPlayCreationHelper {
         newSegment.setDisplayName(segmentName);
         MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), newSegment);
-        MetadataSegment retrievedSegment = segmentProxy
-                .getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(
+                CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         log.info("Created Segment with DisplayName {}, Account Count:{}, Contact Count: {}",
-                retrievedSegment.getDisplayName(), retrievedSegment.getAccounts(), retrievedSegment.getContacts());
+                retrievedSegment.getDisplayName(), retrievedSegment.getAccounts(),
+                retrievedSegment.getContacts());
         return retrievedSegment;
     }
 
@@ -497,8 +503,8 @@ public class TestPlayCreationHelper {
                 .and(Arrays.asList(innerLogical1, innerLogical2)).build();
     }
 
-    private Restriction createBucketRestriction(Object val, ComparisonType comparisonType, BusinessEntity entityType,
-            String attrName) {
+    private Restriction createBucketRestriction(Object val, ComparisonType comparisonType,
+            BusinessEntity entityType, String attrName) {
         Bucket bucket = null;
 
         if (comparisonType == ComparisonType.EQUAL) {
@@ -518,7 +524,8 @@ public class TestPlayCreationHelper {
 
         RatingProxy ratingProxy = new RatingProxyImpl(null, null);
 
-        Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
+        Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass()
+                .getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
         f1.set(ratingProxy, 1000L);
 
@@ -537,7 +544,8 @@ public class TestPlayCreationHelper {
 
         EntityProxy entityProxy = new EntityProxyImpl(null, this.entityProxy);
 
-        Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
+        Field f1 = entityProxy.getClass().getSuperclass().getSuperclass()
+                .getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
         f1.set(entityProxy, 1000L);
 
@@ -604,7 +612,8 @@ public class TestPlayCreationHelper {
         return ratingRule;
     }
 
-    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
+    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment,
+            RatingRule ratingRule) {
         log.info("Creating Rating Engine");
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
@@ -612,30 +621,35 @@ public class TestPlayCreationHelper {
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
 
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
+        RatingEngine createdRatingEngine =
+                ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
 
         ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(),
                 createdRatingEngine.getLatestIteration().getId(), null, null);
-        createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
+        createdRatingEngine =
+                ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine.getScoringIteration());
 
         RatingEngine re = new RatingEngine();
         re.setId(createdRatingEngine.getId());
-        re.setPublishedIteration(ratingEngineProxy.getRatingModel(tenant.getId(), createdRatingEngine.getId(),
-                createdRatingEngine.getScoringIteration().getId()));
+        re.setPublishedIteration(ratingEngineProxy.getRatingModel(tenant.getId(),
+                createdRatingEngine.getId(), createdRatingEngine.getScoringIteration().getId()));
         createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), re);
         Assert.assertNotNull(createdRatingEngine.getPublishedIteration());
 
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(),
+                createdRatingEngine.getId(), null);
         ratingEngine1.setId(createdRatingEngine.getId());
 
-        List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
+        List<RatingModel> models =
+                ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
         for (RatingModel model : models) {
             if (model instanceof RuleBasedModel) {
                 ((RuleBasedModel) model).setRatingRule(ratingRule);
-                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(), model.getId(), model);
+                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(),
+                        model.getId(), model);
             }
         }
 
@@ -644,19 +658,21 @@ public class TestPlayCreationHelper {
         return ratingEngine1;
     }
 
-    public RatingEngine createCrossSellRatingEngineWithPublishedRating(MetadataSegment retrievedSegment) {
+    public RatingEngine createCrossSellRatingEngineWithPublishedRating(
+            MetadataSegment retrievedSegment) {
         crossSellRatingEngine = new RatingEngine();
         crossSellRatingEngine.setSegment(retrievedSegment);
         crossSellRatingEngine.setCreatedBy(CREATED_BY);
         crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
 
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(),
-                crossSellRatingEngine);
+        RatingEngine createdRatingEngine =
+                ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), crossSellRatingEngine);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
 
         try {
-            modelSummary = createModelSummary(String.format("ms__%s__LETest", UUID.randomUUID().toString()), tenant);
+            modelSummary = createModelSummary(
+                    String.format("ms__%s__LETest", UUID.randomUUID().toString()), tenant);
             // modelSummaryEntityMgr.create(modelSummary);
         } catch (Exception e) {
             Assert.fail("Failed to create ModelSummary for the test");
@@ -667,11 +683,14 @@ public class TestPlayCreationHelper {
         aiModel.setModelingJobStatus(JobStatus.COMPLETED);
         aiModel.setModelSummaryId(modelSummary.getId());
         aiModel.setPredictionType(PredictionType.EXPECTED_VALUE);
-        ratingEngineProxy.updateRatingModel(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(), aiModel);
+        ratingEngineProxy.updateRatingModel(tenant.getId(), createdRatingEngine.getId(),
+                aiModel.getId(), aiModel);
 
-        ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(),
-                getBucketMetadata(createdRatingEngine, modelSummary), "ga_dev@lattice-engines.com");
-        createdRatingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), createdRatingEngine.getId());
+        ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(),
+                aiModel.getId(), getBucketMetadata(createdRatingEngine, modelSummary),
+                "ga_dev@lattice-engines.com");
+        createdRatingEngine =
+                ratingEngineProxy.getRatingEngine(tenant.getId(), createdRatingEngine.getId());
 
         RatingEngine toPub = new RatingEngine();
         toPub.setId(createdRatingEngine.getId());
@@ -717,7 +736,8 @@ public class TestPlayCreationHelper {
         summary.setDetails(details);
     }
 
-    private List<BucketMetadata> getBucketMetadata(RatingEngine ratingEngine, ModelSummary modelSummary) {
+    private List<BucketMetadata> getBucketMetadata(RatingEngine ratingEngine,
+            ModelSummary modelSummary) {
         List<BucketMetadata> buckets = new ArrayList<>();
         BucketMetadata bkt = new BucketMetadata(BucketName.A, 15);
         bkt.setModelSummary(modelSummary);
@@ -744,25 +764,29 @@ public class TestPlayCreationHelper {
 
     private TreeMap<String, Map<String, Restriction>> populateBucketToRuleMap() {
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
-        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.A, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.GTE_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "G");
-        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "h", "n");
-        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.D, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.GT_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "O");
-        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
-                null, null, null, null);
-        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.E, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
-                null, null, null, null);
-        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.F, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
-                null, null, null, null);
+        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.A,
+                FrontEndQueryConstants.ACCOUNT_RESTRICTION, ComparisonType.GTE_AND_LT,
+                BusinessEntity.Account, "LDC_Name", "A", "G");
+        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.C,
+                FrontEndQueryConstants.ACCOUNT_RESTRICTION, ComparisonType.GTE_AND_LTE,
+                BusinessEntity.Account, "LDC_Name", "h", "n");
+        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.D,
+                FrontEndQueryConstants.ACCOUNT_RESTRICTION, ComparisonType.GT_AND_LT,
+                BusinessEntity.Account, "LDC_Name", "A", "O");
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.D,
+                FrontEndQueryConstants.CONTACT_RESTRICTION, null, null, null, null, null);
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.E,
+                FrontEndQueryConstants.ACCOUNT_RESTRICTION, null, null, null, null, null);
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.F,
+                FrontEndQueryConstants.CONTACT_RESTRICTION, null, null, null, null, null);
 
         return bucketToRuleMap;
     }
 
     private void populateBucketInfo(TreeMap<String, Map<String, Restriction>> bucketToRuleMap,
-            boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
-            BusinessEntity entity, String attrName, Object min, Object max) {
+            boolean createConcreteRestriction, RatingBucketName bucketName, String key,
+            ComparisonType comparisonType, BusinessEntity entity, String attrName, Object min,
+            Object max) {
         Map<String, Restriction> bucketInfo = bucketToRuleMap.get(bucketName.name());
         if (bucketInfo == null) {
             bucketInfo = new HashMap<>();
@@ -791,12 +815,13 @@ public class TestPlayCreationHelper {
 
     public MetadataSegment createPlayTargetSegment() {
         log.info("creating playTargetSegment");
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Delaware"));
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION,
+                Collections.singletonList("Delaware"));
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         Restriction contactRestriction = createContactRestriction();
-        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlayTargetSegment"), accountRestriction,
-                contactRestriction);
+        this.playTargetSegment = createSegment(NamingUtils.timestamp("PlayTargetSegment"),
+                accountRestriction, contactRestriction);
         return playTargetSegment;
     }
 
@@ -808,11 +833,12 @@ public class TestPlayCreationHelper {
     }
 
     public MetadataSegment createAggregatedSegment() {
-        Restriction dynRest = createBucketRestriction(3, ComparisonType.LESS_THAN, BusinessEntity.Account,
-                ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
+        Restriction dynRest = createBucketRestriction(3, ComparisonType.LESS_THAN,
+                BusinessEntity.Account, ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
-        return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
+        return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction,
+                contactRestriction);
     }
 
     public MetadataSegment createTargetSegment() {
