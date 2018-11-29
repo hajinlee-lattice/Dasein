@@ -20,6 +20,12 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private String duns;
 
+    private String finalDuns;
+
+    private String finalDuDuns;
+
+    private String finalGuDuns;
+
     private String origDuns;
 
     private NameLocation matchedNameLocation;
@@ -185,6 +191,30 @@ public class DnBMatchContext implements Fact, Dimension {
         } else {
             this.duns = null;
         }
+    }
+
+    public String getFinalDuns() {
+        return finalDuns;
+    }
+
+    public void setFinalDuns(String finalDuns) {
+        this.finalDuns = finalDuns;
+    }
+
+    public String getFinalDuDuns() {
+        return finalDuDuns;
+    }
+
+    public void setFinalDuDuns(String finalDuDuns) {
+        this.finalDuDuns = finalDuDuns;
+    }
+
+    public String getFinalGuDuns() {
+        return finalGuDuns;
+    }
+
+    public void setFinalGuDuns(String finalGuDuns) {
+        this.finalGuDuns = finalGuDuns;
     }
 
     public String getOrigDuns() {

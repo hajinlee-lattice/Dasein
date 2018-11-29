@@ -1,28 +1,37 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.datacloud.match.service.DnBMatchPostProcessor;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 /*
  * Base actor that contains the DUNS redirection logic and delegate the post processing of the match result from
  * location-based actor to subclasses.
  */
 public abstract class BaseDunsGuideValidateMicroEngineActor extends MicroEngineActorTemplate<DunsGuideBookLookupActor> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseDunsGuideValidateMicroEngineActor.class);
     @Inject
     protected DnBMatchPostProcessor dnBMatchPostProcessor;
 
@@ -57,18 +66,22 @@ public abstract class BaseDunsGuideValidateMicroEngineActor extends MicroEngineA
         /* redirect (only when match result is valid and DUNS is in AM)  */
 
         DunsGuideBook book = (DunsGuideBook) response.getResult();
-        if (CollectionUtils.isEmpty(book.getItems())) {
-            // no duns to redirect to
-            traveler.debug(String.format(
-                    "DUNS=%s does not have target DUNS in guide book, no redirecting happens", tuple.getDuns()));
-            return;
+        Triple<String, String, String> dunsWithDuGuToRedirect = pickTargetDuns(tuple, book, traveler);
+        // update finalDuns, finalduDuns and finalguDuns irrespective of duns
+        // redirection
+        List<DnBMatchContext> dnbMatchContexts = traveler.getDnBMatchContexts();
+        String duns = dunsWithDuGuToRedirect.getLeft();
+        if (!CollectionUtils.isEmpty(dnbMatchContexts)) {
+            dnbMatchContexts.get(0).setFinalDuns(duns);
+            dnbMatchContexts.get(0).setFinalDuDuns(dunsWithDuGuToRedirect.getMiddle());
+            dnbMatchContexts.get(0).setFinalGuDuns(dunsWithDuGuToRedirect.getRight());
+        } else {
+            log.error("Traveler DnBMatchContext found empty");
         }
-
-        String dunsToRedirect = pickTargetDuns(tuple, book, traveler);
-        if (!tuple.getDuns().equals(dunsToRedirect)) {
+        if (!tuple.getDuns().equals(duns)) {
             // redirect to a different duns
-            tuple.setDuns(dunsToRedirect);
-            updateDunsOriginMap(traveler, dunsToRedirect);
+            tuple.setDuns(duns);
+            updateDunsOriginMap(traveler, duns);
         }
     }
 
@@ -86,11 +99,18 @@ public abstract class BaseDunsGuideValidateMicroEngineActor extends MicroEngineA
     /*
      * pick a target DUNS to redirect to, return source DUNS if no valid target DUNS in the guide book.
      */
-    private String pickTargetDuns(
+    private Triple<String, String, String> pickTargetDuns(
             @NotNull MatchKeyTuple tuple, @NotNull DunsGuideBook book, @NotNull MatchTraveler traveler) {
         String keyPartition = getKeyPartition(tuple);
         String srcDuns = tuple.getDuns();
 
+        if (CollectionUtils.isEmpty(book.getItems())) {
+            // no duns to redirect to
+            traveler.debug(String.format(
+                    "DUNS=%s having GU=%s and DU=%s does not have target DUNS in guide book, no redirecting happens",
+                    tuple.getDuns(), book.getSrcGUDuns(), book.getSrcDUDuns()));
+            return Triple.of(srcDuns, book.getSrcDUDuns(), book.getSrcGUDuns());
+        }
         for (DunsGuideBook.Item item : book.getItems()) {
             if (item == null || item.getKeyPartition() == null || item.getDuns() == null) {
                 continue;
@@ -100,17 +120,19 @@ public abstract class BaseDunsGuideValidateMicroEngineActor extends MicroEngineA
             if (item.getKeyPartition().equals(keyPartition)) {
                 if (!item.getDuns().equals(tuple.getDuns())) {
                     // only generate traveler log when redirected DUNS != input DUNS to prevent confusion
-                    traveler.debug(String.format("Redirect to target DUNS=%s, input KeyPartition=%s, BookSource=%s",
-                            item.getDuns(), item.getKeyPartition(), item.getBookSource()));
+                    traveler.debug(String.format(
+                            "Redirect to target DUNS=%s having GU=%s and DU = %s, input KeyPartition=%s, BookSource=%s",
+                            item.getDuns(), item.getGuDuns(), item.getDuDuns(), item.getKeyPartition(),
+                            item.getBookSource()));
                 }
-                return item.getDuns();
+                return Triple.of(item.getDuns(), item.getDuDuns(), item.getGuDuns());
             }
         }
 
         traveler.debug(String.format(
-                "DUNS=%s does not have target DUNS by KeyPartition=%s in guide book, no redirecting happens",
-                tuple.getDuns(), keyPartition));
-        return srcDuns;
+                "DUNS=%s having GU=%s and DU=%s does not have target DUNS by KeyPartition=%s in guide book, no redirecting happens",
+                tuple.getDuns(), book.getSrcGUDuns(), book.getSrcDUDuns(), keyPartition));
+        return Triple.of(srcDuns, book.getSrcDUDuns(), book.getSrcGUDuns());
     }
 
     private void updateDunsOriginMap(MatchTraveler traveler, String duns) {
