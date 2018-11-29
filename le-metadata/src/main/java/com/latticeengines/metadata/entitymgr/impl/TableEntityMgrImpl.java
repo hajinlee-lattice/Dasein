@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataRuleDao;
@@ -90,6 +91,12 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Inject
     private DataUnitEntityMgr dataUnitEntityMgr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -145,15 +152,15 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (existingTable == null) {
             throw new RuntimeException(String.format("No such table with name %d", name));
         }
-        
+
         Long tenantId = existingTable.getTenantId();
-        for(Attribute attr: attributes) {
+        for (Attribute attr : attributes) {
             attr.setTable(existingTable);
             attr.setTenantId(tenantId);
             attributeDao.create(attr);
         }
     }
-    
+
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addExtract(Table table, Extract extract) {
@@ -197,13 +204,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     public Table findByName(String name) {
         return findByName(name, true);
     }
-    
+
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name, boolean inflate) {
         return findByName(name, true, true);
     }
-    
+
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name, boolean inflate, boolean includeAttributes) {
@@ -257,6 +264,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     // need to rename to avoid copy failure due to name conflict
                     String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
                     if (singleFile) {
+                        srcPath = getS3Path(MultiTenantContext.getCustomerSpace(), srcPath);
                         log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
                         if (existing.getExtracts().size() > 1) {
@@ -271,12 +279,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                                     new org.apache.hadoop.fs.Path(cloneTable, rename).toString()));
                         }
                     } else {
+                        srcPath = getS3Dir(MultiTenantContext.getCustomerSpace(), srcPath);
                         log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
-                        HdfsUtils.copyGlobToDir(yarnConfiguration, srcPath, cloneTable, renameSuffix);
+                        HdfsUtils.copyGlobToDirWithScheme(yarnConfiguration, srcPath, cloneTable, renameSuffix);
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", srcPath,
-                            cloneTable), e);
+                    throw new RuntimeException(
+                            String.format("Failed to copy in HDFS from %s to %s", srcPath, cloneTable), e);
                 }
 
                 if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
@@ -297,8 +306,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 log.info(String.format("Copying table schema from %s to %s", oldTableSchema, cloneTableSchema));
             }
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to copy schema in HDFS from %s to %s", oldTableSchema,
-                    cloneTableSchema), e);
+            throw new RuntimeException(
+                    String.format("Failed to copy schema in HDFS from %s to %s", oldTableSchema, cloneTableSchema), e);
         }
 
         DatabaseUtils.retry("createTable", input -> create(TableUtils.clone(clone, clone.getName())));
@@ -444,7 +453,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         try {
             List<DataUnit> dataUnits = dataUnitEntityMgr.deleteAllByName(tableName);
             log.info("Deleted " + dataUnits.size() + " data units associated with table " + tableName);
-            for (DataUnit unit: dataUnits) {
+            for (DataUnit unit : dataUnits) {
                 if (DataUnit.StorageType.Redshift.equals(unit.getStorageType())) {
                     RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) unit;
                     String redshiftTable = redshiftDataUnit.getRedshiftTable();
@@ -461,8 +470,29 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         try {
             redshiftService.dropTable(AvroUtils.getAvroFriendlyString(tableName));
         } catch (Exception e) {
-            log.error(String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(tableName)), e);
+            log.error(
+                    String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(tableName)),
+                    e);
         }
+    }
+
+    private String getS3Path(CustomerSpace space, String hdfsPath) throws IOException {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, podId, space.toString(), space.getTenantId(), s3Bucket);
+        if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
+            hdfsPath = s3Path;
+        }
+        return hdfsPath;
+    }
+
+    private String getS3Dir(CustomerSpace space, String hdfsPath) throws IOException {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String hdfsDir = pathBuilder.getFullPath(hdfsPath);
+        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, podId, space.toString(), space.getTenantId(), s3Bucket);
+        if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
+            hdfsPath = pathBuilder.exploreS3FilePath(hdfsPath, podId, space.toString(), space.getTenantId(), s3Bucket);
+        }
+        return hdfsPath;
     }
 
 }

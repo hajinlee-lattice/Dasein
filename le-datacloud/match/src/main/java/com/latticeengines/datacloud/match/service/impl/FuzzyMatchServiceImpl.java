@@ -86,9 +86,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
+                matchRecord.setLatticeAccountId(result);
                 if (!traveler.getMatchInput().isCdlMatch()) {
-                    matchRecord.setLatticeAccountId(result);
-                } else {
                     matchRecord.setCdlId(result);
                 }
                 if (StringUtils.isNotEmpty(result)) {

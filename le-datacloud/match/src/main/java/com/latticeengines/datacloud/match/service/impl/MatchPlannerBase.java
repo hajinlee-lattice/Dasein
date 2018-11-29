@@ -85,9 +85,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     public ColumnSelection parseColumnSelection(MatchInput input) {
         CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
-        boolean isCdlMatch = !Boolean.TRUE.equals(input.getDataCloudOnly())
+        boolean isCdlLookup = !Boolean.TRUE.equals(input.getDataCloudOnly())
                 && zkConfigurationService.isCDLTenant(customerSpace);
-        if (isCdlMatch) {
+        if (isCdlLookup) {
             throw new UnsupportedOperationException("Should not call parseColumnSelection for cdl match.");
         } else {
             ColumnSelectionService columnSelectionService = beanDispatcher
@@ -105,7 +105,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    boolean isCdlMatch(MatchInput input) {
+    boolean isCdlLookup(MatchInput input) {
         CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
         return !Boolean.TRUE.equals(input.getDataCloudOnly()) && zkConfigurationService.isCDLTenant(customerSpace);
     }
@@ -113,9 +113,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @VisibleForTesting
     List<ColumnMetadata> parseCDLMetadata(MatchInput input) {
         CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
-        boolean isCdlMatch = !Boolean.TRUE.equals(input.getDataCloudOnly())
+        boolean isCdlLookup = !Boolean.TRUE.equals(input.getDataCloudOnly())
                 && zkConfigurationService.isCDLTenant(customerSpace);
-        if (isCdlMatch) {
+        if (isCdlLookup) {
             return cdlColumnSelectionService.parseMetadata(input);
         } else {
             throw new UnsupportedOperationException("Should not call parseCDLMetadata for non-cdl match.");

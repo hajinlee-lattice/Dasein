@@ -3,11 +3,12 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.service.ImportFromS3Service;
-import com.latticeengines.camille.exposed.locks.LockManager;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -52,7 +52,6 @@ import com.latticeengines.proxy.exposed.lp.ModelOperationProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -89,15 +88,6 @@ public class ModelResource {
     private ModelOperationProxy modelOperationProxy;
 
     @Inject
-    private ImportFromS3Service importFromS3Service;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    @Value("${dataplatform.queue.scheme}")
-    private String ambariQueueScheme;
-
-    @Inject
     protected SourceFileProxy sourceFileProxy;
 
     @Inject
@@ -105,6 +95,15 @@ public class ModelResource {
 
     @Value("${common.test.microservice.url}")
     private String microserviceEndpoint;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
+
+    @Resource(name = "distCpConfiguration")
+    private Configuration distCpConfiguration;
 
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
@@ -191,31 +190,19 @@ public class ModelResource {
     }
 
     private void importFromS3IfNeeded(Table trainigTable, ModelSummary modelSummary) {
-        String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        String queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, getYarnQueueScheme());
         String tenantId = MultiTenantContext.getTenant().getId();
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
-        String lockName = tenantId + "_" + trainigTable.getName();
+        String pivotFilePath = modelSummary.getPivotArtifactPath();
         try {
-            LockManager.registerCrossDivisionLock(lockName);
-            LockManager.acquireWriteLock(lockName, 360, TimeUnit.MINUTES);
-
-            importFromS3Service.importTable(tenantId, trainigTable, queueName);
-            String pivotFilePath = modelSummary.getPivotArtifactPath();
             HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
-            if (StringUtils.isNotBlank(pivotFilePath)) {
-                String s3Path = builder.convertAtlasMetadata(pivotFilePath, importFromS3Service.getPodId(), tenantId,
-                        importFromS3Service.getS3Bucket());
-                importFromS3Service.importFile(tenantId, s3Path, pivotFilePath, queueName);
-            }
-            SourceFile sourceFile = sourceFileProxy.findByTableName(tenantId, modelSummary.getTrainingTableName());
-            if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getPath())) {
-                String s3Path = builder.convertAtlasFile(sourceFile.getPath(), importFromS3Service.getPodId(), tenantId,
-                        importFromS3Service.getS3Bucket());
-                importFromS3Service.importFile(tenantId, s3Path, sourceFile.getPath(), queueName);
+            if (StringUtils.isNotBlank(pivotFilePath) && !HdfsUtils.fileExists(distCpConfiguration, pivotFilePath)) {
+                String s3Path = builder.convertAtlasMetadata(pivotFilePath, podId, tenantId, s3Bucket);
+                HdfsUtils.copyFiles(distCpConfiguration, s3Path, pivotFilePath);
             }
         } catch (Exception ex) {
-            LockManager.releaseWriteLock(lockName);
+            String msg = "Failed to copy file=" + pivotFilePath + " tenantId=" + tenantId;
+            log.error(msg, ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -346,11 +333,4 @@ public class ModelResource {
         return filteredMetadataFields;
     }
 
-    private String getYarnQueueScheme() {
-        if (Boolean.TRUE.equals(useEmr)) {
-            return "default";
-        } else {
-            return ambariQueueScheme;
-        }
-    }
 }

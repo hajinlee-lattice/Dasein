@@ -34,7 +34,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @MatchStep
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
-        if (isCdlMatch(input)) {
+        if (isCdlLookup(input)) {
             if (StringUtils.isBlank(input.getDataCloudVersion())) {
                 input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
             }
@@ -51,7 +51,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         }
         MatchOutput output;
 
-        if (isCdlMatch(input)) {
+        if (isCdlLookup(input)) {
             context.setCdlLookup(true);
             if (metadatas == null) {
                 metadatas = parseCDLMetadata(input);

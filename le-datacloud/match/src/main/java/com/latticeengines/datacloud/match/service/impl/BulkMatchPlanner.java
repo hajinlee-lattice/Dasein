@@ -34,7 +34,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
         MatchOutput output;
         ColumnSelection columnSelection;
-        if (isCdlMatch(input)) {
+        if (isCdlLookup(input)) {
             context.setCdlLookup(true);
             if (metadatas == null) {
                 metadatas = parseCDLMetadata(input);
