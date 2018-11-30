@@ -5,11 +5,11 @@ class LeHPanel extends Component {
   constructor(props) {
     super(props);
   }
-  getHStretch(){
-    if(this.props.hstretch && this.props.hstretch.toString() == "true"){
+  getHStretch() {
+    if (this.props.hstretch && this.props.hstretch.toString() == "true") {
       return "le-h-stretch";
-    }else{
-      return '';
+    } else {
+      return "";
     }
   }
   getHAlignment() {
@@ -44,6 +44,15 @@ class LeHPanel extends Component {
     }
   }
 
+  getWrap(){
+    console.log('WRAP ',this.props.wrap);
+    if(this.props.wrap == true){
+      return 'le-wrap';
+    }else{
+      return 'le-nowrap';
+    }
+  }
+
   render() {
     const self = this;
     const children = React.Children.map(this.props.children, child => {
@@ -56,7 +65,7 @@ class LeHPanel extends Component {
 
     return (
       <div
-        className={`le-h-panel ${this.getHStretch()} ${this.getVStretch()} ${this.getHAlignment()} ${this.getVAlignment()} ${
+        className={`le-h-panel ${this.getHStretch()} ${this.getVStretch()} ${this.getHAlignment()} ${this.getVAlignment()} ${this.getWrap()} ${
           this.props.classes ? this.props.classes : ""
         }`}
       >

@@ -36,6 +36,7 @@ stories.add("Horizontal panel", () => (
     <LeHPanel
       hstretch={boolean("Horizontal Stretch", false).toString()}
       vstretch={boolean("Vertical Stretch", false)}
+      wrap={boolean("Wrap", false)}
     >
       <LeHPanel
         hAlignment={radios("P1 H Alignement", options, "left")}

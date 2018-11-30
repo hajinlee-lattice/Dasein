@@ -1,8 +1,8 @@
 .le-h-panel {
   width: 100%;
+  min-width: 180px;
   display: inline-flex;
   box-sizing: border-box;
-  flex-wrap: wrap;
   padding: 0.5em;
   flex: 0;
   & .le-h-stretch {
@@ -20,8 +20,15 @@
   & .le-pull-v-bottom {
     align-items: flex-end;
   }
+  
 }
 
 .le-vertical-stretch {
   height: 100%;
+}
+.le-wrap {
+  flex-wrap: wrap;
+}
+.le-nowrap{
+  overflow: auto;
 }
