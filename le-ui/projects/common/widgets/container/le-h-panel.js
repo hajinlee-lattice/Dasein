@@ -1,7 +1,14 @@
 import React, { Component } from "../../react-vendor";
 import "./le-h-panel.scss";
 import { LEFT } from "../buttons/le-button";
-import { CENTER, RIGHT, TOP, BOTTOM } from "./le-alignments";
+import {
+  CENTER,
+  RIGHT,
+  TOP,
+  BOTTOM,
+  SPACEAROUND,
+  SPACEBETWEEN
+} from "./le-alignments";
 
 class LeHPanel extends Component {
   constructor(props) {
@@ -41,17 +48,21 @@ class LeHPanel extends Component {
         return "le-pull-v-center";
       case BOTTOM:
         return "le-pull-v-bottom";
+      case SPACEAROUND:
+        return "le-flex-v-spaced-around";
+      case SPACEBETWEEN:
+        return "le-flex-v-spaced-between";
       default:
         return "";
     }
   }
 
-  getWrap(){
-    console.log('WRAP ',this.props.wrap);
-    if(this.props.wrap == true){
-      return 'le-wrap';
-    }else{
-      return 'le-nowrap';
+  getWrap() {
+    console.log("WRAP ", this.props.wrap);
+    if (this.props.wrap == true) {
+      return "le-wrap";
+    } else {
+      return "le-nowrap";
     }
   }
 

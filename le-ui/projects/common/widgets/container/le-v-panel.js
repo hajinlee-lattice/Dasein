@@ -1,6 +1,14 @@
 import React, { Component } from "../../react-vendor";
 import "./le-v-panel.scss";
-import { LEFT, CENTER, TOP, BOTTOM } from "./le-alignments";
+import {
+  LEFT,
+  CENTER,
+  TOP,
+  BOTTOM,
+  SPACEAROUND,
+  SPACEBETWEEN,
+  SPACEEVEN
+} from "./le-alignments";
 import { RIGHT } from "../link/le-link";
 
 class LeVPanel extends Component {
@@ -38,7 +46,7 @@ class LeVPanel extends Component {
       return "le-flex-pull-left";
     }
   }
-  getVAlignment(){
+  getVAlignment() {
     console.log(this.props.valignment);
     if (this.props.valignment) {
       switch (this.props.valignment) {
@@ -48,6 +56,12 @@ class LeVPanel extends Component {
           return "le-flex-v-centered";
         case BOTTOM:
           return "le-flex-v-bottom";
+        case SPACEAROUND:
+          return "le-flex-v-space-around";
+        case SPACEBETWEEN:
+          return "le-flex-v-space-between";
+        case SPACEEVEN:
+          return "le-flex-v-space-even";
       }
     } else {
       return "le-flex-v-top";
@@ -61,12 +75,16 @@ class LeVPanel extends Component {
         return React.cloneElement(child, {
           vstretch: self.props.vstretch,
           hstretch: self.props.hstretch,
-          halignment: self.props.halignment ? self.props.halignment : child.props.halignment,
-          valignment: self.props.valignment ? self.props.valignment : child.props.valignment 
+          halignment: self.props.halignment
+            ? self.props.halignment
+            : child.props.halignment,
+          valignment: self.props.valignment
+            ? self.props.valignment
+            : child.props.valignment
         });
       }
     });
-    
+
     return (
       <div
         className={`fill-height-or-more ${this.getVStretch()} ${this.getHStretch()}`}

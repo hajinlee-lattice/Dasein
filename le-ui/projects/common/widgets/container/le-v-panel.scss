@@ -15,6 +15,16 @@
 .le-flex-v-bottom {
   justify-content: flex-end;
 }
+.le-flex-v-space-around{
+  justify-content: space-around;
+}
+
+.le-flex-v-space-between{
+  justify-content: space-between;
+}
+.le-flex-v-space-even{
+  justify-content: space-evenly;
+}
 
 .le-flex-h-centered {
   align-items: center;

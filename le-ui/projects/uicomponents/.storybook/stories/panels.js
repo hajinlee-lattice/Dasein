@@ -20,7 +20,10 @@ import {
   RIGHT,
   TOP,
   BOTTOM,
-  CENTER
+  CENTER,
+  SPACEAROUND,
+  SPACEBETWEEN,
+  SPACEEVEN
 } from "../../../common/widgets/container/le-alignments";
 const stories = storiesOf("Panels", module);
 
@@ -35,7 +38,10 @@ const options = {
 const vOptions = {
   Top: TOP,
   Center: CENTER,
-  Bottom: BOTTOM
+  Bottom: BOTTOM,
+  'Space Around' : SPACEAROUND,
+  'Space between': SPACEBETWEEN,
+  'Space even': SPACEEVEN
 };
 
 stories.add("Horizontal panel", () => (
