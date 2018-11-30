@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
@@ -55,7 +56,6 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private RatingEngine cdlCERatingEngine;
     private AIModel lpiCEAIModel;
     private AIModel cdlCEAIModel;
-    private AIModel testCERemodel;
     private SourceFile testSourceFile;
     private final String testSourceFileName = "CustomEventModelE2ETestFile.csv";
     private CustomEventModelingType testType;
@@ -75,6 +75,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     @Inject
     private Configuration distCpConfiguration;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customerS3Bucket;
 
     @BeforeClass(groups = { "end2end", "manual", "precheckin" })
     public void setup() {
@@ -110,7 +113,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             String hdfsDataDir = builder.getHdfsAtlasTablesDir(podId, space.getTenantId());
 
             String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, podId, space.toString(), space.getTenantId(),
-                    s3Bucket);
+                    customerS3Bucket);
             System.out.println("HDFS Path=" + hdfsDataDir);
             System.out.println("S3 Path=" + s3DataDir);
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*", s3DataDir, "");
