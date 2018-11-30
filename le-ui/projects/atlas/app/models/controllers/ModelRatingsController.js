@@ -199,9 +199,9 @@ angular.module('lp.models.ratings', [
             vm.canAddBucket = true;
         }
 
-        if (vm.predictionType === 'EXPECTED_VALUE'){
-            vm.avgRevenueTotal = (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads);
-        }        
+        vm.iterationSupplementaryInfo = vm.predictionType === 'EXPECTED_VALUE' ? 
+            'Past Average Weighted Revenue: $' + (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads).toFixed(2) : 
+            'Past Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 

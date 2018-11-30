@@ -432,6 +432,8 @@ angular.module('mainApp.models.services.ModelService', [
                 modelSummary.ModelDetails.TrainingFileExist = data.TrainingFileExist;
                 modelSummary.ModelDetails.ModelSummaryProvenanceProperties = data.ModelSummaryProvenanceProperties;
                 modelSummary.ModelDetails.ConflictWithOptionalRules =ModelServiceUtility.getModelSummaryProvenanceProperties(data.ModelSummaryProvenanceProperties, 'ConflictWithOptionalRules');
+                modelSummary.ModelDetails.TestConversionCount = data.TestConversionCount;
+                modelSummary.ModelDetails.TestRowCount = data.TestRowCount;
 
                 // sync with front-end json structure
                 result.resultObj = modelSummary;

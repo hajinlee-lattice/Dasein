@@ -19,8 +19,8 @@
                         ng-change="vm.changeIterationData()"
                         class="iteration-selection"
                     ></select>
-                    <span ng-if="vm.ratingsSummary.total_expected_revenue">
-                        &nbsp;Past Average Weighted Revenue: ${{vm.model.ModelDetails.AverageRevenue | number: 2}}
+                    <span>
+                        {{ vm.iterationSupplementaryInfo }}
                     </span>
                 </h2>
                 <h2 ng-if="vm.hasRatingsAvailable">
