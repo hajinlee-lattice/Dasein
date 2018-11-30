@@ -256,7 +256,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private String podId;
 
     @Value("${aws.s3.bucket}")
-    private String s3Bucket;
+    protected String s3Bucket;
 
     @Value("${common.le.environment}")
     private String leEnv;
