@@ -31,8 +31,9 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
 
     public synchronized Mono<Boolean> load() {
         AtomicLong start = new AtomicLong();
+        Collection<ColumnMetadata> cms = loadInternal();
         return Mono.fromCallable(() -> {
-            loadInternal().forEach(cm -> filterMap.put(cm.getAttrName(), cm));
+            cms.forEach(cm -> filterMap.put(cm.getAttrName(), cm));
             return true;
         }).doOnSubscribe(subscription -> {
             loaded.set(true);

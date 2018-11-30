@@ -70,7 +70,7 @@ public class Job implements HasPid, HasId<String> {
     @JsonIgnore
     @Transient
     public ApplicationId getAppId() {
-        return ConverterUtils.toApplicationId(id);
+        return ApplicationId.fromString(id);
     }
 
     @Column(name = "CUSTOMER")
