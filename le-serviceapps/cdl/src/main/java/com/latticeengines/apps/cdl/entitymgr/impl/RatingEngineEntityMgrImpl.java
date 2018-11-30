@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -243,9 +244,6 @@ public class RatingEngineEntityMgrImpl //
         if (ratingEngine.getDisplayName() != null) {
             retrievedRatingEngine.setDisplayName(ratingEngine.getDisplayName());
         }
-        if (ratingEngine.getSegment() != null) {
-            retrievedRatingEngine.setSegment(ratingEngine.getSegment());
-        }
         if (ratingEngine.getStatus() != null) {
             validateForStatusUpdate(retrievedRatingEngine, ratingEngine);
             // set Activation Action Context
@@ -307,14 +305,32 @@ public class RatingEngineEntityMgrImpl //
             retrievedRatingEngine.setPublishedIteration(ratingEngine.getPublishedIteration());
         }
 
+        if (ratingEngine.getSegment() != null) {
+            retrievedRatingEngine.setSegment(ratingEngine.getSegment());
+            if (retrievedRatingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
+                updateCustomEventModelingType(retrievedRatingEngine, CustomEventModelingType.CDL);
+            }
+        }
+
         // PLS-7555 - allow segment to be reset to null for custom event rating
         if (unlinkSegment == Boolean.TRUE && !retrievedRatingEngine.getType().isTargetSegmentMandatory()) {
             retrievedRatingEngine.setSegment(null);
+            if (retrievedRatingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
+                updateCustomEventModelingType(retrievedRatingEngine, CustomEventModelingType.LPI);
+            }
         }
 
         retrievedRatingEngine.setUpdated(new Date());
         log.info("================\n\n" + JsonUtils.serialize(retrievedRatingEngine) + "\n\n");
         ratingEngineDao.update(retrievedRatingEngine);
+    }
+
+    void updateCustomEventModelingType(RatingEngine retrievedRatingEngine,
+            CustomEventModelingType modelingType) {
+        AIModel model = (AIModel) retrievedRatingEngine.getLatestIteration();
+        CustomEventModelingConfig advancedModelingConfig = (CustomEventModelingConfig) model
+                .getAdvancedModelingConfig();
+        advancedModelingConfig.setCustomEventModelingType(modelingType);
     }
 
     @VisibleForTesting
@@ -384,6 +400,10 @@ public class RatingEngineEntityMgrImpl //
         case CUSTOM_EVENT:
             if (advancedModelingConfig == null) {
                 advancedModelingConfig = new CustomEventModelingConfig();
+                CustomEventModelingType modelingType = segment == null ? CustomEventModelingType.LPI
+                        : CustomEventModelingType.CDL;
+                ((CustomEventModelingConfig) advancedModelingConfig)
+                        .setCustomEventModelingType(modelingType);
             }
             if (advancedRatingConfig == null) {
                 advancedRatingConfig = new CustomEventRatingConfig();
