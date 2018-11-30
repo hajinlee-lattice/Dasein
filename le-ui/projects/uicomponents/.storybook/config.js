@@ -92,7 +92,7 @@ function loadStories() {
   require('./stories/messages.js');
   require('./stories/overlay.js');
   require('./stories/panels.js');
-
+  require('./stories/layouts.js');
   // You can require as many stories as you need.
 }
 

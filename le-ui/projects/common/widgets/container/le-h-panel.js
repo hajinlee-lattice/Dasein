@@ -1,5 +1,7 @@
 import React, { Component } from "../../react-vendor";
 import "./le-h-panel.scss";
+import { LEFT } from "../buttons/le-button";
+import { CENTER, RIGHT, TOP, BOTTOM } from "./le-alignments";
 
 class LeHPanel extends Component {
   constructor(props) {
@@ -14,11 +16,11 @@ class LeHPanel extends Component {
   }
   getHAlignment() {
     switch (this.props.hAlignment) {
-      case "left":
+      case LEFT:
         return "";
-      case "center":
+      case CENTER:
         return "le-pull-h-center";
-      case "right":
+      case RIGHT:
         return "le-pull-h-right";
       default:
         return "";
@@ -33,11 +35,11 @@ class LeHPanel extends Component {
   }
   getVAlignment() {
     switch (this.props.vAlignment) {
-      case "top":
+      case TOP:
         return "";
-      case "center":
+      case CENTER:
         return "le-pull-v-center";
-      case "bottom":
+      case BOTTOM:
         return "le-pull-v-bottom";
       default:
         return "";
