@@ -149,8 +149,14 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                 TableRoleInCollection.ConsolidatedAccount, activeVersion);
         String contactTableName = dataCollectionProxy.getTableName(shortTenantId,
                 TableRoleInCollection.ConsolidatedContact, activeVersion);
-        List<ColumnMetadata> accountMetadata = metadataProxy.getTableColumns(shortTenantId, accountTableName);
-        List<ColumnMetadata> contactMetadata = metadataProxy.getTableColumns(shortTenantId, contactTableName);
+        List<ColumnMetadata> accountMetadata = Collections.emptyList();
+        List<ColumnMetadata> contactMetadata = Collections.emptyList();
+        if (StringUtils.isNotEmpty(accountTableName)) {
+            accountMetadata = metadataProxy.getTableColumns(shortTenantId, accountTableName);
+        }
+        if (StringUtils.isNotEmpty(contactTableName)) {
+            contactMetadata = metadataProxy.getTableColumns(shortTenantId, contactTableName);
+        }
         List<ColumnMetadata> metadatas = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(accountMetadata)) {
             metadatas.addAll(accountMetadata);
