@@ -24,7 +24,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
+import com.latticeengines.common.exposed.rest.RequestIdUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -182,10 +182,10 @@ public class ScoringApiExceptionHandler {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes();
             String identifier = String
-                    .valueOf(attributes.getRequest().getAttribute(RequestLogInterceptor.IDENTIFIER_KEY));
+                    .valueOf(attributes.getRequest().getAttribute(RequestIdUtils.IDENTIFIER_KEY));
 
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
-            alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, identifier));
+            alertDetails.add(new BasicNameValuePair(RequestIdUtils.REQUEST_ID, identifier));
             alertDetails.add(new BasicNameValuePair("Tenant", requestInfo.get(RequestInfo.TENANT)));
             alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
 

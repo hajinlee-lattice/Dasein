@@ -49,7 +49,7 @@
         <maven.keytool.version>1.5</maven.keytool.version>
         <maven.rpm.version>2.1.5</maven.rpm.version> <!-- upgrade ? -->
 
-        <!-- release trains -->
+        <!-- Reactor -->
         <reactor.release.train>Bismuth-SR6</reactor.release.train>
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
@@ -57,7 +57,6 @@
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> <!-- need ledp3 classifier -->
-        <spring.data.jpa.version>2.0.0.RELEASE</spring.data.jpa.version>
         <tez.version>0.9.0</tez.version>
         <guava.version>19.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
@@ -72,7 +71,7 @@
         <!-- if until 2018 or cascading 3.3, they still do not release new
             version, we should move away from cascading-flink -->
         <cascading.flink.version>0.3.0</cascading.flink.version>
-        <scala.version>2.11.8</scala.version>
+        <scala.version>2.11.12</scala.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
         <jackson.dataformat.version>2.9.6</jackson.dataformat.version>
@@ -128,17 +127,18 @@
         <zip4j.version>1.3.2</zip4j.version>
         <netty.all.version>4.1.21.Final</netty.all.version>
         <netty.version>3.10.6.Final</netty.version>
-        <reactor.version>3.1.3.RELEASE</reactor.version>
         <zt.exec.version>1.10</zt.exec.version>
         <xalan.version>2.7.2</xalan.version>
         <xerces.version>2.12.0</xerces.version>
         <kryo.version>4.0.1</kryo.version>
         <kryo.serializers.version>0.42</kryo.serializers.version> <!-- needed for kryo 4.0.1 -->
+
         <!-- Confluent -->
         <kafka.version>0.11.0.0-cp1</kafka.version>
         <kafka.scala.version>2.11</kafka.scala.version>
         <confluent.version>5.0.0</confluent.version>
         <libthrift.version>0.11.0</libthrift.version>
+
         <!-- Spring -->
         <spring.version>5.0.9.RELEASE</spring.version>
         <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
@@ -146,6 +146,8 @@
         <spring.security.version>5.0.8.RELEASE</spring.security.version>
         <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
         <spring.oauth2.version>2.2.1.RELEASE</spring.oauth2.version>
+        <sprint.data.release.train>Lovelace-SR2</sprint.data.release.train>
+
         <!-- Camel -->
         <camel.version>2.19.1</camel.version>
         <jcifs.version>1.3.17</jcifs.version>
@@ -206,7 +208,7 @@
             <id>central</id>
             <name>LE Maven REPOSITORY</name>
             <layout>default</layout>
-            <url>http://10.41.1.75:8081/repository/maven-public/</url>
+            <url>http://10.141.1.202:8081/repository/maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -224,7 +226,7 @@
         <pluginRepository>
             <id>central</id>
             <name>LE Maven Plugin Repository</name>
-            <url>http://10.41.1.75:8081/repository/maven-public/</url>
+            <url>http://10.141.1.202:8081/repository/maven-public/</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>true</enabled>
@@ -1152,6 +1154,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven.assembly.version}</version>
                     <inherited>true</inherited>
                     <configuration>
                         <descriptors>
@@ -1341,11 +1344,6 @@
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
                 <version>${quartz.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-jpa</artifactId>
-                <version>${spring.data.jpa.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bitcoinj</groupId>
@@ -1686,6 +1684,13 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <version>${spring.security.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-releasetrain</artifactId>
+                <version>${sprint.data.release.train}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

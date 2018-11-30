@@ -1,34 +1,40 @@
-package com.latticeengines.common.exposed.rest;
+package com.latticeengines.scoringapi.exposed;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.rest.HttpStopWatch;
 
-@Component("requestLogInterceptor")
 public class RequestLogInterceptor extends HandlerInterceptorAdapter {
 
-    public static final String IDENTIFIER_KEY = "com.latticeengines.requestid";
-    public static final String REQUEST_ID = "Request-Id";
-    public static final String URI_KEY = "com.latticeengines.uri";
+    private static final String IDENTIFIER_KEY = "com.latticeengines.requestid";
+    private static final String REQUEST_ID = "Request-Id";
+    private static final String URI_KEY = "com.latticeengines.uri";
 
     private static final Logger log = LoggerFactory.getLogger(RequestLogInterceptor.class);
 
-    @Autowired
+    private static final List<String> skipLoggingForUris = //
+            Arrays.asList( //
+                    "score/record", //
+                    "scoreinternal/record");
+
+    @Inject
     private HttpStopWatch httpStopWatch;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         String identifier = getRequestId(request);
         request.setAttribute(IDENTIFIER_KEY, identifier);
@@ -51,8 +57,8 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-            throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, //
+                                Exception ex) {
         try {
             httpStopWatch.stop();
             long duration = httpStopWatch.getTime();
@@ -66,21 +72,18 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
-    protected String getRequestId(HttpServletRequest request) {
-        String identifier = UUID.randomUUID().toString();
+    private String getRequestId(HttpServletRequest request) {
+        String identifier = request.getHeader(REQUEST_ID);
+        if (StringUtils.isBlank(identifier)) {
+            identifier = UUID.randomUUID().toString();
+        }
         return identifier;
     }
 
-    public static String getRequestIdentifierId(HttpServletRequest request) {
-        String requestId = "";
-        Object identifier = request.getAttribute(RequestLogInterceptor.IDENTIFIER_KEY);
-        if (!StringStandardizationUtils.objectIsNullOrEmptyString(identifier)) {
-            requestId = String.valueOf(identifier);
-        }
-        return requestId;
-    }
-
-    protected boolean shouldSkipLogging(String requestURI) {
-        return false;
+    private boolean shouldSkipLogging(String requestURI) {
+        Optional<String> result = skipLoggingForUris.stream() //
+                .filter(requestURI::contains) //
+                .findAny();
+        return result.isPresent();
     }
 }

@@ -129,7 +129,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>${maven.dependency.version}</version>
                         <executions>
                             <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant . -->
                             <execution>

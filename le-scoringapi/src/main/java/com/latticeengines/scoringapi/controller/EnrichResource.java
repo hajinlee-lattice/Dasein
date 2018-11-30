@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
+import com.latticeengines.common.exposed.rest.RequestIdUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
@@ -44,7 +44,7 @@ public class EnrichResource extends BaseEnrich {
         EnrichResponse enrichResponse = enrichRecord(request, enrichRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), credentialId);
 
-        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        String requestId = RequestIdUtils.getRequestIdentifierId(request);
         enrichResponse.setRequestId(requestId);
         return enrichResponse;
     }

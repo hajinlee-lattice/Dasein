@@ -18,6 +18,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 public abstract class BaseExceptionHandler {
+
     @Inject
     protected AlertService alertService;
 

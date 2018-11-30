@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
+import com.latticeengines.common.exposed.rest.RequestIdUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -46,7 +46,7 @@ public class InternalScoreResource extends BaseScoring {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         return getActiveModels(request, type, customerSpace);
     }
-    
+
     @Deprecated
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -112,7 +112,7 @@ public class InternalScoreResource extends BaseScoring {
             boolean enableMatching, //
             HttpServletResponse response) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
                 performFetchOnlyForMatching, requestId, forceSkipMatching, true);
@@ -132,7 +132,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
                 performFetchOnlyForMatching, requestId, forceSkipMatching, true);
@@ -152,7 +152,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
                 performFetchOnlyForMatching, requestId, forceSkipMatching, true);
@@ -172,7 +172,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
                 performFetchOnlyForMatching, requestId, forceSkipMatching, true);
@@ -198,7 +198,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes, requestId,
                 enforceFuzzyMatch, skipDnBCache, forceSkipMatching);

@@ -18,9 +18,9 @@
     <context:annotation-config />
 
     <mvc:interceptors>
-        <bean class="com.latticeengines.scoringapi.exposed.ScoringApiRequestLogInterceptor" />
+        <bean class="com.latticeengines.scoringapi.exposed.RequestLogInterceptor" />
     </mvc:interceptors>
-    
+
     <bean id="scoreRateLimiter" class="com.latticeengines.scoringapi.web.ScoringRateLimiter"/>
 
 </beans>

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
+import com.latticeengines.common.exposed.rest.RequestIdUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -39,7 +39,7 @@ public abstract class BaseEnrich extends CommonBase {
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(enrichRequest));
             }
-            String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
             EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest,
                     enrichInternalAttributes, requestId);
             if (warnings.hasWarnings(requestId)) {

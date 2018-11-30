@@ -30,7 +30,7 @@
         <reflections.version>0.9.9</reflections.version>
         <c3p0.version>0.9.5.2</c3p0.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <reactor.version>3.1.3.RELEASE</reactor.version>
+        <reactor.release.train>Bismuth-SR6</reactor.release.train>
 
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
         <java.version>1.8</java.version>
@@ -41,7 +41,7 @@
             <id>central</id>
             <name>LE Maven REPOSITORY</name>
             <layout>default</layout>
-            <url>http://10.41.1.75:8081/repository/maven-public/</url>
+            <url>http://10.141.1.202:8081/repository/maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -59,7 +59,7 @@
         <pluginRepository>
             <id>central</id>
             <name>LE Maven Plugin Repository</name>
-            <url>http://10.41.1.75:8081/repository/maven-public/</url>
+            <url>http://10.141.1.202:8081/repository/maven-public/</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>true</enabled>
@@ -75,6 +75,18 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.5.10.RELEASE</version>
     </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-bom</artifactId>
+                <version>${reactor.release.train}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -320,7 +332,6 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-            <version>${reactor.version}</version>
         </dependency>
 
     </dependencies>

@@ -12,9 +12,9 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo mkdir -p ${CATALINA_HOME} || true
     sudo chown -R ${USER} ${CATALINA_HOME} || true
 
-    TOMCAT_TGZ_URL="http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
-
     if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]; then
+        APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
+        TOMCAT_TGZ_URL="${APACHE_MIRROR}tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         wget "${TOMCAT_TGZ_URL}" -O "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
     fi
     rm -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION} || true
