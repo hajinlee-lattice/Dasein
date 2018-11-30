@@ -186,7 +186,8 @@ public final class JobStepDisplayInfoMapping {
 
     private static final String[] SEGMENT_EXPORT_STEPS = { //
             "segment_export_init", //
-            "export_data" };
+            "export_data"
+    };
 
     private static final String[] PROCESS_ANALYZE_STEPS = { //
             "Merging, De-duping & matching to Lattice Data Cloud", //
@@ -251,6 +252,17 @@ public final class JobStepDisplayInfoMapping {
             "Publishing", //
             "Publishing", //
             "Publishing", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
             "Scoring", //
             "Scoring", //
             "Scoring", //
