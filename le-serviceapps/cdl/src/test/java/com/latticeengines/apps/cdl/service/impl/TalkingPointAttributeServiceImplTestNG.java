@@ -2,20 +2,21 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.apps.cdl.service.TalkingPointAttributeService;
+import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -24,13 +25,12 @@ import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+
 import reactor.core.publisher.Flux;
 
-@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
-@ContextConfiguration(locations = {"classpath:test-dante-context.xml"})
-public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpringContextTests {
+public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TalkingPointAttributeService talkingPointAttributeService;
 
     private ServingStoreProxy spiedServingStoreProxy;

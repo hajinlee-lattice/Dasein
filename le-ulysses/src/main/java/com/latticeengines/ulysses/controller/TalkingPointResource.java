@@ -1,15 +1,18 @@
 package com.latticeengines.ulysses.controller;
 
 import java.util.List;
+
+import javax.annotation.Resource;
 import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -20,6 +23,7 @@ import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 import com.latticeengines.ulysses.utils.DanteFormatter;
 import com.latticeengines.ulysses.utils.TalkingPointDanteFormatter;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -32,8 +36,7 @@ public class TalkingPointResource {
     @Inject
     private TalkingPointProxy talkingPointProxy;
 
-    @Inject
-    @Qualifier(TalkingPointDanteFormatter.Qualifier)
+    @Resource(name = TalkingPointDanteFormatter.Qualifier)
     private DanteFormatter<TalkingPointDTO> talkingPointDanteFormatter;
 
     @RequestMapping(value = "/{talkingPointId}", method = RequestMethod.GET,
