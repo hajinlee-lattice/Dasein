@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -16,6 +17,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -33,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -69,6 +73,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     @Inject
     private SegmentProxy segmentProxy;
 
+    @Inject
+    private Configuration distCpConfiguration;
+
     @BeforeClass(groups = { "end2end", "manual", "precheckin" })
     public void setup() {
         testType = CustomEventModelingType.CDL;
@@ -90,7 +97,31 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
      */
     @Test(groups = { "end2end", "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
     public void end2endCDLStyleCustomEventReModelTest() {
+        moveCustomerDataToS3();
         runCustomEventRemodel(testType);
+    }
+
+    private void moveCustomerDataToS3() {
+        try {
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+            CustomerSpace space = CustomerSpace.parse(mainTestTenant.getId());
+            String podId = CamilleEnvironment.getPodId();
+            String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());
+            String hdfsDataDir = builder.getHdfsAtlasTablesDir(podId, space.getTenantId());
+
+            String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, podId, space.toString(), space.getTenantId(),
+                    s3Bucket);
+            System.out.println("HDFS Path=" + hdfsDataDir);
+            System.out.println("S3 Path=" + s3DataDir);
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*", s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/AnalyticPurchaseState*", s3DataDir,
+                    "");
+            HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
+            HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+            throw new RuntimeException(ex);
+        }
     }
 
     /**

@@ -116,7 +116,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     try {
                         if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
                             String s3Path = pathBuilder.convertAtlasTableDir(hdfsPath, podId, tenantId, s3Bucket);
-                            requests.add(new ImportExportRequest(s3Path, hdfsPath, table.getName(), false, true));
+                            requests.add(new ImportExportRequest(s3Path, hdfsPath, table.getName(), false, false));
                         }
                     } catch (Exception ex) {
                         throw new RuntimeException("Failed to check Hdfs file=" + hdfsPath, ex);
@@ -149,9 +149,9 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
 
                     Configuration hadoopConfiguration = createConfiguration();
                     if (isSync) {
-                        HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
-                    } else {
                         globalSyncCopy(hadoopConfiguration);
+                    } else {
+                        HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, queueName);
                     }
                     if (hasDataUnit && StringUtils.isNotBlank(tableName)) {
                         registerDataUnit();

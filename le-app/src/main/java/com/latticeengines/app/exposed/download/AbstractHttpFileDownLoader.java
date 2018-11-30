@@ -165,7 +165,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             metadatas.addAll(contactMetadata);
         }
         for (ColumnMetadata metadata : metadatas) {
-            if (metadata.getLogicalDataType().equals(LogicalDataType.Date)) {
+            if (LogicalDataType.Date.equals(metadata.getLogicalDataType())) {
                 dateAttributes.add(metadata.getAttrName());
             }
         }
