@@ -146,7 +146,7 @@
         <spring.security.version>5.0.8.RELEASE</spring.security.version>
         <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
         <spring.oauth2.version>2.2.1.RELEASE</spring.oauth2.version>
-        <sprint.data.release.train>Lovelace-SR2</sprint.data.release.train>
+        <sprint.data.release.train>Kay-SR12</sprint.data.release.train>
 
         <!-- Camel -->
         <camel.version>2.19.1</camel.version>
