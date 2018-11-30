@@ -12,7 +12,7 @@ export LE_PROPDIR=$WSHOME/le-config/conf/env/${LE_ENVIRONMENT}
 echo "Using LE_PROPDIR=${LE_PROPDIR}"
 echo "Using LE_CLIENT_ADDRESS=${LE_CLIENT_ADDRESS}"
 
-export JAVA_OPTS="-Xmx4g -XX:ReservedCodeCacheSize=1g -XX:+UseG1GC"
+export JAVA_OPTS="-Xmx4g -XX:ReservedCodeCacheSize=1g"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.net.preferIPv4Stack=true"
 export JAVA_OPTS="${JAVA_OPTS} -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true"
