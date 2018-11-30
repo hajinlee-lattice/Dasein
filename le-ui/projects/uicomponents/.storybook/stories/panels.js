@@ -10,10 +10,11 @@ import {
   radios
 } from "@storybook/addon-knobs";
 import "../../../common/assets/css/font-awesome.min.css";
-import "../../../common/widgets/layout/layout.scss";
+// import "../../../common/widgets/layout/layout.scss";
 
 import LeVPanel from "../../../common/widgets/container/le-v-panel";
 import LeHPanel from "../../../common/widgets/container/le-h-panel";
+import LeButton from "../../../common/widgets/buttons/le-button";
 
 const stories = storiesOf("Panels", module);
 
@@ -55,22 +56,25 @@ stories.add("Horizontal panel", () => (
     </LeHPanel>
   </div>
 ));
-stories.add("vpanel", () => (
-  <div className="container">
-    <LeVPanel>
-      <div className="sub-container">1</div>
-      <div className="sub-container">2</div>
-      <div className="sub-container">3</div>
-    </LeVPanel>
-  </div>
-));
 
-stories.add("vpanel fill space", () => (
+stories.add("Vertical Panel", () => (
   <div className="container">
-    <LeVPanel fillspace>
-      <div className="sub-container">1</div>
-      {/* <div className="sub-container">2</div>
-      <div className="sub-container">3</div> */}
+    <LeVPanel
+      vstretch={boolean("Vertical Stretch", false).toString()}
+      hstretch={boolean("Horizontal Stretch", false).toString()}
+    >
+      <LeVPanel className="sub-container" halignment={radios("H Alignement", options, "left")} valignment={radios("V Alignement", vOptions, "top")}>
+            <LeButton
+              name="borderless"
+              callback={action("button-click")}
+              disabled={false}
+              config={{icon: "config.icon fa fa-cloud-upload"}}
+            />
+          <span>1.1</span>
+          <span>1.2</span>
+          <span>1.3</span>
+          <span>1.4</span>
+      </LeVPanel>
     </LeVPanel>
   </div>
 ));
