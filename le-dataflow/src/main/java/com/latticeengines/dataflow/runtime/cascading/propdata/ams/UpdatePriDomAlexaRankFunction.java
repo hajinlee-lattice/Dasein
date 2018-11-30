@@ -22,12 +22,14 @@ public class UpdatePriDomAlexaRankFunction extends BaseFunction {
     private String primDomAlexaRankField;
     private int amsDomIdx;
     private int alexaRankIdx;
+    private int domSrcIdx;
 
     public UpdatePriDomAlexaRankFunction(Fields fieldDeclaration, String primDomAlexaRankField) {
         super(fieldDeclaration, true);
         this.primDomAlexaRankField = primDomAlexaRankField;
         amsDomIdx = namePositionMap.get(DataCloudConstants.AMS_ATTR_DOMAIN);
         alexaRankIdx = namePositionMap.get(DataCloudConstants.ATTR_ALEXA_RANK);
+        domSrcIdx = namePositionMap.get(DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE);
     }
 
     @Override
@@ -42,6 +44,7 @@ public class UpdatePriDomAlexaRankFunction extends BaseFunction {
         if (arguments.getString(secDomainField) != null) {
             result.set(amsDomIdx, arguments.getString(primDomainField));
             result.set(alexaRankIdx, arguments.getObject(primDomAlexaRankField));
+            result.set(domSrcIdx, DataCloudConstants.DOMSRC_ORB);
             String optLog = OperationLogUtils.buildLog(DataCloudConstants.TRANSFORMER_AMS_CLEANBY_DOM_OWNER,
                     OperationCode.SECDOM_TO_PRI,
                     String.format(OperationMessage.REPLACE_SECDOM_WITH_PRIDOM, arguments.getString(secDomainField)));

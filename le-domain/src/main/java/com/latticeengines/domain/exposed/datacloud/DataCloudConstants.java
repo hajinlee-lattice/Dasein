@@ -165,6 +165,17 @@ public final class DataCloudConstants {
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 
+    /***********************************
+     * Domain sources for AM
+     ***********************************/
+    public static final String DOMSRC_ORB = "Orb";
+    public static final String DOMSRC_DNB = "DnB";
+    public static final String DOMSRC_HG = "HG";
+    public static final String DOMSRC_RTS = "RTS";
+
+    /***********************************
+     * Predefined attribute values
+     ***********************************/
     public static final String ATTR_VAL_Y = "Y";
     public static final String ATTR_VAL_N = "N";
     public static final String ATTR_VAL_YES = "Yes";

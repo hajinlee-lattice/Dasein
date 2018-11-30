@@ -34,6 +34,7 @@ public class AMSeedCleanByDomainOwner extends ConfigurableFlowBase<DomainOwnersh
     private final static String AMS_DUNS = DataCloudConstants.AMS_ATTR_DUNS;
     private final static String AMS_GU_DUNS = DataCloudConstants.ATTR_GU_DUNS;
     private final static String AMS_DU_DUNS = DataCloudConstants.ATTR_DU_DUNS;
+    private final static String AMS_DOM_SRC = DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE;
     private final static String ALEXA_RANK = DataCloudConstants.ALEXA_ATTR_RANK; // AlexaMostRecent Rank field
     private final static String ORBSEC_PRIDOM = DataCloudConstants.ORBSEC_ATTR_PRIDOM;
     private final static String ORBSRC_SECDOM = DataCloudConstants.ORBSEC_ATTR_SECDOM;
@@ -82,8 +83,7 @@ public class AMSeedCleanByDomainOwner extends ConfigurableFlowBase<DomainOwnersh
                 .retain(new FieldList(renameField(AMS_DOMAIN), renameField(ROOT_DUNS),
                         DUNS_TYPE, REASON_TYPE));
         Node amsClean = computeRootDunsAndCompare(ams, domainOwner) //
-                .groupByAndLimit(new FieldList(AMS_DOMAIN, AMS_DUNS),
-                        1);
+                .groupByAndLimit(new FieldList(AMS_DOMAIN, AMS_DUNS), 1);
 
         // Following parts handles the case that ams domains exist in orbsec as
         // secondary domain, then replace the domain with orb primary domain and
@@ -106,7 +106,15 @@ public class AMSeedCleanByDomainOwner extends ConfigurableFlowBase<DomainOwnersh
         amsJoinOrb = amsJoinOrb //
                 .apply(updateFunction, new FieldList(amsJoinOrb.getFieldNames()), amsJoinOrb.getSchema(),
                         new FieldList(amsJoinOrb.getFieldNames()), Fields.REPLACE) //
-                .retain(new FieldList(amsFields));
+                .retain(new FieldList(amsFields)) //
+                // Reason to dedup here:
+                // If ams domain is secdom in Orb, UpdatePriDomAlexaRankFunction
+                // will update the domain to orb pridom.
+                // But for same duns, ams might already have another domain same
+                // as orb pridom, so we will have duplicate.
+                // Sort by domain source does not have business purpose, just to
+                // have a deterministic dedup behavior
+                .groupByAndLimit(new FieldList(AMS_DOMAIN, AMS_DUNS), new FieldList(AMS_DOM_SRC), 1, false, false);
         return amsJoinOrb;
     }
 
