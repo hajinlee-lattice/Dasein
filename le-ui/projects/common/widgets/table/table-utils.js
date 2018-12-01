@@ -13,45 +13,46 @@ export const ASCENDENT = "asc";
 export const RELOAD = false;
 
 export const getData = api => {
-  if (api) {
-      console.log('======= OK ======');
-    return [{
-      Object: "Contacts",
-      Path: "Templates/ContactSchema",
-      TemplateName: "Contact Schema",
-      LastEditedDate: 1641193886000,
-      Exist: true,
-      FeedType: "ContactSchema"
-    },
-    {
-      Object: "Accounts",
-      Path: "path/s3",
-      TemplateName: "Account Schema",
-      LastEditedDate: 1541193886000,
-      Exist: true
-    },
-    {
-      Object: "Product Purchases",
-      Path: "a/path",
-      TemplateName: "Product Purchases Schema",
-      Exist: false
-    },
-    {
-      Object: "Product Bundles",
-      Path: "b/path",
-      TemplateName: "Product Bundles Schema",
-      LastEditedDate: 1941193886000,
-      Exist: true
-    },
-    {
-      Object: "Product Hierarchy",
-      Path: "N/A",
-      TemplateName: "Product Hierarchy Schema",
-      Exist: false
-    }];
-  } else {
-    // console.log('======= NOPE ======');
-    return [];
-  }
+    if (api) {
+        console.log("======= OK ======");
+        return [
+            {
+                Object: "Contacts",
+                Path: "Templates/ContactSchema",
+                TemplateName: "Contact Schema",
+                LastEditedDate: 1641193886000,
+                Exist: true,
+                FeedType: "ContactSchema"
+            },
+            {
+                Object: "Accounts",
+                Path: "path/s3",
+                TemplateName: "Account Schema",
+                LastEditedDate: 1541193886000,
+                Exist: true
+            },
+            {
+                Object: "Product Purchases",
+                Path: "a/path",
+                TemplateName: "Product Purchases Schema",
+                Exist: false
+            },
+            {
+                Object: "Product Bundles",
+                Path: "b/path",
+                TemplateName: "Product Bundles Schema",
+                LastEditedDate: 1941193886000,
+                Exist: true
+            },
+            {
+                Object: "Product Hierarchy",
+                Path: "N/A",
+                TemplateName: "Product Hierarchy Schema",
+                Exist: false
+            }
+        ];
+    } else {
+        // console.log('======= NOPE ======');
+        return [];
+    }
 };
-

@@ -1,5 +1,5 @@
-@import "../colors.scss";
-@import "../layout//layout.scss";
+@import "widgets/colors.scss";
+@import "widgets/layout/layout.scss";
 
 $columns-gap: 8px;
 $header-height: 50px;
@@ -8,219 +8,219 @@ $max-span: 12;
 $cell-padding: 8px;
 $font-size: 12px;
 @mixin display-grid {
-  /*Defines the dyplay grid for the other browsers*/
-  display: grid;
+    /*Defines the dyplay grid for the other browsers*/
+    display: grid;
 }
 
 @mixin columns-grid {
-  /*Defines the columns for the other browsers*/
-  grid-template-columns: repeat($max-span, minmax(10px, 1fr));
+    /*Defines the columns for the other browsers*/
+    grid-template-columns: repeat($max-span, minmax(10px, 1fr));
 }
 .le-table {
-  *,
-  *:after,
-  *:before {
-    transition: none;
-  }
-  ul {
-    list-style-type: none;
-  }
-  .indicator-row {
-    border-top: 1px solid $silver;
-    border-bottom: 1px solid $silver;
-  }
-  @include display-grid;
-  @include columns-grid;
-  font-size: $font-size;
-  // background: rgba(128, 128, 128, 0.261);
-  height: 100%;
-  padding: 0.5em;
-
-  .le-table-row {
+    *,
+    *:after,
+    *:before {
+        transition: none;
+    }
+    ul {
+        list-style-type: none;
+    }
+    .indicator-row {
+        border-top: 1px solid $silver;
+        border-bottom: 1px solid $silver;
+    }
     @include display-grid;
     @include columns-grid;
-    grid-column: span 12;
-    min-height: $row-height;
-    border-top: 1px solid $silver;
-    border-bottom: 1px solid $silver;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    background-color: $pearl-white;
+    font-size: $font-size;
+    // background: rgba(128, 128, 128, 0.261);
+    height: 100%;
+    padding: 0.5em;
 
-    &.disabled {
-      background-color: $palladium;
-      color: $gun-metal;
-      pointer-events: none;
-    }
-  }
-  .le-table-body {
-    background: none;
-    min-height: 0px;
-  }
-  .le-table-header {
-    @extend .le-table-row;
-    border-top: 1px solid $silver;
-    border-bottom: 0px solid $silver;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    background-color: $pearl-white;
-    font-weight: bold;
-  }
+    .le-table-row {
+        @include display-grid;
+        @include columns-grid;
+        grid-column: span 12;
+        min-height: $row-height;
+        border-top: 1px solid $silver;
+        border-bottom: 1px solid $silver;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        background-color: $pearl-white;
 
-  .le-table-row:hover {
-    background-color: $blue-text;
-    & > .le-table-cell {
-      color: $pearl-white;
+        &.disabled {
+            background-color: $palladium;
+            color: $gun-metal;
+            pointer-events: none;
+        }
     }
-  }
-  .le-table-header:hover,
-  .le-table-footer:hover {
-    background-color: $pearl-white;
-    & > .le-table-cell {
-      color: $black;
-      * {
+    .le-table-body {
+        background: none;
+        min-height: 0px;
+    }
+    .le-table-header {
+        @extend .le-table-row;
+        border-top: 1px solid $silver;
+        border-bottom: 0px solid $silver;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        background-color: $pearl-white;
+        font-weight: bold;
+    }
+
+    .le-table-row:hover {
+        background-color: $blue-text;
+        & > .le-table-cell {
+            color: $pearl-white;
+        }
+    }
+    .le-table-header:hover,
+    .le-table-footer:hover {
+        background-color: $pearl-white;
+        & > .le-table-cell {
+            color: $black;
+            * {
+                color: $black;
+            }
+        }
+    }
+
+    .le-table-body:hover {
+        background: none;
+    }
+    .le-table-row-no-select {
+        background-color: $pearl-white;
         color: $black;
-      }
+        opacity: 1;
     }
-  }
-
-  .le-table-body:hover {
-    background: none;
-  }
-  .le-table-row-no-select {
-    background-color: $pearl-white;
-    color: $black;
-    opacity: 1;
-  }
-  .le-table-row-no-select:hover {
-    background-color: $pearl-white;
-    color: $black;
-    opacity: 1;
-  }
-
-  .le-table-col-span-1 {
-    -ms-grid-column-span: 1;
-    grid-column: span 1;
-  }
-  .le-table-col-span-2 {
-    -ms-grid-column-span: 2;
-    grid-column: span 2;
-  }
-  .le-table-col-span-3 {
-    -ms-grid-column-span: 3;
-    grid-column: span 3;
-  }
-  .le-table-col-span-4 {
-    -ms-grid-column-span: 4;
-    grid-column: span 4;
-  }
-  .le-table-col-span-5 {
-    -ms-grid-column-span: 5;
-    grid-column: span 5;
-  }
-  .le-table-col-span-6 {
-    -ms-grid-column-span: 6;
-    grid-column: span 6;
-  }
-  .le-table-col-span-7 {
-    -ms-grid-column-span: 7;
-    grid-column: span 7;
-  }
-  .le-table-col-span-8 {
-    -ms-grid-column-span: 8;
-    grid-column: span 8;
-  }
-  .le-table-col-span-9 {
-    -ms-grid-column-span: 9;
-    grid-column: span 9;
-  }
-  .le-table-col-span-10 {
-    -ms-grid-column-span: 10;
-    grid-column: span 10;
-  }
-  .le-table-col-span-11 {
-    -ms-grid-column-span: 11;
-    grid-column: span 11;
-  }
-  .le-table-col-span-12 {
-    -ms-grid-column-span: 12;
-    grid-column: span 12;
-  }
-
-  .le-table-cell {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    height: $row-height;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    padding: 0.2em;
-    justify-content: space-between;
-
-    & > div {
-      @extend .le-flex-h-panel;
-      // padding-left: 8px;
-      // padding-right: 8px;
-      align-items: center;
-    }
-    &.disabled {
-      background-color: $palladium;
-      color: $gun-metal;
-      pointer-events: none;
+    .le-table-row-no-select:hover {
+        background-color: $pearl-white;
+        color: $black;
+        opacity: 1;
     }
 
-    .le-table-cell-content {
-      display: flex;
-      flex: 3;
-      align-items: center;
-      flex-wrap: nowrap;
-      min-width: 0;
-      & > span {
-        white-space: nowrap;
-        overflow: hidden;
+    .le-table-col-span-1 {
+        -ms-grid-column-span: 1;
+        grid-column: span 1;
+    }
+    .le-table-col-span-2 {
+        -ms-grid-column-span: 2;
+        grid-column: span 2;
+    }
+    .le-table-col-span-3 {
+        -ms-grid-column-span: 3;
+        grid-column: span 3;
+    }
+    .le-table-col-span-4 {
+        -ms-grid-column-span: 4;
+        grid-column: span 4;
+    }
+    .le-table-col-span-5 {
+        -ms-grid-column-span: 5;
+        grid-column: span 5;
+    }
+    .le-table-col-span-6 {
+        -ms-grid-column-span: 6;
+        grid-column: span 6;
+    }
+    .le-table-col-span-7 {
+        -ms-grid-column-span: 7;
+        grid-column: span 7;
+    }
+    .le-table-col-span-8 {
+        -ms-grid-column-span: 8;
+        grid-column: span 8;
+    }
+    .le-table-col-span-9 {
+        -ms-grid-column-span: 9;
+        grid-column: span 9;
+    }
+    .le-table-col-span-10 {
+        -ms-grid-column-span: 10;
+        grid-column: span 10;
+    }
+    .le-table-col-span-11 {
+        -ms-grid-column-span: 11;
+        grid-column: span 11;
+    }
+    .le-table-col-span-12 {
+        -ms-grid-column-span: 12;
+        grid-column: span 12;
+    }
+
+    .le-table-cell {
         text-overflow: ellipsis;
-        margin-left: 1em;
-      }
-    }
-    .le-table-cell-icon {
-      margin-left: 1em;
-    }
-    .le-table-cell-icon-actions {
-      @extend .le-table-cell-icon;
-      cursor: pointer;
-    }
-    .le-cell-tools {
-      display: flex;
-      flex: 0;
-      width: 100%;
-      flex-wrap: nowrap;
-      padding-right: 0.5em;
-    }
-    .le-cell-template {
-      display: flex;
-      flex: 0;
-      width: 100%;
-      flex-wrap: nowrap;
-      margin-right: 1em;
-    }
-    .flex-1 {
-      @extend .le-cell-template;
-      flex: 1;
-    }
-  }
+        overflow: hidden;
+        height: $row-height;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 0.2em;
+        justify-content: space-between;
 
-  .le-table-cell-centered {
-    justify-content: space-around;
-  }
-  .le-table-cell-right-align {
-    justify-content: flex-end;
-  }
+        & > div {
+            @extend .le-flex-h-panel;
+            // padding-left: 8px;
+            // padding-right: 8px;
+            align-items: center;
+        }
+        &.disabled {
+            background-color: $palladium;
+            color: $gun-metal;
+            pointer-events: none;
+        }
 
-  .le-table-footer {
-    @extend .le-table-header;
-    border-top: 0px;
-    .table-pagination {
-      justify-content: flex-end;
+        .le-table-cell-content {
+            display: flex;
+            flex: 3;
+            align-items: center;
+            flex-wrap: nowrap;
+            min-width: 0;
+            & > span {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-left: 1em;
+            }
+        }
+        .le-table-cell-icon {
+            margin-left: 1em;
+        }
+        .le-table-cell-icon-actions {
+            @extend .le-table-cell-icon;
+            cursor: pointer;
+        }
+        .le-cell-tools {
+            display: flex;
+            flex: 0;
+            width: 100%;
+            flex-wrap: nowrap;
+            padding-right: 0.5em;
+        }
+        .le-cell-template {
+            display: flex;
+            flex: 0;
+            width: 100%;
+            flex-wrap: nowrap;
+            margin-right: 1em;
+        }
+        .flex-1 {
+            @extend .le-cell-template;
+            flex: 1;
+        }
     }
-  }
+
+    .le-table-cell-centered {
+        justify-content: space-around;
+    }
+    .le-table-cell-right-align {
+        justify-content: flex-end;
+    }
+
+    .le-table-footer {
+        @extend .le-table-header;
+        border-top: 0px;
+        .table-pagination {
+            justify-content: flex-end;
+        }
+    }
 }
