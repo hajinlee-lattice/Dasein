@@ -10,7 +10,7 @@ public interface ExportToS3Service {
 
     void executeRequests(List<ExportRequest> requests, boolean onlyAtlas);
 
-    void buildDataUnits(List<ExportRequest> requests);
+    void buildDataUnits(CustomerSpace customerSpace);
 
     class ExportRequest {
         public String name;

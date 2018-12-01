@@ -414,6 +414,10 @@
                     <groupId>org.apache.sqoop</groupId>
                     <artifactId>sqoop</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -424,6 +428,10 @@
                 <exclusion>
                     <groupId>org.apache.sqoop</groupId>
                     <artifactId>sqoop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
