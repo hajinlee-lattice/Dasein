@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -29,6 +30,8 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -36,6 +39,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -67,6 +71,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     private String queueName;
     private HdfsToS3PathBuilder pathBuilder;
@@ -111,36 +118,34 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     }
 
     @Override
-    public void buildDataUnits(List<ExportRequest> requests) {
-        if (CollectionUtils.isEmpty(requests)) {
-            log.info("There's no tenant dir found.");
-            return;
-        }
-        Set<CustomerSpace> spaceSet = new HashSet<>();
-        for (ExportRequest request : requests) {
-            if (!spaceSet.add(request.customerSpace)) {
-                continue;
-            }
-            CustomerSpace customerSpace = request.customerSpace;
-            String customer = customerSpace.toString();
-            String tenantId = customerSpace.getTenantId();
+    public void buildDataUnits(CustomerSpace customerSpace) {
+        String customer = customerSpace.toString();
+        String tenantId = customerSpace.getTenantId();
+        Runnable runnable = () -> {
             try (PerformanceTimer timer = new PerformanceTimer( //
                     "Finished adding data units for active data collection for " + tenantId)) {
                 log.info("Start adding data units for active data collection for " + tenantId);
-                try {
-                    DataCollection dc = dataCollectionService.getDefaultCollection(customer);
-                    if (dc == null) {
-                        log.info("There's no data collection for tenantId=" + tenantId);
-                        continue;
-                    }
-                    DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customer);
-                    for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                        addDataUnitsForRole(customer, tenantId, activeVersion, role);
-                    }
-                } catch (Exception ex) {
-                    log.warn("Failed to get tables for tenantId=" + tenantId + " msg=" + ex.getMessage());
+                Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+                if (tenant == null) {
+                    throw new RuntimeException("Cannot find a tenant with id " + customerSpace.toString());
+                }
+                MultiTenantContext.setTenant(tenant);
+                DataCollection dc = dataCollectionService.getDefaultCollection(customer);
+                if (dc == null) {
+                    log.info("There's no data collection for tenantId=" + tenantId);
+                    return;
+                }
+                DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customer);
+                for (TableRoleInCollection role : TableRoleInCollection.values()) {
+                    addDataUnitsForRole(customer, tenantId, activeVersion, role);
                 }
             }
+        };
+        Future<?> future = getS3ExportWorkers().submit(runnable);
+        try {
+            future.get(30, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
