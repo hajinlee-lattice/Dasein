@@ -39,9 +39,9 @@ const vOptions = {
   Top: TOP,
   Center: CENTER,
   Bottom: BOTTOM,
-  'Space Around' : SPACEAROUND,
-  'Space between': SPACEBETWEEN,
-  'Space even': SPACEEVEN
+  "Space Around": SPACEAROUND,
+  "Space between": SPACEBETWEEN,
+  "Space even": SPACEEVEN
 };
 
 stories.add("Horizontal panel", () => (
@@ -71,11 +71,9 @@ stories.add("Horizontal panel", () => (
 
 stories.add("Vertical Panel", () => (
   <div className="container">
-    <LeVPanel
-      vstretch={boolean("Vertical Stretch", false).toString()}
-      hstretch={boolean("Horizontal Stretch", false).toString()}
-    >
       <LeVPanel
+        vstretch={boolean("Vertical Stretch", false).toString()}
+        hstretch={boolean("Horizontal Stretch", false).toString()}
         className="sub-container"
         halignment={radios("H Alignement", options, LEFT)}
         valignment={radios("V Alignement", vOptions, TOP)}
@@ -91,6 +89,5 @@ stories.add("Vertical Panel", () => (
         <span>1.3</span>
         <span>1.4</span>
       </LeVPanel>
-    </LeVPanel>
   </div>
 ));

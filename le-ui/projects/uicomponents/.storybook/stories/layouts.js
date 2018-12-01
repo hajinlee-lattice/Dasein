@@ -34,25 +34,6 @@ const vOptions = {
 
 stories.add("Complex Layout", () => (
   <div className="container">
-    <LeHPanel
-      hstretch={boolean("Horizontal Stretch", false).toString()}
-      vstretch={boolean("Vertical Stretch", false)}
-      wrap={boolean("Wrap", false)}
-    >
-      <LeHPanel
-        hAlignment={radios("P1 H Alignement", options, "left")}
-        vAlignment={radios("P1 V Alignement", vOptions, "top")}
-        classes="sub-container-h"
-      >
-        <span>1</span>
-      </LeHPanel>
-      <LeHPanel
-        hAlignment={radios("P2 H Alignement", options, "left")}
-        vAlignment={radios("P2 V Alignement", vOptions, "top")}
-        classes="sub-container-h"
-      >
-        <span>2</span>
-      </LeHPanel>
-    </LeHPanel>
+    TODO
   </div>
 ));
