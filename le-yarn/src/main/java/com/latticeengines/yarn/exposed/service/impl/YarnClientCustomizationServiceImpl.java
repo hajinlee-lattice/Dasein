@@ -120,9 +120,9 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             client.setEnvironment(environment);
         }
 
-        if (maxAppAttempts != 0) {
-            client.setMaxAppAttempts(maxAppAttempts);
-        }
+//        if (maxAppAttempts != 0) {
+//            client.setMaxAppAttempts(maxAppAttempts);
+//        }
 
         // copy the metadata.json file to HDFS data directory
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
