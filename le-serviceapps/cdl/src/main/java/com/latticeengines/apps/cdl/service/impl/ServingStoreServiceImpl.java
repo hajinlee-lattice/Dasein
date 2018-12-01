@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.mds.CustomizedMetadataStore;
@@ -14,9 +14,12 @@ import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
@@ -44,6 +47,26 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
             DataCollection.Version version) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        return getFullyDecoratedMetadata(customerSpace, entity, version);
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity,
+            DataCollection.Version version) {
+        return getFullyDecoratedMetadata(entity, version).sorted(Comparator.comparing(ColumnMetadata::getAttrName));
+    }
+
+    @Override
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|md_in_svc\", #customerSpace, #entity)", unless="#result == null")
+    public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
+        String customerSpace = CustomerSpace.parse(tenantId).toString();
+        DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
+        return getFullyDecoratedMetadata(customerSpace, entity, version).sequential().collectList().block();
+    }
+
+    public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(String tenantId, BusinessEntity entity,
+                                                                  DataCollection.Version version) {
+        String customerSpace = CustomerSpace.parse(tenantId).toString();
         TableRoleInCollection role = entity.getServingStore();
         List<String> tables = dataCollectionService.getTableNames(customerSpace, "", role, version);
         if (CollectionUtils.isEmpty(tables) && BusinessEntity.Account.equals(entity)) {
@@ -84,12 +107,6 @@ public class ServingStoreServiceImpl implements ServingStoreService {
             flux = Flux.<ColumnMetadata> empty().parallel();
         }
         return flux;
-    }
-
-    @Override
-    public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity,
-            DataCollection.Version version) {
-        return getFullyDecoratedMetadata(entity, version).sorted(Comparator.comparing(ColumnMetadata::getAttrName));
     }
 
 }

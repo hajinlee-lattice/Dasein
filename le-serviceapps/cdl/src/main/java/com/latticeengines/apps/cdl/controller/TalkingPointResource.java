@@ -4,13 +4,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,29 +25,25 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-// import com.latticeengines.network.exposed.dante.TalkingPointInterface;
-
 @Api(value = "talkingpoints", description = "REST resource for Talking Points related operations")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/talkingpoints")
 public class TalkingPointResource {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
 
     @Inject
     private TalkingPointService talkingPointService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @PostMapping("")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(
             value = "Create/Update a Talking Point. PID value of null or zero will create a TP.")
     public List<TalkingPointDTO> createOrUpdate(@PathVariable String customerSpace,
             @RequestBody List<TalkingPointDTO> talkingPoints) {
-        return talkingPointService.createOrUpdate(talkingPoints, customerSpace);
+        return talkingPointService.createOrUpdate(talkingPoints);
     }
 
-    @RequestMapping(value = "/{name}", method = RequestMethod.GET)
+    @GetMapping("/{name}")
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
     public TalkingPointDTO findByName(@PathVariable String customerSpace,
@@ -55,7 +51,7 @@ public class TalkingPointResource {
         return talkingPointService.findByName(name);
     }
 
-    @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
+    @GetMapping("/play/{playName}")
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
     public List<TalkingPointDTO> findAllByPlayName(@PathVariable String customerSpace,
@@ -64,46 +60,44 @@ public class TalkingPointResource {
         return talkingPointService.findAllByPlayName(playName, publishedOnly);
     }
 
-    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
+    @GetMapping("/previewresources")
     @ResponseBody
     @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
     public DantePreviewResources getPreviewResources(@PathVariable String customerSpace) {
-        return talkingPointService.getPreviewResources(customerSpace);
+        return talkingPointService.getPreviewResources();
     }
 
-    @RequestMapping(value = "/preview", method = RequestMethod.GET)
+    @GetMapping("/preview")
     @ResponseBody
     @ApiOperation(value = "Get Talking Point Preview Data for a given Play")
     public TalkingPointPreview getTalkingPointPreview(@PathVariable String customerSpace,
             @RequestParam("playName") String playName) {
-        return talkingPointService.getPreview(playName, customerSpace);
+        return talkingPointService.getPreview(playName);
     }
 
-    @RequestMapping(value = "/publish", method = RequestMethod.POST)
+    @PostMapping("/publish")
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
-    public void publish(@PathVariable String customerSpace,
-            @RequestParam("playName") String playName) {
-        talkingPointService.publish(playName, customerSpace);
+    public void publish(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
+        talkingPointService.publish(playName);
     }
 
-    @RequestMapping(value = "/revert", method = RequestMethod.POST)
+    @PostMapping("/revert")
     @ResponseBody
     @ApiOperation(
             value = "Revert the given play's talking points to the version last published to dante")
-    public List<TalkingPointDTO> revert(@PathVariable String customerSpace,
-            @RequestParam("playName") String playName) {
-        return talkingPointService.revertToLastPublished(playName, customerSpace);
+    public List<TalkingPointDTO> revert(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
+        return talkingPointService.revertToLastPublished(playName);
     }
 
-    @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{talkingPointName}")
     @ResponseBody
     @ApiOperation(value = "Delete a Talking Point ")
     public void delete(@PathVariable String customerSpace, @PathVariable String talkingPointName) {
         talkingPointService.delete(talkingPointName);
     }
 
-    @RequestMapping(value = "/attributes/{playName}", method = RequestMethod.GET)
+    @GetMapping("/attributes/{playName}")
     @ResponseBody
     @ApiOperation(value = "get all depending attributes in talkingpoint of a play")
     public List<AttributeLookup> getAttributesInTalkingPointOfPlay(

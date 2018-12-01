@@ -3,9 +3,11 @@ package com.latticeengines.apps.cdl.service.impl;
 import static com.latticeengines.domain.exposed.metadata.DataCollection.Version.Blue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -15,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.apps.cdl.dao.DataCollectionDao;
 import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.dao.PlayTypeDao;
@@ -61,7 +64,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setupTestEnvironment();
+        setupTestEnvironment();
         testPlayType = createTestPlayType();
         testPlay = createTestPlay();
         playProxy = spy(new PlayProxy());
@@ -81,7 +84,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         tp.setContent("PLS Deployment Test Talking Point no 1");
         tps.add(tp);
 
-        tps = talkingPointService.createOrUpdate(tps, mainTestTenant.getId());
+        tps = talkingPointService.createOrUpdate(tps);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 1);
         Assert.assertNotNull(tps.get(0).getPid());
@@ -104,7 +107,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         tp2.setContent("PLS Deployment Test Talking Point no 2");
         tps.add(tp2);
 
-        tps = talkingPointService.createOrUpdate(tps, mainTestTenant.getId());
+        tps = talkingPointService.createOrUpdate(tps);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
         Assert.assertNotNull(tps.get(1).getPid());
@@ -114,7 +117,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         tp2 = tps.get(1);
 
         TalkingPointPreview preview =
-                talkingPointService.getPreview(tp.getPlayName(), mainCustomerSpace);
+                talkingPointService.getPreview(tp.getPlayName());
         Assert.assertNotNull(preview);
         Assert.assertNotNull(preview.getNotionObject());
         Assert.assertNotNull(preview.getNotionObject().getTalkingPoints());
@@ -124,7 +127,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(),
                 tp2.getName());
 
-        talkingPointService.publish(tp.getPlayName(), mainCustomerSpace);
+        talkingPointService.publish(tp.getPlayName());
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
@@ -139,7 +142,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 0);
 
-        talkingPointService.revertToLastPublished(testPlay.getName(), mainCustomerSpace);
+        talkingPointService.revertToLastPublished(testPlay.getName());
         tps = talkingPointService.findAllByPlayName(testPlay.getName(), false);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
@@ -153,7 +156,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 0);
 
-        talkingPointService.publish(tp.getPlayName(), mainCustomerSpace);
+        talkingPointService.publish(tp.getPlayName());
         dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), 0);
@@ -174,7 +177,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         testtp.setPlayName(testPlay.getName());
         tps.add(testtp);
 
-        tps = talkingPointService.createOrUpdate(tps, mainTestTenant.getId());
+        tps = talkingPointService.createOrUpdate(tps);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
         Assert.assertNotNull(tps.get(0).getPid());
@@ -197,7 +200,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNull(tps.get(1).getTitle());
         Assert.assertNull(tps.get(1).getContent());
 
-        tps = talkingPointService.createOrUpdate(tps, mainTestTenant.getId());
+        tps = talkingPointService.createOrUpdate(tps);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
         Assert.assertNotNull(tps.get(1).getPid());
@@ -205,7 +208,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(tps.get(1).getName());
 
         TalkingPointPreview preview =
-                talkingPointService.getPreview(tp.getPlayName(), mainCustomerSpace);
+                talkingPointService.getPreview(tp.getPlayName());
         Assert.assertNotNull(preview);
         Assert.assertNotNull(preview.getNotionObject());
         Assert.assertNotNull(preview.getNotionObject().getTalkingPoints());
@@ -213,7 +216,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
                 testtp.getName());
 
-        talkingPointService.publish(tp.getPlayName(), mainCustomerSpace);
+        talkingPointService.publish(tp.getPlayName());
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
@@ -222,7 +225,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(testtp.getName());
-        talkingPointService.publish(tp.getPlayName(), mainCustomerSpace);
+        talkingPointService.publish(tp.getPlayName());
 
         dtps = talkingPointService.findAllByPlayName(testPlay.getName(), true);
         Assert.assertEquals(dtps.size(), 0);

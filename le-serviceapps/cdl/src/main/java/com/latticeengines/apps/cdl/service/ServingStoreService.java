@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -14,5 +16,7 @@ public interface ServingStoreService {
     ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version);
 
     Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity, DataCollection.Version version);
+
+    List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity);
 
 }

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.spy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,81 +14,56 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.service.TalkingPointAttributeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.ParallelFlux;
 
 public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private TalkingPointAttributeService talkingPointAttributeService;
 
-    private ServingStoreProxy spiedServingStoreProxy;
-
-    private final String tenantName = "TalkingPointAttributeTestTenant";
     private final String accountAttributePrefix = "Account.";
 
     @BeforeClass(groups = "functional")
     public void setup() {
+        setupTestEnvironment();
+        String tenantName = CustomerSpace.parse(mainCustomerSpace).getTenantId();
 
-        spiedServingStoreProxy = spy(new ServingStoreProxy() {
+        ServingStoreService spiedServingStoreService = spy(new ServingStoreService() {
             @Override
-            public List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace,
-                    BusinessEntity entity) {
+            public ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity, DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace,
-                    BusinessEntity entity, List<ColumnSelection.Predefined> groups) {
+            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace,
-                    BusinessEntity entity, List<ColumnSelection.Predefined> groups,
-                    DataCollection.Version version) {
+            public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity, DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace) {
+            public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
                 return null;
             }
 
-            @Override
-            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, Version version) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace,
-                    Boolean allCustomerAttrs, Version version) {
-                return null;
-            }
-
-            @Override
-            public Set<String> getServingStoreColumnsFromCache(String customerSpace,
-                    BusinessEntity entity) {
-                return null;
-            }
         });
         ((TalkingPointAttributeServiceImpl) talkingPointAttributeService)
-                .setServingStoreProxy(spiedServingStoreProxy);
+                .setServingStoreService(spiedServingStoreService);
 
         ColumnMetadata at = new ColumnMetadata();
         at.setAttrName("something");
@@ -112,14 +86,17 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.CompanyProfile);
         attrList.add(at);
 
-        doReturn(attrList).when(spiedServingStoreProxy).getDecoratedMetadataFromCache(tenantName,
-                BusinessEntity.Account);
+        doReturn(attrList).when(spiedServingStoreService) //
+                .getDecoratedMetadataFromCache(tenantName, BusinessEntity.Account);
     }
+
+    @AfterClass(groups = "functional")
+    public void teardown() {}
 
     @Test(groups = "functional")
     public void testGetAccountAttributes() {
         List<TalkingPointAttribute> attributes =
-                talkingPointAttributeService.getAccountAttributes(tenantName);
+                talkingPointAttributeService.getAccountAttributes();
         Assert.assertNotNull(attributes);
         Assert.assertEquals(2, attributes.size());
         Assert.assertTrue(attributes.get(0).getValue().startsWith(accountAttributePrefix));
@@ -131,7 +108,7 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
     @Test(groups = "functional")
     public void testGetRecommendationAttributes() {
         List<TalkingPointAttribute> attributes =
-                talkingPointAttributeService.getRecommendationAttributes(tenantName);
+                talkingPointAttributeService.getRecommendationAttributes();
         Assert.assertNotNull(attributes);
         Assert.assertEquals(8, attributes.size());
     }
@@ -142,7 +119,7 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
                 "RecoMMendation", "accOUNT", "something", "invalid", "account", "account",
                 "Variable");
         TalkingPointNotionAttributes notionAttributes =
-                talkingPointAttributeService.getAttributesForNotions(notions, tenantName);
+                talkingPointAttributeService.getAttributesForNotions(notions);
         Assert.assertNotNull(notionAttributes);
         Assert.assertNotNull(notionAttributes.getInvalidNotions());
         Assert.assertEquals(notionAttributes.getInvalidNotions().size(), 2);
@@ -153,7 +130,4 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("variable").size(), 5);
     }
-
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {}
 }

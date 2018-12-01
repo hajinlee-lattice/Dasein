@@ -2,8 +2,9 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.apps.cdl.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -21,17 +23,19 @@ import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
+/**
+ * $ dpltc deploy -a admin,matchapi,microservice,pls -m metadata,cdl,lp,objectapi
+ */
 public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private TalkingPointProxy talkingPointProxy;
 
-    @Autowired
+    @Inject
     private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
 
     @Value("${common.test.pls.url}")
@@ -40,24 +44,21 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
-    private PlayProxy playProxy;
-
-    private RatingEngine ratingEngine;
+    @Inject
+    private CDLTestDataService cdlTestDataService;
 
     private Play testPlay;
 
-    private long totalRatedAccounts;
-
-
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        super.setupTestEnvironment();
+        setupTestEnvironment();
+        cdlTestDataService.populateData(mainTestTenant.getId(), 4);
         testPlayCreationHelper.setupTenantAndCreatePlay(mainTestTenant.getId());
         testPlay = testPlayCreationHelper.getPlay();
     }
 
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app", enabled = false)
     public void testCreateUpdate() {
         List<TalkingPointDTO> tps = new ArrayList<>();
         TalkingPointDTO tp = new TalkingPointDTO();
@@ -114,7 +115,7 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     }
 
-    @Test(groups = {"deployment"}, dependsOnMethods = {"testCreateUpdate"})
+    @Test(groups = {"deployment-app"}, dependsOnMethods = {"testCreateUpdate"}, enabled = false)
     public void testPreviewAndPublish() {
         List<TalkingPointDTO> raw =
                 talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
@@ -175,7 +176,7 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(dtps.size(), 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app", enabled = false)
     public void testDanteOauth() {
         DantePreviewResources previewResources =
                 talkingPointProxy.getPreviewResources(mainTestTenant.getId());

@@ -2,11 +2,13 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.inject.Inject;
+
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
@@ -15,15 +17,15 @@ import com.latticeengines.proxy.exposed.cdl.TalkingPointsAttributesProxy;
 
 public class TalkingPointAttributesResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private TalkingPointsAttributesProxy talkingPointsAttributesProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() {
-        super.setupTestEnvironment();
+        setupTestEnvironment();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testGetRecommendationAttributes() {
         List<TalkingPointAttribute> rawAttributes =
                 talkingPointsAttributesProxy.getRecommendationAttributes(mainCustomerSpace);
@@ -34,7 +36,7 @@ public class TalkingPointAttributesResourceDeploymentTestNG extends CDLDeploymen
         Assert.assertEquals(8, attributes.size());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testAttributes() {
         List<String> notions = Arrays.asList( //
                 "RecoMMendation", "something", "invalid", "Variable");
@@ -46,10 +48,5 @@ public class TalkingPointAttributesResourceDeploymentTestNG extends CDLDeploymen
         Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 2);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("variable").size(), 5);
-    }
-
-    @AfterClass(groups = "deployment")
-    public void teardown() throws Exception {
-
     }
 }

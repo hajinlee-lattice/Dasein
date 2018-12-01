@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +67,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public List<TalkingPointDTO> createOrUpdate(List<TalkingPointDTO> tps, String customerSpace) {
+    public List<TalkingPointDTO> createOrUpdate(List<TalkingPointDTO> tps) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         if (tps == null || tps.size() < 1) {
             log.info("Attempted to update or create empty set of talking points");
             return new ArrayList<>();
@@ -129,8 +132,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public DantePreviewResources getPreviewResources(String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
+    public DantePreviewResources getPreviewResources() {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         try {
             String token = oAuthAccessTokenCache.getOauthTokenFromCache(customerSpace);
 
@@ -161,7 +164,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public void publish(String playName, String customerSpace) {
+    public void publish(String playName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         try {
             log.info("Publishing Talkingpoints for play " + playName + " for availabilty in BIS");
             List<TalkingPoint> tps = talkingPointEntityMgr.findAllByPlayName(playName);
@@ -180,7 +184,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public TalkingPointPreview getPreview(String playName, String customerSpace) {
+    public TalkingPointPreview getPreview(String playName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         try {
             List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
                     .sorted((tp1, tp2) -> Integer.compare(tp1.getOffset(), tp2.getOffset()))
@@ -192,7 +197,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public List<TalkingPointDTO> revertToLastPublished(String playName, String customerSpace) {
+    public List<TalkingPointDTO> revertToLastPublished(String playName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         try {
             for (TalkingPoint tp : talkingPointEntityMgr.findAllByPlayName(playName)) {
                 talkingPointEntityMgr.delete(tp);

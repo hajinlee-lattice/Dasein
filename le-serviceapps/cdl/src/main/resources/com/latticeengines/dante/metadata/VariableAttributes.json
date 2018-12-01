@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Current Date",
+    "value": "Today"
+  },
+  {
+    "name": "Current Time",
+    "value": "Now"
+  },
+  {
+    "name": "Current Time UTC",
+    "value": "NowUTC"
+  },
+  {
+    "name": "New Line",
+    "value": "Newline"
+  },
+  {
+    "name": "Space",
+    "value": "Space"
+  }
+]
