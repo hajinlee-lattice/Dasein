@@ -27,6 +27,17 @@ public interface CDLRawSeedService {
             @NotNull BusinessEntity entity, @NotNull String seedId);
 
     /**
+     * Set the seed entry with the specified info. Only set if a seed with the same info does NOT already exist.
+     *
+     * @param env environment to create the entry in
+     * @param tenant target tenant
+     * @param seed seed object to be set
+     * @return true if the seed is set
+     */
+    boolean setIfNotExists(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed seed);
+
+    /**
      * Retrieve the seed with the specified into.
      *
      * @param env environment to retrieve from
@@ -63,19 +74,20 @@ public interface CDLRawSeedService {
      * @param env environment to perform operation in
      * @param tenant target tenant
      * @param rawSeed seed object used to udpate
-     * @return updated seed (can know whether a lookup key entry is updated successfully by looking at the value)
+     * @return seed before update (can know whether a lookup key entry is updated successfully by looking at the value)
      */
     CDLRawSeed updateIfNotSet(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed);
 
     /**
-     * Clear all {@link com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry} and attributes if they
-     * have the same value as the one specified in the input.
+     * Clear all {@link com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry} and attributes if the
+     * seed has the same version as the one specified in the input.
      *
      * @param env environment to perform operation in
      * @param tenant target tenant
      * @param rawSeed seed object used to clear
-     * @return cleared seed
+     * @return cleared seed, {@literal null} if no such seed exists
+     * @throws IllegalStateException if the seed has a different version as the one specified in the input
      */
     CDLRawSeed clearIfEquals(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed);
@@ -85,8 +97,11 @@ public interface CDLRawSeedService {
      *
      * @param env environment to perform operation in
      * @param tenant target tenant
+     * @param entity target entity type
      * @param seedId seed ID
      * @return true if the seed exists and is deleted
      */
-    boolean delete(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull String seedId);
+    boolean delete(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull BusinessEntity entity, @NotNull String seedId);
 }
