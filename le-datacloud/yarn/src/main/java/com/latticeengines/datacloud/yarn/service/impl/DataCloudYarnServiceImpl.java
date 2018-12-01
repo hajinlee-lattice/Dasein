@@ -91,7 +91,6 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
         if (StringUtils.isNotEmpty(jobConfiguration.getAppName())) {
             appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
         }
-        appMasterProperties.put(AppMasterProperty.MAX_APP_ATTEMPTS.name(), "1");
 
         Properties containerProperties = new Properties();
         containerProperties.put(DataCloudProperty.DATACLOUD_CONFIG, jobConfiguration.toString());
