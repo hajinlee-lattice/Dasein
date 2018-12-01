@@ -4,6 +4,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
 import com.latticeengines.domain.exposed.security.Tenant;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
@@ -28,13 +29,13 @@ public interface CDLLookupEntryService {
      *
      * @param env environment to retrieve the entry from
      * @param tenant target tenant
-     * @param lookupEntry list of entries to lookup with
+     * @param lookupEntries list of entries to lookup with
      * @return a list of seed IDs associated with the lookup entries. the list will not be {@literal null} and will
      * be the same size as the input lookup entry list. if no seed associated with a lookup entry,
      * {@literal null} will be inserted in the respective index.
      */
     List<String> get(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<CDLLookupEntry> lookupEntry);
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<CDLLookupEntry> lookupEntries);
 
     /**
      * Create the mapping from the input lookup entry to the target seed ID. Only create if the input lookup entry
@@ -49,4 +50,38 @@ public interface CDLLookupEntryService {
     boolean createIfNotExists(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull CDLLookupEntry lookupEntry, @NotNull String seedId);
+
+    /**
+     * Set the mapping from the input lookup entry to the target seed ID. Only set if the input lookup entry
+     * has NOT already mapped to a seed or has the same seed ID.
+     *
+     * @param env environment to retrieve the entry from
+     * @param tenant target tenant
+     * @param lookupEntry entry to create the mapping from
+     * @param seedId seed ID to create the mapping to
+     * @return true if mapping is set
+     */
+    boolean setIfEquals(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull CDLLookupEntry lookupEntry, @NotNull String seedId);
+
+    /**
+     * Set the list of mapping from the input [ lookup entry, seedId ] pair. If there are duplicate lookup entry,
+     * the result will be undefined (one of the seed ID will be set).
+     *
+     * @param env environment to retrieve the entry from
+     * @param tenant target tenant
+     * @param pairs list of lookup entry / seed ID pair that will be set
+     */
+    void set(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, List<Pair<CDLLookupEntry, String>> pairs);
+
+    /**
+     * Delete the specified lookup entry.
+     *
+     * @param env environment to perform operation in
+     * @param tenant target tenant
+     * @param lookupEntry target lookup entry
+     * @return true if the entry exists and is deleted, false otherwise
+     */
+    boolean delete(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry);
 }
