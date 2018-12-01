@@ -7,7 +7,8 @@ import {
   TOP,
   BOTTOM,
   SPACEAROUND,
-  SPACEBETWEEN
+  SPACEBETWEEN,
+  SPACEEVEN
 } from "./le-alignments";
 
 class LeHPanel extends Component {
@@ -22,38 +23,45 @@ class LeHPanel extends Component {
     }
   }
   getHAlignment() {
-    switch (this.props.hAlignment) {
-      case LEFT:
-        return "";
-      case CENTER:
-        return "le-pull-h-center";
-      case RIGHT:
-        return "le-pull-h-right";
-      default:
-        return "";
+    console.log(this.props.halignment);
+    if (this.props.halignment) {
+      switch (this.props.halignment) {
+        case LEFT:
+          return "le-h-pull-left";
+        case CENTER:
+          return "le-pull-h-center";
+        case RIGHT:
+          return "le-pull-h-right";
+        case SPACEAROUND:
+          return "le-h-space-around";
+        case SPACEBETWEEN:
+          return "le-h-spaced-between";
+        case SPACEEVEN:
+          return "le-flex-h-space-even";
+        default:
+          return "";
+      }
+    } else {
+      return "le-h-pull-left";
     }
   }
   getVStretch() {
-    if (this.props.vstretch) {
-      return "le-vertical-stretch";
+    if (this.props.vstretch && this.props.vstretch.toString() == "true") {
+      return "le-v-stretch";
     } else {
       return "";
     }
   }
   getVAlignment() {
-    switch (this.props.vAlignment) {
+    switch (this.props.valignment) {
       case TOP:
-        return "";
+        return "le-pull-v-top";
       case CENTER:
         return "le-pull-v-center";
       case BOTTOM:
         return "le-pull-v-bottom";
-      case SPACEAROUND:
-        return "le-flex-v-spaced-around";
-      case SPACEBETWEEN:
-        return "le-flex-v-spaced-between";
       default:
-        return "";
+        return "le-pull-v-top";
     }
   }
 
@@ -71,18 +79,25 @@ class LeHPanel extends Component {
     const children = React.Children.map(this.props.children, child => {
       if (React.isValidElement(child)) {
         return React.cloneElement(child, {
-          hstretch: self.props.hstretch
+          vstretch: self.props.vstretch,
+          hstretch: self.props.hstretch,
+          halignment: self.props.halignment
+            ? self.props.halignment
+            : child.props.halignment,
+          valignment: self.props.valignment
+            ? self.props.valignment
+            : child.props.valignment
         });
       }
     });
 
     return (
-      <div
-        className={`le-h-panel ${this.getHStretch()} ${this.getVStretch()} ${this.getHAlignment()} ${this.getVAlignment()} ${this.getWrap()} ${
-          this.props.classes ? this.props.classes : ""
-        }`}
-      >
-        {children}
+      <div className={`fill-width ${this.getHStretch()} ${this.getVStretch()}`}>
+        <div
+          className={`le-flex-content sub-container ${this.getHAlignment()} ${this.getVAlignment()} ${this.getVStretch()} ${this.getHStretch()} ${this.getWrap()}`}
+        >
+          {children}
+        </div>
       </div>
     );
     // }

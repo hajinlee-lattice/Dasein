@@ -1,34 +1,49 @@
-.le-h-panel {
-  width: 100%;
-  min-width: 180px;
+.fill-width {
   display: inline-flex;
-  box-sizing: border-box;
-  padding: 0.5em;
-  flex: 0;
-  & .le-h-stretch {
-    flex: 1;
+  flex-direction: row;
+  .le-flex-content {
+    display: flex;
+    flex-direction: row;
   }
-  & .le-pull-h-center {
-    justify-content: space-around;
-  }
-  & .le-pull-h-right {
-    justify-content: flex-end;
-  }
-  & .le-pull-v-center {
-    align-items: center;
-  }
-  & .le-pull-v-bottom {
-    align-items: flex-end;
-  }
-  
 }
 
-.le-vertical-stretch {
+.le-h-stretch {
+  flex: 1;
+}
+.le-h-pull-left {
+  justify-content: flex-start;
+}
+.le-pull-h-right {
+  justify-content: flex-end;
+}
+.le-pull-h-center {
+  justify-content: center;
+}
+.le-h-space-around {
+  justify-content: space-around;
+}
+.le-h-spaced-between {
+  justify-content: space-between;
+}
+.le-flex-h-space-even {
+  justify-content: space-evenly;
+}
+.le-v-stretch {
   height: 100%;
 }
+.le-pull-v-top {
+  align-items: flex-start;
+}
+.le-pull-v-center {
+  align-items: center;
+}
+.le-pull-v-bottom {
+  align-items: flex-end;
+}
+
 .le-wrap {
   flex-wrap: wrap;
 }
-.le-nowrap{
+.le-nowrap {
   overflow: auto;
 }
