@@ -203,10 +203,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             log.info("Skip rating engine " + engineId + " : " + engineName
                     + " because it belongs to an invalid segment.");
             valid = false;
-        } else if (engine.getActiveModel() == null) {
-            log.info("Skip rating engine " + engineId + " : " + engineName
-                    + " because it does not have an active model.");
-            valid = false;
         } else if (engine.getScoringIteration() == null) {
             log.info("Skip rating engine " + engineId + " : " + engineName
                     + " because it does not have a scoring iteration set.");

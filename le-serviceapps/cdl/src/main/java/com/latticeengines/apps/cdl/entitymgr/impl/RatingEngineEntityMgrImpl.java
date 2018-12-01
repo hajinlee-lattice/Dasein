@@ -190,17 +190,7 @@ public class RatingEngineEntityMgrImpl //
     @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RatingEngine findById(String id, boolean inflate) {
-        RatingEngine ratingEngine = ratingEngineDao.findById(id);
-        if (ratingEngine != null && inflate) {
-            Long activeModelPid = ratingEngine.getActiveModelPid();
-            if (activeModelPid != null) {
-                ratingEngine.setActiveModel(ratingEngine.getType() == RatingEngineType.RULE_BASED
-                        ? ruleBasedModelDao.findByKey(RuleBasedModel.class, activeModelPid)
-                        : aiModelDao.findByKey(AIModel.class, activeModelPid));
-            }
-        }
-
-        return ratingEngine;
+        return ratingEngineDao.findById(id);
     }
 
     @Override
@@ -287,10 +277,6 @@ public class RatingEngineEntityMgrImpl //
             } else {
                 retrievedRatingEngine.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
             }
-        }
-
-        if (ratingEngine.getActiveModelPid() != null) {
-            retrievedRatingEngine.setActiveModelPid(ratingEngine.getActiveModelPid());
         }
 
         if (ratingEngine.getLatestIteration() != null) {
@@ -453,8 +439,6 @@ public class RatingEngineEntityMgrImpl //
 
         ruleBasedModelDao.create(ruleBasedModel);
 
-        ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
-        ratingEngine.setActiveModel(ruleBasedModel);
         ratingEngine.setLatestIteration(ruleBasedModel);
         ratingEngineDao.update(ratingEngine);
     }
@@ -511,8 +495,6 @@ public class RatingEngineEntityMgrImpl //
         aiModel.setAdvancedModelingConfig(advancedModelingConfig);
         aiModelDao.create(aiModel);
 
-        ratingEngine.setActiveModelPid(aiModel.getPid());
-        ratingEngine.setActiveModel(aiModel);
         ratingEngine.setLatestIteration(aiModel);
         ratingEngineDao.update(ratingEngine);
 

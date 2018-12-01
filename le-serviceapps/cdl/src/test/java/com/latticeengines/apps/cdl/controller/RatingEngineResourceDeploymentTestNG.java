@@ -154,8 +154,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         log.info("After loading, ratingEngine is " + ruleRatingEngine);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
 
-        @SuppressWarnings("deprecation")
-        RatingModel ratingModel = ruleRatingEngine.getActiveModel();
+        RatingModel ratingModel = ruleRatingEngine.getLatestIteration();
         Assert.assertNotNull(ratingModel);
         Assert.assertTrue(ratingModel instanceof RuleBasedModel);
         Assert.assertEquals(((RuleBasedModel) ratingModel).getRatingRule().getDefaultBucketName(),
@@ -315,17 +314,17 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(actions.size(), 1);
         Action action = actions.get(0);
         assertRatingEngineActivationAction(action, re1);
-        Assert.assertNotNull(createdRe.getActiveModel());
+        Assert.assertNotNull(createdRe.getLatestIteration());
         RatingEngine retrievedRe = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), createdRe.getId());
 
-        if (retrievedRe.getActiveModel() instanceof RuleBasedModel) {
-            Assert.assertNotNull(retrievedRe.getActiveModel());
-            RuleBasedModel ruModel = (RuleBasedModel) retrievedRe.getActiveModel();
+        Assert.assertNotNull(retrievedRe.getLatestIteration());
+        if (retrievedRe.getLatestIteration() instanceof RuleBasedModel) {
+            RuleBasedModel ruModel = (RuleBasedModel) retrievedRe.getLatestIteration();
             Assert.assertNotNull(ruModel);
             Assert.assertNotNull(ruModel.getSelectedAttributes());
             Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
-        } else if (retrievedRe.getActiveModel() instanceof AIModel) {
-            AIModel aiModel = (AIModel) retrievedRe.getActiveModel();
+        } else if (retrievedRe.getLatestIteration() instanceof AIModel) {
+            AIModel aiModel = (AIModel) retrievedRe.getLatestIteration();
             Assert.assertNotNull(aiModel);
         }
     }

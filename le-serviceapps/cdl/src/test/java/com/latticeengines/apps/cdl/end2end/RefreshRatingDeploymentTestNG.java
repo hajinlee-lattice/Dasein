@@ -168,7 +168,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
         assertNotNull(newEngine);
-        Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
+        Assert.assertNotNull(newEngine.getLatestIteration(), JsonUtils.pprint(newEngine));
         log.info("Created rating engine " + newEngine.getId());
 
         AIModel model = (AIModel) newEngine.getLatestIteration();
@@ -197,10 +197,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
         assertNotNull(newEngine);
-        Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
+        Assert.assertNotNull(newEngine.getLatestIteration(), JsonUtils.pprint(newEngine));
         log.info("Created rating engine " + newEngine.getId());
 
-        AIModel model = (AIModel) newEngine.getActiveModel();
+        AIModel model = (AIModel) newEngine.getLatestIteration();
         configureCustomEventModel(model, "SomeFileName", CustomEventModelingType.CDL);
         model.setModelSummaryId(modelSummary.getId());
 
@@ -299,7 +299,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Assert.assertEquals(bucketMetadataHistory.size(), 2);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
         if (engineId.equals(ai1.getId())) {
-            for (List<BucketMetadata> bms: bucketMetadataHistory.values()) {
+            for (List<BucketMetadata> bms : bucketMetadataHistory.values()) {
                 bms.forEach(bm -> {
                     try {
                         Assert.assertNotNull(bm.getAverageExpectedRevenue());

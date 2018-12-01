@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -90,8 +91,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
         Assert.assertTrue(ratingModels.get(0) instanceof RuleBasedModel);
-        @SuppressWarnings("deprecation")
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getLatestIteration();
         Assert.assertNotNull(ruleBasedModel);
 
         RatingRule ratingRule = ruleBasedModel.getRatingRule();
@@ -158,7 +158,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     @Test(groups = "deployment-app", dependsOnMethods = { "testEntityPreviewThirdTimeWithPartiallyOverlappingPages" })
     public void testGetSegmentAccountCount() {
         RatingsCountRequest request = new RatingsCountRequest();
-        List<String> segmentIds = Arrays.asList(play.getRatingEngine().getSegment().getName());
+        List<String> segmentIds = Collections.singletonList(play.getRatingEngine().getSegment().getName());
         request.setSegmentIds(segmentIds);
         RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
                 request);
@@ -180,7 +180,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGetSegmentAccountCount" })
     public void testEntityPreviewCount() {
-        List<String> allRatingBuckets = Arrays.asList(RatingBucketName.values()).stream().map(b -> b.getName())
+        List<String> allRatingBuckets = Arrays.asList(RatingBucketName.values()).stream().map(RatingBucketName::getName)
                 .collect(Collectors.toList());
         List<String> partialRatingBuckets = new ArrayList<>();
         boolean removedOneBucket = false;
@@ -195,31 +195,31 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
             partialRatingBuckets.add(ratingBucket);
         }
 
-        Long count1 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
+        long count1 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
                 null, InterfaceName.SalesforceAccountID.name());
-        Long count2 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
+        long count2 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
                 allRatingBuckets, InterfaceName.SalesforceAccountID.name());
-        Long count3 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
+        long count3 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
                 partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
-        Long count4 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null,
+        long count4 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null,
                 actualNameInOneOfTheAccounts, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
 
-        Long count5 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+        long count5 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
                 null, null, InterfaceName.SalesforceAccountID.name());
-        Long count6 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+        long count6 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
                 null, allRatingBuckets, InterfaceName.SalesforceAccountID.name());
-        Long count7 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+        long count7 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
                 null, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
-        Long count8 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+        long count8 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
                 actualNameInOneOfTheAccounts, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
 
-        Long count9 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true, null,
+        long count9 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true, null,
                 null, InterfaceName.SalesforceAccountID.name());
-        Long count10 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
+        long count10 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
                 null, allRatingBuckets, InterfaceName.SalesforceAccountID.name());
-        Long count11 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
+        long count11 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
                 null, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
-        Long count12 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
+        long count12 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
                 actualNameInOneOfTheAccounts, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
 
         Assert.assertTrue(count1 == count2);
@@ -297,9 +297,8 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
                 });
 
         if (actualRatingBucketsInSegment.size() > 0) {
-            actualRatingBucketsInSegment.stream().forEach(bucket -> {
-                Assert.assertNotNull(RatingBucketName.valueOf(bucket), bucket);
-            });
+            actualRatingBucketsInSegment.stream()
+                    .forEach(bucket -> Assert.assertNotNull(RatingBucketName.valueOf(bucket), bucket));
         }
         return accIds;
     }

@@ -63,7 +63,7 @@ public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query<Integer> query = session.createQuery(queryStr);
         query.setParameter("id", ratineEngindId);
-        return query.uniqueResult() != null ? (int) query.uniqueResult() : 0;
+        return query.uniqueResult() != null ? query.uniqueResult() : 0;
     }
 
 }

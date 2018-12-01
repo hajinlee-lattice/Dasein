@@ -177,8 +177,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
             ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngineId, false,
                     "test@lattice-engines.com");
             segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName, false);
-            MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
-                    segmentName);
+            MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), segmentName);
             List<String> deletedSegments = segmentProxy.getAllDeletedSegments(mainTestTenant.getId());
             Assert.assertEquals(deletedSegments.size(), 1);
             Assert.assertEquals(deletedSegments.get(0), segmentName);
@@ -189,8 +188,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
     @Test(groups = "deployment", dependsOnMethods = "testSoftDelete")
     public void testHardDelete() {
         segmentProxy.revertDeleteSegmentByName(mainTestTenant.getId(), segmentName);
-        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
-                segmentName);
+        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), segmentName);
         Assert.assertFalse(segment.getDeleted());
         segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName, true);
     }
@@ -223,7 +221,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         RatingEngine retrievedRatingEngine = testRatingEngineProxy.createOrUpdate(ratingEngine);
         RatingEngine newEngine = testRatingEngineProxy.getRatingEngine(retrievedRatingEngine.getId());
-        String modelId = newEngine.getActiveModel().getId();
+        String modelId = newEngine.getLatestIteration().getId();
         RuleBasedModel model = constructRuleModel(modelId);
         testRatingEngineProxy.updateRatingModel(newEngine.getId(), modelId, model);
         return testRatingEngineProxy.getRatingEngine(newEngine.getId());

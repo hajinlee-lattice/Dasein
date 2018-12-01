@@ -95,7 +95,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = null;// "LETest1539973036934";
+        String existingTenant = "";// "LETest1539973036934";
 
         testPlayCreationHelper.setupTenantAndCreatePlay(existingTenant);
 
@@ -110,8 +110,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
         Assert.assertTrue(ratingModels.get(0) instanceof RuleBasedModel);
-        @SuppressWarnings("deprecation")
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getLatestIteration();
         Assert.assertNotNull(ruleBasedModel);
 
         ratingRule = ruleBasedModel.getRatingRule();
@@ -205,7 +204,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment-app")
     public void testRatingModelIdCoverage() {
         @SuppressWarnings("deprecation")
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getLatestIteration();
         RatingsCountRequest request = new RatingsCountRequest();
         RatingModelIdPair p1 = new RatingModelIdPair();
         p1.setRatingEngineId(ratingEngine.getId());
@@ -310,7 +309,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment-app")
     public void testSegmentIdModelRulesCoverage() {
         @SuppressWarnings("deprecation")
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getLatestIteration();
         RatingsCountRequest request = new RatingsCountRequest();
         SegmentIdAndModelRulesPair r1 = new SegmentIdAndModelRulesPair();
         r1.setSegmentId(ratingEngine.getSegment().getName());
@@ -522,16 +521,14 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotEquals(productIds.size(), 0);
 
         MetadataSegment currentSegment = ratingEngine.getSegment();
-        RatingEnginesCoverageResponse response = ratingCoverageService
-                .getProductCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
-                        currentSegment.getName(), productIds);
+        RatingEnginesCoverageResponse response = ratingCoverageService.getProductCoveragesForSegment(
+                testPlayCreationHelper.getTenant().getId(), currentSegment.getName(), productIds);
 
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getRatingModelsCoverageMap());
         Assert.assertEquals(response.getRatingModelsCoverageMap().size(), productIds.size());
 
-        for (Map.Entry<String, CoverageInfo> entry : response.getRatingModelsCoverageMap()
-                .entrySet()) {
+        for (Map.Entry<String, CoverageInfo> entry : response.getRatingModelsCoverageMap().entrySet()) {
             Long accountCount = entry.getValue().getAccountCount();
             Long unscoredAccountCount = entry.getValue().getUnscoredAccountCount();
             Long totalAccounts = accountCount + unscoredAccountCount;
@@ -540,17 +537,16 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     }
 
     private List<String> getProductIds(String tenantId) {
-        String servingTableName = dataCollectionProxy.getTableName(tenantId,
-                BusinessEntity.Product.getServingStore());
+        String servingTableName = dataCollectionProxy.getTableName(tenantId, BusinessEntity.Product.getServingStore());
 
         if (StringUtils.isBlank(servingTableName)) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(null);
         frontEndQuery.setContactRestriction(null);
-        PageFilter pageFilter = new PageFilter(0,5);
+        PageFilter pageFilter = new PageFilter(0, 5);
         frontEndQuery.setPageFilter(pageFilter);
         frontEndQuery.setMainEntity(BusinessEntity.Product);
 

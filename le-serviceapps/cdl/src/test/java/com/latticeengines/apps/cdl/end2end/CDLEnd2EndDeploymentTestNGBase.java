@@ -438,8 +438,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
         SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
                 csvResource, outsizeFlag);
-        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(),
-                entity.name(), SourceType.FILE.getName(), feedType);
+        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name(),
+                SourceType.FILE.getName(), feedType);
         modifyFieldMappings(entity, fieldMappingDocument);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -460,7 +460,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void importData(BusinessEntity entity, List<String> s3FileName, String feedType, boolean compressed,
             boolean outsizeFlag) {
-        List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
+        List<ApplicationId> applicationIds = new ArrayList<>();
         if (StringUtils.isBlank(feedType)) {
             feedType = entity.name() + "Schema";
         }
@@ -1006,9 +1006,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
         Assert.assertNotNull(newEngine);
-        Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
+        Assert.assertNotNull(newEngine.getLatestIteration(), JsonUtils.pprint(newEngine));
 
-        String modelId = newEngine.getActiveModel().getId();
+        String modelId = newEngine.getLatestIteration().getId();
         RuleBasedModel model = constructRuleModel(modelId);
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), modelId, model);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());

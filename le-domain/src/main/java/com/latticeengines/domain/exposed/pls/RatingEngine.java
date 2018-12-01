@@ -69,8 +69,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class RatingEngine
-        implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
+public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
 
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
@@ -81,11 +80,10 @@ public class RatingEngine
             ScoreType.ExpectedRevenue, "ev", //
             ScoreType.Score, "score" //
     );
-    public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap
-            .of( //
-                    ScoreType.Probability, Double.class, //
-                    ScoreType.ExpectedRevenue, Double.class, //
-                    ScoreType.Score, Integer.class //
+    public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap.of( //
+            ScoreType.Probability, Double.class, //
+            ScoreType.ExpectedRevenue, Double.class, //
+            ScoreType.Score, Integer.class //
     );
     private static final Logger log = LoggerFactory.getLogger(RatingEngine.class);
     private static final String RULES_BASED_NAME_PATTERN = "Rules %s - %s";
@@ -114,10 +112,6 @@ public class RatingEngine
     private Date updated;
 
     private String createdBy;
-
-    private Long activeModelPid;
-
-    private RatingModel activeModel;
 
     private List<RatingEngineNote> ratingEngineNotes;
 
@@ -381,52 +375,6 @@ public class RatingEngine
         this.ratingEngineNotes.add(ratingEngineNote);
     }
 
-    /**
-     * @deprecated use one of {@link #getLatestIteration()},
-     *             {@link #getScoringIteration()} or
-     *             {@link #getPublishedIteration()} instead.
-     */
-    @Deprecated()
-    @JsonProperty("activeModel")
-    @Transient
-    public RatingModel getActiveModel() {
-        return this.activeModel;
-    }
-
-    /**
-     * @deprecated use one of {@link #setLatestIteration(RatingModel)},
-     *             {@link #setScoringIteration(RatingModel)} or
-     *             {@link #setPublishedIteration(RatingModel)} instead.
-     */
-    @Deprecated
-    @JsonProperty("activeModel")
-    public void setActiveModel(RatingModel model) {
-        this.activeModel = model;
-    }
-
-    /**
-     * @deprecated use one of {@link #getLatestIteration()},
-     *             {@link #getScoringIteration()} or
-     *             {@link #getPublishedIteration()} instead.
-     */
-    @Deprecated()
-    @JsonIgnore
-    @Column(name = "ACTIVE_MODEL_PID")
-    public Long getActiveModelPid() {
-        return this.activeModelPid;
-    }
-
-    /**
-     * @deprecated use one of {@link #setLatestIteration(RatingModel)},
-     *             {@link #setScoringIteration(RatingModel)} or
-     *             {@link #setPublishedIteration(RatingModel)} instead.
-     */
-    @Deprecated
-    @JsonIgnore
-    public void setActiveModelPid(Long pid) {
-        this.activeModelPid = pid;
-    }
-
     @JsonProperty("published_iteration")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "PUBLISHED_ITERATION")
@@ -476,8 +424,7 @@ public class RatingEngine
     public void setAdvancedRatingConfigStr(String advancedRatingConfigStr) {
         AdvancedRatingConfig advancedRatingConfig = null;
         if (advancedRatingConfigStr != null) {
-            advancedRatingConfig = JsonUtils.deserialize(advancedRatingConfigStr,
-                    AdvancedRatingConfig.class);
+            advancedRatingConfig = JsonUtils.deserialize(advancedRatingConfigStr, AdvancedRatingConfig.class);
         }
         this.advancedRatingConfig = advancedRatingConfig;
     }
@@ -513,28 +460,26 @@ public class RatingEngine
         String defaultName = String.format(DEFAULT_NAME_PATTERN, datePart);
         try {
             switch (getType()) {
-                case RULE_BASED:
-                    defaultName = String.format(RULES_BASED_NAME_PATTERN,
-                            getSegment().getDisplayName(), datePart);
-                    break;
-                case CUSTOM_EVENT:
-                    defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
-                    break;
-                case CROSS_SELL:
-                    if (getAdvancedRatingConfig() != null) {
-                        defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
-                                ((CrossSellRatingConfig) getAdvancedRatingConfig())
-                                        .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE
-                                                ? "First" : "Repeat",
-                                datePart);
-                    }
-                    break;
-                case PROSPECTING:
-                default:
+            case RULE_BASED:
+                defaultName = String.format(RULES_BASED_NAME_PATTERN, getSegment().getDisplayName(), datePart);
+                break;
+            case CUSTOM_EVENT:
+                defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
+                break;
+            case CROSS_SELL:
+                if (getAdvancedRatingConfig() != null) {
+                    defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
+                            ((CrossSellRatingConfig) getAdvancedRatingConfig())
+                                    .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE ? "First"
+                                            : "Repeat",
+                            datePart);
+                }
+                break;
+            case PROSPECTING:
+            default:
             }
         } catch (Exception e) {
-            log.error(new LedpException(LedpCode.LEDP_40021, e, new String[] { defaultName })
-                    .getMessage(), e);
+            log.error(new LedpException(LedpCode.LEDP_40021, e, new String[] { defaultName }).getMessage(), e);
         }
         return defaultName;
     }

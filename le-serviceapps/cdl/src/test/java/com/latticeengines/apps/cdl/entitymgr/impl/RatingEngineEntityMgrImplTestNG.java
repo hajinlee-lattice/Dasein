@@ -133,8 +133,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
-        Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
-        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
         validateRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
@@ -162,8 +160,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         String createdRatingEngineStr = createdRatingEngine.toString();
         log.info("createdRatingEngineStr is " + createdRatingEngineStr);
         createdRatingEngine = JsonUtils.deserialize(createdRatingEngineStr, RatingEngine.class);
+        Assert.assertNotNull(createdRatingEngine);
+        Assert.assertNotNull(createdRatingEngine.getSegment());
         MetadataSegment segment = createdRatingEngine.getSegment();
-        Assert.assertNotNull(segment);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
         DataCollection dc = segment.getDataCollection();
         log.info("dc is " + dc);
@@ -173,14 +172,11 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
-        Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
-        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         validateAIRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         crossSellRatingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(crossSellRatingEngineId);
         Assert.assertNotNull(createdRatingEngine);
-        Assert.assertNull(createdRatingEngine.getActiveModel());
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
         Assert.assertNull(createdRatingEngine.getScoringIteration());
         Assert.assertNull(createdRatingEngine.getPublishedIteration());
@@ -271,8 +267,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
-        Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
-        Assert.assertNull(createdRatingEngine.getActiveModel());
+        Assert.assertNotNull(createdRatingEngine.getScoringIteration());
+        Assert.assertNull(createdRatingEngine.getLatestIteration());
+
         validateRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
@@ -312,8 +309,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
-        Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
-        Assert.assertNull(createdRatingEngine.getActiveModel());
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
         Assert.assertNotNull(createdRatingEngine.getScoringIteration());
         Assert.assertNull(createdRatingEngine.getPublishedIteration());

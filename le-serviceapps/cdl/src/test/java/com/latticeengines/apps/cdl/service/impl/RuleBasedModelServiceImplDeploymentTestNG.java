@@ -90,7 +90,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
 
     @SuppressWarnings("deprecation")
     protected void assertRatingEngine(RatingEngine createdRatingEngine) {
-        Assert.assertNotNull(createdRatingEngine.getActiveModel());
+        Assert.assertNotNull(createdRatingEngine.getLatestIteration());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
     }
 
@@ -104,7 +104,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
 
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(rbRatingEngineId, true, true);
         Assert.assertNotNull(ratingEngine);
-        Assert.assertNotNull(ratingEngine.getActiveModelPid());
+        Assert.assertNotNull(ratingEngine.getLatestIteration());
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetRatingEngineAndModel" })
