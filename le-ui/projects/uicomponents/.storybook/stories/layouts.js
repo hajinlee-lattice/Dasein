@@ -16,24 +16,17 @@ import LeVPanel from "../../../common/widgets/container/le-v-panel";
 import LeHPanel from "../../../common/widgets/container/le-h-panel";
 import LeButton from "../../../common/widgets/buttons/le-button";
 
+import './layouts.scss';
 const stories = storiesOf("Layouts", module);
 
 stories.addDecorator(withKnobs);
 
-const options = {
-  Left: "left",
-  Center: "center",
-  Right: "right"
-};
-
-const vOptions = {
-  Top: "top",
-  Center: "center",
-  Bottom: "bottom"
-};
-
 stories.add("Complex Layout", () => (
   <div className="container">
-    TODO
+    <LeVPanel vstretch={"true"} className="sub-container">
+        <LeHPanel hstretch={"true"} className="sub-container header"><span>Toolbar</span></LeHPanel>
+        <LeHPanel hstretch={"true"} className="sub-container body"><span>Body</span></LeHPanel>
+        <LeHPanel hstretch={"true"} className="sub-container footer"><span>Footer</span></LeHPanel>
+    </LeVPanel>
   </div>
 ));

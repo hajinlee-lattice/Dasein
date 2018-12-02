@@ -69,21 +69,6 @@ class LeVPanel extends Component {
   }
 
   render() {
-    const self = this;
-    const children = React.Children.map(this.props.children, child => {
-      if (React.isValidElement(child)) {
-        return React.cloneElement(child, {
-          vstretch: self.props.vstretch,
-          hstretch: self.props.hstretch,
-          halignment: self.props.halignment
-            ? self.props.halignment
-            : child.props.halignment,
-          valignment: self.props.valignment
-            ? self.props.valignment
-            : child.props.valignment
-        });
-      }
-    });
 
     return (
       <div
@@ -92,7 +77,7 @@ class LeVPanel extends Component {
         <div
           className={`le-flex-content sub-container ${this.getHAlignment()} ${this.getVAlignment()} ${this.getVStretch()} ${this.getHStretch()}`}
         >
-          {children}
+          {this.props.children}
         </div>
       </div>
     );
