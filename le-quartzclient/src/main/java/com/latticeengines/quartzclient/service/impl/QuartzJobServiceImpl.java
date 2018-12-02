@@ -73,16 +73,16 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             @Override
             public void onSuccess(Boolean result) {
                 try {
-                    log.info(String.format("On Success for job %s", jobName));
+                    log.debug(String.format("On Success for job %s", jobName));
                     jobActives.put(jobKey, false);
                     JobHistory jobHistory =getJobHistoryWithRetries(tenantId, jobName, jobId);
                     jobHistory.setTriggeredJobStatus(TriggeredJobStatus.SUCCESS);
                     jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                    log.info("Updated job status to success");
+                    log.debug("Updated job status to success");
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
-                log.info("Quartz task complete!");
+                log.debug("Quartz task complete!");
             }
 
             @Override
