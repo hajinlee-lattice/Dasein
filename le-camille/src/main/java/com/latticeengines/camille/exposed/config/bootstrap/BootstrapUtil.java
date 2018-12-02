@@ -20,6 +20,7 @@ import com.latticeengines.camille.exposed.CamilleTransaction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
@@ -35,8 +36,22 @@ public class BootstrapUtil {
         log.info("{}Running install of version {}", new Object[] { logPrefix, executableVersion });
 
         // Initialize the service directory
-        camille.upsert(serviceDirectoryPath.parent(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         camille.upsert(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        boolean serviceDirectoryExists = false;
+        int numRetry = 3;
+        do {
+            serviceDirectoryExists = camille.exists(serviceDirectoryPath);
+            if (serviceDirectoryExists == false) {
+                numRetry--;
+                log.info(String.format("Create path %s, %d out of 3 retries remained", serviceDirectoryPath.toString(), numRetry));
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+
+        } while (serviceDirectoryExists == false && numRetry > 0);
 
         BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
         if (state.state == State.INITIAL) {
