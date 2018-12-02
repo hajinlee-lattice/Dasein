@@ -1,5 +1,6 @@
 package com.latticeengines.yarn.exposed.service.impl;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,21 +9,23 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
-import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.yarn.client.YarnClient;
 
 import com.google.common.collect.ComparisonChain;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -34,14 +37,20 @@ import com.latticeengines.yarn.exposed.service.YarnService;
 @Component("yarnService")
 public class YarnServiceImpl implements YarnService {
 
-    @Autowired
-    private YarnClient yarnClient;
-
-    @Autowired
-    @Qualifier("yarnConfiguration")
+    @Resource(name = "yarnConfiguration")
     private Configuration yarnConfiguration;
 
     private RestTemplate rmRestTemplate = new RestTemplate();
+
+    private YarnClient yarnClient;
+
+    @PostConstruct
+    public void postConstruct() {
+        yarnClient = YarnClient.createYarnClient();
+        yarnClient.init(yarnConfiguration);
+        yarnClient.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> yarnClient.stop()));
+    }
 
     private String getResourceManagerEndpoint() {
         if (yarnConfiguration.getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
@@ -54,9 +63,17 @@ public class YarnServiceImpl implements YarnService {
         }
     }
 
+    /**
+     * Use apache yarn client or remove this functionality
+     */
+    @Deprecated
     @Override
     public List<ApplicationReport> getApplications(GetApplicationsRequest request) {
-        return yarnClient.listApplications(request);
+        try {
+            return yarnClient.getApplications(request.getApplicationStates());
+        } catch (IOException | YarnException e) {
+            throw new RuntimeException("Failed to get application reports", e);
+        }
     }
 
     @Override
@@ -133,7 +150,11 @@ public class YarnServiceImpl implements YarnService {
 
     @Override
     public ApplicationReport getApplication(String appId) {
-        return yarnClient.getApplicationReport(ConverterUtils.toApplicationId(appId));
+        try {
+            return yarnClient.getApplicationReport(ApplicationId.fromString(appId));
+        } catch (IOException | YarnException e) {
+            throw new RuntimeException("Failed to get application report", e);
+        }
     }
 
     private String performFailover() {
