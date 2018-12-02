@@ -27,7 +27,7 @@ public class CDLJobProxy extends MicroserviceRestApiProxy implements ProxyInterf
             return null;
         }
         String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
     }
 
     @SuppressWarnings("unchecked")
@@ -39,6 +39,6 @@ public class CDLJobProxy extends MicroserviceRestApiProxy implements ProxyInterf
             return null;
         }
         String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
     }
 }

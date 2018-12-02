@@ -4,18 +4,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.Test;
-
-import com.latticeengines.yarn.exposed.service.impl.YarnServiceImpl;
 
 public class YarnServiceImplUnitTestNG {
 
@@ -56,8 +55,11 @@ public class YarnServiceImplUnitTestNG {
         list.add(app4);
         list.add(app5);
 
-        when(yarnClient.listApplications(GetApplicationsRequest.newInstance(EnumSet.of(YarnApplicationState.FAILED))))
-                .thenReturn(list);
+        try {
+            when(yarnClient.getApplications(EnumSet.of(YarnApplicationState.FAILED))).thenReturn(list);
+        } catch (IOException| YarnException e) {
+            throw new RuntimeException(e);
+        }
 
         List<ApplicationReport> sortedApps = yarnService.getPreemptedApps();
         assertEquals(4, sortedApps.size());

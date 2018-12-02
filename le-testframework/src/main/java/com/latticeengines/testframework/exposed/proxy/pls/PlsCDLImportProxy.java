@@ -26,7 +26,7 @@ public class PlsCDLImportProxy extends PlsRestApiProxyBase {
             return null;
         }
         String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
     }
 
 }

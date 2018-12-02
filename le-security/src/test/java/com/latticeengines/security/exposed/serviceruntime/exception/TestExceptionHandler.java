@@ -153,8 +153,6 @@ public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
                 return false;
             }
 
-
-
             @Override
             public Object getAttribute(String name) {
                 return null;

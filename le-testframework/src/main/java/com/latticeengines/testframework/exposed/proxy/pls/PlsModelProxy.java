@@ -22,7 +22,7 @@ public class PlsModelProxy extends PlsRestApiProxyBase {
             return null;
         }
         String appIdStr = String.valueOf(responseDoc.getResult());
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
     }
 
 }

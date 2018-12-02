@@ -54,7 +54,7 @@ public class YarnClientFactoryTestNG extends AbstractTestNGSpringContextTests {
                 // no resource usage after SLOW_START_THRESHOLD
                 // must be stuck
                 Resource asked = usageReport.getNeededResources();
-                int mb = asked.getMemory();
+                long mb = asked.getMemorySize();
                 int vcores = asked.getVirtualCores();
                 System.out.println("appId=" + app.getApplicationId() + " status=" + app.getYarnApplicationState() + " mb=" + mb + " vcores=" + vcores);
             }

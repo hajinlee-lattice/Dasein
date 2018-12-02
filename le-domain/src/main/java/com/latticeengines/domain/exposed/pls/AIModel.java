@@ -82,7 +82,7 @@ public class AIModel extends RatingModel {
     @Transient
     public ApplicationId getModelingYarnJobId() {
         if (StringUtils.isNotBlank(modelingJobId))
-            return ConverterUtils.toApplicationId(modelingJobId);
+            return ApplicationId.fromString(modelingJobId);
         return null;
     }
 
