@@ -787,6 +787,8 @@ public enum LedpCode {
     LEDP_40043("S3 File missing the following required fields: {0}"), //
     LEDP_40044("Please add Attributes to your model. You can also change usage settings in Attribute Management"), //
     LEDP_40045("Cannot count rating models coverage for segment {0}, as it doesn't exists"),
+    LEDP_40046("Too few events to learn from - the model needs at least {0} successes. Try modeling on "
+            + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

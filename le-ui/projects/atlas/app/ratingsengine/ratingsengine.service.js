@@ -196,7 +196,7 @@ angular.module('lp.ratingsengine')
                     showNextSpinner: true,
                     afterNextValidation: true,
                     nextFn: function(nextState) {
-                        RatingsEngineStore.nextValidateTraining(nextState); // validate here
+                        RatingsEngineStore.nextSaveAIRatingModel(nextState, 'training'); // validate here
                     } 
                 },
                 { 
@@ -430,17 +430,7 @@ angular.module('lp.ratingsengine')
         };
 
         var params = {};
-
         if (rating.type !== undefined && rating.type === 'CROSS_SELL') {
-            opts.activeModel = {
-                AI: {
-                    advancedModelingConfig: {
-                        cross_sell: {
-                            modelingStrategy: rating.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy
-                        }
-                    }
-                }
-            };
             opts.advancedRatingConfig = {
                 cross_sell: {
                     modelingStrategy: rating.advancedRatingConfig.cross_sell.modelingStrategy
@@ -811,7 +801,7 @@ angular.module('lp.ratingsengine')
           id: $stateParams.rating_id ? $stateParams.rating_id : null
         };
 
-        RatingsEngineStore.saveRating(opts, RatingsEngineStore.getCustomEventModelingType() == 'LPI').then(function(rating) {
+        RatingsEngineStore.saveRating(opts).then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
         });
     }
@@ -819,7 +809,8 @@ angular.module('lp.ratingsengine')
     this.nextSaveCustomEventRatingModel = function(nextState) {
         var ratingId = $stateParams.rating_id;
         RatingsEngineStore.getRating(ratingId).then(function(rating) {
-            var model = rating.activeModel,
+
+            var model = rating.latest_iteration,
                 predictionType = RatingsEngineStore.getPredictionType(),
                 dataStores = RatingsEngineStore.getDataStores(),
                 customEventModelingType = RatingsEngineStore.getCustomEventModelingType(),
@@ -878,26 +869,16 @@ angular.module('lp.ratingsengine')
 
         ImportWizardService.SaveFieldDocuments(RatingsEngineStore.getCSVFileName(), FieldDocument, {excludeCustomFileAttributes: RatingsEngineStore.getCustomEventModelingType() === 'CDL'}, true).then(function(result) {
                 RatingsEngineStore.getRating(ratingId).then(function(rating) {
-                    RatingsEngineStore.nextLaunchAIModel(nextState, rating.activeModel);
+                    RatingsEngineStore.nextLaunchAIModel(nextState, rating.latest_iteration);
                 });
         });
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
         var ratingId = $stateParams.rating_id;
-        // console.log('ID ', ratingId);
         var engineType = RatingsEngineStore.getModelingStrategy(),
             opts =  {
                 type: "CROSS_SELL",
-                activeModel: {
-                    AI: {
-                        advancedModelingConfig: {
-                            cross_sell: {
-                                modelingStrategy: engineType
-                            }
-                        }
-                    }
-                },
                 advancedRatingConfig: {
                     cross_sell: {
                         modelingStrategy: engineType
@@ -913,26 +894,6 @@ angular.module('lp.ratingsengine')
         });
     }
 
-    this.nextValidateTraining = function(nextState) {
-        var ratingId = $stateParams.rating_id,
-            modelId = $stateParams.modelId; // no model id here
-
-        RatingsEngineStore.setValidation('training', false); 
-
-        RatingsEngineStore.getRating(ratingId).then(function(rating) {
-            var modelAIId = rating.activeModel.AI.id; // use this instead of model id
-            
-            RatingsEngineService.validateModel(ratingId, modelAIId).then(function(result) {
-                var success = !result.data.errorCode;
-                if(success) {
-                    RatingsEngineStore.nextSaveAIRatingModel(nextState, 'training');
-                }
-                RatingsEngineStore.setValidation('training', !success);
-            });
-        });
-
-    }
-
     /**
      * [nextSaveAIRatingModel 
      * @param  {[string]} nextState [the next state]
@@ -943,7 +904,7 @@ angular.module('lp.ratingsengine')
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
 
-            var model = rating.activeModel.AI,
+            var model = rating.latest_iteration.AI,
                 targetProducts = (model.targetProducts === []) ? [] : RatingsEngineStore.getProductsSelectedIds(),
                 predictionType = RatingsEngineStore.getPredictionType(),
                 configFilters = RatingsEngineStore.getConfigFilters(),
@@ -968,17 +929,14 @@ angular.module('lp.ratingsengine')
                 }
             };
 
-            // console.log("GET RATING & MODEL CREATE OBJECT", obj.AI);
-
             RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
-
-                // console.log("MODEL", model.AI);
 
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);
 
                 if(validate) {
-                    RatingsEngineService.validateModel(ratingId, obj.AI.id).then(function(result) {
+                    rating.latest_iteration = model;
+                    RatingsEngineService.validateModel(ratingId, obj.AI.id, rating).then(function(result) {
                         var success = !result.data.errorCode;
                         if(success) {
                             if (lastRoute[lastRoute.length-1] === 'creation') {
@@ -1071,12 +1029,12 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer();
         RatingsEngineStore.getRating(ratingId).then(function(engine){
             RatingsEngineStore.setRating(engine);
-            if(engine.activeModel.AI){
-                RatingsEngineStore.getRatingModel(ratingId, engine.activeModel.AI.id).then(function(model){
+            if(engine.latest_iteration.AI){
+                RatingsEngineStore.getRatingModel(ratingId, engine.latest_iteration.AI.id).then(function(model){
                     deferred.resolve(model);
                 });
             }else {
-                deferred.resolve(engine.activeModel);
+                deferred.resolve(engine.latest_iteration);
             }
         });   
         return deferred.promise;  
@@ -1467,14 +1425,17 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    this.validateModel = function(ratingId, modelId){
-        var deferred = $q.defer();
+    this.validateModel = function(ratingId, modelId, ratingEngine){
+        var deferred = $q.defer(),
+            method = ratingEngine ? 'POST' : 'GET';
+
         $http({
-            method: 'GET',
+            method: method,
             url: '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId + '/model/validate',
             headers: {
                 'Accept': 'application/json'
-            }
+            },
+            data: ratingEngine
         }).then(
             function onSuccess(response) {
                 deferred.resolve(response);

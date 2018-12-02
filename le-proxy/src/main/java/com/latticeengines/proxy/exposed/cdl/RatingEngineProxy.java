@@ -118,8 +118,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine, String user,
-            Boolean unlinkSegment, Boolean creaateAction) {
-        String url = constructCreateOrUpdateRatingEngineUrl(customerSpace, user, unlinkSegment, creaateAction);
+            Boolean unlinkSegment, Boolean createAction) {
+        String url = constructCreateOrUpdateRatingEngineUrl(customerSpace, user, unlinkSegment, createAction);
         return post("create rating engine", url, ratingEngine, RatingEngine.class);
     }
 

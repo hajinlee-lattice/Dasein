@@ -55,11 +55,11 @@ angular.module('lp.ratingsengine.wizard.products', [
     vm.getSelectedProducts = function() {
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
+                var selectedTargetProducts = rating.latest_iteration.AI.advancedModelingConfig.cross_sell.targetProducts;
 
-                if(rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts !== null){
-                    var selectedTargetProducts = rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts;
+                if(selectedTargetProducts !== null){
+
                     angular.forEach(selectedTargetProducts, function(value, key) {
-                        
                         var product = Products.filter(function( product ) {
                           return product.ProductId === value;
                         });

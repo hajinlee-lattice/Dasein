@@ -261,7 +261,6 @@ angular
                         controller: function ($scope, $stateParams, $state, $rootScope, RatingsEngineStore, Dashboard, RatingEngine, Model, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
-                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -275,12 +274,11 @@ angular
                             } else {
                                 var type = RatingEngine.type.toLowerCase();
                                 $scope.typeContext = 'AI';
-
-                                $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+                                $scope.modelingStrategy = RatingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
                             }
 
-                            $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
-                            $scope.modelIsReady = ((RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
+                            $scope.activeIteration = RatingEngine.latest_iteration[$scope.typeContext].iteration;
+                            $scope.modelIsReady = ((RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
 
                             $scope.stateName = function () {
                                 return $state.current.name;
@@ -635,7 +633,6 @@ angular
                         controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
-                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -650,10 +647,10 @@ angular
                                 var type = RatingEngine.type.toLowerCase();
                                 $scope.typeContext = 'AI';
 
-                                $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+                                $scope.modelingStrategy = RatingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
                             }
-                            $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
-                            $scope.modelIsReady = ((RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
+                            $scope.activeIteration = RatingEngine.latest_iteration[$scope.typeContext].iteration;
+                            $scope.modelIsReady = ((RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
 
                             $scope.stateName = function () {
                                 return $state.current.name;
@@ -693,7 +690,7 @@ angular
                     RatingsSummary: function($q, $stateParams, ModelRatingsService) {
                         var deferred = $q.defer(),
                             ratingId = $stateParams.rating_id,
-                            modelId = $stateParams.ratingEngine.activeModel.AI.id;
+                            modelId = $stateParams.ratingEngine.latest_iteration.AI.id;
 
                         ModelRatingsService.GetBucketedScoresSummaryRatingEngine(ratingId, modelId).then(function(result) {
                             deferred.resolve(result);
@@ -1093,7 +1090,15 @@ angular
 
                         return deferred.promise;
                     },
-                    WizardHeaderTitle: function ($stateParams, CurrentRatingEngine, RatingsEngineStore) {
+                    DataCollectionStatus: function ($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    },
+                    WizardHeaderTitle: function ($stateParams, CurrentRatingEngine, RatingsEngineStore, DataCollectionStatus) {
                         var engineType = $stateParams.engineType,
                             currentRating = CurrentRatingEngine,
                             fromList = $stateParams.fromList,
@@ -1105,7 +1110,8 @@ angular
                         } else if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
                             title = 'Create Model: Customers that will purchase a product for the first time';
                         } else if (engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
-                            title = 'Create Model: Customers that will purchase again next quarter';
+                            var periodType = DataCollectionStatus.ApsRollingPeriod ? DataCollectionStatus.ApsRollingPeriod.toLowerCase() : 'quarter';
+                            title = 'Create Model: Customers that will purchase again next ' + periodType;
                         }
 
                         return title;
@@ -1227,7 +1233,7 @@ angular
                     PredictionType: function ($q, CurrentRatingEngine) {
                         var deferred = $q.defer(),
                             engine = CurrentRatingEngine,
-                            predictionType = engine.activeModel.AI.predictionType;
+                            predictionType = engine.latest_iteration.AI.predictionType;
 
                         deferred.resolve(predictionType);
 

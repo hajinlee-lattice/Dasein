@@ -17,11 +17,11 @@ angular.module('lp.ratingsengine.wizard.attributes', [])
             vm.disableCDLAttributes = true;
             vm.scoringAttributes['CDL'] = false;
             vm.scoringAttributes['CustomFileAttributes'] = vm.checkDataStores(Rating) ? 
-                        Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores.indexOf('CustomFileAttributes') >= 0 : true;
+                        Rating.latest_iteration.AI.advancedModelingConfig.custom_event.dataStores.indexOf('CustomFileAttributes') >= 0 : true;
         } else if ( RatingsEngineStore.getCustomEventModelingType() == 'CDL' || Rating.segment != null) {
             vm.disableTrainingAttributes = true;
             vm.scoringAttributes['CDL'] =  vm.checkDataStores(Rating) ? 
-                        Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores.indexOf('CDL') >= 0 : true;
+                        Rating.latest_iteration.AI.advancedModelingConfig.custom_event.dataStores.indexOf('CDL') >= 0 : true;
             vm.scoringAttributes['CustomFileAttributes'] = false;
         }
         var dataStores = filterDataStores(vm.scoringAttributes);
@@ -30,8 +30,8 @@ angular.module('lp.ratingsengine.wizard.attributes', [])
     }
 
     vm.checkDataStores = function(rating) {
-        return rating && rating.activeModel && rating.activeModel.AI && rating.activeModel.AI.advancedModelingConfig && rating.activeModel.AI.advancedModelingConfig.custom_event
-                && rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores;
+        return rating && rating.latest_iteration && rating.latest_iteration.AI && rating.latest_iteration.AI.advancedModelingConfig && rating.latest_iteration.AI.advancedModelingConfig.custom_event
+                && rating.latest_iteration.AI.advancedModelingConfig.custom_event.dataStores;
     } 
 
     vm.setScoringAttributes = function(option) {

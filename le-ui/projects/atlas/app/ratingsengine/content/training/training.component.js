@@ -123,11 +123,6 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
 
             if(vm.engineType == 'cross_sell'){
-                
-                if(angular.equals({}, vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.filters)){
-                    vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.filters =
-                    vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.filters;
-                }
                 vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -172,9 +167,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.autcompleteChange();
         }
         vm.updateSegmentSelected = function(trainingSegment) {
-            if(vm.ratingEngine.activeModel.AI){
+            if(vm.ratingEngine.latest_iteration.AI){
                 vm.ratingEngine.latest_iteration.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
-                vm.ratingEngine.activeModel.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
             }
         }
 
@@ -190,9 +184,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.autcompleteChange();        
         }
         vm.updateProductsSelected = function(listProducts) {
-            if(vm.ratingEngine.activeModel.AI){
+            if(vm.ratingEngine.latest_iteration.AI){
                 vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
-                vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
             }
         }
 

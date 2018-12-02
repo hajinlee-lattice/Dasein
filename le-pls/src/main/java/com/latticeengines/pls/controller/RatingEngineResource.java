@@ -31,6 +31,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -450,7 +451,13 @@ public class RatingEngineResource {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(), ratingEngineId, ratingModelId);
         } catch (LedpException e) {
-            throw e;
+            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
+            UIAction uiAction = new UIAction();
+            uiAction.setTitle("Validation Error");
+            uiAction.setView(View.Banner);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(e.getMessage());
+            throw new UIActionException(uiAction, LedpCode.LEDP_40046);
         } catch (Exception ex) {
             log.error("Failed to validate due to an unknown server error.", ex);
             throw new RuntimeException("Unable to validate due to an unknown server error");
@@ -460,12 +467,10 @@ public class RatingEngineResource {
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
     @ResponseBody
     @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
-    public boolean validateForModeling(@PathVariable String customerSpace, //
-            @PathVariable String ratingEngineId, //
+    public boolean validateForModeling(@PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
             @RequestBody RatingEngine ratingEngine) {
-        RatingModel ratingModel;
-        ratingModel = ratingEngine.getLatestIteration();
+        RatingModel ratingModel = ratingEngine.getLatestIteration();
         if (ratingModel == null || !(ratingModel instanceof AIModel)) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "LatestIteration of the given Model is Null or unsupported for validation" });
@@ -474,7 +479,13 @@ public class RatingEngineResource {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId, ratingEngine);
         } catch (LedpException e) {
-            throw e;
+            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
+            UIAction uiAction = new UIAction();
+            uiAction.setTitle("Validation Error");
+            uiAction.setView(View.Banner);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(e.getMessage());
+            throw new UIActionException(uiAction, LedpCode.LEDP_40046);
         } catch (Exception ex) {
             log.error("Failed to validate due to an unknown server error.", ex);
             throw new RuntimeException("Unable to validate due to an unknown server error");

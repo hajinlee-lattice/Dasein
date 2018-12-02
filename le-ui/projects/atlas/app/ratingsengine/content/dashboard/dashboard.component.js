@@ -362,8 +362,8 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.isJobRunning = function(){
         var jobStatus = '';
         if(vm.ratingEngine.type === 'RULE_BASED'){
-            var activeModel = vm.ratingEngine.activeModel;
-            jobStatus = activeModel.rule.modelingJobStatus;
+            var latest_iteration = vm.ratingEngine.latest_iteration;
+            jobStatus = latest_iteration.rule.modelingJobStatus;
         }else{
             var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.latest_iteration;
             jobStatus = model.AI.modelingJobStatus;

@@ -589,9 +589,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             Long noOfEvents = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT,
                     null);
             if (noOfEvents < minimumEvents) {
-                errors.add(LedpException.buildMessage(LedpCode.LEDP_40033,
-                        new String[] { aiModel.getId(), ratingEngine.getId(), noOfEvents.toString(),
-                                minimumEvents.toString(), CustomerSpace.parse(customerSpace).toString() }));
+                errors.add(LedpException.buildMessage(LedpCode.LEDP_40046,
+                        new String[] {minimumEvents.toString()}));
             }
             break;
         case CUSTOM_EVENT:

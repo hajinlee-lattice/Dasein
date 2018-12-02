@@ -28,7 +28,7 @@
 
                     <!-- <button
                         class="button orange-button"
-                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.activeModel.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
+                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.latest_iteration.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0 || vm.isJobRunning()">
                         {{ vm.publishOrActivateButtonLabel }}
