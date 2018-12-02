@@ -79,6 +79,18 @@ public class JsonUtils {
         return deserialize(getObjectMapper(), jsonStr, clazz);
     }
 
+    public static <T> T deserializeByTypeRef(String jsonStr, TypeReference<T> type) {
+        if (jsonStr == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = getObjectMapper();
+        try {
+            return objectMapper.readValue(jsonStr, type);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static <T> T deserialize(ObjectMapper objectMapper, String jsonStr, Class<T> clazz) {
         if (jsonStr == null) {
             return null;
