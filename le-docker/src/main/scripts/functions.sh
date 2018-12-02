@@ -16,12 +16,7 @@ function build_docker() {
     if [ -f "Dockerfile.tmp" ]; then
         rm Dockerfile.tmp
     fi
-	UNAME=`uname`
-	if [[ "${UNAME}" == 'Darwin' ]]; then
-	    sed '' "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile > Dockerfile.tmp
-	else
-	    sed "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile> Dockerfile.tmp
-	fi
+	sed "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile> Dockerfile.tmp
 	if [ "${NO_CACHE}" == "--no-cache" ]; then
 	    docker build --no-cache -f Dockerfile.tmp -t ${IMAGE} . || true
 	else

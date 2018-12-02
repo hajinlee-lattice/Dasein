@@ -37,7 +37,7 @@ class EMRScalingCallable implements Callable<Boolean> {
         this.emrService = emrService;
     }
 
-    public void setEmrCacheService(EMRCacheService emrCacheService) {
+    private void setEmrCacheService(EMRCacheService emrCacheService) {
         this.emrCacheService = emrCacheService;
     }
 

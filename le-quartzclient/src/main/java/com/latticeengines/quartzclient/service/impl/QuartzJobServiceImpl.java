@@ -13,10 +13,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
@@ -60,8 +62,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
 
     private TriggeredJobInfo runJobInternal(QuartzJobArguments jobArgs,
             Callable<Boolean> callable) {
-        ListenableFuture<Boolean> task = taskExecutor
-                .submitListenable(callable);
+        ListenableFuture<Boolean> task = taskExecutor.submitListenable(callable);
         final String jobId = Integer.toString(task.hashCode());
         final String tenantId = jobArgs.getTenantId();
         final String jobName = jobArgs.getJobName();
@@ -72,53 +73,28 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             @Override
             public void onSuccess(Boolean result) {
                 try {
-                    log.debug(String.format("On Success for job %s", jobName));
+                    log.info(String.format("On Success for job %s", jobName));
                     jobActives.put(jobKey, false);
-                    JobHistory jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
-                            jobId);
-                    if (jobHistory != null) {
-                        jobHistory.setTriggeredJobStatus(TriggeredJobStatus.SUCCESS);
-                        jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                        log.debug("Updated job status to success");
-                    } else {
-                        // in case the job finished too soon.
-                        Thread.sleep(3000);
-                        jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName, jobId);
-                        if (jobHistory != null) {
-                            jobHistory.setTriggeredJobStatus(TriggeredJobStatus.SUCCESS);
-                            jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                            log.debug("Updated job status to success");
-                        }
-                    }
+                    JobHistory jobHistory =getJobHistoryWithRetries(tenantId, jobName, jobId);
+                    jobHistory.setTriggeredJobStatus(TriggeredJobStatus.SUCCESS);
+                    jobHistoryEntityMgr.updateJobHistory(jobHistory);
+                    log.info("Updated job status to success");
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
-                log.debug("Quartz task complete!");
+                log.info("Quartz task complete!");
             }
 
             @Override
             public void onFailure(Throwable t) {
                 try {
-                    log.debug(String.format("On Failure for job %s", jobName));
+                    log.info(String.format("On Failure for job %s", jobName));
                     jobActives.put(jobKey, false);
-                    JobHistory jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
-                            jobId);
-                    if (jobHistory != null) {
-                        jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
-                        jobHistory.setErrorMessage(t.getMessage());
-                        jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                        log.debug("Updated job status to fail");
-                    } else {
-                        // incase the job finished too soon.
-                        Thread.sleep(3000);
-                        jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName, jobId);
-                        if (jobHistory != null) {
-                            jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
-                            jobHistory.setErrorMessage(t.getMessage());
-                            jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                            log.debug("Updated job status to fail");
-                        }
-                    }
+                    JobHistory jobHistory =getJobHistoryWithRetries(tenantId, jobName, jobId);
+                    jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
+                    jobHistory.setErrorMessage(t.getMessage());
+                    jobHistoryEntityMgr.updateJobHistory(jobHistory);
+                    log.debug("Updated job status to fail");
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
@@ -130,6 +106,24 @@ public class QuartzJobServiceImpl implements QuartzJobService {
         triggeredJobInfo.setJobHandle(jobId);
         triggeredJobInfo.setExecutionHost(getExecutionHost());
         return triggeredJobInfo;
+    }
+
+    private JobHistory getJobHistoryWithRetries(String tenantId, String jobName, String jobId) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10);
+        return retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info("Attempt=" + (context.getRetryCount() + 1) //
+                        + ": retry getting job history for job " + jobName + " : " + jobId);
+            }
+            JobHistory toReturn = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
+                    jobId);
+            if (toReturn == null) {
+                throw new IllegalStateException("Job has not been created in DB after " //
+                        + (context.getRetryCount() + 1) + " retries, retry later.");
+            } else {
+                return toReturn;
+            }
+        });
     }
 
     @Override
