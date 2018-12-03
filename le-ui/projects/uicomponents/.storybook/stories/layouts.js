@@ -16,17 +16,43 @@ import LeVPanel from "../../../common/widgets/container/le-v-panel";
 import LeHPanel from "../../../common/widgets/container/le-h-panel";
 import LeButton from "../../../common/widgets/buttons/le-button";
 
-import './layouts.scss';
+import "./layouts.scss";
+import LeInputText from "../../../common/widgets/inputs/le-input-text";
 const stories = storiesOf("Layouts", module);
 
 stories.addDecorator(withKnobs);
 
 stories.add("Complex Layout", () => (
   <div className="container">
-    <LeVPanel vstretch={"true"} className="sub-container">
-        <LeHPanel hstretch={"true"} className="sub-container header"><span>Toolbar</span></LeHPanel>
-        <LeHPanel hstretch={"true"} className="sub-container body"><span>Body</span></LeHPanel>
-        <LeHPanel hstretch={"true"} className="sub-container footer"><span>Footer</span></LeHPanel>
+    <LeVPanel vstretch={"true"} hstretch={"true"}>
+      <LeHPanel hstretch={"true"} classesName="header">
+        <span>Toolbar</span>
+      </LeHPanel>
+      <LeHPanel hstretch={"true"} classesName="body" flex={"10"}>
+        <LeVPanel vstretch={true} classesName={"nav"}>
+          <form>
+            <LeInputText
+              config={{
+                placeholder: "Callback with debounce",
+                icon: text("config.icon", "fa fa-search"),
+                
+                clearIcon: boolean("config.clearIcon", true),
+                debounce: number("config.debounce", 2000)
+              }}
+              callback={action("typed in text field")}
+            />
+          </form>
+        </LeVPanel>
+        <LeVPanel vstretch={true} classesName={"main"} flex={"6"}>
+          <span>2</span>
+        </LeVPanel>
+        <LeVPanel vstretch={true} classesName={"info"}>
+          <span>3</span>
+        </LeVPanel>
+      </LeHPanel>
+      <LeHPanel hstretch={"true"} classesName="footer">
+        <span>Footer</span>
+      </LeHPanel>
     </LeVPanel>
   </div>
 ));

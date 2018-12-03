@@ -1,9 +1,16 @@
-.header{
-    flex: 1;
+.header, .body, .footer{
+    border: 1px solid gray;
+    background-color: antiquewhite
 }
-.body{
-    flex: 3;
+.nav{
+    border: 0.01em solid rgb(233, 233, 233);
+    background-color: white;
 }
-.footer{
-    flex:1;
+.main{
+    border: 0.01em solid rgb(233, 233, 233);
+    background-color: white;
+}
+.info{
+    border: 0.01em solid rgb(233, 233, 233);
+    background-color: white;
 }
