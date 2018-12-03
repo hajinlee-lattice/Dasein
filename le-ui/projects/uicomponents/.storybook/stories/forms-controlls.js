@@ -1,4 +1,4 @@
-import React from "../../../common/react-vendor";
+import React from "common/react-vendor";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import {
@@ -8,9 +8,9 @@ import {
   select,
   number
 } from "@storybook/addon-knobs";
-import "../../../common/assets/css/font-awesome.min.css";
-import LeInputText from "../../../common/widgets/inputs/le-input-text";
-import LeLink, { LEFT, RIGHT } from "../../../common/widgets/link/le-link";
+import "common/assets/css/font-awesome.min.css";
+import LeInputText from "common/widgets/inputs/le-input-text";
+import LeLink, { LEFT, RIGHT } from "common/widgets/link/le-link";
 
 const stories = storiesOf("Form Controls", module);
 

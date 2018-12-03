@@ -1,4 +1,4 @@
-import React from "../../../common/react-vendor";
+import React from "common/react-vendor";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import {
@@ -8,14 +8,14 @@ import {
   select,
   number
 } from "@storybook/addon-knobs";
-import "../../../common/assets/css/font-awesome.min.css";
-import "../../../common/widgets/layout/layout.scss";
-import LeTile from '../../../common/widgets/container/tile/le-tile';
-import LeTileHeader from '../../../common/widgets/container/tile/le-tile-header';
-import LeTileBody from '../../../common/widgets/container/tile/le-tile-body';
-import LeTileFooter from '../../../common/widgets/container/tile/le-tile-footer';
-import LeMenu from '../../../common/widgets/menu/le-menu';
-import LeMenuItem from '../../../common/widgets/menu/le-menu-item';
+import "common/assets/css/font-awesome.min.css";
+import "common/widgets/layout/layout.scss";
+import LeTile from 'common/widgets/container/tile/le-tile';
+import LeTileHeader from 'common/widgets/container/tile/le-tile-header';
+import LeTileBody from 'common/widgets/container/tile/le-tile-body';
+import LeTileFooter from 'common/widgets/container/tile/le-tile-footer';
+import LeMenu from 'common/widgets/menu/le-menu';
+import LeMenuItem from 'common/widgets/menu/le-menu-item';
 
 const stories = storiesOf("Containers", module);
 

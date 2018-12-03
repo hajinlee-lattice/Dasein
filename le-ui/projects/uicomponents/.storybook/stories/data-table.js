@@ -1,4 +1,4 @@
-import React from "../../../common/react-vendor";
+import React from "common/react-vendor";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import {
@@ -8,15 +8,15 @@ import {
   select,
   number
 } from "@storybook/addon-knobs";
-import "../../../common/assets/css/font-awesome.min.css";
-import "../../../common/widgets/layout/layout.scss";
+import "common/assets/css/font-awesome.min.css";
+import "common/widgets/layout/layout.scss";
 
-import LeTable from "../../../common/widgets/table/table";
-import CopyComponent from "../../../common/widgets/table/controlls/copy-controll";
-import EditControl from "../../../common/widgets/table/controlls/edit-controls";
-import EditorText from "../../../common/widgets/table/editors/editor-text";
-import LeButton from '../../../common/widgets/buttons/le-button';
-import { getData } from "../../../common/widgets/table/table-utils";
+import LeTable from "common/widgets/table/table";
+import CopyComponent from "common/widgets/table/controlls/copy-controll";
+import EditControl from "common/widgets/table/controlls/edit-controls";
+import EditorText from "common/widgets/table/editors/editor-text";
+import LeButton from 'common/widgets/buttons/le-button';
+import { getData } from "common/widgets/table/table-utils";
 const stories = storiesOf("Data Table", module);
 
 stories.addDecorator(withKnobs);

@@ -1,13 +1,13 @@
-import React from "../../../common/react-vendor";
+import React from "common/react-vendor";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import { withKnobs, boolean, radios } from "@storybook/addon-knobs";
-import "../../../common/assets/css/font-awesome.min.css";
+import "common/assets/css/font-awesome.min.css";
 import "./panel.scss";
 
-import LeVPanel from "../../../common/widgets/container/le-v-panel";
-import LeHPanel from "../../../common/widgets/container/le-h-panel";
-import LeButton from "../../../common/widgets/buttons/le-button";
+import LeVPanel from "common/widgets/container/le-v-panel";
+import LeHPanel from "common/widgets/container/le-h-panel";
+import LeButton from "common/widgets/buttons/le-button";
 import {
   LEFT,
   RIGHT,
@@ -17,7 +17,7 @@ import {
   SPACEAROUND,
   SPACEBETWEEN,
   SPACEEVEN
-} from "../../../common/widgets/container/le-alignments";
+} from "common/widgets/container/le-alignments";
 const stories = storiesOf("Panels", module);
 
 stories.addDecorator(withKnobs);

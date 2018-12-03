@@ -1,4 +1,4 @@
-import React from "../../../common/react-vendor";
+import React from "common/react-vendor";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import {
@@ -8,11 +8,11 @@ import {
   select,
   number
 } from "@storybook/addon-knobs";
-import "../../../common/assets/css/font-awesome.min.css";
+import "common/assets/css/font-awesome.min.css";
 import LeButton, {
   LEFT,
   RIGHT
-} from "../../../common/widgets/buttons/le-button";
+} from "common/widgets/buttons/le-button";
 
 const stories = storiesOf("Buttons", module);
 
