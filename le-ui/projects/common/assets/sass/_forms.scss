@@ -139,6 +139,10 @@ output {
       border-left-color: #d22027;
       -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
       box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+      &.ng-not-empty {
+          border-left-width: 1px;
+          border-left-color: #000;
+      }
   }
 
 }
