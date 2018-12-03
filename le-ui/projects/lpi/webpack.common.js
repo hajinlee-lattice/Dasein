@@ -4,11 +4,21 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
+	resolve: {
+		alias: {
+			common: path.resolve(__dirname, "../common"),
+			app: path.resolve(__dirname, "../common/app"),
+			components: path.resolve(__dirname, "../common/components"),
+			widgets: path.resolve(__dirname, "../common/widgets"),
+			atlas: path.resolve(__dirname, "app"),
+			assets: path.resolve(__dirname, "assets")
+		}
+	},
   entry: {
     angular: "../common/angular-vendor.index.js",
     vendor: "../common/vendor.index.js",
     visualization: "../common/vendor-visualization.index.js",
-    atlas: "./index.js"
+    lpi: "./index.js"
   },
   
   plugins: [
