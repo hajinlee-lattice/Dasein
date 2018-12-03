@@ -60,6 +60,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Inject
     private EMREnvService emrEnvService;
 
@@ -90,7 +93,9 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         }
         queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
         pathBuilder = new HdfsToS3PathBuilder();
-        pathBuilder.setProtocol("s3a");
+        if (Boolean.TRUE.equals(useEmr)) {
+            pathBuilder.setProtocol("s3a");
+        }
     }
 
     @Override
