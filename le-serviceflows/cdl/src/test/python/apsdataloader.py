@@ -28,8 +28,6 @@ def fileWriterFunc(param):
             logger.info("Before writing to file:" + file)
             avro.writer(fp, schema, records)
             
-        uploadFromLocalFunc2(file, outputPath, webHdfsHostPort, userId)
-        os.remove(file)
         logger.info("Finished writing Dataframe to avro file %s in directory=%s" % (file, localDir))
 
 def uploadFromLocalFunc2(outputFile, outputPath, webHdfsHostPort, userId):
@@ -41,7 +39,7 @@ def uploadFromLocalFunc2(outputFile, outputPath, webHdfsHostPort, userId):
 
 def uploadFromLocalFunc(param):
         outputFile, outputPath, webHdfsHostPort, userId = param
-        uploadFromLocalFunc2(file, outputPath, webHdfsHostPort, userId)
+        uploadFromLocalFunc2(outputFile, outputPath, webHdfsHostPort, userId)
               
 class ApsDataLoader(object):
     def __init__(self):
@@ -102,7 +100,7 @@ class ApsDataLoader(object):
         outputFiles = glob.glob("%s/*.avro" % localDir)
         userId = pwd.getpwuid(os.getuid())[0]
         params = [[outputFile, self.outputPath, self.webHdfsHostPort, userId] for outputFile in outputFiles]
-        self.parallelExecutePool(uploadFromLocalFunc, params, 1)
+        self.parallelExecutePool(uploadFromLocalFunc, params, 16)
         logger.info("Finished uploadFromLocal data.")
         
     def parallelExecutePool(self, func, params, poolSize):
@@ -154,7 +152,7 @@ class ApsDataLoader(object):
         for df in dfs:
             params.append([df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index), self.webHdfsHostPort, self.outputPath, userId])
             index += 1
-        self.parallelExecutePool(fileWriterFunc, params, 8)
+        self.parallelExecutePool(fileWriterFunc, params, 16)
 
         files = [localDir + '/' + file for file in os.listdir(localDir)]
         for file in files:
