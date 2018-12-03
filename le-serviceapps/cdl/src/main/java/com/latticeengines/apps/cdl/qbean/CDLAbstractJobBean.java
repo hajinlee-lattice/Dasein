@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
+import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
@@ -18,6 +19,9 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     private CDLJobService cdlJobService;
 
     @Autowired
+    private RedShiftCleanupService redShiftCleanupService;
+
+    @Autowired
     private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
 
     @Override
@@ -26,6 +30,7 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
         builder.cdlJobType(cdlJobType)
                 .cdlJobService(cdlJobService)
                 .dataFeedExecutionCleanupService(dataFeedExecutionCleanupService)
+                .redshiftCleanupService(redShiftCleanupService)
                 .jobArguments(jobArguments);
         return new CDLQuartzJobCallable(builder);
     }
