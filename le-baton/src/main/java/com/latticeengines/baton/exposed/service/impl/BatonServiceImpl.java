@@ -371,7 +371,7 @@ public class BatonServiceImpl implements BatonService {
             CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
             doc.setSpace(space);
         } catch (Exception e) {
-            log.error(String.format("Error retrieving tenant %s in %s", tenantId, contractId), e);
+            log.error(String.format("Error retrieving tenant %s in %s", tenantId, contractId));
         }
         return doc;
     }
@@ -502,7 +502,7 @@ public class BatonServiceImpl implements BatonService {
                     try {
                         tenantDocs.addAll(getTenants(contract.getKey(), contract.getValue()));
                     } catch (Exception e) {
-                        log.error(String.format("Error retrieving tenants in contract %s.", contract.getKey()), e);
+                        log.error(String.format("Error retrieving tenants in contract %s.", contract.getKey()));
                     }
                 }
             }
@@ -544,7 +544,7 @@ public class BatonServiceImpl implements BatonService {
                 docs.add(doc);
             } catch (Exception e) {
                 log.error(String.format("Error constructing tenant document for contract %s, tenant %s, and space %s.",
-                        contractId, tenantId, spaceId), e);
+                        contractId, tenantId, spaceId));
             }
         }
 
