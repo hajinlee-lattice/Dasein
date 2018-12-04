@@ -66,6 +66,9 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Inject
     protected ModelSummaryProxy modelSummaryProxy;
 
@@ -82,7 +85,9 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         customer = configuration.getCustomerSpace().toString();
         tenantId = configuration.getCustomerSpace().getTenantId();
         pathBuilder = new HdfsToS3PathBuilder();
-
+        if (Boolean.TRUE.equals(useEmr)) {
+            pathBuilder.setProtocol("s3a");
+        }
     }
 
     @Override
