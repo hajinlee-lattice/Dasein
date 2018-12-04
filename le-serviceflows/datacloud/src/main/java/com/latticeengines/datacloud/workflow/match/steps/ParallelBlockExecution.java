@@ -41,6 +41,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -158,8 +160,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 updateProgress(reports);
                 checkTerminatedApplications(reports);
             }
-        } catch (Exception e) {
-            // ignore
+        } catch (LedpException ex) {
+            log.error("Match failed!", ex);
+            throw ex;
+        } catch (Exception ex) {
+            log.warn("waitForMatchBlocks got exception!", ex);
         }
     }
 
@@ -379,7 +384,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 .status(terminalStatus) //
                 .errorMessage(errorMsg) //
                 .commit();
-        throw new RuntimeException("Match failed. " + errorMsg);
+        throw new LedpException(LedpCode.LEDP_00008, new String[] { errorMsg });
     }
 
     private void failTheWorkflowWithErrorMessage(String errorMsg, Exception ex) {

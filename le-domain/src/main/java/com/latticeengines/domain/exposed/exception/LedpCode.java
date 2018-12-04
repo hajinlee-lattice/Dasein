@@ -12,6 +12,7 @@ public enum LedpCode {
     LEDP_00005("API call rate limit reached, discarding new request: {0}"), //
     LEDP_00006("Match failed. Please go to match block log to find root cause."), //
     LEDP_00007("Generic rest call error."), //
+    LEDP_00008("Match failed. Error: {0}"), //
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //
