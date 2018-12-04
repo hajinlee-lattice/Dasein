@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @ContextConfiguration(locations = { "classpath:test-datacloud-match-context.xml" })
@@ -113,6 +114,14 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
                 .stream()
                 .map(testCase -> testCase.expectedBook.getId())
                 .collect(Collectors.toList());
+
+        try {
+            // sleep 1s
+            Thread.sleep(TimeUnit.SECONDS.toMillis(1L));
+        } catch (InterruptedException e) {
+            Assert.fail(e.getMessage());
+        }
+
         List<DunsGuideBook> results = service.get(TEST_DATACLOUD_VERSION, dunsList);
         Assert.assertNotNull(results);
         Assert.assertEquals(results.size(), testCases.size());
@@ -134,15 +143,15 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
         return new Object[][] {
                 /* valid duns */
                 { new TestCase(newTestGuideBook(0, 10), true) },
-                { new TestCase(newTestGuideBook(0, 10), false) },
+                { new TestCase(newTestGuideBook(10, 10), false) },
                 { new TestCase(newTestGuideBook(123, 1), true) },
-                { new TestCase(newTestGuideBook(123, 1), false) },
+                { new TestCase(newTestGuideBook(223, 1), false) },
                 { new TestCase(newTestGuideBook(98765, 0), true) },
-                { new TestCase(newTestGuideBook(98765, 0), false) },
+                { new TestCase(newTestGuideBook(88765, 0), false) },
                 /* invalid duns */
                 { new TestCase(newTestGuideBook("aabbabc"), true) },
-                { new TestCase(newTestGuideBook("aabbabc"), false) },
-                { new TestCase(newTestGuideBook("1234567890"), true) },
+                { new TestCase(newTestGuideBook("aabbabcd"), false) },
+                { new TestCase(newTestGuideBook("123456789"), true) },
                 { new TestCase(newTestGuideBook("1234567890"), false) },
         };
     }
@@ -152,14 +161,14 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
         return new Object[][] {
                 // of means Pair.of
                 { newTestCaseList(0, params(Param.TT, Param.TF, Param.FT, Param.FF, Param.TT)) },
-                { newTestCaseList(0, params(Param.TT, Param.TT, Param.TT)) },
-                { newTestCaseList(0, params(Param.FT, Param.FF, Param.TF, Param.FF, Param.TF)) },
-                { newTestCaseList(0, params(Param.FF, Param.FT, Param.TT)) },
-                { newTestCaseList(0, params(Param.FF, Param.FF)) },
-                { newTestCaseList(0, params(Param.TT)) },
-                { newTestCaseList(0, params(Param.TF)) },
-                { newTestCaseList(0, params(Param.FT)) },
-                { newTestCaseList(0, params(Param.FF)) },
+                { newTestCaseList(10, params(Param.TT, Param.TT, Param.TT)) },
+                { newTestCaseList(20, params(Param.FT, Param.FF, Param.TF, Param.FF, Param.TF)) },
+                { newTestCaseList(30, params(Param.FF, Param.FT, Param.TT)) },
+                { newTestCaseList(40, params(Param.FF, Param.FF)) },
+                { newTestCaseList(50, params(Param.TT)) },
+                { newTestCaseList(60, params(Param.TF)) },
+                { newTestCaseList(70, params(Param.FT)) },
+                { newTestCaseList(80, params(Param.FF)) },
                 { newTestCaseList(500, Collections.emptyList()) },
         };
     }
@@ -212,6 +221,7 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
     private DunsGuideBook newTestGuideBook(String duns) {
         DunsGuideBook book = new DunsGuideBook();
         book.setId(duns);
+        book.setItems(Collections.emptyList());
         return book;
     }
 
