@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.lang.String;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,9 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     public void truncateDescriptionLength(List<Map<String, Object>> maps) {
         String postfix = "...";
+        if (CollectionUtils.isEmpty(maps)) {
+            return;
+        }
         for (int i = 0; i < maps.size(); i++) {
             Map<String, Object> map = maps.get(i);
             String description = (String) map.get(PlaymakerConstants.Description);

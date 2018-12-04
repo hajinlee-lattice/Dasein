@@ -71,7 +71,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, offset, maximum);
         }
         else {
-            return null;
+            return new ArrayList<Map<String, Object>>();
         }
     }
 
@@ -163,17 +163,17 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Override
     public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<String> contactIds,
             List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId) {
-        log.info("Atlas getContacts: " + orgInfo.toString() + "\t" + appId.toString() + "\n");
+        //log.info("Atlas getContacts: " + orgInfo.toString() + "\t" + appId.toString() + "\n");
         List<Map<String, Object>> contactList = null;
         List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
-        log.info("Atlas get accountIds: " + launchIds + "\n");
+        //log.info("Atlas get accountIds: " + launchIds + "\n");
         contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, accountIds);
-        log.info("Atlas queried contacts : " + contactList + "\n");
+        //log.info("Atlas queried contacts : " + contactList + "\n");
         if (CollectionUtils.isNotEmpty(contactList)) {
             contactList = contactList.subList(Math.min(contactList.size() - 1, offset),
                     Math.min(maximum, contactList.size()));
         }
-        log.info("Atlas reply contacts : " + contactList + "\n");
+        //log.info("Atlas reply contacts : " + contactList + "\n");
         return contactList;
     }
 
