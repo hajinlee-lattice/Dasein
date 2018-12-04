@@ -12,5 +12,5 @@ insert into VendorConfig(PID, COLLECTING_FREQ, DOMAIN_CHECK_FIELD, DOMAIN_FIELD,
 (3, 2592000, '', '', 1, 'COMPETE'),
 (4, 15552000, '', '', 1, 'FEATURE'),
 (5, 15552000, '', '', 1, 'HPA_NEW'),
-(6, 77762000, '', '', 1, 'ORBINTELLIGENCEV2'),
+(6, 77762000, 'orb_num', 'domain', 1, 'ORBINTELLIGENCEV2'),
 (7, 2592000, 'Rank', 'Domain', 1, 'SEMRUSH');

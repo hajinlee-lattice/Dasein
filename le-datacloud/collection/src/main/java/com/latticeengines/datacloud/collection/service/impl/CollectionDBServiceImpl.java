@@ -128,6 +128,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.ingestion.column.pid}")
     private String ingestionPidCol;
 
+    @Value("${datacloud.collection.orbintelligencev2.timestamp}")
+    private String orbIntelligenceV2TimestampColumn;
+
     private long prevCollectMillis = 0;
     private int prevCollectTasks;
     private long prevIngestionMillis = 0;
@@ -621,6 +624,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 return alexaTimestampColumn;
             case VendorConfig.VENDOR_SEMRUSH:
                 return semrushTimestampColumn;
+            case VendorConfig.VENDOR_ORBI_V2:
+                return orbIntelligenceV2TimestampColumn;
             default:
                 throw new Exception("not implemented");
         }
@@ -699,6 +704,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 return new Schema.Parser().parse(AvroUtils.buildSchema("alexa.avsc"));
             case VendorConfig.VENDOR_SEMRUSH:
                 return new Schema.Parser().parse(AvroUtils.buildSchema("semrush.avsc"));
+            case VendorConfig.VENDOR_ORBI_V2:
+                return new Schema.Parser().parse(AvroUtils.buildSchema("orbIntelligence.avsc"));
             default:
                 throw new Exception("not implemented");
         }
