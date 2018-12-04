@@ -455,33 +455,14 @@ angular
         .state('home.model.ratings.history', {
             url: '/history',
             resolve: {
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
+                ScoringHistory: function($q, $stateParams, ModelRatingsService) {
 
-                    FeatureFlagService.GetAllFlags().then(function(result) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.rating_id;
+
+                    ModelRatingsService.ScoringHistory(id).then(function(result) {
                         deferred.resolve(result);
                     });
-
-                    return deferred.promise;
-                },
-                ScoringHistory: function($q, $stateParams, FeatureFlags, ModelRatingsService) {
-
-                    var cdlIsEnabled = FeatureFlags.EnableCdl,
-                        deferred = $q.defer();
-
-                    if(cdlIsEnabled){
-                        var id = $stateParams.rating_id;
-
-                        ModelRatingsService.ScoringHistory(id).then(function(result) {
-                            deferred.resolve(result);
-                        });
-                    } else {
-                        var id = $stateParams.modelId;
-                        
-                        ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
-                            deferred.resolve(result);
-                        });
-                    }
 
                     return deferred.promise;
                 }

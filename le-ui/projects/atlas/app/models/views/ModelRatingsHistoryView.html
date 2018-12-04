@@ -8,16 +8,12 @@
                 <li class="active">History</li>
             </ul>
 
-            <div
-            	ng-if="vm.cdlIsEnabled"
-            	class="iteration-selection-header">
-
+            <div class="iteration-selection-header">
                 <menu-filter-by config="vm.header.filter" current="vm.currentPage"></menu-filter-by>
                 <menu-sort-by config="vm.header.sort"></menu-sort-by>
             </div>
             <ul 
-                class="history-list"
-                ng-if="vm.cdlIsEnabled">
+                class="history-list">
             	<li ng-repeat="
                     configuration in vm.scoringHistory | 
                     filter: vm.header.filter.value : true | 
@@ -47,44 +43,34 @@
 		                    <div class="bucket-label">{{ bucket.bucket_name }}</div>
 		                    <dl>
 		                        <dt>Lift</dt>
-		                        <dd class="lift">{{vm.math.max(bucket.lift).toFixed(1);}}x</dd>
+		                        <dd class="lift">{{vm.math.max(bucket.lift).toFixed(1)}}x</dd>
 		                        <dt>Score Range</dt>
 		                        <dd>{{bucket.left_bound_score}}-{{bucket.right_bound_score}}</dd>
+
+                                <dt ng-if="vm.predictionType == 'EXPECTED_VALUE'">
+                                    Average<br/>Weighted Revenue
+                                </dt>
+                                <dd ng-if="vm.predictionType == 'EXPECTED_VALUE'">
+                                    ${{ bucket.avg_expected_revenue | number: 2 }}
+                                </dd>
+
+                                <!-- <dt ng-if="vm.predictionType != 'EXPECTED_VALUE'">
+                                    Conversion Rate
+                                </dt>
+                                <dd ng-if="vm.predictionType != 'EXPECTED_VALUE'">
+                                    {{ (((bucket.num_converted * bucket.num_leads) / (bucket.num_leads * bucket.num_leads)) * 100) }}
+                                </dd> -->
 		                    </dl>
 		                </li>
 		            </ul><!-- End .bucket-tiles -->
 		        </li>
 		    </ul><!-- End .history -->
 
-            <ul 
-                class="history-list"
-                ng-if="!vm.cdlIsEnabled">
-                <li ng-repeat="configuration in vm.scoringHistory">
-                    <div class="chart-header clearfix">
-                        <div class="list-data pull-left"><span ng-if="configuration[0].last_modified_by_user">Created by: {{configuration[0].last_modified_by_user}}</span></div>
-                        <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
-                    </div><!-- End .chart-header -->
-                    <ul class="bucket-tiles published buckets-{{configuration.length}}">
-                        <li ng-repeat="bucket in configuration">
-                            <div class="bucket-label">{{bucket.bucket_name}}</div>
-                            <dl>
-                                <dt>Lift</dt>
-                                <dd class="lift">{{vm.math.max(bucket.lift).toFixed(1);}}x</dd>
-                                <dt>Score Range</dt>
-                                <dd>{{bucket.left_bound_score}}-{{bucket.right_bound_score}}</dd>
-                            </dl>
-                        </li>
-                    </ul><!-- End .bucket-tiles -->
-                </li>
-                <h4 ng-if="!vm.cdlIsEnabled">Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
-            </ul><!-- End .history -->
-
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->
     <div 
         class="row"
-        ng-show="max > 1"
-        ng-if="vm.cdlIsEnabled">
+        ng-show="max > 1">
         <div class="ten columns offset-one">
             <pd-pagination-controls 
                 class="pull-right"

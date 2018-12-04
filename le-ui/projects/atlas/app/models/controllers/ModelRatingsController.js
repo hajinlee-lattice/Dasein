@@ -249,7 +249,6 @@ angular.module('lp.models.ratings', [
             bucket.bucketAvgRevenue = bucketRevenue / bucketLeads;
             bucket.num_leads = vm.rightLeads - vm.leftLeads;
 
-
             // bucket.lift = ( bucketAvgRevenue / total average expected revenue across all buckets);
 
             if (vm.predictionType === 'EXPECTED_VALUE'){
@@ -483,7 +482,7 @@ angular.module('lp.models.ratings', [
 })
 .controller('ModelRatingsHistoryController', function (
     $scope, $rootScope, $state, $stateParams, $window,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, ScoringHistory, FeatureFlags) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, RatingsEngineStore, ScoringHistory) {
 
     var vm = this;
     angular.extend(vm, {
@@ -493,8 +492,8 @@ angular.module('lp.models.ratings', [
         tenantName: $stateParams.tenantName,
         data: ModelStore,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
-        ResourceUtility: ResourceUtility,
-        cdlIsEnabled: FeatureFlags.EnableCdl,
+        ResourceUtility: ResourceUtility,        
+        currentRating: RatingsEngineStore.currentRating,
         scoringHistory: ScoringHistory,
         math: window.Math,
         currentPage: 1,
@@ -521,47 +520,22 @@ angular.module('lp.models.ratings', [
     });
 
     vm.init = function() {
+        
+        vm.latest_iteration = vm.currentRating.latest_iteration;
+        vm.predictionType = vm.latest_iteration.AI.predictionType;
 
-        if(vm.cdlIsEnabled){
-            vm.header.filter.unfiltered = vm.scoringHistory;
-            vm.header.filter.filtered = vm.scoringHistory;
+        vm.header.filter.unfiltered = vm.scoringHistory;
+        vm.header.filter.filtered = vm.scoringHistory;
 
-            let uniqueIterations = [...new Set(vm.scoringHistory.map(item => item.iteration).sort())];
-            uniqueIterations.sort(function(a, b) {
-              return b - a;
-            });
+        let uniqueIterations = [...new Set(vm.scoringHistory.map(item => item.iteration).sort())];
+        uniqueIterations.sort(function(a, b) {
+          return b - a;
+        });
 
-            angular.forEach(uniqueIterations, function(iterationOption){
-                var iterationFilter = { label: 'Iteration ' + iterationOption, action: { iteration: iterationOption } }
-                vm.header.filter.items.push(iterationFilter);    
-            });
-
-        } else {
-
-            if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
-                vm.modelType = "Leads";
-            } else {
-                vm.modelType = "Accounts";
-            }
-
-        }
-
-        // vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
-
-         // Set value for total leads in set
-        // This will need to get changed when we're saving configurations
-        // vm.historyTotalLeads = pluckDeepKey("num_leads", vm.publishedHistory);
-
-        // Add values for a specific key in object  
-        // function pluckDeepKey(key, obj) {
-        //     if (_.has(obj, key)) {
-        //         return obj[key];
-        //     }
-        //     return _.reduce(_.flatten(_.map(obj, function(v) {
-        //         return _.isObject(v) ? pluckDeepKey(key, v) : [];
-        //     }), false), function(a,b) { return a + b });
-        // }
-
+        angular.forEach(uniqueIterations, function(iterationOption){
+            var iterationFilter = { label: 'Iteration ' + iterationOption, action: { iteration: iterationOption } }
+            vm.header.filter.items.push(iterationFilter);    
+        }); 
     };
 
     vm.init();

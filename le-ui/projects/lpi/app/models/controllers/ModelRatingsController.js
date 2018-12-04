@@ -486,7 +486,7 @@ angular.module('lp.models.ratings', [
 })
 .controller('ModelRatingsHistoryController', function (
     $scope, $rootScope, $state, $stateParams, $window,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, ScoringHistory, FeatureFlags) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, ScoringHistory) {
 
     var vm = this;
     angular.extend(vm, {
@@ -497,7 +497,6 @@ angular.module('lp.models.ratings', [
         data: ModelStore,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         ResourceUtility: ResourceUtility,
-        cdlIsEnabled: FeatureFlags.EnableCdl,
         scoringHistory: ScoringHistory,
         math: window.Math,
         currentPage: 1,
@@ -524,29 +523,10 @@ angular.module('lp.models.ratings', [
     });
 
     vm.init = function() {
-
-        if(vm.cdlIsEnabled){
-            vm.header.filter.unfiltered = vm.scoringHistory;
-            vm.header.filter.filtered = vm.scoringHistory;
-
-            let uniqueIterations = [...new Set(vm.scoringHistory.map(item => item.iteration).sort())];
-            uniqueIterations.sort(function(a, b) {
-              return b - a;
-            });
-
-            angular.forEach(uniqueIterations, function(iterationOption){
-                var iterationFilter = { label: 'Iteration ' + iterationOption, action: { iteration: iterationOption } }
-                vm.header.filter.items.push(iterationFilter);    
-            });
-
+        if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
+            vm.modelType = "Leads";
         } else {
-
-            if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
-                vm.modelType = "Leads";
-            } else {
-                vm.modelType = "Accounts";
-            }
-
+            vm.modelType = "Accounts";
         }
 
         // vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
