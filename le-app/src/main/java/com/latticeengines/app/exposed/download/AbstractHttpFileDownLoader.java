@@ -119,6 +119,11 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     }
 
     private InputStream processDates(InputStream inputStream) {
+        // process dates for CSV files only
+        if (!mimeType.equals("application/csv")) {
+            return inputStream;
+        }
+
         // todo: hard-coded date format. Need to be replaced in date attribute
         // phase 2.
         final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
@@ -204,7 +209,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                 }
                             }
                             for (String val : recordAsArray) {
-                                printer.print(val != null ? String.valueOf(val) : "");
+                                printer.print(val != null ? val : "");
                             }
                             printer.println();
                         } catch (IOException exc) {
@@ -258,7 +263,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                     + nameToDisplayNameMap.get(attrName));
                             s[2] = nameToDisplayNameMap.get(attrName);
                             for (String val : s) {
-                                printer.print(val != null ? String.valueOf(val) : "");
+                                printer.print(val != null ? val: "");
                             }
                             printer.println();
                         } else {
@@ -325,7 +330,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                     + nameToDisplayNameMap.get(attrName));
                             s[1] = nameToDisplayNameMap.get(attrName);
                             for (String val : s) {
-                                printer.print(val != null ? String.valueOf(val) : "");
+                                printer.print(val != null ? val : "");
                             }
                             printer.println();
                         } else {
