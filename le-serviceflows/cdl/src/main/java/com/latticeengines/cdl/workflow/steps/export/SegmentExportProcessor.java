@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -22,13 +22,12 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.flink.util.CollectionUtil;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.Counter;
@@ -365,7 +364,7 @@ public abstract class SegmentExportProcessor {
                     .getCustomDisplayNames(tenantId);
             if (customDisplayNameAttrs != null) {
                 List<AttrConfig> renderedConfigList = customDisplayNameAttrs.get(business);
-                if (!CollectionUtil.isNullOrEmpty(renderedConfigList)) {
+                if (!CollectionUtils.isEmpty(renderedConfigList)) {
                     renderedConfigList.forEach(config -> {
                         if (StringUtil.isNotBlank(
                                 config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class))) {
