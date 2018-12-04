@@ -215,19 +215,22 @@ public class ModelingServiceExecutor {
                 algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " ");
             }
             String[] pipelineProperties = new String[] { //
-                    "featureselectionstep.enabled=true", //
-                    "assignconversionratetoallcategoricalvalues.enabled=true", //
-                    "enumeratedcolumntransformstep.enabled=false", //
-                    "categoricalgroupingstep.enabled=true", //
-                    "unmatchedselectionstep.enabled=true" //
+                    String.format("featureselectionstep.enabled=%s", true), //
+                    String.format("assignconversionratetoallcategoricalvalues.enabled=%s", true), //
+                    String.format("enumeratedcolumntransformstep.enabled=%s", false), //
+                    String.format("categoricalgroupingstep.enabled=%s", !builder.isSkipStandardTransform()), //
+                    String.format("unmatchedselectionstep.enabled=%s", true) //
             };
+
+            log.info(String.format("Model: %s, Pipeline properties: %s", builder.modelName,
+                    JsonUtils.serialize(pipelineProperties)));
             algorithm.setPipelineProperties(StringUtils.join(pipelineProperties, " "));
         }
     }
 
     public String model() throws Exception {
-        if (builder.cdlModel) {
-            return cdlModel();
+        if (builder.isCrossSellModel) {
+            return crossSellModel();
         }
 
         Algorithm algorithm = getAlgorithm();
@@ -253,7 +256,7 @@ public class ModelingServiceExecutor {
         return submitModel(model);
     }
 
-    public String cdlModel() throws Exception {
+    public String crossSellModel() throws Exception {
         Algorithm algorithm = getCdlAlgorithm();
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
@@ -447,8 +450,9 @@ public class ModelingServiceExecutor {
         private String targetTableName;
         private String productType;
         private String transformationGroupName;
+        private boolean skipStandardTransform;
         private boolean v2ProfilingEnabled;
-        private boolean cdlModel;
+        private boolean isCrossSellModel;
         private boolean expectedValue;
         private Predefined predefinedColumnSelection;
         private String predefinedSelectionVersion;
@@ -481,8 +485,8 @@ public class ModelingServiceExecutor {
             return this;
         }
 
-        public Builder cdlModel(boolean cdlModel) {
-            this.setCdlModel(cdlModel);
+        public Builder crossSellModel(boolean isCrossSellModel) {
+            this.setCrossSellModel(isCrossSellModel);
             return this;
         }
 
@@ -493,6 +497,11 @@ public class ModelingServiceExecutor {
 
         public Builder transformationGroupName(String transformationGroupName) {
             this.setTransformationGroupName(transformationGroupName);
+            return this;
+        }
+
+        public Builder skipStandardTransform(boolean skipStandardTransform) {
+            this.setSkipStandardTransform(skipStandardTransform);
             return this;
         }
 
@@ -1019,6 +1028,14 @@ public class ModelingServiceExecutor {
             this.transformationGroupName = transformationGroupName;
         }
 
+        public boolean isSkipStandardTransform() {
+            return skipStandardTransform;
+        }
+
+        public void setSkipStandardTransform(boolean skipStandardTransform) {
+            this.skipStandardTransform = skipStandardTransform;
+        }
+
         public boolean isV2ProfilingEnabled() {
             return v2ProfilingEnabled;
         }
@@ -1027,12 +1044,12 @@ public class ModelingServiceExecutor {
             this.v2ProfilingEnabled = v2ProfilingEnabled;
         }
 
-        public boolean isCdlModel() {
-            return cdlModel;
+        public boolean isCrossSellModel() {
+            return isCrossSellModel;
         }
 
-        public void setCdlModel(boolean cdlModel) {
-            this.cdlModel = cdlModel;
+        public void setCrossSellModel(boolean isCrossSellModel) {
+            this.isCrossSellModel = isCrossSellModel;
         }
 
         public boolean isExpectedValue() {

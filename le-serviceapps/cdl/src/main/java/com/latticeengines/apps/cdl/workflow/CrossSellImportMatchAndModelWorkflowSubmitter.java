@@ -138,7 +138,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
-                .cdlModel(true) //
+                .crossSellModel(true) //
                 .setUniqueKeyColumn(InterfaceName.__Composite_Key__.name()) //
                 .cdlMultiModel(true) //
                 .setEventColumn(InterfaceName.Target.name()) //

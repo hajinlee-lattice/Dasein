@@ -17,8 +17,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({
-        @Type(value = CreatePMMLModelConfiguration.class, name = "CreatePMMLModelConfiguration"), })
+@JsonSubTypes({ @Type(value = CreatePMMLModelConfiguration.class, name = "CreatePMMLModelConfiguration"), })
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @NotEmptyString
     @NotNull
@@ -61,7 +60,7 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean v2ProfilingEnabled;
 
-    private boolean cdlModel = false;
+    private boolean isCrossSellModel = false;
 
     private boolean expectedValue = false;
 
@@ -74,6 +73,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private String aiModelId;
 
     private String ratingEngineId;
+
+    private boolean skipStandardTransform;
 
     @JsonProperty
     private String idColumnName = InterfaceName.Id.name();
@@ -247,12 +248,12 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     }
 
     @JsonProperty
-    public boolean isCdlModel() {
-        return cdlModel;
+    public boolean isCrossSellModel() {
+        return isCrossSellModel;
     }
 
-    public void setCdlModel(boolean cdlModel) {
-        this.cdlModel = cdlModel;
+    public void setCrossSellModel(boolean isCrossSellModel) {
+        this.isCrossSellModel = isCrossSellModel;
     }
 
     public boolean isExpectedValue() {
@@ -321,4 +322,14 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     public void setIdColumnName(String idColumnName) {
         this.idColumnName = idColumnName;
     }
+
+    @JsonProperty
+    public boolean isSkipStandardTransform() {
+        return skipStandardTransform;
+    }
+
+    public void setSkipStandardTransform(boolean skipStandardTransform) {
+        this.skipStandardTransform = skipStandardTransform;
+    }
+
 }

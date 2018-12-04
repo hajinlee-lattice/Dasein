@@ -326,6 +326,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder skipStandardTransform(boolean skipTransform) {
             addStandardAttributes.setSkipStep(skipTransform);
             generateAIRating.skipStandardTransform(skipTransform);
+            modelWorkflowBuilder.skipStandardTransform(skipTransform);
             return this;
         }
 

@@ -299,9 +299,9 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
-        public Builder cdlModel(boolean isCdlModel) {
-            cdlModelWorkflowBuilder.cdlModel(isCdlModel);
-            cdlEventTable.setCrossSell(isCdlModel);
+        public Builder crossSellModel(boolean isCrossSellModel) {
+            cdlModelWorkflowBuilder.setCrossSellModel(isCrossSellModel);
+            cdlEventTable.setCrossSell(isCrossSellModel);
             return this;
         }
 

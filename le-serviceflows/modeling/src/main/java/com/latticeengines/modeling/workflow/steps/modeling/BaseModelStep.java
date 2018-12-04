@@ -79,7 +79,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         if (configuration.isExpectedValue()) {
             targets.add("Revenue: " + InterfaceName.__Revenue.name());
         }
-        if (configuration.isCdlModel()) {
+        if (configuration.isCrossSellModel()) {
             return targets.toArray(new String[targets.size()]);
         }
 
@@ -143,6 +143,11 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
     protected ModelingServiceExecutor createModelingServiceExecutor(Table eventTable, Attribute currentEvent)
             throws Exception {
+        return createModelingServiceExecutor(eventTable, currentEvent, false);
+    }
+
+    protected ModelingServiceExecutor createModelingServiceExecutor(Table eventTable, Attribute currentEvent,
+            boolean skipStandardTransform) throws Exception {
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
 
         List<String> excludedColumns = new ArrayList<>();
@@ -195,8 +200,9 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .trainingTableName(getConfiguration().getTrainingTableName()) //
                 .targetTableName(getConfiguration().getTargetTableName()) //
                 .transformationGroupName(getTransformationGroupName()) //
+                .skipStandardTransform(skipStandardTransform) //
                 .enableV2Profiling(configuration.isV2ProfilingEnabled()) //
-                .cdlModel(configuration.isCdlModel()) //
+                .crossSellModel(configuration.isCrossSellModel()) //
                 .expectedValue(configuration.isExpectedValue()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .moduleName(configuration.getModuleName()) //

@@ -169,8 +169,8 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
             return this;
         }
 
-        public Builder cdlModel(boolean isCdlModel) {
-            model.setCdlModel(isCdlModel);
+        public Builder setCrossSellModel(boolean isCrossSellModel) {
+            model.setCrossSellModel(isCrossSellModel);
             return this;
         }
 

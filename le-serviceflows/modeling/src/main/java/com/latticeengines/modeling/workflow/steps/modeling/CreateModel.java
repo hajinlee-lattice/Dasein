@@ -36,6 +36,7 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
         Table eventTable = getEventTable();
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         List<Attribute> events = eventTable.getAttributes(LogicalDataType.Event);
+        boolean skipStandardTransform = getConfiguration().isSkipStandardTransform();
 
         if (events == null || events.isEmpty()) {
             throw new IllegalStateException("There is no event to create a model on top of");
@@ -48,7 +49,8 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
 
         for (Attribute event : events) {
             try {
-                ModelingServiceExecutor modelExecutor = createModelingServiceExecutor(eventTable, event);
+                ModelingServiceExecutor modelExecutor = createModelingServiceExecutor(eventTable, event,
+                        skipStandardTransform);
                 String modelAppId = modelExecutor.model();
                 log.info("Submitted a model job " + modelAppId);
                 modelApplicationIdToEventColumn.put(modelAppId, event.getName());

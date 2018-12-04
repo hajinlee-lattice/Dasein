@@ -78,8 +78,7 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
                 List<TransformDefinition> stdTransformDefns) {
-            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName,
-                    transformationGroup.getName());
+            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
             return this;
         }
 
@@ -107,8 +106,7 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
         }
 
         public Builder excludePublicDomain(boolean excludePublicDomains) {
-            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
-                    excludePublicDomains);
+            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
             return this;
         }
 
@@ -185,12 +183,16 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
         public ModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
 
-            configuration.setContainerConfiguration("modelWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("modelWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(model);
             configuration.add(export);
             return configuration;
         }
 
+        public Builder skipStandardTransform(boolean skipStandardTransform) {
+            model.setSkipStandardTransform(skipStandardTransform);
+            return this;
+        }
     }
 }
