@@ -42,6 +42,13 @@ public class HdfsToS3PathBuilder {
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
 
+    public HdfsToS3PathBuilder(){
+    }
+
+    public HdfsToS3PathBuilder(String protocol) {
+        this.protocol = protocol;
+    }
+
     // Hdfs Atlas
     public String getHdfsAtlasDir(String pod, String tenantId) {
         return String.format(hdfsAtlasDir, pod, tenantId, tenantId);

@@ -48,6 +48,9 @@ public class FeatureImportanceUtil {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Inject
     private Configuration yarnConfiguration;
 
@@ -100,7 +103,8 @@ public class FeatureImportanceUtil {
     }
 
     private String getS3Path(String customerSpace, String featureImportanceFilePath) throws IOException {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         String s3Path = pathBuilder.exploreS3FilePath(featureImportanceFilePath, podId, space.toString(),
                 space.getTenantId(), s3Bucket);

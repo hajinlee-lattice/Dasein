@@ -102,6 +102,9 @@ public class ModelResource {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Resource(name = "distCpConfiguration")
     private Configuration distCpConfiguration;
 
@@ -194,7 +197,8 @@ public class ModelResource {
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
         String pivotFilePath = modelSummary.getPivotArtifactPath();
         try {
-            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+            String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(protocol);
             if (StringUtils.isNotBlank(pivotFilePath) && !HdfsUtils.fileExists(distCpConfiguration, pivotFilePath)) {
                 String s3Path = builder.convertAtlasMetadata(pivotFilePath, podId, tenantId, s3Bucket);
                 HdfsUtils.copyFiles(distCpConfiguration, s3Path, pivotFilePath);

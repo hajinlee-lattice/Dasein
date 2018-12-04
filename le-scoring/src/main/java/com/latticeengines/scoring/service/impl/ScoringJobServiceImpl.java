@@ -174,7 +174,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     public void syncModelsFromS3ToHdfs(String tenant) {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         String customer = CustomerSpace.parse(tenant).toString();
         String tenantId = CustomerSpace.parse(tenant).getTenantId();
         String s3ModelsDir = pathBuilder.getS3AnalyticsModelDir(s3Bucket, tenantId);

@@ -79,6 +79,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     @Value("${aws.customer.s3.bucket}")
     private String customerS3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @BeforeClass(groups = { "end2end", "manual", "precheckin" })
     public void setup() {
         testType = CustomEventModelingType.CDL;
@@ -106,7 +109,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     private void moveCustomerDataToS3() {
         try {
-            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+            String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(protocol);
             CustomerSpace space = CustomerSpace.parse(mainTestTenant.getId());
             String podId = CamilleEnvironment.getPodId();
             String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());

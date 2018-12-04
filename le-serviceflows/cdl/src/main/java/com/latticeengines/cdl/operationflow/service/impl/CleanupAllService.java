@@ -67,6 +67,9 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Override
     public Map<String, Long> invoke(CleanupAllConfiguration config) {
         Map<String, Long> report;
@@ -244,7 +247,8 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
 
     private void cleanupS3(String customSpace, List<TableRoleInCollection> roles,
                                  List<DataCollection.Version> versions) {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         try {
             versions.forEach(version -> {
                 roles.forEach(role -> {

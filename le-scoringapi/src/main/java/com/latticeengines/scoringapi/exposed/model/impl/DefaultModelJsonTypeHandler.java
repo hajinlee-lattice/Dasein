@@ -67,6 +67,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     private Map<String, FieldSchema> defaultFieldSchemaForMatch;
 
     static {
@@ -127,7 +130,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) throws IOException {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         CustomerSpace space = CustomerSpace.parse(pathBuilder.getCustomerFromHdfsPath(hdfsPath));
         return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, space.toString(), space.getTenantId(),
                 podId, s3Bucket);

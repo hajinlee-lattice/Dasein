@@ -42,6 +42,9 @@ public class SourceFileServiceImpl implements SourceFileService {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Override
     public SourceFile getByTableNameCrossTenant(String tableName) {
         return sourceFileEntityMgr.getByTableName(tableName);
@@ -127,7 +130,8 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     private String getS3Path(String customerSpace, String hdfsPath) throws IOException {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, podId, space.toString(),
                 space.getTenantId(), s3Bucket);

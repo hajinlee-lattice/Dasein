@@ -49,10 +49,6 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
         if (!Boolean.TRUE.equals(useEmr) && useAmbari) {
             properties.setProperty("yarn.application.classpath", ambariYarnCp);
             properties.setProperty("mapreduce.application.classpath", ambariMrCp);
-
-        } else if (Boolean.TRUE.equals(useEmr)) {
-            properties.setProperty("yarn.application.classpath", emrYarnCp);
-            properties.setProperty("mapreduce.application.classpath", emrMrCp);
         }
         return (YarnConfiguration) ConfigurationUtils.createFrom((Configuration) baseConfiguration, properties);
     }
@@ -62,6 +58,10 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
         Properties properties = getYarnProperties(masterIp);
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
         properties.forEach((k, v) -> yarnConfiguration.set((String) k, (String) v));
+        if (Boolean.TRUE.equals(useEmr)) {
+            properties.setProperty("yarn.application.classpath", emrYarnCp);
+            properties.setProperty("mapreduce.application.classpath", emrMrCp);
+        }
         return yarnConfiguration;
     }
 }
