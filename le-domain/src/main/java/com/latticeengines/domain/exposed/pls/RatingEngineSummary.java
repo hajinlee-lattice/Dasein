@@ -58,6 +58,8 @@ public class RatingEngineSummary {
     private boolean isPublished;
     @JsonProperty("deleted")
     private Boolean deleted;
+    @JsonProperty("completed")
+    private Boolean completed;
 
     public RatingEngineSummary() {
     }
@@ -236,6 +238,14 @@ public class RatingEngineSummary {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
     }
 
     @Override

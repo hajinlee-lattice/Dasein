@@ -75,6 +75,16 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setPublishedIterationId(
                 ratingEngine.getPublishedIteration() != null ? ratingEngine.getPublishedIteration().getId() : null);
 
+        if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
+                || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
+            Boolean completed = ratingEngineSummary.getScoringIterationId() != null ? true
+                    : ((AIModel) ratingEngine.getLatestIteration())
+                            .getModelingJobStatus() != JobStatus.PENDING;
+            ratingEngineSummary.setCompleted(completed);
+        } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED){
+            ratingEngineSummary.setCompleted(true);
+        }
+
         MetadataSegment segment = ratingEngine.getSegment();
         if (segment != null) {
             ratingEngineSummary.setAccountsInSegment(segment.getAccounts());
