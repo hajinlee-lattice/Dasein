@@ -68,25 +68,27 @@ angular.module('lp.jobs.row.subjobs', [])
                     return 'Failed';
                 }
                 if (subjob.jobStatus === 'Running') {
+                    console.log('RUNNING', subjob.jobStatus, subjob);
                     return 'In Progress';
-                }
-
-                if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
-                    return 'In Progress';
-                }
-                if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows')) {
-                    return 'Failed';
                 }
                 if (getPayloadValue(subjob, 'total_rows') === getPayloadValue(subjob, 'imported_rows') && subjob.jobStatus === 'Completed') {
+                    // console.log(subjob.jobStatus, ' == ',getPayloadValue(subjob, 'total_rows'), ' -- ',getPayloadValue(subjob, 'imported_rows'));
                     return 'Success';
                 }
                 if (getPayloadValue(subjob, 'imported_rows') < getPayloadValue(subjob, 'total_rows') && subjob.jobStatus === 'Completed') {
                     return 'Partial Success';
                 }
+                if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
+                    console.log('IN PROGRESS ',subjob, getPayloadValue(subjob, 'total_rows'), getPayloadValue(subjob, 'imported_rows'), subjob.jobStatus);
+                    return 'In Progress';
+                }
+                if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows')) {
+                    return 'Failed';
+                }
                 return subjob.jobStatus;
 
 
-            }
+            };
 
             function getPayloadValue(subjob, field) {
                 if (subjob.reports && subjob.reports.length > 0) {

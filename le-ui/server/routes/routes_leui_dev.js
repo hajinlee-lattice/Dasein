@@ -102,8 +102,6 @@ module.exports = [{
         '/insights': '/dist',
         '/insights/app': '/app',
         '/insights/assets': '/assets',
-        '/insights/app': '/app',
-        '/insights/assets': '/assets',
         '/insights/lib': '/lib'
     }
 },{    
@@ -162,33 +160,6 @@ module.exports = [{
         '/dante/resources': '/assets/resources',
         '/dante/styles': '/assets/styles',
         '/dante/images': '/assets/images'
-    }
-},{    
-    path: '/projects/widgets',
-    html5mode: true,
-    pages: {
-        '/widgets/': 'index.html',
-        '/widgets/index': 'index.html'
-    },
-    folders: {
-        '/widgets/app': '/app',
-        '/widgets/assets': '/assets',
-        '/widgets/components': '/components',
-        '/widgets/css': '/css',
-        '/widgets/libs': '/node_modules',
-        '/widgets/sass': '/sass',
-        '/widgets/tests': '/tests'
-    }
-},{    
-    path: '/projects/widgetsdemo',
-    html5mode: true,
-    pages: {
-        '/widgetsdemo/': '/dist/index.html',
-        '/widgetsdemo/index': '/dist/indexwp.html'
-    },
-    folders: {
-        '/widgetsdemo' : '/dist',
-        '/dist': '/dist',
     }
 },{    
     path: '/projects/uicomponents',
