@@ -13,6 +13,7 @@ public enum MatchKey {
     DUNS, //
     LookupId, // for CDL lookup, can be AccountId or one of the external lookup
               // ids
-    LatticeAccountID; // internal id for quicker lookup in curated AccountMaster
-
+    LatticeAccountID, // internal id for quicker lookup in curated AccountMaster
+    SystemId, // Use one MatchKey for all system IDs, eg. (user provided) AccountId, or external ID such as SfdcId,
+              // MktoId, etc.
 }

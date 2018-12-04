@@ -170,6 +170,27 @@ public class MatchInput implements Fact, Dimension {
     // END FLAGS
     // ====================
 
+    // ====================
+    // BEGIN CDL MATCH PROPERTIES
+    // ====================
+
+    @JsonProperty("OperationalMode")
+    private OperationalMode operationalMode;
+
+    @JsonProperty("AllocateId")
+    private boolean allocateId;
+
+    @JsonProperty("DecisionGraphCluster")
+    private String decisionGraphCluster;
+
+    @JsonProperty("EntityKeyMap")
+    private List<EntityKeyMap> entityKeyMap;
+
+    // ====================
+    // END CDL MATCH PROPERTIES
+    // ====================
+
+
     public MatchRequestSource getRequestSource() {
         return requestSource;
     }
@@ -532,6 +553,24 @@ public class MatchInput implements Fact, Dimension {
         this.matchResultPath = matchResultPath;
     }
 
+    public OperationalMode getOperationalMode() { return operationalMode; }
+
+    public void setOperationalMode(OperationalMode operationalMode) { this.operationalMode = operationalMode; }
+
+    public boolean isAllocateId() { return allocateId; }
+
+    public void setAllocateId(boolean allocateId) { this.allocateId = allocateId; }
+
+    public String getDecisionGraphCluster() { return decisionGraphCluster; }
+
+    public void setDecisionGraphCluster(String decisionGraphCluster) {
+        this.decisionGraphCluster = decisionGraphCluster;
+    }
+
+    public List<EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
+
+    public void setEntityKeyMap(List<EntityKeyMap> entityKeyMap) { this.entityKeyMap = entityKeyMap; }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -544,5 +583,32 @@ public class MatchInput implements Fact, Dimension {
         deepCopy.setNumSelectedColumns(numSelectedColumns);
         return deepCopy;
     }
+
+    public static class EntityKeyMap {
+
+        @JsonProperty("BusinessEntity")
+        private String businessEntity;
+
+        @JsonProperty("KeyMap")
+        private Map<MatchKey, List<String>> keyMap;
+
+        // The order of System IDs in this list matters and must match the order in the Key Map above.
+        @JsonProperty("SystemIdPriority")
+        private List<String> systemIdPriority;
+
+        public String getBusinessEntity() { return businessEntity; }
+
+        public void setBusinessEntity(String businessEntity) { this.businessEntity = businessEntity; }
+
+        public Map<MatchKey, List<String>> getKeyMap() { return keyMap; }
+
+        public void setKeyMap(Map<MatchKey, List<String>> keyMap) { this.keyMap = keyMap; }
+
+        public List<String> getSystemIdPriority() { return systemIdPriority; }
+
+        public void setSystemIdPriority(List<String> systemIdPriority) { this.systemIdPriority = systemIdPriority; }
+
+    }
+
 
 }
