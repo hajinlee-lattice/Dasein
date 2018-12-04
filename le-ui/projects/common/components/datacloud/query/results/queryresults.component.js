@@ -386,6 +386,8 @@ angular.module('common.datacloud.query.results', [
     }
 
     vm.launchUnscoredClick = function() {
+        console.log({valid: (vm.topNCount || vm.launchUnscored), topNCount: vm.topNCount, launchUnscored: vm.launchUnscored});
+        PlaybookWizardStore.setValidation('targets', (vm.topNCount || vm.launchUnscored));
         PlaybookWizardStore.setLaunchUnscored(vm.launchUnscored);
     }
 
