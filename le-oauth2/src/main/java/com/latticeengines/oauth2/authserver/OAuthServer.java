@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
+import com.latticeengines.oauth2db.exposed.services.LatticeAuthenticationKeyGenerator;
+import com.latticeengines.oauth2db.exposed.services.LatticeTokenServices;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 
 @Configuration

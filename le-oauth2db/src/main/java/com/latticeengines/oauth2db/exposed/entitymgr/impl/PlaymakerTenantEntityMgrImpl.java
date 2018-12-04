@@ -1,11 +1,19 @@
 package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
+import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.sql.DataSource;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +26,10 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.dao.PlaymakerTenantDao;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
+import com.latticeengines.oauth2db.exposed.services.LatticeAuthenticationKeyGenerator;
+import com.latticeengines.oauth2db.exposed.services.LatticeTokenServices;
+import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-
 
 @Component("playmakerTenantEntityMgr")
 public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
@@ -31,6 +41,12 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Autowired
     private OAuthUserEntityMgr userEngityMgr;
+
+    @Resource(name = "dataSourceOauth2")
+    private DataSource dataSource;
+
+    @Inject
+    private LatticeAuthenticationKeyGenerator authenticationKeyGenerator;
 
     @Override
     @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
@@ -117,9 +133,23 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     @Override
     @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void deleteByTenantName(String tenantName) {
+        deleteTokens(tenantName);
         tenantDao.deleteByTenantName(tenantName);
         userEngityMgr.delete(tenantName);
         log.info("Deleted the following tenantName=" + tenantName);
+    }
+
+    private void deleteTokens(String tenantName) {
+        JdbcTokenStore tokenStore = new JsonJdbcTokenStore(dataSource);
+        tokenStore.setAuthenticationKeyGenerator(authenticationKeyGenerator);
+        LatticeTokenServices tokenServices = new LatticeTokenServices(tokenStore);
+        tokenServices.setTokenStore(tokenStore);
+        Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByUserName(tenantName);
+        if (CollectionUtils.isNotEmpty(tokens)) {
+            tokens.stream().forEach(token -> {
+                tokenServices.revokeToken(token.getValue());
+            });
+        }
     }
 
     @Override
