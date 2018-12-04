@@ -140,6 +140,7 @@ public abstract class SegmentExportProcessor {
         List<Attribute> configuredPurHistoryAttributes = configuredBusEntityAttrMap.get(BusinessEntity.PurchaseHistory);
         List<Attribute> configuredCuratedAccAttributes = configuredBusEntityAttrMap.get(BusinessEntity.CuratedAccount);
 
+
         if (exportType == MetadataSegmentExportType.ACCOUNT
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
@@ -210,7 +211,7 @@ public abstract class SegmentExportProcessor {
 
             Map<String, String> customizedNameMapping = getCustomizedDisplayNames(tenant.getId(),
                     BusinessEntity.Contact);
-            configuredAccountAttributes.stream().forEach(attr -> {
+            configuredContactAttributes.stream().forEach(attr -> {
                 if (customizedNameMapping.containsKey(attr.getName())) {
                     attr.setDisplayName(customizedNameMapping.get(attr.getName()));
                 }
@@ -362,9 +363,9 @@ public abstract class SegmentExportProcessor {
         try {
             Map<BusinessEntity, List<AttrConfig>> customDisplayNameAttrs = cdlAttrConfigProxy
                     .getCustomDisplayNames(tenantId);
-            if (customDisplayNameAttrs != null) {
+            if (MapUtils.isNotEmpty(customDisplayNameAttrs)) {
                 List<AttrConfig> renderedConfigList = customDisplayNameAttrs.get(business);
-                if (!CollectionUtils.isEmpty(renderedConfigList)) {
+                if (CollectionUtils.isNotEmpty(renderedConfigList)) {
                     renderedConfigList.forEach(config -> {
                         if (StringUtil.isNotBlank(
                                 config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class))) {
@@ -374,6 +375,7 @@ public abstract class SegmentExportProcessor {
                     });
                 }
             }
+            log.info("Customer display name: \n" + nameToDisplayNameMap);
         } catch (LedpException e) {
             log.warn("Got LedpException " + ExceptionUtils.getStackTrace(e));
             return new HashMap<>();
