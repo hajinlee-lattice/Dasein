@@ -79,7 +79,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         }
         for (String simpleTable : redshift_table) {
             log.info("drop table : " + simpleTable);
-//            redshiftService.dropTable(simpleTable);
+            redshiftService.dropTable(simpleTable);
         }
     }
 
