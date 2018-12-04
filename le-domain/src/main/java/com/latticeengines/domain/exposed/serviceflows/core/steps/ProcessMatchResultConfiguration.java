@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfiguration {
 
@@ -14,11 +13,11 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
     @JsonProperty("keep_lid")
     private boolean keepLid;
 
-    @JsonProperty("id_column_name")
-    private String idColumnName = InterfaceName.Id.name();
-
     @JsonProperty("match_group_id")
     private String matchGroupId;
+
+    @JsonProperty("join_internal_id")
+    private boolean joinInternalId;
 
     public ProcessMatchResultConfiguration() {
         setBeanName("parseMatchResult");
@@ -48,14 +47,6 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
         this.keepLid = keepLid;
     }
 
-    public String getIdColumnName() {
-        return idColumnName;
-    }
-
-    public void setIdColumnName(String idColumnName) {
-        this.idColumnName = idColumnName;
-    }
-
     public String getMatchGroupId() {
         return matchGroupId;
     }
@@ -64,4 +55,11 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
         this.matchGroupId = matchGroupId;
     }
 
+    public boolean isJoinInternalId() {
+        return joinInternalId;
+    }
+
+    public void setJoinInternalId(boolean joinInternalId) {
+        this.joinInternalId = joinInternalId;
+    }
 }

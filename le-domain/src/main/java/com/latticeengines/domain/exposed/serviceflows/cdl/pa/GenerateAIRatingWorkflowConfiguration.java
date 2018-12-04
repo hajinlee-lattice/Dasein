@@ -143,13 +143,13 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
-        public Builder cdlMultiModel(boolean cdlMultiMode) {
-            combineInputWithScores.setCdlMultiModel(cdlMultiMode);
+        public Builder matchJoinInternalId(boolean joinInternalId) {
+            match.joinWithInternalId(joinInternalId);
             return this;
         }
 
-        public Builder idColumnName(String idColumnName) {
-            match.idColumnName(idColumnName);
+        public Builder cdlMultiModel(boolean cdlMultiMode) {
+            combineInputWithScores.setCdlMultiModel(cdlMultiMode);
             return this;
         }
 
@@ -261,7 +261,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         private void setMatchConfig() {
             if (!CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
-                match.idColumnName(InterfaceName.__Composite_Key__.name());
+                match.matchGroupId(InterfaceName.__Composite_Key__.name());
             }
             match.matchType(MatchStepConfiguration.LDC);
             match.excludePublicDomains(false);

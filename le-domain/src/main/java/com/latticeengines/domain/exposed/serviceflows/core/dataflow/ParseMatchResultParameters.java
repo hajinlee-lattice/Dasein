@@ -25,10 +25,10 @@ public class ParseMatchResultParameters extends DataFlowParameters {
     @JsonProperty
     public boolean keepLid;
 
-    @JsonProperty()
-    public String idColumnName;
-
-    @JsonProperty()
+    @JsonProperty
     public String matchGroupId;
+
+    @JsonProperty
+    public boolean joinInternalId;
 
 }

@@ -202,10 +202,10 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
-        public Builder idColumnName(String idColumnName) {
-            matchDataCloudWorkflowBuilder.idColumnName(idColumnName);
-            matchAccountWithIdBuilder.idColumnName(idColumnName);
-            matchAccountWithoutIdBuilder.idColumnName(idColumnName);
+        public Builder matchGroupId(String matchGroupId) {
+            matchDataCloudWorkflowBuilder.matchGroupId(matchGroupId);
+            matchAccountWithIdBuilder.matchGroupId(matchGroupId);
+            matchAccountWithoutIdBuilder.matchGroupId(matchGroupId);
             return this;
         }
 
@@ -213,6 +213,7 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             matchAccountWithIdBuilder.matchType(MatchStepConfiguration.LDC);
             matchAccountWithoutIdBuilder.matchType(MatchStepConfiguration.LDC);
             matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
+            matchDataCloudWorkflowBuilder.joinWithInternalId(true);
 
             configuration.setContainerConfiguration("customEventMatchWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

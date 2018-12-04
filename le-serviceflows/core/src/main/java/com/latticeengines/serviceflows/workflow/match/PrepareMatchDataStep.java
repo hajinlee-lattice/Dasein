@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -65,8 +64,7 @@ public class PrepareMatchDataStep extends RunDataFlow<PrepareMatchDataConfigurat
                 allFields.addAll(keyMap.get(matchKey));
             }
         }
-        String idColumn = StringUtils.isNotEmpty(configuration.getMatchGroupId()) ? configuration.getMatchGroupId()
-                : configuration.getIdColumnName();
+        String idColumn = configuration.getMatchGroupId();
         if (fields.contains(idColumn) && !allFields.contains(idColumn)) {
             allFields.add(idColumn);
         }

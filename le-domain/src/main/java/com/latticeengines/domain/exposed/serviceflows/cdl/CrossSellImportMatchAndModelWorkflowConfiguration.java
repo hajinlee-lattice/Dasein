@@ -357,7 +357,9 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
 
         public Builder matchGroupId(String matchGroupId) {
             matchDataCloudWorkflowBuilder.matchGroupId(matchGroupId);
+            matchDataCloudWorkflowBuilder.joinWithInternalId(false);
             generateAIRating.matchGroupId(matchGroupId);
+            generateAIRating.matchJoinInternalId(false);
             return this;
         }
 

@@ -40,34 +40,43 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
             fieldsToRetain.retainAll(fieldFilter);
             resultNode = resultNode.retain(new FieldList(fieldsToRetain));
         }
-
-        if (StringUtils.isNotEmpty(parameters.sourceTableName) && (StringUtils.isNotEmpty(parameters.idColumnName)
-                || StringUtils.isNotEmpty(parameters.idColumnName))) {
-            resultNode = joinSourceTable(parameters, resultNode);
-        }
+        resultNode = joinSourceTable(parameters, resultNode);
         return resultNode;
 
     }
 
     private Node joinSourceTable(ParseMatchResultParameters parameters, Node resultNode) {
-        Node sourceNode = addSource(parameters.sourceTableName);
-        List<String> retainFields = new ArrayList<>(sourceNode.getFieldNames());
-        Set<String> retainSet = new HashSet<>(retainFields);
         List<String> matchFields = resultNode.getFieldNames();
-        matchFields.forEach(field -> {
-            if (!retainSet.contains(field)) {
-                retainFields.add(field);
-                retainSet.add(field);
+
+        String joinKey = null;
+        if (parameters.joinInternalId) {
+            if (StringUtils.isNotBlank(parameters.matchGroupId)) {
+                joinKey = parameters.matchGroupId;
+            } else if (matchFields.contains(InterfaceName.InternalId.name())) {
+                joinKey = InterfaceName.InternalId.name();
             }
-        });
-        String idColumnName = matchFields.contains(InterfaceName.InternalId.name()) ? InterfaceName.InternalId.name()
-                : parameters.idColumnName;
-        if (StringUtils.isNotEmpty(parameters.matchGroupId)) {
-            idColumnName = parameters.matchGroupId;
+        } else {
+            if (matchFields.contains(InterfaceName.InternalId.name())) {
+                joinKey = InterfaceName.InternalId.name();
+            } else if (StringUtils.isNotBlank(parameters.matchGroupId)) {
+                joinKey = parameters.matchGroupId;
+            }
         }
-        FieldList idColumn = new FieldList(idColumnName);
-        resultNode = sourceNode.innerJoin(idColumn, resultNode, idColumn);
-        resultNode = resultNode.retain(new FieldList(retainFields));
+
+        if (StringUtils.isNotEmpty(joinKey) && StringUtils.isNotEmpty(parameters.sourceTableName)) {
+            Node sourceNode = addSource(parameters.sourceTableName);
+            List<String> retainFields = new ArrayList<>(sourceNode.getFieldNames());
+            Set<String> retainSet = new HashSet<>(retainFields);
+            matchFields.forEach(field -> {
+                if (!retainSet.contains(field)) {
+                    retainFields.add(field);
+                    retainSet.add(field);
+                }
+            });
+            FieldList idColumn = new FieldList(joinKey);
+            resultNode = sourceNode.innerJoin(idColumn, resultNode, idColumn);
+            resultNode = resultNode.retain(new FieldList(retainFields));
+        }
         return resultNode;
     }
 

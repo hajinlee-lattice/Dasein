@@ -49,8 +49,8 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         parameters.sourceColumns = sourceCols(preMatchTable);
         parameters.excludeDataCloudAttrs = configuration.isExcludeDataCloudAttrs();
         parameters.keepLid = configuration.isKeepLid();
-        parameters.idColumnName = configuration.getIdColumnName();
         parameters.matchGroupId = configuration.getMatchGroupId();
+        parameters.joinInternalId = configuration.isJoinInternalId();
         configuration.setDataFlowParams(parameters);
 
     }

@@ -73,6 +73,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder matchGroupId(String matchGroupId) {
             generateAIRating.matchGroupId(matchGroupId);
+            generateAIRating.matchJoinInternalId(false);
             return this;
         }
 

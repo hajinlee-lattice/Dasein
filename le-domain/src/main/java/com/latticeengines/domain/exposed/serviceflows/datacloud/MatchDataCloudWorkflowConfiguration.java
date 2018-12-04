@@ -176,16 +176,16 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             return this;
         }
 
-        public Builder idColumnName(String idColumnName) {
-            prepareMatchDataConfiguration.setIdColumnName(idColumnName);
-            matchResult.setIdColumnName(idColumnName);
-            return this;
-        }
-
         public Builder matchGroupId(String matchGroupId) {
             prepareMatchDataConfiguration.setMatchGroupId(matchGroupId);
             matchResult.setMatchGroupId(matchGroupId);
             return this;
         }
+
+        public Builder joinWithInternalId(boolean joinWithInternalId) {
+            matchResult.setJoinInternalId(joinWithInternalId);
+            return this;
+        }
+
     }
 }
