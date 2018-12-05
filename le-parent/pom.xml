@@ -11,9 +11,9 @@
     <description>Parent of all lattice engine maven projects.</description>
 
     <scm>
-        <connection>scm:svn:https://lesvn/svn/lattice/LEDP/branches/develop/ledp</connection>
-        <developerConnection>scm:svn:https://lesvn/svn/lattice/LEDP/branches/develop/ledp</developerConnection>
-        <url>scm:svn:https://lesvn/svn/lattice/LEDP/branches/develop/ledp</url>
+        <connection>scm:svn:https://10.41.1.73/svn/lattice/LEDP/branches/develop/ledp</connection>
+        <developerConnection>scm:svn:https://10.41.1.73/svn/lattice/LEDP/branches/develop/ledp</developerConnection>
+        <url>scm:svn:https://10.41.1.73/svn/lattice/LEDP/branches/develop/ledp</url>
     </scm>
 
     <properties>
