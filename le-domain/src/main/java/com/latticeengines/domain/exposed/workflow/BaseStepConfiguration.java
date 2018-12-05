@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.Ingest
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
@@ -29,7 +30,8 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = PrepareBulkMatchInputConfiguration.class, name = "PrepareBulkMatchInputConfiguration"),
         @Type(value = PublishConfiguration.class, name = "PublishConfiguration"),
         @Type(value = SegmentExportStepConfiguration.class, name = "SegmentExportStepConfiguration"),
-        @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"), })
+        @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"),
+        @Type(value = CommitEntityMatchConfiguration.class, name = "CommitEntityMatchConfiguration"), })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {
 

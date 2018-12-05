@@ -9,17 +9,20 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CommitEntityMatchWorkflowConfiguration;
 
 public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
         private ProcessAccountWorkflowConfiguration configuration = new ProcessAccountWorkflowConfiguration();
         private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
+        private CommitEntityMatchWorkflowConfiguration.Builder commitMatch = new CommitEntityMatchWorkflowConfiguration.Builder();
         private UpdateAccountWorkflowConfiguration.Builder updateAccountWorkflowBuilder = new UpdateAccountWorkflowConfiguration.Builder();
         private RebuildAccountWorkflowConfiguration.Builder rebuildAccountWorkflowBuilder = new RebuildAccountWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            commitMatch.customer(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
             updateAccountWorkflowBuilder.customer(customerSpace);
             rebuildAccountWorkflowBuilder.customer(customerSpace);
@@ -56,6 +59,7 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setContainerConfiguration("processAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processAccountStepConfiguration);
+            configuration.add(commitMatch.build());
             configuration.add(updateAccountWorkflowBuilder.build());
             configuration.add(rebuildAccountWorkflowBuilder.build());
             return configuration;
