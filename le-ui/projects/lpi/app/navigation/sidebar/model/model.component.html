@@ -1,3 +1,4 @@
+
 <ul class="menu">
     <li role="presentation" ui-sref-active="active">
         <a ui-sref="home.models" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_MODELS')}}">
@@ -66,6 +67,16 @@
                 <span class="ico ico-alerts ico-light-gray"></span>
             </span>
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}</span>
+        </a>
+    </li>
+    <li 
+        role="presentation" 
+        ui-sref-active="active">
+        <a ui-sref="home.model.jobs" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}">
+                <span class="ico ico-scoring ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}</span>
         </a>
     </li>
     <li 
