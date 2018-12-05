@@ -177,11 +177,11 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("OperationalMode")
     private OperationalMode operationalMode;
 
+    // Allocate ID only applies in ENTITY_MATCH Operational Mode.  Further, it refers to an Entity Match process
+    // where an ID can be created, rather than just looked up.  This option is only available in Bulk Match mode,
+    // thus allocateId must be false for Real Time match.
     @JsonProperty("AllocateId")
     private boolean allocateId;
-
-    @JsonProperty("DecisionGraphCluster")
-    private String decisionGraphCluster;
 
     @JsonProperty("EntityKeyMap")
     private List<EntityKeyMap> entityKeyMap;
@@ -560,12 +560,6 @@ public class MatchInput implements Fact, Dimension {
     public boolean isAllocateId() { return allocateId; }
 
     public void setAllocateId(boolean allocateId) { this.allocateId = allocateId; }
-
-    public String getDecisionGraphCluster() { return decisionGraphCluster; }
-
-    public void setDecisionGraphCluster(String decisionGraphCluster) {
-        this.decisionGraphCluster = decisionGraphCluster;
-    }
 
     public List<EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
 
