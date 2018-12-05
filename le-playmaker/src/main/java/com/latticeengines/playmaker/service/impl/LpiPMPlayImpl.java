@@ -93,7 +93,10 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard;
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
-        //launchstates.add(LaunchState.UnLaunched);
+
+        if (start < 90000000000L) { // if request using second level timestamp
+            start = start*1000;
+        }
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
                     launchstates, start, 0L, 1000L, null, null, null, null, null);
