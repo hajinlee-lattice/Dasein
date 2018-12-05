@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,13 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("redShiftCleanupService")
@@ -27,12 +29,15 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
     @Inject
     private RedshiftService redshiftService;
+
     @Inject
     private DataFeedEntityMgr dataFeedEntityMgr;
+
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     @Override
     public boolean removeUnusedTable() {
@@ -58,18 +63,19 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         MultiTenantContext.setTenant(tenant);
         log.info("tenant name is : " + tenant.getName());
         String customerspace = MultiTenantContext.getCustomerSpace().toString();
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerspace);
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerspace);
+        DataCollection dataCollection = dataCollectionService.getDefaultCollection(customerspace);
+        DataCollection.Version activeVersion = dataCollection.getVersion();
+        DataCollection.Version inactiveVersion = activeVersion.complement();
         // 1. get all inused tablename in this tenant_id
-        List<String> tableNames = new ArrayList<>();
-        tableNames.addAll(dataCollectionProxy.getTableNames(customerspace, activeVersion));
-        tableNames.addAll(dataCollectionProxy.getTableNames(customerspace, inactiveVersion));
+        Set<String> tableNames = new HashSet<>();
+        tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, activeVersion));
+        tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, inactiveVersion));
         log.info("inuse tableNames:" + tableNames.toString());
         // 2. get all tablename in this tenant_id on redshift
         List<String> redshift_tableNames = redshiftService.getTables(tenant.getName());
         log.info("redshift tablename under tenant is :" + redshift_tableNames.toString());
         // 3.drop table
-        dropTable(redshift_tableNames, tableNames);
+        dropTable(redshift_tableNames, new ArrayList<>(tableNames));
     }
 
     private void dropTable(List<String> redshift_table, List<String> data_table) {

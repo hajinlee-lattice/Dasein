@@ -5,9 +5,10 @@ import static org.testng.Assert.assertFalse;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -30,9 +31,10 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class RedShiftCleanupTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private RedshiftService redshiftService;
-    @Autowired
+
+    @Inject
     private RedShiftCleanupService redshiftCleanupService;
 
     @Value("${aws.test.s3.bucket}")
