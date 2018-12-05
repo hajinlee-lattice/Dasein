@@ -42,10 +42,6 @@ angular
     });
 
     vm.init = function() {
-        if (RatingsEngineStore.getCustomEventModelingType()) {
-            RatingsEngineStore.setValidation("mapping", false);
-            vm.showAdditionalFieldsCDL = RatingsEngineStore.getDataStores().indexOf('CustomFileAttributes') >= 0;
-        }
         vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.cdlEnabled ? 'SalesforceAccount' : vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
@@ -59,11 +55,6 @@ angular
         }
         if (vm.fuzzyMatchEnabled) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
-        }
-        if (RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
-            vm.standardFieldsList[1] = 'AccountId';
-            delete vm.requiredFieldsMissing['Id'];
-            vm.requiredFieldsMissing['AccountId'] = true;
         }
 
         vm.UnmappedFields.forEach(function(field) {
@@ -168,7 +159,7 @@ angular
                 }
             });
         }
-        RatingsEngineStore.setAvailableFields(vm.AvailableFields);
+        // RatingsEngineStore.setAvailableFields(vm.AvailableFields);
 
         $timeout(vm.validateForm, 0);
     };
@@ -274,9 +265,6 @@ angular
         vm.validateIsReserved(name, mapping);
         vm.validateIsDuplicate(name, mapping);
 
-        if (RatingsEngineStore.getCustomEventModelingType()) {
-            RatingsEngineStore.setValidation('mapping', vm.FormValidated && $scope.fieldMappingForm.$valid);
-        }
     };
 
     vm.validateIsReserved = function(name, mapping) {
@@ -335,10 +323,6 @@ angular
         for (var field in vm.requiredFieldsMissing) {
              vm.FormValidated = vm.FormValidated && !vm.requiredFieldsMissing[field];
         }
-
-        if (vm.cdlEnabled) {
-            RatingsEngineStore.setValidation("mapping", vm.FormValidated);
-        }
     };
 
     // here are additional checks not covered by angular's built in form validation
@@ -349,7 +333,7 @@ angular
             vm.validateRequiredFields();
         } 
 
-        if (vm.NextClicked || RatingsEngineStore.getCustomEventModelingType() == 'LPI') {
+        if (vm.NextClicked) {
             vm.fieldMappings.forEach(function(fieldMapping) {
                 if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                     vm.FormValidated = false;
@@ -373,9 +357,9 @@ angular
         return true;
     };
 
-    vm.getModelingType = function() {
-        return RatingsEngineStore.getCustomEventModelingType();
-    }
+    // vm.getModelingType = function() {
+    //     return RatingsEngineStore.getCustomEventModelingType();
+    // }
 
     if (FieldDocument) {
         vm.init();
