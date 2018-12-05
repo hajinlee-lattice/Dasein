@@ -475,12 +475,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(),
                     entity.name(), SourceType.FILE.getName(), feedType);
             modifyFieldMappings(entity, fieldMappingDocument);
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            fieldMappingDocument.getFieldMappings().stream().forEach(fieldMapping -> {
                 if (fieldMapping.getMappedField() == null) {
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
                 }
-            }
+            });
 
             fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
                     SourceType.FILE.getName(), feedType);

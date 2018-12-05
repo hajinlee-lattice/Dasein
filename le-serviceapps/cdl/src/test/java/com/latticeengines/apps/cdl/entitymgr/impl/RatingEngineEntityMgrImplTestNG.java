@@ -268,7 +268,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
         Assert.assertNotNull(createdRatingEngine.getScoringIteration());
-        Assert.assertNull(createdRatingEngine.getLatestIteration());
+        Assert.assertNotNull(createdRatingEngine.getLatestIteration());
 
         validateRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
