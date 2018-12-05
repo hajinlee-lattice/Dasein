@@ -120,8 +120,9 @@
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
+                        
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.transformationGroup ? 'No' : 'Yes'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ (vm.model.advancedModelingConfig.custom_event.transformationGroup == 'NONE') ? 'No' : 'Yes'}}</dd>
 
                         <dt ng-if="vm.hasSettingsInfo">Training:</dt>
                         <dd ng-if="vm.hasSettingsInfo">
