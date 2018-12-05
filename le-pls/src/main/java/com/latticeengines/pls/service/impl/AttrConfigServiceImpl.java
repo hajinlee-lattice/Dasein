@@ -855,7 +855,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         BusinessEntity entity = CategoryUtils.getEntity(cat);
 
         Map<String, StatsCube> cubes = dataLakeService.getStatsCubes();
-        if (cubes.get(entity.name()) == null) {
+        if (MapUtils.isEmpty(cubes) || cubes.get(entity.name()) == null) {
             return Collections.<String, AttributeStats> emptyMap();
         }
         StatsCube cube = cubes.get(entity.name());
