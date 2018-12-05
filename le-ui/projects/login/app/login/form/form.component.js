@@ -62,7 +62,7 @@ angular.module('login.form', [
 
                 if (result !== null && result.Success === true) {
 
-                    if (Object.keys(vm.params).length != 0 && vm.params.constructor === Object){
+                    if (Object.keys(vm.params).length != 0 && vm.params.constructor === Object && vm.params.type == 'jwt'){
                         
                         LoginService.PostToJwt(vm.params).then(function(result){
                             $window.location.href = result.url;

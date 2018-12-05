@@ -36,7 +36,7 @@ angular.module('login')
                         }
                         break;
                     case 'login':
-                        if ((Object.keys(vm.params).length != 0) && vm.logindocument.UserName) {
+                        if (((Object.keys(vm.params).length != 0) && (vm.params.type == 'jwt')) && vm.logindocument.UserName) {
                             LoginService.PostToJwt(vm.params).then(function(result){
                                 $window.location.href = result.url;
                             });
