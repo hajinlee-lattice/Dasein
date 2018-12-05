@@ -30,7 +30,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     }
 
     $scope.backToSummaryView = false;
-
     // Get Internal category list
     var internalCategoryObj = data.InternalAttributes;
     if (internalCategoryObj) {
@@ -39,23 +38,31 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.showInternalCategories = internalCategoryObj.total > 0;
 
         for (var i = 0; i < $scope.internalCategories.length; i++) {
+            if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
+                var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
+                if (myAttributesCategory) {
+                    myAttributesCategory.categoryName = 'My Attributes';
+                    myAttributesCategory.name = 'My Attributes';
+
+                    var childAttributes = myAttributesCategory.children;
+                    angular.forEach(childAttributes, function(attribute){
+                        attribute.categoryName = 'My Attributes';
+                    }); 
+                    setAttributeColor(myAttributesCategory, '#457DB9');
+                }
+                $scope.hasAccountAttributes = true;
+                
+                $scope.internalCategories[i].name = 'My Attributes';
+                $scope.internalCategories[i].color = '#457DB9';
+                
+                
+            }
             if ($scope.internalCategories[i].name == 'My Attributes') {
 
                 $scope.hasAccountAttributes = false;
                 $scope.internalCategories[i].color = '#457DB9';
                 
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'My Attributes' });
-                if (myAttributesCategory) {
-                    setAttributeColor(myAttributesCategory, '#457DB9');
-                }
-            }
-            if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
-                $scope.hasAccountAttributes = true;
-                
-                $scope.internalCategories[i].name = 'My Attributes';
-                $scope.internalCategories[i].color = '#457DB9';
-                
-                var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
                 if (myAttributesCategory) {
                     setAttributeColor(myAttributesCategory, '#457DB9');
                 }
@@ -294,7 +301,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
     $scope.categoryClicked = function (category) {
 
-        if($scope.hasAccountAttributes && category.name === 'My Attributes'){
+        if(category.name === 'My Attributes'){
             category.name = 'ACCOUNT_ATTRIBUTES';
             category.categoryName = 'ACCOUNT_ATTRIBUTES';
         }
