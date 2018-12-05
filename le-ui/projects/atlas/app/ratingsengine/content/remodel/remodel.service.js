@@ -1,5 +1,5 @@
 angular.module('lp.ratingsengine.remodel')
-.service('AtlasRemodelStore', function($q, $state, $stateParams, $timeout, BrowserStorageUtility, AtlasRemodelService, RatingsEngineStore, JobsStore) {
+.service('AtlasRemodelStore', function($q, $state, $stateParams, $timeout, BrowserStorageUtility, AtlasRemodelService, RatingsEngineStore, JobsStore, RatingsEngineService) {
     var store = this;
     
     this.init = function(){
@@ -76,7 +76,7 @@ angular.module('lp.ratingsengine.remodel')
     this.setConfigFilters = function(filters){
         this.configFilters = filters;
     }
-    this.saveIteration = function(nextState) {
+    this.saveIteration = function(nextState, stateToValidate) {
 
         var engineId = $stateParams.engineId,
             iteration = store.getRemodelIteration(),
@@ -128,22 +128,27 @@ angular.module('lp.ratingsengine.remodel')
                         delete attribute.hasWarning; 
                     });
                 }
-            });
+            }); 
+            RatingsEngineStore.setValidation(stateToValidate, false);
+            // Validate Model
+            RatingsEngineService.validateModel(engineId, modelId, RatingsEngineStore.getRatingEngine()).then(function(result) {
+                var success = result.data == true;
+                if (success) {
+                    // Launch Model
+                    AtlasRemodelService.launchModeling(engineId, modelId, attributes).then(function(applicationid){
+                        // console.log(applicationid);
 
-            // Launch Model
-            AtlasRemodelService.launchModeling(engineId, modelId, attributes).then(function(applicationid){
-                // console.log(applicationid);
+                        RatingsEngineStore.setApplicationId(applicationid);
+                        JobsStore.inProgressModelJobs[engineId] = null;
 
-                RatingsEngineStore.setApplicationId(applicationid);
-                JobsStore.inProgressModelJobs[engineId] = null;
-
-                // console.log('Model Launched', id, nextState);
-                if(nextState) {
-                    $state.go(nextState, { ai_model_job_id: applicationid });
+                        // console.log('Model Launched', id, nextState);
+                        if(nextState) {
+                            $state.go(nextState, { ai_model_job_id: applicationid });
+                        }
+                    });
                 }
+                RatingsEngineStore.setValidation(stateToValidate, !success);
             });
-
-
         });
 
     };

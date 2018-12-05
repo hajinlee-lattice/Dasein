@@ -264,34 +264,28 @@ angular.module('lp.ratingsengine.ratingslist', [
         var tileState = vm.current.tileStates[rating.id];
 
         if(tileState.editRating !== true){
-            RatingsEngineStore.getModel(rating.id).then(function(model){
-                if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT'){
-
-                    var jobStatus = model.AI.modelingJobStatus;
-                    var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : '',
-                        modelJobId = model.AI.modelingJobId;
-                    
-                    if ((modelId !== null) || (modelJobId !== null)) {
+            if (rating.completed) {
+                $state.go('home.ratingsengine.dashboard', { 
+                    rating_id: rating.id, 
+                    modelingJobStatus: 'Completed'
+                });
+            } else {
+                switch (rating.type) {
+                    case 'CROSS_SELL':
+                        var strategy = rating.advancedRatingConfig.cross_sell.modelingStrategy;
+                        $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: strategy, fromList: true});
+                        break;
+                    case 'CUSTOM_EVENT':
+                        $state.go('home.ratingsengine.customevent', {rating_id: rating.id, fromList: true});
+                        break;
+                    case 'RULE_BASED':
                         $state.go('home.ratingsengine.dashboard', { 
                             rating_id: rating.id, 
-                            modelId: modelId,
-                            modelingJobStatus: jobStatus
+                            modelId: '' 
                         });
-                    } else {
-                        if(rating.type === 'CROSS_SELL'){
-                            var strategy = rating.advancedRatingConfig.cross_sell.modelingStrategy;
-                            $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: strategy, fromList: true});
-                        }else {
-                            $state.go('home.ratingsengine.customevent', {rating_id: rating.id, fromList: true});
-                        }
-                    }
-                }else{
-                    $state.go('home.ratingsengine.dashboard', { 
-                        rating_id: rating.id, 
-                        modelId: '' 
-                    });
+                        break;
                 }
-            });
+            }
         }
     };
 

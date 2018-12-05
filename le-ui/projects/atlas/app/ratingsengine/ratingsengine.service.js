@@ -1,6 +1,6 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
-    $q, $state, $stateParams,  $rootScope, $timeout,
+    $q, $state, $stateParams,  $rootScope, $timeout, $filter,
     RatingsEngineService, DataCloudStore, BrowserStorageUtility, SegmentStore, ImportWizardService, JobsStore, Banner
 ){
     var RatingsEngineStore = this;
@@ -936,9 +936,10 @@ angular.module('lp.ratingsengine')
 
                 if(validate) {
                     rating.latest_iteration = model;
+                    RatingsEngineStore.setValidation(validate, false);
                     RatingsEngineService.validateModel(ratingId, obj.AI.id, rating).then(function(result) {
-                        var success = !result.data.errorCode;
-                        if(success) {
+                        var success = result.data == true;
+                        if (success) {
                             if (lastRoute[lastRoute.length-1] === 'creation') {
                                 // console.log("Model Updated & Launch", model);
                                 RatingsEngineStore.nextLaunchAIModel(nextState, model);
@@ -1066,6 +1067,12 @@ angular.module('lp.ratingsengine')
 
         return deferred.promise;
 
+    }
+
+    this.getIterationFromDashboard = function(ratingEngineDashboard, iterationId) {
+        var iterations = $filter('filter')(ratingEngineDashboard.iterations, {id:iterationId});
+        console.log(iterations);
+        return iterations && iterations.length != 1 ? null : iterations[0];
     }
 
 })

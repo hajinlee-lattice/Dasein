@@ -111,25 +111,6 @@ angular
                     BackStore.setHidden(false);
                 }],
                 resolve: {
-                    JobStatus : function($q, $stateParams, RatingsEngineStore){
-                        var jobStatus = $stateParams.modelingJobStatus;
-                        var deferred = $q.defer();
-                        if(jobStatus == null){
-                            var ratingId = $stateParams.rating_id;
-                            RatingsEngineStore.getModel(ratingId).then(function(model){
-
-                                if(model.AI){
-                                    var jobStatus = model.AI.modelingJobStatus;
-                                    deferred.resolve({modelingJobStatus: jobStatus});
-                                }else {
-                                    deferred.resolve({modelingJobStatus: 'Completed'});
-                                }
-                            });
-                        }else{
-                            deferred.resolve({modelingJobStatus: jobStatus});
-                        }
-                        return deferred.promise;
-                    },
                     Dashboard: function ($q, $stateParams, RatingsEngineStore, ModelStore) {
                         var deferred = $q.defer();
                         var rating_id = $stateParams.rating_id || RatingsEngineStore.getRatingId();
@@ -138,6 +119,18 @@ angular
                             deferred.resolve(data);
                         });
 
+                        return deferred.promise;
+                    },
+                    JobStatus : function($q, $stateParams, Dashboard, RatingsEngineStore){
+                        var jobStatus = $stateParams.modelingJobStatus;
+                        var deferred = $q.defer();
+                        if (jobStatus == null){
+                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
+                            var modelingStatus = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelingJobStatus || '';
+                            deferred.resolve({modelingJobStatus: modelingStatus});
+                        }else{
+                            deferred.resolve({modelingJobStatus: jobStatus});
+                        }
                         return deferred.promise;
                     },
                     RatingEngine: function($q, $stateParams, RatingsEngineStore) {
@@ -150,9 +143,11 @@ angular
 
                         return deferred.promise;
                     },
-                    Model: function($q, $stateParams, ModelStore, RatingEngine) {
+                    Model: function($q, $stateParams, ModelStore, RatingEngine, RatingsEngineStore, Dashboard) {
+                        console.log(Dashboard.summary.latestIterationId);
+                        var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
                         var deferred = $q.defer(),
-                            id = $stateParams.modelId;
+                            id = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
 
                         if ((RatingEngine.type === 'RULE_BASED') || (id === '')) {
                             deferred.resolve(null);
@@ -260,7 +255,8 @@ angular
                     "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, RatingsEngineStore, Dashboard, RatingEngine, Model, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
-                            $scope.modelId = $stateParams.modelId || '';
+                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
+                            $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -578,20 +574,13 @@ angular
             .state('home.ratingsengine.dashboard.notes', {
                 url: '/notes',
                 resolve: {
-                    JobStatus : function($q, $stateParams, RatingsEngineStore){
+                    JobStatus : function($q, $stateParams, Dashboard, RatingsEngineStore) {
                         var jobStatus = $stateParams.modelingJobStatus;
                         var deferred = $q.defer();
                         if(jobStatus == null){
-                            var ratingId = $stateParams.rating_id;
-                            RatingsEngineStore.getModel(ratingId).then(function(model){
-
-                                if(model.AI){
-                                    var jobStatus = model.AI.modelingJobStatus;
-                                    deferred.resolve({modelingJobStatus: jobStatus});
-                                }else {
-                                    deferred.resolve({modelingJobStatus: 'Completed'});
-                                }
-                            });
+                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
+                            var modelingStatus = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelingJobStatus || '';
+                            deferred.resolve({modelingJobStatus: modelingStatus});
                         }else{
                             deferred.resolve({modelingJobStatus: jobStatus});
                         }
@@ -630,9 +619,10 @@ angular
                 },
                 views: {
                     "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingsEngineStore, RatingEngine, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
-                            $scope.modelId = $stateParams.modelId || '';
+                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
+                            $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;

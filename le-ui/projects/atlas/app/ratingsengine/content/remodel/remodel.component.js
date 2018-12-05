@@ -26,15 +26,7 @@ angular.module('lp.ratingsengine.remodel', [
                             label: 'Training Changes', 
                             state: 'training', 
                             nextFn: function(nextState) {
-                                var ratingId = $state.params.engineId,
-                                    modelId = $state.params.modelId;
-
-                                RatingsEngineService.validateModel(ratingId, modelId).then(function(result) {
-                                    var success = !result.data.errorCode;
-                                    if(success) {
-                                        $state.go(nextState);
-                                    }
-                                });
+                                $state.go(nextState);
                             }, 
                             progressDisabled: false 
                         },
@@ -42,7 +34,7 @@ angular.module('lp.ratingsengine.remodel', [
                             label: 'Attributes Enablement', 
                             state: 'training.attributes', 
                             nextFn: function(nextState) {
-                                AtlasRemodelStore.saveIteration(nextState);
+                                AtlasRemodelStore.saveIteration(nextState, 'attributes');
                             }, 
                             progressDisabled: false,
                             showNextSpinner: true
