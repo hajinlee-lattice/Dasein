@@ -126,14 +126,5 @@ angular.module('login', [
                 "banner": "bannerMessage",
                 "FrameContent": "loginSamlError"
             }
-        })
-        .state('login.logout', {
-            url: 'logout',
-            params: {
-                disableUserInfo: true
-            },
-            views: {
-                "FrameContent": "logoutView"
-            }
         });
 });

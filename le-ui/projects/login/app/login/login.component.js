@@ -25,11 +25,6 @@ angular.module('login')
                 return LoginService.Logout(vm.params);
             } else {
                 switch($state.current.name) {
-                    case 'login.logout':
-                        if (vm.logindocument.UserName) {
-                            LoginService.Logout(vm.params);
-                        }
-                        break;
                     case 'login.form': 
                         if (vm.logindocument.UserName) {
                             $state.go('login.tenants', { obj: vm.params });
@@ -42,11 +37,9 @@ angular.module('login')
                         break;
                     case 'login':
                         if ((Object.keys(vm.params).length != 0) && vm.logindocument.UserName) {
-                    
                             LoginService.PostToJwt(vm.params).then(function(result){
                                 $window.location.href = result.url;
                             });
-
                         } else {
                             $state.go('login.form', { obj: vm.params });
                         }

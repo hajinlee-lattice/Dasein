@@ -17,12 +17,17 @@ angular.module('login.form', [
         var vm = this;
 
         vm.$onInit = function() {
-
             vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
             vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
 
             var urlParams = $location.$$search;
             vm.params = (Object.keys(urlParams).length != 0 && urlParams.constructor === Object) ? urlParams : $stateParams.obj;
+
+            if (vm.params.logout) {
+                Banner.error({
+                    message: 'You have been logged out.'
+                });
+            }
 
             vm.ResourceUtility = ResourceUtility;
             vm.username = "";

@@ -228,7 +228,8 @@ angular.module('mainApp.login.services.LoginService', [
                         if(authenticationRoute === 'SSO') {
                             $window.open('/login/saml/' + tenantId + '/logout' + paramString, '_self');
                         } else {
-                            $window.open('/login/logout' + paramString, '_self');
+                            paramString = params ? paramString + '&logout=true' : '?logout=true';
+                            $window.open('/login' + paramString, '_self');
                         }
                     }, 300);
                 } else {
