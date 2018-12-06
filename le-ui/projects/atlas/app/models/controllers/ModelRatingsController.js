@@ -130,6 +130,9 @@ angular.module('lp.models.ratings', [
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 
+
+        console.log(vm.model);
+
         // Give the above code time to catch up before rendering the chart
         $timeout(function() {
             renderChart();
@@ -191,6 +194,8 @@ angular.module('lp.models.ratings', [
         vm.bucketsLength = vm.buckets.length;
         vm.updateContent = false;
 
+
+
         if (vm.buckets.length === 6) {
             vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
             vm.canAddBucket = false;
@@ -202,6 +207,8 @@ angular.module('lp.models.ratings', [
         vm.iterationSupplementaryInfo = vm.predictionType === 'EXPECTED_VALUE' ? 
             'Past Average Weighted Revenue: $' + (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads).toFixed(2) : 
             'Past Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
+
+            console.log(vm.workingBuckets);
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
@@ -247,14 +254,17 @@ angular.module('lp.models.ratings', [
 
             bucket.conversionRate = (bucketConverted / (bucketLeads * bucketLeads)) * 100;
             bucket.bucketAvgRevenue = bucketRevenue / bucketLeads;
+            bucket.avg_expected_revenue = bucket.bucketAvgRevenue;
             bucket.num_leads = vm.rightLeads - vm.leftLeads;
+            bucket.total_expected_revenue = (bucket.avg_expected_revenue * bucket.num_leads);
 
             // bucket.lift = ( bucketAvgRevenue / total average expected revenue across all buckets);
 
             if (vm.predictionType === 'EXPECTED_VALUE'){
-                bucket.lift = (bucket.bucketAvgRevenue / vm.avgRevenueTotal) >= 0.1 ? (bucket.bucketAvgRevenue / vm.avgRevenueTotal) : 0.1010101;
+                
+                bucket.lift = (bucket.bucketAvgRevenue / (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads)) >= 0.1 ? (bucket.bucketAvgRevenue / (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads)) : 0.1010101;
+            
             } else {
-
                 if (vm.totalLeads === 0 || vm.ratingsSummary.total_num_converted === 0 || vm.ratingsSummary.total_num_leads === 0) {
                     bucket.lift = 0;
                 } else {
@@ -421,62 +431,38 @@ angular.module('lp.models.ratings', [
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
 
-        var rating_id = $stateParams.rating_id;
-
-        if(vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') {
-            var aiModelId = vm.ratingModelId;
+        var rating_id = $stateParams.rating_id,
+            aiModelId = vm.ratingModelId;
             
-            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
-                if (result != null && result.success === true) {
+        ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
+            if (result != null && result.success === true) {
 
-                    RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
-                        vm.chartNotUpdated = true;
-                        vm.updateContent = true;
-                        vm.savingConfiguration = false;
-
-                        Notice.success({
-                            delay: 4000,
-                            title: 'Publish Configuration', 
-                            message: 'Your new ratings configuration has been published.'
-                        });
-
-                        $rootScope.$broadcast('statusChange', { 
-                            activeStatus: 'ACTIVE',
-                            activeIteration: vm.activeIteration.iteration
-                        });
-                        $timeout( function(){ 
-                            vm.updateContent = false;
-                        }, 300);
-                    });
-                   
-                } else {
-                    vm.savingConfiguration = false;
-                    vm.createBucketsErrorMessage = result;
-                    vm.showSaveBucketsError = true;
-                }
-            });
-        } else {
-
-            ModelRatingsService.CreateABCDBuckets(vm.modelId, vm.workingBuckets).then(function(result){
-                if (result != null && result.success === true) {
+                RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
                     vm.chartNotUpdated = true;
                     vm.updateContent = true;
+                    vm.savingConfiguration = false;
+
                     Notice.success({
                         delay: 4000,
                         title: 'Publish Configuration', 
                         message: 'Your new ratings configuration has been published.'
                     });
+
+                    $rootScope.$broadcast('statusChange', { 
+                        activeStatus: 'ACTIVE',
+                        activeIteration: vm.activeIteration.iteration
+                    });
                     $timeout( function(){ 
                         vm.updateContent = false;
-                    }, 200);
-                    
-                } else {
-                    vm.savingConfiguration = false;
-                    vm.createBucketsErrorMessage = result;
-                    vm.showSaveBucketsError = true;
-                }
-            });
-        }
+                    }, 300);
+                });
+               
+            } else {
+                vm.savingConfiguration = false;
+                vm.createBucketsErrorMessage = result;
+                vm.showSaveBucketsError = true;
+            }
+        });
     }
 
 })

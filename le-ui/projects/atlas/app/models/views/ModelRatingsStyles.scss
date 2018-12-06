@@ -138,10 +138,10 @@
 				background-color: #33BDB7;
 			}
 			&:nth-child(3) {
-				background-color: #457EBA;
+				background-color: #65B7E6;
 			}
 			&:nth-child(4) {
-				background-color: #2A5587;
+				background-color: #457EBA;
 			}
 			&:nth-child(5) {
 				background-color: #CD80BC;
@@ -160,12 +160,15 @@
 				background-color: #33BDB7;
 			}
 			&:nth-child(3) {
-				background-color: #457EBA;
+				background-color: #65B7E6;
 			}
 			&:nth-child(4) {
-				background-color: #2A5587;
+				background-color: #457EBA;
 			}
 			&:nth-child(5) {
+				background-color: #CD80BC;
+			}
+			&:nth-child(6) {
 				background-color: #8E71B2;
 			}
 		}
@@ -179,9 +182,15 @@
 				background-color: #33BDB7;
 			}
 			&:nth-child(3) {
-				background-color: #457EBA;
+				background-color: #65B7E6;
 			}
 			&:nth-child(4) {
+				background-color: #457EBA;
+			}
+			&:nth-child(5) {
+				background-color: #CD80BC;
+			}
+			&:nth-child(6) {
 				background-color: #8E71B2;
 			}
 		}
@@ -195,6 +204,15 @@
 				background-color: #33BDB7;
 			}
 			&:nth-child(3) {
+				background-color: #65B7E6;
+			}
+			&:nth-child(4) {
+				background-color: #457EBA;
+			}
+			&:nth-child(5) {
+				background-color: #CD80BC;
+			}
+			&:nth-child(6) {
 				background-color: #8E71B2;
 			}
 		}
@@ -205,6 +223,18 @@
 				background-color: #70BF4A;
 			}
 			&:nth-child(2) {
+				background-color: #33BDB7;
+			}
+			&:nth-child(3) {
+				background-color: #65B7E6;
+			}
+			&:nth-child(4) {
+				background-color: #457EBA;
+			}
+			&:nth-child(5) {
+				background-color: #CD80BC;
+			}
+			&:nth-child(6) {
 				background-color: #8E71B2;
 			}
 		}
@@ -370,18 +400,18 @@
 			}
 			&:nth-child(3) {
 				.bucket-label{
-					background-color: #457EBA;
+					background-color: #65B7E6;
 				}
 				dd.lift {
-					color: #457EBA;
+					color: #65B7E6;
 				}
 			}
 			&:nth-child(4) {
 				.bucket-label{
-					background-color: #2A5587;
+					background-color: #457EBA;
 				}
 				dd.lift {
-					color: #2A5587;
+					color: #457EBA;
 				}
 			}
 			&:nth-child(5) {
@@ -422,21 +452,29 @@
 			}
 			&:nth-child(3) {
 				.bucket-label{
+					background-color: #65B7E6;
+				}
+				dd.lift {
+					color: #65B7E6;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
 					background-color: #457EBA;
 				}
 				dd.lift {
 					color: #457EBA;
 				}
 			}
-			&:nth-child(4) {
+			&:nth-child(5) {
 				.bucket-label{
-					background-color: #2A5587;
+					background-color: #CD80BC;
 				}
 				dd.lift {
-					color: #2A5587;
+					color: #CD80BC;
 				}
 			}
-			&:nth-child(5) {
+			&:nth-child(6) {
 				.bucket-label{
 					background-color: #8E71B2;
 				}
@@ -466,13 +504,29 @@
 			}
 			&:nth-child(3) {
 				.bucket-label{
+					background-color: #65B7E6;
+				}
+				dd.lift {
+					color: #65B7E6;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
 					background-color: #457EBA;
 				}
 				dd.lift {
 					color: #457EBA;
 				}
 			}
-			&:nth-child(4) {
+			&:nth-child(5) {
+				.bucket-label{
+					background-color: #CD80BC;
+				}
+				dd.lift {
+					color: #CD80BC;
+				}
+			}
+			&:nth-child(6) {
 				.bucket-label{
 					background-color: #8E71B2;
 				}
@@ -502,6 +556,30 @@
 			}
 			&:nth-child(3) {
 				.bucket-label{
+					background-color: #65B7E6;
+				}
+				dd.lift {
+					color: #65B7E6;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
+					background-color: #457EBA;
+				}
+				dd.lift {
+					color: #457EBA;
+				}
+			}
+			&:nth-child(5) {
+				.bucket-label{
+					background-color: #CD80BC;
+				}
+				dd.lift {
+					color: #CD80BC;
+				}
+			}
+			&:nth-child(6) {
+				.bucket-label{
 					background-color: #8E71B2;
 				}
 				dd.lift {
@@ -521,6 +599,38 @@
 				}
 			}
 			&:nth-child(2) {
+				.bucket-label{
+					background-color: #33BDB7;
+				}
+				dd.lift {
+					color: #33BDB7;
+				}
+			}
+			&:nth-child(3) {
+				.bucket-label{
+					background-color: #65B7E6;
+				}
+				dd.lift {
+					color: #65B7E6;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
+					background-color: #457EBA;
+				}
+				dd.lift {
+					color: #457EBA;
+				}
+			}
+			&:nth-child(5) {
+				.bucket-label{
+					background-color: #CD80BC;
+				}
+				dd.lift {
+					color: #CD80BC;
+				}
+			}
+			&:nth-child(6) {
 				.bucket-label{
 					background-color: #8E71B2;
 				}
