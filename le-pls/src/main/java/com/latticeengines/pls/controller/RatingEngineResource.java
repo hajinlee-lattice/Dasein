@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
@@ -141,10 +142,15 @@ public class RatingEngineResource {
             @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
+            @RequestParam(value = "free_form_text_search", required = false) String freeFormTextSearch2, //
             @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
             @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
         descending = descending == null ? false : descending;
         Tenant tenant = MultiTenantContext.getTenant();
+
+        if (StringUtils.isBlank(freeFormTextSearch) && StringUtils.isNotBlank(freeFormTextSearch2)) {
+            freeFormTextSearch = freeFormTextSearch2;
+        }
 
         return ratingEngineProxy.getEntityPreview(tenant.getId(), ratingEngineId, offset, maximum, entityType, sortBy,
                 descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
