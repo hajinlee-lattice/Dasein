@@ -130,9 +130,6 @@ angular.module('lp.models.ratings', [
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 
-
-        console.log(vm.model);
-
         // Give the above code time to catch up before rendering the chart
         $timeout(function() {
             renderChart();
@@ -208,7 +205,6 @@ angular.module('lp.models.ratings', [
             'Past Average Weighted Revenue: $' + (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads).toFixed(2) : 
             'Past Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
 
-            console.log(vm.workingBuckets);
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
