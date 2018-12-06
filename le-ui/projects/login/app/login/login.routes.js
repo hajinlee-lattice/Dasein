@@ -77,6 +77,9 @@ angular.module('login', [
         })
         .state('login.update', {
             url: 'update',
+            params: {
+                disableUserInfo: true
+            },
             resolve: {
                 logindocument: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getLoginDocument() || {};

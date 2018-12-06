@@ -31,9 +31,6 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     if ($scope.isPasswordOlderThanNinetyDays) {
         $scope.showPasswordError = true;
         $scope.validateErrorMessage = ResourceUtility.getString("NINTY_DAY_OLD_PASSWORD");
-    } else if ($scope.isLoggedInWithTempPassword) {
-        $scope.showPasswordError = true;
-        $scope.validateErrorMessage = ResourceUtility.getString("MUST_CHANGE_TEMP_PASSWORD");
     }
 
     function validatePassword () {
