@@ -1,15 +1,16 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 
 /**
  * Wrapper actor for {@link CDLAssociateServiceImpl}
@@ -22,7 +23,7 @@ public class CDLAssociateActor extends DataSourceWrapperActorTemplate {
 
     @Inject
     @Qualifier("cdlAssociateService")
-    private DataSourceLookupServiceBase dnBCacheLookupService;
+    private DataSourceLookupServiceBase cdlAssociateService;
 
     @PostConstruct
     public void postConstruct() {
@@ -31,7 +32,7 @@ public class CDLAssociateActor extends DataSourceWrapperActorTemplate {
 
     @Override
     protected DataSourceLookupService getDataSourceLookupService() {
-        return dnBCacheLookupService;
+        return cdlAssociateService;
     }
 
     @Override

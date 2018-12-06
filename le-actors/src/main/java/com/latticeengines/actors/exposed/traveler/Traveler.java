@@ -8,34 +8,68 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Stack;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.Level;
 
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
+/**
+ * @author build
+ *
+ */
+/**
+ * @author build
+ *
+ */
 public abstract class Traveler {
 
+    protected abstract Object getInputData();
+
+    /*************************
+     * Bound to whole travel
+     **************************/
     private final String rootOperationUid;
     private final String travelerId;
     private final List<TravelLog> travelStory = new ArrayList<>();
-    private final Map<String, Set<String>> visitedHistory = new HashMap<>();
-    private final Map<String, Long> checkpoints = new HashMap<>();
-    private final Queue<String> visitingQueue = new LinkedList<>();
-    private TravelException travelException;
-    private Object result;
+
+    // Set with 1st anchor location when the traveler comes into actor system
+    // Will not change after jumping to sub decision graph
+    // Purpose: Send traveler to this location to terminate traveling
     private String originalLocation;
-    private String anchorActorLocation;
+
+    // Take snapshot of current traveler status at junction actor and push to
+    // stack
+    // After return back to junction actor, recover the traveler status from
+    // stack
+    private final Stack<TransitionHistory> transitionHistory = new Stack<>();
+
     private StopWatch stopWatch;
     private Level logLevel = Level.DEBUG;
 
+    /***********************************
+     * Bound to current decision graph
+     ***********************************/
+    private Map<String, Set<String>> visitedHistory = new HashMap<>();
+    private Map<String, Long> checkpoints = new HashMap<>();
+    private Queue<String> visitingQueue = new LinkedList<>();
+    private TravelException travelException;
+    private Object result;
+
+    // Set with anchor location of current decision graph
+    private String anchorActorLocation;
+
+
+    /*******************************
+     * Constructor & Getter/Setter
+     *******************************/
     public Traveler(String rootOperationUid) {
         travelerId = UUID.randomUUID().toString();
         this.rootOperationUid = rootOperationUid;
     }
-
-    protected abstract Object getInputData();
 
     public String getRootOperationUid() {
         return rootOperationUid;
@@ -51,13 +85,6 @@ public abstract class Traveler {
 
     public Map<String, Set<String>> getVisitedHistory() {
         return visitedHistory;
-    }
-
-    public void logVisitHistory(String traversedActor) {
-        if (!visitedHistory.containsKey(traversedActor)) {
-            visitedHistory.put(traversedActor, new HashSet<String>());
-        }
-        visitedHistory.get(traversedActor).add(getInputData().toString());
     }
 
     public TravelException getTravelException() {
@@ -88,6 +115,29 @@ public abstract class Traveler {
         this.logLevel = logLevel;
     }
 
+    public String getAnchorActorLocation() {
+        return anchorActorLocation;
+    }
+
+    public void setAnchorActorLocation(String anchorActorLocation) {
+        this.anchorActorLocation = anchorActorLocation;
+    }
+
+    public Stack<TransitionHistory> getTransitionHistory() {
+        return transitionHistory;
+    }
+
+    /********************
+     * Business methods
+     ********************/
+
+    public void logVisitHistory(String traversedActor) {
+        if (!visitedHistory.containsKey(traversedActor)) {
+            visitedHistory.put(traversedActor, new HashSet<String>());
+        }
+        visitedHistory.get(traversedActor).add(getInputData().toString());
+    }
+
     public String getNextLocationFromVisitingQueue() {
         return visitingQueue.poll();
     }
@@ -110,14 +160,6 @@ public abstract class Traveler {
 
     public boolean visitingQueueIsEmpty() {
         return visitingQueue.isEmpty();
-    }
-
-    public String getAnchorActorLocation() {
-        return anchorActorLocation;
-    }
-
-    public void setAnchorActorLocation(String anchorActorLocation) {
-        this.anchorActorLocation = anchorActorLocation;
     }
 
     public void warn(String message, Throwable throwable) {
@@ -191,6 +233,128 @@ public abstract class Traveler {
     @Override
     public String toString() {
         return String.format("%s[%s:%s]", getClass().getSimpleName(), getTravelerId(), getRootOperationUid());
+    }
+
+    // TODO: After moving decisionGraph from MatchTraveler to Traveler
+    // 1. remove decisionGraph from parameter
+    // 2. clear decisionGraph if clearCurrent = true
+    public void pushToTransitionHistory(String junction, String decisionGraph, boolean clearCurrent) {
+        TransitionHistory snapshot = new TransitionHistoryBuilder()//
+                .withJunction(junction) //
+                .withDecisionGraph(decisionGraph) //
+                .withVisitedHistory(visitedHistory) //
+                .withCheckpoints(checkpoints) //
+                .withVisitingQueue(visitingQueue) //
+                .build();
+        transitionHistory.push(snapshot);
+        if (clearCurrent) {
+            visitedHistory.clear();
+            checkpoints.clear();
+            visitingQueue.clear();
+        }
+    }
+
+    // TODO: After moving decisionGraph from MatchTraveler to Traveler
+    // 1. Recover decision graph and no longer return
+    public String recoverTransitionHistory() {
+        TransitionHistory snapshot = transitionHistory.pop();
+        visitedHistory = snapshot.getVisitedHistory();
+        checkpoints = snapshot.getCheckpoints();
+        visitingQueue = snapshot.getVisitingQueue();
+        return snapshot.getDecisionGraph();
+    }
+
+
+    /**
+     * To take snapshot of traveler status at junction actor
+     */
+    public static class TransitionHistory {
+        private String junction;
+        private String decisionGraph;
+        private Map<String, Set<String>> visitedHistory;
+        private Map<String, Long> checkpoints;
+        private Queue<String> visitingQueue;
+
+        @SuppressWarnings("unused")
+        public String getJunction() {
+            return junction;
+        }
+
+        public void setJunction(String junction) {
+            this.junction = junction;
+        }
+
+        public String getDecisionGraph() {
+            return decisionGraph;
+        }
+
+        public void setDecisionGraph(String decisionGraph) {
+            this.decisionGraph = decisionGraph;
+        }
+
+        public Map<String, Set<String>> getVisitedHistory() {
+            return visitedHistory;
+        }
+
+        public void setVisitedHistory(Map<String, Set<String>> visitedHistory) {
+            this.visitedHistory = visitedHistory;
+        }
+
+        public Map<String, Long> getCheckpoints() {
+            return checkpoints;
+        }
+
+        public void setCheckpoints(Map<String, Long> checkpoints) {
+            this.checkpoints = checkpoints;
+        }
+
+        public Queue<String> getVisitingQueue() {
+            return visitingQueue;
+        }
+
+        public void setVisitingQueue(Queue<String> visitingQueue) {
+            this.visitingQueue = visitingQueue;
+        }
+
+    }
+
+    public static final class TransitionHistoryBuilder {
+        private TransitionHistory transitionHistory;
+
+        public TransitionHistoryBuilder() {
+            transitionHistory = new TransitionHistory();
+        }
+
+        public TransitionHistoryBuilder withJunction(String junction) {
+            transitionHistory.setJunction(junction);
+            return this;
+        }
+
+        public TransitionHistoryBuilder withDecisionGraph(String decisionGraph) {
+            transitionHistory.setDecisionGraph(decisionGraph);
+            return this;
+        }
+
+        public TransitionHistoryBuilder withVisitedHistory(Map<String, Set<String>> visitedHistory) {
+            Map<String, Set<String>> visitedHistoryCopy = visitedHistory.entrySet().stream()
+                    .collect(Collectors.toMap(ent -> ent.getKey(), ent -> new HashSet<>(ent.getValue())));
+            transitionHistory.setVisitedHistory(visitedHistoryCopy);
+            return this;
+        }
+
+        public TransitionHistoryBuilder withCheckpoints(Map<String, Long> checkpoints) {
+            transitionHistory.setCheckpoints(new HashMap<>(checkpoints));
+            return this;
+        }
+
+        public TransitionHistoryBuilder withVisitingQueue(Queue<String> visitingQueue) {
+            transitionHistory.setVisitingQueue(new LinkedList<>(visitingQueue));
+            return this;
+        }
+
+        public TransitionHistory build() {
+            return transitionHistory;
+        }
     }
 
 }

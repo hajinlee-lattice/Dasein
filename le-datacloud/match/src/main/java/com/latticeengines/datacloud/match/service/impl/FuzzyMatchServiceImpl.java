@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -225,7 +226,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 matchRecord.setTravelerId(travelContext.getTravelerId());
                 travelContext.setMatchInput(matchInput);
                 travelContext.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);
-                matchFutures.add(askFuzzyMatchAnchor(travelContext));
+                matchFutures.add(askMatchAnchor(travelContext));
 
                 // send to collector
                 String domain = matchKeyTuple.getDomain();
@@ -249,9 +250,13 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
     }
 
-    private Future<Object> askFuzzyMatchAnchor(MatchTraveler traveler) {
+    private Future<Object> askMatchAnchor(MatchTraveler traveler) {
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
-        return actorSystem.askAnchor(traveler, timeout);
+        try {
+            return actorSystem.askAnchor(traveler, timeout);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Fail to ask match anchor");
+        }
     }
 
     private void checkRecordType(List<? extends OutputRecord> matchRequests) {

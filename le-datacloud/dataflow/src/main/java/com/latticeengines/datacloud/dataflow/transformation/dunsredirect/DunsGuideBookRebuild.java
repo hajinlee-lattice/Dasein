@@ -54,8 +54,8 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
         config = getTransformerConfig(parameters);
         Node ams = addSource(parameters.getBaseTables().get(0));
         List<Node> books = new ArrayList<>();
-        for (int i = 0; i < config.getBookPriority().size(); i++) {
-            Node book = addSource(parameters.getBaseTables().get(i + 1));
+        for (int i = 1; i < parameters.getBaseTables().size(); i++) {
+            Node book = addSource(parameters.getBaseTables().get(i));
             books.add(book);
         }
 

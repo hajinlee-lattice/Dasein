@@ -33,9 +33,9 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 @Component
-public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class MatchSingleActorTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchActorTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchSingleActorTestNG.class);
 
     private static final String COUNTRY_CODE = "US";
     private static final String STATE = "CALIFORNIA";

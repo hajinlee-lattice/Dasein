@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
@@ -57,20 +58,20 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
             DataSourceLookupRequest req = new DataSourceLookupRequest();
             req.setMatchTravelerContext(matchTraveler);
             req.setInputData(prepareInputData(matchTraveler.getMatchKeyTuple()));
-            guideBook.logVisit(self().path().toSerializationFormat(), matchTraveler);
+            guideBook.logVisit(ActorUtils.getPath(self()), matchTraveler);
 
             datasourceRef.tell(req, self());
             return true;
         } else {
             matchTraveler.debug("Rejected by " + getClass().getSimpleName());
-            guideBook.logVisit(self().path().toSerializationFormat(), matchTraveler);
+            guideBook.logVisit(ActorUtils.getPath(self()), matchTraveler);
             return false;
         }
     }
 
     @Override
     protected String getNextLocation(Traveler traveler) {
-        return guideBook.next(getSelf().path().toSerializationFormat(), traveler);
+        return guideBook.next(ActorUtils.getPath(getSelf()), traveler);
     }
 
     @Override

@@ -29,6 +29,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
     private Boolean isMatched = false;
+    // When the 1st time anchor receives the traveler, isProcessed will be set
+    // as true
     private Boolean isProcessed = false;
 
     // only for metric purpose
@@ -170,7 +172,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void setTravelTimeout(Timeout travelTimeout) {
         this.travelTimeout = travelTimeout;
     }
-    
+
     @Override
     public void start() {
         super.start();

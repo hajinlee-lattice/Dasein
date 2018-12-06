@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.actors.visitor.sample.SampleMatchTravelContext;
 import com.latticeengines.actors.visitor.sample.impl.SampleDomainBasedMicroEngineActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleDunsBasedMicroEngineActor;
@@ -42,20 +43,16 @@ public class SampleMatchGuideBook extends GuideBook {
         fuzzyMatchAnchor = actorSystem.getFuzzyMatchAnchor();
 
         dummyPathGraph = new ArrayList<>();
-        dummyPathGraph.add(
-                actorSystem.getActorRef(SampleDunsDomainBasedMicroEngineActor.class).path().toSerializationFormat());
-        dummyPathGraph
-                .add(actorSystem.getActorRef(SampleDomainBasedMicroEngineActor.class).path().toSerializationFormat());
-        dummyPathGraph
-                .add(actorSystem.getActorRef(SampleDunsBasedMicroEngineActor.class).path().toSerializationFormat());
-        dummyPathGraph.add(
-                actorSystem.getActorRef(SampleLocationToDunsMicroEngineActor.class).path().toSerializationFormat());
+        dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleDunsDomainBasedMicroEngineActor.class)));
+        dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleDomainBasedMicroEngineActor.class)));
+        dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleDunsBasedMicroEngineActor.class)));
+        dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleLocationToDunsMicroEngineActor.class)));
     }
 
     @Override
     public String next(String currentLocation, Traveler traveler) {
         SampleMatchTravelContext matchTravelContext = (SampleMatchTravelContext) traveler;
-        if (fuzzyMatchAnchor.path().toSerializationFormat().equals(currentLocation)) {
+        if (ActorUtils.getPath(fuzzyMatchAnchor).equals(currentLocation)) {
             return nextMoveForAnchor(matchTravelContext);
         } else {
             return nextMoveForMicroEngine(matchTravelContext);

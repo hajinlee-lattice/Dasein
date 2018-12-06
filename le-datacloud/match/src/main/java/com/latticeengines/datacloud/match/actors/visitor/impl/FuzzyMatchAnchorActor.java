@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
@@ -48,7 +50,22 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
-        traveler.setAnchorActorLocation(self().path().toSerializationFormat());
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
+        if (!matchTraveler.isProcessed()) {
+            // Just enter current decision graph
+            traveler.setAnchorActorLocation(ActorUtils.getPath(self()));
+            return false;
+        } else if (CollectionUtils.isNotEmpty(matchTraveler.getTransitionHistory())) {
+            // Finished traveling around current decision graph but need to
+            // return to previoud junction actor
+            String junction = matchTraveler.getTransitionHistory().peek().getJunction();
+            ActorRef junctionRef = matchActorSystem.getActorRef(junction);
+            Response response = new Response();
+            response.setTravelerContext(matchTraveler);
+            junctionRef.tell(response, self());
+            return true;
+        }
+        // Completed whole trip
         return false;
     }
 
@@ -60,7 +77,7 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
     @Override
     protected void setOriginalSender(Traveler traveler, ActorRef originalSender) {
         if (traveler.getOriginalLocation() == null) {
-            traveler.setOriginalLocation(originalSender.path().toSerializationFormat());
+            traveler.setOriginalLocation(ActorUtils.getPath(originalSender));
         }
     }
 

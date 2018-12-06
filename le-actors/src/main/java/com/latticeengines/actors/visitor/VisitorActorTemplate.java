@@ -7,6 +7,7 @@ import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
 import akka.actor.ActorRef;
@@ -16,12 +17,26 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     protected abstract GuideBook getGuideBook();
 
+    /**
+     * @param traveler:
+     *            Message sent from actor within current decision graph
+     *            Eg of actor type: MicroEngine, Junction
+     * @return True: Pause/Stop travel for now. Do something else 
+     *         False: Continue traveling immediately
+     */
     protected abstract boolean process(Traveler traveler);
 
+    /**
+     * @param response:
+     *            Message sent from external/assistant actor outside of current
+     *            decision graph
+     *            Eg of external actor: Anchor of other decision graph
+     *            Eg of assistant actor: Lookup actor (match)
+     */
     protected abstract void process(Response response);
 
     protected String getNextLocation(Traveler traveler) {
-        return getGuideBook().next(self().path().toSerializationFormat(), traveler);
+        return getGuideBook().next(ActorUtils.getPath(self()), traveler);
     }
 
     @Override
@@ -44,8 +59,8 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                 }
 
                 setOriginalSender(traveler, sender());
-                boolean hasSentMessageToDataSourceActor = process(traveler);
-                if (hasSentMessageToDataSourceActor) {
+                boolean sentToExternalActor = process(traveler);
+                if (sentToExternalActor) {
                     // unblock current actor
                     return;
                 }
@@ -72,7 +87,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     @SuppressWarnings("deprecation")
     protected void travel(Traveler traveler, ActorRef currentActorRef, boolean rejected) {
-        getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
+        getGuideBook().logVisit(ActorUtils.getPath(currentActorRef), traveler);
         String nextLocation = getNextLocation(traveler);
         if (nextLocation == null) {
             nextLocation = traveler.getAnchorActorLocation();
@@ -98,7 +113,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     }
 
     protected String getActorName(ActorRef actorRef) {
-        return actorRef.path().toSerializationFormat();
+        return ActorUtils.getPath(actorRef);
     }
 
     protected boolean logCheckInNOut() {

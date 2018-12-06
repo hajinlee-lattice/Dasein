@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
 import com.latticeengines.actors.visitor.sample.SampleMatchTravelContext;
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchGuideBook;
@@ -38,7 +39,7 @@ public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
-        traveler.setAnchorActorLocation(self().path().toSerializationFormat());
+        traveler.setAnchorActorLocation(ActorUtils.getPath(self()));
         return false;
     }
 
@@ -50,7 +51,7 @@ public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
     @Override
     protected void setOriginalSender(Traveler traveler, ActorRef originalSender) {
         if (traveler.getOriginalLocation() == null) {
-            traveler.setOriginalLocation(originalSender.path().toSerializationFormat());
+            traveler.setOriginalLocation(ActorUtils.getPath(originalSender));
         }
     }
 }

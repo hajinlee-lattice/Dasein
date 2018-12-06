@@ -38,6 +38,7 @@ public class MatchInput implements Fact, Dimension {
     private Tenant tenant;
     @JsonProperty("Fields")
     private List<String> fields;
+    // IMPORTANT: Number of records cannot exceed 200
     @JsonProperty("Data")
     private List<List<Object>> data;
     @JsonIgnore

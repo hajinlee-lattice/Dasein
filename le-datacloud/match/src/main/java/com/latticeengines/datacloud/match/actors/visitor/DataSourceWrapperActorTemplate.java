@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.TravelException;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 
 import akka.actor.ActorRef;
@@ -36,7 +37,7 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
     protected void processMessage(Object msg) {
         if (msg instanceof DataSourceLookupRequest) {
             DataSourceLookupRequest request = (DataSourceLookupRequest) msg;
-            request.setCallerMicroEngineReference(sender().path().toSerializationFormat());
+            request.setCallerMicroEngineReference(ActorUtils.getPath(sender()));
 
             DataSourceLookupService dataSourceLookupService = getDataSourceLookupService();
 
@@ -47,7 +48,7 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
                     if (log.isDebugEnabled()) {
                         log.debug(self() + " received an async request from " + sender());
                     }
-                    dataSourceLookupService.asyncLookup(lookupId, request, self().path().toSerializationFormat());
+                    dataSourceLookupService.asyncLookup(lookupId, request, ActorUtils.getPath(self()));
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug(self() + " received a sync request from " + sender());

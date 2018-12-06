@@ -25,7 +25,7 @@ public class SampleServiceImplTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private SampleFuzzyMatchService service;
 
-//    @Test(groups = "functional")
+    // @Test(groups = "functional")
     public void testActorSystem() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);

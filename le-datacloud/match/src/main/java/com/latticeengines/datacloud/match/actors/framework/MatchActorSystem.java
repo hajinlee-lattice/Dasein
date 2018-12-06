@@ -1,23 +1,19 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 
-import com.latticeengines.datacloud.match.actors.visitor.impl.CDLAssociateActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.CDLLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +26,13 @@ import com.latticeengines.actors.exposed.ActorFactory;
 import com.latticeengines.actors.exposed.ActorSystemFactory;
 import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.actors.exposed.RoutingLogic;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchJunctionActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.CDLAssociateActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.CDLLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnBCacheLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
@@ -39,10 +41,22 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryState
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryZipCodeBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityEmailBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
+import com.latticeengines.domain.exposed.datacloud.match.MatchActorType;
+import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -100,8 +114,21 @@ public class MatchActorSystem {
 
     private ExecutorService dataSourceServiceExecutor;
 
-    private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
+    @Autowired
+    private MatchDecisionGraphService matchDecisionGraphService;
+
+    // ActorName -> ActorRef
+    private final ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
+    // ActorPath -> ActorName
+    private final ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
+    // AnchorName -> AnchorPath
+    // Multiple anchors share same anchor class but with different anchor name
+    private final ConcurrentMap<String, String> anchorPaths = new ConcurrentHashMap<>();
+    // ActorName -> ActorType
+    private final ConcurrentMap<String, MatchActorType> actorNameToType = new ConcurrentHashMap<>();
+    // ActorNameAbbr -> ActorType
+    private final ConcurrentMap<String, MatchActorType> actorNameAbbrToType = new ConcurrentHashMap<>();
+
 
     @Autowired
     public MatchActorSystem(ActorFactory actorFactory) {
@@ -124,8 +151,8 @@ public class MatchActorSystem {
         return getActorRef(actorClz.getSimpleName());
     }
 
-    ActorRef getActorRef(String actorClassName) {
-        return getActorRefMap().get(actorClassName);
+    public ActorRef getActorRef(String actorName) {
+        return getActorRefMap().get(actorName);
     }
 
     String getActorName(String actorPath) {
@@ -133,7 +160,7 @@ public class MatchActorSystem {
     }
 
     public String getActorName(ActorRef actorRef) {
-        String path = actorRef.path().toSerializationFormat();
+        String path = ActorUtils.getPath(actorRef);
         String clzName = getActorName(path);
         if (StringUtils.isEmpty(clzName)) {
             return path;
@@ -142,18 +169,19 @@ public class MatchActorSystem {
         }
     }
 
-    ActorRef getFuzzyMatchAnchor() {
-        return getActorRef(FuzzyMatchAnchorActor.class);
+    ActorRef getMatchAnchor(MatchTraveler traveler) throws ExecutionException {
+        DecisionGraph dg = matchDecisionGraphService.getDecisionGraph(traveler);
+        return getActorRef(dg.getAnchor());
     }
 
     public ActorRef getMetricActor() {
-        initilize();
+        initialize();
         return getActorRef(MetricActor.class);
     }
 
-    public Future<Object> askAnchor(MatchTraveler traveler, Timeout timeout) {
-        initilize();
-        return Patterns.ask(getFuzzyMatchAnchor(), traveler, timeout);
+    public Future<Object> askAnchor(MatchTraveler traveler, Timeout timeout) throws ExecutionException {
+        initialize();
+        return Patterns.ask(getMatchAnchor(traveler), traveler, timeout);
     }
 
     public void sendResponse(Object response, String returnAddress) {
@@ -183,47 +211,64 @@ public class MatchActorSystem {
     }
 
     private ActorSystem getActorSystem() {
-        initilize();
+        initialize();
         return system;
     }
 
     private ConcurrentMap<String, ActorRef> getActorRefMap() {
-        initilize();
+        initialize();
         return actorRefMap;
     }
 
     private ConcurrentMap<String, String> getActorPathMap() {
-        initilize();
+        initialize();
         return actorPathMap;
     }
 
-    private void initilize() {
+    public String getAnchorPath(String anchorName) {
+        initialize();
+        return anchorPaths.get(anchorName);
+    }
+
+    public MatchActorType getActorType(String actorName) {
+        initialize();
+        return actorNameToType.get(actorName);
+    }
+
+    public MatchActorType getActorTypeByNameAbbr(String actorNameAbbr) {
+        initialize();
+        return actorNameAbbrToType.get(actorNameAbbr);
+    }
+
+    private void initialize() {
         if (system == null) {
             synchronized (this) {
                 if (system == null) {
                     system = ActorSystemFactory.create("datacloud", 16);
                     initDefaultDataSourceThreadPool();
                     initActors();
+                    initActorInfo();
                 }
             }
         }
     }
 
     private void initActors() {
-        initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
-        initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
-        initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
-        initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
-        initNamedActor(CDLLookupActor.class, true, cdlLookupActorCardinality);
-        initNamedActor(CDLAssociateActor.class, true, cdlAssociateActorCardinality);
-
+        initAnchors();
         initMicroEngines();
-
-        initNamedActor(FuzzyMatchAnchorActor.class);
-
-        initNamedActor(MetricActor.class, true, metricActorCardinality);
+        initJunctions();
+        initDataSourceActors();
+        initMetricActors();
 
         log.info("All match actors created.");
+    }
+
+    private void initAnchors() {
+        List<String> anchors = matchDecisionGraphService.findAllAnchors();
+        anchors.forEach(anchor -> {
+            initNamedActor(FuzzyMatchAnchorActor.class, false, 1,
+                    MatchActorUtils.getFullActorName(anchor, MatchActorType.ANCHOR));
+        });
     }
 
     private void initMicroEngines() {
@@ -239,6 +284,29 @@ public class MatchActorSystem {
         initNamedActor(DomainCountryZipCodeBasedMicroEngineActor.class);
         initNamedActor(DomainCountryStateBasedMicroEngineActor.class);
         initNamedActor(DomainCountryBasedMicroEngineActor.class);
+        initNamedActor(EntityIdAssociateMicroEngineActor.class);
+        initNamedActor(EntityEmailBasedMicroEngineActor.class);
+        initNamedActor(EntityNameBasedMicroEngineActor.class);
+        initNamedActor(EntitySystemIdBasedMicroEngineActor.class);
+        initNamedActor(EntityDomainBasedMicroEngineActor.class);
+    }
+
+    private void initDataSourceActors() {
+        initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
+        initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
+        initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
+        initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
+        initNamedActor(CDLLookupActor.class, true, cdlLookupActorCardinality);
+        initNamedActor(CDLAssociateActor.class, true, cdlAssociateActorCardinality);
+    }
+
+    private void initJunctions() {
+        initNamedActor(FuzzyMatchJunctionActor.class);
+        initNamedActor(AccountMatchJunctionActor.class);
+    }
+
+    private void initMetricActors() {
+        initNamedActor(MetricActor.class, true, metricActorCardinality);
     }
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz) {
@@ -247,16 +315,21 @@ public class MatchActorSystem {
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz, boolean useRouting,
             int routingCardinality) {
+        return initNamedActor(actorClz, useRouting, routingCardinality, actorClz.getSimpleName());
+    }
+
+    private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz, boolean useRouting,
+            int routingCardinality, String actorName) {
         ActorRef actorRef;
         if (useRouting) {
-            actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz,
+            actorRef = actorFactory.create(system, actorName, actorClz,
                     RoutingLogic.RoundRobinRoutingLogic, routingCardinality);
         } else {
-            actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz);
+            actorRef = actorFactory.create(system, actorName, actorClz);
         }
-        actorRefMap.put(actorClz.getSimpleName(), actorRef);
-        actorPathMap.putIfAbsent(actorRef.path().toSerializationFormat(), actorClz.getSimpleName());
-        log.info("Add actor-ref " + actorClz.getSimpleName());
+        actorRefMap.put(actorName, actorRef);
+        actorPathMap.putIfAbsent(ActorUtils.getPath(actorRef), actorName);
+        log.info(String.format("Add actor-ref %s with class %s", actorName, actorClz.getSimpleName()));
         return actorRef;
     }
 
@@ -265,5 +338,47 @@ public class MatchActorSystem {
         BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>();
         dataSourceServiceExecutor = new ThreadPoolExecutor(defaultThreadpoolCountMin, defaultThreadpoolCountMax, 1,
                 TimeUnit.MINUTES, runnableQueue);
+    }
+
+    private void initActorInfo() {
+        log.info("Initialze anchor path info");
+        List<String> anchors = matchDecisionGraphService.findAllAnchors();
+        anchors.forEach(anchor -> {
+            anchorPaths.put(anchor, ActorUtils.getPath(getActorRef(anchor)));
+        });
+
+        initActorType();
+    }
+
+    // TODO: Change to dynamically load from DecisionGraph table instead of
+    // hard-coding
+    private void initActorType() {
+        Object[][] types = new Object[][] {
+                { DunsDomainBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DomainBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DunsBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { LocationToDunsMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { LocationToCachedDunsMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DunsValidateMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { CachedDunsValidateMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DunsGuideValidateMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { CachedDunsGuideValidateMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DomainCountryZipCodeBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DomainCountryStateBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { DomainCountryBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { EntityIdAssociateMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { EntityEmailBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { EntityNameBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { EntityDomainBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+
+                { FuzzyMatchJunctionActor.class.getSimpleName(), MatchActorType.JUNCION }, //
+                { AccountMatchJunctionActor.class.getSimpleName(), MatchActorType.JUNCION }, //
+        };
+        Stream.of(types).forEach(type -> {
+            actorNameToType.put((String) type[0], (MatchActorType) type[1]);
+            actorNameAbbrToType.put(MatchActorUtils.getShortActorName((String) type[0], (MatchActorType) type[1]),
+                    (MatchActorType) type[1]);
+        });
     }
 }

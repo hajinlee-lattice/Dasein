@@ -5,68 +5,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.utils.ActorUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.entitymgr.DecisionGraphEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
+import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 
 @Component("matchGuideBook")
 public class MatchGuideBook extends GuideBook {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchGuideBook.class);
-    private static final String MICROENGINE_ACTOR = "MicroEngineActor";
-
-    private String fuzzyMatchAnchorPath;
-    private boolean initialized;
 
     @Autowired
     private MatchActorSystem actorSystem;
 
     @Autowired
-    private DecisionGraphEntityMgr decisionGraphEntityMgr;
-
-    @Value("${datacloud.match.default.decision.graph}")
-    private String defaultGraph;
-
-    private LoadingCache<String, DecisionGraph> decisionGraphLoadingCache;
-
-    @PostConstruct
-    private void postConstruct() {
-        decisionGraphLoadingCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, DecisionGraph>() {
-                    @Override
-                    public DecisionGraph load(String graphName) throws Exception {
-                        return decisionGraphEntityMgr.getDecisionGraph(graphName);
-                    }
-                });
-    }
+    private MatchDecisionGraphService matchDecisionGraphService;
 
     @Override
     public String next(String currentLocation, Traveler traveler) {
-        initialize();
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        if (fuzzyMatchAnchorPath.equals(currentLocation)) {
+        String anchorPath;
+        try {
+            anchorPath = actorSystem
+                    .getAnchorPath(matchDecisionGraphService.getDecisionGraph(matchTraveler).getAnchor());
+        } catch (ExecutionException e) {
+            traveler.warn("Fail to retrieve anchor path for match traveler " + JsonUtils.serialize(matchTraveler), e);
+            return traveler.getOriginalLocation();
+        }
+
+        if (anchorPath.equals(currentLocation)) {
             return nextMoveForAnchor(matchTraveler);
         } else {
             String nextStop = nextMoveForMicroEngine(matchTraveler);
-            if (fuzzyMatchAnchorPath.equals(nextStop)) {
-                String lastStop = toActorName(actorSystem.getActorName(currentLocation));
-                matchTraveler.setLastStop(lastStop);
+            if (anchorPath.equals(nextStop)) {
+                matchTraveler.setLastStop(actorSystem.getActorName(currentLocation));
             }
             return nextStop;
         }
@@ -74,23 +57,24 @@ public class MatchGuideBook extends GuideBook {
 
     @Override
     public void logVisit(String traversedActor, Traveler traveler) {
-        initialize();
-        if (fuzzyMatchAnchorPath.equals(traversedActor)) {
-            return;
-        }
-
-        traveler.logVisitHistory(traversedActor);
         DecisionGraph decisionGraph;
         try {
-            decisionGraph = getDecisionGraph((MatchTraveler) traveler);
+            decisionGraph = matchDecisionGraphService.getDecisionGraph((MatchTraveler) traveler);
         } catch (Exception e) {
             traveler.warn("Failed to retrieve decision graph " + ((MatchTraveler) traveler).getDecisionGraph()
                     + " from loading cache.", e);
             traveler.clearLocationsToVisitingQueue();
             return;
         }
+        String anchorPath = actorSystem.getAnchorPath(decisionGraph.getAnchor());
+        if (anchorPath.equals(traversedActor)) {
+            return;
+        }
 
-        String nodeName = toActorName(actorSystem.getActorName(traversedActor));
+        traveler.logVisitHistory(traversedActor);
+
+        // Node.name is actor name abbreviation, not full name
+        String nodeName = toActorNameAbbr(actorSystem.getActorName(traversedActor));
         DecisionGraph.Node thisNode = decisionGraph.getNode(nodeName);
         if (thisNode == null) {
             throw new RuntimeException("Cannot find the graph node named " + nodeName);
@@ -98,8 +82,7 @@ public class MatchGuideBook extends GuideBook {
         List<DecisionGraph.Node> children = thisNode.getChildren();
         List<String> childNodes = new ArrayList<>();
         for (DecisionGraph.Node child : children) {
-            String actorPath = actorSystem.getActorRef(toActorClassName(child.getName())).path()
-                    .toSerializationFormat();
+            String actorPath = ActorUtils.getPath(actorSystem.getActorRef(toActorName(child.getName())));
             childNodes.add(actorPath);
         }
         childNodes.removeAll(traveler.getVisitingQueue());
@@ -113,7 +96,7 @@ public class MatchGuideBook extends GuideBook {
             // initialization
             DecisionGraph decisionGraph;
             try {
-                decisionGraph = getDecisionGraph(traveler);
+                decisionGraph = matchDecisionGraphService.getDecisionGraph(traveler);
             } catch (Exception e) {
                 traveler.warn(
                         "Failed to retrieve decision graph " + traveler.getDecisionGraph() + " from loading cache.", e);
@@ -123,8 +106,7 @@ public class MatchGuideBook extends GuideBook {
             String[] startingNodes = new String[decisionGraph.getStartingNodes().size()];
             for (int i = 0; i < startingNodes.length; i++) {
                 DecisionGraph.Node node = decisionGraph.getStartingNodes().get(i);
-                String actorPath = actorSystem.getActorRef(toActorClassName(node.getName())).path()
-                        .toSerializationFormat();
+                String actorPath = ActorUtils.getPath(actorSystem.getActorRef(toActorName(node.getName())));
                 startingNodes[i] = actorPath;
             }
 
@@ -165,33 +147,12 @@ public class MatchGuideBook extends GuideBook {
         return false;
     }
 
-    private DecisionGraph getDecisionGraph(MatchTraveler traveler) throws ExecutionException {
-        String graphName = traveler.getDecisionGraph();
-        if (StringUtils.isEmpty(graphName)) {
-            graphName = defaultGraph;
-            traveler.setDecisionGraph(defaultGraph);
-        }
-        return decisionGraphLoadingCache.get(graphName);
+    private String toActorNameAbbr(String actorName) {
+        return MatchActorUtils.getShortActorName(actorName, actorSystem.getActorType(actorName));
     }
 
-    private String toActorName(String actorClassName) {
-        return actorClassName.replace(MICROENGINE_ACTOR, "");
-    }
-
-    private String toActorClassName(String actorName) {
-        return actorName + MICROENGINE_ACTOR;
-    }
-
-    private void initialize() {
-        if (!initialized) {
-            synchronized (this) {
-                if (!initialized) {
-                    log.info("Initialize fuzzy match guide book.");
-                    fuzzyMatchAnchorPath = actorSystem.getFuzzyMatchAnchor().path().toSerializationFormat();
-                    initialized = true;
-                }
-            }
-        }
+    private String toActorName(String actorNameAbbr) {
+        return MatchActorUtils.getFullActorName(actorNameAbbr, actorSystem.getActorTypeByNameAbbr(actorNameAbbr));
     }
 
 }

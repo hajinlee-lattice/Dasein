@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -17,6 +19,10 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.latticeengines.domain.exposed.datacloud.match.MatchActorType;
+import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -33,6 +39,8 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "GraphName", unique = true, nullable = false, length = 100)
     private String graphName;
 
+    // Content format
+    // Actor name abbreviations separated by comma
     @Column(name = "Vertices", nullable = false, length = 1000)
     private String vertices;
 
@@ -45,11 +53,24 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "Edges", length = 1000)
     private String edges;
 
+    @Column(name = "Anchor", nullable = false, length = 100)
+    private String anchor;
+
+
+    // Content format
+    // JunctionActorNameAbbr1:DecisionGraph1,JunctionActorNameAbbr2:DecisionGraph2,...
+    @Column(name = "JunctionGraphs", length = 1000)
+    private String junctionGraphs;
+
     @Transient
     private List<Node> startingNodes;
 
     @Transient
     private Map<String, Node> nodeMap;
+
+    // JunctionName (short actor name) -> decision graph
+    @Transient
+    private Map<String, String> junctionGraphMap;
 
     @Override
     public Long getPid() {
@@ -79,6 +100,39 @@ public class DecisionGraph implements HasPid, Serializable {
 
     private String getEdges() {
         return edges;
+    }
+
+    public String getAnchor() {
+        return MatchActorUtils.getFullActorName(anchor, MatchActorType.ANCHOR);
+    }
+
+    public void setAnchor(String anchor) {
+        this.anchor = anchor;
+    }
+
+    public String getJunctionGraphs() {
+        return junctionGraphs;
+    }
+
+    public void setJunctionGraphs(String junctionGraphs) {
+        this.junctionGraphs = junctionGraphs;
+    }
+
+    public String getNextGraphForJunction(String junctionName) {
+        junctionName = MatchActorUtils.getShortActorName(junctionName, MatchActorType.JUNCION);
+        return getJunctionGraphMap().get(junctionName);
+    }
+
+    private Map<String, String> getJunctionGraphMap() {
+        if (junctionGraphMap == null) {
+            if (StringUtils.isBlank(junctionGraphs)) {
+                junctionGraphMap = new HashMap<>();
+            } else {
+                junctionGraphMap = Stream.of(junctionGraphs.split(","))
+                        .collect(Collectors.toMap(x -> x.split(":")[0], x -> x.split(":")[1]));
+            }
+        }
+        return junctionGraphMap;
     }
 
     public List<Node> getStartingNodes() {
@@ -148,7 +202,7 @@ public class DecisionGraph implements HasPid, Serializable {
     }
 
     public static class Node {
-        private final String name;
+        private final String name; // Actor name abbreviation, not full name
         private List<Node> children = new ArrayList<>();
 
         Node(String name) {

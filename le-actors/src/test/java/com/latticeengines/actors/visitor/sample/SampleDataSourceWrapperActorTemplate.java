@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
 
 import akka.actor.ActorRef;
@@ -30,14 +31,14 @@ public abstract class SampleDataSourceWrapperActorTemplate extends ActorTemplate
     protected void processMessage(Object msg) {
         if (msg instanceof SampleDataSourceLookupRequest) {
             SampleDataSourceLookupRequest request = (SampleDataSourceLookupRequest) msg;
-            request.setCallerMicroEngineReference(sender().path().toSerializationFormat());
+            request.setCallerMicroEngineReference(ActorUtils.getPath(sender()));
 
             SampleDataSourceLookupService dataSourceLookupService = getDataSourceLookupService();
 
             if (shouldDoAsyncLookup()) {
                 String lookupId = UUID.randomUUID().toString();
                 requestMap.put(lookupId, request);
-                dataSourceLookupService.asyncLookup(lookupId, request, self().path().toSerializationFormat());
+                dataSourceLookupService.asyncLookup(lookupId, request, ActorUtils.getPath(self()));
             } else {
                 Response response = dataSourceLookupService.syncLookup(request);
                 response.setTravelerContext(request.getMatchTravelerContext());
