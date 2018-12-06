@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -37,37 +37,51 @@ public class MatchSingleActorTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(MatchSingleActorTestNG.class);
 
-    private static final String COUNTRY_CODE = "US";
-    private static final String STATE = "CALIFORNIA";
-    private static final String CITY = "FOSTER CITY";
-    private static final String NAME = "LATTICE ENGINES";
-    private static final String DUNS = "028675958";
-    private static final int CONFIDENCE_CODE = 7;
-    private static final String MATCH_GRADE = "AZZFAZZAFAF";
-
+    // IMPORTANT
+    // Should not run tests in parallel which need different mode
+    // (batch/realtime) for actorSystem
     @Autowired
     private MatchActorSystem actorSystem;
 
-    @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
+    @Test(groups = { "functional" }, dataProvider = "dnbLookupActorData", priority = 1)
+    public void testDnBActorRealtimeMode(String name, String countryCode, String state, String city,
+            DnBReturnCode dnbCode, String expectedDuns, int expectedConfidenceCode, String expectedMatchGrade)
+            throws Exception {
+        // Realtime mode, use DnBCache
+        testDnBActor(name, countryCode, state, city, dnbCode, expectedDuns, expectedConfidenceCode, expectedMatchGrade,
+                false, true);
+    }
 
-    @Test(groups = {"functional", "dnb"})
-    public void testDnBActorNonBatchMode() throws Exception {
-        actorSystem.setBatchMode(false);
+    // Submit to remote DnB batch API, so set test group as dnb which only runs
+    // once a week
+    @Test(groups = "dnb", dataProvider = "dnbLookupActorData", priority = 2)
+    public void testDnBActorBatchMode(String name, String countryCode, String state, String city, DnBReturnCode dnbCode,
+            String expectedDuns, int expectedConfidenceCode, String expectedMatchGrade) throws Exception {
+        // Batch mode, skip DnBCache
+        testDnBActor(name, countryCode, state, city, dnbCode, expectedDuns, expectedConfidenceCode, expectedMatchGrade,
+                true, false);
+    }
+
+    private void testDnBActor(String name, String countryCode, String state, String city, DnBReturnCode dnbCode,
+            String expectedDuns, int expectedConfidenceCode, String expectedMatchGrade, boolean isBatchMode,
+            boolean useDnBCache) throws Exception {
+        actorSystem.setBatchMode(isBatchMode);
         DataSourceLookupRequest msg = new DataSourceLookupRequest();
         msg.setCallerMicroEngineReference(null);
-        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
-        matchKeyTuple.setCountryCode(COUNTRY_CODE);
-        matchKeyTuple.setState(STATE);
-        matchKeyTuple.setCity(CITY);
-        matchKeyTuple.setName(NAME);
+        MatchKeyTuple.Builder tupleBuilder = new MatchKeyTuple.Builder();
+        MatchKeyTuple matchKeyTuple = tupleBuilder.withCountryCode(countryCode) //
+                .withState(state) //
+                .withCity(city) //
+                .withName(name) //
+                .build();
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
-        MatchInput matchInput = new MatchInput();
-        matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(true);
-        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        MatchInput matchInput = new MatchInput(); // Just set minimum fields
+                                                  // needed to DnBLookupActor
+        matchInput.setUseDnBCache(useDnBCache);
+        matchInput.setUseRemoteDnB(Boolean.TRUE);
+        matchInput.setDataCloudVersion(currentDataCloudVersion);
         matchTravelerContext.setMatchInput(matchInput);
         msg.setMatchTravelerContext(matchTravelerContext);
 
@@ -77,40 +91,19 @@ public class MatchSingleActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         log.info(String.format("DnBReturnCode = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
                 data.getDnbCodeAsString(), data.getDuns(), data.getConfidenceCode(),
                 data.getMatchGrade().getRawCode()));
-        Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
-        Assert.assertEquals(data.getDuns(), DUNS);
-        Assert.assertEquals((int) data.getConfidenceCode(), CONFIDENCE_CODE);
-        Assert.assertEquals(data.getMatchGrade().getRawCode(), MATCH_GRADE);
+        Assert.assertEquals(data.getDnbCode(), dnbCode);
+        Assert.assertEquals(data.getDuns(), expectedDuns);
+        Assert.assertEquals((int) data.getConfidenceCode(), expectedConfidenceCode);
+        Assert.assertEquals(data.getMatchGrade().getRawCode(), expectedMatchGrade);
     }
 
-    @Test(groups = "dnb", dependsOnMethods = { "testDnBActorNonBatchMode" })
-    public void testDnBActorBatchMode() throws Exception {
-        actorSystem.setBatchMode(true);
-        DataSourceLookupRequest msg = new DataSourceLookupRequest();
-        msg.setCallerMicroEngineReference(null);
-        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
-        matchKeyTuple.setCountryCode(COUNTRY_CODE);
-        matchKeyTuple.setState(STATE);
-        matchKeyTuple.setCity(CITY);
-        matchKeyTuple.setName(NAME);
-        msg.setInputData(matchKeyTuple);
-        String rootOperationUid = UUID.randomUUID().toString();
-        MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
-        MatchInput matchInput = new MatchInput();
-        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
-        matchTravelerContext.setMatchInput(matchInput);
-        msg.setMatchTravelerContext(matchTravelerContext);
-        matchInput.setUseDnBCache(false);
-        matchInput.setUseRemoteDnB(true);
-
-        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, true);
-        Assert.assertNotNull(result);
-        DnBMatchContext data = (DnBMatchContext) result.getResult();
-        Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
-        Assert.assertEquals(data.getDuns(), DUNS);
-        Assert.assertEquals((int) data.getConfidenceCode(), CONFIDENCE_CODE);
-        Assert.assertEquals(data.getMatchGrade().getRawCode(), MATCH_GRADE);
-        actorSystem.setBatchMode(false);
+    // Name, CountryCode, State, City, DnBReturnCode, ExpectedDuns,
+    // ExpectedConfidenceCode, ExpectedMatchGrade
+    @DataProvider(name = "dnbLookupActorData")
+    private Object[][] provideDnBLookupData() {
+        return new Object[][] { { "LATTICE ENGINES", "US", "CALIFORNIA", "FOSTER CITY", DnBReturnCode.OK, "028675958",
+                7, "AZZFAZZAFAF" }, //
+        };
     }
 
     private Object sendMessageToActor(Object msg, Class<? extends ActorTemplate> actorClazz, boolean batchMode)
