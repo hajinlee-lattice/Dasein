@@ -219,6 +219,7 @@ public class ModelingServiceExecutor {
                     String.format("assignconversionratetoallcategoricalvalues.enabled=%s", true), //
                     String.format("enumeratedcolumntransformstep.enabled=%s", false), //
                     String.format("categoricalgroupingstep.enabled=%s", !builder.isSkipStandardTransform()), //
+                    String.format("pivotstep.enabled=%s", !builder.isSkipStandardTransform()), //
                     String.format("unmatchedselectionstep.enabled=%s", true) //
             };
 
