@@ -22,10 +22,13 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsActionConfiguration;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
@@ -49,6 +52,9 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
         return dao;
     }
 
+    /*
+     * For PA, need to get all the metrics including deprecated
+     */
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
     public List<ActivityMetrics> findWithType(ActivityType type) { // filter by TenantID
@@ -59,14 +65,35 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
         return metrics;
     }
 
+    /*
+     * For metrics configuration UI:
+     * 
+     * 1. Need to exclude deprecated metrics
+     * 
+     * 2. TotalSpendOvertime & AvgSpendOvertime changed comparison type in time
+     * filter from WITHIN to BETWEEN in M26. If PA, we still support both
+     * calculation since we need ensure backward compatibility, but for metrics
+     * configuration UI, old WITHIN will be translated to BETWEEN
+     */
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
     public List<ActivityMetrics> findActiveWithType(ActivityType type) { // filter by TenantID
         List<ActivityMetrics> metrics = repository.findAllByIsEOLAndType(false, type);
         metrics.forEach(m -> {
-            m.getPeriodsConfig();
+            List<TimeFilter> timeFilters = m.getPeriodsConfig();
+            if (m.getMetrics() == InterfaceName.TotalSpendOvertime
+                    || m.getMetrics() == InterfaceName.AvgSpendOvertime) {
+                m.getPeriodsConfig().set(0, withinToBetween(timeFilters.get(0)));
+            }
         });
         return metrics;
+    }
+
+    private TimeFilter withinToBetween(TimeFilter timeFilter) {
+        if (timeFilter.getRelation() != ComparisonType.WITHIN) {
+            return timeFilter;
+        }
+        return TimeFilter.between(1, (int) timeFilter.getValues().get(0), timeFilter.getPeriod());
     }
 
     @Override
@@ -86,7 +113,7 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
             metrics.setPeriods();
         });
 
-        // for action info: metrics displayname without period
+        // for action info: metrics display name without period
         Set<String> activated = new HashSet<>();
         Set<String> updated = new HashSet<>();
         Set<String> deactivated = new HashSet<>();
@@ -121,15 +148,17 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
             deactivated.add(ActivityMetricsUtils.getMetricsDisplayName(existing.getMetrics()));
         }
         for (ActivityMetrics metrics : metricsList) {
-            if (existingMetrics.containsKey(ActivityMetricsUtils.getNameWithPeriod(metrics))) {
-                metrics.setPid(existingMetrics.get(ActivityMetricsUtils.getNameWithPeriod(metrics)).getPid());
-                metrics.setCreated(existingMetrics.get(ActivityMetricsUtils.getNameWithPeriod(metrics)).getCreated());
+            String metricsNameWithPeriod = ActivityMetricsUtils.getNameWithPeriod(metrics);
+            String metricsDisplayName = ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics());
+            if (existingMetrics.containsKey(metricsNameWithPeriod)) {
+                metrics.setPid(existingMetrics.get(metricsNameWithPeriod).getPid());
+                metrics.setCreated(existingMetrics.get(metricsNameWithPeriod).getCreated());
             }
-            if (deactivated.contains(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()))) {
-                deactivated.remove(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
-                updated.add(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
-            } else if (!updated.contains(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()))) {
-                activated.add(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
+            if (deactivated.contains(metricsDisplayName)) {
+                deactivated.remove(metricsDisplayName);
+                updated.add(metricsDisplayName);
+            } else if (!updated.contains(metricsDisplayName)) {
+                activated.add(metricsDisplayName);
             }
             super.createOrUpdate(metrics);
         }

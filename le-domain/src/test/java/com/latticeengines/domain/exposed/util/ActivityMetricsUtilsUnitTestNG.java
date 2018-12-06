@@ -14,9 +14,9 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsUtilsUnitTestNG {
 
-    @Test(groups = "unit", dataProvider = "Metrics")
-    public void test(String fullName, String productId, InterfaceName metrics, String displayName, String periods,
-            String depivotedName, String secDisplayName, NullMetricsImputation nullImputation) {
+    @Test(groups = "unit", dataProvider = "MetricsToTestName")
+    public void testVariousGetNames(String fullName, String productId, InterfaceName metrics, String displayName,
+            String periods, String depivotedName, String secDisplayName, NullMetricsImputation nullImputation) {
         Assert.assertEquals(ActivityMetricsUtils.getProductIdFromFullName(fullName), productId);
         Assert.assertEquals(ActivityMetricsUtils.getMetricsFromFullName(fullName), metrics);
         Assert.assertEquals(ActivityMetricsUtils.getPeriodsFromFullName(fullName), periods);
@@ -25,8 +25,8 @@ public class ActivityMetricsUtilsUnitTestNG {
         Assert.assertEquals(
                 ActivityMetricsUtils.getDisplayNamesFromFullName(fullName, "2018-01-01", strategies).getLeft(),
                 displayName);
-        Assert.assertEquals(ActivityMetricsUtils.getDepivotedAttrNameFromFullName(fullName), depivotedName);
-        Assert.assertEquals(ActivityMetricsUtils.getDepivotedAttrNameFromFullName(fullName), depivotedName);
+        Assert.assertEquals(ActivityMetricsUtils.getNameWithPeriodFromFullName(fullName), depivotedName);
+        Assert.assertEquals(ActivityMetricsUtils.getNameWithPeriodFromFullName(fullName), depivotedName);
         Assert.assertEquals(
                 ActivityMetricsUtils.getDisplayNamesFromFullName(fullName, "2018-01-01", strategies).getRight(),
                 secDisplayName);
@@ -34,8 +34,8 @@ public class ActivityMetricsUtilsUnitTestNG {
     }
 
     // full name, product id, metrics, display name, period str, depivoted metrics name, secondary display name, null imputation
-    @DataProvider(name = "Metrics")
-    protected Object[][] provideMetrics() {
+    @DataProvider(name = "MetricsToTestName")
+    protected Object[][] provideMetricsToTestName() {
         return new Object[][] {
                 { "AM_FE5FB1286A4E60345D0E4AAD0E66E664__EVER__HP", "FE5FB1286A4E60345D0E4AAD0E66E664",
                         InterfaceName.HasPurchased, "Has Purchased", "EVER", "EVER__HP", null,
@@ -55,9 +55,15 @@ public class ActivityMetricsUtilsUnitTestNG {
                 { "AM_FE5FB1286A4E60345D0E4AAD0E66E664__W_10__TS", "FE5FB1286A4E60345D0E4AAD0E66E664",
                         InterfaceName.TotalSpendOvertime, "Total Spend in last 10 weeks", "W_10", "W_10__TS",
                         "(2017-10-22 to 2017-12-30)", NullMetricsImputation.ZERO }, //
+                { "AM_FE5FB1286A4E60345D0E4AAD0E66E664__M_2_3__TS", "FE5FB1286A4E60345D0E4AAD0E66E664",
+                        InterfaceName.TotalSpendOvertime, "Total Spend in last 2 to 3 months", "M_2_3", "M_2_3__TS",
+                        "(2017-10-01 to 2017-11-30)", NullMetricsImputation.ZERO }, //
                 { "AM_FE5FB1286A4E60345D0E4AAD0E66E664__Q_1__AS", "FE5FB1286A4E60345D0E4AAD0E66E664",
                         InterfaceName.AvgSpendOvertime, "Average Spend in last 1 quarter", "Q_1", "Q_1__AS",
                         "(2017-10-01 to 2017-12-31)", NullMetricsImputation.ZERO }, //
+                { "AM_FE5FB1286A4E60345D0E4AAD0E66E664__Y_1_1__AS", "FE5FB1286A4E60345D0E4AAD0E66E664",
+                        InterfaceName.AvgSpendOvertime, "Average Spend in last 1 to 1 years", "Y_1_1", "Y_1_1__AS",
+                        "(2017-01-01 to 2017-12-31)", NullMetricsImputation.ZERO }, //
         };
     }
 
@@ -65,7 +71,7 @@ public class ActivityMetricsUtilsUnitTestNG {
     public void testIsDeprecated() {
         Tenant tenant = new Tenant("dummy");
         tenant.setPid(-1L);
-        List<ActivityMetrics> metrics = ActivityMetricsUtils.fakePurchaseMetrics(tenant);
+        List<ActivityMetrics> metrics = ActivityMetricsTestUtils.fakePurchaseMetrics(tenant);
         for (ActivityMetrics m : metrics) {
             if (m.getMetrics() == InterfaceName.Margin) {
                 m.setEOL(true);

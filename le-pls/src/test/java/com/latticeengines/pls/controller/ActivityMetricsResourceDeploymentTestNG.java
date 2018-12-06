@@ -36,6 +36,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     private List<ActivityMetrics> created, updated, secUpdated, invalid;
 
+    @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -85,7 +86,8 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         verifyActions(2);
     }
 
-    // Re-activate 1 old metrics, deprecate all the other metrics
+    // Re-activate 1 old metrics, deprecate all the existing metrics, add new
+    // Total/Avg SP metrics with BETWEEN relation (introduced in M25)
     @Test(groups = "deployment", priority = 3)
     public void testReactivate() {
         List<?> list = restTemplate.postForObject(getRestAPIHostPort() + "/pls/datacollection/metrics/PurchaseHistory",
@@ -120,7 +122,6 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         String tenantId = MultiTenantContext.getShortTenantId();
         List<Action> actions = actionProxy.getActions(tenantId);
         Assert.assertNotNull(actions);
-        Assert.assertEquals(actions.size(), cnt);
         actions.forEach(action -> {
             Assert.assertNotNull(action);
             Assert.assertEquals(action.getType(), ActionType.ACTIVITY_METRICS_CHANGE);
@@ -129,6 +130,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
             Assert.assertNotNull(action.getDescription());
             log.info("ActivityMetricsChange description is " + action.getDescription());
         });
+        Assert.assertEquals(actions.size(), cnt);
     }
 
     private List<ActivityMetrics> constructMetricsList() {
@@ -212,6 +214,27 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         List<TimeFilter> filters = new ArrayList<>();
         filters.add(filter1);
         filters.add(filter2);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
+        metricsList.add(metrics);
+
+        // New Total/Avg SP using BEWTWEEN relation (introduced in M25)
+        metrics = new ActivityMetrics();
+        metrics.setMetrics(InterfaceName.TotalSpendOvertime);
+        TimeFilter filter = new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(),
+                Arrays.asList(1, 1));
+        filters = new ArrayList<>();
+        filters.add(filter);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
+        metricsList.add(metrics);
+
+        metrics = new ActivityMetrics();
+        metrics.setMetrics(InterfaceName.AvgSpendOvertime);
+        filter = new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Year.name(),
+                Arrays.asList(1, 2));
+        filters = new ArrayList<>();
+        filters.add(filter);
         metrics.setPeriodsConfig(filters);
         metrics.setType(ActivityType.PurchaseHistory);
         metricsList.add(metrics);

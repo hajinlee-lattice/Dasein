@@ -110,7 +110,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.ActivityMetricsTestUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -1174,7 +1174,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void setupPurchaseHistoryMetrics() {
-        List<ActivityMetrics> metrics = ActivityMetricsUtils.fakePurchaseMetrics(mainTestTenant);
+        List<ActivityMetrics> metrics = ActivityMetricsTestUtils.fakePurchaseMetrics(mainTestTenant);
         activityMetricsProxy.save(mainCustomerSpace, ActivityType.PurchaseHistory, metrics);
     }
 

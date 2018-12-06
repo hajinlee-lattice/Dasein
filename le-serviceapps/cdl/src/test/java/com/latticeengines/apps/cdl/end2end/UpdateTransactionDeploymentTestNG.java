@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
@@ -139,8 +139,10 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
     }
 
     private void setupUpdatedPurchaseHistoryMetrics() {
-        // Deprecated all the selected metrics
-        List<ActivityMetrics> metrics = new ArrayList<>();
+        // Deprecated Total/Avg SP metrics with WITHIN relation and create new
+        // ones with BETWEEN relation
+        List<ActivityMetrics> metrics = activityMetricsProxy.getActiveActivityMetrics(mainCustomerSpace,
+                ActivityType.PurchaseHistory);
         RestTemplate restTemplate = testBed.getRestTemplate();
         deployedHostPort = deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
                 : deployedHostPort;

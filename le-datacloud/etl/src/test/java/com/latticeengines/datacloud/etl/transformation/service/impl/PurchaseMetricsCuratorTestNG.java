@@ -203,10 +203,12 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         weekSWDepr.setPeriodsConfig(Arrays.asList(TimeFilter.within(2, PeriodStrategy.Template.Week.name())));
         weekSWDepr.setEOL(true);
 
+        // Use AvgSpendOvertime to test BETWEEN relation (M25)
         weekAS = new ActivityMetrics();
         weekAS.setMetrics(InterfaceName.AvgSpendOvertime);
-        weekAS.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+        weekAS.setPeriodsConfig(Arrays.asList(TimeFilter.between(1, 1, PeriodStrategy.Template.Week.name())));
 
+        // Use TotalSpendOvertime to test WITHIN relation
         weekTS = new ActivityMetrics();
         weekTS.setMetrics(InterfaceName.TotalSpendOvertime);
         weekTS.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
@@ -225,7 +227,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         for (int i = 1; i <= 500; i++) {
             ActivityMetrics metrics = new ActivityMetrics();
             metrics.setMetrics(InterfaceName.TotalSpendOvertime);
-            metrics.setPeriodsConfig(Arrays.asList(TimeFilter.within(i, PeriodStrategy.Template.Week.name())));
+            metrics.setPeriodsConfig(Arrays.asList(TimeFilter.between(i, i + 1, PeriodStrategy.Template.Week.name())));
             metrics.setEOL(true);
             metricsListLoadTest.add(metrics);
         }
@@ -454,7 +456,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     };
 
-    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP, W_2__SW
+    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1_1__AS, W_1__TS,
+    // W_1__W_2_2__SC, EVER__HP, W_2__SW
     private Object[][] depivotedMetricsData = new Object[][] { //
             { "AID1", "PID1", 33, 85, 45.0, 45.0, 125, true, 100 }, //
             { "AID1", "PID2", 33, 85, 45.0, 45.0, 125, true, 81 }, //
@@ -503,10 +506,14 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     };
 
     // Schema: AccountId
-    // AM_PID1__W_1__MG, AM_PID1__W_1__SW, AM_PID2__W_2__SW, AM_PID1__W_1__AS, AM_PID1__W_1__TS, AM_PID1__W_1__W_2_2__SC, AM_PID1__EVER__HP
-    // AM_PID2__W_1__MG, AM_PID2__W_1__SW, AM_PID2__W_2__SW, AM_PID2__W_1__AS, AM_PID2__W_1__TS, AM_PID2__W_1__W_2_2__SC, AM_PID2__EVER__HP
-    // AM_PID3__W_1__MG, AM_PID3__W_1__SW, AM_PID3__W_2__SW, AM_PID3__W_1__AS, AM_PID3__W_1__TS, AM_PID3__W_1__W_2_2__SC, AM_PID3__EVER__HP
-    // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_2__SW, AM_PID4__W_1__AS, AM_PID4__W_1__TS, AM_PID4__W_1__W_2_2__SC, AM_PID4__EVER__HP
+    // AM_PID1__W_1__MG, AM_PID1__W_1__SW, AM_PID2__W_2__SW, AM_PID1__W_1_1__AS,
+    // AM_PID1__W_1__TS, AM_PID1__W_1__W_2_2__SC, AM_PID1__EVER__HP
+    // AM_PID2__W_1__MG, AM_PID2__W_1__SW, AM_PID2__W_2__SW, AM_PID2__W_1_1__AS,
+    // AM_PID2__W_1__TS, AM_PID2__W_1__W_2_2__SC, AM_PID2__EVER__HP
+    // AM_PID3__W_1__MG, AM_PID3__W_1__SW, AM_PID3__W_2__SW, AM_PID3__W_1_1__AS,
+    // AM_PID3__W_1__TS, AM_PID3__W_1__W_2_2__SC, AM_PID3__EVER__HP
+    // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_2__SW, AM_PID4__W_1_1__AS,
+    // AM_PID4__W_1__TS, AM_PID4__W_1__W_2_2__SC, AM_PID4__EVER__HP
     private Object[][] pivotMetricsData = new Object[][] {
             { "AID1", //
                     33, 85, 100, 45.0, 45.0, 125, true, //
