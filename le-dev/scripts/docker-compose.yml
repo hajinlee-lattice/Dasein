@@ -18,8 +18,7 @@ services:
     - '3306:3306'
     volumes:
     - $DOCKER_DATA_ROOT/mysql:/var/lib/mysql
-    - $WSHOME/le-dev/mysql:/etc/mysql/conf.d
-    - $WSHOME/le-dev/mysql:/etc/my.cnf.d
+    - $WSHOME/le-dev/mysql/my.cnf:/etc/my.cnf.d/lattice.cnf
 
   redis:
     container_name: le_redis
