@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkf
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CascadingBulkMatchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CommitEntityMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = IngestionWorkflowConfiguration.class, name = "IngestionWorkflowConfiguration"),
         @Type(value = PublishWorkflowConfiguration.class, name = "PublishWorkflowConfiguration"),
         @Type(value = TransformationWorkflowConfiguration.class, name = "TransformationWorkflowConfiguration"),
+        @Type(value = CommitEntityMatchWorkflowConfiguration.class, name = "CommitEntityMatchWorkflowConfiguration"),
         @Type(value = MatchDataCloudWorkflowConfiguration.class, name = "MatchDataCloudWorkflowConfiguration"), })
 public class BaseDataCloudWorkflowConfiguration extends WorkflowConfiguration {
 
