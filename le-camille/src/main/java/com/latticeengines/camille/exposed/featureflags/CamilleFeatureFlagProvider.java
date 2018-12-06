@@ -225,7 +225,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
             toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_FILE),
                     FeatureFlagValueMap.class);
         } catch (Exception e) {
-            log.error("Exception occurred attempting to retrieve feature flags", e);
+            log.error("Exception occurred attempting to retrieve feature flags");
             toReturn = null;
         }
         if (toReturn == null) {

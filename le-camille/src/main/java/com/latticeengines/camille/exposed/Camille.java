@@ -137,7 +137,7 @@ public class Camille {
                         try {
                             return asMapEntry(getChildren(input));
                         } catch (Exception e) {
-                            log.error("error getting children of path " + input, e);
+                            log.error("error getting children of path " + input);
                             return null;
                         }
                     }
@@ -182,7 +182,7 @@ public class Camille {
                         try {
                             return asMapEntry(getChildrenInCache(input, cache));
                         } catch (Exception e) {
-                            log.error("error getting children of path " + input, e);
+                            log.error("error getting children of path " + input);
                             return null;
                         }
                     }

@@ -83,7 +83,7 @@ public class BootstrapUtil {
             } catch (KeeperException.NodeExistsException e) {
                 log.warn("{}Another process already installed the initial configuration", logPrefix);
             } catch (Exception e) {
-                log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix, e);
+                log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix);
                 String stackTrace = ExceptionUtils.getStackTrace(e);
                 getHostName();
                 BootstrapStateUtil.setState(

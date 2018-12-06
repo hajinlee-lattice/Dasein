@@ -277,7 +277,7 @@ public class BatonServiceImpl implements BatonService {
                 docs.add(doc);
             } catch (Exception e) {
                 log.error(String.format("Error constructing tenant document for contract %s, tenant %s, and space %s.",
-                        contractId, tenantId, spaceId), e);
+                        contractId, tenantId, spaceId));
             }
         }
 

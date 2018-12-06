@@ -68,7 +68,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
             CustomerSpace space = CustomerSpace.parse(tenantId);
             FeatureFlagClient.setEnabled(space, flagId, value);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_19108, e, new String[] { flagId, tenantId });
+            throw new LedpException(LedpCode.LEDP_19108, new String[] { flagId, tenantId });
         }
     }
 
