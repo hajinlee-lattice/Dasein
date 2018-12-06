@@ -74,14 +74,19 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         // be worth the effort as it is fast enough. Therefore handling
         // pagination in application layer itself
         List<Play> plays;
+        List<LaunchState> launchstates = new ArrayList<>();
+        launchstates.add(LaunchState.Launched);
+        if (start < 90000000000L) { // if request using second level timestamp
+            start = start*1000L;
+        }
         PlayLaunchDashboard dashboard;
         if (orgInfo == null) {
-            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, null,
-                    0L, 0L, 1000L, null, null, null, null, null);
+            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, launchstates,
+                    start, 0L, 1000L, null, null, null, null, null);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
-            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, null,
-                    0L, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(), effectiveOrgInfo.getRight());
+            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, launchstates,
+                    start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(), effectiveOrgInfo.getRight());
         }
         plays = dashboard.getUniquePlaysWithLaunches();
         return plays;
@@ -95,7 +100,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         launchstates.add(LaunchState.Launched);
 
         if (start < 90000000000L) { // if request using second level timestamp
-            start = start*1000;
+            start = start*1000L;
         }
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
