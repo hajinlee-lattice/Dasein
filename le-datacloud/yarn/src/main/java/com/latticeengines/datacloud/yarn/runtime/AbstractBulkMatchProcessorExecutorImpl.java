@@ -16,6 +16,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,11 +144,19 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
+            logError(processorContext, groupOutput);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write result to avro.", e);
         }
 
-        List<OutputRecord> recordsWithErrors = new ArrayList<>();
+        groupOutput.setResult(new ArrayList<>());
+
+        MatchOutput blockOutput = MatchUtils.mergeOutputs(processorContext.getBlockOutput(), groupOutput);
+        processorContext.setBlockOutput(blockOutput);
+        log.info("Merge group output into block output.");
+    }
+
+    private void logError(ProcessorContext processorContext, MatchOutput groupOutput) throws IOException {
         for (OutputRecord record : groupOutput.getResult()) {
             if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
                 // TODO: per record error might cause out of memory. change to
@@ -159,11 +168,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 }
             }
         }
-        groupOutput.setResult(recordsWithErrors);
 
-        MatchOutput blockOutput = MatchUtils.mergeOutputs(processorContext.getBlockOutput(), groupOutput);
-        processorContext.setBlockOutput(blockOutput);
-        log.info("Merge group output into block output.");
+        writeErrorDataToAvro(processorContext, groupOutput.getResult());
     }
 
     private void logMatchErrorMessage(String msg) {
@@ -198,18 +204,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
             GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
             List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
-            for (int i = 0; i < fields.size(); i++) {
-                Object value = allValues.get(i);
-                if (value instanceof Date) {
-                    value = ((Date) value).getTime();
-                }
-                if (value instanceof Timestamp) {
-                    value = ((Timestamp) value).getTime();
-                }
-                Schema.Type type = AvroUtils.getType(fields.get(i));
-                value = convertToClaimedType(type, value, fields.get(i).name());
-                builder.set(fields.get(i), value);
-            }
+            buildAvroRecords(allValues, builder, fields);
             records.add(builder.build());
         }
         int randomSplit = random.nextInt(processorContext.getSplits());
@@ -221,6 +216,54 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                     useSnappy);
         }
         log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro(randomSplit));
+    }
+
+    private void buildAvroRecords(List<Object> allValues, GenericRecordBuilder builder, List<Schema.Field> fields) {
+        for (int i = 0; i < fields.size(); i++) {
+            Object value = allValues.get(i);
+            if (value instanceof Date) {
+                value = ((Date) value).getTime();
+            }
+            if (value instanceof Timestamp) {
+                value = ((Timestamp) value).getTime();
+            }
+            Schema.Type type = AvroUtils.getType(fields.get(i));
+            value = convertToClaimedType(type, value, fields.get(i).name());
+            builder.set(fields.get(i), value);
+        }
+    }
+
+    private void writeErrorDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
+            throws IOException {
+        if (!processorContext.getOriginalInput().isEntityMatch()
+                || !processorContext.getOriginalInput().isAllocateId()) {
+            return;
+        }
+        List<GenericRecord> records = new ArrayList<>();
+        Schema errorSchema = processorContext.appendErrorSchema(processorContext.getInputSchema());
+        for (OutputRecord outputRecord : outputRecords) {
+            if (CollectionUtils.isEmpty(outputRecord.getErrorMessages())) {
+                continue;
+            }
+
+            List<Object> allValues = new ArrayList<>(outputRecord.getInput());
+            allValues.add(StringUtils.join(outputRecord.getErrorMessages(), "|"));
+            GenericRecordBuilder builder = new GenericRecordBuilder(errorSchema);
+            List<Schema.Field> fields = errorSchema.getFields();
+            buildAvroRecords(allValues, builder, fields);
+            records.add(builder.build());
+        }
+        if (CollectionUtils.isEmpty(records)) {
+            return;
+        }
+        int randomSplit = random.nextInt(processorContext.getSplits());
+        String errorAvroFile = processorContext.getErrorOutputAvro(randomSplit);
+        if (!HdfsUtils.fileExists(yarnConfiguration, errorAvroFile)) {
+            AvroUtils.writeToHdfsFile(yarnConfiguration, errorSchema, errorAvroFile, records, useSnappy);
+        } else {
+            AvroUtils.appendToHdfsFile(yarnConfiguration, errorAvroFile, records, useSnappy);
+        }
+        log.info("Write " + records.size() + " error generic records to " + errorAvroFile);
     }
 
     private void appendDebugValues(List<Object> allValues, OutputRecord outputRecord) {
@@ -289,9 +332,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         if (processorContext.getReturnUnmatched()) {
             if (!processorContext.getExcludePublicDomain()
                     && !processorContext.getBlockSize().equals(count.intValue())) {
-                throw new RuntimeException(String.format(
-                        "Block size [%d] does not equal to the count of the avro [%d].",
-                        processorContext.getBlockSize(), count));
+                throw new RuntimeException(
+                        String.format("Block size [%d] does not equal to the count of the avro [%d].",
+                                processorContext.getBlockSize(), count));
             }
         } else {
             // check matched rows
@@ -345,8 +388,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             blockOutput.setFinishedAt(finishedAt);
             blockOutput.setReceivedAt(processorContext.getReceivedAt());
             blockOutput.getStatistics().setRowsRequested(processorContext.getBlockSize());
-            blockOutput.getStatistics().setTimeElapsedInMsec(
-                    finishedAt.getTime() - processorContext.getReceivedAt().getTime());
+            blockOutput.getStatistics()
+                    .setTimeElapsedInMsec(finishedAt.getTime() - processorContext.getReceivedAt().getTime());
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File(MATCHOUTPUT_BUFFER_FILE), blockOutput);
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, MATCHOUTPUT_BUFFER_FILE, processorContext.getOutputJson());

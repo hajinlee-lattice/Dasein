@@ -15,7 +15,7 @@ public enum LatticeFeatureFlag {
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
     LATTICE_MARKETO_SCORING("LatticeMarketoScoring", "Lattice Integration for Marketo Scoring"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
-    ENABLE_CDL_MATCH("EnableCDLMatch", "Enable CDL Match"), //
+    ENABLE_ENTITY_MATCH("EnableEntityMatch", "Enable Entity Match"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
     ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
     VDB_MIGRATION("VDBMigration", "VDB Migration"), //

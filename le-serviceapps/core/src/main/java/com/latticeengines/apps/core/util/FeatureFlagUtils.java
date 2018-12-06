@@ -31,12 +31,12 @@ public class FeatureFlagUtils {
         }
     }
 
-    public static boolean isCDLMatchEnabled(FeatureFlagValueMap flags) {
+    public static boolean isEntityMatchEnabled(FeatureFlagValueMap flags) {
         try {
-            return flags.containsKey(LatticeFeatureFlag.ENABLE_CDL_MATCH.getName())
-                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_CDL_MATCH.getName()));
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName()));
         } catch (Exception e) {
-            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_CDL_MATCH.getName() + " feature flag!", e);
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName() + " feature flag!", e);
             return false;
         }
     }

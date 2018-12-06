@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("exportProcessAnalyzeToS3")
@@ -44,6 +45,16 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
                     addTableDir(t, requests, paTs);
                 });
             }
+        }
+        
+        addMatchError(requests);
+    }
+
+    private void addMatchError(List<BaseImportExportS3<ImportExportS3StepConfiguration>.ImportExportRequest> requests) {
+        String errorDir = getStringValueFromContext(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH);
+        if (StringUtils.isNotBlank(errorDir)) {
+            String tgtPath = pathBuilder.exploreS3FilePath(errorDir, podId, customer, tenantId, s3Bucket);
+            requests.add(new ImportExportRequest(errorDir, tgtPath));
         }
     }
 

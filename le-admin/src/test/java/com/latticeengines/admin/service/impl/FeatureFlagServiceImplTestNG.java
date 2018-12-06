@@ -62,7 +62,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.DANTE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
-                LatticeFeatureFlag.ENABLE_CDL_MATCH, //
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
                 LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
@@ -82,7 +82,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
-                LatticeFeatureFlag.ENABLE_CDL_MATCH, //
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
                 LatticeFeatureFlag.VDB_MIGRATION, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //

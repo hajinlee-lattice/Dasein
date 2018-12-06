@@ -9,6 +9,7 @@ import com.latticeengines.datacloud.workflow.match.listeners.UpdateFailedMatchLi
 import com.latticeengines.datacloud.workflow.match.steps.ParallelBlockExecution;
 import com.latticeengines.datacloud.workflow.match.steps.PrepareBulkMatchInput;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -26,6 +27,9 @@ public class BulkMatchWorkflowImpl extends AbstractWorkflow<BulkMatchWorkflowCon
     private ParallelBlockExecution parallelBlockExecution;
 
     @Autowired
+    private ExportData exportData;
+
+    @Autowired
     private UpdateFailedMatchListener updateFailedMatchListener;
 
     @Override
@@ -33,6 +37,7 @@ public class BulkMatchWorkflowImpl extends AbstractWorkflow<BulkMatchWorkflowCon
         return new WorkflowBuilder(name(), config) //
                 .next(prepareBulkMatchInput) //
                 .next(parallelBlockExecution) //
+                .next(exportData) //
                 .listener(updateFailedMatchListener) //
                 .build();
     }

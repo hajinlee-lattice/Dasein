@@ -79,6 +79,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MAP_TARGET_SCORE_INPUT_TABLE_NAME = "MAP_TARGET_SCORE_INPUT_TABLE_NAME";
     protected static final String PIVOT_SCORE_INPUT_TABLE_NAME = "PIVOT_SCORE_INPUT_TABLE_NAME";
     protected static final String EXPORT_DATA_APPLICATION_ID = "EXPORT_DATA_APPLICATION_ID";
+    protected static final String SKIP_EXPORT_DATA = "SKIP_EXPORT_DATA";
     protected static final String EXPORT_TABLE_NAME = "EXPORT_TABLE_NAME";
     protected static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
     protected static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";

@@ -48,6 +48,7 @@ public class HdfsPathBuilder {
     private static final String SERVICES = "Services";
     private static final String MATCHES_SEGMENT = "Matches";
     private static final String BLOCKS_SEGMENT = "Blocks";
+    private static final String BLOCKS_ERROR_SEGMENT = "BlocksError";
     private static final String RAW_DATA_FLOW_TYPE = "Raw";
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
@@ -234,6 +235,16 @@ public class HdfsPathBuilder {
         return constructMatchDir(rootOperationUid).append("Output");
     }
 
+    public Path constructMatchErrorDir(String rootOperationUid) {
+        return constructMatchDir(rootOperationUid).append("Error");
+    }
+
+    public Path constructMatchBlockErrorSplitAvro(String rootOperationUid, String blockOperationUid, int split) {
+        String fileName = BLOCK + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d", split)
+                + AVRO_FILE_EXTENSION;
+        return constructMatchBlockErrorDir(rootOperationUid, blockOperationUid).append(fileName);
+    }
+
     public Path constructMatchErrorFile(String rootOperationUid) {
         String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + ERR_FILE_EXTENSION;
         return constructMatchOutputDir(rootOperationUid).append(fileName);
@@ -259,8 +270,16 @@ public class HdfsPathBuilder {
         return constructMatchDir(rootOperationUid).append(BLOCKS_SEGMENT).append(blockOperationUid);
     }
 
+    public Path constructMatchBlockErrorDir(String rootOperationUid, String blockOperationUid) {
+        return constructMatchDir(rootOperationUid).append(BLOCKS_ERROR_SEGMENT).append(blockOperationUid);
+    }
+    
     public String constructMatchBlockAvroGlob(String rootOperationUid, String blockOperationUid) {
         return constructMatchBlockDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
+    }
+
+    public String constructMatchBlockErrorAvroGlob(String rootOperationUid, String blockOperationUid) {
+        return constructMatchBlockErrorDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
     }
 
     public Path constructMatchBlockSplitAvro(String rootOperationUid, String blockOperationUid, int split) {

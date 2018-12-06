@@ -305,8 +305,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
         TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
-        boolean cdlMatchEnabled = FeatureFlagUtils.isCDLMatchEnabled(flags);
-        log.info("CDL Match Enabled=" + cdlMatchEnabled);
+        boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
+        log.info("Entity Match Enabled=" + entityMatchEnabled);
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
@@ -340,7 +340,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dynamoSignature(signature) //
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
-                .cdlMatchEnabled(cdlMatchEnabled) //
+                .entityMatchEnabled(entityMatchEnabled) //
                 .build();
     }
 
@@ -358,9 +358,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 // get IDs before we clear them
                 List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
                         .collect(Collectors.toList());
-                // clear PID to create new action that has the same content as the old ones
-                // NOTE that since we don't update retry job's input context, action IDs in context
-                //      will not be the same as the ones owned by the retry job
+                // clear PID to create new action that has the same content as
+                // the old ones
+                // NOTE that since we don't update retry job's input context,
+                // action IDs in context
+                // will not be the same as the ones owned by the retry job
                 lastFailedActions.forEach(action -> {
                     action.setPid(null);
                     action.setOwnerId(retryJob.getPid());

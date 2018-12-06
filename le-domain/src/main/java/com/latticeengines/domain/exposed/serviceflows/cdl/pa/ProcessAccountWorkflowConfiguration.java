@@ -44,6 +44,12 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processAccountStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            rebuildAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Account)) {

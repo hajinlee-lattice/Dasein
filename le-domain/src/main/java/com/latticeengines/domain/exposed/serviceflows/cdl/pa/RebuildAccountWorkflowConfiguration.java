@@ -33,6 +33,11 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processAccountStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Account)) {
@@ -49,5 +54,6 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processAccountStepConfiguration);
             return configuration;
         }
+
     }
 }

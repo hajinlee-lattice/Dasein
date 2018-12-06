@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,10 +14,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
+
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 
 @Component("exportData")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -30,6 +31,10 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
+        if ("true".equals(getStringValueFromContext(SKIP_EXPORT_DATA))) {
+            log.info("Skip flag is set, skip export.");
+            return;
+        }
         exportData();
 
         if (configuration.isExportMergedFile()) {
@@ -37,6 +42,14 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 mergeCSVFiles();
             }
         }
+        cleanupContext();
+    }
+
+    private void cleanupContext() {
+        removeObjectFromContext(EXPORT_TABLE_NAME);
+        removeObjectFromContext(EXPORT_INPUT_PATH);
+        removeObjectFromContext(EXPORT_OUTPUT_PATH);
+        removeObjectFromContext(SKIP_EXPORT_DATA);
     }
 
     protected void mergeCSVFiles() {
@@ -46,12 +59,12 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         log.info("MergedFileName=" + configuration.getMergedFileName());
 
         try {
-            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, mergeToPath,".*.csv$");
+            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, mergeToPath, ".*.csv$");
             log.info("HDFS CSV files=" + JsonUtils.serialize(csvFiles));
             String localCsvFilesPath = "csvFiles";
             File localCsvDir = new File(localCsvFilesPath);
             if (!localCsvDir.exists()) {
-                if(!localCsvDir.mkdir()) {
+                if (!localCsvDir.mkdir()) {
                     throw new IOException(String.format("Cannot create local path %s", localCsvFilesPath));
                 }
             }
@@ -93,8 +106,8 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
             writer.close();
             log.info("Start copying file from local to hdfs.");
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localOutputCSV.getPath(), mergeToPath);
-            log.info(String.format("Copied merged CSV file from local %s to HDFS %s",
-                    localOutputCSV.getPath(), mergeToPath));
+            log.info(String.format("Copied merged CSV file from local %s to HDFS %s", localOutputCSV.getPath(),
+                    mergeToPath));
             FileUtils.deleteDirectory(localCsvDir);
             log.info("Done merging CSV files.");
         } catch (Exception e) {

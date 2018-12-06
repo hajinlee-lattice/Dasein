@@ -182,6 +182,10 @@ public class ProcessorContext {
         return hdfsPathBuilder.constructMatchBlockSplitAvro(rootOperationUid, blockOperationUid, split).toString();
     }
 
+    public String getErrorOutputAvro(int split) {
+        return hdfsPathBuilder.constructMatchBlockErrorSplitAvro(rootOperationUid, blockOperationUid, split).toString();
+    }
+
     public String getOutputJson() {
         return outputJson;
     }
@@ -196,6 +200,10 @@ public class ProcessorContext {
 
     public Date getReceivedAt() {
         return receivedAt;
+    }
+
+    public Schema getInputSchema() {
+        return inputSchema;
     }
 
     public Schema getOutputSchema() {
@@ -457,6 +465,14 @@ public class ProcessorContext {
         return (Schema) AvroUtils.combineSchemas(schema, debugSchema)[0];
     }
 
+    Schema appendErrorSchema(Schema schema) {
+        Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
+        fieldMap.put("Entity_Match_Error", String.class);
+        Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
+        Schema errorSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
+        return (Schema) AvroUtils.combineSchemas(schema, errorSchema)[0];
+    }
+
     private Map<String, Map<String, String>> getPropertiesMap(Set<String> keySet) {
         Map<String, Map<String, String>> propertiesMap = new HashMap<String, Map<String, String>>();
         Map<String, String> properties = new HashMap<>();
@@ -509,8 +525,8 @@ public class ProcessorContext {
                 log.info("Using provided input schema: \n"
                         + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
             }
-            inputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
-            return (Schema) AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
+            Schema newInputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
+            return (Schema) AvroUtils.combineSchemas(newInputSchema, outputSchema)[0];
         } else {
             throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
         }

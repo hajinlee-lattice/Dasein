@@ -43,8 +43,12 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("parallelBlockExecution")
@@ -74,6 +78,9 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
+    @Autowired
+    private MetadataProxy metadataProxy;
+
     private YarnClient yarnClient;
     private String rootOperationUid;
     private List<ApplicationId> applicationIds = new ArrayList<>();
@@ -86,6 +93,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private List<DataCloudJobConfiguration> jobConfigurations;
     private List<DataCloudJobConfiguration> remainingJobs;
     private int totalRetries = 0;
+    private String matchErrorDir;
 
     @Override
     public void execute() {
@@ -107,6 +115,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
             HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
+            matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
             remainingJobs = new ArrayList<DataCloudJobConfiguration>(jobConfigurations);
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
                 submitMatchBlocks();
@@ -204,10 +213,35 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     .status(MatchStatus.FINISHED) //
                     .progress(1f) //
                     .commit();
+
+            setupErrorExport();
         } catch (Exception e) {
             String errorMessage = "Failed to finalize the match: " + e.getMessage();
             throw new RuntimeException(errorMessage, e);
         }
+    }
+
+    private void setupErrorExport() {
+        try {
+            if (AvroUtils.count(yarnConfiguration, matchErrorDir + "/*.avro") <= 0) {
+                putStringValueInContext(SKIP_EXPORT_DATA, "true");
+                return;
+            }
+        } catch (Exception ex) {
+            log.warn("Can not get error records' count! error=" + ex.getMessage());
+            putStringValueInContext(SKIP_EXPORT_DATA, "true");
+            return;
+        }
+        Table errorTable = MetaDataTableUtils.createTable(yarnConfiguration, "MatchError" + rootOperationUid,
+                matchErrorDir);
+        errorTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), errorTable.getName(), errorTable);
+        putStringValueInContext(EXPORT_TABLE_NAME, errorTable.getName());
+
+        putStringValueInContext(EXPORT_INPUT_PATH, matchErrorDir);
+        putStringValueInContext(EXPORT_OUTPUT_PATH, matchErrorDir + "CSV/" + errorTable.getName());
+        saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH, matchErrorDir + "CSV");
+
     }
 
     private List<ApplicationReport> gatherApplicationReports() {
@@ -295,6 +329,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 } else if (FinalApplicationStatus.SUCCEEDED.equals(status)) {
                     matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                     mergeBlockResult(appId);
+                    mergeBlockErrorResult(appId);
                 } else {
                     log.error("Unknown teminal status " + status + " for Application [" + appId
                             + "]. Treat it as FAILED.");
@@ -456,6 +491,28 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     + " to match output dir: " + e.getMessage(), e);
         }
 
+    }
+
+    private void mergeBlockErrorResult(ApplicationId appId) {
+        if (!jobConfigurations.get(0).getMatchInput().isEntityMatch()
+                || !jobConfigurations.get(0).getMatchInput().isAllocateId()) {
+            return;
+        }
+        String blockOperationUid = blockUuidMap.get(appId.toString());
+        try {
+            String blockAvroGlob = hdfsPathBuilder.constructMatchBlockErrorAvroGlob(rootOperationUid,
+                    blockOperationUid);
+            if (HdfsUtils.getFilesByGlob(yarnConfiguration, blockAvroGlob).size() <= 0) {
+                return;
+            }
+            if (!HdfsUtils.fileExists(yarnConfiguration, matchErrorDir)) {
+                HdfsUtils.mkdir(yarnConfiguration, matchErrorDir);
+            }
+            HdfsUtils.moveGlobToDir(yarnConfiguration, blockAvroGlob, matchErrorDir);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to move block error avro generated by application " + appId
+                    + " to match output dir: " + e.getMessage(), e);
+        }
     }
 
     private Boolean hitThirtyPercentChance() {

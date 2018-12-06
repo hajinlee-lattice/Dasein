@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
@@ -19,6 +20,7 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
         private BulkMatchWorkflowConfiguration configuration = new BulkMatchWorkflowConfiguration();
         private PrepareBulkMatchInputConfiguration prepareConfig = new PrepareBulkMatchInputConfiguration();
         private ParallelBlockExecutionConfiguration parallelExecConfig = new ParallelBlockExecutionConfiguration();
+        private ExportStepConfiguration export = new ExportStepConfiguration();
         private CustomerSpace customerSpace;
 
         public Builder rootOperationUid(String rootUid) {
@@ -29,6 +31,7 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
         public Builder customer(CustomerSpace customerSpace) {
             prepareConfig.setCustomerSpace(customerSpace);
             parallelExecConfig.setCustomerSpace(customerSpace);
+            export.setCustomerSpace(customerSpace);
             this.customerSpace = customerSpace;
             return this;
         }
@@ -36,6 +39,7 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
         public Builder hdfsPodId(String hdfsPodId) {
             prepareConfig.setHdfsPodId(hdfsPodId);
             parallelExecConfig.setPodId(hdfsPodId);
+            export.setPodId(hdfsPodId);
             return this;
         }
 
@@ -43,6 +47,7 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
             customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
             prepareConfig.setCustomerSpace(customerSpace);
             parallelExecConfig.setCustomerSpace(customerSpace);
+            export.setCustomerSpace(customerSpace);
             parallelExecConfig.setResultLocation(matchInput.getMatchResultPath());
             prepareConfig.setMatchInput(matchInput);
             InputBuffer inputBuffer = matchInput.getInputBuffer();
@@ -69,6 +74,7 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
 
         public Builder microserviceHostPort(String hostPort) {
             parallelExecConfig.setMicroServiceHostPort(hostPort);
+            export.setMicroServiceHostPort(hostPort);
             return this;
         }
 
@@ -82,6 +88,7 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
                     configuration.getClass().getSimpleName());
             configuration.add(prepareConfig);
             configuration.add(parallelExecConfig);
+            configuration.add(export);
             return configuration;
         }
 

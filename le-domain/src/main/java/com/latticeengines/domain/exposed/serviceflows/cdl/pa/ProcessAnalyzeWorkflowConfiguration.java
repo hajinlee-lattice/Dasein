@@ -194,8 +194,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder cdlMatchEnabled(boolean cdlMatchEnabled) {
-            // TODO:
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 

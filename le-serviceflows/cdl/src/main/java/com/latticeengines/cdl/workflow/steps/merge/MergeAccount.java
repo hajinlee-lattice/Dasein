@@ -209,6 +209,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setMatchDebugEnabled(false);
         matchInput.setPartialMatchEnabled(true);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+        matchInput.setEntityMatch(configuration.isEntityMatchEnabled());
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }
