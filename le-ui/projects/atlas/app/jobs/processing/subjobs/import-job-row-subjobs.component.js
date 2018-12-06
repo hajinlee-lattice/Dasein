@@ -2,10 +2,77 @@ angular.module('lp.jobs.row.subjobs', [])
 
     .directive('importJobRowSubJobs', [function () {
         var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', function ($scope, JobsStore, JobsService, BrowserStorageUtility) {
+            $scope.typesGroupd = {};
             function init() {
                 // console.log('EXPANDED ======= ',$scope);
                 $scope.emptyMessage = "No Actions Found";
+                $scope.sobjobsGrouped = [];
+                $scope.usersGroupped = {};
+                $scope.typesGroupd = {};
+                $scope.groupdByUser($scope.subjobs);
+                $scope.groupInsideUsers();
+                $scope.$watchCollection('subjobs', function(newSubJobs) {
+                    $scope.sobjobsGrouped = [];
+                    $scope.usersGroupped = {};
+                    $scope.groupdByUser(newSubJobs);
+                    $scope.groupInsideUsers();
+                });
             }
+
+            
+            function addToGroup(subjob){
+                if(!$scope.typesGroupd[subjob.jobType]){
+                    $scope.typesGroupd[subjob.jobType] = [];
+                    $scope.typesGroupd[subjob.jobType].push(subjob);
+                    subjob.actionsCount = 1;
+                }else{
+                    let actionsCount = $scope.typesGroupd[subjob.jobType][0].actionsCount + 1;
+                    if(subjob.startTimestamp > $scope.typesGroupd[subjob.jobType][0].startTimestamp){
+                        $scope.typesGroupd[subjob.jobType].unshift(subjob);
+                    }else{
+                        $scope.typesGroupd[subjob.jobType].push(subjob);
+                    }
+                    $scope.typesGroupd[subjob.jobType][0].actionsCount = actionsCount;
+                }
+            }
+            
+            $scope.groupdByUser = function(subjobs){
+                subjobs.forEach(subjob => {
+                    if(!$scope.usersGroupped[subjob.user]){
+                        $scope.usersGroupped[subjob.user] = [];
+                        $scope.usersGroupped[subjob.user].push(subjob);
+                    }else{
+                        $scope.usersGroupped[subjob.user].push(subjob);
+                    }
+                });
+            };
+
+            $scope.groupInsideUsers = function(){
+                const keys = Object.keys($scope.usersGroupped);
+                for(const key of keys){
+                    let jobs = $scope.usersGroupped[key];
+                    $scope.groupByTypes(jobs);
+                }
+            }
+
+            $scope.groupByTypes = function(subjobs){
+                $scope.typesGroupd = {};
+                if(subjobs && subjobs != null){
+                    subjobs.forEach(subjob => {
+                        if(JobsStore.nonWorkflowJobTypes.indexOf(subjob.jobType) >=0){
+                            addToGroup(subjob);
+                        }else{
+                            $scope.sobjobsGrouped.push(subjob);
+                        }
+                    });
+                    const keys = Object.keys($scope.typesGroupd);
+                    for (const key of keys) {
+                        let array = $scope.typesGroupd[key];
+                        $scope.sobjobsGrouped.push(array[0]);
+                    }
+                }
+            };
+
             $scope.getActionType = function (subjob) {
 
                 var type = subjob.jobType;
@@ -20,7 +87,7 @@ angular.module('lp.jobs.row.subjobs', [])
                         };
                     default:
                         {
-                            return subjob.name;
+                            return `${subjob.actionsCount > 1 ? subjob.actionsCount: ''} ${subjob.name}`;
                         }
                 }
             }
@@ -68,7 +135,6 @@ angular.module('lp.jobs.row.subjobs', [])
                     return 'Failed';
                 }
                 if (subjob.jobStatus === 'Running') {
-                    console.log('RUNNING', subjob.jobStatus, subjob);
                     return 'In Progress';
                 }
                 if (getPayloadValue(subjob, 'total_rows') === getPayloadValue(subjob, 'imported_rows') && subjob.jobStatus === 'Completed') {
@@ -79,7 +145,6 @@ angular.module('lp.jobs.row.subjobs', [])
                     return 'Partial Success';
                 }
                 if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
-                    console.log('IN PROGRESS ',subjob, getPayloadValue(subjob, 'total_rows'), getPayloadValue(subjob, 'imported_rows'), subjob.jobStatus);
                     return 'In Progress';
                 }
                 if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows')) {

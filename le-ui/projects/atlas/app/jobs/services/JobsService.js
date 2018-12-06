@@ -211,12 +211,6 @@ angular
 
                     deferred.resolve(result);
                 } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
 
                     if (!result.data) {
                         result.data = {};
@@ -507,7 +501,7 @@ angular
                 }
             }
         }
-        return null;
+        return [];
     }
 
     function getStepRunning(job) {
@@ -551,22 +545,6 @@ angular
         return stepsCompleted;
     }
 
-    // function getActions(job) {
-    //     if(job.subJobs){
-    //         return job.subJobs;
-    //     }else {
-    //         return [];
-    //     }
-    // }
-
-    // function getActionsCount(job) {
-    //     if(!job.inputs || !job.inputs.ACTION_IDS){
-    //         return 0;
-    //     }else {
-    //         var actions = JSON.parse(job.inputs.ACTION_IDS);
-    //         return actions.length;
-    //     }
-    // }
     function getSubJobs(job) {
         if(job.subJobs != undefined){
             return job.subJobs;

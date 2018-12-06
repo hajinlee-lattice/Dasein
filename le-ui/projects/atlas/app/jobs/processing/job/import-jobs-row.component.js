@@ -72,8 +72,6 @@ angular.module('lp.jobs.import.row', [
                 $scope.expanded = true;
             }
             $scope.loading = false;
-
-            $scope.bundledSubjobs = $scope.bundleSubjobs($scope.job.subJobs);
         }
 
         function getRecordFound(subjob) {
@@ -319,58 +317,6 @@ angular.module('lp.jobs.import.row', [
                 return '-';
             }
         };
-
-        $scope.bundleSubjobs = function(jobs) {
-            var subjobs = angular.copy(jobs);
-            var subjobsByUser = {};
-            var result = [];
-            subjobs.forEach(function(subjob) {
-                if (isNonWorkflowJobType(subjob)) {
-                    if (subjobsByUser[subjob.user] != undefined) {
-                        var userJobs = subjobsByUser[subjob.user];
-                        if (userJobs[subjob.jobType] != undefined) {
-                            userJobs[subjob.jobType].push(subjob);
-                        } else {
-                            userJobs[subjob.jobType] = [subjob];
-                        }
-                    } else {
-                        var jobType = subjob.jobType;
-                        subjobsByUser[subjob.user] = {};
-                        subjobsByUser[subjob.user][jobType] = [subjob];
-                    }
-                } else {
-                    result.push(subjob);
-                }
-            });
-            
-            for (var user in subjobsByUser) {
-                for (var subjobType in subjobsByUser[user]) {
-                    var userJobs = subjobsByUser[user][subjobType];
-                    var job = getLatestJob(userJobs);
-                    var toAdd = angular.copy(job);
-                    toAdd.name = userJobs.length > 1 ? userJobs.length + ' ' + toAdd.name : toAdd.name;
-                    result.push(toAdd);
-                }
-            }
-            return result;
-        }
-
-        function getLatestJob (subjobs) {
-            var latestTimestamp = null;
-            var latestJob = null;
-            subjobs.forEach(function(job) {
-              var currentTimestamp = new Date(job.startTimestamp);
-              if (latestTimestamp == null || currentTimestamp > latestTimestamp) {
-                latestJob = job;
-                latestTimestamp = currentTimestamp;
-              }
-            });
-            return latestJob;
-        }
-
-        function isNonWorkflowJobType (job) {
-            return job.id == null && job.pid == null && JobsStore.nonWorkflowJobTypes.indexOf(job.jobType) >= 0;
-        }
 
         $scope.hasRight = function(){
             return AuthorizationUtility.checkAccessLevel(['INTERNAL_ADMIN', 'SUPER_ADMIN']);

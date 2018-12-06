@@ -10,7 +10,7 @@
             <div class="le-cell le-col-start-11 le-col-span-2">User</div>
         </div>
         
-        <div class="le-row" ng-repeat="subjob in subjobs | orderBy:'-startTimestamp'">
+        <div class="le-row" ng-repeat="subjob in sobjobsGrouped | orderBy:'-startTimestamp'">
             <div class="le-cell le-col-start-1 le-col-span-1">
                 {{subjob.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
             </div>
