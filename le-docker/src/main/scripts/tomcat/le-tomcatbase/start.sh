@@ -3,8 +3,13 @@ echo "JAVA_HOME=${JAVA_HOME}"
 echo "CATALINA_HOME=${CATALINA_HOME}"
 
 if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
-    echo "copying properties file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"
-    cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
+    if [ "${LE_IS_DR}" == "true" ]; then
+        PROP_ENV="prodcluster_dr"
+    else
+        PROP_ENV="${LE_ENVIRONMENT}"
+    fi
+    echo "copying properties file for PROP_ENV=${PROP_ENV}"
+    cp /tmp/conf/env/${PROP_ENV}/latticeengines.properties /etc/ledp
 fi
 
 if [ -f "/etc/ledp/ledp_keystore.jks" ]; then

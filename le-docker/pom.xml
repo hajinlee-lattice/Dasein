@@ -55,14 +55,8 @@
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster/latticeengines.properties"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/devcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/devcluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/qacluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/prodcluster/latticeengines.properties"
+                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster_dr/latticeengines.properties"
+                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster_dr/latticeengines.properties"
                                       overwrite="true" />
 
                                 <!-- special wars -->
@@ -127,9 +121,6 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/dellebi/target/le-dellebi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/dellebi.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-microservice/dante/target/le-dante-microservice-${project.version}.war"
-                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/dante.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/cdl/target/le-cdl-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/cdl.war"
