@@ -62,6 +62,7 @@ public class DistCpConfigurationBeanFactory extends HadoopConfigurationBeanFacto
             properties.setProperty("yarn.application.classpath", emrYarnCp);
             properties.setProperty("mapreduce.application.classpath", emrMrCp);
         }
+        properties.setProperty("yarn.resourcemanager.am.max-attempts", "2");
         return yarnConfiguration;
     }
 }
