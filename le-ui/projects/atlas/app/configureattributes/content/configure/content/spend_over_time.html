@@ -9,10 +9,20 @@
             </button>
             <select
                 class="form-control"
-                ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val']"
-                ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val', ''+vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index))"
-                ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val']" 
-                ng-change="vm.setOptions(form); vm.setDisabled('TotalSpendOvertime');"
+                ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]"
+                ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]"
+                ng-change="vm.setOptions(form);"
+                ng-disabled="!(vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
+                <option 
+                    ng-repeat="(key,option) in vm.newArray(vm.periods[vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period']])" 
+                    ng-disabled="vm.disableSpendOvertime('TotalSpendOvertime', vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'], option)">{{option}}</option>
+            </select>
+            to
+            <select
+                class="form-control"
+                ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]"
+                ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]"
+                ng-change="vm.setOptions(form);"
                 ng-disabled="!(vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
                 <option 
                     ng-repeat="(key,option) in vm.newArray(vm.periods[vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period']])" 
@@ -45,10 +55,20 @@
             </button>
             <select
                 class="form-control"
-                ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val']"
-                ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val', ''+vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index))"
-                ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val']" 
-                ng-change="vm.setOptions(form); vm.setDisabled('AvgSpendOvertime');"
+                ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]"
+                ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]" 
+                ng-change="vm.setOptions(form);"
+                ng-disabled="!(vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
+                <option 
+                    ng-repeat="(key,option) in vm.newArray(vm.periods[vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period']])" 
+                    ng-disabled="vm.disableSpendOvertime('AvgSpendOvertime', vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'], option)">{{option}}</option>
+            </select>
+            to
+            <select
+                class="form-control"
+                ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]"
+                ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]" 
+                ng-change="vm.setOptions(form);"
                 ng-disabled="!(vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
                 <option 
                     ng-repeat="(key,option) in vm.newArray(vm.periods[vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period']])" 

@@ -48,7 +48,7 @@ angular.module('lp.configureattributes')
                 option = options[key];
             for(var j in option) {
                 var first_key = 'null'; //Object.keys(option[j])[0]; // leave this be
-                if(Object.keys(option[j]).length > 1 && option[j][first_key]) { //fixes weird behavior where options can become duplicated or go missing
+                if(Object.keys(option[j]).length > 1 && option[j][first_key]) { // fixes weird behavior where options can become duplicated or go missing
                     delete option[j][first_key];
                 }
             }
@@ -64,11 +64,18 @@ angular.module('lp.configureattributes')
         var periods = [];
         for(var i in _option) {
             for(var j in _option[i]) {
-                var cmp = j;
-                var option = _option[i][cmp],
-                    period = {
-                        Cmp: (cmp !== 'null' ? cmp : 'WITHIN'),
-                        Vals: [parseInt(option.Val)],
+                var cmp = j,
+                    option = _option[i][cmp];
+
+                var vals = Object.values(option.Val);
+                vals.forEach(function(value, key) {
+                    vals[key] = parseInt(value);
+                });
+                vals.sort(function(a,b){return a - b}); // sort this for backend
+                
+                var period = {
+                        Cmp: (cmp !== 'null' ? cmp : 'BETWEEN'),
+                        Vals: vals,
                         Period: option.Period
                     },
                     timestamp = + new Date(),
@@ -82,7 +89,7 @@ angular.module('lp.configureattributes')
                         IsEOL: false
                     };
 
-                if(period.Vals && Number.isInteger(parseInt(period.Vals[0]))) {
+                if( period.Vals && Number.isInteger(parseInt(period.Vals[0])) && Number.isInteger(parseInt(period.Vals[1])) ) {
                     ConfigureAttributesStore.purchaseHistory.push(obj);
                 }
             }

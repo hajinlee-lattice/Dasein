@@ -114,6 +114,18 @@ angular.module('lp.configureattributes.configure', [])
             return period;
         }
 
+        function valsToArray(obj) {
+            var type = typeof obj; 
+            if (type == 'object') {
+                for (var key in obj) {
+                    if(key === 'Val') {
+                        obj[key] = Object.values(obj[key]);
+                    }
+                    valsToArray(obj[key])
+                }
+            }
+        }
+
         vm.setOptions = function(form) {
             ConfigureAttributesStore.setOptions(vm.options);
             if(form) {
@@ -307,8 +319,8 @@ angular.module('lp.configureattributes.configure', [])
                         option = vm.options[type];
                     for(var j in option) {
                         for(var k in option[j]) {
-                            if(Object.keys(option[j][k]).length >= 2) {
-                                hasOptions = true;
+                            if(option[j][k].Val && Object.values(option[j][k].Val).length >=2) {
+                                hasOptions = true; // see if either side has both values set
                             }
                         }
                     }
@@ -523,7 +535,7 @@ angular.module('lp.configureattributes.configure', [])
                                 metrics: null,
                                 periods: [{
                                     Cmp: Object.keys(option)[0],
-                                    Vals: [option[Object.keys(option)[0]].Val],
+                                    Vals: [option[Object.keys(option)[0]].Val[0], option[Object.keys(option)[0]].Val[1]],
                                     Period: option[Object.keys(option)[0]].Period
                                 }]
                             };

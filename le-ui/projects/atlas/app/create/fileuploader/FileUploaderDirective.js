@@ -50,7 +50,7 @@ angular
             });
         },
         controllerAs: 'vm_uploader',
-        controller: function ($scope, $state, $q, $element, ImportService, ImportStore, ImportWizardStore, ServiceErrorUtility, Banner) {
+        controller: function ($scope, $state, $q, $element, ImportService, ImportStore, ImportWizardStore, ServiceErrorUtility, Banner, Notice) {
             var vm = this,
                 options = {
                     compress_percent: 0,
@@ -468,10 +468,9 @@ angular
                         vm.completeTransfer();
                     } else {
                         vm.abortTransfer(result);
-                        var msg = result.ResultErrors ? result.ResultErrors : 'Unknown error while uploading file.';
-                        Banner.error({message: msg});
-                        // var errorCode = result.errorCode || 'LEDP_ERR';
-                        // var errorMsg  = result.errorMsg || result.ResultErrors || 'Unknown error while uploading file.';
+                        // removed as per PLS-11516
+                        // var msg = result.ResultErrors ? result.ResultErrors : 'The file upload was aborted';
+                        // Notice.warning({message: msg});
                     }
                 }
             }
