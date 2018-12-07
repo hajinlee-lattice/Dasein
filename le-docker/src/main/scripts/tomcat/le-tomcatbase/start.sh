@@ -62,7 +62,7 @@ if [ -f "/etc/internaladdr.txt" ]; then
 fi
 
 export JAVA_OPTS="-Dfile.encoding=UTF8"
-if [ "${ENVIRONMENT}" = "prodcluster" ]; then
+if [ "${LE_ENVIRONMENT}" = "prodcluster" ]; then
     export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=US/Eastern"
 else
     export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=UTC"
