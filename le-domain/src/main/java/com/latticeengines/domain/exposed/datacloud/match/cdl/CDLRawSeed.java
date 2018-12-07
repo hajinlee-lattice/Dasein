@@ -63,7 +63,7 @@ public class CDLRawSeed {
     }
 
     /*
-     * Generated equals and hashCode (version is internal and not used here)
+     * Generated equals and hashCode (version is internal and not used here, attributes also not evaluated)
      */
 
     @Override

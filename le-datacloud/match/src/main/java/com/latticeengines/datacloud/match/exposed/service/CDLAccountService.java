@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.CDLEntityMatchInternalService;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLAccountSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 /**
  * Service to retrieve {@link CDLAccountSeed}. This class can be used by external classes of datacloud/match. For
- * internal usage, see {@link com.latticeengines.datacloud.match.service.CDLAccountInternalService}
+ * internal usage, see {@link CDLEntityMatchInternalService}
  */
 public interface CDLAccountService {
 

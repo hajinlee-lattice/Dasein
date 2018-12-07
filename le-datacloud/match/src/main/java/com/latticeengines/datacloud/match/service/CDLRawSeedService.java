@@ -93,6 +93,18 @@ public interface CDLRawSeedService {
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed);
 
     /**
+     * Clear all {@link com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry} and attributes if the
+     * seed has the same version as the one specified in the input.
+     *
+     * @param env environment to perform operation in
+     * @param tenant target tenant
+     * @param rawSeed seed object used to clear
+     * @return cleared seed, {@literal null} if no such seed exists
+     */
+    CDLRawSeed clear(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed);
+
+    /**
      * Delete the seed with the specified info.
      *
      * @param env environment to perform operation in

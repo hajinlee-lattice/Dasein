@@ -178,6 +178,39 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     @Override
     public CDLRawSeed clearIfEquals(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed) {
+        return clear(env, tenant, rawSeed, true);
+    }
+
+    @Override
+    public CDLRawSeed clear(CDLMatchEnvironment env, Tenant tenant, CDLRawSeed rawSeed) {
+        return clear(env, tenant, rawSeed, false);
+    }
+
+    @Override
+    public boolean delete(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull BusinessEntity entity, @NotNull String seedId) {
+        checkNotNull(env, tenant, entity, seedId);
+
+        int version = getMatchVersion(env, tenant);
+        PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
+        DeleteItemOutcome result = dynamoItemService.delete(getTableName(env), new DeleteItemSpec()
+                .withPrimaryKey(key)
+                // return all old attributes to determine whether item is deleted
+                .withReturnValues(ReturnValue.ALL_OLD));
+        Preconditions.checkNotNull(result);
+        Preconditions.checkNotNull(result.getDeleteItemResult());
+        return MapUtils.isNotEmpty(result.getDeleteItemResult().getAttributes());
+    }
+
+    /*
+     * 1. clear all lookup entries & attributes that are in the input seed.
+     * 2. if useOptimisticLocking, will only clear if the existing seed has the same internal version as the one
+     * specified in input seed.
+     */
+    private CDLRawSeed clear(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull CDLRawSeed rawSeed, boolean useOptimisticLocking) {
         checkNotNull(env, tenant, rawSeed);
 
         int version = getMatchVersion(env, tenant);
@@ -187,11 +220,13 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         Map<String, Set<String>> setAttrs = getStringSetAttributes(rawSeed);
 
         ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
-                // increase the version by 1
-                .addUpdate(N(ATTR_SEED_VERSION).add(1))
-                .withCondition(N(ATTR_SEED_VERSION).eq(rawSeed.getVersion()))
                 // set TTL (no effect on serving)
                 .addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
+        if (useOptimisticLocking) {
+            // increase the version by 1
+            builder.addUpdate(N(ATTR_SEED_VERSION).add(1))
+                    .withCondition(N(ATTR_SEED_VERSION).eq(rawSeed.getVersion()));
+        }
 
         // clear attributes
         strAttrs.forEach((attrName, attrValue) -> builder.addUpdate(
@@ -212,23 +247,6 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
             // someone update this seed in between
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public boolean delete(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId) {
-        checkNotNull(env, tenant, entity, seedId);
-
-        int version = getMatchVersion(env, tenant);
-        PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
-        DeleteItemOutcome result = dynamoItemService.delete(getTableName(env), new DeleteItemSpec()
-                .withPrimaryKey(key)
-                // return all old attributes to determine whether item is deleted
-                .withReturnValues(ReturnValue.ALL_OLD));
-        Preconditions.checkNotNull(result);
-        Preconditions.checkNotNull(result.getDeleteItemResult());
-        return MapUtils.isNotEmpty(result.getDeleteItemResult().getAttributes());
     }
 
     // TODO unit test this

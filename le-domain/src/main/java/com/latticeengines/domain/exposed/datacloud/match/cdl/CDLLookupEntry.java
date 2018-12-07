@@ -169,13 +169,13 @@ public class CDLLookupEntry {
             return false;
         }
         CDLLookupEntry that = (CDLLookupEntry) o;
-        return type == that.type &&
+        return type == that.type && entity == that.entity &&
                 Objects.equal(serializedKeys, that.serializedKeys) &&
                 Objects.equal(serializedValues, that.serializedValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(type, serializedKeys, serializedValues);
+        return Objects.hashCode(type, entity, serializedKeys, serializedValues);
     }
 }
