@@ -76,7 +76,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         summary1.setId("123");
         summary1.setName("Model1");
         summary1.setRocScore(0.75);
-        summary1.setLookupId(String.format("%s|Q_EventTable_%s|abcde", tenant1.getName(), tenant1.getName()));
+        summary1.setLookupId(
+                String.format("%s|Q_EventTable_%s|abcde", tenant1.getName(), tenant1.getName()));
         summary1.setTrainingRowCount(8000L);
         summary1.setTestRowCount(2000L);
         summary1.setTotalRowCount(10000L);
@@ -150,7 +151,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         summary2.setId("456");
         summary2.setName("Model2");
         summary2.setRocScore(0.80);
-        summary2.setLookupId(String.format("%s|Q_EventTable_%s|fghij", tenant2.getName(), tenant2.getName()));
+        summary2.setLookupId(
+                String.format("%s|Q_EventTable_%s|fghij", tenant2.getName(), tenant2.getName()));
         summary2.setTrainingRowCount(80000L);
         summary2.setTestRowCount(20000L);
         summary2.setTotalRowCount(100000L);
@@ -203,7 +205,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findByModelId() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true,
+                true, false);
         assertEquals(retrievedSummary.getId(), summary1.getId());
         assertEquals(retrievedSummary.getName(), summary1.getName());
 
@@ -211,7 +214,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         assertEquals(predictors.size(), 3);
 
         KeyValue details = retrievedSummary.getDetails();
-        String uncompressedStr = new String(CompressionUtils.decompressByteArray(details.getData()));
+        String uncompressedStr = new String(
+                CompressionUtils.decompressByteArray(details.getData()));
         assertEquals(details.getTenantId(), summary1.getTenantId());
         assertTrue(uncompressedStr.contains("\"Segmentations\":"));
 
@@ -240,7 +244,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
             }
             List<PredictorElement> retrievedElements = predictors.get(i).getPredictorElements();
-            List<PredictorElement> summaryElements = summary1.getPredictors().get(i).getPredictorElements();
+            List<PredictorElement> summaryElements = summary1.getPredictors().get(i)
+                    .getPredictorElements();
             for (int j = 0; j < retrievedElements.size(); j++) {
                 for (String field : predictorElementFields) {
                     assertEquals(ReflectionTestUtils.getField(retrievedElements.get(j), field),
@@ -262,7 +267,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGetByModelNameInTenant() {
         setupSecurityContext(summary1);
-        ModelSummary summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant1);
+        ModelSummary summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(),
+                tenant1);
         assertNotNull(summary);
         assertEquals(summary.getId(), summary1.getId());
         assertEquals(summary.getName(), summary1.getName());
@@ -310,8 +316,10 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         try {
-            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
-            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
+            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(),
+                    ModelSummaryStatus.ACTIVE);
+            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(),
+                    ModelSummaryStatus.DELETED);
             Assert.fail("Should not come here!");
         } catch (LedpException ex) {
             Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18021);
@@ -327,8 +335,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         modelSummaryEntityMgr.update(retrievedSummary);
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
         assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false));
-        Assert.assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(),
-                ModelSummaryStatus.DELETED);
+        Assert.assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false)
+                .getStatus(), ModelSummaryStatus.DELETED);
         List<ModelSummary> modelSummaryList = modelSummaryEntityMgr.findAllValid();
         Assert.assertEquals(modelSummaryList.size(), 0);
     }
@@ -339,7 +347,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         ModelSummary retrievedSummary = modelSummaryEntityMgr.getByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         try {
-            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
+            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(),
+                    ModelSummaryStatus.ACTIVE);
             Assert.fail("Should not come here!");
         } catch (LedpException ex) {
             Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18024);
@@ -378,7 +387,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testFindAndUpdatePredictorsForSummary() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true,
+                false, false);
 
         List<Predictor> predictorsUsedForBi = modelSummaryEntityMgr
                 .findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
@@ -388,25 +398,26 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         AttributeMap attrMap = createValidMap();
         modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
 
-        ModelSummary retrievedSummaryAfterUpdatingPredictors = modelSummaryEntityMgr.findByModelId(summary1.getId(),
-                true, false, false);
+        ModelSummary retrievedSummaryAfterUpdatingPredictors = modelSummaryEntityMgr
+                .findByModelId(summary1.getId(), true, false, false);
 
-        predictorsUsedForBi = modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
+        predictorsUsedForBi = modelSummaryEntityMgr
+                .findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
         assertTrue(predictorsUsedForBi.size() == 1);
 
         predictors = retrievedSummaryAfterUpdatingPredictors.getPredictors();
         for (Predictor predictor : predictors) {
             String predictorName = predictor.getName();
             switch (predictorName) {
-            case "LeadSource":
-                assertTrue(predictor.getUsedForBuyerInsights() == false);
-                break;
-            case "Website_Custom":
-                assertTrue(predictor.getUsedForBuyerInsights() == false);
-                break;
-            case "Income":
-                assertTrue(predictor.getUsedForBuyerInsights() == true);
-                break;
+                case "LeadSource":
+                    assertTrue(predictor.getUsedForBuyerInsights() == false);
+                    break;
+                case "Website_Custom":
+                    assertTrue(predictor.getUsedForBuyerInsights() == false);
+                    break;
+                case "Income":
+                    assertTrue(predictor.getUsedForBuyerInsights() == true);
+                    break;
             }
         }
 
@@ -423,28 +434,32 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "testGetModelSummariesModifiedWithinTimeFrame")
     public void testUpdateLastModifiedTime() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true,
+                false, false);
         long oldLastUpdateTime = retrievedSummary.getLastUpdateTime();
         modelSummaryEntityMgr.updateLastUpdateTime(retrievedSummary);
-        retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
+        retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false,
+                false);
         long newLastUpdateTime = retrievedSummary.getLastUpdateTime();
         assertTrue(newLastUpdateTime > oldLastUpdateTime);
     }
 
     @Test(groups = "functional")
     public void testGetModelSummariesModifiedWithinTimeFrame() {
-        List<ModelSummary> summaries = modelSummaryEntityMgr.getModelSummariesModifiedWithinTimeFrame(120000L);
+        List<ModelSummary> summaries = modelSummaryEntityMgr
+                .getModelSummariesModifiedWithinTimeFrame(120000L);
         assertNotNull(summaries);
         Object[] result = summaries.stream()
-                .filter(summary -> summary.getId().equals(summary1.getId()) || summary.getId().equals(summary2.getId()))
+                .filter(summary -> summary.getId().equals(summary1.getId())
+                        || summary.getId().equals(summary2.getId()))
                 .toArray();
         assertEquals(result.length, 2);
         for (Object obj : result) {
-        	ModelSummary ms = (ModelSummary) obj;
-        	KeyValue details = ms.getDetails();
-        	assertNotNull(details);
-        	assertEquals(details.getTenantId(), ms.getTenantId());
-        	assertEquals(ms.getDataCloudVersion(), "2.0.3");
+            ModelSummary ms = (ModelSummary) obj;
+            KeyValue details = ms.getDetails();
+            assertNotNull(details);
+            assertEquals(details.getTenantId(), ms.getTenantId());
+            assertEquals(ms.getDataCloudVersion(), "2.0.3");
         }
     }
 

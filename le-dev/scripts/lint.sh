@@ -14,9 +14,9 @@ if ! [ -z "$PROJECT" ]; then
     pushd "./le-$PROJECT"
 fi
 
-mvn -T8 -Pcheckstyle-report -Dchecker=${CHECKER} validate \
-    && mvn -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate \
-    && mvn -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
+mvn -T8 -q -Pcheckstyle-report -Dchecker=${CHECKER} validate \
+    && mvn -q -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate \
+    && mvn -q -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
 
 if ! [ -z "$PROJECT" ]; then
     popd

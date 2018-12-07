@@ -22,40 +22,45 @@ public class MarketoSoapServiceTestNG extends RemoteFunctionalTestNGBase {
     @Autowired
     private MarketoSoapService marketoSoapService;
 
-    @Test(groups = "functional", enabled = true)
-    public void testValidateMarketoSoapCredentials() throws Exception {
+    @Test(groups = "functional")
+    public void testValidateMarketoSoapCredentials() {
         String soapEndPoint = SOAP_ENDPOINT;
         String userId = USERID;
         String encryptionKey = ENCRYPTIONKEY;
 
-        boolean result = marketoSoapService.validateMarketoSoapCredentials(soapEndPoint, userId, encryptionKey);
+        boolean result = marketoSoapService.validateMarketoSoapCredentials(soapEndPoint, userId,
+                encryptionKey);
         assertEquals(result, true);
 
         LedpException ledpException = null;
 
         try {
-            marketoSoapService.validateMarketoSoapCredentials("malformedSoapEndpoint", userId, encryptionKey);
+            marketoSoapService.validateMarketoSoapCredentials("malformedSoapEndpoint", userId,
+                    encryptionKey);
         } catch (LedpException e) {
             ledpException = e;
         }
         assertEquals(ledpException.getCode(), LedpCode.LEDP_21034);
 
         try {
-            marketoSoapService.validateMarketoSoapCredentials("https://invalidhost123.mktorest.com/rest", userId, encryptionKey);
+            marketoSoapService.validateMarketoSoapCredentials(
+                    "https://invalidhost123.mktorest.com/rest", userId, encryptionKey);
         } catch (LedpException e) {
             ledpException = e;
         }
         assertEquals(ledpException.getCode(), LedpCode.LEDP_21035);
 
         try {
-            marketoSoapService.validateMarketoSoapCredentials(soapEndPoint, "bogusUserId", encryptionKey);
+            marketoSoapService.validateMarketoSoapCredentials(soapEndPoint, "bogusUserId",
+                    encryptionKey);
         } catch (LedpException e) {
             ledpException = e;
         }
         assertEquals(ledpException.getCode(), LedpCode.LEDP_21035);
 
         try {
-            marketoSoapService.validateMarketoSoapCredentials(soapEndPoint, userId, "bogusEncryptionKey");
+            marketoSoapService.validateMarketoSoapCredentials(soapEndPoint, userId,
+                    "bogusEncryptionKey");
         } catch (LedpException e) {
             ledpException = e;
         }
@@ -64,12 +69,13 @@ public class MarketoSoapServiceTestNG extends RemoteFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void testGetLeadFields() throws Exception {
-        List<LeadField> fields = marketoSoapService.getLeadFields(SOAP_ENDPOINT, USERID, ENCRYPTIONKEY);
-        assert(fields.size() > 100);
+        List<LeadField> fields = marketoSoapService.getLeadFields(SOAP_ENDPOINT, USERID,
+                ENCRYPTIONKEY);
+        assert (fields.size() > 100);
         /*
-        for (LeadField leadField : fields) {
-            assertTrue(leadField.getDataType().equals("string") || leadField.getDataType().equals("email"));
-        }
-		*/
+         * for (LeadField leadField : fields) {
+         * assertTrue(leadField.getDataType().equals("string") ||
+         * leadField.getDataType().equals("email")); }
+         */
     }
 }

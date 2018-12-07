@@ -24,16 +24,17 @@ public class BucketMetadataUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "dataProvider")
     public void test(double score, BucketName expectedBucket) {
-        Assert.assertEquals(BucketMetadataUtils.bucketMetadata(buckets, score).getBucket(), expectedBucket);
+        Assert.assertEquals(BucketMetadataUtils.bucketMetadata(buckets, score).getBucket(),
+                expectedBucket);
     }
 
     @DataProvider(name = "dataProvider")
     public Object[][] provideData() {
-        return new Object[][]{
-                { 0.5, BucketName.D },
-                { 1.0, BucketName.C },
-                { 5.0, BucketName.A },
-                { 15.0, BucketName.A },
+        return new Object[][] { //
+                { 0.5, BucketName.D }, //
+                { 1.0, BucketName.C }, //
+                { 5.0, BucketName.A }, //
+                { 15.0, BucketName.A }, //
         };
     }
 
@@ -49,13 +50,13 @@ public class BucketMetadataUtilsUnitTestNG {
     }
 
     @SuppressWarnings("deprecation")
-	private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+    private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore,
+            BucketName bucketName) {
         BucketMetadata bucket = new BucketMetadata();
         bucket.setLeftBoundScore(leftBoundScore);
         bucket.setRightBoundScore(rightBoundScore);
         bucket.setBucket(bucketName);
         return bucket;
     }
-
 
 }

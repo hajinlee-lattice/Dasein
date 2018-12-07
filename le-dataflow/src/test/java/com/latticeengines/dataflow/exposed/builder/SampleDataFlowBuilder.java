@@ -23,14 +23,15 @@ public class SampleDataFlowBuilder extends TypesafeDataFlowBuilder<DataFlowParam
      */
 
     @SuppressWarnings("deprecation")
-	@Override
+    @Override
     public Node construct(DataFlowParameters parameters) {
         Node lead = addSource("Lead");
         Node oppty = addSource("Opportunity");
 
         // SELECT a.*, b.* FROM lead a, oppty b WHERE a.ConvertedOpportunityId =
         // b.Id
-        Node last = lead.innerJoin(new FieldList("ConvertedOpportunityId"), oppty, new FieldList("Id"));
+        Node last = lead.innerJoin(new FieldList("ConvertedOpportunityId"), oppty,
+                new FieldList("Id"));
 
         last = last.addFunction("Email == null ? \"\" : Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
@@ -41,20 +42,22 @@ public class SampleDataFlowBuilder extends TypesafeDataFlowBuilder<DataFlowParam
         // FROM T GROUP BY Domain
         List<Aggregation> aggregation = new ArrayList<>();
         aggregation.add(new Aggregation("AnnualRevenue", "MaxRevenue", AggregationType.MAX));
-        aggregation.add(new Aggregation("NumberOfEmployees", "TotalEmployees", AggregationType.SUM));
+        aggregation
+                .add(new Aggregation("NumberOfEmployees", "TotalEmployees", AggregationType.SUM));
         last = last.groupBy(new FieldList("Domain"), aggregation);
 
         last = last.checkpoint("checkpoint");
 
-//        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees)
-//        // TotalEmployees, HashCode(Domain) DomainHashCode
-//        // FROM T GROUP BY Domain
-//        last = last.addJythonFunction( //
-//                "com.latticeengines.dataflow.exposed.builder", //
-//                "encoder", //
-//                "encode", //
-//                new FieldList("Domain"), //
-//                new FieldMetadata("DomainHashCode", Long.class));
+        // // SELECT Domain, MAX(AnnualRevenue) MaxRevenue,
+        // SUM(NumberOfEmployees)
+        // // TotalEmployees, HashCode(Domain) DomainHashCode
+        // // FROM T GROUP BY Domain
+        // last = last.addJythonFunction( //
+        // "com.latticeengines.dataflow.exposed.builder", //
+        // "encoder", //
+        // "encode", //
+        // new FieldList("Domain"), //
+        // new FieldMetadata("DomainHashCode", Long.class));
 
         return last;
     }

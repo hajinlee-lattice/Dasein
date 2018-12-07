@@ -28,7 +28,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
-    @BeforeClass(groups = {"functional", "functional.production"})
+    @BeforeClass(groups = { "functional", "functional.production" })
     public void setup() {
         ModelingJob job1 = new ModelingJob();
         job1.setId("application_12345_00001_" + suffix);
@@ -65,11 +65,11 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
     }
 
-    @AfterClass(groups = {"functional", "functional.production"})
-    public void tearDown(){
-    		if (modelDef.getModels() != null) {
-    			modelDef.getModels().remove(model);
-    		}
+    @AfterClass(groups = { "functional", "functional.production" })
+    public void tearDown() {
+        if (modelDef.getModels() != null) {
+            modelDef.getModels().remove(model);
+        }
         modelDefinitionEntityMgr.delete(modelDef);
     }
 
@@ -92,12 +92,12 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     }
 
-    @Test(groups = {"functional", "functional.production"})
+    @Test(groups = { "functional", "functional.production" })
     public void testPersist() {
         modelEntityMgr.create(model);
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
+    @Test(groups = { "functional", "functional.production" }, dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         Model retrievedModel = new Model();
         retrievedModel.setPid(model.getPid());
@@ -106,7 +106,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertModelsEqual(model, retrievedModel);
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
+    @Test(groups = { "functional", "functional.production" }, dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(model.getPid());
         model.setCustomer("NEW CUSTOMER");
@@ -116,7 +116,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         testRetrieval();
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testUpdate" })
+    @Test(groups = { "functional", "functional.production" }, dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         modelEntityMgr.delete(model);
     }

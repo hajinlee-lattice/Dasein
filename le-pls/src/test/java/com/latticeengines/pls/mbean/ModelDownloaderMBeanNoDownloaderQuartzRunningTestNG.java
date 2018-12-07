@@ -7,12 +7,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ModelDownloaderMBeanNoDownloaderQuartzRunningTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ModelDownloaderMBeanNoDownloaderQuartzRunningTestNG
+        extends PlsFunctionalTestNGBaseDeprecated {
 
-	@Autowired
-	private ModelDownloaderMBean modelDownloaderMBean;
+    @Autowired
+    private ModelDownloaderMBean modelDownloaderMBean;
 
-	@Test(groups = {"functional", "functional.production"})
+    @Test(groups = { "functional", "functional.production" })
     public void testCheckQuartzJob() {
         assertTrue(modelDownloaderMBean.checkModelDownloader().contains("FAILURE"));
     }

@@ -24,29 +24,34 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
     private String getAttributeResourceUrl() {
         return ulyssesHostPort + "/ulysses/attributes";
     }
-    
+
     @SuppressWarnings("deprecation")
     @Test(groups = "deployment")
     public void testGetPrimaryAttributeConfiguration() {
         String url = getAttributeResourceUrl() + "/primaryfield-configuration";
-        PrimaryFieldConfiguration primaryFieldConfig = getOAuth2RestTemplate().getForObject(url, PrimaryFieldConfiguration.class);
+        PrimaryFieldConfiguration primaryFieldConfig = getOAuth2RestTemplate().getForObject(url,
+                PrimaryFieldConfiguration.class);
         List<PrimaryField> primaryFields = primaryFieldConfig.getPrimaryFields();
         log.info("Primary Fields: " + primaryFields);
         verifyPrimaryFields(primaryFields);
         Assert.assertNotNull(primaryFieldConfig.getValidationExpression());
-        log.info("Primary Fields Validation Expression: " + primaryFieldConfig.getValidationExpression().getExpression());
+        log.info("Primary Fields Validation Expression: "
+                + primaryFieldConfig.getValidationExpression().getExpression());
         FeatureFlagValueMap ffMap = getFeatureFlags();
-        if(ffMap.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())) {
-        	Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.FUZZY_MATCH_VALIDATION_EXPRESSION);
+        if (ffMap.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())) {
+            Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(),
+                    FieldInterpretationCollections.FUZZY_MATCH_VALIDATION_EXPRESSION);
         } else {
-        	Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
+            Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(),
+                    FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
         }
     }
-    
-	private void verifyPrimaryFields(List<PrimaryField> primaryFields) {
-		Assert.assertNotNull(primaryFields);
+
+    private void verifyPrimaryFields(List<PrimaryField> primaryFields) {
+        Assert.assertNotNull(primaryFields);
         Assert.assertTrue(primaryFields.size() > 0);
-        Assert.assertEquals(FieldInterpretationCollections.PrimaryMatchingFields.size(), primaryFields.size());
+        Assert.assertEquals(FieldInterpretationCollections.PrimaryMatchingFields.size(),
+                primaryFields.size());
         // Create a temporary set with Primary Field Names
         Set<String> fieldNames = new HashSet<>();
         for (PrimaryField field : primaryFields) {
@@ -56,11 +61,12 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
         for (FieldInterpretation field : FieldInterpretationCollections.PrimaryMatchingFields) {
             Assert.assertTrue(fieldNames.contains(field.getFieldName()));
         }
-	}
-    
+    }
+
     private FeatureFlagValueMap getFeatureFlags() {
         FeatureFlagValueMap map = getOAuth2RestTemplate().getForObject(
-                getUlyssesRestAPIPort() + "/ulysses/tenant/featureflags", FeatureFlagValueMap.class);
+                getUlyssesRestAPIPort() + "/ulysses/tenant/featureflags",
+                FeatureFlagValueMap.class);
         return map;
     }
 }

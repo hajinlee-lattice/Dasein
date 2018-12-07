@@ -1,6 +1,6 @@
 package com.latticeengines.eai.controller;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -31,7 +31,7 @@ public class ValidateCredentialResourceHelper {
             eaiCredentialValidationService.validateSourceCredential(customerSpace, sourceType, crmCredential);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            List<String> error = Arrays.<String> asList(new String[] { e.getMessage() });
+            List<String> error = Collections.singletonList(e.getMessage());
             return SimpleBooleanResponse.failedResponse(error);
         }
         return SimpleBooleanResponse.successResponse();
