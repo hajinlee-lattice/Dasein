@@ -8,9 +8,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "StorageType")
-@JsonSubTypes({ @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "Dynamo"),
-        @JsonSubTypes.Type(value = RedshiftDataUnit.class, name = "Redshift"),
-        @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"), })
+@JsonSubTypes({ //
+        @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "Dynamo"), //
+        @JsonSubTypes.Type(value = RedshiftDataUnit.class, name = "Redshift"), //
+        @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"), //
+        @JsonSubTypes.Type(value = HdfsDataUnit.class, name = "Hdfs"), //
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -22,7 +25,9 @@ public abstract class DataUnit {
     @JsonProperty("Name")
     private String name;
 
-    @JsonProperty("StorageType")
+    @JsonProperty("Count")
+    private Long count;
+
     public abstract StorageType getStorageType();
 
     public String getTenant() {
@@ -39,6 +44,14 @@ public abstract class DataUnit {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
     }
 
     public enum StorageType {

@@ -24,6 +24,7 @@
         <module>le-eai</module>
         <module>le-workflowapi</module>
         <module>le-dellebi</module>
+        <module>le-spark</module>
         <module>le-datacloud/yarn</module>
     </modules>
 </project>

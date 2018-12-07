@@ -35,6 +35,9 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo bash $ARTIFACT_DIR/$ANACONDA_SH -b -p ${ANACONDA_HOME}
     popd
     sudo chown -R ${USER} ${ANACONDA_HOME}
+
+    ${ANACONDA_HOME}/bin/conda config --add channels conda-forge
+
     ${ANACONDA_HOME}/bin/pip install --upgrade pip
     ${ANACONDA_HOME}/bin/pip install -r $WSHOME/le-dev/scripts/requirements3.txt
 
@@ -43,7 +46,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     fi
 fi
 
-for CONDAENV in 'lattice|2.7' 'v01|2.7' 'p2|2.7'
+for CONDAENV in 'lattice|2.7' 'v01|2.7' 'p2|2.7' 'spark|3.5'
     do
         envname=`echo $CONDAENV | cut -d \| -f 1`
         pythonversion=`echo $CONDAENV | cut -d \| -f 2`
@@ -78,7 +81,7 @@ pip install \
 
 pip install --no-deps kazoo==2.2.1 patsy==0.3.0 python-dateutil==2.4.1
 
-$ANACONDA_HOME/bin/conda install -y \
+${ANACONDA_HOME}/bin/conda install -y \
     libiconv=1.14=0 \
     libxml2=2.9.4=0 \
     libxslt=1.1.28=3 \
@@ -99,7 +102,7 @@ $ANACONDA_HOME/bin/conda install -y \
     zlib=1.2.8=3 \
     python-snappy=0.5.1
 
-$ANACONDA_HOME/bin/conda install -y libgfortran=1
+${ANACONDA_HOME}/bin/conda install -y libgfortran=1
 
 source ${ANACONDA_HOME}/bin/deactivate
 
@@ -144,3 +147,32 @@ pip install git+https://github.com/jpmml/sklearn2pmml.git@0.17.4
 
 source ${ANACONDA_HOME}/bin/deactivate
 
+source ${ANACONDA_HOME}/bin/activate spark
+
+pip install --upgrade pip
+
+${ANACONDA_HOME}/bin/conda install -y \
+	scikit-learn \
+	statsmodels \
+	fastavro \
+	seaborn \
+	scipy \
+	jupyter \
+	matplotlib \
+	sparkmagic \
+	jupyter_contrib_nbextensions \
+	jupyter_nbextensions_configurator \
+	ipython \
+	prompt_toolkit \
+	pyyaml \
+	jinja2
+
+pip uninstall -y ipython prompt_toolkit
+pip install -y ipython prompt_toolkit
+
+jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
+jupyter-kernelspec install ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/sparkkernel
+jupyter-kernelspec install ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pyspark3kernel
+
+source ${ANACONDA_HOME}/bin/deactivate

@@ -79,7 +79,7 @@ public class QueryEvaluator {
                     if (results.next()) {
                         Map<String, Object> row = readRow(attrNames, results);
                         sink.next(row);
-                        iter.getAndIncrement();
+                        iter.incrementAndGet();
                     } else {
                         results.close();
                         sink.complete();

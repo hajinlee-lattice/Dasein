@@ -1,6 +1,7 @@
 package com.latticeengines.camille.exposed.paths;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -209,5 +210,13 @@ public final class PathBuilder {
 
     public static Path buildInvokeTimePath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.INVOKE_TIME);
+    }
+
+    public static Path buildWorkspacesPath(String podId, CustomerSpace customerSpace) {
+        return buildCustomerSpacePath(podId, customerSpace).append(PathConstants.WORKSPACES);
+    }
+
+    public static Path buildRandomWorkspacePath(String podId, CustomerSpace customerSpace) {
+        return buildWorkspacesPath(podId, customerSpace).append(UUID.randomUUID().toString().toLowerCase());
     }
 }

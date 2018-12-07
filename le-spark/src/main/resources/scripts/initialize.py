@@ -1,0 +1,30 @@
+import json
+
+def load_data_unit(unit):
+    storage = unit['StorageType'].lower()
+    if storage == "hdfs":
+        return load_hdfs_unit(unit)
+    else:
+        raise ValueError("Unsupported storage type %s" % storage)
+
+def load_hdfs_unit(unit):
+    path = "hdfs://%s" % unit['Path']
+    return spark.read.format("com.databricks.spark.avro").load(path)
+
+script_targets = json.loads('''{{TARGETS}}''')
+script_output = {}
+print("----- BEGIN SCRIPT OUTPUT -----")
+print("Targets:", script_targets)
+print("----- END SCRIPT OUTPUT -----")
+
+raw_input = json.loads('''{{INPUT}}''')
+script_input = [load_data_unit(unit) for unit in raw_input]
+
+print("----- BEGIN SCRIPT OUTPUT -----")
+print("Input:", script_input)
+print("----- END SCRIPT OUTPUT -----")
+
+script_params = json.loads('''{{PARAMS}}''')
+
+print("----- BEGIN SCRIPT OUTPUT -----")
+print("Params: %s" % json.dumps(script_params))

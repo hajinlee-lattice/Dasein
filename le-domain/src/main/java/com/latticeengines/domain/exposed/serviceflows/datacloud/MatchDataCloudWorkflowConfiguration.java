@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultCascadingConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -31,6 +32,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private BulkMatchWorkflowConfiguration.Builder bulkMatchWorkflowConfigurationBuilder = new BulkMatchWorkflowConfiguration.Builder();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
+        private ProcessMatchResultCascadingConfiguration matchResultCascading = new ProcessMatchResultCascadingConfiguration();
 
         public MatchDataCloudWorkflowConfiguration build() {
             configuration.setContainerConfiguration("matchDataCloudWorkflow",
@@ -38,8 +40,8 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             configuration.add(match);
             configuration.add(prepareMatchDataConfiguration);
             configuration.add(bulkMatchWorkflowConfigurationBuilder.build());
+            configuration.add(matchResultCascading);
             configuration.add(matchResult);
-
             return configuration;
         }
 
@@ -48,7 +50,8 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setCustomerSpace(customerSpace);
             prepareMatchDataConfiguration.setCustomerSpace(customerSpace);
             bulkMatchWorkflowConfigurationBuilder.customer(customerSpace);
-            matchResult.setCustomerSpace(customerSpace);
+            matchResultCascading.setCustomerSpace(customerSpace);
+            matchResult.setCustomer(customerSpace.toString());
             return this;
         }
 
@@ -56,7 +59,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setMicroServiceHostPort(microServiceHostPort);
             prepareMatchDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             bulkMatchWorkflowConfigurationBuilder.microserviceHostPort(microServiceHostPort);
-            matchResult.setMicroServiceHostPort(microServiceHostPort);
+            matchResultCascading.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 

@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RedshiftDataUnit extends DataUnit {
@@ -9,7 +8,7 @@ public class RedshiftDataUnit extends DataUnit {
     private String redshiftTable;
 
     @Override
-    @JsonIgnore
+    @JsonProperty("StorageType")
     public StorageType getStorageType() {
         return StorageType.Redshift;
     }

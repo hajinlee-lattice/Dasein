@@ -1,6 +1,8 @@
 package com.latticeengines.serviceflows.workflow.match;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -14,25 +16,35 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchDataCloudWorkflow extends AbstractWorkflow<MatchDataCloudWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private PrepareMatchConfig preMatchConfigStep;
 
-    @Autowired
+    @Inject
     private PrepareMatchDataStep prepareMatchData;
 
-    @Autowired
+    @Inject
     private BulkMatchWorkflow bulkMatchWorkflow;
 
-    @Autowired
+    @Inject
     private ProcessMatchResult processMatchResult;
+
+    @Inject
+    private ProcessMatchResultCascading processMatchResultCascading;
+
+    @Value("${workflowapi.use.spark}")
+    private boolean useSpark;
 
     @Override
     public Workflow defineWorkflow(MatchDataCloudWorkflowConfiguration config) {
-        return new WorkflowBuilder(name(), config) //
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
                 .next(prepareMatchData) //
                 .next(preMatchConfigStep) //
-                .next(bulkMatchWorkflow) //
-                .next(processMatchResult) //
-                .build();
+                .next(bulkMatchWorkflow);
+        if (useSpark) {
+            builder = builder.next(processMatchResult);
+        } else {
+            builder = builder.next(processMatchResultCascading);
+        }
+        return builder.build();
     }
 }

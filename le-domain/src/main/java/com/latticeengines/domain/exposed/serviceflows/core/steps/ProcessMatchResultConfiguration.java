@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfiguration {
+public class ProcessMatchResultConfiguration extends SparkJobStepConfiguration {
 
     @JsonProperty("data_cloud_version")
     private String dataCloudVersion;
@@ -18,10 +18,6 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
 
     @JsonProperty("join_internal_id")
     private boolean joinInternalId;
-
-    public ProcessMatchResultConfiguration() {
-        setBeanName("parseMatchResult");
-    }
 
     public String getDataCloudVersion() {
         return dataCloudVersion;

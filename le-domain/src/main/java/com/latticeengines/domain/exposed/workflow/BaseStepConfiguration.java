@@ -9,6 +9,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
@@ -31,7 +32,9 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = PublishConfiguration.class, name = "PublishConfiguration"),
         @Type(value = SegmentExportStepConfiguration.class, name = "SegmentExportStepConfiguration"),
         @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"),
-        @Type(value = CommitEntityMatchConfiguration.class, name = "CommitEntityMatchConfiguration"), })
+        @Type(value = CommitEntityMatchConfiguration.class, name = "CommitEntityMatchConfiguration"),
+        @Type(value = SparkJobStepConfiguration.class, name = "SparkJobStepConfiguration"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {
 

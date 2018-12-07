@@ -15,7 +15,7 @@ for lib in 'leadprioritization' 'cdl' 'datacloud' 'modeling' 'scoring'; do
     fi
 done
 
-for lib in "dataflowapi" "eai" "workflowapi" "sqoop" "dataplatform" "dellebi" "scoring" "dataflow"; do
+for lib in "dataflowapi" "eai" "workflowapi" "sqoop" "dataplatform" "dellebi" "scoring" "dataflow" "spark"; do
     mkdir -p ${dist}/${lib}/lib
     cp ../le-${lib}/target/le-*-shaded.jar ${dist}/${lib}/lib
 done

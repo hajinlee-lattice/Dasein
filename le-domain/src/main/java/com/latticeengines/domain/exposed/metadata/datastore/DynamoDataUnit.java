@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DynamoDataUnit extends DataUnit {
@@ -19,7 +18,7 @@ public class DynamoDataUnit extends DataUnit {
     private String linkedTable;
 
     @Override
-    @JsonIgnore
+    @JsonProperty("StorageType")
     public StorageType getStorageType() {
         return StorageType.Dynamo;
     }

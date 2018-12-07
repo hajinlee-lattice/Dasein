@@ -83,5 +83,6 @@
         <module>le-ldc-collectiondb</module>
         <module>le-graph</module>
         <module>le-component</module>
+        <module>le-spark</module>
     </modules>
 </project>

@@ -9,7 +9,7 @@ public class S3DataUnit extends DataUnit {
     private String linkedDir;
 
     @Override
-    @JsonIgnore
+    @JsonProperty("StorageType")
     public StorageType getStorageType() {
         return StorageType.S3;
     }

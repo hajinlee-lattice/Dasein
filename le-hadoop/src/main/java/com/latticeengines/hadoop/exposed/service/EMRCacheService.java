@@ -12,4 +12,6 @@ public interface EMRCacheService {
 
     String getWebHdfsUrl();
 
+    String getLivyUrl();
+
 }

@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultCascadingConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
@@ -42,6 +43,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private ExportScoreTrainingFileStepConfiguration export = new ExportScoreTrainingFileStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
+        private ProcessMatchResultCascadingConfiguration matchResultCascading = new ProcessMatchResultCascadingConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -52,13 +54,14 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
             combineInputWithScores.setCustomerSpace(customerSpace);
             combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
-            matchResult.setCustomerSpace(customerSpace);
+            matchResult.setCustomer(customerSpace.toString());
+            matchResultCascading.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            matchResult.setMicroServiceHostPort(microServiceHostPort);
+            matchResultCascading.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 

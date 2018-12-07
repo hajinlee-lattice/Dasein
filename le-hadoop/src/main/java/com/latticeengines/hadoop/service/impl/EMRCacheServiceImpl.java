@@ -64,6 +64,11 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     }
 
     @Override
+    public String getLivyUrl() {
+        return "http://" + getMasterIp() + ":8998";
+    }
+
+    @Override
     public String getClusterId(String clusterName) {
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
         return retryTemplate.execute(context -> _impl.getClusterIdFromAWS(clusterName));

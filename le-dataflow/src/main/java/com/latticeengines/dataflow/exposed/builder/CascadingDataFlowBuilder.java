@@ -263,7 +263,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                         newName));
                 sourceName = newName;
             }
-            String source = addSource(sourceName, extract.getPath(), true);
+            String extractPath = extract.getPath();
+            if (!extractPath.endsWith(".avro")) {
+                if (!extractPath.endsWith("/")) {
+                    extractPath += "/";
+                }
+                extractPath += "*.avro";
+            }
+            String source = addSource(sourceName, extractPath, true);
             String[] extraCols = new String[allColumnsClone.size()];
             allColumnsClone.toArray(extraCols);
 

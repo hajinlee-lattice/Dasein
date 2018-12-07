@@ -18,6 +18,16 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- akka -->
         <dependency>
@@ -25,7 +35,7 @@
             <artifactId>flakka-actor_2.11</artifactId>
             <version>${flink.akka-version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
@@ -36,7 +46,7 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
-        
+
         <!-- swagger -->
         <dependency>
             <groupId>io.springfox</groupId>
@@ -68,7 +78,7 @@
             <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
- 
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>

@@ -37,4 +37,6 @@ public final class PathConstants {
 
     public static final String TRIGGER_FILTER_FILE = "TriggerEventFilter.json";
     public static final String INVOKE_TIME = "InvokeTime";
+
+    public static final String WORKSPACES = "Workspaces";
 }

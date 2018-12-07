@@ -36,6 +36,9 @@ alias sqdpl='mvn -Pshaded-yarn -DskipTests clean install && sqdplnobld'
 alias eaidplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh eai'
 alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -DskipTests clean install && eaidplnobld'
 
+alias spkdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh spark'
+alias spkdpl='mvn -Pshaded-yarn -DskipTests clean install && spkdplnobld'
+
 alias msbld='dirs -c && pushd $WSHOME/le-microservice && mvn -T8 -DskipTests clean package && popd'
 alias rbldcdl='pushd $WSHOME/le-serviceapps/cdl &&mvn -DskipTests clean install && popd && msbld &&cp $WSHOME/le-microservice/cdl/target/le-cdl-microservice-*-SNAPSHOT.war /opt/tomcat/webapps/ms/cdl.war'
 
