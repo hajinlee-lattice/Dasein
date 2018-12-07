@@ -484,8 +484,7 @@ public class StatsCubeUtils {
     }
 
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
-        // Date Attributes are no longer hidden in the UI.
-        return isSystemAttribute(entity, cm);
+        return isDateAttribute(cm) || isSystemAttribute(entity, cm);
     }
 
     private static boolean isDateAttribute(ColumnMetadata cm) {
