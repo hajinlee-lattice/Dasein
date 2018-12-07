@@ -29,6 +29,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
 
+//FIXME: stopped all tests here because it is spamming emails to @test.com domain
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Autowired
@@ -53,7 +54,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         destroyTestTenant();
     }
 
-    @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider")
+    @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider", enabled = false)
     public void registerUser(AccessLevel level, Boolean[] expectForEachTargetLevel) {//
         switchToAccessLevel(level);
         for (int i = 0; i < LEVELS.length; i++) {
@@ -67,7 +68,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         }
     }
 
-    @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider")
+    @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider", enabled = false)
     public void updateAccessLevel(AccessLevel level, Boolean[] expectForEachTargetLevel) {
         switchToAccessLevel(level);
         User user = createTestUser(AccessLevel.EXTERNAL_USER);
@@ -77,7 +78,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         }
     }
 
-    @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider")
+    @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider", enabled = false)
     public void deleteUser(AccessLevel level, Boolean[] expectForEachTargetLevel) {
         switchToAccessLevel(level);
         for (int i = 0; i < LEVELS.length; i++) {
@@ -98,14 +99,14 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         };
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" }, enabled = false)
     public void validateNewUser() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testConflictingUserInTenant();
         testConflictingUserOutsideTenant();
     }
 
-    @Test(groups = { "functional", "deployment" }, dataProvider = "getAllUsersProvider")
+    @Test(groups = { "functional", "deployment" }, dataProvider = "getAllUsersProvider", enabled = false)
     public void getAllUsers(AccessLevel level, Boolean expectSucceed, int visibleUsers) throws Exception {
         tearDown();
         setup();
@@ -141,7 +142,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         };
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" }, enabled = false)
     public void changePassword() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testChangePassword(AccessLevel.THIRD_PARTY_USER);
@@ -154,7 +155,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" }, enabled = false)
     public void deleteUserWithShortEmail() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         String shortEmail = "a@b.c";
@@ -170,7 +171,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" }, enabled = false)
     public void stringifiedUserName_updateAccessLevel_acessLevelSuccessfullyUpdated() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         User user = createTestUser(AccessLevel.EXTERNAL_USER);
