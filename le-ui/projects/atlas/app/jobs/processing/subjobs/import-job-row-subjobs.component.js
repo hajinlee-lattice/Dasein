@@ -3,6 +3,7 @@ angular.module('lp.jobs.row.subjobs', [])
     .directive('importJobRowSubJobs', [function () {
         var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', function ($scope, JobsStore, JobsService, BrowserStorageUtility) {
             $scope.typesGroupd = {};
+            $scope.watcher = null;
             function init() {
                 // console.log('EXPANDED ======= ',$scope);
                 $scope.emptyMessage = "No Actions Found";
@@ -11,7 +12,7 @@ angular.module('lp.jobs.row.subjobs', [])
                 $scope.typesGroupd = {};
                 $scope.groupdByUser($scope.subjobs);
                 $scope.groupInsideUsers();
-                $scope.$watchCollection('subjobs', function(newSubJobs) {
+                $scope.watcher = $scope.$watchCollection('subjobs', function(newSubJobs) {
                     $scope.sobjobsGrouped = [];
                     $scope.usersGroupped = {};
                     $scope.groupdByUser(newSubJobs);
@@ -36,6 +37,12 @@ angular.module('lp.jobs.row.subjobs', [])
                 }
             }
             
+            this.$onDestroy = function () {
+                if($scope.watcher != null){
+                    $scope.watcher();
+                }
+            };
+
             $scope.groupdByUser = function(subjobs){
                 subjobs.forEach(subjob => {
                     if(!$scope.usersGroupped[subjob.user]){
