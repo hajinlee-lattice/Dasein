@@ -46,6 +46,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateM
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityEmailBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameBasedMicroEngineActor;
@@ -289,6 +290,7 @@ public class MatchActorSystem {
         initNamedActor(EntityNameBasedMicroEngineActor.class);
         initNamedActor(EntitySystemIdBasedMicroEngineActor.class);
         initNamedActor(EntityDomainBasedMicroEngineActor.class);
+        initNamedActor(EntityDunsBasedMicroEngineActor.class);
     }
 
     private void initDataSourceActors() {
@@ -371,6 +373,7 @@ public class MatchActorSystem {
                 { EntityNameBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
                 { EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
                 { EntityDomainBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
+                { EntityDunsBasedMicroEngineActor.class.getSimpleName(), MatchActorType.MICRO_ENGINE }, //
 
                 { FuzzyMatchJunctionActor.class.getSimpleName(), MatchActorType.JUNCION }, //
                 { AccountMatchJunctionActor.class.getSimpleName(), MatchActorType.JUNCION }, //
