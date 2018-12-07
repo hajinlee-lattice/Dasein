@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.spark;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class TestJoinJobConfig extends SparkJobConfig {
 
