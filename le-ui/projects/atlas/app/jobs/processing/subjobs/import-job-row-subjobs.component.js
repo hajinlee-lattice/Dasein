@@ -19,7 +19,12 @@ angular.module('lp.jobs.row.subjobs', [])
                     $scope.groupInsideUsers();
                 });
             }
-
+            
+            this.$onDestroy = function () {
+                if($scope.watcher != null){
+                    $scope.watcher();
+                }
+            };
             
             function addToGroup(subjob){
                 if(!$scope.typesGroupd[subjob.jobType]){
@@ -36,12 +41,7 @@ angular.module('lp.jobs.row.subjobs', [])
                     $scope.typesGroupd[subjob.jobType][0].actionsCount = actionsCount;
                 }
             }
-            
-            this.$onDestroy = function () {
-                if($scope.watcher != null){
-                    $scope.watcher();
-                }
-            };
+
 
             $scope.groupdByUser = function(subjobs){
                 subjobs.forEach(subjob => {
