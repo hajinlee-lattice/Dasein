@@ -12,7 +12,6 @@ import com.latticeengines.datacloud.match.service.CDLRawSeedService;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -78,7 +77,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
     // [ tenant PID, lookup entry ] => seed ID
     private volatile Cache<Pair<Long, CDLLookupEntry>, String> lookupCache;
     // [ tenant PID, seed ID ] => raw seed
-    private volatile Cache<Pair<Pair<Long, BusinessEntity>, String>, CDLRawSeed> seedCache;
+    private volatile Cache<Pair<Pair<Long, String>, String>, CDLRawSeed> seedCache;
 
     private BlockingQueue<Triple<Tenant, CDLLookupEntry, String>> lookupQueue = new LinkedBlockingQueue<>();
     private volatile ExecutorService lookupExecutorService; // thread pool for populating lookup staging table
@@ -113,7 +112,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
     }
 
     @Override
-    public CDLRawSeed get(@NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull String seedId) {
+    public CDLRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId) {
         checkNotNull(tenant, entity, seedId);
         List<CDLRawSeed> seeds = get(tenant, entity, Collections.singletonList(seedId));
         Preconditions.checkNotNull(seeds);
@@ -122,7 +121,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
     }
 
     @Override
-    public List<CDLRawSeed> get(@NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull List<String> seedIds) {
+    public List<CDLRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
         check(tenant, seedIds);
         checkNotNull(entity);
         if (seedIds.isEmpty()) {
@@ -136,7 +135,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
     }
 
     @Override
-    public String allocateId(@NotNull Tenant tenant, @NotNull BusinessEntity entity) {
+    public String allocateId(@NotNull Tenant tenant, @NotNull String entity) {
         checkNotNull(tenant, entity);
         if (isRealTimeMode) {
             throw new UnsupportedOperationException("Not allowed to allocate ID in realtime mode");
@@ -210,7 +209,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
     }
 
     @VisibleForTesting
-    Cache<Pair<Pair<Long, BusinessEntity>, String>, CDLRawSeed> getSeedCache() {
+    Cache<Pair<Pair<Long, String>, String>, CDLRawSeed> getSeedCache() {
         return seedCache;
     }
 
@@ -388,9 +387,9 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
      * Start from local cache -> staging table -> serving table and perform synchronization between layers.
      */
     private List<CDLRawSeed> getSeedsInternal(
-            @NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull List<String> seedIds) {
+            @NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
         // need entity here because seed ID does not contain this info (unlike lookup entry)
-        Pair<Long, BusinessEntity> prefix = Pair.of(tenant.getPid(), entity);
+        Pair<Long, String> prefix = Pair.of(tenant.getPid(), entity);
         Set<String> uniqueSeedIds = new HashSet<>(seedIds);
         if (!isRealTimeMode) {
             // in bulk mode, does not cache seed in-memory because seed will be updated and invalidating cache
@@ -419,7 +418,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
      * Retrieve raw seeds, starting from staging
      */
     private Map<String, CDLRawSeed> getSeedsStaging(
-            @NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull Set<String> seedIds) {
+            @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds) {
         if (isRealTimeMode) {
             throw new IllegalStateException("Should not reach here in real time mode.");
         }
@@ -447,7 +446,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
      * Retrieve raw seeds in serving table
      */
     private Map<String, CDLRawSeed> getSeedsServing(
-            @NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull Set<String> seedIds) {
+            @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds) {
         return getSeedsInEnvironment(tenant, CDLMatchEnvironment.SERVING, entity, seedIds);
     }
 
@@ -456,7 +455,7 @@ public class CDLEntityMatchInternalServiceImpl implements CDLEntityMatchInternal
      */
     private Map<String, CDLRawSeed> getSeedsInEnvironment(
             @NotNull Tenant tenant, @NotNull CDLMatchEnvironment env,
-            @NotNull BusinessEntity entity, @NotNull Set<String> uniqueSeedIds) {
+            @NotNull String entity, @NotNull Set<String> uniqueSeedIds) {
         List<String> seedIds = new ArrayList<>(uniqueSeedIds);
         List<CDLRawSeed> seeds = cdlRawSeedService.get(env, tenant, entity, seedIds);
         return IntStream

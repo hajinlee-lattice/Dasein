@@ -32,7 +32,7 @@ public class CDLLookupEntryServiceImplTestNG extends DataCloudMatchFunctionalTes
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final Tenant TEST_TENANT = getTestTenant();
-    private static final BusinessEntity TEST_ENTITY = BusinessEntity.Account;
+    private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String MAIN_TEST_SEED_ID = "123";
     private static final String OTHER_TEST_SEED_ID = "456";
 

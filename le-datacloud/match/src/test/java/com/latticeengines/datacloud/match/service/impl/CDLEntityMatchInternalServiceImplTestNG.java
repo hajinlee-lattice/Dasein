@@ -43,7 +43,7 @@ public class CDLEntityMatchInternalServiceImplTestNG extends DataCloudMatchFunct
 
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
-    private static final BusinessEntity TEST_ENTITY = BusinessEntity.Account;
+    private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final Tenant TEST_TENANT = getTestTenant();
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
@@ -143,8 +143,8 @@ public class CDLEntityMatchInternalServiceImplTestNG extends DataCloudMatchFunct
         verifyCDLRawSeeds(results, SEED_ID_1, SEED_ID_2, SEED_ID_3, null, null);
 
         // check in-memory cache (should not use cache in bulk mode for seed)
-        Pair<Long, BusinessEntity> prefix = Pair.of(TEST_TENANT.getPid(), TEST_ENTITY);
-        Cache<Pair<Pair<Long, BusinessEntity>, String>, CDLRawSeed> seedCache = cdlEntityMatchInternalService
+        Pair<Long, String> prefix = Pair.of(TEST_TENANT.getPid(), TEST_ENTITY);
+        Cache<Pair<Pair<Long, String>, String>, CDLRawSeed> seedCache = cdlEntityMatchInternalService
                 .getSeedCache();
         Assert.assertNotNull(seedCache);
         SEED_IDS.forEach(id -> seedCache.getIfPresent(Pair.of(prefix, id)));

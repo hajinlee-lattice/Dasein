@@ -36,7 +36,7 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final Tenant TEST_TENANT = getTestTenant();
-    private static final BusinessEntity TEST_ENTITY = BusinessEntity.Account;
+    private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
     private static final String TEST_COUNTRY = "USA";

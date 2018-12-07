@@ -43,7 +43,7 @@ public interface CDLEntityMatchInternalService {
      * @param seedId seed ID
      * @return seed object, {@literal null} if no seed with the specified ID exists
      */
-    CDLRawSeed get(@NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull String seedId);
+    CDLRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
 
     /**
      * Retrieve a list of {@link CDLRawSeed} with a list of seed IDs.
@@ -54,7 +54,7 @@ public interface CDLEntityMatchInternalService {
      * @return a list of seed IDs. the list will not be {@literal null} and will have the same size as the input
      * list of seed IDs. If no seed with a specific ID exists, {@literal null} will be inserted in the respective index.
      */
-    List<CDLRawSeed> get(@NotNull Tenant tenant, @NotNull BusinessEntity entity, @NotNull List<String> seedIds);
+    List<CDLRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds);
 
     // TODO consider to add get seed by lookup entry (not sure will be needed)
 
@@ -65,7 +65,7 @@ public interface CDLEntityMatchInternalService {
      * @param entity target entity
      * @return the allocated ID, will not be {@literal null}
      */
-    String allocateId(@NotNull Tenant tenant, @NotNull BusinessEntity entity);
+    String allocateId(@NotNull Tenant tenant, @NotNull String entity);
 
     /**
      * Associate all lookup entries and attributes in the input {@link CDLRawSeed} to the current ones and return

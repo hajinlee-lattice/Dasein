@@ -271,7 +271,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
         int suffix = (sortKey.hashCode() & 0x7fffffff) % numStagingShards;
         String partitionKey = String.join(DELIMITER,
                 PREFIX, tenant.getPid().toString(), String.valueOf(version),
-                entry.getEntity().name(), String.valueOf(suffix));
+                entry.getEntity(), String.valueOf(suffix));
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey, ATTR_RANGE_KEY, sortKey);
     }
 
@@ -283,7 +283,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
     private PrimaryKey buildServingKey(@NotNull Tenant tenant, @NotNull CDLLookupEntry entry, int version) {
         String lookupKey = serialize(entry);
         String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entry.getEntity().name(), lookupKey);
+                PREFIX, tenant.getPid().toString(), String.valueOf(version), entry.getEntity(), lookupKey);
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey);
     }
 

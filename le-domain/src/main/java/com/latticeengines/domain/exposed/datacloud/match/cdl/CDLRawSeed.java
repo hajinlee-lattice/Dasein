@@ -17,19 +17,19 @@ import java.util.Map;
  */
 public class CDLRawSeed {
     private final String id; // entity ID
-    private final BusinessEntity entity; // CDL entity
+    private final String entity; // CDL entity
     private final int version; // internal version for optimistic locking
     private final List<CDLLookupEntry> lookupEntries; // list of lookup entry associated, sorted by entry priority, desc
     private final Map<String, String> attributes; // extra attributes to stored in the seed, cannot be used for lookup
 
     public CDLRawSeed(
-            @NotNull String id, @NotNull BusinessEntity entity,
+            @NotNull String id, @NotNull String entity,
             @NotNull List<CDLLookupEntry> lookupEntries, Map<String, String> attributes) {
         this(id, entity, -1, lookupEntries, attributes);
     }
 
     public CDLRawSeed(
-            @NotNull String id, @NotNull BusinessEntity entity, int version,
+            @NotNull String id, @NotNull String entity, int version,
             @NotNull List<CDLLookupEntry> lookupEntries, Map<String, String> attributes) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(entity);
@@ -46,7 +46,7 @@ public class CDLRawSeed {
         return id;
     }
 
-    public BusinessEntity getEntity() {
+    public String getEntity() {
         return entity;
     }
 

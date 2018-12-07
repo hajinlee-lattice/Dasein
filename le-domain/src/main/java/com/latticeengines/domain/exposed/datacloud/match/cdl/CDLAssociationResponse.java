@@ -8,17 +8,17 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
  * Response class for CDL entity association.
  */
 public class CDLAssociationResponse {
-    private final BusinessEntity entity;
+    private final String entity;
     private final String associatedEntityId;
     // TODO add conflict errors
 
-    public CDLAssociationResponse(@NotNull BusinessEntity entity, String associatedEntityId) {
+    public CDLAssociationResponse(@NotNull String entity, String associatedEntityId) {
         Preconditions.checkNotNull(entity);
         this.entity = entity;
         this.associatedEntityId = associatedEntityId;
     }
 
-    public BusinessEntity getEntity() {
+    public String getEntity() {
         return entity;
     }
 

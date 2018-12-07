@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -89,7 +88,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     @Override
     public boolean createIfNotExists(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId) {
+            @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
         Item item = getBaseItem(env, tenant, entity, seedId);
         return conditionalSet(getTableName(env), item);
@@ -109,7 +108,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     @Override
     public CDLRawSeed get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId) {
+            @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
 
         int version = getMatchVersion(env, tenant);
@@ -122,7 +121,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     @Override
     public List<CDLRawSeed> get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull List<String> seedIds) {
+            @NotNull String entity, @NotNull List<String> seedIds) {
         checkNotNull(env, tenant, entity, seedIds);
         if (seedIds.isEmpty()) {
             return Collections.emptyList();
@@ -155,7 +154,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
 
         ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
                 .addUpdate(S(ATTR_SEED_ID).set(rawSeed.getId()))
-                .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity().name()))
+                .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity()))
                 // increase the version by 1
                 .addUpdate(N(ATTR_SEED_VERSION).add(1))
                 // set TTL (no effect on serving)
@@ -189,7 +188,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     @Override
     public boolean delete(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId) {
+            @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
 
         int version = getMatchVersion(env, tenant);
@@ -259,7 +258,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         }
 
         String seedId = map.get(ATTR_SEED_ID).getS();
-        BusinessEntity entity = BusinessEntity.getByName(map.get(ATTR_SEED_ENTITY).getS());
+        String entity = map.get(ATTR_SEED_ENTITY).getS();
         int version = map.containsKey(ATTR_SEED_VERSION)
             ? INITIAL_SEED_VERSION : Integer.parseInt(map.get(ATTR_SEED_VERSION).getN());
         List<CDLLookupEntry> entries = new ArrayList<>();
@@ -292,7 +291,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         }
 
         String seedId = item.getString(ATTR_SEED_ID);
-        BusinessEntity entity = BusinessEntity.getByName(item.getString(ATTR_SEED_ENTITY));
+        String entity = item.getString(ATTR_SEED_ENTITY);
         int version = item.hasAttribute(ATTR_SEED_VERSION) ? item.getInt(ATTR_SEED_VERSION) : INITIAL_SEED_VERSION;
         List<CDLLookupEntry> entries = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
@@ -340,13 +339,13 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     private Item getBaseItem(
-            CDLMatchEnvironment env, Tenant tenant, BusinessEntity entity, String seedId) {
+            CDLMatchEnvironment env, Tenant tenant, String entity, String seedId) {
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
         return new Item()
                 .withPrimaryKey(key)
                 .withString(ATTR_SEED_ID, seedId)
-                .withString(ATTR_SEED_ENTITY, entity.name())
+                .withString(ATTR_SEED_ENTITY, entity)
                 .withNumber(ATTR_SEED_VERSION, INITIAL_SEED_VERSION)
                 // set TTL (no effect on serving)
                 .withNumber(ATTR_EXPIRED_AT, getExpiredAt());
@@ -400,7 +399,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * TODO unit test this
      */
     private List<CDLLookupEntry> parseLookupEntries(
-            @NotNull BusinessEntity entity, @NotNull String attributeName, Object value) {
+            @NotNull String entity, @NotNull String attributeName, Object value) {
         for (CDLLookupEntry.Type type : CDLLookupEntry.Type.values()) {
             int idx = attributeName.indexOf(type.name());
             if (idx < 0) {
@@ -421,7 +420,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     private List<CDLLookupEntry> getLookupEntries(
-            @NotNull CDLLookupEntry.Type type, @NotNull BusinessEntity entity,
+            @NotNull CDLLookupEntry.Type type, @NotNull String entity,
             @NotNull String serializedKeys, @NotNull AttributeValue value) {
         if (value.getS() != null) {
             return Collections.singletonList(
@@ -437,7 +436,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     private List<CDLLookupEntry> getLookupEntries(
-            @NotNull CDLLookupEntry.Type type, @NotNull BusinessEntity entity,
+            @NotNull CDLLookupEntry.Type type, @NotNull String entity,
             @NotNull String attributeName, @NotNull String serializedKeys, @NotNull Item item) {
         Class<?> clz = item.getTypeOf(attributeName);
         if (String.class.equals(clz)) {
@@ -495,7 +494,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     private PrimaryKey buildKey(
-            CDLMatchEnvironment env, Tenant tenant, int version, BusinessEntity entity, String seedId) {
+            CDLMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
         Preconditions.checkNotNull(tenant.getPid());
         switch (env) {
             case SERVING:
@@ -515,12 +514,12 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      *     - E.g., "aabbabc123456789"
      */
     private PrimaryKey buildStagingKey(
-            Tenant tenant, int version, BusinessEntity entity, String seedId) {
+            Tenant tenant, int version, String entity, String seedId) {
         // use calculated suffix because we need lookup
         // & 0x7fffffff to make it positive and mod nShards
         int suffix = (seedId.hashCode() & 0x7fffffff) % numStagingShards;
         String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity.name(), String.valueOf(suffix));
+                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, String.valueOf(suffix));
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey, ATTR_RANGE_KEY, seedId);
     }
 
@@ -530,9 +529,9 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      *     - E.g., "SEED_123_5_Account_aabbabc123456789"
      */
     private PrimaryKey buildServingKey(
-            Tenant tenant, int version, BusinessEntity entity, String seedId) {
+            Tenant tenant, int version, String entity, String seedId) {
         String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity.name(), seedId);
+                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, seedId);
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey);
     }
 }

@@ -24,7 +24,7 @@ public interface CDLRawSeedService {
      */
     boolean createIfNotExists(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId);
+            @NotNull String entity, @NotNull String seedId);
 
     /**
      * Set the seed entry with the specified info. Only set if a seed with the same info does NOT already exist.
@@ -48,7 +48,7 @@ public interface CDLRawSeedService {
      */
     CDLRawSeed get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId);
+            @NotNull String entity, @NotNull String seedId);
 
     /**
      * Retrieve a list of seeds with the specified into.
@@ -62,7 +62,7 @@ public interface CDLRawSeedService {
      */
     List<CDLRawSeed> get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull List<String> seedIds);
+            @NotNull String entity, @NotNull List<String> seedIds);
 
     /**
      * Update all {@link com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry} and attributes in the
@@ -109,11 +109,11 @@ public interface CDLRawSeedService {
      *
      * @param env environment to perform operation in
      * @param tenant target tenant
-     * @param entity target entity type
+     * @param entity target entity
      * @param seedId seed ID
      * @return true if the seed exists and is deleted
      */
     boolean delete(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull BusinessEntity entity, @NotNull String seedId);
+            @NotNull String entity, @NotNull String seedId);
 }

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Class to represent seed for CDL account.
  */
 public class CDLAccountSeed {
-    private static final BusinessEntity ENTITY = BusinessEntity.Account;
+    private static final String ENTITY = BusinessEntity.Account.name();
     private static final String KEY_LATTICE_ACCOUNT_ID = "latticeAccountId";
 
     private final String id;

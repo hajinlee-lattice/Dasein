@@ -10,13 +10,13 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
  */
 public class CDLLookupEntry {
     private final Type type;
-    private final BusinessEntity entity;
+    private final String entity;
     // store serialized form since internal operation only need these
     private final String serializedKeys;
     private final String serializedValues;
 
     public CDLLookupEntry(
-            @NotNull Type type, @NotNull BusinessEntity entity, @NotNull String[] keys, @NotNull String[] values) {
+            @NotNull Type type, @NotNull String entity, @NotNull String[] keys, @NotNull String[] values) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(entity);
         type.checkKeys(keys);
@@ -33,7 +33,7 @@ public class CDLLookupEntry {
      * NOTE not checking here for performance
      */
     public CDLLookupEntry(
-            @NotNull Type type, @NotNull BusinessEntity entity,
+            @NotNull Type type, @NotNull String entity,
             @NotNull String serializedKeys, @NotNull String serializedValues) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(entity);
@@ -49,7 +49,7 @@ public class CDLLookupEntry {
         return type;
     }
 
-    public BusinessEntity getEntity() {
+    public String getEntity() {
         return entity;
     }
 
@@ -169,7 +169,7 @@ public class CDLLookupEntry {
             return false;
         }
         CDLLookupEntry that = (CDLLookupEntry) o;
-        return type == that.type && entity == that.entity &&
+        return type == that.type && Objects.equal(this.entity, that.entity) &&
                 Objects.equal(serializedKeys, that.serializedKeys) &&
                 Objects.equal(serializedValues, that.serializedValues);
     }

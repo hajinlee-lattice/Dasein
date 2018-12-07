@@ -13,13 +13,13 @@ import java.util.List;
  */
 public class CDLAssociationRequest {
     private final boolean allocateNewId;
-    private final BusinessEntity entity;
+    private final String entity;
     private final List<Pair<CDLLookupEntry, String>> lookupResults;
     // used to define the priority of lookup keys, from high to low priority (DESC).
     private final Comparator<CDLLookupEntry> lookupEntryComparator;
 
     public CDLAssociationRequest(
-            @NotNull BusinessEntity entity, @NotNull List<Pair<CDLLookupEntry, String>> lookupResults,
+            @NotNull String entity, @NotNull List<Pair<CDLLookupEntry, String>> lookupResults,
             @NotNull Comparator<CDLLookupEntry> lookupEntryComparator, boolean allocateNewId) {
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(lookupResults);
@@ -34,7 +34,7 @@ public class CDLAssociationRequest {
         return allocateNewId;
     }
 
-    public BusinessEntity getEntity() {
+    public String getEntity() {
         return entity;
     }
 
