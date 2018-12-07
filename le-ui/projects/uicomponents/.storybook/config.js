@@ -1,6 +1,7 @@
 import { addDecorator, configure } from '@storybook/react';
 import { withOptions } from '@storybook/addon-options';
 
+import './index.scss';
 
 addDecorator(
   withOptions({
@@ -80,20 +81,8 @@ addDecorator(
   })
 );
 
-
-
-
-function loadStories() {
-  require('./stories/buttons.js');
-  require('./stories/forms-controlls.js');
-  require('./stories/containers.js');
-  require('./stories/navigation.js');
-  require('./stories/data-table.js');
-  require('./stories/messages.js');
-  require('./stories/overlay.js');
-  require('./stories/panels.js');
-  require('./stories/layouts.js');
-  // You can require as many stories as you need.
+function loadStorie (r) {
+  r.keys().forEach(r);
 }
 
-configure(loadStories, module);
+configure(loadStorie(require.context('./stories', true, /\.stories\.js$/)), module);
