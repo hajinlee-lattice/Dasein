@@ -6,6 +6,11 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -57,4 +62,9 @@ public abstract class BaseExceptionHandler {
         String message = StringUtils.isBlank(e.getMessage()) ? e.toString() : e.getMessage();
         alertService.triggerCriticalEvent(message, null, dedupKey, details);
     }
+
+    protected String emptyStringIfNull(Object o) {
+        return o != null ? o.toString() : "";
+    }
+
 }

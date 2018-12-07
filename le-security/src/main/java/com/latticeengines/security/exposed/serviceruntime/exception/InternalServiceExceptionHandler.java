@@ -75,8 +75,4 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
         return JsonUtils.deserialize(serialized, JsonNode.class);
     }
 
-    private String emptyStringIfNull(Object o) {
-        return o != null ? o.toString() : "";
-    }
-
 }
