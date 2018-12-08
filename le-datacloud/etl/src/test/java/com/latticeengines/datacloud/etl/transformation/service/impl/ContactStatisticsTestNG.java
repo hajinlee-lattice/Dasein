@@ -37,8 +37,8 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
     private GeneralSource contactBucket = new GeneralSource("ContactBucket");
     private GeneralSource source = new GeneralSource("ContactStats");
 
-    private static int profileStep = 0 + 1;
-    private static int bucketStep = 1 + 1;
+    private static int profileStep = 0;
+    private static int bucketStep = 1;
 
     @Override
     @Test(groups = "functional")
@@ -63,11 +63,9 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
             TransformationStepConfig calc = calcStats();
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
-                    scaleOut(), //
                     profile, //
                     bucket, //
-                    calc, //
-                    scaleIn()
+                    calc //
             );
             // -----------
             steps.get(steps.size() - 1).setTargetSource(getTargetSourceName());
@@ -76,24 +74,6 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private TransformationStepConfig scaleOut() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(EMRScalingTransformer.TRANSFORMER_NAME);
-        EMRScalingConfig config = EMRScalingConfig.scaleOut();
-        config.setDelta(6);
-        step.setConfiguration(JsonUtils.serialize(config));
-        return step;
-    }
-
-    private TransformationStepConfig scaleIn() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(EMRScalingTransformer.TRANSFORMER_NAME);
-        EMRScalingConfig config = EMRScalingConfig.scaleIn();
-        config.setDelta(6);
-        step.setConfiguration(JsonUtils.serialize(config));
-        return step;
     }
 
     @Override
