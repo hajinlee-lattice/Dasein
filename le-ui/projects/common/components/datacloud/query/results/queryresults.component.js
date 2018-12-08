@@ -538,9 +538,10 @@ angular.module('common.datacloud.query.results', [
             },
             buckets = {};
 
-        vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
-            sections.total += parseInt(count.count);
-        });
+        // vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
+        //     sections.total += parseInt(count.count);
+        // });
+        sections.total = vm.accountsCoverage.accountCount;
 
         var _contacts = 0;
         for(var i in vm.selectedBuckets) {

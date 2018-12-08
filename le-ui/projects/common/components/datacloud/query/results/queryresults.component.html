@@ -85,7 +85,7 @@
                 </li>
                 -->
             </ul>
-            <div class="unscored-accounts">
+            <div class="unscored-accounts" ng-if="vm.unscoredAccounts.total">
                 <input type="checkbox" ng-model="vm.launchUnscored" ng-click="vm.launchUnscoredClick()" /> Include the <strong>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</strong> Unscored Accounts?
             </div>
         </div>
