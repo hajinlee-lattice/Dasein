@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller.datacollection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -70,11 +69,10 @@ public class DropBoxResource {
     @ResponseBody
     @ApiOperation(value = "Get drop box summary")
     @PreAuthorize("hasRole('Generate_S3_Credential')")
-    public ModelAndView getDropBox() {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+    public Map<String, UIAction> getDropBox() {
         String customerSpace = MultiTenantContext.getShortTenantId();
         UIAction uiAction = generateUIActionBasedOnDropBox(dropBoxProxy.getDropBox(customerSpace));
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @VisibleForTesting
@@ -135,9 +133,8 @@ public class DropBoxResource {
     @ResponseBody
     @ApiOperation(value = "Refresh access key to drop box, if the access was granted to a Lattice user")
     @PreAuthorize("hasRole('Generate_S3_Credential')")
-    public ModelAndView refreshAccessKey(@RequestBody GrantDropBoxAccessRequest request) {
+    public Map<String, UIAction> refreshAccessKey(@RequestBody GrantDropBoxAccessRequest request) {
         String customerSpace = MultiTenantContext.getShortTenantId();
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = new UIAction();
         GrantDropBoxAccessResponse response = dropBoxProxy.refreshAccessKey(customerSpace);
         sendEmailToAdmins(response);
@@ -147,7 +144,7 @@ public class DropBoxResource {
         uiAction.setMessage(String.format(GET_DROPBOX_SUCCESS_MSG, response.getAccessKey(), response.getSecretKey(),
                 response.getBucket(), response.getDropBox(), MultiTenantContext.getShortTenantId(),
                 MultiTenantContext.getEmailAddress()));
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
 }

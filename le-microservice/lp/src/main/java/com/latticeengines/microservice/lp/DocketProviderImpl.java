@@ -1,8 +1,9 @@
 package com.latticeengines.microservice.lp;
 
+import java.util.function.Predicate;
+
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
 import com.latticeengines.common.exposed.util.SwaggerUtils;
 import com.latticeengines.microservice.exposed.DocketProvider;
 import com.latticeengines.microservice.exposed.DocketProviderBase;

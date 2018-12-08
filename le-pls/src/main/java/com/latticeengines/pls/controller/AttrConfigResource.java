@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -62,23 +60,22 @@ public class AttrConfigResource {
         return attrConfigService.getOverallAttrConfigNameOverview();
     }
 
+    @ResponseBody
     @PutMapping(value = "/activation/config/category/{categoryName}")
     @ApiOperation("update Activation Config")
-    public ModelAndView updateActivationConfig(@PathVariable String categoryName,
+    public Map<String, UIAction> updateActivationConfig(@PathVariable String categoryName,
             @RequestBody AttrConfigSelectionRequest request) {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = attrConfigService.updateActivationConfig(categoryName, request);
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @PutMapping(value = "/usage/config/category/{categoryName}")
     @ApiOperation("update Usage Config")
-    public ModelAndView updateUsageConfig(@PathVariable String categoryName,
+    public Map<String, UIAction> updateUsageConfig(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName,
             @RequestBody AttrConfigSelectionRequest request, HttpServletResponse response) {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = attrConfigService.updateUsageConfig(categoryName, usageName, request);
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @PutMapping(value = "/name/config/category/{categoryName}")

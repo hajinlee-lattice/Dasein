@@ -6,8 +6,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
@@ -47,7 +45,8 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ResponseBody
     public JsonNode handleException(UIActionException e) {
         logError(e);
-        return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
+        return JsonUtils.getObjectMapper() //
+                .valueToTree(ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
     }
 
     @ExceptionHandler
@@ -79,18 +78,6 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
                 : ExceptionUtils.getStackTrace(e);
         logError(stackTrace);
         return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", e.getCode().name(), //
-                "errorMsg", e.getMessage()));
-    }
-
-    private ModelAndView getModelAndView() {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
-                "errorMsg", LedpCode.LEDP_00002.getMessage()));
-    }
-
-    private ModelAndView getModelAndView(LedpException e) {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
                 "errorMsg", e.getMessage()));
     }
 

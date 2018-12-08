@@ -1,6 +1,7 @@
 package com.latticeengines.eai.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/validatecredential/customerspaces/{customerSpace}")
 public class ValidateCredentialResource implements ValidateCredentialInterface {
 
-    @Autowired
+    @Inject
     private ValidateCredentialResourceHelper validateCredentialResourceHelper;
 
     @RequestMapping(value = "/sourcetypes/{sourceType}", method = RequestMethod.POST, headers = "Accept=application/json")

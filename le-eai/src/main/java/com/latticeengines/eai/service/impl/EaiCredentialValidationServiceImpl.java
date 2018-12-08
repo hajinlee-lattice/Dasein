@@ -19,12 +19,14 @@ import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
+import javax.inject.Inject;
+
 @Component("eaiCredentialValidationService")
 public class EaiCredentialValidationServiceImpl implements EaiCredentialValidationService {
 
     private Logger log = LoggerFactory.getLogger(EaiCredentialValidationServiceImpl.class);
 
-    @Autowired
+    @Inject
     private CrmCredentialZKService crmCredentialZKService;
 
     @Value("${eai.salesforce.clientid}")

@@ -1,8 +1,9 @@
 package com.latticeengines.microservice.sqoop;
 
+import java.util.function.Predicate;
+
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
 import com.latticeengines.microservice.exposed.DocketProvider;
 import com.latticeengines.microservice.exposed.DocketProviderBase;
 
@@ -17,7 +18,7 @@ public class DocketProviderImpl extends DocketProviderBase implements DocketProv
     }
 
     protected Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("com.latticeengines.sqoop.controller");
+        return RequestHandlerSelectors.basePackage("com.latticeengines.sqoop.controller")::apply;
     }
 
     protected String contextPath()  {

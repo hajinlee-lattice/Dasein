@@ -7,9 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,7 +37,7 @@ public class HealthResource {
 
     private static final AtomicBoolean ready = new AtomicBoolean(false);
 
-    @Autowired
+    @Inject
     private RateLimitingService ratelimitingService;
 
     @Inject
@@ -47,7 +46,7 @@ public class HealthResource {
     @Inject
     private RealTimeMatchService realTimeMatchService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
@@ -58,7 +57,7 @@ public class HealthResource {
         return StatusDocument.online();
     }
 
-    @RequestMapping(value = "/dnbstatus", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/dnbstatus")
     @ResponseBody
     @ApiOperation(value = "DnB Rate Limit Status")
     public StatusDocument dnbRateLimitStatus() {

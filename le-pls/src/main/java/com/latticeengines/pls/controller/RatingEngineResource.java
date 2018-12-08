@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -255,7 +253,7 @@ public class RatingEngineResource {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingCoverageProxy.getCoverageInfo(tenant.getId(), ratingModelSegmentIds);
     }
-    
+
     @PostMapping(value = "/coverage/segment/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
@@ -361,12 +359,11 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/dependencies/modelAndView")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public ModelAndView getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
+    public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
         Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
                 ratingEngineId);
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model is safe to edit", View.Notice,
                 Status.Success, null);
         if (MapUtils.isNotEmpty(dependencies)) {
@@ -374,7 +371,7 @@ public class RatingEngineResource {
             uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner, Status.Warning,
                     message);
         }
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @PostMapping(value = "/{ratingEngineId}/notes")

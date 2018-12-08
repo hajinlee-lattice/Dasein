@@ -9,17 +9,17 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 import com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection;
 
-@SuppressWarnings("deprecation")
+
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = { "com.latticeengines.db", "com.latticeengines.oauth2db", "com.latticeengines.scoringapi",
         "com.latticeengines.common.exposed.rest" })
-public class WebConfiguration extends WebMvcConfigurerAdapter {
+public class WebConfiguration implements WebMvcConfigurer {
 
     public WebConfiguration() {
         super();
@@ -29,7 +29,6 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setPrettyPrint(true);
-
         converters.add(converter);
     }
 

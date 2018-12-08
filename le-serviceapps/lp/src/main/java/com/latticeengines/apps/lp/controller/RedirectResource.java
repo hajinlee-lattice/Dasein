@@ -10,6 +10,9 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +25,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.Mono;
 
 @Api(value = "redirect", description = "Redirect links")
 @RestController
@@ -94,6 +98,13 @@ public class RedirectResource {
         } else {
             return new ModelAndView("Cannot find the master ip of emr cluster in current stack.");
         }
+    }
+
+    // to be used when migrate to webflux
+    private Mono<String> redirectTo(ServerHttpResponse response, String url) {
+        response.setStatusCode(HttpStatus.SEE_OTHER);
+        response.getHeaders().add(HttpHeaders.LOCATION, "/");
+        return response.setComplete().then(Mono.just("Redirected to " + url));
     }
 
 }

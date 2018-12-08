@@ -3,20 +3,19 @@ package com.latticeengines.security.exposed.serviceruntime.exception;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 
 @Controller
 public class ErrorController {
 
 
-    @RequestMapping(value = "errors", method = RequestMethod.GET)
-    public ModelAndView renderErrorPage(HttpServletRequest httpRequest) {
+    @GetMapping(value = "errors")
+    public JsonNode renderErrorPage(HttpServletRequest httpRequest) {
         int httpErrorCode = getErrorCode(httpRequest);
         switch (httpErrorCode) {
             case 401:
@@ -35,21 +34,18 @@ public class ErrorController {
                 .getAttribute("javax.servlet.error.status_code");
     }
 
-    private ModelAndView get401ModelAndView() {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_19001.name(), //
+    private JsonNode get401ModelAndView() {
+        return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", LedpCode.LEDP_19001.name(), //
                 "errorMsg", LedpCode.LEDP_19001.getMessage()));
     }
 
-    private ModelAndView get403ModelAndView() {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_19002.name(), //
+    private JsonNode get403ModelAndView() {
+        return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", LedpCode.LEDP_19002.name(), //
                 "errorMsg", LedpCode.LEDP_19002.getMessage()));
     }
 
-    private ModelAndView get404ModelAndView() {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_19003.name(), //
+    private JsonNode get404ModelAndView() {
+        return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", LedpCode.LEDP_19003.name(), //
                 "errorMsg", LedpCode.LEDP_19003.getMessage()));
     }
 }

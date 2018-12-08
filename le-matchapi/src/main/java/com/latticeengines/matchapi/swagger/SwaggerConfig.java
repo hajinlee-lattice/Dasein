@@ -2,12 +2,13 @@ package com.latticeengines.matchapi.swagger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.latticeengines.common.exposed.version.VersionManager;
 
@@ -21,12 +22,12 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
-@EnableWebMvc
 @ImportResource("classpath:common-component-context.xml")
+@PropertySource("classpath:swagger.properties")
 @EnableSwagger2
 public class SwaggerConfig {
 
-    @Autowired
+    @Inject
     private VersionManager docVersionManager;
 
     @Bean

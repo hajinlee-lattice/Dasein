@@ -5,20 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
@@ -27,7 +28,7 @@ import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 public class LedpPlaymakerExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(LedpPlaymakerExceptionHandler.class);
 
-    @Autowired
+    @Inject
     private OAuthUserEntityMgr oAuthUserEntityMgr;
 
     public LedpPlaymakerExceptionHandler() {
@@ -35,8 +36,8 @@ public class LedpPlaymakerExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ModelAndView handleException(LedpException ex, HttpServletRequest request) {
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+    @ResponseBody
+    public JsonNode handleException(LedpException ex, HttpServletRequest request) {
         String stackTrace = ex.getCause() != null ? ExceptionUtils.getStackTrace(ex.getCause()) : ExceptionUtils
                 .getStackTrace(ex);
 
@@ -57,12 +58,13 @@ public class LedpPlaymakerExceptionHandler {
             cause = cause.getCause();
         }
 
-        return new ModelAndView(jsonView, ImmutableMap.of("errorCode", ex.getCode().name(), //
+        return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", ex.getCode().name(), //
                 "errorMsg", ex.getCode().getMessage(), "cause", errorMsg));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
     public Map<String, Object> handleException(Exception ex, HttpServletRequest request) {
         String trace = ExceptionUtils.getStackTrace(ex);
         String tenantName = null;

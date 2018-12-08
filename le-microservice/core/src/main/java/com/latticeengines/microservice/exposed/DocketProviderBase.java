@@ -2,10 +2,11 @@ package com.latticeengines.microservice.exposed;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.util.function.Predicate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.base.Predicate;
 import com.latticeengines.common.exposed.version.VersionManager;
 
 import springfox.documentation.RequestHandler;
@@ -24,7 +25,7 @@ public abstract class DocketProviderBase implements DocketProvider {
     public Docket getDocket() {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
-                .apis(apiSelector()) //
+                .apis(apiSelector()::test) //
                 .paths(PathSelectors.any()) //
                 .build() //
                 .pathMapping(contextPath()) //

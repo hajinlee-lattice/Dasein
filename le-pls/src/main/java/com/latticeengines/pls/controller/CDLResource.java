@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -111,15 +110,15 @@ public class CDLResource {
         }
     }
 
+    @ResponseBody
     @RequestMapping(value = "/s3/template", method = RequestMethod.POST)
     @ApiOperation(value = "Create s3 import template")
-    public ModelAndView createS3Template(@RequestParam(value = "templateFileName") String templateFileName,
-            @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
-            @RequestParam(value = "importData", required = false, defaultValue = "false") boolean importData,
-            @RequestBody S3ImportTemplateDisplay templateDisplay) {
+    public Map<String, UIAction> createS3Template(@RequestParam(value = "templateFileName") String templateFileName,
+                                                  @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+                                                  @RequestParam(value = "importData", required = false, defaultValue = "false") boolean importData,
+                                                  @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
             EntityType entityType = EntityType.fromDisplayNameToEntityType(templateDisplay.getObject());
             String entity = entityType.getEntity().name();
             String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
@@ -138,7 +137,7 @@ public class CDLResource {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                             String.format(createS3TemplateAndImportMsg, entity));
                 }
-                return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
@@ -147,7 +146,7 @@ public class CDLResource {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                             String.format(createS3TemplateMsg, entity));
                 }
-                return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to create template for S3 import: %s", e.getMessage()));
@@ -157,13 +156,12 @@ public class CDLResource {
 
     @RequestMapping(value = "/s3/template/import", method = RequestMethod.POST)
     @ApiOperation(value = "Start s3 import job")
-    public ModelAndView importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
+    public Map<String, UIAction> importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
             @RequestParam(value = "subType", required = false) String subType,
             @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
             if (dataFeedTask == null) {
@@ -172,7 +170,7 @@ public class CDLResource {
             cdlService.submitS3ImportOnlyData(customerSpace.toString(), dataFeedTask.getUniqueId(), templateFileName);
             UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                     importUsingTemplateMsg);
-            return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[] { "S3ImportFile", e.getMessage() });
@@ -202,13 +200,12 @@ public class CDLResource {
 
     @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")
-    public ModelAndView cleanup(@RequestParam(value = "fileName") String fileName,
+    public Map<String, UIAction> cleanup(@RequestParam(value = "fileName") String fileName,
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
             @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
-        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @RequestMapping(value = "/cleanupbyrange", method = RequestMethod.POST)

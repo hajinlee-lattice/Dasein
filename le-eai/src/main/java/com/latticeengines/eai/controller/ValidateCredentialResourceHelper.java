@@ -3,10 +3,11 @@ package com.latticeengines.eai.controller;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class ValidateCredentialResourceHelper {
 
     private Logger log = LoggerFactory.getLogger(ValidateCredentialResourceHelper.class);
 
-    @Autowired
+    @Inject
     private EaiCredentialValidationService eaiCredentialValidationService;
 
     public SimpleBooleanResponse validateSourceCredential(@PathVariable String customerSpace, //

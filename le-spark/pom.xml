@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-spark</artifactId>
     <packaging>jar</packaging>
-    <name>le-spark</name>
+    <name>le-${component-name}</name>
 
     <parent>
         <artifactId>le-parent</artifactId>

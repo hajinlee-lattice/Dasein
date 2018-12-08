@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.opensaml.saml1.core.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.HttpHeaders;
@@ -38,7 +35,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.saml.LogoutValidationResponse;
 import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
@@ -73,7 +69,7 @@ public class SamlLoginResource {
 
     @Autowired
     private SPSamlProxy samlProxy;
-    
+
     @Autowired
     private SamlConfigProxy samlConfigProxy;
 
@@ -204,9 +200,9 @@ public class SamlLoginResource {
     /*
      * @RequestMapping(value = "/metadata/" + InternalResource.TENANT_ID_PATH,
      * method = RequestMethod.GET, headers = "Accept=application/json")
-     * 
+     *
      * @ResponseBody
-     * 
+     *
      * @ApiOperation(value =
      * "Get ServiceProvider SAML Metadata for requested Tenant")
      */
@@ -227,13 +223,13 @@ public class SamlLoginResource {
             throw new RuntimeException(e);
         }
     }
-    
+
     @RequestMapping(value = "/splogin", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ApiOperation(value = "Lattice initiated SAML Authentication and Login")
-    public ModelAndView spInitiateLoginRequest(@RequestBody SpSamlLoginRequest spLoginRequest) {
+    public Map<String, SpSamlLoginResponse> spInitiateLoginRequest(@RequestBody SpSamlLoginRequest spLoginRequest) {
         log.info("Initiating SP Login for Request: %s", JsonUtils.serialize(spLoginRequest));
-        
+
         String tenantDeploymentId = spLoginRequest.getTenantDeploymentId();
         if (StringUtils.isBlank(tenantDeploymentId)) {
             throw new LedpException(LedpCode.LEDP_33005);
@@ -245,10 +241,9 @@ public class SamlLoginResource {
         String encodedRelayState = encode(constructRelayState(spLoginRequest));
         String ssoUrl = String.format("%s?RelayState=%s", samlConfigMetadata.getSingleSignOnService(), encodedRelayState);
         log.info("SSO Url for Sp Initiated Login: %s", ssoUrl);
-        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         SpSamlLoginResponse spResp = new SpSamlLoginResponse();
         spResp.setSsoUrl(ssoUrl);
-        return new ModelAndView(jsonView, ImmutableMap.of(SpSamlLoginResponse.class.getSimpleName(), spResp));
+        return ImmutableMap.of(SpSamlLoginResponse.class.getSimpleName(), spResp);
     }
 
     private String encode(String constructRelayState) {
@@ -267,7 +262,7 @@ public class SamlLoginResource {
             return "";
         }
         Map<String, String> reqParams = new HashMap<>(spLoginRequest.getRequestParameters());
-        
+
         // ReturnTo needs to be last parameter in RelayStateURL, Because it could contain additional query parameters
         String returnToValue = reqParams.get(RETURN_TO_PARAM);
         reqParams.remove(RETURN_TO_PARAM);
@@ -279,7 +274,7 @@ public class SamlLoginResource {
             sb.append(key).append("=").append(reqParams.get(key)).append("&");
         });
         sb.append(RETURN_TO_PARAM).append("=").append(returnToValue);
-        
+
         return sb.toString();
     }
 

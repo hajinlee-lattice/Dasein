@@ -10,9 +10,6 @@
 
     <properties>
         <component-name>datacloudapi-microservice</component-name>
-        <le.microservice.version>4.13.0-SNAPSHOT</le.microservice.version>
-        <le.propdata.version>4.13.0-SNAPSHOT</le.propdata.version>
-        <le.aws.version>4.13.0-SNAPSHOT</le.aws.version>
     </properties>
 
     <parent>
@@ -38,23 +35,13 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-microservice</artifactId>
-            <version>${le.microservice.version}</version>
+            <version>${project.version}</version>
             <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-aws</artifactId>
-            <version>${le.aws.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>${apache.http.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

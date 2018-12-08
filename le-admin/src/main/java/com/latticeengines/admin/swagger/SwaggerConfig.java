@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.latticeengines.common.exposed.util.SwaggerUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
@@ -21,7 +20,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
-@EnableWebMvc
 @ImportResource("classpath:common-component-context.xml")
 @EnableSwagger2
 public class SwaggerConfig {
@@ -34,7 +32,7 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
                 .apis(SwaggerUtils.getApiSelector("com.latticeengines.admin.controller.*",
-                        "com.latticeengines.security.controller.ActiveDirectoryLoginResource")) //
+                        "com.latticeengines.security.controller.ActiveDirectoryLoginResource")::test) //
                 .paths(PathSelectors.any()) //
                 .build() //
                 .pathMapping("/") //

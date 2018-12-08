@@ -9,8 +9,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class BulkRecordScoreRequest {
 
-    public static final int MAX_ALLOWED_RECORDS = 200;
-
     @JsonProperty("source")
     @ApiModelProperty(value = "Name of the source system that originated this score request.")
     private String source;

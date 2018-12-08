@@ -37,6 +37,10 @@
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
                         <configuration>
+                            <supportedPackagings>
+                                <supportedPackaging>jar</supportedPackaging>
+                                <supportedPackaging>war</supportedPackaging>
+                            </supportedPackagings>
                             <jettyXml>
                                 ${jetty.conf.dir}/jetty.xml,
                                 ${jetty.conf.dir}/jetty-ssl.xml,
@@ -88,7 +92,7 @@
                             <stopKey>STOP</stopKey>
                             <stopWait>10</stopWait>
                             <daemon>true</daemon>
-                            </configuration>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>start-jetty</id>
@@ -359,17 +363,14 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
         </dependency>
-
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>jsr250-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -391,7 +392,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
         </dependency>
-
 
     </dependencies>
 

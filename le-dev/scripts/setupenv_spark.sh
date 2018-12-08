@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+printf "%s\n" "${SPARK_HOME:?You must set SPARK_HOME}"
+printf "%s\n" "${LIVY_HOME:?You must set LIVY_HOME}"
+
 BOOTSTRAP_MODE=$1
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
