@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 
 @Component(TalkingPointDanteFormatter.Qualifier)
 public class TalkingPointDanteFormatter implements DanteFormatter<TalkingPointDTO> {
