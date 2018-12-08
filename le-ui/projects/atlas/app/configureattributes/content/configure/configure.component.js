@@ -79,7 +79,7 @@ angular.module('lp.configureattributes.configure', [])
            return new Array(count).join().split(',').map(function(item, index){ return ++index;});
         }
 
-        vm.getVals = function(type, data, index) {
+        vm.getVals = function(type, data, index, vals_index) {
             if(!type || !data) {
                 return false;
             }
@@ -92,9 +92,13 @@ angular.module('lp.configureattributes.configure', [])
             if (type === 'WITHIN') {
                 val = (valObj ? valObj.Vals[0] : null);
             } else if (type === 'BETWEEN') {
-                var max = Math.max.apply(null, valObj.Vals),
-                    min = Math.min.apply(null, valObj.Vals);
-                val = max - min + 1;
+                if(vals_index || vals_index === 0) {
+                    val = valObj.Vals[vals_index];
+                } else {
+                    var max = Math.max.apply(null, valObj.Vals),
+                        min = Math.min.apply(null, valObj.Vals);
+                    val = max - min + 1;
+                }
             }
             return val;
         }

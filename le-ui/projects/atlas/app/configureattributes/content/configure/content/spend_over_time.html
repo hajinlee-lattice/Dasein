@@ -10,6 +10,7 @@
             <select
                 class="form-control"
                 ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]"
+                ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val.0', ''+vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index, 0))"
                 ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]"
                 ng-change="vm.setOptions(form);"
                 ng-disabled="!(vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
@@ -21,6 +22,7 @@
             <select
                 class="form-control"
                 ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]"
+                ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val.1', ''+vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index, 1))"
                 ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]"
                 ng-change="vm.setOptions(form);"
                 ng-disabled="!(vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
@@ -56,6 +58,7 @@
             <select
                 class="form-control"
                 ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]"
+                ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val.0', ''+vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index, 0))"
                 ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][0]" 
                 ng-change="vm.setOptions(form);"
                 ng-disabled="!(vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
@@ -67,6 +70,7 @@
             <select
                 class="form-control"
                 ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]"
+                ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val.1', ''+vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index, 1))"
                 ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Val'][1]" 
                 ng-change="vm.setOptions(form);"
                 ng-disabled="!(vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp || 'null']['Period'])">
