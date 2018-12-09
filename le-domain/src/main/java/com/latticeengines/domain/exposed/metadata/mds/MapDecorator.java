@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 
 public abstract class MapDecorator implements Decorator, NeedsLoad {
@@ -29,21 +28,14 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
         this.name = name;
     }
 
-    public synchronized Mono<Boolean> load() {
+    public synchronized void load() {
         AtomicLong start = new AtomicLong();
+        log.info(getLoggerName() + ": Start loading.");
         Collection<ColumnMetadata> cms = loadInternal();
-        return Mono.fromCallable(() -> {
-            cms.forEach(cm -> filterMap.put(cm.getAttrName(), cm));
-            return true;
-        }).doOnSubscribe(subscription -> {
-            loaded.set(true);
-            start.set(System.currentTimeMillis());
-            log.info(getLoggerName() + ": Start loading.");
-        }).doOnSuccess(s -> {
-            long duration = System.currentTimeMillis() - start.getAndIncrement();
-            log.info(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
-                    + " msecs.");
-        }).doOnError(t -> log.error(getLoggerName() + ": Failed to load.", t));
+        cms.forEach(cm -> filterMap.put(cm.getAttrName(), cm));
+        long duration = System.currentTimeMillis() - start.getAndIncrement();
+        log.info(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
+                + " msecs.");
     }
 
     @Override

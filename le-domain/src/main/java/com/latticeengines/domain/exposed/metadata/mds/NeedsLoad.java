@@ -1,10 +1,8 @@
 package com.latticeengines.domain.exposed.metadata.mds;
 
-import reactor.core.publisher.Mono;
-
 interface NeedsLoad {
 
-    Mono<Boolean> load();
+    void load();
 
     boolean isLoaded();
 
@@ -12,7 +10,7 @@ interface NeedsLoad {
         if (!isLoaded()) {
             synchronized (this) {
                 if (!isLoaded()) {
-                    load().block();
+                    load();
                 }
             }
         }

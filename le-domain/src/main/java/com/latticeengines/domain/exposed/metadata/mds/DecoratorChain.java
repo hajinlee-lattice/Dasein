@@ -1,22 +1,25 @@
 package com.latticeengines.domain.exposed.metadata.mds;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 public class DecoratorChain implements Decorator, NeedsLoad {
 
-    private final static Scheduler scheduler = Schedulers.newParallel("decorator-chain");
     private final Iterable<Decorator> decorators;
     private String name;
     private AtomicBoolean loaded = new AtomicBoolean();
+    private static ExecutorService DC_LOADERS;
 
     public DecoratorChain(String name, Decorator... decorators) {
         this.name = name;
@@ -34,20 +37,16 @@ public class DecoratorChain implements Decorator, NeedsLoad {
     }
 
     @Override
-    public Mono<Boolean> load() {
-        return Flux.fromIterable(decorators) //
-                .doOnSubscribe(s -> loaded.set(true)) //
-                .parallel().runOn(scheduler) //
-                .filter(d -> d instanceof NeedsLoad) //
-                .map(d -> (NeedsLoad) d) //
-                .flatMap(d -> {
-                    if (d.isLoaded()) {
-                        return Mono.just(true);
-                    } else {
-                        return d.load();
-                    }
-                }) //
-                .sequential().last();
+    public void load() {
+        List<Runnable> runnables = new ArrayList<>();
+        for (Decorator decorator: decorators) {
+            if (decorator instanceof NeedsLoad) {
+                runnables.add(((NeedsLoad) decorator)::load);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(runnables)) {
+            ThreadPoolUtils.runRunnablesInParallel(getDcLoaders(), runnables, 60, 1);
+        }
     }
 
     @Override
@@ -77,6 +76,17 @@ public class DecoratorChain implements Decorator, NeedsLoad {
     @Override
     public String getName() {
         return name;
+    }
+
+    private static ExecutorService getDcLoaders() {
+        if (DC_LOADERS == null) {
+            synchronized (DecoratorChain.class) {
+                if (DC_LOADERS == null) {
+                    DC_LOADERS = ThreadPoolUtils.getCachedThreadPool("decorator-chain");
+                }
+            }
+        }
+        return DC_LOADERS;
     }
 
 }

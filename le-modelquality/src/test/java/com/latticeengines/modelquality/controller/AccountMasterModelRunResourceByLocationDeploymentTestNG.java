@@ -53,7 +53,7 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
         }
     }
 
-    @Test(groups = { "am_all" }, enabled = true, dataProvider = "getAccountMasterLocationCsvFile")
+    @Test(groups = { "am_all" }, dataProvider = "getAccountMasterLocationCsvFile")
     public void runModelAccountMasterLocation(String dataSetName, String csvFile) {
         runModelAccountMaster(dataSetName, csvFile);
     }
