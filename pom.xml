@@ -15,7 +15,7 @@
     </parent>
 
     <modules>
-        <module>le-parent/web-pom.xml</module>
+        <module>le-parent</module>
         <module>le-config</module>
         <module>le-aws</module>
         <module>le-redshiftdb</module>
@@ -32,7 +32,6 @@
         <module>le-proxy</module>
         <module>le-remote</module>
         <module>le-scheduler</module>
-        <module>le-parent</module>
         <module>le-datadb</module>
         <module>le-db</module>
         <module>le-documentdb</module>

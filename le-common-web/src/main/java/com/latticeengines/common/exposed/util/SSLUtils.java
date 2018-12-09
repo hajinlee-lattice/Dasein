@@ -18,6 +18,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import reactor.netty.http.client.HttpClient;
 
 public class SSLUtils {
 
@@ -64,7 +65,8 @@ public class SSLUtils {
                     .forClient()
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
                     .build();
-            return new ReactorClientHttpConnector(opt -> opt.sslContext(sslContext));
+            HttpClient client = HttpClient.create().secure(t -> t.sslContext(sslContext));
+            return new ReactorClientHttpConnector(client);
         } catch (SSLException e) {
             throw new IllegalStateException("Cannot construct ssl blind http connectors.", e);
         }

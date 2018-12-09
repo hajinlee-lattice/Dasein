@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2.authserver;
+package com.latticeengines.oauth2.swagger;
 
 import static com.google.common.collect.Lists.newArrayList;
 

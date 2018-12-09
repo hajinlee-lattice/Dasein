@@ -118,13 +118,13 @@
         <property name="supportUnsolicitedResponse" value="true"/>
     </bean>
 
- 
+
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <bean id="metadataManager" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg>
             <list>
             </list>
-        </constructor-arg>        
+        </constructor-arg>
     </bean>
 
     <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
@@ -149,7 +149,7 @@
 		</bean>
 	</property>
     </bean>
- 
+
     <bean id="latticeMetadataCredentialResolver" class="com.latticeengines.saml.LatticeMetadataCredentialResolver">
         <constructor-arg>
             <ref bean="metadataManager"/>

@@ -37,6 +37,7 @@ public abstract class AbstractAuthenticationTokenFilter extends AbstractAuthenti
             this.unsuccessfulAuthentication(request, response, var8);
             return;
         } catch (AuthenticationException var9) {
+            logger.warn("AuthenticationException", var9);
             this.unsuccessfulAuthentication(request, response, var9);
             return;
         }

@@ -2,9 +2,13 @@ package com.latticeengines.proxy.exposed.matchapi;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -50,6 +55,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private LocalCacheManager<String, Object> amStatsCache;
 
     private Scheduler parallelFluxThreadPool;
+    private ExecutorService parallelFetchers;
 
     public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
@@ -131,16 +137,16 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             long count = getColumnCount(dataCloudVersion);
             int pageSize = 5000;
             int numPages = (int) Math.ceil(1.0 * count / pageSize);
-            Flux<ColumnMetadata> flux = Flux.range(0, numPages) //
-                    .parallel().runOn(parallelFluxThreadPool()) //
-                    .flatMap(page -> Flux.fromIterable(requestMetadataPage(dataCloudVersion, page, pageSize)))
-                    .doOnError(Flux::error) //
-                    .sequential();
-            List<ColumnMetadata> cms = flux.collectList() //
-                    .block(Duration.of(10, ChronoUnit.MINUTES));
-            if (cms != null) {
-                log.info("Loaded in total " + cms.size() + " columns from matchapi");
+            List<Callable<List<ColumnMetadata>>> callables = new ArrayList<>();
+            for (int i = 0; i< numPages; i++) {
+                final int page = i;
+                Callable<List<ColumnMetadata>> callable = () -> requestMetadataPage(dataCloudVersion, page, pageSize);
+                callables.add(callable);
             }
+            List<List<ColumnMetadata>> cmLists = ThreadPoolUtils.runCallablesInParallel(parallelFetchers(), //
+                    callables, 10, 1);
+            List<ColumnMetadata> cms = cmLists.stream().flatMap(Collection::stream).collect(Collectors.toList());
+            log.info("Loaded in total " + CollectionUtils.size(cms) + " columns from matchapi");
             return cms;
         }
     }
@@ -297,6 +303,13 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             parallelFluxThreadPool = Schedulers.newParallel("column-metadata");
         }
         return parallelFluxThreadPool;
+    }
+
+    private synchronized ExecutorService parallelFetchers() {
+        if (parallelFetchers == null) {
+            parallelFetchers = ThreadPoolUtils.getFixedSizeThreadPool("column-metadata", 4);
+        }
+        return parallelFetchers;
     }
 
 }

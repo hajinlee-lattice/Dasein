@@ -23,6 +23,7 @@ import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
 @SuppressWarnings("deprecation")
@@ -62,6 +63,13 @@ public class InternalResource extends InternalResourceBase {
             }
         }
         return props;
+    }
+
+    // an api to test reactive endpoint
+    @GetMapping(value = "/mono")
+    @ResponseBody
+    public Mono<String> submitYarnJob() {
+        return Mono.just("Hello!");
     }
 
 }

@@ -13,9 +13,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "adlogin", description = "REST resource for logging in using Active Directory")
 @RestController
+@RequestMapping("/adlogin")
 public class ActiveDirectoryLoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(ActiveDirectoryLoginResource.class);
@@ -40,7 +41,7 @@ public class ActiveDirectoryLoginResource {
         activeDirectoryProvider.setUseAuthenticationRequestCredentials(true);
     }
 
-    @RequestMapping(value = "/adlogin", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ApiOperation(value = "Login using ActiveDirectory")
     public ADLoginDocument login(@RequestBody Credentials creds) {
         try {

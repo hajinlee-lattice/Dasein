@@ -15,9 +15,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-web-parent</artifactId>
+        <artifactId>le-spring-boot-webmvc-parent</artifactId>
         <version>4.13.0-SNAPSHOT</version>
-        <relativePath>../le-parent/web-pom.xml</relativePath>
+        <relativePath>../le-parent/spring-boot/webmvc</relativePath>
     </parent>
 
     <dependencies>
@@ -108,7 +108,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version><!--$NO-MVN-MAN-VER$-->
+            <version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
             <scope>test</scope>
         </dependency>
         <dependency>

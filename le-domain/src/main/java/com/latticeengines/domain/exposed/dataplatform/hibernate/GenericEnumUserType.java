@@ -11,7 +11,9 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
 import org.hibernate.type.AbstractStandardBasicType;
+import org.hibernate.type.TypeFactory;
 import org.hibernate.type.TypeResolver;
+import org.hibernate.type.spi.TypeConfiguration;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
 
@@ -82,8 +84,13 @@ public class GenericEnumUserType<E extends Enum<E>> implements UserType, Paramet
                     + "' given by property '" + PROPERTY_NAME_IDENTIFIER_METHOD + "'", e);
         }
 
-        type = (AbstractSingleColumnStandardBasicType<? extends Object>) new TypeResolver()
-                .heuristicType(identifierType.getName(), parameters);
+        //FIXME: TypeResolver is deprecated, according to Hibernate
+        // (since 5.3) No replacement, access to and handling of Types will be much different in 6.0
+        // https://docs.jboss.org/hibernate/orm/5.3/javadocs/deprecated-list.html
+        final TypeConfiguration tc = new TypeConfiguration();
+        final TypeResolver tr = new TypeResolver(tc, new TypeFactory(tc));
+        type = (AbstractSingleColumnStandardBasicType<? extends Object>)
+                tr.heuristicType(identifierType.getName(), parameters);
 
         if (type == null)
             throw new HibernateException("Unsupported identifier type " + identifierType.getName());

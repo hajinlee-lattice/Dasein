@@ -5,14 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-web-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.13.0-SNAPSHOT</version>
     <description>Parent of all lattice engine web projects.</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
         <version>4.13.0-SNAPSHOT</version>
-        <relativePath>pom.xml</relativePath>
+        <relativePath>..</relativePath>
     </parent>
 
     <properties>
@@ -120,120 +119,6 @@
                                 <groupId>com.sun.mail</groupId>
                                 <artifactId>javax.mail</artifactId>
                                 <version>${javax.mail.version}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>jetty2</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant . -->
-                            <execution>
-                                <id>download-alpn-boot</id>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <phase>generate-sources</phase>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.mortbay.jetty.alpn</groupId>
-                                            <artifactId>alpn-boot</artifactId>
-                                            <version>${alpn.version}</version>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <stripVersion>true</stripVersion>
-                                    <outputDirectory>${basedir}/target/alpn-boot</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <jettyXml>
-                                ${jetty.conf.dir}/jetty.xml,
-                                ${jetty.conf.dir}/jetty-ssl.xml,
-                                ${jetty.conf.dir}/jetty-ssl-context.xml,
-                                ${jetty.conf.dir}/jetty-alpn.xml,
-                                ${jetty.conf.dir}/jetty-http2.xml,
-                                ${jetty.conf.dir}/jetty-https.xml
-                            </jettyXml>
-                            <webAppConfig>
-                                <extraClasspath>${env.HADOOP_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar
-                                </extraClasspath>
-                            </webAppConfig>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>log4j.configuration</name>
-                                    <value>file:///${project.basedir}/src/${jetty.dir}/resources/log4j.properties</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>com.latticeengines.registerBootstrappers</name>
-                                    <value>true</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jdk.tls.ephemeralDHKeySize</name>
-                                    <value>2048</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jetty.httpConfig.securePort</name>
-                                    <value>${jetty.ssl.port}</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jetty.ssl.port</name>
-                                    <value>${jetty.ssl.port}</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jetty.sslContext.keyStorePath</name>
-                                    <value>${jetty.ks.path}</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jetty.sslContext.keyStorePassword</name>
-                                    <value>${jetty.ks.password}</value>
-                                </systemProperty>
-                            </systemProperties>
-                            <jvmArgs>
-                                -Xbootclasspath/p:${basedir}/target/alpn-boot/alpn-boot.jar
-                            </jvmArgs>
-                            <webXml>${basedir}/src/${jetty.dir}/webapp/WEB-INF/web.xml</webXml>
-                            <webAppSourceDirectory>${basedir}/src/${jetty.dir}/webapp</webAppSourceDirectory>
-                            <useTestClasspath>${jetty.use.test.cp}</useTestClasspath>
-                            <scanIntervalSeconds>0</scanIntervalSeconds>
-                            <stopPort>${jetty.stop.port}</stopPort>
-                            <stopKey>STOP</stopKey>
-                            <stopWait>10</stopWait>
-                            <daemon>true</daemon>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.sun.mail</groupId>
-                                <artifactId>javax.mail</artifactId>
-                                <version>${javax.mail.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.eclipse.jetty</groupId>
-                                <artifactId>jetty-servlets</artifactId>
-                                <version>${jetty.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.eclipse.jetty</groupId>
-                                <artifactId>jetty-alpn-server</artifactId>
-                                <version>${jetty.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.eclipse.jetty.http2</groupId>
-                                <artifactId>http2-server</artifactId>
-                                <version>${jetty.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -358,6 +243,21 @@
         </pluginManagement>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox.swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox.swagger.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -379,7 +279,7 @@
 
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
-            <artifactId>jsp-api</artifactId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
             <scope>provided</scope>
         </dependency>
 

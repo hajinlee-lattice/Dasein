@@ -11,9 +11,9 @@
 
     <import resource="classpath:common-webapp-env-context.xml"/>
     <import resource="classpath:saml-common-context.xml"/>
+    <import resource="classpath:saml-management-context.xml"/>
     <import resource="classpath:saml-server-context.xml"/>
     <import resource="classpath:saml-persistence-context.xml"/>
-    <import resource="classpath:saml-management-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
 

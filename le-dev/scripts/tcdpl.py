@@ -47,7 +47,7 @@ else:
 
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
-              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl', 'lp']
+              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'cdl', 'lp']
 
 APP_ROOT = "https://localhost"
 APP_URL = {
@@ -67,7 +67,7 @@ PRESETS = {
     'cdl_pre_checkin': {
         'apps': ['admin', 'pls', 'microservice', 'matchapi', 'scoringapi'],
         'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl',
-                    'objectapi', 'dante', 'sqoop', 'quartz', 'lp']
+                    'objectapi', 'sqoop', 'quartz', 'lp']
     },
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],
@@ -77,8 +77,7 @@ PRESETS = {
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses', 'saml', 'scoringapi'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'lp',
-                    'quartz', 'cdl', 'dante',
-                    'objectapi', 'sqoop']
+                    'quartz', 'cdl', 'objectapi', 'sqoop']
     },
     'etl': {
         'apps': ['microservice', 'matchapi'],
@@ -92,8 +91,7 @@ PRESETS = {
     'all': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop',
-                    'datacloudapi', 'cdl', 'dante',
-                    'objectapi']
+                    'datacloudapi', 'cdl', 'objectapi']
     }
 }
 

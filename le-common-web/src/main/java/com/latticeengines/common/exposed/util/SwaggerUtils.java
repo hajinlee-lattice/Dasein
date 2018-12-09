@@ -8,7 +8,7 @@ public class SwaggerUtils {
 
     public static Predicate<RequestHandler> getApiSelector(final String ... classCanonicalNameRegex) {
         return (requestHandler) -> {
-            if (requestHandler != null && requestHandler.getRequestMapping() != null) {
+            if (requestHandler != null) {
                 String canonicalName = requestHandler.getHandlerMethod().getMethod().getDeclaringClass().getCanonicalName();
                 for (String pattern : classCanonicalNameRegex) {
                     if (canonicalName.matches(pattern)) {

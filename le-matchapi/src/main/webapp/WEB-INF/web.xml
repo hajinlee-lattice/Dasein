@@ -7,6 +7,15 @@
     <display-name>Match REST API</display-name>
     <description>Lattice Engines Match REST API</description>
 
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:matchapi-web-context.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>match</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

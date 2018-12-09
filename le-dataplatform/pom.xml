@@ -28,9 +28,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-web-parent</artifactId>
+        <artifactId>le-spring-boot-parent</artifactId>
         <version>4.13.0-SNAPSHOT</version>
-        <relativePath>../le-parent/web-pom.xml</relativePath>
+        <relativePath>../le-parent/spring-boot-pom.xml</relativePath>
     </parent>
 
     <profiles>

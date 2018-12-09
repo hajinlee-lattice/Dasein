@@ -2,7 +2,8 @@ package com.latticeengines.saml.swagger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -23,26 +24,25 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
 
     @Bean
     public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.saml.controller"))
-                .build()
-                .pathMapping("/")
-                .apiInfo(apiInfo())
-                .useDefaultResponseMessages(false)
-                .globalResponseMessage(
-                        RequestMethod.GET,
-                        newArrayList(
-                                new ResponseMessageBuilder().code(500).message("Internal Server Error").build(), //
-                                new ResponseMessageBuilder().code(400).message("Bad Request").build(), //
-                                new ResponseMessageBuilder().code(401).message("Unauthorized").build(), //
-                                new ResponseMessageBuilder().code(402).message("Request Failed").build() //
-                        ));
+        return new Docket(DocumentationType.SWAGGER_2) //
+                .select() //
+                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.saml.controller")) //
+                .build() //
+                .pathMapping("/") //
+                .apiInfo(apiInfo()) //
+                .useDefaultResponseMessages(false) //
+                .globalResponseMessage(RequestMethod.GET, newArrayList(
+                        new ResponseMessageBuilder().code(500).message("Internal Server Error")
+                                .build(), //
+                        new ResponseMessageBuilder().code(400).message("Bad Request").build(), //
+                        new ResponseMessageBuilder().code(401).message("Unauthorized").build(), //
+                        new ResponseMessageBuilder().code(402).message("Request Failed").build() //
+        ));
     }
 
     private ApiInfo apiInfo() {
