@@ -50,7 +50,6 @@ import com.latticeengines.proxy.exposed.cdl.CDLModelProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelOperationProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import io.swagger.annotations.Api;
@@ -86,9 +85,6 @@ public class ModelResource {
 
     @Inject
     private ModelOperationProxy modelOperationProxy;
-
-    @Inject
-    protected SourceFileProxy sourceFileProxy;
 
     @Inject
     private CDLModelProxy cdlModelProxy;

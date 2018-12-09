@@ -30,6 +30,7 @@
         <jetty.ks.password>Lattice1</jetty.ks.password>
         <jetty.xmx>2g</jetty.xmx>
         <alpn.version>8.1.11.v20170118</alpn.version>
+        <tomcat.version>9.0.13</tomcat.version>
 
         <webjars.locator.version>0.36</webjars.locator.version>
     </properties>
@@ -224,6 +225,22 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Lattice jars -->
+            <dependency>
+                <groupId>com.latticeengines</groupId>
+                <artifactId>le-common-web</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -318,6 +335,7 @@
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>jsr250-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

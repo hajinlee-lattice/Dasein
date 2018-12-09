@@ -145,7 +145,7 @@
         <!-- Spring -->
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
-        <spring.oauth2.version>2.2.1.RELEASE</spring.oauth2.version>
+        <spring.oauth2.version>2.3.4.RELEASE</spring.oauth2.version>
         <!-- Better match spring boot -->
         <!-- https://github.com/spring-projects/spring-boot/blob/v2.1.1.RELEASE/spring-boot-project/spring-boot-dependencies/pom.xml -->
         <spring-framework.version>5.1.3.RELEASE</spring-framework.version>
