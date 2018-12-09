@@ -216,6 +216,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
 
             configuration.add(match);
             configuration.add(matchResult);
+            configuration.add(matchResultCascading);
             configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);
