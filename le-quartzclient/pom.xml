@@ -18,9 +18,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-spring-boot-parent</artifactId>
+        <artifactId>le-microservice-parent</artifactId>
         <version>4.13.0-SNAPSHOT</version>
-        <relativePath>../le-parent/spring-boot-pom.xml</relativePath>
+        <relativePath>../le-microservice</relativePath>
     </parent>
 
     <build>
