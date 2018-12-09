@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.util.ArtifactUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -129,7 +130,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
         inputProperties.put(WorkflowContextConstants.Inputs.RATING_ENGINE_ID, parameters.getRatingEngineId());
         inputProperties.put(WorkflowContextConstants.Inputs.RATING_MODEL_ID, parameters.getAiModelId());
 
-        Predefined predefinedSelection = Predefined.getDefaultSelection();
+        Predefined predefinedSelection;
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {
             predefinedSelection = Predefined.fromName(predefinedSelectionName);
@@ -160,7 +161,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
         if (!isLPI) {
             version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         }
-        return new CustomEventModelingWorkflowConfiguration.Builder() //
+        CustomEventModelingWorkflowConfiguration configuration = new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .sourceFileName(sourceFile.getName()) //
@@ -199,7 +200,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, isFuzzyMatchEnabled(flags)) //
                 .addProvenanceProperty(ProvenancePropertyName.IsV2ProfilingEnabled, isV2ProfilingEnabled()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
-                .moduleName(moduleName != null ? moduleName : null) //
+                .moduleName(moduleName) //
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
@@ -226,5 +227,8 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .workflowContainerMem(workflowMemMb) //
                 .ratingEngineType(ratingEngineType) //
                 .build();
+        // temporary
+        log.info("WorkflowConfig=" + JsonUtils.serialize(configuration));
+        return configuration;
     }
 }
