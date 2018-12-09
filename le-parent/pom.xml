@@ -339,58 +339,6 @@
             </build>
         </profile>
         <profile>
-            <id>shaded</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>${maven.shade.version}</version>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>org.hibernate:*</exclude>
-                                    <exclude>org.apache.hadoop:*</exclude>
-                                    <exclude>org.springframework:*</exclude>
-                                    <exclude>com.google.http-client:*</exclude>
-                                </excludes>
-                            </artifactSet>
-
-                            <filters>
-                                <!-- Strip any signatures to avoid security
-                                    errors running the shaded JAR. -->
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>reference.conf</resource>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
             <id>cc</id>
             <build>
                 <plugins>
@@ -498,6 +446,102 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>cc-aggregate-report</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jacoco-dependency-ant</id>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>process-test-resources</phase>
+                                <inherited>true</inherited>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.jacoco</groupId>
+                                            <artifactId>org.jacoco.ant</artifactId>
+                                            <version>${jacoco.version}</version>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <stripVersion>true</stripVersion>
+                                    <outputDirectory>${jacoco.coverage.dir}/jacoco/jacoco-jars</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven.antrun.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Execute an ant task within maven -->
+                                        <echo
+                                                message="Generating jacoco reports..." />
+                                        <taskdef name="report"
+                                                 classname="org.jacoco.ant.ReportTask">
+                                            <classpath
+                                                    path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
+                                        </taskdef>
+                                        <mkdir
+                                                dir="${jacoco.coverage.dir}/site/jacoco" />
+                                        <report>
+                                            <executiondata>
+                                                <fileset
+                                                        dir="${jacoco.coverage.dir}/jacoco">
+                                                    <include
+                                                            name="*.exec" />
+                                                </fileset>
+                                            </executiondata>
+                                            <structure
+                                                    name="Jacoco Multi-Run Coverage Project">
+                                                <group
+                                                        name="jacoco-multi-run-coverage">
+                                                    <classfiles>
+                                                        <fileset
+                                                                dir="${project.build.directory}/classes" />
+                                                    </classfiles>
+                                                    <sourcefiles
+                                                            encoding="UTF-8">
+                                                        <fileset
+                                                                dir="${project.build.sourceDirectory}" />
+                                                    </sourcefiles>
+                                                </group>
+                                            </structure>
+                                            <html
+                                                    destdir="${jacoco.coverage.dir}/site/jacoco" />
+                                            <xml
+                                                    destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
+                                            <csv
+                                                    destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
+                                        </report>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.jacoco</groupId>
+                                <artifactId>org.jacoco.ant</artifactId>
+                                <version>${jacoco.version}</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                 </plugins>
             </build>
@@ -828,102 +872,6 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>cc-aggregate-report</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>jacoco-dependency-ant</id>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <phase>process-test-resources</phase>
-                                <inherited>true</inherited>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.jacoco</groupId>
-                                            <artifactId>org.jacoco.ant</artifactId>
-                                            <version>${jacoco.version}</version>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <stripVersion>true</stripVersion>
-                                    <outputDirectory>${jacoco.coverage.dir}/jacoco/jacoco-jars</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>${maven.antrun.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <!-- Execute an ant task within maven -->
-                                        <echo
-                                            message="Generating jacoco reports..." />
-                                        <taskdef name="report"
-                                            classname="org.jacoco.ant.ReportTask">
-                                            <classpath
-                                                path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
-                                        </taskdef>
-                                        <mkdir
-                                            dir="${jacoco.coverage.dir}/site/jacoco" />
-                                        <report>
-                                            <executiondata>
-                                                <fileset
-                                                    dir="${jacoco.coverage.dir}/jacoco">
-                                                    <include
-                                                        name="*.exec" />
-                                                </fileset>
-                                            </executiondata>
-                                            <structure
-                                                name="Jacoco Multi-Run Coverage Project">
-                                                <group
-                                                    name="jacoco-multi-run-coverage">
-                                                    <classfiles>
-                                                        <fileset
-                                                            dir="${project.build.directory}/classes" />
-                                                    </classfiles>
-                                                    <sourcefiles
-                                                        encoding="UTF-8">
-                                                        <fileset
-                                                            dir="${project.build.sourceDirectory}" />
-                                                    </sourcefiles>
-                                                </group>
-                                            </structure>
-                                            <html
-                                                destdir="${jacoco.coverage.dir}/site/jacoco" />
-                                            <xml
-                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
-                                            <csv
-                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
-                                        </report>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.jacoco</groupId>
-                                <artifactId>org.jacoco.ant</artifactId>
-                                <version>${jacoco.version}</version>
-                            </dependency>
-                        </dependencies>
                     </plugin>
                 </plugins>
             </build>

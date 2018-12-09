@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.mds.AttrConfigDecorator;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -23,7 +24,6 @@ import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.MapDecorator;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 import reactor.core.publisher.ParallelFlux;
@@ -48,7 +48,7 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant);
         Decorator decorator = attrConfigDecorator.getDecorator(tenant.getId(), BusinessEntity.Account);
         MapDecorator mapDecorator = (MapDecorator) decorator;
-        mapDecorator.load().block();
+        mapDecorator.load();
     }
 
     @Test(groups = "manual", enabled = true)
