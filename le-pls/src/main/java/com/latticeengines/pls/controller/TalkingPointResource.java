@@ -54,12 +54,12 @@ public class TalkingPointResource {
         return talkingPointProxy.createOrUpdate(tenant.getId(), talkingPoints);
     }
 
-    @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
-    public TalkingPointDTO findByName(@PathVariable String name) {
+    public TalkingPointDTO findByName(@PathVariable String talkingPointName) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return talkingPointProxy.findByName(tenant.getId(), name);
+        return talkingPointProxy.findByName(tenant.getId(), talkingPointName);
     }
 
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
@@ -129,7 +129,7 @@ public class TalkingPointResource {
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public void delete(@PathVariable String talkingPointName) {
         Tenant tenant = MultiTenantContext.getTenant();
-        talkingPointProxy.delete(tenant.getId(), talkingPointName);
+        talkingPointProxy.deleteByName(tenant.getId(), talkingPointName);
     }
 
     @RequestMapping(value = "/attributes", method = RequestMethod.POST)

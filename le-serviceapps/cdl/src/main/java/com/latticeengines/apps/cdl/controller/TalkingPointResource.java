@@ -1,9 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
-
 import javax.inject.Inject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -29,6 +27,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/talkingpoints")
 public class TalkingPointResource {
+
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
 
     @Inject
     private TalkingPointService talkingPointService;
@@ -43,12 +43,12 @@ public class TalkingPointResource {
         return talkingPointService.createOrUpdate(talkingPoints);
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/{talkingPointName}")
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
     public TalkingPointDTO findByName(@PathVariable String customerSpace,
-            @PathVariable String name) {
-        return talkingPointService.findByName(name);
+            @PathVariable String talkingPointName) {
+        return talkingPointService.findByName(talkingPointName);
     }
 
     @GetMapping("/play/{playName}")
@@ -78,7 +78,8 @@ public class TalkingPointResource {
     @PostMapping("/publish")
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
-    public void publish(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
+    public void publish(@PathVariable String customerSpace,
+            @RequestParam("playName") String playName) {
         talkingPointService.publish(playName);
     }
 
@@ -86,7 +87,8 @@ public class TalkingPointResource {
     @ResponseBody
     @ApiOperation(
             value = "Revert the given play's talking points to the version last published to dante")
-    public List<TalkingPointDTO> revert(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
+    public List<TalkingPointDTO> revert(@PathVariable String customerSpace,
+            @RequestParam("playName") String playName) {
         return talkingPointService.revertToLastPublished(playName);
     }
 

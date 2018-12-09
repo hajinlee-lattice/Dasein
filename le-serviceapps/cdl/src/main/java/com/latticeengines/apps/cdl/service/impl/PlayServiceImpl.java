@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -47,7 +48,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 @Component("playService")
@@ -65,7 +65,7 @@ public class PlayServiceImpl implements PlayService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Inject
-    private TalkingPointProxy talkingPointProxy;
+    private TalkingPointService talkingPointService;
 
     @Inject
     private PlayLaunchService playLaunchService;
@@ -467,7 +467,7 @@ public class PlayServiceImpl implements PlayService {
                     + " has not been launched yet, cannot publish talking points on public apis yet.");
             return;
         }
-        talkingPointProxy.publish(customerSpace, playName);
+        talkingPointService.publish(playName);
         play.setLastTalkingPointPublishTime(new Date());
         playEntityMgr.update(play);
     }
@@ -507,8 +507,8 @@ public class PlayServiceImpl implements PlayService {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (plays != null) {
             for (Play play : plays) {
-                dependingAttributes.addAll(talkingPointProxy
-                        .getAttributesInTalkingPointOfPlay(tenant.getId(), play.getName()));
+                dependingAttributes.addAll(
+                        talkingPointService.getAttributesInTalkingPointOfPlay(play.getName()));
             }
         }
 
@@ -524,8 +524,8 @@ public class PlayServiceImpl implements PlayService {
             List<Play> plays = getAllPlays();
             if (plays != null) {
                 for (Play play : plays) {
-                    List<AttributeLookup> playAttributes = talkingPointProxy
-                            .getAttributesInTalkingPointOfPlay(tenant.getId(), play.getName());
+                    List<AttributeLookup> playAttributes =
+                            talkingPointService.getAttributesInTalkingPointOfPlay(play.getName());
                     for (AttributeLookup attributeLookup : playAttributes) {
                         if (attributes.contains(sanitize(attributeLookup.toString()))) {
                             dependingPlays.add(play);

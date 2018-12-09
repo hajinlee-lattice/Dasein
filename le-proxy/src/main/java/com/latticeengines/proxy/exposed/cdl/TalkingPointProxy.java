@@ -28,7 +28,7 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Proxy
         return post("createOrUpdate", url, talkingPoints, List.class);
     }
 
-    public void delete(String customerSpace, String name) {
+    public void deleteByName(String customerSpace, String name) {
         String url = constructUrl(URL_PREFIX + "/" + name, shortenCustomerSpace(customerSpace));
         delete("delete", url);
     }

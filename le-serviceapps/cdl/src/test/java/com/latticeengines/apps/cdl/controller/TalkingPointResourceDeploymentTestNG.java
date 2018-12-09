@@ -2,9 +2,9 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,11 +13,11 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.apps.cdl.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -31,6 +31,9 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
  * $ dpltc deploy -a admin,matchapi,microservice,pls -m metadata,cdl,lp,objectapi
  */
 public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(TalkingPointResourceDeploymentTestNG.class);
 
     @Inject
     private TalkingPointProxy talkingPointProxy;
@@ -52,13 +55,16 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
-        cdlTestDataService.populateData(mainTestTenant.getId(), 4);
-        testPlayCreationHelper.setupTenantAndCreatePlay(mainTestTenant.getId());
-        testPlay = testPlayCreationHelper.getPlay();
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
+        testPlayCreationHelper.setTenant(mainTestTenant);
+        testPlayCreationHelper.setDestinationOrgId("O" + System.currentTimeMillis());
+        testPlayCreationHelper.setDestinationOrgType(CDLExternalSystemType.CRM);
+        testPlayCreationHelper.setupPlayTestEnv();
+        testPlay = testPlayCreationHelper.createPlayOnlyAndGet();
     }
 
 
-    @Test(groups = "deployment-app", enabled = false)
+    @Test(groups = "deployment-app")
     public void testCreateUpdate() {
         List<TalkingPointDTO> tps = new ArrayList<>();
         TalkingPointDTO tp = new TalkingPointDTO();
@@ -115,7 +121,7 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     }
 
-    @Test(groups = {"deployment-app"}, dependsOnMethods = {"testCreateUpdate"}, enabled = false)
+    @Test(groups = {"deployment-app"}, dependsOnMethods = {"testCreateUpdate"})
     public void testPreviewAndPublish() {
         List<TalkingPointDTO> raw =
                 talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
@@ -142,8 +148,8 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(dtps.get(1).getName(), tps.get(1).getName());
 
         // delete
-        talkingPointProxy.delete(mainCustomerSpace, tps.get(0).getName());
-        talkingPointProxy.delete(mainCustomerSpace, tps.get(1).getName());
+        talkingPointProxy.deleteByName(mainCustomerSpace, tps.get(0).getName());
+        talkingPointProxy.deleteByName(mainCustomerSpace, tps.get(1).getName());
 
         raw = talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
         tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
@@ -157,8 +163,8 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(dtps.get(1).getName(), tps.get(1).getName());
 
         // delete
-        talkingPointProxy.delete(mainCustomerSpace, tps.get(0).getName());
-        talkingPointProxy.delete(mainCustomerSpace, tps.get(1).getName());
+        talkingPointProxy.deleteByName(mainCustomerSpace, tps.get(0).getName());
+        talkingPointProxy.deleteByName(mainCustomerSpace, tps.get(1).getName());
 
         raw = talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
         tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
@@ -174,9 +180,11 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
         dtps = publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
         Assert.assertEquals(dtps.size(), 0);
+        log.info("should pass!");
+        Assert.assertEquals(1, 0);
     }
 
-    @Test(groups = "deployment-app", enabled = false)
+    @Test(groups = "deployment-app")
     public void testDanteOauth() {
         DantePreviewResources previewResources =
                 talkingPointProxy.getPreviewResources(mainTestTenant.getId());
