@@ -67,6 +67,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setInternalResourceHostPort(internalResourceHostPort);
             prepareMatchDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             matchResult.setInternalResourceHostPort(internalResourceHostPort);
+            matchResultCascading.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -96,6 +97,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
+            matchResultCascading.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 
@@ -129,11 +131,13 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             matchResult.setExcludeDataCloudAttrs(exclude);
+            matchResultCascading.setExcludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder keepMatchLid(boolean keepLid) {
             matchResult.setKeepLid(keepLid);
+            matchResultCascading.setKeepLid(keepLid);
             return this;
         }
 
@@ -151,6 +155,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setSkipStep(skipMatchingStep);
             prepareMatchDataConfiguration.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);
+            matchResultCascading.setSkipStep(skipMatchingStep);
             return this;
         }
 
@@ -182,11 +187,13 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         public Builder matchGroupId(String matchGroupId) {
             prepareMatchDataConfiguration.setMatchGroupId(matchGroupId);
             matchResult.setMatchGroupId(matchGroupId);
+            matchResultCascading.setMatchGroupId(matchGroupId);
             return this;
         }
 
         public Builder joinWithInternalId(boolean joinWithInternalId) {
             matchResult.setJoinInternalId(joinWithInternalId);
+            matchResultCascading.setJoinInternalId(joinWithInternalId);
             return this;
         }
 

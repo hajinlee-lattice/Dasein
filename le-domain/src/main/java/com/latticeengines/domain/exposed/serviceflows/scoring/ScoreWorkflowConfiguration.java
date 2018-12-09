@@ -97,6 +97,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             matchResult.setExcludeDataCloudAttrs(exclude);
+            matchResultCascading.setExcludeDataCloudAttrs(exclude);
             return this;
         }
 
@@ -180,6 +181,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
+            matchResultCascading.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 
