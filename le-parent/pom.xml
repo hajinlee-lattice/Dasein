@@ -2510,7 +2510,6 @@
 
     <modules>
         <module>spring-boot</module>
-        <module>web-parent</module>
     </modules>
 
 </project>
