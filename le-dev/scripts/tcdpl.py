@@ -53,7 +53,7 @@ LE_APPS = [ app for app in LE_APPS + MS_MODULES if app != 'microservice' ]
 
 APP_ROOT = "https://localhost"
 APP_URL = {
-    'microservice': "%s:9080" % APP_ROOT,
+    'ms': "%s:9080" % APP_ROOT,
     'pls': "%s:9081" % APP_ROOT,
     'admin': "%s:9085" % APP_ROOT,
     'saml': "%s:9087" % APP_ROOT,
