@@ -10,7 +10,7 @@ CONDA_ARTIFACT_DIR=${WSHOME}/le-dev/conda/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
-    ANACONDA_VERSION=5.3.0
+    ANACONDA_VERSION=5.3.1
 
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then

@@ -15,7 +15,9 @@ public class WorkflowUtils {
     public static Map<String, String> getFlattenedConfig(WorkflowConfiguration workflowConfig) {
         Map<String, String> flattenedConfig = getFlattenedConfig(workflowConfig,
                 new StringBuilder(workflowConfig.getWorkflowName()));
-        log.info(flattenedConfig.toString());
+        if (log.isDebugEnabled()) {
+            log.debug(flattenedConfig.toString());
+        }
         return flattenedConfig;
     }
 

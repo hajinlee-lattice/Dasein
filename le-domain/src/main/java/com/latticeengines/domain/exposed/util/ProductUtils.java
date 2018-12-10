@@ -89,7 +89,9 @@ public class ProductUtils {
             productList.add(product);
         }
 
-        log.info("Loaded products " + JsonUtils.serialize(productList));
+        if (log.isDebugEnabled()) {
+            log.debug("Loaded products " + JsonUtils.serialize(productList));
+        }
         return productList;
     }
 
