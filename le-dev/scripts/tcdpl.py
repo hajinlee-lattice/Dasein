@@ -113,7 +113,7 @@ def get_webapp_dir_in_tc(app):
         else:
             webapp_dir = os.path.join(CATALINA_HOME, "webapps", "ms", webapp)
     else:
-        webapp_dir = os.path.join(CATALINA_HOME, 'webapps', webapp)
+        webapp_dir = os.path.join(CATALINA_HOME, 'webapps', webapp, 'ROOT')
     return webapp_dir
 
 
