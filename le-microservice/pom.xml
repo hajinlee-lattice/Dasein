@@ -83,7 +83,6 @@
         <module>modelquality</module>
         <module>sqoop</module>
         <module>objectapi</module>
-        <module>dante</module>
         <module>cdl</module>
         <module>lp</module>
     </modules>

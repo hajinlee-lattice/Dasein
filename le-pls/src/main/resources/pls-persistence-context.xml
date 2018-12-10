@@ -1,74 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:p="http://www.springframework.org/schema/p"
        xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-      http://www.springframework.org/schema/tx
-      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
       http://www.springframework.org/schema/data/jpa
       http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
-
-    <bean id="dataSourceAccountMaster" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-        <property name="url" value="${pls.accountmaster.datasource.url}"/>
-        <property name="username" value="${pls.accountmaster.datasource.user}"/>
-        <property name="password" value="${pls.accountmaster.datasource.password.encrypted}"/>
-    </bean>
-
-
-    <!-- Hibernate session factory -->
-    <!--
-    <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSourceAccountMaster"/>
-        <property name="packagesToScan"
-                  value="com.latticeengines.domain.exposed.pls, com.latticeengines.domain.exposed.metadata, com.latticeengines.domain.exposed.modelreview, com.latticeengines.domain.exposed.security, com.latticeengines.domain.exposed.workflow, com.latticeengines.domain.exposed.dante.multitenant"/>
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-            </props>
-        </property>
-    </bean>
- 	-->
-
-    <!-- Hibernate session factory -->
-    <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
-        <property name="entityManagerFactory" ref="entityManagerFactoryAccountMaster" />
-    </bean>
-
-    <!-- Entity manager factory -->
-    <bean id="entityManagerFactoryAccountMaster"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="dataSourceAccountMaster" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.pls, com.latticeengines.domain.exposed.metadata, com.latticeengines.domain.exposed.modelreview, com.latticeengines.domain.exposed.security, com.latticeengines.domain.exposed.workflow, com.latticeengines.domain.exposed.multitenant" />
-        <property name="jpaVendorAdapter">
-            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-                <!-- property name="prepareConnection" value="false"/-->
-            </bean>
-        </property>
-        <property name="jpaProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-                <prop key="hibernate.show_sql">true</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-                <prop key="hibernate.id.new_generator_mappings">true</prop>
-                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
-                <prop key="hibernate.allow_refresh_detached_entity">true</prop>
-                <!-- prop key="hibernate.connection.release_mode">on_close</prop-->
-                <!-- prop key="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION</prop-->
-            </props>
-        </property>
-    </bean>
-
-    <bean id="transactionManagerAccountMaster" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
-          p:sessionFactory-ref="sessionFactoryAccountMaster">
-        <qualifier value="accountMaster"/>
-    </bean>
-
-    <tx:annotation-driven transaction-manager="transactionManagerAccountMaster"/>
 
     <jpa:repositories base-package="com.latticeengines.pls.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"

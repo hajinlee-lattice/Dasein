@@ -73,8 +73,6 @@
         <module>le-actors</module>
         <module>le-sqoop</module>
         <module>le-ulysses</module>
-        <module>le-dantedb</module>
-        <module>le-dante</module>
         <module>le-serviceapps</module>
         <module>le-oauth2</module>
         <module>le-cache</module>
