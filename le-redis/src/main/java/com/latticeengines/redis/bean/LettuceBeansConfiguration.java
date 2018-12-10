@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,11 +41,14 @@ public class LettuceBeansConfiguration {
     @Value("${cache.redis.command.timeout.min}")
     private int redisTimeout;
 
+    @Value("${cache.local.redis}")
+    private boolean localRedis;
+
     @Bean
     public RedisConnectionFactory lettuceConnectionFactory() {
         RedisConnectionFactory factory;
 
-        if (useLocalRedis()) {
+        if (localRedis) {
             log.info("Using local redis server");
             RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
@@ -108,11 +110,6 @@ public class LettuceBeansConfiguration {
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
         return jackson2JsonRedisSerializer;
-    }
-
-    private boolean useLocalRedis() {
-        return StringUtils.isNotBlank(System.getenv(USE_LOCAL_REDIS))
-                && Boolean.valueOf(System.getenv(USE_LOCAL_REDIS));
     }
 
 }
