@@ -76,7 +76,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<Play> plays;
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
-        if (start < 90000000000L) { // if request using second level timestamp
+        if (start < 90000000000L && start > 0) { // if request using second level timestamp
             start = start*1000L;
         }
         PlayLaunchDashboard dashboard;
@@ -99,7 +99,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
 
-        if (start < 90000000000L) { // if request using second level timestamp
+        if (start < 90000000000L && start > 0) { // if request using second level timestamp
             start = start*1000L;
         }
         if (orgInfo == null) {
