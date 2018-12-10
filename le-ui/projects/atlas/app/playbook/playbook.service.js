@@ -19,7 +19,6 @@ angular.module('lp.playbook')
     this.destinationSysType = null;
     this.destinationAccountId = null;
     this.excludeItems = false;
-    this.launchUnscored = false;
 
     this.init = function() {
 
@@ -32,6 +31,7 @@ angular.module('lp.playbook')
         this.targetData = null;
         this.types = null;
         this.recommendationCounts = null;
+        this.launchUnscored = false;
 
         this.settings_form = {
             play_display_name: '',
