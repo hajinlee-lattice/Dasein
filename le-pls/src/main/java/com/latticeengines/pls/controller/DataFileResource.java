@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -186,8 +187,11 @@ public class DataFileResource {
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
+            log.info("name before decode " + fileName);
+            String decodedName = URLDecoder.decode(fileName, "UTF-8");
+            log.info("name after decode " + decodedName);
             dataFileProviderService.downloadFileByApplicationId(request, response, "application/csv", applicationId,
-                    fileName);
+                    decodedName);
         } catch (Exception e) {
             throw e;
         }

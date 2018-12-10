@@ -197,7 +197,7 @@ angular
                 $scope.job.status = jobStatus.jobStatus;
                 $scope.job.user = jobStatus.user;
                 $scope.job.sourceFileExists = jobStatus.sourceFileExists;
-                $scope.job.source = jobStatus.source;
+                $scope.job.source = encodeURI(jobStatus.source);
                 $scope.job.applicationId = jobStatus.applicationId;
                 $scope.job.applicationLogUrl = jobStatus.applicationLogUrl;
                 for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
