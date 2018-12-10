@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(ScoringResourceDeploymentTestNG.class);
 
     private static final int SAFETY_RANGE = 1;
 
@@ -199,38 +202,49 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
     public void testScoreCorrectness() throws IOException {
-        String url = apiHostPort + "/score/record/debug";
-        List<ScoreRequest> scoreRequests = getScoreRequestsForScoreCorrectness();
-        List<Integer> expectedScores = getExpectedScoresForScoreCorrectness();
-        List<DebugScoreResponse> signleRecordScoreResponseList = new ArrayList<>();
-
-        for (ScoreRequest scoreRequest : scoreRequests) {
-            ResponseEntity<DebugScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
-                    DebugScoreResponse.class);
-            signleRecordScoreResponseList.add(response.getBody());
-        }
-
-        url = apiHostPort + "/score/records/debug";
-        BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequestForScoreCorrectness();
-
-        List<?> resultObjList = null;
-        ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
-        resultObjList = response.getBody();
-
+        List<ScoreRequest> scoreRequests = null;
+        BulkRecordScoreRequest bulkScoreRequest = null;
         int idx = 0;
-        ObjectMapper om = new ObjectMapper();
-        for (Object res : resultObjList) {
-            System.out.println("Expected score = " + expectedScores.get(idx).intValue());
-            DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res), DebugRecordScoreResponse.class);
-            Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
-                    new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
-            assertScoreIsWithinAcceptableRange(result.getScores().get(0).getScore().intValue(),
-                    expectedScores.get(idx).intValue());
-            System.out.println("idx = " + idx);
-            System.out.println("single record request = " + JsonUtils.serialize(scoreRequests.get(idx)));
-            matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
-                    result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
-            idx++;
+        try {
+            String url = apiHostPort + "/score/record/debug";
+            scoreRequests = getScoreRequestsForScoreCorrectness();
+            List<Integer> expectedScores = getExpectedScoresForScoreCorrectness();
+            List<DebugScoreResponse> signleRecordScoreResponseList = new ArrayList<>();
+
+            for (ScoreRequest scoreRequest : scoreRequests) {
+                ResponseEntity<DebugScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
+                        DebugScoreResponse.class);
+                signleRecordScoreResponseList.add(response.getBody());
+            }
+
+            url = apiHostPort + "/score/records/debug";
+            bulkScoreRequest = getBulkScoreRequestForScoreCorrectness();
+
+            List<?> resultObjList = null;
+            ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+            resultObjList = response.getBody();
+
+            ObjectMapper om = new ObjectMapper();
+            for (Object res : resultObjList) {
+                System.out.println("Expected score = " + expectedScores.get(idx).intValue());
+                DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res),
+                        DebugRecordScoreResponse.class);
+                Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
+                        new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
+                assertScoreIsWithinAcceptableRange(result.getScores().get(0).getScore().intValue(),
+                        expectedScores.get(idx).intValue());
+                System.out.println("idx = " + idx);
+                System.out.println("single record request = " + JsonUtils.serialize(scoreRequests.get(idx)));
+                Assert.assertNotNull(result.getScores().get(0).getProbability());
+                Assert.assertNotNull(signleRecordScoreResponseList.get(idx).getProbability());
+                matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
+                        result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
+                idx++;
+            }
+        } catch (AssertionError ex) {
+            log.error(String.format("\nidx: %d\n\nSingleRecordList: %s\n\nBulkRecord: %s\n", idx,
+                    JsonUtils.serialize(scoreRequests), JsonUtils.serialize(bulkScoreRequest)));
+            throw ex;
         }
     }
 
@@ -263,7 +277,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     }
 
     private void assertScoreIsWithinAcceptableRange(int score, int expectedScore) {
-        Assert.assertTrue(Math.abs(score - expectedScore) <= SAFETY_RANGE);
+        Assert.assertTrue(Math.abs(score - expectedScore) <= SAFETY_RANGE,
+                String.format("score = %d,  expectedScore = %d", score, expectedScore));
     }
 
     private void matchTransformedRecord(Map<String, Object> singleRecordScoreTransformedRecord,
@@ -307,7 +322,16 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             }
         }
 
+        boolean skipMissingDUNSKey = false;
         if (singleRecordScoreTransformedRecord.size() != batchScoreTransformedRecord.size()) {
+            if ((singleRecordScoreTransformedRecord.containsKey("DUNS")
+                    && singleRecordScoreTransformedRecord.get("DUNS") == null
+                    && !batchScoreTransformedRecord.containsKey("DUNS"))
+                    || (batchScoreTransformedRecord.containsKey("DUNS")
+                            && batchScoreTransformedRecord.get("DUNS") == null
+                            && !singleRecordScoreTransformedRecord.containsKey("DUNS"))) {
+                skipMissingDUNSKey = true;
+            }
             System.out.println(String.format(
                     "singleRecordScoreTransformedRecord.size() = %d, batchScoreTransformedRecord.size() = %d"
                             + "\n\nsingleRecordScoreTransformedRecord = %s\n======="
@@ -316,10 +340,17 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                     JsonUtils.serialize(singleRecordScoreTransformedRecord),
                     JsonUtils.serialize(batchScoreTransformedRecord)));
         }
-        Assert.assertEquals(singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size());
+
+        if (!skipMissingDUNSKey) {
+            Assert.assertEquals(singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size());
+        }
+
         Assert.assertTrue(singleRecordScoreTransformedRecord.size() > 0);
 
         for (String key : singleRecordScoreTransformedRecord.keySet()) {
+            if (skipMissingDUNSKey && key.equals("DUNS")) {
+                continue;
+            }
             Assert.assertTrue(batchScoreTransformedRecord.containsKey(key));
             Assert.assertEquals(singleRecordScoreTransformedRecord.get(key), batchScoreTransformedRecord.get(key));
         }

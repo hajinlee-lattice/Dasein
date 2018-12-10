@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -20,12 +24,15 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreMod
 import com.latticeengines.scoringapi.controller.ScoringResourceDeploymentTestNG;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
+import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
 import com.latticeengines.scoringapi.score.BulkMatchingContext;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploymentTestNG {
+    private static final Logger log = LoggerFactory.getLogger(ScoreRequestProcessorDeploymentTestNG.class);
+
     private static final int MAX_RECORD_COUNT = 19; // prime number for better
                                                     // distribution of models
     private ScoreRequestProcessor scoreRequestProcessor;
@@ -196,13 +203,17 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testTransform" })
     public void testGenerateDebugScoreResponse() {
+        boolean originalFlag = additionalScoreConfig.isDebug();
+        additionalScoreConfig.setDebug(true);
         List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl
                 .generateDebugScoreResponse(additionalScoreConfig, bulkMatchingConfig);
+        additionalScoreConfig.setDebug(originalFlag);
 
         Assert.assertNotNull(recordScoreResponseDebugList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
-        Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getScore());
+        Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability(),
+                JsonUtils.serialize(recordScoreResponseDebugList.get(0).getScores().get(0)));
         Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability()
                 .doubleValue() != recordScoreResponseDebugList.get(0).getScores().get(0).getScore().doubleValue());
 
@@ -212,8 +223,11 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateDebugScoreResponse" })
     public void testGenerateScoreResponse() {
+        boolean originalFlag = additionalScoreConfig.isDebug();
+        additionalScoreConfig.setDebug(false);
         List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl
                 .generateScoreResponse(additionalScoreConfig, bulkMatchingConfig);
+        additionalScoreConfig.setDebug(originalFlag);
 
         Assert.assertNotNull(recordScoreResponseList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseList.size());
@@ -227,16 +241,27 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     public void testBulkMatchAndJoinEnrichOnly() {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
                 .getMatcher(true).matchAndJoin(additionalScoreConfig, bulkMatchingConfig,
-                        bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(), false);
+                        bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(), true);
 
         Map<RecordModelTuple, Map<String, Object>> matchedResult = extractMap(unorderedMatchedRecordEnrichmentMap,
                 Matcher.RESULT);
         Assert.assertNotNull(matchedResult);
-        Assert.assertEquals(0, matchedResult.size());
+        Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap = bulkMatchingConfig
+                .getUniqueScoringArtifactsMap();
+        bulkMatchingConfig.setUniqueScoringArtifactsMap(null);
+        if (0 != matchedResult.size()) {
+            log.info(String.format("additionalScoreConfig = %s", JsonUtils.serialize(additionalScoreConfig)));
+            log.info(String.format("bulkMatchingConfig = %s", JsonUtils.serialize(bulkMatchingConfig)));
+
+        }
+        Assert.assertEquals(matchedResult.size(), 0,
+                String.format("matchedResult = %s", JsonUtils.serialize(matchedResult)));
+        bulkMatchingConfig.setUniqueScoringArtifactsMap(uniqueScoringArtifactsMap);
         Map<RecordModelTuple, Map<String, Object>> enrichmentMap = extractMap(unorderedMatchedRecordEnrichmentMap,
                 Matcher.ENRICHMENT);
         Assert.assertNotNull(enrichmentMap);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, enrichmentMap.size());
+        Assert.assertEquals(enrichmentMap.size(), MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                JsonUtils.serialize(enrichmentMap));
     }
 
     @Override
