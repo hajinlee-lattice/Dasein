@@ -184,6 +184,13 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("AllocateId")
     private boolean allocateId;
 
+    // Target entity represents the ultimate Business Entity that this match request is trying to find an ID for.
+    // Since some entity matches will require matching other entities, eg. Contact might require Account, and
+    // Transaction requires Account, Contact, and Product, it won't necessarily be clear from the Entity Key Map
+    // what the ultimate match goal is.
+    @JsonProperty("TargetEntity")
+    String targetEntity;
+
     @JsonProperty("EntityKeyMap")
     private List<EntityKeyMap> entityKeyMap;
 
@@ -561,6 +568,10 @@ public class MatchInput implements Fact, Dimension {
     public boolean isAllocateId() { return allocateId; }
 
     public void setAllocateId(boolean allocateId) { this.allocateId = allocateId; }
+
+    public String getTargetEntity() { return targetEntity; }
+
+    public void setTargetEntity(String targetEntity) { this.targetEntity = targetEntity; }
 
     public List<EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
 
