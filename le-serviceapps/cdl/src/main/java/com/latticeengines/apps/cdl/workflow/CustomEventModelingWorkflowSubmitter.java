@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.util.ArtifactUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -227,8 +226,6 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .workflowContainerMem(workflowMemMb) //
                 .ratingEngineType(ratingEngineType) //
                 .build();
-        // temporary
-        log.info("WorkflowConfig=" + JsonUtils.serialize(configuration));
         return configuration;
     }
 }
