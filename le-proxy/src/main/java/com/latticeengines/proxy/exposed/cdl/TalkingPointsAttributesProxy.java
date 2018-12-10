@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
-// import com.latticeengines.network.exposed.dante.TalkingPointAttributesInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;;
 
@@ -23,7 +22,6 @@ public class TalkingPointsAttributesProxy extends MicroserviceRestApiProxy
     public List<TalkingPointAttribute> getAccountAttributes(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/accountattributes",
                 shortenCustomerSpace(customerSpace));
-        // String url = constructUrl("/accountattributes?customerSpace=" + customerSpace);
         return get("getAccountAttributes", url, List.class);
     }
 
@@ -31,14 +29,12 @@ public class TalkingPointsAttributesProxy extends MicroserviceRestApiProxy
     public List<TalkingPointAttribute> getRecommendationAttributes(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/recommendationattributes",
                 shortenCustomerSpace(customerSpace));
-        // String url = constructUrl("/recommendationattributes?customerSpace=" + customerSpace);
         return get("getRecommendationAttributes", url, List.class);
     }
 
     public TalkingPointNotionAttributes getAttributesByNotions(String customerSpace,
             List<String> notions) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
-        // String url = constructUrl("?customerSpace=" + customerSpace);
         return post("getAttributesByNotions", url, notions, TalkingPointNotionAttributes.class);
     }
 }
