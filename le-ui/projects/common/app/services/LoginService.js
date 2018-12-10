@@ -229,7 +229,9 @@ angular.module('mainApp.login.services.LoginService', [
                             $window.open('/login/saml/' + tenantId + '/logout' + paramString, '_self');
                         } else {
                             paramString = params ? paramString + '&logout=true' : '?logout=true';
-                            $window.open('/login' + paramString, '_self');
+                            setTimeout(function() {
+                                $window.open('/login' + paramString, '_self');    
+                            }, 300);
                         }
                     }, 300);
                 } else {
