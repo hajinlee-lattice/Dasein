@@ -2,15 +2,5 @@
   "presets": [
       "env",
       "react"
-  ],
-  "plugins": [
-    ["module-resolver", {
-      "root": ["./"],
-      "alias": {
-        "common": "./",
-        "enzyme": "./node_modules/enzyme",
-        "enzyme-adapter-react-16": "./node_modules/enzyme-adapter-react-16"
-      }
-    }]
   ]
 }
