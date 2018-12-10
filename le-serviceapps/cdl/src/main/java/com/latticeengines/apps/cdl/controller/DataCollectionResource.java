@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.MediaType;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -329,5 +330,11 @@ public class DataCollectionResource {
             @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.deleteArtifact(customerSpace, name, version);
+    }
+
+    @GetMapping(value = "/artifact/{exportId}/download", produces = MediaType.APPLICATION_OCTET_STREAM)
+    @ApiOperation(value = "Download a data collection artifact")
+    public byte[] downloadArtifact(@PathVariable String customerSpace, @PathVariable String exportId) {
+        return dataCollectionService.downloadDataCollectionArtifact(customerSpace, exportId);
     }
 }

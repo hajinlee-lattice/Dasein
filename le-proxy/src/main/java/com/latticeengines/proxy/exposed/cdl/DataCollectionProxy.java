@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -415,4 +417,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return post("createDataCollectionArtifact", requestUrl, artifact, DataCollectionArtifact.class);
     }
 
+    public byte[] downloadDataCollectionArtifact(String customerSpace, String exportId) {
+        String requestUrl = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/artifact/{exportId}/download",
+                shortenCustomerSpace(customerSpace), exportId);
+        return get("downloaDataCollectionArtifact", requestUrl, byte[].class);
+    }
 }

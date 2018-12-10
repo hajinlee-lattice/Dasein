@@ -618,6 +618,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
 
             if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
+                log.info(String.format("WorkflowJob is in terminated status: %s. Skip checking lastUpdatedTime. "
+                        + "WorkflowId=%s", workflowJob.getStatus(), workflowJob.getWorkflowId()));
                 continue;
             }
 

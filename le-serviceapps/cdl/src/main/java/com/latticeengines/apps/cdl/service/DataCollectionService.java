@@ -73,4 +73,6 @@ public interface DataCollectionService {
     DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact);
 
     DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version);
+
+    byte[] downloadDataCollectionArtifact(String customerSpace, String exportId);
 }

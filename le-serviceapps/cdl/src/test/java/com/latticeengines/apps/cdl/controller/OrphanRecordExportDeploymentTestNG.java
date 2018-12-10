@@ -76,7 +76,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.TRANSACTION);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
 
-        ApplicationId appid = cdlProxy.OrphanRecordsExport(customerSpace, request);
+        ApplicationId appid = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
         log.info("ApplicationId=" + appid.toString());
 
         JobStatus status = waitForWorkflowStatus(appid.toString(), false);
@@ -94,7 +94,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.CONTACT);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
 
-        ApplicationId appid = cdlProxy.OrphanRecordsExport(customerSpace, request);
+        ApplicationId appid = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
         log.info("ApplicationId=" + appid.toString());
 
         JobStatus status = waitForWorkflowStatus(appid.toString(), false);
@@ -112,7 +112,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.UNMATCHED_ACCOUNT);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
 
-        ApplicationId appid = cdlProxy.OrphanRecordsExport(customerSpace, request);
+        ApplicationId appid = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
         log.info("ApplicationId=" + appid.toString());
 
         JobStatus status = waitForWorkflowStatus(appid.toString(), false);

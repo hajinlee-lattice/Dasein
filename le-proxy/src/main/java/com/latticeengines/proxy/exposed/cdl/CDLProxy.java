@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -182,7 +181,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return responseDoc.isSuccess();
     }
 
-    public ApplicationId OrphanRecordsExport(String customerSpace, OrphanRecordsExportRequest request) {
+    public ApplicationId submitOrphanRecordsExport(String customerSpace, OrphanRecordsExportRequest request) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datacollection/datafeed/exportorphanrecords", customerSpace);
         ResponseDocument responseDoc = post("orphanRecordExport", url, request, ResponseDocument.class);
@@ -194,7 +193,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
         } else {
             throw new RuntimeException(
-                    "Failed to start OrphanRecordsExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
+                    "Failed to submit orphanRecordsExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
