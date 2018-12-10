@@ -62,7 +62,7 @@
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
         </div>
 
-        <div ng-if="vm.accountsCoverage.bucketCoverageCounts.length > 1" class="buckets-container">
+        <div ng-if="vm.accountsCoverage.bucketCoverageCounts.length" class="buckets-container">
             <div class="buckets-about">
                 Select the recommendations. Each one show how many <strong>accounts</strong> match each rating category (as of the last scoring job).
             </div>
