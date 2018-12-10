@@ -175,9 +175,9 @@ def find_war_in_project(app):
 
 def get_project(app):
     if app in MS_MODULES:
-        return os.path.join('le-microservice', app)
+        return os.path.join(WSHOME, 'le-microservice', app)
     else:
-        return 'le-%s' % app
+        return os.path.join(WSHOME, 'le-%s' % app)
 
 
 def get_mgr_app(app):
