@@ -18,11 +18,17 @@ mvn -T8 -q -Pcheckstyle-report -Dchecker=${CHECKER} validate \
     && mvn -q -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate \
     && mvn -q -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
 
-if ! [ -z "$PROJECT" ]; then
+if ! [ -z "${PROJECT}" ]; then
     popd
 fi
 
+if [ -z "${PROJECT}" ]; then
+    PROJ_OPT=""
+else
+    PROJ_OPT="--proj ${PROJECT}"
+fi
 # shift argument list by 2 to pass the remaining arguments to python script
 # if project argument is not specified, an empty string will be passed to --proj flag
 shift 2
-python $WSHOME/le-dev/scripts/checkstyle_report_generator.py --proj "$PROJECT" "$@"
+echo "Generating aggregated report ..."
+python $WSHOME/le-dev/scripts/checkstyle_report_generator.py ${PROJ_OPT} $@

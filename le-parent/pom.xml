@@ -36,6 +36,7 @@
         <maven.assembly.version>3.1.0</maven.assembly.version>
         <maven.exec.version>1.6.0</maven.exec.version>
         <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
+        <maven.spotbugs.version>3.1.9</maven.spotbugs.version>
         <maven.scala.version>3.4.4</maven.scala.version>
         <maven.dependency.version>3.1.1</maven.dependency.version>
 
@@ -931,6 +932,31 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>spotbugs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <version>${maven.spotbugs.version}</version>
+                        <executions>
+                            <execution>
+                                <id>spotbugs</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <onlyAnalyze>org.latticeengines.*</onlyAnalyze>
+                                    <xmlOutput>true</xmlOutput>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <distributionManagement>
@@ -1008,9 +1034,13 @@
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     </configuration>
                 </plugin>
-                <!-- -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface, tests -->
                 <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${maven.spotbugs.version}</version>
+                </plugin>
+                <plugin>
+                    <!-- jar plugin to produce 3 jars: impl (default), interface, tests -->
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven.jar.version}</version>
                     <executions>
@@ -1138,6 +1168,11 @@
                         </reports>
                     </reportSet>
                 </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${maven.spotbugs.version}</version>
             </plugin>
         </plugins>
     </reporting>
@@ -1457,7 +1492,7 @@
     			<version>${zookeeper.version}</version>
     			<classifier>tests</classifier>
 			</dependency>
-            
+
 
             <!-- Avro Dependencies -->
             <dependency>

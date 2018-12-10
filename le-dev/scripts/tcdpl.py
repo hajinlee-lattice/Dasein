@@ -208,13 +208,13 @@ def undeploy_app(app):
     global APP_URL
 
     deploy_mgr_app(app, wait=True)
-
-    app_url = APP_URL[app]
+    mgr_app = get_mgr_app(app)
+    app_url = APP_URL[mgr_app]
 
     mgr_url = app_url + "/manager"
     with no_ssl_verification():
         tomcat = tm.TomcatManager()
-        logger.info("Connecting to %s's manager app at %s ..." % (app, mgr_url))
+        logger.info("Connecting to %s's manager app at %s ..." % (mgr_app, mgr_url))
         r = tomcat.connect(mgr_url, 'admin', 'admin')
         if r.ok:
             logger.info("Connected!")
