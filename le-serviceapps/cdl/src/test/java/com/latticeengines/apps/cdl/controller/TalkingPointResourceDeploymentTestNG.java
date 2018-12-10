@@ -180,8 +180,6 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
         dtps = publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
         Assert.assertEquals(dtps.size(), 0);
-        log.info("should pass!");
-        Assert.assertEquals(1, 0);
     }
 
     @Test(groups = "deployment-app")
