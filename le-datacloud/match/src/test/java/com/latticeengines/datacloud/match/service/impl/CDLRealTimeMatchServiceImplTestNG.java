@@ -81,6 +81,8 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
             "AM_650050C066EF46905EC469E9CC2921E0__Q_1__Q_2_3__SC", "AM_650050C066EF46905EC469E9CC2921E0__Q_1__AS" };
     private static Object[] phAttrVals = { true, 397, 123400.0 };
 
+    private static final String DATACLOUD_VERSION = "2.0.15";
+
     @BeforeClass(groups = "functional")
     public void setup() {
         loadAccountSchema();
@@ -169,6 +171,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         columnSelection.setColumns(columns);
         input.setPredefinedSelection(null);
         input.setCustomSelection(columnSelection);
+        input.setDataCloudVersion(DATACLOUD_VERSION);
         return input;
     }
 
