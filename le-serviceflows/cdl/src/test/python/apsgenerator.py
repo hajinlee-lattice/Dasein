@@ -159,6 +159,9 @@ if __name__ == '__main__':
     uid = str(uuid.uuid4())
     input = '/mnt/ebs/input' + uid
     output = '/mnt/ebs/output' + uid
+    if not os.path.isdir('/mnt/ebs'):
+        input = './input'
+        output = './output'
     if not os.path.isdir(input):
         os.makedirs(input)
     if not os.path.isdir(output):
