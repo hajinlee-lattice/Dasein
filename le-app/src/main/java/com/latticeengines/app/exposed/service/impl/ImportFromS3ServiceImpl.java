@@ -68,7 +68,7 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
         try {
             URI uri = new URI(inputFile);
             String inputPath = uri.getPath();
-            String s3FilePath = pathBuilder.exploreS3FilePath(inputPath, podId, space.toString(), s3Bucket);
+            String s3FilePath = pathBuilder.exploreS3FilePath(inputPath, podId, s3Bucket);
             String s3FileKey = s3FilePath.substring(pathBuilder.getS3BucketDir(s3Bucket).length() + 1);
             if (StringUtils.isNotBlank(s3FileKey) && s3Service.objectExist(s3Bucket, s3FileKey)) {
                 log.info("Import from S3, bucket=" + s3Bucket + " file path=" + s3FilePath);
