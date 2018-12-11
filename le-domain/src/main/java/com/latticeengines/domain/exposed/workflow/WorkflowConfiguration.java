@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,6 +32,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflo
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class WorkflowConfiguration extends BasePayloadConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowConfiguration.class);
 
     @JsonProperty("stepConfigRegistry")
     private Map<String, String> stepConfigRegistry = new HashMap<>();
@@ -73,10 +78,12 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     }
 
     public void add(BaseStepConfiguration configuration) {
+        log.info("Added " + configuration.getClass().getSimpleName() + " to " + getClass().getSimpleName());
         stepConfigRegistry.put(configuration.getClass().getSimpleName(), configuration.toString());
     }
 
     protected void add(WorkflowConfiguration configuration) {
+        log.info("Added " + configuration.getWorkflowName() + " to " + getClass().getSimpleName());
         subWorkflowConfigRegistry.put(configuration.getWorkflowName(), configuration);
     }
 
