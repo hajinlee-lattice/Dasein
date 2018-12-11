@@ -4,11 +4,13 @@ import java.time.Duration;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
@@ -30,7 +32,7 @@ import io.lettuce.core.RedisURI;
 public class LettuceBeansConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceBeansConfiguration.class);
-    private static final String USE_LOCAL_REDIS = "USE_LOCAL_REDIS";
+    private static final String LE_ENVIRONMENT = "LE_ENVIRONMENT";
 
     @Inject
     private ElasticCacheService elastiCacheService;
@@ -41,14 +43,11 @@ public class LettuceBeansConfiguration {
     @Value("${cache.redis.command.timeout.min}")
     private int redisTimeout;
 
-    @Value("${cache.local.redis}")
-    private boolean localRedis;
-
     @Bean
     public RedisConnectionFactory lettuceConnectionFactory() {
         RedisConnectionFactory factory;
 
-        if (localRedis) {
+        if (useLocalRedis()) {
             log.info("Using local redis server");
             RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
@@ -110,6 +109,11 @@ public class LettuceBeansConfiguration {
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
         return jackson2JsonRedisSerializer;
+    }
+
+    private boolean useLocalRedis() {
+        return StringUtils.isNotBlank(System.getenv(LE_ENVIRONMENT))
+                && "dev".equalsIgnoreCase(System.getenv(LE_ENVIRONMENT));
     }
 
 }
