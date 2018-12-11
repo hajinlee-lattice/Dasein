@@ -489,8 +489,14 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         String hdfsDir = pathBuilder.getFullPath(hdfsPath);
         String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, podId, space.toString(), space.getTenantId(), s3Bucket);
+        String original = hdfsPath;
         if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
             hdfsPath = pathBuilder.exploreS3FilePath(hdfsPath, podId, space.toString(), space.getTenantId(), s3Bucket);
+            //TODO: temp log to be removed
+            log.info("Use s3 path " + hdfsPath + " instead of the original hdfs path " + original);
+        } else {
+            //TODO: temp log to be removed
+            log.info("Did not find data at s3 dir " + s3Dir + " fall back to original hfs path " + original);
         }
         return hdfsPath;
     }
