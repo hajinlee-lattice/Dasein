@@ -484,16 +484,18 @@ public class StatsCubeUtils {
     }
 
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
-        return isDateAttribute(cm) || isSystemAttribute(entity, cm);
+        // Hide Date Attributes not in category Account Attributes (aka "My Attributes") and all system attributes.
+        return ((isDateAttribute(cm) && !Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()))
+                || isSystemAttribute(entity, cm));
     }
 
-    private static boolean isDateAttribute(ColumnMetadata cm) {
+    public static boolean isDateAttribute(ColumnMetadata cm) {
         return FundamentalType.DATE.equals(cm.getFundamentalType())
                 || LogicalDataType.Date.equals(cm.getLogicalDataType())
                 || LogicalDataType.Timestamp.equals(cm.getLogicalDataType());
     }
 
-    private static boolean isSystemAttribute(BusinessEntity entity, ColumnMetadata cm) {
+    public static boolean isSystemAttribute(BusinessEntity entity, ColumnMetadata cm) {
         return getSystemAttrs(entity).contains(cm.getAttrName());
     }
 

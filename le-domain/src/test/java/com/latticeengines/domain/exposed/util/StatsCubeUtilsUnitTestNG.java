@@ -180,9 +180,19 @@ public class StatsCubeUtilsUnitTestNG {
             topAttrs.forEach(topAttr -> {
                 AttributeLookup attributeLookup = new AttributeLookup(topAttr.getEntity(), topAttr.getAttribute());
                 ColumnMetadata cm = consolidatedCmMap.get(attributeLookup);
-                Assert.assertNotEquals(cm.getFundamentalType(), FundamentalType.DATE);
-                Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Timestamp);
-                Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);
+
+                // Account Attributes (aka "My Attributes") that are date attribute types are allowed to be in the
+                // TopN Tree as long as they are not system attributes.
+                if (!Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                        || StatsCubeUtils.isSystemAttribute(topAttr.getEntity(), cm)) {
+                    Assert.assertNotEquals(cm.getFundamentalType(), FundamentalType.DATE);
+                    Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Timestamp);
+                    Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);
+                } else if ("AccountCreatedDate".equals(cm.getAttrName())) {
+                    Assert.assertEquals(cm.getLogicalDataType(), LogicalDataType.Date);
+                } else if ("LastCalledDate".equals(cm.getAttrName())) {
+                    Assert.assertEquals(cm.getFundamentalType(), FundamentalType.DATE);
+                }
             });
         })));
     }
