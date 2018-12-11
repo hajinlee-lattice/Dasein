@@ -87,7 +87,7 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
                         <!-- Created Play with no previous launch history -->
-                        <div ng-if="play.launchHistory.mostRecentLaunch === null">This campaign was started but not launched.</div>
+                        <div ng-if="play.launchHistory.mostRecentLaunch === null || ['Launching','Launched'].indexOf(play.launchHistory.mostRecentLaunch.launchState) === -1">This campaign was started but not launched.</div>
 
                         <!-- Created Play with no previous launch history -->
                         <!-- <div ng-if="
@@ -103,7 +103,7 @@
 
                         <!-- Ratings chart if play has Launched -->
                         <div 
-                            ng-if="(play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'UnLaunched') && vm.current.tileStates[play.name].launching != true"
+                            ng-if="['Launching','Launched'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 && vm.current.tileStates[play.name].launching != true"
                             class="{{ play.ratingEngine.tileClass }}">
                             <bar-chart
                                 config="play.ratingEngine.chartConfig" 

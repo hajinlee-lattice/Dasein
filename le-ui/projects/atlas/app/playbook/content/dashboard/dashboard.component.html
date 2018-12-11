@@ -100,7 +100,7 @@
                                 <!-- <span ng-if="vm.launchedState != 'Launched'">Avaliable for Launch</span> -->
                                 <span>Available Recommendations</span>
                             </div>
-                            <div class="column" ng-show="vm.play.launchHistory.mostRecentLaunch">
+                            <div class="column" ng-show="vm.play.launchHistory.mostRecentLaunch && ['Launching','Launched','Failed'].indexOf(vm.play.launchHistory.mostRecentLaunch.launchState) !== -1">
                                 <a ui-sref="home.playbook.dashboard.launchhistory({play_name: vm.play.name})"><span class="ico ico-cog ico-black"></span> Launch History</a>
                             </div>
                         </h2>
@@ -122,18 +122,20 @@
                             </ul>
                         </div>
                         <div class="dashboard-section-content-subsection ratings {{vm.play.ratingEngine.tileClass}} " ng-class="{'padded-lift-chart': vm.hasLiftChart(vm.play)}">
-<!-- 
+                            <!-- 
                             <barchart 
                                 header="Account Ratings"
                                 ratings="true" 
                                 data="vm.ratingsGraph.buckets">
-                            </barchart> -->
+                            </barchart> 
+                            -->
                             <bar-chart
                                 config="vm.play.ratingEngine.chartConfig" 
                                 bktlist="vm.play.ratingEngine.newBucketMetadata">
                             </bar-chart>
 
-                            <!-- <div class="dashboard-subsection-header">
+                            <!-- 
+                            <div class="dashboard-subsection-header">
                                 <h3>Account ratings</h3>
                             </div>
                             <ul class="playbook-ratings graph" ng-if="vm.ratingsGraph">
@@ -142,8 +144,8 @@
                                     <div class="rating-bar" ng-style="{'height': (rating.count/vm.ratingsGraph.total)*100 + '%'}"></div>
                                     <div class="rating-label">{{rating.bucket}}</div>
                                 </li>
-                            </ul> -->
-                            
+                            </ul> 
+                            -->
                         </div>
                     </div>
                     <div class="dashboard-section-footer">

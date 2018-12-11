@@ -62,11 +62,11 @@
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
         </div>
 
-        <div ng-if="vm.accountsCoverage.bucketCoverageCounts.length" class="buckets-container">
+        <div class="buckets-container">
             <div class="buckets-about">
                 Select the recommendations. Each one show how many <strong>accounts</strong> match each rating category (as of the last scoring job).
             </div>
-            <ul class="bucket-checkboxes">
+            <ul class="bucket-checkboxes" ng-if="vm.accountsCoverage.bucketCoverageCounts.length">
                 <li 
                     ng-class="vm.selectedBuckets.indexOf(bucket.bucket) !== -1 ? '' : 'unselected'"
                     ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
@@ -84,6 +84,16 @@
                     <p>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</p>
                 </li>
                 -->
+            </ul>
+            <ul class="bucket-checkboxes" ng-if="!vm.accountsCoverage.bucketCoverageCounts.length">
+                <li 
+                    ng-class="buckets-null"
+                    ng-repeat="bucket in vm.noBuckets"
+                    ng-disabled="true">
+                    <h3>{{bucket.bucket}}</h3>
+                    <h4>Accounts</h4>
+                    <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 1 }})</p>
+                </li>
             </ul>
             <div class="unscored-accounts" ng-if="vm.unscoredAccounts.total">
                 <input type="checkbox" ng-model="vm.launchUnscored" ng-click="vm.launchUnscoredClick()" /> Include the <strong>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</strong> Unscored Accounts?

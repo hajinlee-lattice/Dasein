@@ -223,14 +223,20 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                     padding: 10px 30px;
                 }
                 .dashboard-section-header {
-                    @include flex-item(0 1 auto);
                     border-bottom: 1px solid #d0d0d0;
                     h2 {
                         background-repeat: no-repeat;
                         background-image: url('/assets/images/ico-settings.png');
                         background-position: left center;
                         padding-left: 35px;
-                        @include flex-container;
+                        a {
+                            position: relative;
+                            top: 4px;
+                            .ico {
+                                position: relative;
+                                top: -2px;
+                            }
+                        }
                         div.column {
                             @include flex-item(1 1 auto);
                             &:last-child {
@@ -242,7 +248,9 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                                 }
                             }
                         }
+                        @include flex-container;
                     }
+                    @include flex-item(0 1 auto);
                 }
                 .dashboard-subsection-header {
                     h3 {

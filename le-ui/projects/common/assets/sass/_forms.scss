@@ -896,6 +896,14 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
                 color: #ddd;
             }
         }
+        &[disabled] {
+          pointer-events: none;
+          border-color: #ddd;
+          background: #eee;
+            h3, h4, p {
+                color: #ccc;
+            }
+        }
     }
 }
 
