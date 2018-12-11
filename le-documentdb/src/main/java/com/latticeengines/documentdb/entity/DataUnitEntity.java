@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
 
     @Column(name = "Name", //
-            columnDefinition = "'VARCHAR(100) GENERATED ALWAYS AS (`Document` ->> '$.Name')'", //
+            columnDefinition = "'VARCHAR(200) GENERATED ALWAYS AS (`Document` ->> '$.Name')'", //
             insertable = false, updatable = false)
     private String name;
 
