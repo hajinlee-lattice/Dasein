@@ -5,6 +5,7 @@ import numpy as np
 import logging
 import os
 import shutil
+import uuid
 
 from apsdataloader import ApsDataLoader
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -155,14 +156,17 @@ def createAps(transactionDf, allowZeroOrNegativeValues=False):
 
     
 if __name__ == '__main__':
-    if not os.path.isdir('./input'):
-        os.mkdir("./input")
-    if not os.path.isdir('./output'):
-        os.mkdir("./output")
+    uid = str(uuid.uuid4())
+    input = '/mnt/ebs/input' + uid
+    output = '/mnt/ebs/output' + uid
+    if not os.path.isdir(input):
+        os.makedirs(input)
+    if not os.path.isdir(output):
+        os.makedirs(output)
      
     loader = ApsDataLoader()
-    loader.downloadToLocal()
-    df = loader.readDataFrameFromAvro()
+    loader.downloadToLocal(input)
+    df = loader.readDataFrameFromAvro(input)
     logger.info("df type:" + str(type(df)))
     logger.info("df shape:" + str(df.shape))
     logger.info("df memoryn usage:" + str(df.memory_usage().sum()))
@@ -176,8 +180,11 @@ if __name__ == '__main__':
     #logger.info("aps density:" + str(apState.density))
     
     apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
-    loader.parallelWriteDataFrameToAvro(apState)
+    loader.parallelWriteDataFrameToAvro(apState, output)
     logger.info(apState.shape)
-    #loader.uploadFromLocal()
-    loader.parallelUploadFromLocal()
+    #loader.uploadFromLocal(output)
+    loader.parallelUploadFromLocal(output)
+    
+    shutil.rmtree(input, ignore_errors=True)
+    shutil.rmtree(output, ignore_errors=True)
     
