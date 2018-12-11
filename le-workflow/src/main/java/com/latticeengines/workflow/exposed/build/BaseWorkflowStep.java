@@ -81,6 +81,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EXPORT_DATA_APPLICATION_ID = "EXPORT_DATA_APPLICATION_ID";
     protected static final String SKIP_EXPORT_DATA = "SKIP_EXPORT_DATA";
     protected static final String EXPORT_TABLE_NAME = "EXPORT_TABLE_NAME";
+    protected static final String EXPORT_MERGE_FILE_NAME = "EXPORT_MERGE_FILE_NAME";
+    protected static final String EXPORT_MERGE_FILE_PATH = "EXPORT_MERGE_FILE_PATH";
     protected static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
     protected static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
     protected static final String EXPORT_BUCKET_TOOL_TABLE_NAME = "EXPORT_BUCKET_TOOL_TABLE_NAME";

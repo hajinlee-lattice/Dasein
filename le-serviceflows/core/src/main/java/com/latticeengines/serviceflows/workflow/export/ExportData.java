@@ -37,7 +37,8 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         }
         exportData();
 
-        if (configuration.isExportMergedFile()) {
+        if (configuration.isExportMergedFile()
+                || StringUtils.isNotBlank(getStringValueFromContext(EXPORT_MERGE_FILE_NAME))) {
             if (configuration.getExportFormat().equals(ExportFormat.CSV)) {
                 mergeCSVFiles();
             }
@@ -50,13 +51,23 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         removeObjectFromContext(EXPORT_INPUT_PATH);
         removeObjectFromContext(EXPORT_OUTPUT_PATH);
         removeObjectFromContext(SKIP_EXPORT_DATA);
+        removeObjectFromContext(EXPORT_MERGE_FILE_NAME);
+        removeObjectFromContext(EXPORT_MERGE_FILE_PATH);
     }
 
     protected void mergeCSVFiles() {
         String mergeToPath = configuration.getExportTargetPath();
+        if (StringUtils.isNotBlank(getStringValueFromContext(EXPORT_MERGE_FILE_PATH))) {
+            mergeToPath = getStringValueFromContext(EXPORT_MERGE_FILE_PATH);
+        }
         log.info("MergeTo=" + mergeToPath);
-        putStringValueInContext(MERGED_FILE_NAME, configuration.getMergedFileName());
-        log.info("MergedFileName=" + configuration.getMergedFileName());
+
+        String mergedFileName = configuration.getMergedFileName();
+        if (StringUtils.isNotBlank(getStringValueFromContext(EXPORT_MERGE_FILE_NAME))) {
+            mergedFileName = getStringValueFromContext(EXPORT_MERGE_FILE_NAME);
+        }
+        putStringValueInContext(MERGED_FILE_NAME, mergedFileName);
+        log.info("MergedFileName=" + mergedFileName);
 
         try {
             List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, mergeToPath, ".*.csv$");
@@ -73,14 +84,14 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, file, localCsvFilesPath);
             }
 
-            File localOutputCSV = new File(localCsvFilesPath, configuration.getMergedFileName());
+            File localOutputCSV = new File(localCsvFilesPath, mergedFileName);
             log.info("Local output CSV=" + localOutputCSV.toString());
 
             CSVWriter writer = new CSVWriter(new FileWriter(localOutputCSV), CSVWriter.DEFAULT_SEPARATOR,
                     CSVWriter.NO_QUOTE_CHARACTER);
 
             File[] files = localCsvDir.listFiles(file -> {
-                return file.getName().matches("\\w+_part-\\d+.csv$");
+                return file.getName().matches("\\w+_part-\\d+.csv$|.*-p-\\d+.csv$");
             });
 
             if (files == null) {

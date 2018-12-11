@@ -240,7 +240,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
         putStringValueInContext(EXPORT_INPUT_PATH, matchErrorDir);
         putStringValueInContext(EXPORT_OUTPUT_PATH, matchErrorDir + "CSV/" + errorTable.getName());
-        saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH, matchErrorDir + "CSV");
+        putStringValueInContext(EXPORT_MERGE_FILE_PATH, matchErrorDir + "CSV");
+        putStringValueInContext(EXPORT_MERGE_FILE_NAME, "matcherror.csv");
+        saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH,
+                matchErrorDir + "CSV/matcherror.csv");
 
     }
 
