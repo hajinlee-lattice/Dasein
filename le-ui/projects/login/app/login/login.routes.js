@@ -129,5 +129,14 @@ angular.module('login', [
                 "banner": "bannerMessage",
                 "FrameContent": "loginSamlError"
             }
+        })
+        .state('login.logout', {
+            url: 'logout',
+            resolve: {
+                logindocument: function(LoginService) {
+                    return LoginService.Logout();
+                }
+            }
         });
+
 });
