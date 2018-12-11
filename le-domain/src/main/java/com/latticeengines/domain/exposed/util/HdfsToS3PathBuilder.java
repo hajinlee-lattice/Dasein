@@ -243,17 +243,24 @@ public class HdfsToS3PathBuilder {
     public String exploreS3FilePath(String filePath, String pod, String customer, String tenantId,
             String s3Bucket) {
         filePath = FilenameUtils.normalize(filePath);
+        log.info("FilePath=" + filePath);
         StringBuilder builder = new StringBuilder();
         String hdfsFilesDir = getHdfsAnalyticsDir(customer);
         if (filePath.startsWith(hdfsFilesDir)) {
             return builder.append(getS3AnalyticsDir(s3Bucket, tenantId))
                     .append(filePath.substring(hdfsFilesDir.length())).toString();
+        } else {
+            //TODO: temp log
+            log.info("filePath not start with hdfs analytics dir " + hdfsFilesDir);
         }
 
         hdfsFilesDir = getHdfsAtlasDir(pod, tenantId);
         if (filePath.startsWith(hdfsFilesDir)) {
             return builder.append(getS3AtlasDir(s3Bucket, tenantId))
                     .append(filePath.substring(hdfsFilesDir.length())).toString();
+        } else {
+            //TODO: temp log
+            log.info("filePath not start with hdfs atlas dir " + hdfsFilesDir);
         }
         return filePath;
     }
