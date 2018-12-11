@@ -129,12 +129,10 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         return modelEvaluator;
     }
 
-    private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) throws IOException {
+    private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) {
         String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
-        CustomerSpace space = CustomerSpace.parse(pathBuilder.getCustomerFromHdfsPath(hdfsPath));
-        return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, space.toString(), space.getTenantId(),
-                podId, s3Bucket);
+        return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, podId, s3Bucket);
     }
 
     @Override

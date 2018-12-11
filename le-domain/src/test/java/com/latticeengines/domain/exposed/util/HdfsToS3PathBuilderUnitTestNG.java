@@ -176,17 +176,17 @@ public class HdfsToS3PathBuilderUnitTestNG {
         Assert.assertEquals(
                 builder.exploreS3FilePath(
                         "/user/s-analytics/customers/tenantId2.tenantId2.Production/data/table2/samples/file2.csv",
-                        "pod2", "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
+                        "pod2", "bucket2"),
                 "s3n://bucket2/tenantId2/analytics/data/table2/samples/file2.csv");
         Assert.assertEquals(
                 builder.exploreS3FilePath(
                         "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export/file2.csv",
-                        "pod2", "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
+                        "pod2", "bucket2"),
                 "s3n://bucket2/tenantId2/atlas/Metadata/Export/file2.csv");
         Assert.assertEquals(
                 builder.exploreS3FilePath(
                         "/Pods/pod2//Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export", "pod2",
-                        "tenantId2.tenantId2.Production", "tenantId2", "bucket2"),
+                        "bucket2"),
                 "s3n://bucket2/tenantId2/atlas/Metadata/Export");
     }
 

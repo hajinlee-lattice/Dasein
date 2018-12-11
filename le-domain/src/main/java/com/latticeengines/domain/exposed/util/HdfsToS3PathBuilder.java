@@ -240,27 +240,29 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
-    public String exploreS3FilePath(String filePath, String pod, String customer, String tenantId,
-            String s3Bucket) {
+    public String exploreS3FilePath(String filePath, String pod, String s3Bucket) {
         filePath = FilenameUtils.normalize(filePath);
-        log.info("FilePath=" + filePath);
         StringBuilder builder = new StringBuilder();
-        String hdfsFilesDir = getHdfsAnalyticsDir(customer);
-        if (filePath.startsWith(hdfsFilesDir)) {
-            return builder.append(getS3AnalyticsDir(s3Bucket, tenantId))
-                    .append(filePath.substring(hdfsFilesDir.length())).toString();
-        } else {
-            //TODO: temp log
-            log.info("filePath not start with hdfs analytics dir " + hdfsFilesDir);
+
+        // try analytics
+        Matcher matcher = Pattern.compile("^/user/s-analytics/customers" //
+                + "/(?<customerSpace>[^/]+)/(?<tail>.*)").matcher(filePath);
+        if (matcher.matches()) {
+            String customerSpace = matcher.group("customerSpace");
+            String tail = "/" + matcher.group("tail");
+            String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
+            return builder.append(getS3AnalyticsDir(s3Bucket, tenantId)).append(tail).toString();
         }
 
-        hdfsFilesDir = getHdfsAtlasDir(pod, tenantId);
-        if (filePath.startsWith(hdfsFilesDir)) {
-            return builder.append(getS3AtlasDir(s3Bucket, tenantId))
-                    .append(filePath.substring(hdfsFilesDir.length())).toString();
-        } else {
-            //TODO: temp log
-            log.info("filePath not start with hdfs atlas dir " + hdfsFilesDir);
+        // try atlas
+        matcher = Pattern.compile("^/Pods/" + pod //
+                + "/Contracts/(?<contractId>[^/]+)" //
+                + "/Tenants/(?<tenantId>[^/]+)" //
+                + "/Spaces/Production/(?<tail>.*)").matcher(filePath);
+        if (matcher.matches()) {
+            String tenantId = matcher.group("tenantId");
+            String tail = "/" + matcher.group("tail");
+            return builder.append(getS3AtlasDir(s3Bucket, tenantId)).append(tail).toString();
         }
         return filePath;
     }
@@ -275,10 +277,9 @@ public class HdfsToS3PathBuilder {
     }
 
     // Some ad hoc methods
-    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String customer,
-            String tenantId, String podId, String s3Bucket) {
+    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String podId, String s3Bucket) {
         try {
-            String s3Path = exploreS3FilePath(path, podId, customer, tenantId, s3Bucket);
+            String s3Path = exploreS3FilePath(path, podId, s3Bucket);
             if (isGlob) {
                 if (CollectionUtils.isNotEmpty(HdfsUtils.getFilesByGlob(yarnConfiguration, s3Path))) {
                     path = s3Path;

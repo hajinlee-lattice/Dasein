@@ -425,7 +425,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String hdfsScoreArtifactAppIdDir = String.format(HDFS_SCORE_ARTIFACT_APPID_DIR, customerSpace.toString(),
                 modelNameAndVersion.getKey(), modelNameAndVersion.getValue());
         try {
-            hdfsScoreArtifactAppIdDir = getS3PathIfNeeded(customerSpace, hdfsScoreArtifactAppIdDir, false);
+            hdfsScoreArtifactAppIdDir = getS3PathIfNeeded(hdfsScoreArtifactAppIdDir, false);
             List<String> folders = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactAppIdDir);
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
@@ -451,7 +451,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         if (scoredTxtHdfsPath.size() == 1) {
             String hdfsPath = scoredTxtHdfsPath.get(0);
             try {
-                hdfsPath = getS3PathIfNeeded(customerSpace, hdfsPath, false);
+                hdfsPath = getS3PathIfNeeded(hdfsPath, false);
                 content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
@@ -470,17 +470,15 @@ public class ModelRetrieverImpl implements ModelRetriever {
             String filterStr) {
         List<String> hdfsPaths = null;
         try {
-            baseDirectory = getS3PathIfNeeded(customerSpace, baseDirectory, false);
-            hdfsPaths = HdfsUtils.getFilesForDir(yarnConfiguration, baseDirectory, new HdfsFilenameFilter() {
-                @Override
-                public boolean accept(String filename) {
-                    if (filename.endsWith(filterStr)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            });
+            baseDirectory = getS3PathIfNeeded(baseDirectory, false);
+            hdfsPaths = HdfsUtils.getFilesForDir(yarnConfiguration, baseDirectory, //
+                    (HdfsFilenameFilter) filename -> {
+                        if (filename.endsWith(filterStr)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_31018, new String[] { baseDirectory });
@@ -526,7 +524,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         FSDataInputStream is = null;
 
         String modelJsonType = null;
-        globPath = getS3PathIfNeeded(customerSpace, globPath, true);
+        globPath = getS3PathIfNeeded(globPath, true);
         try (FileSystem fs = HdfsUtils.getFileSystem(yarnConfiguration, globPath)) {
             List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, globPath);
 
@@ -535,7 +533,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             }
             String modelJsonPath = files.get(0);
             modelJsonPath = new HdfsToS3PathBuilder().toHdfsPath(modelJsonPath);
-            modelJsonPath = getS3PathIfNeeded(customerSpace, modelJsonPath, false);
+            modelJsonPath = getS3PathIfNeeded(modelJsonPath, false);
             is = fs.open(new Path(modelJsonPath));
             ObjectMapper om = new ObjectMapper();
             JsonNode node = om.readValue((InputStream) is, JsonNode.class);
@@ -550,11 +548,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return modelJsonType;
     }
 
-    private String getS3PathIfNeeded(CustomerSpace customerSpace, String path, boolean isGlob) {
-        String customer = customerSpace.toString();
-        String tenantId = customerSpace.getTenantId();
-        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, path, isGlob, customer, tenantId, podId,
-                s3Bucket);
+    private String getS3PathIfNeeded(String path, boolean isGlob) {
+        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, path, isGlob, podId, s3Bucket);
     }
 
     private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, //

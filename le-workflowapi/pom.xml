@@ -218,12 +218,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-security</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
@@ -336,6 +330,12 @@
                     <groupId>org.springframework.boot</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
