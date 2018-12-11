@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
+    "babel-jest": "23.6.0",
     "babel-loader": "^7.1.5",
     "babel-plugin-module-resolver": "^3.1.1",
     "babel-preset-env": "^1.7.0",
@@ -80,7 +81,10 @@
       "bower_components",
       "shared"
     ],
+    "setupFiles": ["./setupTests.js"],
     "moduleNameMapper": {
+      "^common(.*)$": "<rootDir>/$1",
+      "^widgets(.*)$": "<rootDir>/widgets/$1",
       "^config$": "<rootDir>/configs/app-config.js",
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
       "\\.(css|less|scss)$": "<rootDir>/__mocks__/styleMock.js"

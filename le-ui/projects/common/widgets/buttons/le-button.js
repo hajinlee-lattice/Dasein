@@ -1,4 +1,4 @@
-import React, { Component } from "../../react-vendor";
+import React, { Component } from "common/react-vendor";
 import propTypes from "prop-types";
 import "./buttons.scss";
 

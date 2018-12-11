@@ -1,7 +1,5 @@
 import React from "common/react-vendor";
-import { configure, shallow, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-configure({ adapter: new Adapter() });
+import { shallow, mount } from 'enzyme';
 
 
 import LeTable from "./table";
