@@ -8,10 +8,10 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -124,7 +124,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
         entityLookupEntryService.set(env, TEST_TENANT, pairs);
 
         // wait a bit for eventual consistency
-        Thread.sleep(1000);
+        Thread.sleep(3000);
 
         seedIds = entityLookupEntryService.get(env, TEST_TENANT, TEST_ENTRIES);
 
