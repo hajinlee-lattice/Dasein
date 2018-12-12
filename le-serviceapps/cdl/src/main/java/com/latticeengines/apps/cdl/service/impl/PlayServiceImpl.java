@@ -333,10 +333,6 @@ public class PlayServiceImpl implements PlayService {
             return null;
         }
         RatingEngine ratingEngine = play.getRatingEngine();
-        if (ratingEngine == null || ratingEngine.getId() == null) {
-            log.error(String.format("Rating Engine for Play %s is not defined.", play.getName()));
-            throw new LedpException(LedpCode.LEDP_18187, new String[] {play.getName()});
-        }
 
         if (tenant != null) {
             MultiTenantContext.setTenant(tenant);

@@ -4,10 +4,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.annotation.Resource;
 import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
@@ -106,6 +103,9 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     }
 
     private void createNewPlay(Play play) {
+        if (play.getRatingEngine() != null) {
+            play.setRatingEngine(findRatingEngine(play));
+        }
         if (play.getTargetSegment() == null) {
             throw new LedpException(LedpCode.LEDP_18206);
         } else {
@@ -116,14 +116,10 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
             MetadataSegment selSegment = segmentEntityMgr.findByName(segmentName.trim());
             play.setTargetSegment(selSegment);
         }
-        if (play.getRatingEngine() == null) {
-            throw new LedpException(LedpCode.LEDP_18209);
-        } else {
-            play.setRatingEngine(findRatingEngine(play));
-        }
         // TODO: Remove in M24
         if (play.getDisplayName() == null) {
-            play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
+            play.setDisplayName(
+                    String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
         }
         if (play.getName() == null) {
             play.setName(play.generateNameStr());
@@ -131,6 +127,9 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     }
 
     private RatingEngine findRatingEngine(Play play) {
+        if (play.getRatingEngine() == null) {
+            throw new NullPointerException("No Model associated with play.");
+        }
         String ratingEngineId = play.getRatingEngine().getId();
         if (ratingEngineId == null) {
             throw new NullPointerException("Rating Engine Id cannot be null.");
@@ -165,7 +164,8 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (play.getIsCleanupDone() != null) {
             existingPlay.setIsCleanupDone(play.getIsCleanupDone());
         }
-        if (play.getPlayType() != null && !play.getPlayType().getId().equals(existingPlay.getPlayType().getId())) {
+        if (play.getPlayType() != null
+                && !play.getPlayType().getId().equals(existingPlay.getPlayType().getId())) {
             existingPlay.setPlayType(play.getPlayType());
         }
         existingPlay.setUpdatedBy(play.getUpdatedBy());
@@ -185,7 +185,8 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList) {
+    public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine,
+            List<PlayStatus> statusList) {
         return playWriterRepository.findByRatingEngineAndPlayStatusIn(ratingEngine, statusList);
     }
 
@@ -200,7 +201,8 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     public void deleteByName(String name, Boolean hardDelete) {
         Play play = getPlayByName(name, true);
         if (play == null) {
-            throw new NullPointerException(String.format("Play with name %s cannot be found", name));
+            throw new NullPointerException(
+                    String.format("Play with name %s cannot be found", name));
         }
         playDao.deleteByPid(play.getPid(), hardDelete == Boolean.TRUE);
     }

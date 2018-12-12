@@ -282,9 +282,10 @@ public class PlayResource {
         }
         playLaunch.setPlay(play);
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
-        validateNonEmptyTargetsForLaunch(customerSpace, play, playName, playLaunch, //
+        if (play.getRatingEngine() != null){
+            validateNonEmptyTargetsForLaunch(customerSpace, play, playName, playLaunch, //
                 playLaunch.getDestinationAccountId());
-
+        }
         // this dry run flag is useful in writing robust testcases
         if (!isDryRunMode) {
             String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
@@ -294,18 +295,9 @@ public class PlayResource {
         playLaunch.setLaunchState(LaunchState.Launching);
         playLaunch.setPlay(play);
         playLaunch.setTableName(createTable(playLaunch));
-        
-        RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
-        coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
-        coverageRequest.setRestrictNullLookupId(playLaunch.getExcludeItemsWithoutSalesforceId());
-        coverageRequest.setLookupId(playLaunch.getDestinationAccountId());
-        RatingEnginesCoverageResponse coverageResponse = ratingCoverageService
-                .getRatingCoveragesForSegment(customerSpace, play.getTargetSegment().getName(), coverageRequest);
 
-        // Todo: change this to segment's account count once UI supports launching unscored accounts
-        Long totalAvailableRatedAccounts = coverageResponse.getRatingModelsCoverageMap()
-                .get(play.getRatingEngine().getId()).getAccountCount();
-
+        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+                
         playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
         playLaunch.setAccountsSuppressed(0L);
         playLaunch.setAccountsErrored(0L);

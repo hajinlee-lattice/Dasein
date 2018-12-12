@@ -202,9 +202,11 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         playMap.put(PlaymakerConstants.AverageProbability, null);
         playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
         playMap.put(PlaymakerConstants.PlayGroups, null);
-        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
-                play.getRatingEngine().getId());
-        playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine, allProducts));
+        if(play.getRatingEngine() != null) {
+            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
+                    play.getRatingEngine().getId());
+            playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine, allProducts));
+        }
         playMap.put(PlaymakerConstants.Workflow, PlayType.getIdForBIS(play.getPlayType().getDisplayName()));
 
         playMap.put(PlaymakerConstants.RowNum, rowNum);

@@ -270,7 +270,7 @@ public enum LedpCode {
     LEDP_18147("User {0} do not have access for tenant {1}"), //
     LEDP_18148(
             "Standard file import only. Your file has {0} million rows. Please use drop folder for file exceeds 1 million rows."), //
-    LEDP_18149("Play {0} cannot be launched since it does not have Rating Engine specified."), //
+    LEDP_18149("Unable to launch play with selected buckets since no Model's were selected for play {0}"), //
     LEDP_18150("Cannot get tenant configuration."), //
     LEDP_18151("Play not found for {0}."), //
     LEDP_18152("Failed to submit a customer report on matching issue."), //
@@ -333,8 +333,7 @@ public enum LedpCode {
     LEDP_18205("Unable to update PlayLaunch due to {0}"), //
     LEDP_18206("Play validation failure: Segment is empty"), LEDP_18207(
             "Play validation failure: Segment Name is empty"), LEDP_18208(
-                    "CSV file name validations failed: CSV injection in the file name or headers"), LEDP_18209(
-                            "No model selected for this play"), //
+                    "CSV file name validations failed: CSV injection in the file name or headers"), //
     LEDP_18210("You do not have admin rights to setup automation on this tenant. Contact your Admin and setup your file transfers. For more information, visit help.lattice-engines.com"),
 
 

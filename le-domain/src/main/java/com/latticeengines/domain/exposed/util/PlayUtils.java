@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -18,18 +19,25 @@ public class PlayUtils {
 
     public static void validatePlay(String playName, Play play) {
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_18149, new String[] { playName });
+            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
         }
-        if (play.getRatingEngine() == null) {
-            throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
-        }
-        if (play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
+        
+        if (play.getRatingEngine() != null && play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
         }
     }
 
     public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch, Play play) {
-        if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
+        if (play.getRatingEngine() == null){
+            if (!CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())){
+                throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
+                
+            }
+            Set<RatingBucketName> emptyBucketsToLaunch = Collections.emptySet();
+            playLaunch.setBucketsToLaunch(emptyBucketsToLaunch);
+            playLaunch.setLaunchUnscored(true);
+        }
+        else if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
             // TODO - enable it once UI has fix for PLS-6769
             // throw new LedpException(LedpCode.LEDP_18156, new String[] {
             // play.getName() });
