@@ -1,8 +1,10 @@
 package com.latticeengines.security.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.Collections;
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,9 +39,6 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "user", description = "REST resource for user management")
 @RestController
@@ -125,7 +124,7 @@ public class UserResource {
             return response;
         }
 
-        RegistrationResult result = userService.registerUserToTenant(uRegTenant);
+        RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
         response.setResult(result);
         if (!result.isValid())
             return response;
@@ -203,7 +202,7 @@ public class UserResource {
             }
 
             boolean newUser = !userService.inTenant(tenantId, username);
-            userService.assignAccessLevel(targetLevel, tenantId, username);
+            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername);
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);

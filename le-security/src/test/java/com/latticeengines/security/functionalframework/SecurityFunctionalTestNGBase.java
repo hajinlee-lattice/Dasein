@@ -1,13 +1,9 @@
 package com.latticeengines.security.functionalframework;
 
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -61,6 +57,9 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
+
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-security-context.xml" })
@@ -264,7 +263,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
             Credentials user1Creds = new Credentials();
             user1Creds.setUsername(username);
             user1Creds.setPassword(password);
-            assertTrue(globalUserManagementService.registerUser(user1, user1Creds));
+            assertTrue(globalUserManagementService.registerUser(null, user1, user1Creds));
         } catch (Exception e) {
             log.info("User " + username + " already created.");
         }

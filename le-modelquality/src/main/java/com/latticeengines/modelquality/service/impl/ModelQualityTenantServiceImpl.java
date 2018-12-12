@@ -75,7 +75,7 @@ public class ModelQualityTenantServiceImpl implements ModelQualityTenantService 
                 creds.setPassword(passwordHash);
                 userReg.setCredentials(creds);
 
-                userService.createUser(userReg);
+                userService.createUser(null, userReg);
                 log.info("Successfully created ModelQuality service user: " + username + ".");
             }
 

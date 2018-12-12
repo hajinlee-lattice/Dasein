@@ -170,10 +170,10 @@ public class PLSComponentManager {
             // ignore
         }
 
-        assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId());
+        assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
+        assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
+        assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
+        assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId());
     }
 
     public void discardTenant(String tenantId) {
@@ -196,7 +196,7 @@ public class PLSComponentManager {
         }
     }
 
-    private void assignAccessLevelByEmails(Collection<String> emails, AccessLevel accessLevel, String tenantId) {
+    private void assignAccessLevelByEmails(String userName, Collection<String> emails, AccessLevel accessLevel, String tenantId) {
         for (String email : emails) {
             User user;
             try {
@@ -208,7 +208,7 @@ public class PLSComponentManager {
             if (user == null) {
                 UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
                 try {
-                    userService.createUser(uReg);
+                    userService.createUser(userName, uReg);
                     Thread.sleep(500);
                     user = userService.findByEmail(email);
                     if (user == null) {
@@ -220,7 +220,7 @@ public class PLSComponentManager {
                 updatePasswordBasedOnUsername(user);
             }
             try {
-                userService.assignAccessLevel(accessLevel, tenantId, email);
+                userService.assignAccessLevel(accessLevel, tenantId, email, userName);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);

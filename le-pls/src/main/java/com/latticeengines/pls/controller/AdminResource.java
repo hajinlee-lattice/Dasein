@@ -1,8 +1,10 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -32,9 +35,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "admin", description = "REST resource for managing PLS tenants")
 @RestController
@@ -95,7 +95,7 @@ public class AdminResource extends InternalResourceBase {
     public Boolean addAdminUser(@RequestBody UserRegistrationWithTenant userRegistrationWithTenant,
             HttpServletRequest request) {
         checkHeader(request);
-        return userService.addAdminUser(userRegistrationWithTenant);
+        return userService.addAdminUser(MultiTenantContext.getEmailAddress(), userRegistrationWithTenant);
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -135,7 +135,7 @@ public class AdminResource extends InternalResourceBase {
         LOGGER.info(String.format("Updating user %s in the tenant %s using the internal API", username, tenantId));
 
         if (accessLevel != null) {
-            userService.assignAccessLevel(accessLevel, tenantId, username);
+            userService.assignAccessLevel(accessLevel, tenantId, username, MultiTenantContext.getEmailAddress());
             LOGGER.info(String.format("User %s has been updated to %s for the tenant %s through the internal API",
                     username, accessLevel.name(), tenantId));
         }

@@ -95,20 +95,20 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     private ZendeskService zendeskService;
 
     @Override
-    public synchronized Boolean registerUser(User user, Credentials creds) {
+    public synchronized Boolean registerUser(String userName, User user, Credentials creds) {
         try {
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
-            return globalAuthRegisterUser(user, creds);
+            return globalAuthRegisterUser(userName, user, creds);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18004, e, new String[] { creds.getUsername() });
         }
     }
 
     @Override
-    public synchronized Boolean registerExternalIntegrationUser(User user) {
+    public synchronized Boolean registerExternalIntegrationUser(String userName, User user) {
         try {
             log.info(String.format("Registering external integration user %s against Global Auth.", user.getEmail()));
-            createGlobalAuthUser(user, true);
+            createGlobalAuthUser(userName, user, true);
             return true;
         } catch (LedpException le) {
             throw le;
@@ -117,7 +117,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
-    private Boolean globalAuthRegisterUser(User user, Credentials creds) throws Exception {
+    private Boolean globalAuthRegisterUser(String userName, User user, Credentials creds) throws Exception {
         GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
                 .findByUsername(creds.getUsername());
         if (latticeAuthenticationData != null) {
@@ -139,7 +139,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new Exception("The specified email already exists.");
         }
 
-        userData = createGlobalAuthUser(user, false);
+        userData = createGlobalAuthUser(userName, user, false);
 
         latticeAuthenticationData = new GlobalAuthAuthentication();
         latticeAuthenticationData.setUsername(creds.getUsername());
@@ -152,7 +152,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return true;
     }
 
-    protected GlobalAuthUser createGlobalAuthUser(User user, boolean externalIntegUser) {
+    protected GlobalAuthUser createGlobalAuthUser(String userName, User user, boolean externalIntegUser) {
         if (externalIntegUser && StringUtils.isNotBlank(user.getEmail()) && user.getEmail().toUpperCase().endsWith(LATTICE_ENGINES_COM)) {
             throw new LedpException(LedpCode.LEDP_19004);
         }
@@ -164,23 +164,36 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         userData.setTitle(user.getTitle());
         userData.setPhoneNumber(user.getPhoneNumber());
         userData.setIsActive(true);
+        userData.setCreatedByUser(userName);
         gaUserEntityMgr.create(userData);
         return userData;
     }
 
     @Override
-    public synchronized Boolean grantRight(String right, String tenant, String username) {
+    public Boolean grantRight(String right, String tenant, String username) {
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
                     tenant));
-            return globalAuthGrantRight(right, tenant, username);
+            return globalAuthGrantRight(right, tenant, username, null);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[] { right, username, tenant });
         }
     }
 
-    public Boolean globalAuthGrantRight(String right, String tenant, String username)
+    @Override
+    public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser) {
+        try {
+            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
+                    tenant));
+            return globalAuthGrantRight(right, tenant, username, createdByUser);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18005, e,
+                    new String[] { right, username, tenant });
+        }
+    }
+
+    public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser)
             throws Exception {
 
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
@@ -202,6 +215,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         rightData.setGlobalAuthUser(globalAuthUser);
         rightData.setGlobalAuthTenant(tenantData);
         rightData.setOperationName(right);
+        rightData.setCreatedByUser(createdByUser);
         gaUserTenantRightEntityMgr.create(rightData);
 
         if (isZendeskEnabled(globalAuthUser.getEmail())) {
@@ -792,7 +806,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public String addUserAccessLevel(String emails, AccessLevel level) {
+    public String addUserAccessLevel(String userName, String emails, AccessLevel level) {
         String[] emailStr = emails.trim().split(",");
         Set<String> emailSet = new HashSet<>();
         for(String email : emailStr) {
@@ -814,6 +828,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 gaUserTenantRight.setGlobalAuthTenant(tenant);
                 gaUserTenantRight.setGlobalAuthUser(gaUser);
                 gaUserTenantRight.setOperationName(level.toString());
+                gaUserTenantRight.setCreatedByUser(userName);
                 log.info(String.format("user %s is granted to %s", email, level));
                 gaUserTenantRightEntityMgr.create(gaUserTenantRight);
             }

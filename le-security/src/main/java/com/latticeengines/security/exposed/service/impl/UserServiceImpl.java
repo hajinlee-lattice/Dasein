@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
                     userByEmail));
         } else {
             try {
-                globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
+                globalUserManagementService.registerUser(null, userRegistration.getUser(), userRegistration.getCredentials());
             } catch (Exception e) {
                 LOGGER.warn("Error creating admin user.");
             }
@@ -88,7 +88,50 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean createUser(UserRegistration userRegistration) {
+    public boolean addAdminUser(String createdByUser, UserRegistrationWithTenant userRegistrationWithTenant) {
+        UserRegistration userRegistration = userRegistrationWithTenant.getUserRegistration();
+        String tenant = userRegistrationWithTenant.getTenant();
+
+        if (userRegistration == null) {
+            LOGGER.error("User registration cannot be null.");
+            return false;
+        }
+
+        if (userRegistration.getUser() == null) {
+            LOGGER.error("User cannot be null.");
+            return false;
+        }
+        if (userRegistration.getCredentials() == null) {
+            LOGGER.error("Credentials cannot be null.");
+            return false;
+        }
+        if (tenant == null) {
+            LOGGER.error("Tenant cannot be null.");
+            return false;
+        }
+
+        User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+
+        if (userByEmail != null) {
+            LOGGER.warn(String.format(
+                    "A user with the same email address %s already exists. Update instead of create user.",
+                    userByEmail));
+        } else {
+            try {
+                globalUserManagementService.registerUser(createdByUser, userRegistration.getUser(), userRegistration.getCredentials());
+            } catch (Exception e) {
+                LOGGER.warn("Error creating admin user.");
+            }
+        }
+
+        String username = userRegistration.getUser().getUsername();
+        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser);
+
+        return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
+    }
+
+    @Override
+    public boolean createUser(String userName, UserRegistration userRegistration) {
         if (userRegistration == null) {
             LOGGER.error("User registration cannot be null.");
             return false;
@@ -115,7 +158,7 @@ public class UserServiceImpl implements UserService {
                     userByEmail));
         } else {
             try {
-                globalUserManagementService.registerUser(user, creds);
+                globalUserManagementService.registerUser(userName, user, creds);
                 userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
             } catch (Exception e) {
                 LOGGER.warn("Error creating admin user.");
@@ -128,12 +171,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean upsertSamlIntegrationUser(LoginValidationResponse samlLoginResp, String tenantDeploymentId) {
+    public boolean upsertSamlIntegrationUser(String userName, LoginValidationResponse samlLoginResp, String tenantDeploymentId) {
         GlobalAuthUser globalAuthUser = globalUserManagementService.findByEmailNoJoin(samlLoginResp.getUserId());
         User userInfoFromSaml = IntegrationUserUtils.buildUserFrom(samlLoginResp);
         if (globalAuthUser == null) {
             LOGGER.info("Creating new User: %s for Tenant: %s", samlLoginResp.getUserId(), tenantDeploymentId);
-            globalUserManagementService.registerExternalIntegrationUser(userInfoFromSaml);
+            globalUserManagementService.registerExternalIntegrationUser(userName, userInfoFromSaml);
         }
         List<String> gaUserRights = globalUserManagementService.getRights(userInfoFromSaml.getEmail(),
                 tenantDeploymentId);
@@ -165,6 +208,22 @@ public class UserServiceImpl implements UserService {
         if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
+            } catch (Exception e) {
+                LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser) {
+        if (accessLevel == null) {
+            return resignAccessLevel(tenantId, username);
+        }
+        if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
+            try {
+                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser);
             } catch (Exception e) {
                 LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
@@ -289,7 +348,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (result.isValid()) {
-            Boolean flag = createUser(userReg);
+            Boolean flag = createUser(null, userReg);
             result.setValid(flag);
         }
 
@@ -302,7 +361,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RegistrationResult registerUserToTenant(UserRegistrationWithTenant userRegistrationWithTenant) {
+    public RegistrationResult registerUserToTenant(String userName, UserRegistrationWithTenant userRegistrationWithTenant) {
         UserRegistration userRegistration = userRegistrationWithTenant.getUserRegistration();
         userRegistration.toLowerCase();
         User user = userRegistration.getUser();
@@ -313,13 +372,13 @@ public class UserServiceImpl implements UserService {
             return result;
         }
 
-        result.setValid(createUser(userRegistration));
+        result.setValid(createUser(userName, userRegistration));
         if (!result.isValid()) {
             return result;
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
-            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername());
+            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName);
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
@@ -450,7 +509,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String addUserAccessLevel(String userName, String emails, AccessLevel level) {
         LOGGER.info(String.format("%s sets user %s to %s", userName, emails, level));
-        return globalUserManagementService.addUserAccessLevel(emails, level);
+        return globalUserManagementService.addUserAccessLevel(userName, emails, level);
     }
 
 }

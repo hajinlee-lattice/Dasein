@@ -49,6 +49,10 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     @Column(name = "Operation_Name", nullable = true)
     private String operationName;
 
+    @JsonProperty("created_by_user")
+    @Column(name = "Created_By_User", nullable = true)
+    private String createdByUser;
+
     @Override
     public Long getPid() {
         return userTenantRightId;
@@ -82,4 +86,8 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     public void setOperationName(String operationName) {
         this.operationName = operationName;
     }
+
+    public String getCreatedByUser() { return createdByUser; }
+
+    public void setCreatedByUser(String createdByUser) { this.createdByUser = createdByUser; }
 }

@@ -59,6 +59,10 @@ public class GlobalAuthUser extends BaseGlobalAuthObject implements HasPid {
     @Column(name = "IsActive", nullable = true)
     private boolean isActive;
 
+    @JsonProperty("created_by_user")
+    @Column(name = "Created_By_User", nullable = true)
+    private String createdByUser;
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "globalAuthUser")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthAuthentication> gaAuthentications;
@@ -125,6 +129,10 @@ public class GlobalAuthUser extends BaseGlobalAuthObject implements HasPid {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+
+    public String getCreatedByUser() { return createdByUser; }
+
+    public void setCreatedByUser(String createdByUser) { this.createdByUser = createdByUser; }
 
     public List<GlobalAuthAuthentication> getAuthentications() {
         return gaAuthentications;

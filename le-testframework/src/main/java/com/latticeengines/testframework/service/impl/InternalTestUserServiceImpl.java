@@ -50,7 +50,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
                 Credentials user1Creds = new Credentials();
                 user1Creds.setUsername(username);
                 user1Creds.setPassword(password);
-                globalUserManagementService.registerUser(user1, user1Creds);
+                globalUserManagementService.registerUser(null, user1, user1Creds);
             }
         } catch (Exception e) {
             // user already created

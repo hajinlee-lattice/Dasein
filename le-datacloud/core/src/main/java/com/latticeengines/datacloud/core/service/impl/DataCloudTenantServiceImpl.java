@@ -67,7 +67,7 @@ public class DataCloudTenantServiceImpl implements DataCloudTenantService {
             creds.setPassword(passwordHash);
             userReg.setCredentials(creds);
 
-            userService.createUser(userReg);
+            userService.createUser(null, userReg);
         }
 
         if (!AccessLevel.SUPER_ADMIN.equals(userService.getAccessLevel(tenantId, username))) {

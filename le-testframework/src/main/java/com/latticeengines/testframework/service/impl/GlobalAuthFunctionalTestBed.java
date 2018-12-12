@@ -110,7 +110,7 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
         String username = TestFrameworkUtils.usernameForAccessLevel(accessLevel);
         if (userService.findByUsername(username) == null) {
             UserRegistration userReg = TestFrameworkUtils.createUserRegistration(accessLevel);
-            userService.createUser(userReg);
+            userService.createUser(null, userReg);
         }
         userService.assignAccessLevel(accessLevel, tenant.getId(), username);
     }

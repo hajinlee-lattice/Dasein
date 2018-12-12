@@ -1,10 +1,5 @@
 package com.latticeengines.security.exposed.service.impl;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +19,11 @@ import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementServ
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
@@ -100,31 +100,31 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
     public void testFindUser() {
         User user = userService.findByUsername(uReg.getCredentials().getUsername());
         assertNotNull(user);
-        
+
         user = userService.findByEmail(uReg.getUser().getEmail());
         assertNotNull(user);
     }
-    
+
     @Test(groups = "functional")
     public void testCreateSamlExternalUser() {
-        assertTrue(userService.upsertSamlIntegrationUser(samlUser, tenant.getId()));
+        assertTrue(userService.upsertSamlIntegrationUser(null, samlUser, tenant.getId()));
         User user = userService.findByUsername(samlUser.getUserId());
         assertNotNull(user);
         user = userService.findByEmail(samlUser.getUserId());
         assertNotNull(user);
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = {"testCreateSamlExternalUser"})
     public void testSamlUserAccessLevel() {
         AccessLevel level = userService.getAccessLevel(tenant.getId(), samlUser.getUserId());
         assertEquals(level, AccessLevel.EXTERNAL_USER);
-        
+
         // Simulate the SAML Login by changing User Roles on OKTA
         List<String> externalRoles = new ArrayList<>();
         externalRoles.add(SamlIntegrationRole.LATTICE_ADMIN.name());
         samlUser.setUserRoles(externalRoles);
-        
-        assertTrue(userService.upsertSamlIntegrationUser(samlUser, tenant.getId()));
+
+        assertTrue(userService.upsertSamlIntegrationUser(null, samlUser, tenant.getId()));
         level = userService.getAccessLevel(tenant.getId(), samlUser.getUserId());
         assertEquals(level, AccessLevel.EXTERNAL_ADMIN);
     }

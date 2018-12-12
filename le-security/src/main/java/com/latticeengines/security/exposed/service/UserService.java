@@ -15,17 +15,21 @@ public interface UserService {
 
     boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant);
 
-    boolean createUser(UserRegistration userRegistration);
+    boolean addAdminUser(String createdByUser, UserRegistrationWithTenant userRegistrationWithTenant);
 
-    boolean upsertSamlIntegrationUser(LoginValidationResponse samlLoginResp, String tenantDeploymentId);
+    boolean createUser(String userName, UserRegistration userRegistration);
 
-    RegistrationResult registerUserToTenant(UserRegistrationWithTenant userRegistrationWithTenant);
+    boolean upsertSamlIntegrationUser(String userName, LoginValidationResponse samlLoginResp, String tenantDeploymentId);
+
+    RegistrationResult registerUserToTenant(String userName, UserRegistrationWithTenant userRegistrationWithTenant);
 
     User findByEmail(String email);
 
     User findByUsername(String username);
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
+
+    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser);
 
     boolean resignAccessLevel(String tenantId, String username);
 
