@@ -143,6 +143,11 @@ class ApsDataLoader(object):
         logger.info("Start to split Dataframe.")
 #         dfs = np.array_split(dataFrame, parallel)
         chunkSize = 50000
+        if dataFrame.shape[1] > 5000:
+            chunkSize = 5000
+        elif dataFrame.shape[1] > 2500:
+            chunkSize = 10000
+        logger.info("Chunk size:" + str(chunkSize))
         dfs = [dataFrame[i:i + chunkSize] for i in range(0, dataFrame.shape[0], chunkSize)]
         logger.info("Finished splitting Dataframe.")
 
