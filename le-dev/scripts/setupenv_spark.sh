@@ -29,8 +29,9 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
 
     if [ ! -f "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" ]; then
         JERSEY_URL="http://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
-        wget ${JERSEY_URL} -O ${SPARK_HOME}/jars/jersey-bundle-1.19.1.jar
+        wget ${JERSEY_URL} -O ${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar
     fi
+    sudo cp ${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar ${SPARK_HOME}/jars
 
     sudo chown -R ${USER} ${SPARK_HOME}
 fi
@@ -46,13 +47,13 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     if [ ! -f "${ARTIFACT_DIR}/livy-${LIVY_VERSION}.zip" ]; then
         APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
         SPARK_TGZ_URL="${APACHE_MIRROR}incubator/livy/${LIVY_VERSION}/livy-${LIVY_VERSION}-bin.zip"
-        wget ${SPARK_TGZ_URL} -O ${ARTIFACT_DIR}/livy-${LIVY_VERSION}.zip
+        wget ${SPARK_TGZ_URL} -O ${ARTIFACT_DIR}/livy-${LIVY_VERSION}-bin.zip
     fi
 
     if [ -d "${ARTIFACT_DIR}/livy-${LIVY_VERSION}-bin" ]; then
         rm -rf ${ARTIFACT_DIR}/livy-${LIVY_VERSION}-bin
     fi
-    unzip ${ARTIFACT_DIR}/livy-${LIVY_VERSION}.zip -d ${ARTIFACT_DIR}
+    unzip ${ARTIFACT_DIR}/livy-${LIVY_VERSION}-bin.zip -d ${ARTIFACT_DIR}
 
     if [ -d "${LIVY_HOME}" ]; then
         sudo rm -rf ${LIVY_HOME}
