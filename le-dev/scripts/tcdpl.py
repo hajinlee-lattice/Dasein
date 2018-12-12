@@ -181,8 +181,8 @@ def get_project(app):
 
 
 def get_mgr_app(app):
-    if app == "oauth":
-        mgr_app = 'oauth2'
+    if app == "oauth2":
+        mgr_app = 'oauth'
     elif app in MS_MODULES:
         mgr_app = 'ms'
     else:
