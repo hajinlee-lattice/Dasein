@@ -48,7 +48,7 @@ alias sfbld='dirs -c && pushd $WSHOME/le-serviceflows && mvn -T6 -DskipTests cle
 alias sfdpl='sfbld && swlibdpl'
 alias sabld='dirs -c && pushd $WSHOME/le-serviceapps && mvn -T4 -DskipTests clean install && popd'
 
-alias cfgdplnobld='hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -put -f $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -put -f $WSHOME/le-config/conf/env/dev/log4j.properties /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/lib; hdfs dfs -put -f $WSHOME/le-config/src/main/resources/jacocoagent.jar /app/${LE_STACK}/$(leversion)/lib;'
+alias cfgdplnobld='hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -put -f $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -put -f $WSHOME/le-config/conf/env/dev/log4j.properties /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -put -f $WSHOME/le-config/conf/env/dev/log4j2-yarn.xml /app/${LE_STACK}/$(leversion)/conf; hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/lib; hdfs dfs -put -f $WSHOME/le-config/src/main/resources/jacocoagent.jar /app/${LE_STACK}/$(leversion)/lib;'
 alias cfgbld='bash $WSHOME/le-dev/scripts/cfgbld.sh'
 alias cfgdpl='cfgbld && cfgdplnobld'
 

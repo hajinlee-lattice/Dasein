@@ -91,6 +91,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/conf/log4j2-yarn.xml", versionManager.getCurrentVersionInStack(stackName)), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
         if (JacocoUtils.needToLocalizeJacoco()) {
@@ -221,11 +225,17 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         }
         String parameter = setupParameters(containerProperties);
 
-        return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
+        List<String> commands = Arrays.asList( //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE
                 // -Xrunjdwp:transport=dt_socket,address=4023,server=y,suspend=y",
+                "ls -alhR . > <LOG_DIR>/directory.info", //
+                "&&", //
+                "$JAVA_HOME/bin/java", //
                 "-Dlog4j.debug", //
                 "-Dlog4j.configuration=file:log4j.properties", //
+                "-Dlog4j2.debug", //
+                "-Dlog4j.configurationFile=log4j2-yarn.xml", //
+                "-DLOG4J_DEBUG_DIR=<LOG_DIR>", //
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
                 getXmxSetting(appMasterProperties, true), //
@@ -235,7 +245,11 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "yarnAppmaster", //
                 parameter, //
                 "1><LOG_DIR>/Appmaster.stdout", //
-                "2><LOG_DIR>/Appmaster.stderr" });
+                "2><LOG_DIR>/Appmaster.stderr");
+        if (log.isDebugEnabled()) {
+            log.debug("Commands send to YARN: " + commands);
+        }
+        return commands;
     }
 
     private String getJacocoOpt(Properties properties) {

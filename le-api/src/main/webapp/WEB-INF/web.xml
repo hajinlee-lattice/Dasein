@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-    <display-name>LEDP REST API</display-name>
+    <display-name>api</display-name>
     <description>Lattice Engines Data Platform REST API</description>
 
     <filter>
@@ -16,7 +16,7 @@
         <filter-name>cors</filter-name>
         <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
-    
+
     <servlet>
         <servlet-name>rest</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

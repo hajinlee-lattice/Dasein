@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="app">oauth2</Property>
+        <Property name="log.dir">/var/log/ledp</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="ColorConsole" target="SYSTEM_OUT">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${app}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n"/>
+        </Console>
+        <RollingFile
+                name="RollingFile"
+                fileName="${log.dir}/le-$${app}.log"
+                filePattern="${log.dir}/le-$${app}-%d{yyyy-MM-dd}-%i.log.gz"
+                ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} [%t] %-5p %c{1.}:%L - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="ColorConsole"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <Logger name="com.latticeengines" additivity="false" level="DEBUG">
+            <AppenderRef ref="ColorConsole"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.latticeengines.monitor.exposed.metrics.impl" additivity="false" level="DEBUG">
+            <AppenderRef ref="ColorConsole"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.latticeengines.monitor.metric.service.impl" additivity="false" level="DEBUG">
+            <AppenderRef ref="ColorConsole"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>

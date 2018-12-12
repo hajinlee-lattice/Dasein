@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-    <display-name>Admin REST API</display-name>
+    <display-name>admin</display-name>
     <description>Lattice Engines Admin REST API</description>
 
     <listener>

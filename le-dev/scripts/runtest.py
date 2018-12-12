@@ -21,7 +21,7 @@ def propDirsOpts():
 def commonOpts():
     args = [
         '-Djavax.net.ssl.trustStore=%s/le-security/certificates/cacerts' % WSHOME,
-        '-Djava.util.logging.config.file=../le-dev/test-logging.properties'
+        '-Dlog4j.configurationFile=%s/le-dev/log4j2-test.xml' % WSHOME
     ]
 
     sp = subprocess.Popen(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)

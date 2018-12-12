@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
-    <display-name>QUARTZ SERVICE API</display-name>
+    <display-name>quartz</display-name>
     <description>Lattice Engines Quartz Service REST API</description>
 
     <filter>

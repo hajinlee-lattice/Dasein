@@ -59,7 +59,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
                 fieldMap = fieldMaps.get(i);
             }
             if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
-                log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement, fieldMap));
+                log.debug(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement, fieldMap));
             }
         }
     }
