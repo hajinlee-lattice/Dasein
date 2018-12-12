@@ -9,9 +9,11 @@ import javax.inject.Inject;
 
 import com.amazonaws.services.dynamodbv2.document.DeleteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -63,6 +65,19 @@ public class DynamoItemServiceImpl implements DynamoItemService {
             timer.setTimerMessage("Queried " + items.size() + " items from table " + tableName);
         }
 
+        return items;
+    }
+
+    @Override
+    public List<Item> scan(String tableName, ScanSpec scanSpec) {
+        Preconditions.checkNotNull(tableName);
+        Preconditions.checkNotNull(scanSpec);
+        List<Item> items = new ArrayList<>();
+        DynamoDB dynamoDB = dynamoService.getDynamo();
+        ItemCollection<ScanOutcome> itemCollection = dynamoDB.getTable(tableName).scan(scanSpec);
+        for (Item anItemCollection : itemCollection) {
+            items.add(anItemCollection);
+        }
         return items;
     }
 

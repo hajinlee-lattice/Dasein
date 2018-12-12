@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service to manipulate {@link CDLRawSeed} in different environment (e.g., staging, serving) for the given tenant.
@@ -63,6 +64,20 @@ public interface CDLRawSeedService {
     List<CDLRawSeed> get(
             @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, @NotNull List<String> seedIds);
+
+    /**
+     * Scan dynamo and return a set of seeds with the specified into.
+     *
+     * @param env environment to retrieve from(only support STAGING right now)
+     * @param tenant target tenant
+     * @param entity target entity type
+     * @param seedIds list of seed IDs used as start keys, null/empty indicates all shards.
+     * @return seed objects map. the map will be {@literal null} if scan to the end, map key is shard id, value is
+     * list of seed IDs scanned in that shards.
+     */
+    Map<Integer, List<CDLRawSeed>> scan(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull String entity, List<String> seedIds, int maxResultSize);
 
     /**
      * Update all {@link com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry} and attributes in the

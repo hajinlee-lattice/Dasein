@@ -8,6 +8,9 @@ import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -75,6 +78,86 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
         // cleanup afterwards
         cleanup(env, seedId);
+    }
+
+    @Test(groups = "functional")
+    private void testScan() {
+        List<String> seedIds = Arrays.asList("testScan1", "testScan2", "testScan3", "testScan4", "testScan5",
+                "testScan6", "testScan7");
+        List<CDLRawSeed> scanSeeds = new ArrayList<>();
+        CDLMatchEnvironment env = CDLMatchEnvironment.STAGING;
+
+        // make sure we don't have this seed
+        for(String seedId : seedIds) {
+            cleanup(env, seedId);
+        }
+
+        // create successfully because no seed at the moment
+        for (String seedId : seedIds) {
+            Assert.assertTrue(cdlRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+        }
+        // should already exists
+        List<String> getSeedIds = new ArrayList<>();
+        int loopCount = 0;
+        do {
+            loopCount++;
+            Map<Integer, List<CDLRawSeed>> seeds = cdlRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 2);
+            getSeedIds.clear();
+            if (MapUtils.isNotEmpty(seeds)) {
+                for (Map.Entry<Integer, List<CDLRawSeed>> entry : seeds.entrySet()) {
+                    getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
+                    scanSeeds.addAll(entry.getValue());
+                    if (loopCount == 1) {
+                        Assert.assertTrue(entry.getValue().size() <= 2);
+                    }
+                }
+            }
+        } while (CollectionUtils.isNotEmpty(getSeedIds));
+
+        Assert.assertEquals(loopCount, 3);
+        Assert.assertEquals(scanSeeds.size(), seedIds.size());
+
+        //try another batch size
+        scanSeeds.clear();
+        loopCount = 0;
+        do {
+            loopCount++;
+            Map<Integer, List<CDLRawSeed>> seeds = cdlRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 3);
+            getSeedIds.clear();
+            if (MapUtils.isNotEmpty(seeds)) {
+                for (Map.Entry<Integer, List<CDLRawSeed>> entry : seeds.entrySet()) {
+                    getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
+                    scanSeeds.addAll(entry.getValue());
+                    Assert.assertTrue(entry.getValue().size() <= 3);
+                }
+            }
+        } while (CollectionUtils.isNotEmpty(getSeedIds));
+
+        Assert.assertEquals(loopCount, 3);
+        Assert.assertEquals(scanSeeds.size(), seedIds.size());
+
+        //try another batch size
+        scanSeeds.clear();
+        loopCount = 0;
+        do {
+            loopCount++;
+            Map<Integer, List<CDLRawSeed>> seeds = cdlRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 4);
+            getSeedIds.clear();
+            if (MapUtils.isNotEmpty(seeds)) {
+                for (Map.Entry<Integer, List<CDLRawSeed>> entry : seeds.entrySet()) {
+                    getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
+                    scanSeeds.addAll(entry.getValue());
+                    Assert.assertTrue(entry.getValue().size() <= 4);
+                }
+            }
+        } while (CollectionUtils.isNotEmpty(getSeedIds));
+
+        Assert.assertEquals(loopCount, 2);
+        Assert.assertEquals(scanSeeds.size(), seedIds.size());
+
+        for(String seedId : seedIds) {
+            cleanup(env, seedId);
+        }
     }
 
     @Test(groups = "functional", dataProvider = "cdlMatchEnvironment")

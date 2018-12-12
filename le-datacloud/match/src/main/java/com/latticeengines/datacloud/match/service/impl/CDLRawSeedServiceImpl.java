@@ -6,12 +6,14 @@ import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
+import com.amazonaws.services.dynamodbv2.xspec.ScanExpressionSpec;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -23,11 +25,16 @@ import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,6 +56,11 @@ import static com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEnt
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 @Component("cdlRawSeedService")
 public class CDLRawSeedServiceImpl implements CDLRawSeedService {
@@ -73,6 +85,8 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     private final CDLConfigurationService cdlConfigurationService;
 
     private final int numStagingShards;
+
+    private static final Scheduler scheduler = Schedulers.newParallel("cdl-rawseed");
 
     @Inject
     public CDLRawSeedServiceImpl(
@@ -139,6 +153,64 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
                 .map(item -> Pair.of(item.getString(ATTR_SEED_ID), item))
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1)); // ignore duplicates
         return seedIds.stream().map(itemMap::get).map(this::fromItem).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Integer, List<CDLRawSeed>> scan(
+            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull String entity, List<String> seedIds, int maxResultSize) {
+        checkNotNull(env, tenant, entity);
+        if (!CDLMatchEnvironment.STAGING.equals(env)) {
+            throw new UnsupportedOperationException(String.format("Scanning for %s is not supported.", env.name()));
+        }
+        Map<Integer, String> seedMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(seedIds)) {
+            for (int i = 0; i < numStagingShards; i++) {
+                seedMap.put(i, "");
+            }
+        } else {
+            seedIds.forEach(seedId -> {
+                seedMap.put(getShardId(seedId), seedId);
+            });
+        }
+        List<Pair<Integer, Item>> itemPairs = scanPartition(env, tenant, entity, seedMap, maxResultSize).sequential().collectList().block();
+        Map<Integer, List<CDLRawSeed>> result = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(itemPairs)) {
+            itemPairs.forEach(itemPair -> {
+                result.putIfAbsent(itemPair.getLeft(), new ArrayList<>());
+                result.get(itemPair.getLeft()).add(fromItem(itemPair.getRight()));
+            });
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    private ParallelFlux<Pair<Integer, Item>> scanPartition(CDLMatchEnvironment env, Tenant tenant, String entity,
+                                             Map<Integer, String> seedMap, int maxResultSize) {
+        Integer[] shardIds = new Integer[seedMap.keySet().size()];
+        shardIds = seedMap.keySet().toArray(shardIds);
+        return Flux.just(shardIds).parallel().runOn(scheduler)
+                .map(k -> {
+                    ScanExpressionSpec xspec = new ExpressionSpecBuilder()
+                            .withCondition(S(ATTR_PARTITION_KEY)
+                                    .eq(getShardPartitionKey(tenant, getMatchVersion(env, tenant), entity, k)))
+                            .buildForScan();
+                    PrimaryKey primaryKey = StringUtils.isEmpty(seedMap.get(k)) ? null : buildKey(env, tenant,
+                            getMatchVersion(env, tenant), entity, seedMap.get(k));
+                    ScanSpec scanSpec = new ScanSpec()
+                            .withExpressionSpec(xspec)
+                            .withExclusiveStartKey(primaryKey)
+                            .withMaxResultSize(maxResultSize);
+                    List<Pair<Integer, Item>> result = new ArrayList<>();
+                    dynamoItemService.scan(getTableName(env), scanSpec)
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .forEach(item -> {
+                                result.add(new ImmutablePair<>(k, item));
+                            });
+                    return result;
+                }).flatMap(Flux::fromIterable);
     }
 
     @Override
@@ -496,11 +568,12 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     private PrimaryKey buildKey(
             CDLMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
         Preconditions.checkNotNull(tenant.getPid());
+        String partitionKey = getPartitionKey(env, tenant, version, entity, seedId);
         switch (env) {
             case SERVING:
-                return buildServingKey(tenant, version, entity, seedId);
+                return buildServingKey(partitionKey);
             case STAGING:
-                return buildStagingKey(tenant, version, entity, seedId);
+                return buildStagingKey(partitionKey, seedId);
             default:
                 throw new UnsupportedOperationException("Unsupported environment: " + env);
         }
@@ -513,13 +586,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * - Sort Key: <CDL_ACCOUNT_ID>
      *     - E.g., "aabbabc123456789"
      */
-    private PrimaryKey buildStagingKey(
-            Tenant tenant, int version, String entity, String seedId) {
-        // use calculated suffix because we need lookup
-        // & 0x7fffffff to make it positive and mod nShards
-        int suffix = (seedId.hashCode() & 0x7fffffff) % numStagingShards;
-        String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, String.valueOf(suffix));
+    private PrimaryKey buildStagingKey(String partitionKey, String seedId) {
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey, ATTR_RANGE_KEY, seedId);
     }
 
@@ -528,10 +595,31 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * - Partition Key: SEED_<TENANT_PID>_<SERVING_VERSION>_<ENTITY>_<CDL_ACCOUNT_ID>
      *     - E.g., "SEED_123_5_Account_aabbabc123456789"
      */
-    private PrimaryKey buildServingKey(
-            Tenant tenant, int version, String entity, String seedId) {
-        String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, seedId);
+    private PrimaryKey buildServingKey(String partitionKey) {
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey);
+    }
+
+    private String getPartitionKey(CDLMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
+        switch (env) {
+            case STAGING:
+                int shardsId = getShardId(seedId);
+                return getShardPartitionKey(tenant, version, entity, shardsId);
+            case SERVING:
+                return String.join(DELIMITER,
+                    PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, seedId);
+            default:
+                throw new UnsupportedOperationException("Unsupported environment: " + env);
+        }
+    }
+
+    private int getShardId(String seedId) {
+        // use calculated suffix because we need lookup
+        // & 0x7fffffff to make it positive and mod nShards
+        return (seedId.hashCode() & 0x7fffffff) % numStagingShards;
+    }
+
+    private String getShardPartitionKey(Tenant tenant, int version, String entity, int shardId) {
+        return String.join(DELIMITER,
+                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, String.valueOf(shardId));
     }
 }

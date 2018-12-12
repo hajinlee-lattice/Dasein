@@ -10,6 +10,7 @@ import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
@@ -24,6 +25,8 @@ public interface DynamoItemService {
     List<Item> batchGet(String tableName, List<PrimaryKey> primaryKeys);
 
     List<Item> query(String tableName, QuerySpec spec);
+
+    List<Item> scan(@NotNull String tableName, @NotNull ScanSpec scanSpec);
 
     /*
      * Thin wrapper to expose full put/update/delete functionality
