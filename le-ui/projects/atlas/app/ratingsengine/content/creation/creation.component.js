@@ -3,7 +3,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     templateUrl: 'app/ratingsengine/content/creation/creation.component.html',
     bindings: {
         ratingEngine: '<',
-        products: '<'
+        products: '<',
+        datacollectionstatus: '<'
     },
     controller: function(
         $q, $state, $stateParams, $scope, $interval,
@@ -45,6 +46,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             var model = vm.ratingEngine.latest_iteration.AI;
             vm.type = vm.ratingEngine.type.toLowerCase();
+
+            vm.periodType = vm.datacollectionstatus.ApsRollingPeriod;
 
             console.log(model);
 
@@ -257,6 +260,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         vm.showSetting = function(setting) {
             // console.log('SETTINGS', setting, vm.modelSettingsSummary[vm.type][setting]);
             return vm.modelSettingsSummary[vm.type][setting];
+        }
+
+        vm.getPeriodType = function(value) {
+            return value > 1 ? vm.periodType + 's' : vm.periodType;
         }
     }
 

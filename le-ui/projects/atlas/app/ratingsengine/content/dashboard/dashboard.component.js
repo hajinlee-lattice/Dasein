@@ -4,7 +4,7 @@ angular.module('lp.ratingsengine.dashboard', [
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce,
     RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
-    Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService
+    Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -21,6 +21,7 @@ angular.module('lp.ratingsengine.dashboard', [
         products: Products,
         targetProducts: TargetProducts,
         trainingProducts: TrainingProducts,
+        periodType: DataCollectionStatus.ApsRollingPeriod,
         barChartConfig: {
             'data': {
                 'tosort': true,
@@ -418,6 +419,10 @@ angular.module('lp.ratingsengine.dashboard', [
             viewingIteration: true
         },{ reload:true });   
 
+    }
+
+    vm.getPeriodType = function(value) {
+        return value > 1 ? vm.periodType + 's' : vm.periodType;
     }
 
     $scope.$on("$destroy", function() {

@@ -21,7 +21,7 @@
                     <dd ng-if="$ctrl.showSetting('products')">{{ $ctrl.targetProducts.length == 1 ? $ctrl.targetProductName : $ctrl.targetProducts.length + ' selected'}} </dd>
 
                     <dt ng-if="$ctrl.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
-                    <dd ng-if="$ctrl.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ $ctrl.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
+                    <dd ng-if="$ctrl.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ $ctrl.configFilters['PURCHASED_BEFORE_PERIOD'].value }} {{$ctrl.getPeriodType($ctrl.configFilters['PURCHASED_BEFORE_PERIOD'].value) | lowercase}}</dd>
 
                     <dt ng-if="$ctrl.showSetting('prioritizeBy')">Prioritize by:</dt>
                     <dd ng-if="$ctrl.showSetting('prioritizeBy')">{{ $ctrl.prioritizeBy }}</dd>
@@ -41,7 +41,7 @@
                         <ul ng-if="$ctrl.type == 'cross_sell'">
                             <li 
                                 ng-if="$ctrl.configFilters['SPEND_IN_PERIOD']">
-                                Spend in the quarter was {{ $ctrl.spendCriteria }} ${{ $ctrl.configFilters['SPEND_IN_PERIOD'].value | number }}
+                                Spend in the {{ $ctrl.periodType | lowercase }} was {{ $ctrl.spendCriteria }} ${{ $ctrl.configFilters['SPEND_IN_PERIOD'].value | number }}
                             </li>
                             <li
                                 ng-if="$ctrl.configFilters['QUANTITY_IN_PERIOD']">
@@ -49,7 +49,7 @@
                             </li>
                             <li
                                 ng-if="$ctrl.configFilters['TRAINING_SET_PERIOD']">
-                                {{ $ctrl.configFilters['TRAINING_SET_PERIOD'].value }} months of historical records
+                                {{ $ctrl.configFilters['TRAINING_SET_PERIOD'].value }} {{ $ctrl.getPeriodType($ctrl.configFilters['TRAINING_SET_PERIOD'].value) | lowercase}} of historical records
                             </li>
                             <li
                                 ng-if="$ctrl.trainingSegment !== null">

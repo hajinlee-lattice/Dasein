@@ -1,10 +1,11 @@
 angular.module('lp.ratingsengine.ratingsenginetype', [])
 .controller('RatingsEngineType', function ($state, $stateParams, 
-    RatingsEngineStore, FeatureFlagService, ConfigureAttributesStore) {
+    RatingsEngineStore, FeatureFlagService, ConfigureAttributesStore, DataCollectionStatus) {
     var vm = this;
     angular.extend(vm, {
         datacollectionPrecheck: null,
-        datacollectionPrechecking: false
+        datacollectionPrechecking: false,
+        periodType: DataCollectionStatus.ApsRollingPeriod
     });
 
     function getDatacollectionPrecheck() {

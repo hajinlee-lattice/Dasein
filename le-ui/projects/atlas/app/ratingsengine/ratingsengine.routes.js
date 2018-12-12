@@ -86,6 +86,16 @@ angular
                     pageTitle: 'Models',
                     rating_id: ''
                 },
+                resolve: {
+                    DataCollectionStatus: function ($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }
+                },
                 views: {
                     "summary@": {
                         templateUrl: 'app/navigation/summary/BlankLine.html'
@@ -245,6 +255,14 @@ angular
                         } else {
                             return null;
                         }
+                    },
+                    DataCollectionStatus: function ($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
                     }
                 },
                 views: {
@@ -1309,6 +1327,14 @@ angular
                         RatingsEngineStore.getProducts(params).then(function (result) {
                             deferred.resolve(result);
                         });
+                        return deferred.promise;
+                    },
+                    datacollectionstatus: function ($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+
                         return deferred.promise;
                     }
                 },

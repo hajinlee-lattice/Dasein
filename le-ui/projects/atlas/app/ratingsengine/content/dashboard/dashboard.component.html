@@ -102,7 +102,7 @@
                         </dd>
 
                         <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
-                        <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
+                        <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} {{vm.getPeriodType(vm.configFilters['PURCHASED_BEFORE_PERIOD'].value) | lowercase}}</dd>
 
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Prioritize by:</dt>
                         <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.prioritizeBy }}</dd>
@@ -129,7 +129,7 @@
                             <ul>
                                 <li 
                                     ng-if="vm.configFilters['SPEND_IN_PERIOD']">
-                                    Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.configFilters['SPEND_IN_PERIOD'].value | number }}
+                                    Spend in the {{ vm.getPeriodType() | lowercase}} was {{ vm.spendCriteria }} ${{ vm.configFilters['SPEND_IN_PERIOD'].value | number }}
                                 </li>
                                 <li
                                     ng-if="vm.configFilters['QUANTITY_IN_PERIOD']">
@@ -137,7 +137,7 @@
                                 </li>
                                 <li
                                     ng-if="vm.configFilters['TRAINING_SET_PERIOD']">
-                                    {{ vm.configFilters['TRAINING_SET_PERIOD'].value }} months of historical records
+                                    {{ vm.configFilters['TRAINING_SET_PERIOD'].value }} {{ vm.getPeriodType(vm.configFilters['TRAINING_SET_PERIOD'].value) | lowercase }} of historical records
                                 </li>
                                 <li
                                     ng-if="vm.trainingSegment !== null">
