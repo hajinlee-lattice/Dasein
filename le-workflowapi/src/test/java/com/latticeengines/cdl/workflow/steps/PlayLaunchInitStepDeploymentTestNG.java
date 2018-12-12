@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
-import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -92,9 +91,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private RecommendationEntityMgr recommendationEntityMgr;
 
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
@@ -176,8 +172,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
         helper = new PlayLaunchInitStepTestHelper(playProxy, entityProxy, recommendationService, pageSize,
-                metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataCollectionProxy, dataDbDriver, dataDbUrl, dataDbUser,
-                dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
+                metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataCollectionProxy, dataDbDriver, dataDbUrl,
+                dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
@@ -196,11 +192,10 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
 
-//        recommendations.stream().forEach(rec -> {
-//            log.info("Cleaning up recommendation: " + rec.getId());
-//            recommendationService.delete(rec, false);
-//        });
-        recommendationEntityMgr.deleteInBulkByPlayId(rulesBasedPlay.getName(), null, true,1000);
+        recommendations.stream().forEach(rec -> {
+            log.info("Cleaning up recommendation: " + rec.getId());
+            recommendationService.delete(rec, false);
+        });
         recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
 
         Assert.assertNotNull(recommendations);
