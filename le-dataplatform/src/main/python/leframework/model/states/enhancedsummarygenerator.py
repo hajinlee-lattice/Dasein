@@ -16,7 +16,15 @@ class EnhancedSummaryGenerator(State):
         self.result = OrderedDict()
 
         if hasattr(self.mediator, "segmentations"):
+            self.result["ProbabilitySegmentations"] = self.mediator.segmentations
             self.result["Segmentations"] = self.mediator.segmentations
+
+        if hasattr(self.mediator, "revenuesegmentations"):
+            self.result["RevenueSegmentations"] = self.mediator.revenuesegmentations
+
+        if hasattr(self.mediator, "evsegmentations"):
+            self.result["EVSegmentations"] = self.mediator.evsegmentations
+            self.result["Segmentations"] = self.mediator.evsegmentations
 
         if hasattr(self.mediator, "predictors"):
             self.result["Predictors"] = self.mediator.predictors

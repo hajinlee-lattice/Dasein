@@ -118,6 +118,7 @@ class RevenueSegmentationGenerator(State):
             segment = OrderedDict()
             segment["Score"] = (100 - index)
             segment["Count"] = revRateChartDf.iloc[index]['Count']
+            segment["Converted"] = revRateChartDf.iloc[index]['Sum']
             segment["Sum"] = revRateChartDf.iloc[index]['Sum']
             segment["Mean"] = revRateChartDf.iloc[index]['Mean']
             segment["Max"] = revRateChartDf.iloc[index]['Max']
@@ -126,7 +127,7 @@ class RevenueSegmentationGenerator(State):
         # Construct Result
         result = []
         allSegments = OrderedDict()
-        allSegments["LeadSource"] = "ALL"
+        allSegments["LeadSource"] = "All"
         allSegments["Segments"] = new_segments
         result.append(allSegments)
         return result
@@ -190,19 +191,36 @@ class EVSegmentationGenerator(State):
             ['min', 'max', 'mean', 'sum', 'count'])
         revRateChartDf.columns = ['Min', 'Max', 'Mean', 'Sum', 'Count']
         new_segments = []
+        lowestScore = 100
         for index in range(revRateChartDf.shape[0]):
+            lowestScore = (100 - index)
             segment = OrderedDict()
-            segment["Score"] = (100 - index)
+            segment["Score"] = lowestScore
             segment["Count"] = revRateChartDf.iloc[index]['Count']
+            segment["Converted"] = revRateChartDf.iloc[index]['Sum']
             segment["Sum"] = revRateChartDf.iloc[index]['Sum']
             segment["Mean"] = revRateChartDf.iloc[index]['Mean']
             segment["Max"] = revRateChartDf.iloc[index]['Max']
             segment["Min"] = revRateChartDf.iloc[index]['Min']
             new_segments.append(segment)
+
+        if lowestScore > 1:
+            lowestScore = lowestScore - 1
+            for index in range(lowestScore):
+                segment = OrderedDict()
+                segment["Score"] = (lowestScore - index)
+                segment["Count"] = 0
+                segment["Converted"] = 0
+                segment["Sum"] = 0
+                segment["Mean"] = 0
+                segment["Max"] = 0
+                segment["Min"] = 0
+                new_segments.append(segment)
+
         # Construct Result
         result = []
         allSegments = OrderedDict()
-        allSegments["LeadSource"] = "ALL"
+        allSegments["LeadSource"] = "All"
         allSegments["Segments"] = new_segments
         result.append(allSegments)
         return result
