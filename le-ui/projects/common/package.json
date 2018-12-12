@@ -99,7 +99,7 @@
     }
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "dev-test": "jest --watchAll",
     "build": "webpack --mode=production",
     "watch": "webpack --mode=development --watch"

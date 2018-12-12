@@ -1,7 +1,6 @@
-import React from "../../react-vendor.js";
+import React from "common/react-vendor";
 import { shallow } from "enzyme";
 import LeButton, { LEFT, RIGHT } from "./le-button";
-
 
 describe("<LeButton /> state and colors", () => {
   it("<LeButton /> with no initial state", () => {
@@ -119,5 +118,26 @@ describe("<LeButton /> icon", () => {
       />
     );
     expect(wrapper.find("button").children()).toHaveLength(2);
+  });
+});
+
+describe("<LeButton/> interactions", () => {
+  it("<LeButton /> click ", () => {
+    const mockCallBack = jest.fn();
+
+    const button = shallow(
+      <LeButton
+        name="clickable-button"
+        callback={mockCallBack}
+        config={{
+          label: "Lattice Engines",
+          iconside: RIGHT,
+          icon: "fa fa-search"
+        }}
+      />
+    );
+    button.find("button").simulate("click");
+    expect(mockCallBack.mock.calls[0][0]).toBe('clickable-button');
+    expect(mockCallBack.mock.calls[0][1]).toEqual({disabled: false});
   });
 });
