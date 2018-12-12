@@ -3,25 +3,25 @@ package com.latticeengines.datacloud.match.service.impl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.CDLConfigurationService;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-@Component("cdlMatchConfiguration")
-public class CDLConfigurationServiceImpl implements CDLConfigurationService {
+@Component("entityMatchConfigurationService")
+public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigurationService {
 
-    @Value("${datacloud.match.cdl.staging.shards:5}")
+    @Value("${datacloud.match.entity.staging.shards:5}")
     private int numStagingShards;
-    @Value("${datacloud.match.cdl.staging.table}")
+    @Value("${datacloud.match.entity.staging.table}")
     private String stagingTableName;
-    @Value("${datacloud.match.cdl.serving.table}")
+    @Value("${datacloud.match.entity.serving.table}")
     private String servingTableName;
-    @Value("${datacloud.match.cdl.staging.ttl:2629746}")
+    @Value("${datacloud.match.entity.staging.ttl:2629746}")
     private long stagingTTLInSeconds; // expire 1 month
 
     @Override
-    public String getTableName(@NotNull CDLMatchEnvironment environment) {
+    public String getTableName(@NotNull EntityMatchEnvironment environment) {
         Preconditions.checkNotNull(environment);
         switch (environment) {
             case SERVING:
@@ -34,8 +34,8 @@ public class CDLConfigurationServiceImpl implements CDLConfigurationService {
     }
 
     @Override
-    public int getNumShards(@NotNull CDLMatchEnvironment environment) {
-        Preconditions.checkArgument(CDLMatchEnvironment.STAGING.equals(environment));
+    public int getNumShards(@NotNull EntityMatchEnvironment environment) {
+        Preconditions.checkArgument(EntityMatchEnvironment.STAGING.equals(environment));
         // currently only staging environment needs sharding
         return numStagingShards;
     }

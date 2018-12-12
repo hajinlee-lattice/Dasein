@@ -12,16 +12,16 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 /**
- * Wrapper actor for {@link CDLLookupServiceImpl}
+ * Wrapper actor for {@link EntityLookupServiceImpl}
  */
-@Component("cdlLookupActor")
+@Component("entityLookupActor")
 @Scope("prototype")
-public class CDLLookupActor extends DataSourceWrapperActorTemplate {
+public class EntityLookupActor extends DataSourceWrapperActorTemplate {
 
-    private static final Logger log = LoggerFactory.getLogger(CDLLookupActor.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityLookupActor.class);
 
     @Inject
-    @Qualifier("cdlLookupService")
+    @Qualifier("entityLookupService")
     private DataSourceLookupServiceBase dnBCacheLookupService;
 
     @PostConstruct

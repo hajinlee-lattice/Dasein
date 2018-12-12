@@ -2,10 +2,10 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntryConverter;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -34,7 +34,7 @@ import java.util.Set;
  * TODO add more test cases
  * TODO retry on test method to guard against eventual consistency failure, retryAnalyzer is not working for some reason
  */
-public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
@@ -46,32 +46,32 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
     @Inject
     @InjectMocks
-    private CDLRawSeedServiceImpl cdlRawSeedService;
+    private EntityRawSeedServiceImpl entityRawSeedService;
 
     @Mock
-    private CDLConfigurationServiceImpl cdlConfigurationService;
+    private EntityMatchConfigurationServiceImpl entityConfigurationService;
 
     @BeforeClass(groups = "functional")
     private void setup() {
         MockitoAnnotations.initMocks(this);
-        cdlConfigurationService.setStagingTableName(TEST_STAGING_TABLE);
-        cdlConfigurationService.setServingTableName(TEST_SERVING_TABLE);
+        entityConfigurationService.setStagingTableName(TEST_STAGING_TABLE);
+        entityConfigurationService.setServingTableName(TEST_SERVING_TABLE);
     }
 
-    @Test(groups = "functional", dataProvider = "cdlMatchEnvironment")
-    private void testCreateIfNotExists(CDLMatchEnvironment env) {
+    @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
+    private void testCreateIfNotExists(EntityMatchEnvironment env) {
         String seedId = "testCreateIfNotExists";
 
         // make sure we don't have this seed
         cleanup(env, seedId);
 
         // create successfully because no seed at the moment
-        Assert.assertTrue(cdlRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+        Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
         // should already exists
-        Assert.assertFalse(cdlRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+        Assert.assertFalse(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
 
         // check the created seed
-        CDLRawSeed seed = cdlRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        EntityRawSeed seed = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         Assert.assertNotNull(seed);
         Assert.assertEquals(seed.getId(), seedId);
         Assert.assertEquals(seed.getEntity(), TEST_ENTITY);
@@ -84,8 +84,8 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     private void testScan() {
         List<String> seedIds = Arrays.asList("testScan1", "testScan2", "testScan3", "testScan4", "testScan5",
                 "testScan6", "testScan7");
-        List<CDLRawSeed> scanSeeds = new ArrayList<>();
-        CDLMatchEnvironment env = CDLMatchEnvironment.STAGING;
+        List<EntityRawSeed> scanSeeds = new ArrayList<>();
+        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
 
         // make sure we don't have this seed
         for(String seedId : seedIds) {
@@ -94,17 +94,17 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
         // create successfully because no seed at the moment
         for (String seedId : seedIds) {
-            Assert.assertTrue(cdlRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+            Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
         }
         // should already exists
         List<String> getSeedIds = new ArrayList<>();
         int loopCount = 0;
         do {
             loopCount++;
-            Map<Integer, List<CDLRawSeed>> seeds = cdlRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 2);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 2);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
-                for (Map.Entry<Integer, List<CDLRawSeed>> entry : seeds.entrySet()) {
+                for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
                     getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
                     scanSeeds.addAll(entry.getValue());
                     if (loopCount == 1) {
@@ -122,10 +122,10 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         loopCount = 0;
         do {
             loopCount++;
-            Map<Integer, List<CDLRawSeed>> seeds = cdlRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 3);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 3);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
-                for (Map.Entry<Integer, List<CDLRawSeed>> entry : seeds.entrySet()) {
+                for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
                     getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
                     scanSeeds.addAll(entry.getValue());
                     Assert.assertTrue(entry.getValue().size() <= 3);
@@ -141,10 +141,10 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         loopCount = 0;
         do {
             loopCount++;
-            Map<Integer, List<CDLRawSeed>> seeds = cdlRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 4);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 4);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
-                for (Map.Entry<Integer, List<CDLRawSeed>> entry : seeds.entrySet()) {
+                for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
                     getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
                     scanSeeds.addAll(entry.getValue());
                     Assert.assertTrue(entry.getValue().size() <= 4);
@@ -160,23 +160,23 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional", dataProvider = "cdlMatchEnvironment")
-    private void testSetIfNotExists(CDLMatchEnvironment env) {
+    @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
+    private void testSetIfNotExists(EntityMatchEnvironment env) {
         String seedId = "testSetIfNotExists";
 
         // make sure we don't have this seed
         cleanup(env, seedId);
 
-        CDLRawSeed seed = newSeed(
+        EntityRawSeed seed = newSeed(
                 seedId, "sfdc_1", "mkt_1", "9999", "google.com", "facebook.com");
 
         // create successfully because no seed at the moment
-        Assert.assertTrue(cdlRawSeedService.setIfNotExists(env, TEST_TENANT, seed));
+        Assert.assertTrue(entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed));
         // should already exists
-        Assert.assertFalse(cdlRawSeedService.setIfNotExists(env, TEST_TENANT, seed));
+        Assert.assertFalse(entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed));
 
         // check the created seed
-        CDLRawSeed updatedSeed = cdlRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        EntityRawSeed updatedSeed = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         Assert.assertNotNull(updatedSeed);
         Assert.assertTrue(equals(updatedSeed, seed));
 
@@ -184,25 +184,25 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         cleanup(env, seedId);
     }
 
-    @Test(groups = "functional", dataProvider = "cdlMatchEnvironment")
-    private void testUpdateIfNotSet(CDLMatchEnvironment env) {
+    @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
+    private void testUpdateIfNotSet(EntityMatchEnvironment env) {
         String seedId = "testUpdateIfNotSet";
 
         // make sure we don't have this seed
         cleanup(env, seedId);
 
-        CDLRawSeed seed1 = newSeed(seedId, "sfdc_1", null, "lattice_1", "domain1.com");
-        CDLRawSeed result1 = cdlRawSeedService.updateIfNotSet(env, TEST_TENANT, seed1);
+        EntityRawSeed seed1 = newSeed(seedId, "sfdc_1", null, "lattice_1", "domain1.com");
+        EntityRawSeed result1 = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed1);
         // currently no seed exists, so the returned old seed will be null
         Assert.assertNull(result1);
         // check all attributes are updated correctly
-        Assert.assertEquals(cdlRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId), seed1);
+        Assert.assertEquals(entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId), seed1);
 
-        CDLRawSeed seed2 = newSeed(seedId, "sfdc_2", "marketo_1", "lattice_2", "domain2.com");
-        CDLRawSeed result2 = cdlRawSeedService.updateIfNotSet(env, TEST_TENANT, seed2);
+        EntityRawSeed seed2 = newSeed(seedId, "sfdc_2", "marketo_1", "lattice_2", "domain2.com");
+        EntityRawSeed result2 = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed2);
         // seed before update should be seed1
         Assert.assertEquals(result2, seed1);
-        CDLRawSeed resultAfterUpdate2 = cdlRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        EntityRawSeed resultAfterUpdate2 = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         // 1. SFDC ID & lattice Account ID already exists, not updating
         // 2. Marketo ID updated successfully
         // 3. Domains are merged and no duplicate
@@ -215,37 +215,37 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         cleanup(env, seedId);
     }
 
-    @Test(groups = "functional", dataProvider = "cdlMatchEnvironment")
-    private void testClearIfEquals(CDLMatchEnvironment env) {
+    @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
+    private void testClearIfEquals(EntityMatchEnvironment env) {
         String seedId = "testClearIfEquals";
 
         // make sure we don't have this seed
         cleanup(env, seedId);
 
-        CDLRawSeed seed = newSeed(
+        EntityRawSeed seed = newSeed(
                 seedId, "sfdc_1", null, "lattice_1",
                 "domain1.com", "domain2.com");
-        CDLRawSeed result = cdlRawSeedService.updateIfNotSet(env, TEST_TENANT, seed);
+        EntityRawSeed result = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed);
         // currently no seed exists, so the returned old seed will be null
         Assert.assertNull(result);
         // check all attributes are updated correctly
-        CDLRawSeed resultAfterUpdate = cdlRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        EntityRawSeed resultAfterUpdate = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         Assert.assertEquals(resultAfterUpdate, seed);
         // check version
         Assert.assertEquals(resultAfterUpdate.getVersion(), 1);
 
-        CDLRawSeed seedWithWrongVer = newSeed(
+        EntityRawSeed seedWithWrongVer = newSeed(
                 seedId, "sfdc_1", "marketo_1", null, "domain1.com", "domain4.com");
         // wrong version, optimistic locking failed
         Assert.assertThrows(
                 IllegalStateException.class,
-                () -> cdlRawSeedService.clearIfEquals(env, TEST_TENANT, seedWithWrongVer));
+                () -> entityRawSeedService.clearIfEquals(env, TEST_TENANT, seedWithWrongVer));
 
         // right vesion, clear succeeded
-        CDLRawSeed seedWithRightVer = copyAndSetVersion(seedWithWrongVer, resultAfterUpdate.getVersion());
-        cdlRawSeedService.clearIfEquals(env, TEST_TENANT, seedWithRightVer);
+        EntityRawSeed seedWithRightVer = copyAndSetVersion(seedWithWrongVer, resultAfterUpdate.getVersion());
+        entityRawSeedService.clearIfEquals(env, TEST_TENANT, seedWithRightVer);
 
-        CDLRawSeed resultAfterClear = cdlRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        EntityRawSeed resultAfterClear = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         Assert.assertNotNull(resultAfterClear);
         // 1. SFDC ID cleared
         // 2. Marketo ID does not exist, so clearing it has no effect
@@ -259,27 +259,27 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         cleanup(env, seedId);
     }
 
-    @DataProvider(name = "cdlMatchEnvironment")
-    private Object[][] provideCDLMatchEnv() {
+    @DataProvider(name = "entityMatchEnvironment")
+    private Object[][] provideEntityMatchEnv() {
         return new Object[][] {
-                { CDLMatchEnvironment.STAGING },
-                { CDLMatchEnvironment.SERVING },
+                { EntityMatchEnvironment.STAGING },
+                { EntityMatchEnvironment.SERVING },
         };
     }
 
-    private void cleanup(CDLMatchEnvironment env, String... seedIds) {
-        Arrays.stream(seedIds).forEach(id -> cdlRawSeedService.delete(env, TEST_TENANT, TEST_ENTITY, id));
+    private void cleanup(EntityMatchEnvironment env, String... seedIds) {
+        Arrays.stream(seedIds).forEach(id -> entityRawSeedService.delete(env, TEST_TENANT, TEST_ENTITY, id));
     }
 
-    private boolean equals(CDLRawSeed seed1, CDLRawSeed seed2) {
+    private boolean equals(EntityRawSeed seed1, EntityRawSeed seed2) {
         if (seed1 == null && seed2 == null) {
             return true;
         } else if (seed1 == null || seed2 == null) {
             return false;
         }
 
-        Set<CDLLookupEntry> set1 = new HashSet<>(seed1.getLookupEntries());
-        Set<CDLLookupEntry> set2 = new HashSet<>(seed1.getLookupEntries());
+        Set<EntityLookupEntry> set1 = new HashSet<>(seed1.getLookupEntries());
+        Set<EntityLookupEntry> set2 = new HashSet<>(seed1.getLookupEntries());
         return Objects.equals(seed1.getId(), seed2.getId()) && Objects.equals(seed1.getEntity(), seed2.getEntity())
                 && Objects.equals(seed1.getAttributes(), seed2.getAttributes())
                 && Objects.equals(set1, set2);
@@ -288,30 +288,30 @@ public class CDLRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     /*
      * Create a test raw seed with two external system (SFDC/Marketo), lattice accountID and domain set
      */
-    private CDLRawSeed newSeed(String seedId, String sfdcId, String marketoId, String latticeId, String... domains) {
-        List<CDLLookupEntry> entries = new ArrayList<>();
+    private EntityRawSeed newSeed(String seedId, String sfdcId, String marketoId, String latticeId, String... domains) {
+        List<EntityLookupEntry> entries = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
         if (sfdcId != null) {
-            entries.add(CDLLookupEntryConverter.fromExternalSystem(TEST_ENTITY, EXT_SYSTEM_SFDC, sfdcId));
+            entries.add(EntityLookupEntryConverter.fromExternalSystem(TEST_ENTITY, EXT_SYSTEM_SFDC, sfdcId));
         }
         if (marketoId != null) {
-            entries.add(CDLLookupEntryConverter.fromExternalSystem(TEST_ENTITY, EXT_SYSTEM_MARKETO, marketoId));
+            entries.add(EntityLookupEntryConverter.fromExternalSystem(TEST_ENTITY, EXT_SYSTEM_MARKETO, marketoId));
         }
         if (domains != null) {
             Arrays.stream(domains).forEach(domain ->
-                    entries.add(CDLLookupEntryConverter.fromDomainCountry(TEST_ENTITY, domain, TEST_COUNTRY)));
+                    entries.add(EntityLookupEntryConverter.fromDomainCountry(TEST_ENTITY, domain, TEST_COUNTRY)));
         }
         if (latticeId != null) {
             attributes.put(DataCloudConstants.LATTICE_ACCOUNT_ID, latticeId);
         }
-        return new CDLRawSeed(seedId, TEST_ENTITY, 0, entries, attributes);
+        return new EntityRawSeed(seedId, TEST_ENTITY, 0, entries, attributes);
     }
 
     /*
      * copy raw seed and set the version
      */
-    private CDLRawSeed copyAndSetVersion(CDLRawSeed seed, int version) {
-        return new CDLRawSeed(seed.getId(), seed.getEntity(), version, seed.getLookupEntries(), seed.getAttributes());
+    private EntityRawSeed copyAndSetVersion(EntityRawSeed seed, int version) {
+        return new EntityRawSeed(seed.getId(), seed.getEntity(), version, seed.getLookupEntries(), seed.getAttributes());
     }
 
     private static Tenant getTestTenant() {

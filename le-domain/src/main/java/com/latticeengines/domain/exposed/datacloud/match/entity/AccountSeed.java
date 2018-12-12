@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.match.cdl;
+package com.latticeengines.domain.exposed.datacloud.match.entity;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -15,9 +15,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Class to represent seed for CDL account.
+ * Class to represent seed for account entity.
  */
-public class CDLAccountSeed {
+public class AccountSeed {
     private static final String ENTITY = BusinessEntity.Account.name();
     private static final String KEY_LATTICE_ACCOUNT_ID = "latticeAccountId";
 
@@ -28,7 +28,7 @@ public class CDLAccountSeed {
     private final Set<Pair<String, String>> domainCountries; // Pair<Domain, Country>
     private final Set<Pair<String, String>> nameCountries; // Pair<Name, Country>
 
-    public CDLAccountSeed(
+    public AccountSeed(
             @NotNull String id, String latticeAccountId, Map<String, String> externalSystemIdMap, String duns,
             Set<Pair<String, String>> domainCountries, Set<Pair<String, String>> nameCountries) {
         Preconditions.checkNotNull(id);
@@ -66,68 +66,68 @@ public class CDLAccountSeed {
      * TODO find out if we need this method or not (probably not)
      *
      * @param comparator sort lookup entries by their priority, in DESC order (from high to low)
-     * @return generated {@link CDLRawSeed} will not be {@literal null}
+     * @return generated {@link EntityRawSeed} will not be {@literal null}
      */
-    public CDLRawSeed toRawSeed(@NotNull Comparator<CDLLookupEntry> comparator) {
+    public EntityRawSeed toRawSeed(@NotNull Comparator<EntityLookupEntry> comparator) {
         Preconditions.checkNotNull(comparator);
-        List<CDLLookupEntry> lookupEntries = new ArrayList<>();
+        List<EntityLookupEntry> lookupEntries = new ArrayList<>();
         if (!externalSystemIdMap.isEmpty()) {
             lookupEntries.addAll(externalSystemIdMap
                     .entrySet()
                     .stream()
-                    .map(entry -> CDLLookupEntryConverter.fromExternalSystem(ENTITY, entry.getKey(), entry.getValue()))
+                    .map(entry -> EntityLookupEntryConverter.fromExternalSystem(ENTITY, entry.getKey(), entry.getValue()))
                     .collect(Collectors.toList()));
         }
         if (StringUtils.isNotBlank(duns)) {
-            lookupEntries.add(CDLLookupEntryConverter.fromDuns(ENTITY, duns));
+            lookupEntries.add(EntityLookupEntryConverter.fromDuns(ENTITY, duns));
         }
         if (!domainCountries.isEmpty()) {
             lookupEntries.addAll(domainCountries
                     .stream()
-                    .map(entry -> CDLLookupEntryConverter.fromDomainCountry(ENTITY, entry.getKey(), entry.getValue()))
+                    .map(entry -> EntityLookupEntryConverter.fromDomainCountry(ENTITY, entry.getKey(), entry.getValue()))
                     .collect(Collectors.toList()));
         }
         if (!nameCountries.isEmpty()) {
             lookupEntries.addAll(nameCountries
                     .stream()
-                    .map(entry -> CDLLookupEntryConverter.fromNameCountry(ENTITY, entry.getKey(), entry.getValue()))
+                    .map(entry -> EntityLookupEntryConverter.fromNameCountry(ENTITY, entry.getKey(), entry.getValue()))
                     .collect(Collectors.toList()));
         }
         // sort base on order
         lookupEntries.sort(comparator);
-        return new CDLRawSeed(id, ENTITY, lookupEntries,
+        return new EntityRawSeed(id, ENTITY, lookupEntries,
                 StringUtils.isBlank(latticeAccountId)
                 ? null
                 : Collections.singletonMap(KEY_LATTICE_ACCOUNT_ID, latticeAccountId));
     }
 
     /**
-     * Create a new instance of {@link CDLAccountSeed} from given {@link CDLRawSeed}
+     * Create a new instance of {@link AccountSeed} from given {@link EntityRawSeed}
      *
      * @param rawSeed raw seed to transform from, should not be {@literal null} and
      *                should have the correct {@link BusinessEntity}
-     * @return generated {@link CDLAccountSeed}
+     * @return generated {@link AccountSeed}
      */
-    public static CDLAccountSeed fromRawSeed(@NotNull CDLRawSeed rawSeed) {
+    public static AccountSeed fromRawSeed(@NotNull EntityRawSeed rawSeed) {
         Preconditions.checkNotNull(rawSeed);
         Preconditions.checkArgument(rawSeed.getEntity() == ENTITY);
-        CDLAccountSeedBuilder builder = new CDLAccountSeedBuilder();
+        AccountSeedBuilder builder = new AccountSeedBuilder();
         // set CDL account ID and lattice account ID
         builder.withId(rawSeed.getId()).withLatticeAccountId(rawSeed.getAttributes().get(KEY_LATTICE_ACCOUNT_ID));
         rawSeed.getLookupEntries().forEach(entry -> {
             // TODO check for data integrity
             switch (entry.getType()) {
                 case DUNS:
-                    builder.withDuns(CDLLookupEntryConverter.toDuns(entry));
+                    builder.withDuns(EntityLookupEntryConverter.toDuns(entry));
                     break;
                 case NAME_COUNTRY:
-                    builder.addNameCountryPair(CDLLookupEntryConverter.toNameCountry(entry));
+                    builder.addNameCountryPair(EntityLookupEntryConverter.toNameCountry(entry));
                     break;
                 case DOMAIN_COUNTRY:
-                    builder.addDomainCountryPair(CDLLookupEntryConverter.toDomainCountry(entry));
+                    builder.addDomainCountryPair(EntityLookupEntryConverter.toDomainCountry(entry));
                     break;
                 case EXTERNAL_SYSTEM:
-                    builder.addExternalSystemIdPair(CDLLookupEntryConverter.toExternalSystem(entry));
+                    builder.addExternalSystemIdPair(EntityLookupEntryConverter.toExternalSystem(entry));
                     break;
                 default:
                     throw new UnsupportedOperationException("Lookup entry type is not supported: " + entry.getType());

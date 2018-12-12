@@ -1,21 +1,20 @@
-package com.latticeengines.domain.exposed.datacloud.match.cdl;
+package com.latticeengines.domain.exposed.datacloud.match.entity;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /**
  * Lookup entry for a specific entity
  */
-public class CDLLookupEntry {
+public class EntityLookupEntry {
     private final Type type;
     private final String entity;
     // store serialized form since internal operation only need these
     private final String serializedKeys;
     private final String serializedValues;
 
-    public CDLLookupEntry(
+    public EntityLookupEntry(
             @NotNull Type type, @NotNull String entity, @NotNull String[] keys, @NotNull String[] values) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(entity);
@@ -32,7 +31,7 @@ public class CDLLookupEntry {
      *
      * NOTE not checking here for performance
      */
-    public CDLLookupEntry(
+    public EntityLookupEntry(
             @NotNull Type type, @NotNull String entity,
             @NotNull String serializedKeys, @NotNull String serializedValues) {
         Preconditions.checkNotNull(type);
@@ -72,7 +71,7 @@ public class CDLLookupEntry {
     }
 
     /**
-     * Lookup type. whenever new item is added here, remember to update {@link CDLLookupEntryConverter} as well.
+     * Lookup type. whenever new item is added here, remember to update {@link EntityLookupEntryConverter} as well.
      *
      * 1. Keys are used to determine the attribute name. E.g., in external system, system name will be used in the
      *    attribute name so different system will have different attribute name. while in DUNS, we only have one
@@ -168,7 +167,7 @@ public class CDLLookupEntry {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        CDLLookupEntry that = (CDLLookupEntry) o;
+        EntityLookupEntry that = (EntityLookupEntry) o;
         return type == that.type && Objects.equal(this.entity, that.entity) &&
                 Objects.equal(serializedKeys, that.serializedKeys) &&
                 Objects.equal(serializedValues, that.serializedValues);

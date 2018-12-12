@@ -8,7 +8,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.match.service.CDLRawSeedService;
+import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -19,7 +19,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
     private static final Logger log = LoggerFactory.getLogger(CommitEntityMatch.class);
 
     @Inject
-    private CDLRawSeedService cdlRawSeedService;
+    private EntityRawSeedService entityRawSeedService;
 
     @Override
     public void execute() {

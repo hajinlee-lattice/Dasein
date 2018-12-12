@@ -1,24 +1,24 @@
-package com.latticeengines.domain.exposed.datacloud.match.cdl;
+package com.latticeengines.domain.exposed.datacloud.match.entity;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * Class to convert to and from other classes to {@link CDLLookupEntry}
+ * Class to convert to and from other classes to {@link EntityLookupEntry}
  */
-public class CDLLookupEntryConverter {
+public class EntityLookupEntryConverter {
 
     /**
-     * Create {@link CDLLookupEntry} from {@link MatchKeyTuple}
+     * Create {@link EntityLookupEntry} from {@link MatchKeyTuple}
      * @param entity input business entity
      * @param tuple input match key tuple
      * @return created entry, {@literal null} if not valid fields
      */
-    public static CDLLookupEntry fromMatchKeyTuple(@NotNull String entity, @NotNull MatchKeyTuple tuple) {
+    public static EntityLookupEntry fromMatchKeyTuple(@NotNull String entity, @NotNull MatchKeyTuple tuple) {
         Preconditions.checkNotNull(tuple);
         // FIXME remove placeholder entity
         // TODO create from external system ID
@@ -33,12 +33,12 @@ public class CDLLookupEntryConverter {
     }
 
     /**
-     * Create {@link MatchKeyTuple} from {@link CDLLookupEntry}
+     * Create {@link MatchKeyTuple} from {@link EntityLookupEntry}
      * @param entry input lookup entry
      * @return created tuple, will not be {@literal null}
      * @throws UnsupportedOperationException if the entry type is not supported
      */
-    public static MatchKeyTuple toMatchKeyTuple(@NotNull CDLLookupEntry entry) {
+    public static MatchKeyTuple toMatchKeyTuple(@NotNull EntityLookupEntry entry) {
         Preconditions.checkNotNull(entry);
         Preconditions.checkNotNull(entry.getType());
         // TODO put entity into match key tuple or return a different object as response
@@ -65,10 +65,10 @@ public class CDLLookupEntryConverter {
         throw new UnsupportedOperationException("Entry type " + entry.getType() + " is not supported");
     }
 
-    public static CDLLookupEntry fromDomainCountry(
+    public static EntityLookupEntry fromDomainCountry(
             @NotNull String entity, @NotNull String domain, String country) {
-        return new CDLLookupEntry(
-                CDLLookupEntry.Type.DOMAIN_COUNTRY, entity, new String[0], new String[] { domain, country });
+        return new EntityLookupEntry(
+                EntityLookupEntry.Type.DOMAIN_COUNTRY, entity, new String[0], new String[] { domain, country });
     }
 
     /**
@@ -77,15 +77,15 @@ public class CDLLookupEntryConverter {
      * @param entry target entry
      * @return [ Domain, Country ], will not be {@literal null}
      */
-    public static Pair<String, String> toDomainCountry(@NotNull CDLLookupEntry entry) {
-        check(entry, CDLLookupEntry.Type.DOMAIN_COUNTRY);
+    public static Pair<String, String> toDomainCountry(@NotNull EntityLookupEntry entry) {
+        check(entry, EntityLookupEntry.Type.DOMAIN_COUNTRY);
         String[] values = entry.getValues();
         return Pair.of(values[0], values[1]);
     }
 
-    public static CDLLookupEntry fromNameCountry(@NotNull String entity, @NotNull String name, String country) {
-        return new CDLLookupEntry(
-                CDLLookupEntry.Type.NAME_COUNTRY, entity, new String[0], new String[] { name, country });
+    public static EntityLookupEntry fromNameCountry(@NotNull String entity, @NotNull String name, String country) {
+        return new EntityLookupEntry(
+                EntityLookupEntry.Type.NAME_COUNTRY, entity, new String[0], new String[] { name, country });
     }
 
     /**
@@ -94,28 +94,28 @@ public class CDLLookupEntryConverter {
      * @param entry target entry
      * @return [ Name, Country ], will not be {@literal null}
      */
-    public static Pair<String, String> toNameCountry(@NotNull CDLLookupEntry entry) {
-        check(entry, CDLLookupEntry.Type.NAME_COUNTRY);
+    public static Pair<String, String> toNameCountry(@NotNull EntityLookupEntry entry) {
+        check(entry, EntityLookupEntry.Type.NAME_COUNTRY);
         String[] values = entry.getValues();
         return Pair.of(values[0], values[1]);
     }
-    public static CDLLookupEntry fromDuns(@NotNull String entity, @NotNull String duns) {
-        return new CDLLookupEntry(
-                CDLLookupEntry.Type.DUNS, entity, new String[0], new String[] { duns });
+    public static EntityLookupEntry fromDuns(@NotNull String entity, @NotNull String duns) {
+        return new EntityLookupEntry(
+                EntityLookupEntry.Type.DUNS, entity, new String[0], new String[] { duns });
     }
 
-    public static String toDuns(@NotNull CDLLookupEntry entry) {
-        check(entry, CDLLookupEntry.Type.DUNS);
+    public static String toDuns(@NotNull EntityLookupEntry entry) {
+        check(entry, EntityLookupEntry.Type.DUNS);
         return entry.getValues()[0];
     }
 
     /*
      * systemId is the ID in that external system. e.g., SFDC ID
      */
-    public static CDLLookupEntry fromExternalSystem(
+    public static EntityLookupEntry fromExternalSystem(
             @NotNull String entity, @NotNull String systemName, @NotNull String systemId) {
-        return new CDLLookupEntry(
-                CDLLookupEntry.Type.EXTERNAL_SYSTEM, entity, new String[] { systemName }, new String[] { systemId });
+        return new EntityLookupEntry(
+                EntityLookupEntry.Type.EXTERNAL_SYSTEM, entity, new String[] { systemName }, new String[] { systemId });
     }
 
     /**
@@ -124,12 +124,12 @@ public class CDLLookupEntryConverter {
      * @param entry target entry
      * @return [ System name, System ID ], will not be {@literal null}
      */
-    public static Pair<String, String> toExternalSystem(@NotNull CDLLookupEntry entry) {
-        check(entry, CDLLookupEntry.Type.EXTERNAL_SYSTEM);
+    public static Pair<String, String> toExternalSystem(@NotNull EntityLookupEntry entry) {
+        check(entry, EntityLookupEntry.Type.EXTERNAL_SYSTEM);
         return Pair.of(entry.getKeys()[0], entry.getValues()[0]);
     }
 
-    private static void check(CDLLookupEntry entry, @NotNull CDLLookupEntry.Type type) {
+    private static void check(EntityLookupEntry entry, @NotNull EntityLookupEntry.Type type) {
         Preconditions.checkNotNull(entry);
         Preconditions.checkArgument(entry.getType() == type);
     }

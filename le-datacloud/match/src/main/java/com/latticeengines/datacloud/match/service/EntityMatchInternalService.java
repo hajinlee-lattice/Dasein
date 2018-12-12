@@ -1,19 +1,18 @@
 package com.latticeengines.datacloud.match.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.List;
 
 /**
- * Internal service to manipulate {@link CDLLookupEntry} and {@link CDLRawSeed} for CDL entities. Data integrity
+ * Internal service to manipulate {@link EntityLookupEntry} and {@link EntityRawSeed} for entities. Data integrity
  * constraints will be preserved during these operations.
  */
-public interface CDLEntityMatchInternalService {
+public interface EntityMatchInternalService {
 
     /**
      * Retrieve the seed ID with the input lookup entry.
@@ -22,7 +21,7 @@ public interface CDLEntityMatchInternalService {
      * @param lookupEntry entry used to lookup the seed
      * @return seed ID mapped by the lookup entry, {@literal null} if no seed mapped by the entry
      */
-    String getId(@NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry);
+    String getId(@NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry);
 
     /**
      * Retrieve a list of seed IDs with the input list of lookup entries.
@@ -33,20 +32,20 @@ public interface CDLEntityMatchInternalService {
      * list of seed IDs. If no seed mapped by specific lookup entry, {@literal null} will
      * be inserted in the respective index.
      */
-    List<String> getIds(@NotNull Tenant tenant, @NotNull List<CDLLookupEntry> lookupEntries);
+    List<String> getIds(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries);
 
     /**
-     * Retrieve {@link CDLRawSeed} with the given ID under the target tenant.
+     * Retrieve {@link EntityRawSeed} with the given ID under the target tenant.
      *
      * @param tenant target tenant
      * @param entity target entity
      * @param seedId seed ID
      * @return seed object, {@literal null} if no seed with the specified ID exists
      */
-    CDLRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
+    EntityRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
 
     /**
-     * Retrieve a list of {@link CDLRawSeed} with a list of seed IDs.
+     * Retrieve a list of {@link EntityRawSeed} with a list of seed IDs.
      *
      * @param tenant target tenant
      * @param entity target entity
@@ -54,12 +53,12 @@ public interface CDLEntityMatchInternalService {
      * @return a list of seed IDs. the list will not be {@literal null} and will have the same size as the input
      * list of seed IDs. If no seed with a specific ID exists, {@literal null} will be inserted in the respective index.
      */
-    List<CDLRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds);
+    List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds);
 
     // TODO consider to add get seed by lookup entry (not sure will be needed)
 
     /**
-     * Allocate a new ID for given CDL entity in the specified tenant.
+     * Allocate a new ID for given entity in the specified tenant.
      *
      * @param tenant target tenant
      * @param entity target entity
@@ -68,7 +67,7 @@ public interface CDLEntityMatchInternalService {
     String allocateId(@NotNull Tenant tenant, @NotNull String entity);
 
     /**
-     * Associate all lookup entries and attributes in the input {@link CDLRawSeed} to the current ones and return
+     * Associate all lookup entries and attributes in the input {@link EntityRawSeed} to the current ones and return
      * all lookup entries that cannot be associated (have conflict with current entries).
      *
      * @param tenant target tenant
@@ -79,6 +78,6 @@ public interface CDLEntityMatchInternalService {
      *   the right list contains all lookup entries that already mapped to another seed
      * @throws UnsupportedOperationException if allocating new accounts are not supported
      */
-    Triple<CDLRawSeed, List<CDLLookupEntry>, List<CDLLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull CDLRawSeed seed);
+    Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
+            @NotNull Tenant tenant, @NotNull EntityRawSeed seed);
 }

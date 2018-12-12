@@ -9,10 +9,10 @@ import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplat
 
 @Component("entitySystemIdBasedMicroEngineActor")
 @Scope("prototype")
-public class EntitySystemIdBasedMicroEngineActor extends MicroEngineActorTemplate<CDLLookupActor> {
+public class EntitySystemIdBasedMicroEngineActor extends MicroEngineActorTemplate<EntityLookupActor> {
     @Override
-    protected Class<CDLLookupActor> getDataSourceActorClz() {
-        return CDLLookupActor.class;
+    protected Class<EntityLookupActor> getDataSourceActorClz() {
+        return EntityLookupActor.class;
     }
 
     @Override

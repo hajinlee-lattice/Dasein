@@ -29,8 +29,8 @@ import com.latticeengines.actors.exposed.RoutingLogic;
 import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchJunctionActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.CDLAssociateActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.CDLLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityAssociateActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnBCacheLookupActor;
@@ -93,11 +93,11 @@ public class MatchActorSystem {
     @Value("${datacloud.match.dunsGuideBookLookupActor.actor.cardinality:3}")
     private int dunsGuideBookLookupActorCardinality;
 
-    @Value("${datacloud.match.cdlLookupActor.actor.cardinality:3}")
-    private int cdlLookupActorCardinality;
+    @Value("${datacloud.match.entityLookupActor.actor.cardinality:3}")
+    private int entityLookupActorCardinality;
 
-    @Value("${datacloud.match.cdlAssociateActor.actor.cardinality:2}")
-    private int cdlAssociateActorCardinality;
+    @Value("${datacloud.match.entityAssociateActor.actor.cardinality:2}")
+    private int entityAssociateActorCardinality;
 
     @Value("${datacloud.match.metricActor.actor.cardinality:4}")
     private int metricActorCardinality;
@@ -298,8 +298,8 @@ public class MatchActorSystem {
         initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
         initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
         initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
-        initNamedActor(CDLLookupActor.class, true, cdlLookupActorCardinality);
-        initNamedActor(CDLAssociateActor.class, true, cdlAssociateActorCardinality);
+        initNamedActor(EntityLookupActor.class, true, entityLookupActorCardinality);
+        initNamedActor(EntityAssociateActor.class, true, entityAssociateActorCardinality);
     }
 
     private void initJunctions() {

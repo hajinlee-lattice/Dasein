@@ -1,12 +1,12 @@
 package com.latticeengines.datacloud.match.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 
 /**
- * Central place to manage all CDL related configurations
+ * Central place to manage all entity match related configurations
  */
-public interface CDLConfigurationService {
+public interface EntityMatchConfigurationService {
 
     /**
      * Get the table name for a given environment.
@@ -15,7 +15,7 @@ public interface CDLConfigurationService {
      * @return table name, will not be {@literal null}
      * @throws UnsupportedOperationException if no table for given environment.
      */
-    String getTableName(@NotNull CDLMatchEnvironment environment);
+    String getTableName(@NotNull EntityMatchEnvironment environment);
 
     /**
      * Retrieve the number of shards for a given environment
@@ -24,7 +24,7 @@ public interface CDLConfigurationService {
      * @return number of shrads for given environment, will be a positive number
      * @throws UnsupportedOperationException if sharding is not supported for this environment
      */
-    int getNumShards(@NotNull CDLMatchEnvironment environment);
+    int getNumShards(@NotNull EntityMatchEnvironment environment);
 
     /**
      * Get the expired timestamp, starting from current time.

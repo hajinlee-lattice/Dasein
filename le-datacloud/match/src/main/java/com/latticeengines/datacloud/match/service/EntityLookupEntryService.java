@@ -1,18 +1,18 @@
 package com.latticeengines.datacloud.match.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
 /**
- * Service to manipulate {@link CDLLookupEntry} in different environment (e.g., staging, serving) for the given tenant.
+ * Service to manipulate {@link EntityLookupEntry} in different environment (e.g., staging, serving) for the given tenant.
  * Note that lookup entries cannot be modified once created.
  */
-public interface CDLLookupEntryService {
+public interface EntityLookupEntryService {
 
     /**
      * Retrieve the seed ID allocated to the given entity under the given tenant.
@@ -22,7 +22,7 @@ public interface CDLLookupEntryService {
      * @param lookupEntry entry to lookup with
      * @return seed ID associated with the lookup, {@literal null} if no seed associated with the entry.
      */
-    String get(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry);
+    String get(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry);
 
     /**
      * Retrieve a list of seed IDs allocated to the given entity under the given tenant.
@@ -35,7 +35,7 @@ public interface CDLLookupEntryService {
      * {@literal null} will be inserted in the respective index.
      */
     List<String> get(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<CDLLookupEntry> lookupEntries);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries);
 
     /**
      * Create the mapping from the input lookup entry to the target seed ID. Only create if the input lookup entry
@@ -48,8 +48,8 @@ public interface CDLLookupEntryService {
      * @return true if mapping is created
      */
     boolean createIfNotExists(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLLookupEntry lookupEntry, @NotNull String seedId);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId);
 
     /**
      * Set the mapping from the input lookup entry to the target seed ID. Only set if the input lookup entry
@@ -62,8 +62,8 @@ public interface CDLLookupEntryService {
      * @return true if mapping is set
      */
     boolean setIfEquals(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLLookupEntry lookupEntry, @NotNull String seedId);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId);
 
     /**
      * Set the list of mapping from the input [ lookup entry, seedId ] pair. If there are duplicate lookup entry,
@@ -73,7 +73,7 @@ public interface CDLLookupEntryService {
      * @param tenant target tenant
      * @param pairs list of lookup entry / seed ID pair that will be set
      */
-    void set(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, List<Pair<CDLLookupEntry, String>> pairs);
+    void set(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<Pair<EntityLookupEntry, String>> pairs);
 
     /**
      * Delete the specified lookup entry.
@@ -83,5 +83,5 @@ public interface CDLLookupEntryService {
      * @param lookupEntry target lookup entry
      * @return true if the entry exists and is deleted, false otherwise
      */
-    boolean delete(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry);
+    boolean delete(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry);
 }

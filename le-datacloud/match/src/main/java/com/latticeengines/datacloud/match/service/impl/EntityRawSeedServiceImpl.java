@@ -17,13 +17,13 @@ import com.amazonaws.services.dynamodbv2.xspec.ScanExpressionSpec;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.CDLConfigurationService;
-import com.latticeengines.datacloud.match.service.CDLMatchVersionService;
-import com.latticeengines.datacloud.match.service.CDLRawSeedService;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
+import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,9 +50,9 @@ import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.SS;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.if_not_exists;
 import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
-import static com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry.Mapping.MANY_TO_MANY;
-import static com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry.Mapping.MANY_TO_ONE;
-import static com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry.Mapping.ONE_TO_ONE;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_ONE;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
@@ -62,46 +62,46 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-@Component("cdlRawSeedService")
-public class CDLRawSeedServiceImpl implements CDLRawSeedService {
+@Component("entityRawSeedService")
+public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     // TODO add retries
 
     /* constants */
-    private static final String PREFIX = DataCloudConstants.CDL_PREFIX_SEED;
-    private static final String PREFIX_SEED_ATTRIBUTES = DataCloudConstants.CDL_PREFIX_SEED_ATTRIBUTES;
-    private static final String ATTR_PARTITION_KEY = DataCloudConstants.CDL_ATTR_PID;
-    private static final String ATTR_RANGE_KEY = DataCloudConstants.CDL_ATTR_SID;
-    private static final String ATTR_SEED_ID = DataCloudConstants.CDL_ATTR_SEED_ID;
-    private static final String ATTR_SEED_ENTITY = DataCloudConstants.CDL_ATTR_ENTITY;
-    private static final String ATTR_SEED_VERSION = DataCloudConstants.CDL_ATTR_VERSION;
-    private static final String ATTR_EXPIRED_AT = DataCloudConstants.CDL_ATTR_EXPIRED_AT;
-    private static final String DELIMITER = DataCloudConstants.CDL_DELIMITER;
+    private static final String PREFIX = DataCloudConstants.ENTITY_PREFIX_SEED;
+    private static final String PREFIX_SEED_ATTRIBUTES = DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
+    private static final String ATTR_PARTITION_KEY = DataCloudConstants.ENTITY_ATTR_PID;
+    private static final String ATTR_RANGE_KEY = DataCloudConstants.ENTITY_ATTR_SID;
+    private static final String ATTR_SEED_ID = DataCloudConstants.ENTITY_ATTR_SEED_ID;
+    private static final String ATTR_SEED_ENTITY = DataCloudConstants.ENTITY_ATTR_ENTITY;
+    private static final String ATTR_SEED_VERSION = DataCloudConstants.ENTITY_ATTR_VERSION;
+    private static final String ATTR_EXPIRED_AT = DataCloudConstants.ENTITY_ATTR_EXPIRED_AT;
+    private static final String DELIMITER = DataCloudConstants.ENTITY_DELIMITER;
     private static final int INITIAL_SEED_VERSION = 0;
 
     /* services */
     private final DynamoItemService dynamoItemService;
-    private final CDLMatchVersionService cdlMatchVersionService;
-    private final CDLConfigurationService cdlConfigurationService;
+    private final EntityMatchVersionService entityMatchVersionService;
+    private final EntityMatchConfigurationService entityMatchConfigurationService;
 
     private final int numStagingShards;
 
-    private static final Scheduler scheduler = Schedulers.newParallel("cdl-rawseed");
+    private static final Scheduler scheduler = Schedulers.newParallel("entity-rawseed");
 
     @Inject
-    public CDLRawSeedServiceImpl(
-            DynamoItemService dynamoItemService, CDLMatchVersionService cdlMatchVersionService,
-            CDLConfigurationService cdlConfigurationService) {
+    public EntityRawSeedServiceImpl(
+            DynamoItemService dynamoItemService, EntityMatchVersionService entityMatchVersionService,
+            EntityMatchConfigurationService entityMatchConfigurationService) {
         this.dynamoItemService = dynamoItemService;
-        this.cdlMatchVersionService = cdlMatchVersionService;
-        this.cdlConfigurationService = cdlConfigurationService;
+        this.entityMatchVersionService = entityMatchVersionService;
+        this.entityMatchConfigurationService = entityMatchConfigurationService;
         // NOTE this will not be changed at runtime
-        numStagingShards = cdlConfigurationService.getNumShards(CDLMatchEnvironment.STAGING);
+        numStagingShards = entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
     }
 
     @Override
     public boolean createIfNotExists(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
         Item item = getBaseItem(env, tenant, entity, seedId);
@@ -110,7 +110,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
 
     @Override
     public boolean setIfNotExists(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed seed) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed) {
         checkNotNull(env, tenant, seed);
         Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId());
         // set attributes
@@ -120,8 +120,8 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     @Override
-    public CDLRawSeed get(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+    public EntityRawSeed get(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
 
@@ -133,8 +133,8 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     @Override
-    public List<CDLRawSeed> get(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+    public List<EntityRawSeed> get(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, @NotNull List<String> seedIds) {
         checkNotNull(env, tenant, entity, seedIds);
         if (seedIds.isEmpty()) {
@@ -156,11 +156,11 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     @Override
-    public Map<Integer, List<CDLRawSeed>> scan(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+    public Map<Integer, List<EntityRawSeed>> scan(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, List<String> seedIds, int maxResultSize) {
         checkNotNull(env, tenant, entity);
-        if (!CDLMatchEnvironment.STAGING.equals(env)) {
+        if (!EntityMatchEnvironment.STAGING.equals(env)) {
             throw new UnsupportedOperationException(String.format("Scanning for %s is not supported.", env.name()));
         }
         Map<Integer, String> seedMap = new HashMap<>();
@@ -174,7 +174,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
             });
         }
         List<Pair<Integer, Item>> itemPairs = scanPartition(env, tenant, entity, seedMap, maxResultSize).sequential().collectList().block();
-        Map<Integer, List<CDLRawSeed>> result = new HashMap<>();
+        Map<Integer, List<EntityRawSeed>> result = new HashMap<>();
         if (CollectionUtils.isNotEmpty(itemPairs)) {
             itemPairs.forEach(itemPair -> {
                 result.putIfAbsent(itemPair.getLeft(), new ArrayList<>());
@@ -186,8 +186,8 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         }
     }
 
-    private ParallelFlux<Pair<Integer, Item>> scanPartition(CDLMatchEnvironment env, Tenant tenant, String entity,
-                                             Map<Integer, String> seedMap, int maxResultSize) {
+    private ParallelFlux<Pair<Integer, Item>> scanPartition(EntityMatchEnvironment env, Tenant tenant, String entity,
+                                                            Map<Integer, String> seedMap, int maxResultSize) {
         Integer[] shardIds = new Integer[seedMap.keySet().size()];
         shardIds = seedMap.keySet().toArray(shardIds);
         return Flux.just(shardIds).parallel().runOn(scheduler)
@@ -214,8 +214,8 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     @Override
-    public CDLRawSeed updateIfNotSet(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed) {
+    public EntityRawSeed updateIfNotSet(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
         checkNotNull(env, tenant, rawSeed);
 
         int version = getMatchVersion(env, tenant);
@@ -247,19 +247,19 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     @Override
-    public CDLRawSeed clearIfEquals(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLRawSeed rawSeed) {
+    public EntityRawSeed clearIfEquals(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
         return clear(env, tenant, rawSeed, true);
     }
 
     @Override
-    public CDLRawSeed clear(CDLMatchEnvironment env, Tenant tenant, CDLRawSeed rawSeed) {
+    public EntityRawSeed clear(EntityMatchEnvironment env, Tenant tenant, EntityRawSeed rawSeed) {
         return clear(env, tenant, rawSeed, false);
     }
 
     @Override
     public boolean delete(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
 
@@ -279,9 +279,9 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * 2. if useOptimisticLocking, will only clear if the existing seed has the same internal version as the one
      * specified in input seed.
      */
-    private CDLRawSeed clear(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLRawSeed rawSeed, boolean useOptimisticLocking) {
+    private EntityRawSeed clear(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityRawSeed rawSeed, boolean useOptimisticLocking) {
         checkNotNull(env, tenant, rawSeed);
 
         int version = getMatchVersion(env, tenant);
@@ -324,7 +324,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     /*
      * Transform attribute value map to raw seed
      */
-    private CDLRawSeed fromAttributeMap(Map<String, AttributeValue> map) {
+    private EntityRawSeed fromAttributeMap(Map<String, AttributeValue> map) {
         if (MapUtils.isEmpty(map)) {
             return null;
         }
@@ -333,7 +333,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         String entity = map.get(ATTR_SEED_ENTITY).getS();
         int version = map.containsKey(ATTR_SEED_VERSION)
             ? INITIAL_SEED_VERSION : Integer.parseInt(map.get(ATTR_SEED_VERSION).getN());
-        List<CDLLookupEntry> entries = new ArrayList<>();
+        List<EntityLookupEntry> entries = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
         map.forEach((seedAttrName, value) -> {
             if (isReservedAttribute(seedAttrName)) {
@@ -350,14 +350,14 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
             // TODO log error if failed to parse lookup entries here
             entries.addAll(parseLookupEntries(entity, seedAttrName, value));
         });
-        return new CDLRawSeed(seedId, entity, version, entries, attributes);
+        return new EntityRawSeed(seedId, entity, version, entries, attributes);
     }
 
     // TODO unit test this
     /*
      * Transform item to raw seed
      */
-    private CDLRawSeed fromItem(Item item) {
+    private EntityRawSeed fromItem(Item item) {
         if (item == null) {
             return null;
         }
@@ -365,7 +365,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         String seedId = item.getString(ATTR_SEED_ID);
         String entity = item.getString(ATTR_SEED_ENTITY);
         int version = item.hasAttribute(ATTR_SEED_VERSION) ? item.getInt(ATTR_SEED_VERSION) : INITIAL_SEED_VERSION;
-        List<CDLLookupEntry> entries = new ArrayList<>();
+        List<EntityLookupEntry> entries = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
         item.attributes().forEach(e -> {
             if (isReservedAttribute(e.getKey())) {
@@ -383,7 +383,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
             // TODO log error if failed to parse lookup entries here
             entries.addAll(parseLookupEntries(entity, e.getKey(), item));
         });
-        return new CDLRawSeed(seedId, entity, version, entries, attributes);
+        return new EntityRawSeed(seedId, entity, version, entries, attributes);
     }
 
     /*
@@ -411,7 +411,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     private Item getBaseItem(
-            CDLMatchEnvironment env, Tenant tenant, String entity, String seedId) {
+            EntityMatchEnvironment env, Tenant tenant, String entity, String seedId) {
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
         return new Item()
@@ -427,7 +427,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * Build all string attributes. Returns Map<attributeName, attributeValue>.
      * TODO unit test this
      */
-    private Map<String, String> getStringAttributes(@NotNull CDLRawSeed seed) {
+    private Map<String, String> getStringAttributes(@NotNull EntityRawSeed seed) {
         Map<String, String> attrs = seed.getLookupEntries()
                 .stream()
                 .filter(entry -> entry.getType().mapping == ONE_TO_ONE || entry.getType().mapping == MANY_TO_ONE)
@@ -444,7 +444,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * Build all string set attributes. Returns Map<attributeName, Set<attributeValue>>.
      * TODO unit test this
      */
-    private Map<String, Set<String>> getStringSetAttributes(@NotNull CDLRawSeed seed) {
+    private Map<String, Set<String>> getStringSetAttributes(@NotNull EntityRawSeed seed) {
         return seed.getLookupEntries()
                 .stream()
                 .filter(entry -> entry.getType().mapping == MANY_TO_MANY)
@@ -457,7 +457,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * build seed attribute name/value for lookup entries
      * TODO unit test this
      */
-    private Pair<String, String> buildAttrPairFromLookupEntry(@NotNull CDLLookupEntry entry) {
+    private Pair<String, String> buildAttrPairFromLookupEntry(@NotNull EntityLookupEntry entry) {
         String attrName = entry.getType().name();
         if (!entry.getSerializedKeys().isEmpty()) {
             attrName += DELIMITER + entry.getSerializedKeys();
@@ -470,9 +470,9 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * (String -> single item, String Set -> multiple items)
      * TODO unit test this
      */
-    private List<CDLLookupEntry> parseLookupEntries(
+    private List<EntityLookupEntry> parseLookupEntries(
             @NotNull String entity, @NotNull String attributeName, Object value) {
-        for (CDLLookupEntry.Type type : CDLLookupEntry.Type.values()) {
+        for (EntityLookupEntry.Type type : EntityLookupEntry.Type.values()) {
             int idx = attributeName.indexOf(type.name());
             if (idx < 0) {
                 continue;
@@ -491,33 +491,33 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
         return Collections.emptyList();
     }
 
-    private List<CDLLookupEntry> getLookupEntries(
-            @NotNull CDLLookupEntry.Type type, @NotNull String entity,
+    private List<EntityLookupEntry> getLookupEntries(
+            @NotNull EntityLookupEntry.Type type, @NotNull String entity,
             @NotNull String serializedKeys, @NotNull AttributeValue value) {
         if (value.getS() != null) {
             return Collections.singletonList(
-                    new CDLLookupEntry(type, entity, serializedKeys, value.getS()));
+                    new EntityLookupEntry(type, entity, serializedKeys, value.getS()));
         } else if (value.getSS() != null) {
             return value.getSS()
                     .stream()
-                    .map(val -> new CDLLookupEntry(type, entity, serializedKeys, val))
+                    .map(val -> new EntityLookupEntry(type, entity, serializedKeys, val))
                     .collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
     }
 
-    private List<CDLLookupEntry> getLookupEntries(
-            @NotNull CDLLookupEntry.Type type, @NotNull String entity,
+    private List<EntityLookupEntry> getLookupEntries(
+            @NotNull EntityLookupEntry.Type type, @NotNull String entity,
             @NotNull String attributeName, @NotNull String serializedKeys, @NotNull Item item) {
         Class<?> clz = item.getTypeOf(attributeName);
         if (String.class.equals(clz)) {
             return Collections.singletonList(
-                    new CDLLookupEntry(type, entity, serializedKeys, item.getString(attributeName)));
+                    new EntityLookupEntry(type, entity, serializedKeys, item.getString(attributeName)));
         } else if (Set.class.isAssignableFrom(clz)) {
             return item.getStringSet(attributeName)
                     .stream()
-                    .map(val -> new CDLLookupEntry(type, entity, serializedKeys, val))
+                    .map(val -> new EntityLookupEntry(type, entity, serializedKeys, val))
                     .collect(Collectors.toList());
         } else {
             return Collections.emptyList();
@@ -525,7 +525,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
     }
 
     private long getExpiredAt() {
-        return cdlConfigurationService.getExpiredAt();
+        return entityMatchConfigurationService.getExpiredAt();
     }
 
     /*
@@ -557,16 +557,16 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
             || ATTR_SEED_VERSION.equals(attrName) || ATTR_EXPIRED_AT.equals(attrName);
     }
 
-    private int getMatchVersion(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant) {
-        return cdlMatchVersionService.getCurrentVersion(env, tenant);
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant) {
+        return entityMatchVersionService.getCurrentVersion(env, tenant);
     }
 
-    private String getTableName(CDLMatchEnvironment environment) {
-        return cdlConfigurationService.getTableName(environment);
+    private String getTableName(EntityMatchEnvironment environment) {
+        return entityMatchConfigurationService.getTableName(environment);
     }
 
     private PrimaryKey buildKey(
-            CDLMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
+            EntityMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
         Preconditions.checkNotNull(tenant.getPid());
         String partitionKey = getPartitionKey(env, tenant, version, entity, seedId);
         switch (env) {
@@ -583,7 +583,7 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
      * Dynamo key format:
      * - Partition Key: SEED_<TENANT_PID>_<STAGING_VERSION>_<ENTITY>_<CALCULATED_SUFFIX>
      *     - E.g., "SEED_123_5_Account_3"
-     * - Sort Key: <CDL_ACCOUNT_ID>
+     * - Sort Key: <ENTITY_ID>
      *     - E.g., "aabbabc123456789"
      */
     private PrimaryKey buildStagingKey(String partitionKey, String seedId) {
@@ -592,14 +592,14 @@ public class CDLRawSeedServiceImpl implements CDLRawSeedService {
 
     /*
      * Dynamo key format:
-     * - Partition Key: SEED_<TENANT_PID>_<SERVING_VERSION>_<ENTITY>_<CDL_ACCOUNT_ID>
+     * - Partition Key: SEED_<TENANT_PID>_<SERVING_VERSION>_<ENTITY>_<ENTITY_ID>
      *     - E.g., "SEED_123_5_Account_aabbabc123456789"
      */
     private PrimaryKey buildServingKey(String partitionKey) {
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey);
     }
 
-    private String getPartitionKey(CDLMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
+    private String getPartitionKey(EntityMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
         switch (env) {
             case STAGING:
                 int shardsId = getShardId(seedId);

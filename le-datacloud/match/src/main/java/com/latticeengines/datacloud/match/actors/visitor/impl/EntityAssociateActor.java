@@ -13,16 +13,16 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 
 /**
- * Wrapper actor for {@link CDLAssociateServiceImpl}
+ * Wrapper actor for {@link EntityAssociateServiceImpl}
  */
-@Component("cdlAssociateActor")
+@Component("entityAssociateActor")
 @Scope("prototype")
-public class CDLAssociateActor extends DataSourceWrapperActorTemplate {
+public class EntityAssociateActor extends DataSourceWrapperActorTemplate {
 
-    private static final Logger log = LoggerFactory.getLogger(CDLAssociateActor.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityAssociateActor.class);
 
     @Inject
-    @Qualifier("cdlAssociateService")
+    @Qualifier("entityAssociateService")
     private DataSourceLookupServiceBase cdlAssociateService;
 
     @PostConstruct

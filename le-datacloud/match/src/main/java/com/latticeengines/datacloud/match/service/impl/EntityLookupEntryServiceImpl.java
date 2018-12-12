@@ -12,12 +12,12 @@ import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.CDLConfigurationService;
-import com.latticeengines.datacloud.match.service.CDLLookupEntryService;
-import com.latticeengines.datacloud.match.service.CDLMatchVersionService;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.cdl.CDLMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,40 +39,40 @@ import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.S;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
 import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
 
-@Component("cdlLookupEntryService")
-public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
+@Component("entityLookupEntryService")
+public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     /*
      * TODO add retries
      */
     /* constants */
-    private static final String PREFIX = DataCloudConstants.CDL_PREFIX_LOOKUP;
-    private static final String ATTR_PARTITION_KEY = DataCloudConstants.CDL_ATTR_PID;
-    private static final String ATTR_RANGE_KEY = DataCloudConstants.CDL_ATTR_SID;
-    private static final String ATTR_SEED_ID = DataCloudConstants.CDL_ATTR_SEED_ID;
-    private static final String ATTR_EXPIRED_AT = DataCloudConstants.CDL_ATTR_EXPIRED_AT;
-    private static final String DELIMITER = DataCloudConstants.CDL_DELIMITER;
+    private static final String PREFIX = DataCloudConstants.ENTITY_PREFIX_LOOKUP;
+    private static final String ATTR_PARTITION_KEY = DataCloudConstants.ENTITY_ATTR_PID;
+    private static final String ATTR_RANGE_KEY = DataCloudConstants.ENTITY_ATTR_SID;
+    private static final String ATTR_SEED_ID = DataCloudConstants.ENTITY_ATTR_SEED_ID;
+    private static final String ATTR_EXPIRED_AT = DataCloudConstants.ENTITY_ATTR_EXPIRED_AT;
+    private static final String DELIMITER = DataCloudConstants.ENTITY_DELIMITER;
 
     /* services */
     private final DynamoItemService dynamoItemService;
-    private final CDLMatchVersionService cdlMatchVersionService;
-    private final CDLConfigurationService cdlConfigurationService;
+    private final EntityMatchVersionService entityMatchVersionService;
+    private final EntityMatchConfigurationService entityMatchConfigurationService;
     private final int numStagingShards;
 
     @Inject
-    public CDLLookupEntryServiceImpl(
-            DynamoItemService dynamoItemService, CDLMatchVersionService cdlMatchVersionService,
-            CDLConfigurationService cdlConfigurationService) {
+    public EntityLookupEntryServiceImpl(
+            DynamoItemService dynamoItemService, EntityMatchVersionService entityMatchVersionService,
+            EntityMatchConfigurationService entityMatchConfigurationService) {
         this.dynamoItemService = dynamoItemService;
-        this.cdlMatchVersionService = cdlMatchVersionService;
-        this.cdlConfigurationService = cdlConfigurationService;
+        this.entityMatchVersionService = entityMatchVersionService;
+        this.entityMatchConfigurationService = entityMatchConfigurationService;
         // NOTE this will not be changed at runtime
-        numStagingShards = cdlConfigurationService.getNumShards(CDLMatchEnvironment.STAGING);
+        numStagingShards = entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
     }
 
     @Override
     public String get(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry) {
         checkNotNull(env, tenant, lookupEntry);
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
@@ -82,7 +82,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
 
     @Override
     public List<String> get(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<CDLLookupEntry> lookupEntries) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries) {
         checkNotNull(env, tenant, lookupEntries);
         if (lookupEntries.isEmpty()) {
             return Collections.emptyList();
@@ -105,8 +105,8 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
 
     @Override
     public boolean createIfNotExists(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLLookupEntry lookupEntry, @NotNull String seedId) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId) {
         checkNotNull(env, tenant, lookupEntry, seedId);
         PutItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
                 // use partition key to determine whether item exists
@@ -117,8 +117,8 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
 
     @Override
     public boolean setIfEquals(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull CDLLookupEntry lookupEntry, @NotNull String seedId) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId) {
         checkNotNull(env, tenant, lookupEntry, seedId);
         PutItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
                 // use partition key to determine whether item exists
@@ -129,8 +129,8 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
 
     @Override
     public void set(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull List<Pair<CDLLookupEntry, String>> pairs) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull List<Pair<EntityLookupEntry, String>> pairs) {
         checkNotNull(env, tenant, pairs);
         if (pairs.isEmpty()) {
             return;
@@ -154,7 +154,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
 
     @Override
     public boolean delete(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry) {
         checkNotNull(env, tenant, lookupEntry);
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
@@ -171,7 +171,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
      * Update lookup entry with condition specified in the given expression spec
      */
     private boolean conditionalSet(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry lookupEntry,
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
             @NotNull String seedId, @NotNull PutItemExpressionSpec expressionSpec) {
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
@@ -214,21 +214,21 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
     /* thin wrappers */
 
     private long getExpiredAt() {
-        return cdlConfigurationService.getExpiredAt();
+        return entityMatchConfigurationService.getExpiredAt();
     }
 
-    private int getMatchVersion(@NotNull CDLMatchEnvironment env, @NotNull Tenant tenant) {
-        return cdlMatchVersionService.getCurrentVersion(env, tenant);
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant) {
+        return entityMatchVersionService.getCurrentVersion(env, tenant);
     }
 
-    private String getTableName(CDLMatchEnvironment environment) {
-        return cdlConfigurationService.getTableName(environment);
+    private String getTableName(EntityMatchEnvironment environment) {
+        return entityMatchConfigurationService.getTableName(environment);
     }
 
     /*
      * helper to rebuild primary key from item
      */
-    private PrimaryKey getKey(@NotNull CDLMatchEnvironment env, Item item) {
+    private PrimaryKey getKey(@NotNull EntityMatchEnvironment env, Item item) {
         if (item == null) {
             return null;
         }
@@ -246,7 +246,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
     }
 
     private PrimaryKey buildKey(
-            @NotNull CDLMatchEnvironment env, @NotNull Tenant tenant, @NotNull CDLLookupEntry entry, int version) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry entry, int version) {
         switch (env) {
             case STAGING:
                 return buildStagingKey(tenant, entry, version);
@@ -264,7 +264,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
      * - Sort Key: <LOOKUP_TYPE>_<SERIALIZED_KEY_VALUES>
      *     - E.g., "DOMAIN_COUNTRY_google.com_USA"
      */
-    private PrimaryKey buildStagingKey(@NotNull Tenant tenant, @NotNull CDLLookupEntry entry, int version) {
+    private PrimaryKey buildStagingKey(@NotNull Tenant tenant, @NotNull EntityLookupEntry entry, int version) {
         // use calculated suffix because we need lookup
         // & 0x7fffffff to make it positive and mod nShards
         String sortKey = serialize(entry);
@@ -280,7 +280,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
      * - Partition Key: SEED_<TENANT_PID>_<SERVING_VERSION>_<ENTITY>_<LOOKUP_TYPE>_<SERIALIZED_KEY_VALUES>
      *     - E.g., "LOOKUP_123_0_Account_DOMAIN_COUNTRY_google.com_USA"
      */
-    private PrimaryKey buildServingKey(@NotNull Tenant tenant, @NotNull CDLLookupEntry entry, int version) {
+    private PrimaryKey buildServingKey(@NotNull Tenant tenant, @NotNull EntityLookupEntry entry, int version) {
         String lookupKey = serialize(entry);
         String partitionKey = String.join(DELIMITER,
                 PREFIX, tenant.getPid().toString(), String.valueOf(version), entry.getEntity(), lookupKey);
@@ -290,7 +290,7 @@ public class CDLLookupEntryServiceImpl implements CDLLookupEntryService {
     /*
      * Helper to generate primary key for lookup entries
      */
-    private String serialize(@NotNull CDLLookupEntry entry) {
+    private String serialize(@NotNull EntityLookupEntry entry) {
         return merge(entry.getType().name(), entry.getSerializedKeys(), entry.getSerializedValues());
     }
 
