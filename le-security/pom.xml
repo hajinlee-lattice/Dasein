@@ -185,5 +185,10 @@
 			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
