@@ -91,8 +91,10 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 24 * 3600L);
         T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 24 * 3600L);
 
-        System.out.println(String.format("LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
-                + "T1 = %s, T2 = %s, T3 = %s, T4 = %s", LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
+        System.out.println(String.format(
+                "LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
+                        + "T1 = %s, T2 = %s, T3 = %s, T4 = %s",
+                LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
 
         recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, LAUNCH_DATE, SFDC_ACCOUNT_ID, null, null,
                 "A");
@@ -518,8 +520,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertEquals(0, recommendationCount);
 
         recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate2, //
-                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
-                orgInfo);
+                (recommendationCount - minPageSize) < 0 ? 0 : (recommendationCount - minPageSize), //
+                minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() == 0);
 
