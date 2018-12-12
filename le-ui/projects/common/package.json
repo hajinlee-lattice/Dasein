@@ -61,6 +61,7 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-ng-annotate": "^2.0.1",
     "jest": "23.6.0",
+    "jest-enzyme": "^7.0.1",
     "webpack": "^4.16.0",
     "webpack-cli": "^3.0.8"
   },
@@ -81,7 +82,11 @@
       "bower_components",
       "shared"
     ],
-    "setupFiles": ["./setupTests.js"],
+    "setupTestFrameworkScriptFile": "jest-enzyme",
+    "testEnvironment": "enzyme",
+    "testEnvironmentOptions": {
+      "enzymeAdapter": "react16"
+    },
     "moduleNameMapper": {
       "^common(.*)$": "<rootDir>/$1",
       "^widgets(.*)$": "<rootDir>/widgets/$1",
@@ -95,6 +100,7 @@
   },
   "scripts": {
     "test": "jest",
+    "dev-test": "jest --watchAll",
     "build": "webpack --mode=production",
     "watch": "webpack --mode=development --watch"
   }

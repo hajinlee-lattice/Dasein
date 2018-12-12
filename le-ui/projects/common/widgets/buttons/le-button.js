@@ -54,8 +54,7 @@ export default class LeButton extends Component {
       
     let classes = `button ${
       this.props.config.classNames ? this.props.config.classNames : ""
-    } ${(this.props.disabled || this.state.disabled) ? 'disabled': ''}`;
-    console.log("THE CLASSES ", classes);
+    } ${(this.props.disabled || this.state.disabled == true) ? 'disabled': ''}`;
     return classes;
   }
   render() {
