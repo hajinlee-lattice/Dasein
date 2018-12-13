@@ -17,7 +17,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -139,5 +138,12 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         Assert.assertEquals(playCount, 1);
         playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) + 2, null, 1, null);
         Assert.assertEquals(playCount, 0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountForFutureTimestamp" })
+    public void testDeletePlay() throws Exception {
+        playProxy.deletePlay(tenant.getId(), secondPlayWithLaunch.getName(), false);
+        int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
+        Assert.assertEquals(playCount, 1);
     }
 }
