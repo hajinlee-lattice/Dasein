@@ -650,7 +650,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }
         // make sure the system metadata include the customer config
         if (CollectionUtils.isNotEmpty(renderedAttrNames)) {
-            log.warn("Wrong customer config, system can't render these attributes " + renderedAttrNames.toString());
+            log.warn(String.format("Wrong customer config, system can't render these attributes %s for tenant %s",
+                    renderedAttrNames.toString(), MultiTenantContext.getCustomerSpace()));
+            // filter out non-existing customer config from map
+            map = map.entrySet().stream().filter(e -> !renderedAttrNames.contains(e.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
         return new ArrayList<>(map.values());
     }
