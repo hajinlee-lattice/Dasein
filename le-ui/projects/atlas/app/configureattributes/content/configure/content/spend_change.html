@@ -18,7 +18,9 @@
     <li>
         <label for="options_past">
             past average 
-            <strong ng-init="vm.initValue('SpendChange.BETWEEN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.SpendChange))">{{(vm.options['SpendChange']['WITHIN']['Period'] ? vm.options['SpendChange']['WITHIN']['Period'] + 'ly' : '&nbsp;') | lowercase}}</strong>
+            <strong ng-init="vm.initValue('SpendChange.BETWEEN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.SpendChange))">
+                {{(vm.options['SpendChange']['WITHIN']['Period'] ? vm.options['SpendChange']['WITHIN']['Period'] + 'ly' : '&nbsp;') | lowercase}}
+            </strong>
             spend during last
         </label>
         <select id="options_past"
@@ -31,13 +33,17 @@
             ng-options="option disable when option > vm.options['SpendChange']['BETWEEN']['Val'] for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
                 <option value="" hidden disabled>Select</option>
         </select>
-        <strong>{{vm.options['SpendChange']['WITHIN']['Period'] + (vm.options['SpendChange']['WITHIN']['Period'] ? 's' : '')|| '&nbsp;'| lowercase}}</strong>
+        <strong>
+            {{vm.options['SpendChange']['WITHIN']['Period'] + (vm.options['SpendChange']['WITHIN']['Period'] ? 's' : '')|| '&nbsp;'| lowercase}}
+        </strong>
     </li>
     <li>
         <label for="options">
             Compared to average
-            <strong>{{vm.options['SpendChange']['WITHIN']['Period'] + (vm.options['SpendChange']['WITHIN']['Period'] ? 's' : '')|| '&nbsp;'| lowercase}}</strong>
-            spend prior
+            <strong>
+                {{(vm.options['SpendChange']['WITHIN']['Period'] ? vm.options['SpendChange']['WITHIN']['Period'] + 'ly' : '&nbsp;') | lowercase}}
+            </strong>
+            spend of prior
         </label>
         <select id="options"
             class="form-control"
@@ -49,6 +55,8 @@
             ng-options="option disable when option < vm.options['SpendChange']['WITHIN']['Val'] for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
                 <option value="" hidden disabled>Select</option>
         </select>
-        <strong>{{vm.options['SpendChange']['WITHIN']['Period'] + (vm.options['SpendChange']['WITHIN']['Period'] ? 's' : '')|| '&nbsp;'| lowercase}}</strong>
+        <strong>
+            {{vm.options['SpendChange']['WITHIN']['Period'] + (vm.options['SpendChange']['WITHIN']['Period'] ? 's' : '')|| '&nbsp;'| lowercase}}
+        </strong>
     </li>
 </ul>

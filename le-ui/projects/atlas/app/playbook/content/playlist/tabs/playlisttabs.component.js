@@ -6,15 +6,20 @@ angular.module('lp.playbook.playlisttabs', [
 
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
-        current: PlaybookWizardStore.current
+        current: PlaybookWizardStore.current,
+        counts: {}
     });
 
     vm.count = function(type, current) {
         var filter = current
             ? { launchHistory: { playLaunch: { launchState: type } } }
             : { launchHistory: { mostRecentLaunch: { launchState: type } } };
-        
-        return ($filter('filter')(vm.current.plays, filter, true) || []).length;
+
+        var launched = $filter('filter')(vm.current.plays, filter, true);
+        if(launched && launched.length) {
+            vm.counts[type] = launched.length;
+        }
+        return vm.counts[type] || 0;
     }
 
     vm.historyTabIsDisabled = ((vm.count('Launching') + vm.count('Launched') + vm.count('Failed')) === 0);

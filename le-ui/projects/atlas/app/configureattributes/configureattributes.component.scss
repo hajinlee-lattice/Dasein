@@ -206,6 +206,9 @@
                 }
             }
             &.step-spend_over_time {
+                .form-control {
+                    min-width: 60px;
+                }
                 .button {
                     &.add,
                     &.remove {

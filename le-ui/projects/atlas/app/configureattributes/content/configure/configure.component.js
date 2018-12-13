@@ -33,18 +33,18 @@ angular.module('lp.configureattributes.configure', [])
                 spend_change: {
                     type: 'SpendChange',
                     label: '% Spend Change',
-                    description: $sce.trustAsHtml('<p>This curated attribute is calculated by comparing average spend for a given product of a given account in the specified time window with that of the range in prior time window.</p><p>The insights are useful to drive sales &amp; marketing campaigns for the accounts where the spend is declining.</p>'),
+                    description: $sce.trustAsHtml('<p>This attribute is calculated by comparing average spend of two selected time windows for a specific account.</p><p>The insights are useful to drive sales &amp; marketing campaigns for the accounts where the spend is declining.</p>'),
                 },
                 spend_over_time: {
                     type: 'TotalSpendOvertime,AvgSpendOvertime',
                     label: 'Spend Over Time',
-                    description: $sce.trustAsHtml('<p>This curated attribute is calulated by aggregating spend for a given product of a given account over a specified time window</p><p>The insights are useful to provide dynamic talking points to the reps when executing x-sell &amp; upsell plays for a set of accounts.</p>'),
+                    description: $sce.trustAsHtml('<p>This curated attribute is calulated by aggregating spend for a given product of a given account over a specified time window.</p><p>The insights are useful to provide dynamic talking points to the reps when executing x-sell &amp; upsell plays for a set of accounts.</p>'),
                 },
                 share_of_wallet: {
                     type: 'ShareOfWallet',
                     label: '% Share of Wallet',
                     disabled: Precheck.disableShareOfWallet,
-                    description: $sce.trustAsHtml('<p>This curated attribute is calculated by comparing spend ratio for a given product of a given account with that of other accounts in the same segment.</p><p>This insignts are useful to drive sales &amp; marketing campaigns for the accounts where the share of wallet is below the desired range.</p>'),
+                    description: $sce.trustAsHtml('<p>This attribute is calculated by comparing spend ratio of a specific product of an account with other accounts in a segment.</p><p>This insignts are useful to drive sales &amp; marketing campaigns for the accounts where the share of wallet is below the desired range.</p>'),
                 },
                 margin: {
                     type: 'Margin',
