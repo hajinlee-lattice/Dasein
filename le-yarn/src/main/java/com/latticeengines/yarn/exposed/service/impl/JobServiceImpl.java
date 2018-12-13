@@ -53,6 +53,9 @@ import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
 
+    // 60 * (5s delay + 10s connection timeout) = 15 minute
+    private static final int MAX_CONTINUOUS_EXCEPTIONS = 60;
+
     protected static final Logger log = LoggerFactory.getLogger(JobServiceImpl.class);
 
     private static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
@@ -284,6 +287,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         long startTime = System.currentTimeMillis();
         int maxTries = 17280; // maximum wait time 24h
         int i = 0;
+        int nContExceptions = 0; // number of continuous exceptions
         do {
             try {
                 finalStatus = getJobStatus(applicationId);
@@ -294,8 +298,23 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                 }
                 log.info(logMsg);
             } catch (Exception e) {
-                log.warn("Failed to get application status of application id " + applicationId);
+                nContExceptions++;
+                log.warn(
+                        "Failed to get application status of application id = {}," +
+                        " # consecutive errors = {}, error = {}",
+                        applicationId, nContExceptions, e.getMessage());
+                if (nContExceptions >= MAX_CONTINUOUS_EXCEPTIONS) {
+                    // failed for too many consecutive times
+                    String msg = String.format(
+                            "Failed to retrieve yarn job status for %d consecutive times, application ID = %s",
+                            nContExceptions, applicationId);
+                    log.error(msg, e);
+                    throw new RuntimeException(msg);
+                }
             }
+            // clear once we get status successfully
+            nContExceptions = 0;
+
             try {
                 Thread.sleep(5000L);
             } catch (InterruptedException e) {
@@ -306,7 +325,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
                 break;
             }
-        } while (!TERMINAL_STATUS.contains(finalStatus.getStatus()));
+        } while (finalStatus == null || !TERMINAL_STATUS.contains(finalStatus.getStatus()));
 
         log.info(
                 String.format("The terminal status of application [%s] is %s", applicationId, finalStatus.getStatus()));
