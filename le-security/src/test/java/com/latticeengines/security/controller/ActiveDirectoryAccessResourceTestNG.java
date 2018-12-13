@@ -38,7 +38,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
         } catch (Exception e) {
             exception = true;
             String code = e.getMessage();
-            assertEquals(code, "403");
+            assertEquals(code, "403 FORBIDDEN");
         }
         assertTrue(exception);
     }

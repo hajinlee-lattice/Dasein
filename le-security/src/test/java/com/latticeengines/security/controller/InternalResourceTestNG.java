@@ -28,7 +28,7 @@ public class InternalResourceTestNG extends SecurityFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             String code = e.getMessage();
-            assertEquals(code, "401");
+            assertEquals(code, "401 UNAUTHORIZED");
         }
         assertTrue(exception);
     }
