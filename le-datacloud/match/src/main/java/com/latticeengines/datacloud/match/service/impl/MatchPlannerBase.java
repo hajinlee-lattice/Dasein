@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
+
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -202,11 +204,20 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
-        output.setKeyMap(input.getKeyMap());
+
+        // TODO(dzheng): Should we be copying EntityKeyMap to the MatchOutput?  What about the other Entity Match
+        //     specific fields?
+        output.setOperationalMode(input.getOperationalMode());
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            output.setEntityKeyMap(input.getEntityKeyMapList());
+        } else {
+            output.setKeyMap(input.getKeyMap());
+        }
         output.setSubmittedBy(input.getTenant());
         if (CollectionUtils.isNotEmpty(metadatas)) {
             output = appendMetadata(output, metadatas);
         } else {
+            // TODO(dzheng): Does this case have to work for Entity Match?
             output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
         }
         output = parseOutputFields(output, input.getMetadataFields());

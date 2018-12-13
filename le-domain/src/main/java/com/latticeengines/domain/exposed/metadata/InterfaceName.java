@@ -8,6 +8,7 @@ public enum InterfaceName {
     Domain, //
 
     // IDS - shared between LPI and CDL
+    AtlasId, // Represents the ID known as CDL ID internally.
     AccountId, //
     ContactId, //
     CategoryId, //

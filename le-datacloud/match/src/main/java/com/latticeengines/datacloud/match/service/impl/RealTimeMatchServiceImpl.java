@@ -17,13 +17,18 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 @Component("realTimeMatchService")
 public class RealTimeMatchServiceImpl implements RealTimeMatchService {
 
     @Resource(name = "realTimeMatchPlanner")
-    private MatchPlanner matchPlanner;
+    private MatchPlanner realTimeMatchPlanner;
+
+    @Resource(name = "realTimeEntityMatchPlanner")
+    private MatchPlanner realTimeEntityMatchPlanner;
+
 
     @Resource(name = "realTimeMatchExecutor")
     private MatchExecutor matchExecutor;
@@ -58,7 +63,11 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
         if (StringUtils.isEmpty(input.getRootOperationUid())) {
             input.setRootOperationUid(UUID.randomUUID().toString());
         }
-        return matchPlanner.plan(input, metadatas, skipExecutionPlanning);
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            return realTimeEntityMatchPlanner.plan(input, metadatas, skipExecutionPlanning);
+        } else {
+            return realTimeMatchPlanner.plan(input, metadatas, skipExecutionPlanning);
+        }
     }
 
     private List<MatchContext> doPreProcessing(BulkMatchInput input) {

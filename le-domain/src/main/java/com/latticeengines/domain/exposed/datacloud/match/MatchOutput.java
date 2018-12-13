@@ -44,6 +44,22 @@ public class MatchOutput {
     private Date finishedAt;
     private String rootOperationUID;
 
+    // ====================
+    // BEGIN CDL MATCH PROPERTIES
+    // ====================
+
+    // $CDL$ Should we duplicate MatchInput fields for CDL Match here?  Looks like
+    // TODO(dzheng):  Looks like initializeMatchOutput at least needs keyMap.
+    @JsonProperty("EntityKeyMap")
+    private List<MatchInput.EntityKeyMap> entityKeyMap;
+
+    @JsonProperty("OperationalMode")
+    private OperationalMode operationalMode;
+
+    // ====================
+    // END CDL MATCH PROPERTIES
+    // ====================
+
     // for json constructor
     @SuppressWarnings("unused")
     private MatchOutput() {
@@ -53,6 +69,7 @@ public class MatchOutput {
         this.rootOperationUID = rootOperationUID;
     }
 
+    // TODO(dzheng):  Why are the @JsonProperty flags on the fields in MatchInput and on the setter and getter here?
     @JsonProperty("InputFields")
     public List<String> getInputFields() {
         return inputFields;
@@ -192,4 +209,12 @@ public class MatchOutput {
     public Integer numOutputFields() {
         return getOutputFields().size();
     }
+
+    public List<MatchInput.EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
+
+    public void setEntityKeyMap(List<MatchInput.EntityKeyMap> entityKeyMap) { this.entityKeyMap = entityKeyMap; }
+
+    public OperationalMode getOperationalMode() { return operationalMode; }
+
+    public void setOperationalMode(OperationalMode operationalMode) { this.operationalMode = operationalMode; }
 }
