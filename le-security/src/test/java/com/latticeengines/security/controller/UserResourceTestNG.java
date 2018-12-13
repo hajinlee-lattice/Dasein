@@ -32,6 +32,8 @@ import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
 //FIXME: stopped all tests here because it is spamming emails to @test.com domain
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
+    private static final String FORBIDDEN_MSG = "403 FORBIDDEN";
+
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
@@ -124,7 +126,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
                 restTemplate.getForObject(usersApi, String.class);
             } catch (RuntimeException e) {
                 exception = true;
-                assertEquals(e.getMessage(), "403");
+                assertEquals(e.getMessage(), FORBIDDEN_MSG);
             }
             assertTrue(exception);
         }
@@ -244,7 +246,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
             restTemplate.postForObject(usersApi, userReg, String.class);
         } catch (RuntimeException e) {
             exception = true;
-            assertEquals(e.getMessage(), "403");
+            assertEquals(e.getMessage(), FORBIDDEN_MSG);
         }
         assertTrue(exception);
         assertNull(userService.findByEmail(userReg.getUser().getEmail()));
@@ -267,7 +269,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
                 sendHttpDeleteForObject(restTemplate, url, ResponseDocument.class);
             } catch (RuntimeException e) {
                 exception = true;
-                assertEquals(e.getMessage(), "403");
+                assertEquals(e.getMessage(), FORBIDDEN_MSG);
             }
             assertTrue(exception);
             assertNotNull(userService.findByEmail(user.getEmail()));
@@ -307,7 +309,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
             sendHttpPutForObject(restTemplate, url, data, ResponseDocument.class);
         } catch (RuntimeException e) {
             exception = true;
-            assertEquals(e.getMessage(), "403");
+            assertEquals(e.getMessage(), FORBIDDEN_MSG);
         }
         assertTrue(exception);
     }
