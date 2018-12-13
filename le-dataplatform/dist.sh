@@ -46,3 +46,4 @@ if [ ! -z "${STACK_PROFILE}" ]; then
     python2.7 replace_token.py ${dist}/conf ${STACK_PROFILE}
 fi
 cp ../le-config/conf/env/${LE_ENVIRONMENT}/log4j.properties ${dist}/conf
+cp ../le-config/conf/env/${LE_ENVIRONMENT}/log4j2-yarn.xml ${dist}/conf
