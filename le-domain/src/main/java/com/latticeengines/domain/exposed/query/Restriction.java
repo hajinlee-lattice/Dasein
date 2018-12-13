@@ -12,6 +12,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonSubTypes({ //
         @Type(value = BucketRestriction.class, name = "bucketRestriction"),
         @Type(value = TransactionRestriction.class, name = "transactionRestriction"),
+        @Type(value = DateRestriction.class, name = "dateRestriction"),
         @Type(value = MetricRestriction.class, name = "metricRestriction"),
         @Type(value = TimeRestriction.class, name = "timeRestriction"),
         @Type(value = ConcreteRestriction.class, name = "concreteRestriction"),

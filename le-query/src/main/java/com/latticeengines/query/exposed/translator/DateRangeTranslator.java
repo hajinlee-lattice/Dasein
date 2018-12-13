@@ -28,7 +28,8 @@ public class DateRangeTranslator extends TranslatorCommon {
     public Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
         if (isHasNotPurchased(txnRestriction)) {
-            SubQuery notPurchasedSubQuery = constructHasPurchasedSubQuery(txnRestriction, queryFactory, repository, sqlUser);
+            SubQuery notPurchasedSubQuery = constructHasPurchasedSubQuery(txnRestriction, queryFactory, repository,
+                    sqlUser);
             return Restriction.builder() //
                     .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                     .notInSubquery(notPurchasedSubQuery) //

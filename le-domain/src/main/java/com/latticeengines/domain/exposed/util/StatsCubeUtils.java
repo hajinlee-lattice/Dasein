@@ -251,9 +251,9 @@ public class StatsCubeUtils {
         List<Integer> dayBoundaries = algo.getDayBoundaries();
         Integer dayBound = bktId == dayBoundaries.size() + 1 ? null : dayBoundaries.get(bktId - 1);
         if (dayBound != null) {
-            bucket.setDateTimeFilter(TimeFilter.within(dayBound, PeriodStrategy.Template.Day.name()));
+            bucket.setDateFilter(TimeFilter.within(dayBound, PeriodStrategy.Template.Day.name()));
         } else {
-            bucket.setDateTimeFilter(TimeFilter.ever(PeriodStrategy.Template.Day.name()));
+            bucket.setDateFilter(TimeFilter.ever(PeriodStrategy.Template.Day.name()));
         }
 
     }

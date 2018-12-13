@@ -10,6 +10,6 @@ public interface TransactionService {
 
     TimeFilterTranslator getTimeFilterTranslator(String evaluationDate);
 
-    boolean hasTransactionBucket(FrontEndQuery frontEndQuery);
+    boolean needTimeFilterTranslator(FrontEndQuery frontEndQuery);
 
 }

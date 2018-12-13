@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.DateRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.MetricRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.DateRangeTranslator;
+import com.latticeengines.query.exposed.translator.DayRangeTranslator;
 import com.latticeengines.query.exposed.translator.MetricTranslator;
 
 abstract class QueryTranslator {
@@ -97,14 +99,13 @@ abstract class QueryTranslator {
     }
 
     Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction,
-                                             TimeFilterTranslator timeTranslator, String sqlUser,
-                                             boolean translatePriorOnly) {
+            TimeFilterTranslator timeTranslator, String sqlUser, boolean translatePriorOnly) {
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction, translatePriorOnly);
         if (restriction == null) {
             return null;
         }
 
-        Restriction translated = translateTransactionRestriction(restriction, timeTranslator, sqlUser);
+        Restriction translated = specifyRestrictionParameters(restriction, timeTranslator, sqlUser);
         return RestrictionOptimizer.optimize(translated);
     }
 
@@ -189,7 +190,7 @@ abstract class QueryTranslator {
     }
 
     // this is only used by non-event-table translations
-    private Restriction translateTransactionRestriction(Restriction restriction, TimeFilterTranslator timeTranslator,
+    private Restriction specifyRestrictionParameters(Restriction restriction, TimeFilterTranslator timeTranslator,
             String sqlUser) {
         restriction = RestrictionOptimizer.groupMetrics(restriction);
         Restriction translated;
@@ -210,6 +211,13 @@ abstract class QueryTranslator {
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(metricRestriction);
                     parent.getRestrictions().add(concrete);
+                } else if (object instanceof DateRestriction) {
+                    DateRestriction dateRestriction = (DateRestriction) object;
+                    modifyDateRestriction(dateRestriction, timeTranslator);
+                    Restriction concrete = new DayRangeTranslator().convert(dateRestriction);
+                    LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                    parent.getRestrictions().remove(dateRestriction);
+                    parent.getRestrictions().add(concrete);
                 }
             });
             translated = restriction;
@@ -220,6 +228,10 @@ abstract class QueryTranslator {
         } else if (restriction instanceof MetricRestriction) {
             MetricRestriction metricRestriction = (MetricRestriction) restriction;
             translated = MetricTranslator.convert(metricRestriction);
+        } else if (restriction instanceof DateRestriction) {
+            DateRestriction dateRestriction = (DateRestriction) restriction;
+            modifyDateRestriction(dateRestriction, timeTranslator);
+            translated = new DayRangeTranslator().convert(dateRestriction);
         } else {
             translated = restriction;
         }
@@ -240,9 +252,16 @@ abstract class QueryTranslator {
         }
     }
 
+    private static void modifyDateRestriction(DateRestriction dateRestriction, TimeFilterTranslator timeTranslator) {
+        if (timeTranslator == null) {
+            throw new NullPointerException("TimeTranslator cannot be null.");
+        }
+        dateRestriction.setTimeFilter(timeTranslator.translate(dateRestriction.getTimeFilter()));
+    }
+
     private static AggregationFilter setAggToSum(AggregationFilter filter) {
         return new AggregationFilter(filter.getSelector(), AggregationType.SUM, //
-                                     filter.getComparisonType(), filter.getValues(), filter.isIncludeNotPurchased());
+                filter.getComparisonType(), filter.getValues(), filter.isIncludeNotPurchased());
     }
 
     static Sort translateFrontEndSort(FrontEndSort frontEndSort) {

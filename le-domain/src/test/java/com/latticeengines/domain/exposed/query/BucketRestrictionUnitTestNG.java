@@ -156,6 +156,37 @@ public class BucketRestrictionUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testDateRestriction() {
+        TimeFilter last = new TimeFilter(ComparisonType.LAST, Collections.singletonList(7));
+
+        Bucket bkt = Bucket.dateBkt(last);
+        BucketRestriction bucketRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "A"),
+                bkt);
+        String serialized = JsonUtils.serialize(bucketRestriction);
+        BucketRestriction deserialized = JsonUtils.deserialize(serialized, BucketRestriction.class);
+        Assert.assertNotNull(deserialized);
+        Assert.assertNotNull(deserialized.getBkt());
+        Assert.assertNull(deserialized.getBkt().getComparisonType());
+        Assert.assertNull(deserialized.getBkt().getValues());
+
+        TimeFilter dateFilter = deserialized.getBkt().getDateFilter();
+        Assert.assertNotNull(dateFilter);
+        Assert.assertNotNull(dateFilter.getRelation());
+        Assert.assertEquals(dateFilter.getRelation(), ComparisonType.LAST);
+        Assert.assertEquals(dateFilter.getValues().get(0), 7);
+
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, false);
+        Assert.assertNotNull(convertedRestriction);
+        Assert.assertTrue(convertedRestriction instanceof DateRestriction);
+
+        DateRestriction dateRestriction = (DateRestriction) convertedRestriction;
+        Assert.assertEquals(dateRestriction.getAttr().getAttribute(), "A");
+        Assert.assertNotNull(dateRestriction.getTimeFilter());
+        Assert.assertEquals(dateRestriction.getTimeFilter().getRelation(), ComparisonType.LAST);
+        Assert.assertEquals(dateRestriction.getTimeFilter().getValues().get(0), 7);
+    }
+
+    @Test(groups = "unit")
     public void testGenericPurchaseHistory() {
         // last quarter
         TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, PeriodStrategy.Template.Quarter.name(),
@@ -202,9 +233,10 @@ public class BucketRestrictionUnitTestNG {
 
     @Test(groups = "unit")
     public void testPurchaseHistoryWithZeroImputation() {
-        Bucket bkt = Bucket.chgBkt(Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST, Collections.singletonList(0));
-        BucketRestriction bucketRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_A80D4770376C1226C47617C071324C0B__M_1__M_2_3__SC"), bkt);
+        Bucket bkt = Bucket.chgBkt(Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST,
+                Collections.singletonList(0));
+        BucketRestriction bucketRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.PurchaseHistory,
+                "AM_A80D4770376C1226C47617C071324C0B__M_1__M_2_3__SC"), bkt);
         String serialized = JsonUtils.serialize(bucketRestriction);
         BucketRestriction deserialized = JsonUtils.deserialize(serialized, BucketRestriction.class);
         Assert.assertNotNull(deserialized);

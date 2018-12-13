@@ -25,7 +25,7 @@ public class QueryServiceUtils {
 
     public static TimeFilterTranslator getTimeFilterTranslator(TransactionService transactionService,
                                                                FrontEndQuery frontEndQuery) {
-        if (frontEndQuery != null && transactionService.hasTransactionBucket(frontEndQuery)) {
+        if (frontEndQuery != null && transactionService.needTimeFilterTranslator(frontEndQuery)) {
             return transactionService.getTimeFilterTranslator(frontEndQuery.getEvaluationDateStr());
         } else {
             return null;

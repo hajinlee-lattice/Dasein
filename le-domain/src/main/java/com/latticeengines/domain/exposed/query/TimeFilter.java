@@ -65,6 +65,13 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
+    public static TimeFilter isEmpty() {
+        TimeFilter timeFilter = new TimeFilter();
+        timeFilter.relation = ComparisonType.IS_EMPTY;
+        timeFilter.values = Collections.emptyList();
+        return timeFilter;
+    }
+
     public static TimeFilter priorOnly(int val, String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.PRIOR_ONLY;
@@ -166,8 +173,7 @@ public class TimeFilter implements Serializable {
 
         @Override
         public boolean equals(Object object) {
-            return !(object == null || !(object instanceof Period))
-                    && EqualsBuilder.reflectionEquals(this, object);
+            return !(object == null || !(object instanceof Period)) && EqualsBuilder.reflectionEquals(this, object);
         }
 
         @Override

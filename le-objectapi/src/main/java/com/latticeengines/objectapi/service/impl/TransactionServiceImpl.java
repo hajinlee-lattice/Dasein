@@ -109,44 +109,44 @@ public class TransactionServiceImpl implements TransactionService {
         });
     }
 
-    public boolean hasTransactionBucket(FrontEndQuery frontEndQuery) {
+    public boolean needTimeFilterTranslator(FrontEndQuery frontEndQuery) {
         boolean hasTxn = false;
         if (frontEndQuery.getAccountRestriction() != null) {
             Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
-            hasTxn = hasTransactionBucket(restriction);
+            hasTxn = hasTransactionOrDateFilterBucket(restriction);
         }
         if (frontEndQuery.getContactRestriction() != null) {
             Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
-            hasTxn = hasTxn || hasTransactionBucket(restriction);
+            hasTxn = hasTxn || hasTransactionOrDateFilterBucket(restriction);
         }
         if (CollectionUtils.isNotEmpty(frontEndQuery.getRatingModels())) {
             for (RatingModel ratingModel : frontEndQuery.getRatingModels()) {
                 if (ratingModel instanceof RuleBasedModel) {
-                    hasTxn = hasTxn || hasTransactionBucket((RuleBasedModel) ratingModel);
+                    hasTxn = hasTxn || hasTransactionOrDateFilterBucket((RuleBasedModel) ratingModel);
                 }
             }
         }
         return hasTxn;
     }
 
-    private boolean hasTransactionBucket(RuleBasedModel model) {
+    private boolean hasTransactionOrDateFilterBucket(RuleBasedModel model) {
         boolean hasTxn = false;
         if (model.getRatingRule() != null) {
             Stream<Restriction> restrictions = model.getRatingRule().getBucketToRuleMap().values().stream()
                     .flatMap(map -> map.values().stream()).filter(Objects::nonNull);
-            hasTxn = restrictions.anyMatch(this::hasTransactionBucket);
+            hasTxn = restrictions.anyMatch(this::hasTransactionOrDateFilterBucket);
         }
         return hasTxn;
     }
 
-    private boolean hasTransactionBucket(Restriction restriction) {
+    private boolean hasTransactionOrDateFilterBucket(Restriction restriction) {
         BreadthFirstSearch search = new BreadthFirstSearch();
         AtomicBoolean hasTxn = new AtomicBoolean(false);
         if (restriction != null) {
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) object;
-                    if (!Boolean.TRUE.equals(bucket.getIgnored()) && isTransactionBucket(bucket)) {
+                    if (!Boolean.TRUE.equals(bucket.getIgnored()) && isTransactionOrDateFilterBucket(bucket)) {
                         hasTxn.set(true);
                     }
                 }
@@ -158,8 +158,8 @@ public class TransactionServiceImpl implements TransactionService {
         return hasTxn.get();
     }
 
-    private boolean isTransactionBucket(BucketRestriction restriction) {
-        return restriction.getBkt().getTransaction() != null;
+    private boolean isTransactionOrDateFilterBucket(BucketRestriction restriction) {
+        return restriction.getBkt().getTransaction() != null || restriction.getBkt().getDateFilter() != null;
     }
 
     private List<PeriodStrategy> getPeriodStrategies(CustomerSpace customerSpace) {

@@ -23,6 +23,7 @@ public class TimeFilterTranslator {
 
     private final ImmutableMap<String, PeriodBuilder> periodBuilders;
     private final ImmutableMap<String, Integer> currentPeriodIds;
+    private final String evaluationDate;
 
     public TimeFilterTranslator(List<PeriodStrategy> strategyList, String evaluationDate) {
         Map<String, Integer> currentPeriodMap = new HashMap<>();
@@ -38,17 +39,19 @@ public class TimeFilterTranslator {
             periodBuilders = ImmutableMap.copyOf(Collections.emptyMap());
         }
         this.currentPeriodIds = ImmutableMap.copyOf(currentPeriodMap);
+        this.evaluationDate = evaluationDate;
     }
 
     public TimeFilter translate(TimeFilter timeFilter) {
         Pair<String, String> range = translateRange(timeFilter);
         List<Object> vals;
-        if (range == null) {
+        if (range == null && ComparisonType.EVER.equals(timeFilter.getRelation())) {
             return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
+        } else if (range == null && ComparisonType.IS_EMPTY.equals(timeFilter.getRelation())) {
+            return new TimeFilter(ComparisonType.IS_EMPTY, null, null);
         } else {
             vals = Arrays.asList(range.getLeft(), range.getRight());
-            return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(),
-                    vals);
+            return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(), vals);
         }
     }
 
@@ -59,21 +62,24 @@ public class TimeFilterTranslator {
         }
         ComparisonType operator = timeFilter.getRelation();
         switch (operator) {
-            case EVER:
-                return null;
-            case WITHIN:
-                return translateWithIn(timeFilter.getPeriod(), timeFilter.getValues());
-            case WITHIN_INCLUDE:
-                return translateWithInInclude(timeFilter.getPeriod(), timeFilter.getValues());
-            case PRIOR:
-                return translatePrior(timeFilter.getPeriod(), timeFilter.getValues());
-            case BETWEEN:
-                return translateBetween(timeFilter.getPeriod(), timeFilter.getValues());
-            case IN_CURRENT_PERIOD:
-                return translateInCurrent(timeFilter.getPeriod());
-            default:
-                throw new UnsupportedOperationException(
-                        "TimeFilter Operator " + operator + " is not supported.");
+        case EVER:
+            return null;
+        case IS_EMPTY:
+            return null;
+        case WITHIN:
+            return translateWithIn(timeFilter.getPeriod(), timeFilter.getValues());
+        case WITHIN_INCLUDE:
+            return translateWithInInclude(timeFilter.getPeriod(), timeFilter.getValues());
+        case PRIOR:
+            return translatePrior(timeFilter.getPeriod(), timeFilter.getValues());
+        case LAST:
+            return translateLast(timeFilter.getPeriod(), timeFilter.getValues());
+        case BETWEEN:
+            return translateBetween(timeFilter.getPeriod(), timeFilter.getValues());
+        case IN_CURRENT_PERIOD:
+            return translateInCurrent(timeFilter.getPeriod());
+        default:
+            throw new UnsupportedOperationException("TimeFilter Operator " + operator + " is not supported.");
         }
     }
 
@@ -81,21 +87,19 @@ public class TimeFilterTranslator {
         ComparisonType operator = timeFilter.getRelation();
         List<Object> vals = timeFilter.getValues();
         switch (operator) {
-            case BETWEEN:
-            case BETWEEN_DATE:
-                verifyDoubleVals(operator, vals);
-                List<String> dates = vals.stream().map(this::castToDate)
-                        .collect(Collectors.toList());
-                return Pair.of(dates.get(0), dates.get(1));
-            case BEFORE:
-                verifySingleVal(operator, vals);
-                return Pair.of(null, castToDate(vals.get(0)));
-            case AFTER:
-                verifySingleVal(operator, vals);
-                return Pair.of(castToDate(vals.get(0)), null);
-            default:
-                throw new UnsupportedOperationException(
-                        "Operator " + operator + " is not supported for date queries.");
+        case BETWEEN:
+        case BETWEEN_DATE:
+            verifyDoubleVals(operator, vals);
+            List<String> dates = vals.stream().map(this::castToDate).collect(Collectors.toList());
+            return Pair.of(dates.get(0), dates.get(1));
+        case BEFORE:
+            verifySingleVal(operator, vals);
+            return Pair.of(null, castToDate(vals.get(0)));
+        case AFTER:
+            verifySingleVal(operator, vals);
+            return Pair.of(castToDate(vals.get(0)), null);
+        default:
+            throw new UnsupportedOperationException("Operator " + operator + " is not supported for date queries.");
         }
     }
 
@@ -113,6 +117,21 @@ public class TimeFilterTranslator {
         return Pair.of(start, end);
     }
 
+    private Pair<String, String> translateLast(String period, List<Object> vals) {
+        if (!PeriodStrategy.Template.Day.name().equals(period)) {
+            throw new UnsupportedOperationException(String.format("We do not support %s", period));
+        }
+        int lastDays = parseSingleInteger(ComparisonType.LAST, vals);
+        if (lastDays < 1) {
+            throw new IllegalArgumentException("Operand has to be larger than 1, but " + vals + " was provided.");
+        }
+        LocalDate endDate = LocalDate.parse(getEvaluationDate(), DateTimeFormatter.ISO_DATE);
+        LocalDate startDate = endDate.minusDays(lastDays - 1);
+        String end = endDate.format(DateTimeFormatter.ISO_DATE);
+        String start = startDate.format(DateTimeFormatter.ISO_DATE);
+        return Pair.of(start, end);
+    }
+
     private Pair<String, String> translateWithIn(String period, List<Object> vals) {
         verifyPeriodIsValid(period);
         int offset = parseSingleInteger(ComparisonType.WITHIN, vals);
@@ -121,8 +140,7 @@ public class TimeFilterTranslator {
         int targetPeriod = currentPeriodId - offset;
 
         PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod,
-                currentPeriodId - 1);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, currentPeriodId - 1);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);
@@ -184,8 +202,7 @@ public class TimeFilterTranslator {
     private void verifySingleVal(ComparisonType operator, List<Object> vals) {
         if (CollectionUtils.isEmpty(vals) || vals.size() != 1) {
             throw new IllegalArgumentException(operator + //
-                    " operator is only compatible with single value, but " + vals
-                    + " was provided.");
+                    " operator is only compatible with single value, but " + vals + " was provided.");
         }
     }
 
@@ -214,8 +231,7 @@ public class TimeFilterTranslator {
             try {
                 integer = Integer.valueOf(String.valueOf(val));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Cannot cast value " + val + " to an Integer.",
-                        e);
+                throw new IllegalArgumentException("Cannot cast value " + val + " to an Integer.", e);
             }
         }
         return integer;
@@ -233,11 +249,14 @@ public class TimeFilterTranslator {
         int currentPeriodId = currentPeriodIds.get(period);
 
         PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(currentPeriodId,
-                currentPeriodId);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(currentPeriodId, currentPeriodId);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);
+    }
+
+    private String getEvaluationDate() {
+        return this.evaluationDate;
     }
 
 }

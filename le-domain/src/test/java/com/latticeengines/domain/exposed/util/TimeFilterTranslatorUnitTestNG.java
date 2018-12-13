@@ -30,39 +30,35 @@ public class TimeFilterTranslatorUnitTestNG {
     @DataProvider(name = "timeFilterProvider")
     public Object[][] provideTimeFilters() {
         TimeFilter currentMonth = new TimeFilter(//
-                ComparisonType.IN_CURRENT_PERIOD, PeriodStrategy.Template.Month.name(),
-                Collections.emptyList());
+                ComparisonType.IN_CURRENT_PERIOD, PeriodStrategy.Template.Month.name(), Collections.emptyList());
         TimeFilter within1Month = new TimeFilter(//
-                ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(),
-                Collections.singletonList(1));
+                ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(), Collections.singletonList(1));
         TimeFilter within3Month = new TimeFilter(//
-                ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(),
-                Collections.singletonList(3));
+                ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(), Collections.singletonList(3));
         TimeFilter within2Quarter = new TimeFilter(//
-                ComparisonType.WITHIN, PeriodStrategy.Template.Quarter.name(),
-                Collections.singletonList(2));
+                ComparisonType.WITHIN, PeriodStrategy.Template.Quarter.name(), Collections.singletonList(2));
         TimeFilter within2QuarterIncludeCurrent = new TimeFilter(//
-                ComparisonType.WITHIN_INCLUDE, PeriodStrategy.Template.Quarter.name(),
-                Collections.singletonList(2));
+                ComparisonType.WITHIN_INCLUDE, PeriodStrategy.Template.Quarter.name(), Collections.singletonList(2));
         TimeFilter prior1Month = new TimeFilter(//
-                ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(),
-                Collections.singletonList(1));
+                ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(), Collections.singletonList(1));
         TimeFilter prior3Month = new TimeFilter(//
-                ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(),
-                Collections.singletonList(3));
+                ComparisonType.PRIOR, PeriodStrategy.Template.Month.name(), Collections.singletonList(3));
         TimeFilter between1And3Month = new TimeFilter(//
                 ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(), Arrays.asList(1, 3));
         TimeFilter betweenDates = new TimeFilter(//
                 ComparisonType.BETWEEN_DATE, PeriodStrategy.Template.Date.name(),
                 Arrays.asList("2018-02-01", "2019-01-01"));
         TimeFilter beforeDate = new TimeFilter(//
-                ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(),
-                Collections.singletonList("2018-02-01"));
+                ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(), Collections.singletonList("2018-02-01"));
         TimeFilter afterDate = new TimeFilter(//
-                ComparisonType.AFTER, PeriodStrategy.Template.Date.name(),
-                Collections.singletonList("2018-02-01"));
+                ComparisonType.AFTER, PeriodStrategy.Template.Date.name(), Collections.singletonList("2018-02-01"));
+        TimeFilter last1Day = new TimeFilter(//
+                ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(1));
+        TimeFilter last7Days = new TimeFilter(//
+                ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(7));
         return new Object[][] { //
                 { TimeFilter.ever(), null }, //
+                { TimeFilter.isEmpty(), null }, //
                 { currentMonth, Pair.of("2018-02-01", "2018-02-28") }, //
                 { within1Month, Pair.of("2018-01-01", "2018-01-31") }, //
                 { within3Month, Pair.of("2017-11-01", "2018-01-31") }, //
@@ -74,6 +70,8 @@ public class TimeFilterTranslatorUnitTestNG {
                 { betweenDates, Pair.of("2018-02-01", "2019-01-01") }, //
                 { beforeDate, Pair.of(null, "2018-02-01") }, //
                 { afterDate, Pair.of("2018-02-01", null) }, //
+                { last1Day, Pair.of("2018-02-17", "2018-02-17") }, //
+                { last7Days, Pair.of("2018-02-11", "2018-02-17") }, //
         };
     }
 

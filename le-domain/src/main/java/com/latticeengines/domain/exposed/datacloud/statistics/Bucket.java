@@ -55,7 +55,7 @@ public class Bucket implements Serializable {
     private Change change;
 
     @JsonProperty("Fltr")
-    private TimeFilter dateTimeFilter;
+    private TimeFilter dateFilter;
 
     public Bucket() {
     }
@@ -97,8 +97,7 @@ public class Bucket implements Serializable {
         return rangeBkt(min, max, true, false);
     }
 
-    public static Bucket rangeBkt(Object min, Object max, boolean minInclusive,
-            boolean maxInclusive) {
+    public static Bucket rangeBkt(Object min, Object max, boolean minInclusive, boolean maxInclusive) {
         Bucket bucket = new Bucket();
         List<Object> vals;
         ComparisonType comparator;
@@ -165,8 +164,13 @@ public class Bucket implements Serializable {
         return bucket;
     }
 
-    public static Bucket chgBkt(Change.Direction direction, Change.ComparisonType comparator,
-            List<Object> values) {
+    public static Bucket dateBkt(TimeFilter dateFilter) {
+        Bucket bucket = new Bucket();
+        bucket.setDateFilter(dateFilter);
+        return bucket;
+    }
+
+    public static Bucket chgBkt(Change.Direction direction, Change.ComparisonType comparator, List<Object> values) {
         Bucket bucket = new Bucket();
         Change change = new Change();
         change.setDirection(direction);
@@ -248,14 +252,13 @@ public class Bucket implements Serializable {
         this.change = change;
     }
 
-    public TimeFilter getDateTimeFilter() {
-        return dateTimeFilter;
+    public TimeFilter getDateFilter() {
+        return dateFilter;
     }
 
-    public void setDateTimeFilter(TimeFilter dateTimeFilter) {
-        this.dateTimeFilter = dateTimeFilter;
+    public void setDateFilter(TimeFilter dateFilter) {
+        this.dateFilter = dateFilter;
     }
-
 
     public int getIdAsInt() {
         return id.intValue();

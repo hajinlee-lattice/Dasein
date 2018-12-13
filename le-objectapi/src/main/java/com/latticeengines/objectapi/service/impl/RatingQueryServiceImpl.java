@@ -201,7 +201,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
     }
 
     private TimeFilterTranslator getTimeFilterTranslator(FrontEndQuery frontEndQuery) {
-        if (transactionService.hasTransactionBucket(frontEndQuery)) {
+        if (transactionService.needTimeFilterTranslator(frontEndQuery)) {
             return transactionService.getTimeFilterTranslator(frontEndQuery.getEvaluationDateStr());
         } else {
             return null;
