@@ -216,8 +216,7 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
-    vm.initDataModel = function(){
-
+    vm.init = function() {
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
             if (vm.dashboard.dependencies[type]) {
@@ -270,11 +269,6 @@ angular.module('lp.ratingsengine.dashboard', [
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
-                if (typeof vm.model.advancedModelingConfig[type].filters != 'undefined' && (Object.keys(vm.model.advancedModelingConfig[type].filters).length === 0 || (vm.model.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(vm.model.advancedModelingConfig[type].filters).length === 1)) && vm.model.trainingSegment == null && vm.model.advancedModelingConfig[type].filters.targetProducts == null) {
-                    vm.hasSettingsInfo = false;
-                } else {
-                    vm.hasSettingsInfo = true;
-                }
 
                 if(Array.isArray(vm.targetProducts)){
                     vm.targetProductsIsArray = true;
@@ -287,6 +281,14 @@ angular.module('lp.ratingsengine.dashboard', [
 
                 vm.modelingStrategy = vm.model.advancedModelingConfig[type].modelingStrategy;
                 vm.configFilters = vm.model.advancedModelingConfig[type].filters;
+
+                vm.hasSettingsInfo = 
+                    ((vm.trainingProducts || vm.trainingSegment) ||
+                    vm.modelingStrategy == 'CROSS_SELL_REPEAT_PURCHASE' && Object.keys(vm.model.advancedModelingConfig[type].filters).length > 1 ||
+                    vm.modelingStrategy == 'CROSS_SELL_FIRST_PURCHASE' && Object.keys(vm.model.advancedModelingConfig[type].filters).length != 0)
+                    ? true : false;
+
+                vm.oneTrainingProduct = typeof vm.trainingProducts == 'object' ? true : false;
 
                 if (vm.configFilters && vm.configFilters['SPEND_IN_PERIOD']) {
                     vm.spendCriteria = vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL' ? 'at least' : 'at most';
@@ -315,10 +317,6 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
         }
-    }
-
-    vm.init = function() {
-        vm.initDataModel();
     }
 
     vm.isIterationActive = function(iterationId){

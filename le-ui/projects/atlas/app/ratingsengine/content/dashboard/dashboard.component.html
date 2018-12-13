@@ -89,10 +89,10 @@
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Products:</dt>
                         <dd 
                             ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'"
-                            ng-class="{'show-tooltip left delay': vm.targetProductsIsArray}">
+                            ng-class="{'show-tooltip left delay': vm.multipleTargetProducts}">
                             {{ vm.targetProducts }}
 
-                            <div class="tooltip_ small" ng-if="vm.targetProductsIsArray">
+                            <div class="tooltip_ small" ng-if="vm.multipleTargetProducts">
                                 <div class="cover">
                                     <ul>
                                         <li ng-repeat="product in vm.tooltipContent track by $index">{{ product.ProductName }}</li>
@@ -146,9 +146,10 @@
                                 <li
                                     ng-if="vm.trainingProducts !== undefined">
                                     Model with similar product(s): 
-                                    <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
+                                    <br/>
+                                    <span ng-if="vm.oneTrainingProduct">{{ vm.trainingProducts.ProductName }}</span>
                                     <span 
-                                        ng-if="vm.trainingProducts.length > 1"
+                                        ng-if="!vm.oneTrainingProduct || vm.trainingProducts.length > 1"
                                         class="show-tooltip left delay">
                                         {{ vm.trainingProducts.length }} selected
                                         <div class="tooltip_ small">

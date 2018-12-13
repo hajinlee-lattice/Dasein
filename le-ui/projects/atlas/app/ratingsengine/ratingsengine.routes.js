@@ -154,7 +154,6 @@ angular
                         return deferred.promise;
                     },
                     Model: function($q, $stateParams, ModelStore, RatingEngine, RatingsEngineStore, Dashboard) {
-                        console.log(Dashboard.summary.latestIterationId);
                         var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
                         var deferred = $q.defer(),
                             id = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
@@ -222,8 +221,9 @@ angular
                             return null;
                         }
                     },
-                    TrainingProducts: function(RatingEngine, Products) {
-                        var ratingEngine = RatingEngine,
+                    TrainingProducts: function($q, RatingEngine, Products) {
+                        var deferred = $q.defer(),
+                            ratingEngine = RatingEngine,
                             type = ratingEngine.type.toLowerCase();
 
                         if (type != 'rule_based') {
@@ -243,18 +243,23 @@ angular
 
                             if (trainingProducts && trainingProducts.length != 0) {
                                 if(trainingProducts.length == 1){
-                                    return products.find(function(obj) { return obj.ProductId === trainingProducts[0].toString() });
+                                    var trainingProductNames = products.find(function(obj) { return obj.ProductId === trainingProducts[0].toString() });
+                                    deferred.resolve(trainingProductNames);
                                 } else {
                                     var trainingProductNames = [];
                                     angular.forEach(trainingProducts, function(product){
                                         trainingProductNames.push(products.find(function(obj) { return obj.ProductId === product.toString() }));
                                     });
-                                    return trainingProductNames;
+                                    deferred.resolve(trainingProductNames);
                                 }
+                            } else {
+                                deferred.resolve(null);    
                             }
                         } else {
-                            return null;
+                            deferred.resolve(null);
                         }
+
+                        return deferred.promise;
                     },
                     DataCollectionStatus: function ($q, QueryStore) {
                         var deferred = $q.defer();

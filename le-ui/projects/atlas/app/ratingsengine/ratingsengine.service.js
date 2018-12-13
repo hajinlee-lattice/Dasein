@@ -1071,7 +1071,6 @@ angular.module('lp.ratingsengine')
 
     this.getIterationFromDashboard = function(ratingEngineDashboard, iterationId) {
         var iterations = $filter('filter')(ratingEngineDashboard.iterations, {id:iterationId});
-        console.log(iterations);
         return iterations && iterations.length != 1 ? null : iterations[0];
     }
 
