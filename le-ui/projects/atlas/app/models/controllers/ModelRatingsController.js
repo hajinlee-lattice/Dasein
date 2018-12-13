@@ -134,6 +134,8 @@ angular.module('lp.models.ratings', [
         $timeout(function() {
             renderChart();
         }, 500);
+
+        console.log(vm.currentConfiguration);
     }
 
     vm.init();
@@ -426,6 +428,10 @@ angular.module('lp.models.ratings', [
     vm.publishConfiguration = function() {
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
+
+        vm.workingBuckets.forEach(function(bucket){
+            delete bucket.bucketAvgRevenue;
+        });
 
         var rating_id = $stateParams.rating_id,
             aiModelId = vm.ratingModelId;

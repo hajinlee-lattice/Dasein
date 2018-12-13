@@ -93,25 +93,19 @@
                 <ul class="data">
                     <li 
                         ng-repeat="data in vm.ratingsSummary.bar_lifts track by $index"
-                        ng-attr-style="{{'height: '+ vm.Math.round(vm.barMultiplier * data) +'px;'}}"
+                        ng-attr-style="{{'height: '+ (vm.Math.round(vm.barMultiplier * data) + 1) +'px;'}}"
                         ng-attr-title="{{data}}">&nbsp;
                     </li>
                 </ul>
                 <div 
                     id="barColors" 
-                    class="bar-colors buckets-{{vm.workingBuckets.length}}" 
+                    class="bar-colors" 
                     ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
                         class="overlay bucket-{{$index}}"
                         ng-attr-style="
                             {{
-                                $index === 0 && '
-                                height: '+ vm.dugoutHeight +'px;
-                                right: '+ bucket.right_bound_score +'%;
-                                width: '+ (bucket.left_bound_score - bucket.right_bound_score) +'%;' || 
-
-                                $index != 0 && '
-                                height: '+ vm.dugoutHeight +'px;
+                                'height: '+ vm.dugoutHeight +'px;
                                 right: '+ bucket.right_bound_score +'%;
                                 width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'
                             }} 
@@ -121,9 +115,8 @@
                     </div>  
                 </div><!-- End .bar-colors -->
                 <ul class="horizontal-axis">
-                    <li class="hidden"></li>
-                    <li class="mark"><span>99</span></li>
-                    <li></li><li></li><li></li><li class="mid"></li>
+                    <li class="mark"><span>100</span></li>
+                    <li></li><li></li><li></li><li></li><li class="mid"></li>
                     <li></li><li></li><li></li><li></li>
                     <li class="mark"><span>90</span></li>
                     <li></li><li></li><li></li><li></li><li class="mid"></li>
@@ -177,7 +170,7 @@
                 </li>
             </ul><!-- End .bucket-tiles -->
 
-            <div ng-if="(vm.section === 'dashboard.ratings' && vm.dashboard.summary.bucketMetadata) || vm.section != 'dashboard.ratings'">
+            <div ng-if="vm.dashboard.summary.bucketMetadata">
                 <hr/>
                 <h3>Currently published configuration</h3>
                 <refresher condition="vm.updateContent">
