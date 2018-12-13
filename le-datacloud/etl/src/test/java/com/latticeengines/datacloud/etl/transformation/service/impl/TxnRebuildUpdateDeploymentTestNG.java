@@ -364,6 +364,7 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(productMap);
+        config.setProductTable(null);
 
         step.setConfiguration(JsonUtils.serialize(config));
         previousStep++;

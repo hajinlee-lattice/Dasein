@@ -1,9 +1,16 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
 
 import cascading.tuple.Fields;
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -13,10 +20,18 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProductMapperConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 
 @Component(ProductMapperFlow.BEAN_NAME)
 public class ProductMapperFlow extends ConfigurableFlowBase<ProductMapperConfig> {
+    private static final Logger log = LoggerFactory.getLogger(ProductMapperFlow.class);
     public static final String BEAN_NAME = "productMapperFlow";
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -28,10 +43,23 @@ public class ProductMapperFlow extends ConfigurableFlowBase<ProductMapperConfig>
         }
 
         List<String> rolledUpFields = Arrays.asList(config.getProductField(), config.getProductTypeField());
-
         Fields fieldDeclaration = new Fields(node.getFieldNamesArray());
+
+        Map<String, List<Product>> productMap;
+        if (config.getProductTable() == null && config.getProductMap() != null) {
+            log.info("Get product map from config=" + JsonUtils.serialize(config));
+            productMap = config.getProductMap();
+        } else {
+            Table table = config.getProductTable();
+            log.info("Get product map from table=" + table.getName());
+            List<Product> productList = new ArrayList<>();
+            table.getExtracts().forEach(
+                    extract -> productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
+            productMap = ProductUtils.getActiveProductMap(productList);
+        }
+
         node = node.apply(
-                new ProductMapperFunction(fieldDeclaration, config.getProductField(), config.getProductMap(), rolledUpFields), //
+                new ProductMapperFunction(fieldDeclaration, config.getProductField(), productMap, rolledUpFields), //
                 new FieldList(node.getFieldNames()), //
                 node.getSchema(), //
                 new FieldList(node.getFieldNames()), //

@@ -44,13 +44,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -68,7 +66,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep;
     private Table rawTable, dailyTable;
     private List<Table> periodTables;
-    private Map<String, List<Product>> productMap;
+    private Table productTable;
 
     private String sortedDailyTablePrefix;
     private String sortedPeriodTablePrefix;
@@ -117,7 +115,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         sortedDailyTablePrefix = TableRoleInCollection.AggregatedTransaction.name();
         sortedPeriodTablePrefix = TableRoleInCollection.AggregatedPeriodTransaction.name();
 
-        loadProductMap();
+        getProductTable();
     }
 
     private String getRawTransactionTableName() {
@@ -224,7 +222,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         periodedStep = 1;
         dailyAgrStep = 2;
         dayPeriodStep = 3;
-        TransformationStepConfig productAgr = rollupProduct(productMap); // productAgrStep
+        TransformationStepConfig productAgr = rollupProduct(productTable); // productAgrStep
         TransformationStepConfig perioded = addPeriod(productAgrStep, null); // periodedStep
         TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
         TransformationStepConfig dayPeriods = collectDays(); // dayPeriodStep
@@ -255,8 +253,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
-    private void loadProductMap() {
-        Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
+    private void getProductTable() {
+        productTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedProduct, inactive);
         if (productTable == null) {
             log.info("Did not find product table in inactive version.");
@@ -266,16 +264,11 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 throw new IllegalStateException("Cannot find the product table in both versions");
             }
         }
-        log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
-                productTable.getName()));
-
-        List<Product> productList = new ArrayList<>();
-        productTable.getExtracts().forEach(
-                extract -> productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
-        productMap = ProductUtils.getActiveProductMap(productList);
+        log.info(String.format("productTableName for customer %s is %s",
+                configuration.getCustomerSpace().toString(), productTable.getName()));
     }
 
-    private TransformationStepConfig rollupProduct(Map<String, List<Product>> productMap) {
+    private TransformationStepConfig rollupProduct(Table productTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
         String tableSourceName = "CustomerUniverse";
@@ -290,7 +283,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(productMap);
+        config.setProductMap(null);
+        config.setProductTable(productTable);
 
         step.setConfiguration(JsonUtils.serialize(config));
         return step;

@@ -205,7 +205,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         inputMergeStep = startStep + 0;
         dailyStep = startStep + 1;
         standardizeStep = startStep + 2;
-        dayPeriodStep = startStep +3; 
+        dayPeriodStep = startStep + 3;
         dailyRawStep = startStep + 5;
         productAgrStep = startStep + 6;
         periodedStep = startStep + 7;
@@ -448,6 +448,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(productMap);
+        config.setProductTable(null);
 
         stepConfig.setConfiguration(JsonUtils.serialize(config));
         return stepConfig;

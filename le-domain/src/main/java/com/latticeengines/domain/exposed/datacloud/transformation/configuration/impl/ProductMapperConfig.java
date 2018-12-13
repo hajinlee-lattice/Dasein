@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class ProductMapperConfig extends TransformerConfig {
 
@@ -16,6 +17,9 @@ public class ProductMapperConfig extends TransformerConfig {
 
     @JsonProperty("ProductMap")
     private Map<String, List<Product>> productMap;
+
+    @JsonProperty("ProductTable")
+    private Table productTable;
 
     public String getProductField() {
         return this.productField;
@@ -39,5 +43,13 @@ public class ProductMapperConfig extends TransformerConfig {
 
     public void setProductMap(Map<String, List<Product>> productMap) {
         this.productMap = productMap;
+    }
+
+    public Table getProductTable() {
+        return productTable;
+    }
+
+    public void setProductTable(Table productTable) {
+        this.productTable = productTable;
     }
 }

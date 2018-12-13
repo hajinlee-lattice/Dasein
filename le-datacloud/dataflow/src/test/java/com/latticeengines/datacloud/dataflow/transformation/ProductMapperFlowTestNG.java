@@ -153,6 +153,7 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(ProductUtils.getActiveProductMap(productList));
+        config.setProductTable(null);
         return config;
     }
 

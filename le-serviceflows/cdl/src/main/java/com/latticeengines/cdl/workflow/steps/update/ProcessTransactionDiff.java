@@ -39,11 +39,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -56,7 +54,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
     static final String BEAN_NAME = "processTransactionDiff";
 
-    private Map<String, List<Product>> productMap;
+    private Table productTable;
     private int dailyRawStep, productAgrStep, addPeriodStep;
     private int dailyAgrStep, periodsStep, periodDataStep, periodDataWithPeriodIdStep, periodAgrStep;
 
@@ -138,7 +136,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         dailyAgrStep = 3;
 
         TransformationStepConfig dailyRaw = collectDailyData(); // dailyRawStep
-        TransformationStepConfig productAgr = rollupProduct(productMap); // productAgrStep
+        TransformationStepConfig productAgr = rollupProduct(productTable); // productAgrStep
         TransformationStepConfig periodAdded = addPeriod(productAgrStep, null); // addPeriodStep
         TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
         TransformationStepConfig dailyRetained = retainFields(dailyAgrStep,
@@ -183,7 +181,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     }
 
     private void loadProductMap() {
-        Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
+        productTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedProduct, inactive);
         if (productTable == null) {
             log.info("Did not find product table in inactive version.");
@@ -195,12 +193,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
-        // productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration,
-        // productTable);
-        List<Product> productList = new ArrayList<>();
-        productTable.getExtracts().forEach(
-                extract -> productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
-        productMap = ProductUtils.getActiveProductMap(productList);
     }
 
     private TransformationStepConfig collectDailyData() {
@@ -225,14 +217,15 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         return step;
     }
 
-    private TransformationStepConfig rollupProduct(Map<String, List<Product>> productMap) {
+    private TransformationStepConfig rollupProduct(Table productTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
         step.setInputSteps(Collections.singletonList(dailyRawStep));
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(productMap);
+        config.setProductMap(null);
+        config.setProductTable(productTable);
 
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
@@ -359,7 +352,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     private TransformationStepConfig collectPeriodData(int periodsStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_FILTER);
-        step.setInputSteps(Arrays.asList(periodsStep));
+        step.setInputSteps(Collections.singletonList(periodsStep));
 
         String tableSourceName = "DailyTable";
         String sourceTableName = dailyTable.getName();
