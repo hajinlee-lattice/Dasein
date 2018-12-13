@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -21,27 +23,33 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MatchInputValidator {
     private static Logger log = LoggerFactory.getLogger(MatchInputValidator.class);
 
     public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput) {
-        Map<MatchKey, List<String>> keyMap = commonValidation(input);
-        input.setKeyMap(keyMap);
+        commonValidation(input);
 
-        validateKeys(input.getKeyMap().keySet());
-
-        if (input.getData() == null || input.getData().isEmpty()) {
-            throw new IllegalArgumentException("Empty input data.");
+        // Perform a different set of validation operations for Entity Match case.
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            // Check that for real time match, Entity Match is set to non-allocate.
+            if (input.isAllocateId()) {
+                throw new UnsupportedOperationException("Real Time Entity Match only supports non-Allocate mode.");
+            }
+            validateEntityMatch(input);
+        } else {
+            input.setKeyMap(validateNonEntityMatch(input));
+            validateAccountMatchKeys(input.getKeyMap().keySet());
         }
 
-        if (input.getData().size() > maxRealTimeInput) {
-            throw new IllegalArgumentException("Too many input data, maximum rows = " + maxRealTimeInput);
-        }
+        validateInputData(input, maxRealTimeInput);
     }
 
     public static void validateBulkInput(MatchInput input, Configuration yarnConfiguration) {
@@ -56,7 +64,7 @@ public class MatchInputValidator {
         }
 
         if (IOBufferType.SQL.equals(input.getOutputBufferType())) {
-            throw new UnsupportedOperationException("Only the IOBufferType [AVRO] is supported");
+            throw new UnsupportedOperationException("Only the IOBufferType [AVRO] is supported.");
         }
 
         List<String> inputFields;
@@ -72,23 +80,101 @@ public class MatchInputValidator {
         }
         input.setFields(inputFields);
 
-        Map<MatchKey, List<String>> keyMap = commonValidation(input);
+        commonValidation(input);
+        Map<MatchKey, List<String>> keyMap = validateNonEntityMatch(input);
         input.setKeyMap(keyMap);
-        validateKeys(input.getKeyMap().keySet());
+        validateAccountMatchKeys(input.getKeyMap().keySet());
     }
 
-    private static Map<MatchKey, List<String>> commonValidation(MatchInput input) {
+    private static void commonValidation(MatchInput input) {
         if (input.getTenant() == null) {
             throw new IllegalArgumentException("Must provide tenant to run a match.");
         }
         if (input.getTenant().getId() == null) {
             throw new IllegalArgumentException("Must provide tenant identifier to run a match.");
         }
-        validateColumnSelection(input);
 
-        if (input.getFields() == null || input.getFields().isEmpty()) {
+        if (CollectionUtils.isEmpty(input.getFields())) {
             throw new IllegalArgumentException("Empty list of fields.");
         }
+    }
+
+    private static void validateEntityMatch(MatchInput input) {
+        // Verify that column selection is set appropriately for Entity Match.
+        validateEntityMatchColumnSelection(input);
+
+        // Verify that EntityKeyMap is set.
+        if (CollectionUtils.isEmpty(input.getEntityKeyMapList())) {
+            throw new IllegalArgumentException("MatchInput for Entity Match must contain EntityKeyMap.");
+        }
+
+        // For now, Entity Match does not support automatic key resolution.
+        if (!input.isSkipKeyResolution()) {
+            log.warn("isSkipKeyResolution must be set true for Entity Match: "
+                    + "Automatic match key resolution not yet supported.");
+        }
+
+        for (EntityKeyMap entityKeyMap : input.getEntityKeyMapList()) {
+            Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
+            entityKeyMap.setKeyMap(resolveKeyMap(keyMap, input.getFields(), true));
+
+            // TODO(jwinter): Add support for other Business Entities.
+            // For now, we only handle validation of Account Entity keys.
+            if (BusinessEntity.Account.name().equalsIgnoreCase(entityKeyMap.getBusinessEntity())) {
+                validateAccountMatchKeys(keyMap.keySet());
+
+                // For the Account Entity Key Map, also validate that the System ID priority matches the
+                // order in the key map.
+                if (keyMap.containsKey(MatchKey.SystemId)) {
+                    List<String> values = keyMap.get(MatchKey.SystemId);
+                    if (values.size() != entityKeyMap.getSystemIdPriority().size()) {
+                        throw new IllegalArgumentException(
+                                "System ID MatchKey values and System ID priority list are not the same size.");
+                    }
+                    if (entityKeyMap.getSystemIdPriority().isEmpty()) {
+                        throw new IllegalArgumentException("System ID priority list is empty.");
+                    }
+                    for (int i = 0; i < values.size(); i++) {
+                        if (!values.get(i).equals(entityKeyMap.getSystemIdPriority().get(i))) {
+                            throw new IllegalArgumentException(
+                                    "System ID MatchKey values and System ID priority list mismatch at index " + i
+                                            + ".");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    static void validateEntityMatchColumnSelection(MatchInput input) {
+        // Only predefined column selection type is permitted for Entity Match.
+        if (input.getPredefinedSelection() == null) {
+            throw new IllegalArgumentException("Entity Match must have predefined column selection set.");
+        }
+
+        // Check that custom and union column selection are not set for Entity Match.
+        if (input.getCustomSelection() != null) {
+            throw new IllegalArgumentException("Entity Match cannot have custom column selection set.");
+        }
+        if (input.getUnionSelection() != null) {
+            throw new IllegalArgumentException("Entity Match cannot have union column selection set.");
+        }
+
+        // For Entity Match Allocated ID mode, predefined column selection must be "ID".  Otherwise, the predefined
+        // column selection must be a valid value.
+        if (input.isAllocateId()) {
+            if (!Predefined.ID.equals(input.getPredefinedSelection())) {
+                throw new UnsupportedOperationException(
+                        "Entity Match Allocate ID mode only supports predefined column selection set to \"ID\".");
+            }
+        } else {
+            validatePredefinedSelection(input.getPredefinedSelection());
+        }
+    }
+
+    private static Map<MatchKey, List<String>> validateNonEntityMatch(MatchInput input) {
+        validateNonEntityMatchColumnSelection(input);
 
         if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId)) {
             if (input.getKeyMap().get(MatchKey.LookupId).size() != 1) {
@@ -97,38 +183,53 @@ public class MatchInputValidator {
             }
         }
 
-        return resolveKeyMap(input);
+        return resolveKeyMap(input.getKeyMap(), input.getFields(), input.isSkipKeyResolution());
     }
 
-    private static Map<MatchKey, List<String>> resolveKeyMap(MatchInput input) {
-        Map<MatchKey, List<String>> keyMap = input.getKeyMap();
-        if (!input.isSkipKeyResolution()) {
-            keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
-            if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
-                for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {
+    private static Map<MatchKey, List<String>> resolveKeyMap(Map<MatchKey, List<String>> keyMap,
+                                                             List<String> inputFields, boolean isSkipKeyResolution) {
+        Map<MatchKey, List<String>> newKeyMap = keyMap;
+        // TODO(jwinter): Automatic key resolution is not allowed for the Entity Match case.  This code would have
+        //     to be changed to work because it is not set up to handle multiple key maps, one for each entity, and
+        //     would currently populate each entity's key map with all input fields.
+        if (!isSkipKeyResolution) {
+            newKeyMap = MatchKeyUtils.resolveKeyMap(inputFields);
+            if (MapUtils.isNotEmpty(keyMap)) {
+                for (Map.Entry<MatchKey, List<String>> entry : keyMap.entrySet()) {
                     log.debug("Overwriting key map entry " + JsonUtils.serialize(entry));
-                    keyMap.put(entry.getKey(), entry.getValue());
+                    newKeyMap.put(entry.getKey(), entry.getValue());
                 }
             }
-        } else if (keyMap == null || keyMap.isEmpty()) {
+        } else if (MapUtils.isEmpty(newKeyMap)) {
             throw new IllegalArgumentException("Have to provide a key map, when skipping automatic key resolution.");
         }
 
-        for (List<String> fields : keyMap.values()) {
-            if (fields != null && !fields.isEmpty()) {
-                for (String field : fields) {
-                    if (!input.getFields().contains(field)) {
+        // Validate the MatchKeys by checking:
+        //   a) That all keys are non-null
+        //   b) That all values are non-null and non-empty lists.
+        //   c) That all value list elements are contained in the input fields.
+        for (Map.Entry<MatchKey, List<String>> entry : newKeyMap.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new IllegalArgumentException("MatchKey key must be non-null.");
+            } else if (!MatchKey.Domain.equals(entry.getKey()) && CollectionUtils.isEmpty(entry.getValue())) {
+                throw new IllegalArgumentException("MatchKey value must be non-null and non-empty.");
+            } else {
+                for (String elem : entry.getValue()) {
+                    if (!inputFields.contains(elem)) {
                         throw new IllegalArgumentException(
-                                "Cannot find target field " + field + " in claimed field list.");
+                                "Cannot find target field " + elem + " in claimed field list.");
                     }
                 }
             }
         }
 
-        return keyMap;
+        return newKeyMap;
     }
 
-    private static void validateColumnSelection(MatchInput input) {
+    private static void validateNonEntityMatchColumnSelection(MatchInput input) {
+        // TODO(dzheng): This first return clause seems to assume that if Predefined Column Selection is set to "ID",
+        //     there is no Union Column Selection or Custom Column Selection added, since they do not get validated.
+        //     Is this always true?
         if (Predefined.ID.equals(input.getPredefinedSelection())) {
             return;
         }
@@ -161,7 +262,7 @@ public class MatchInputValidator {
         }
     }
 
-    private static void validateKeys(Set<MatchKey> keySet) {
+    private static void validateAccountMatchKeys(Set<MatchKey> keySet) {
         if (!keySet.contains(MatchKey.DUNS) && !keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
                 && !keySet.contains(MatchKey.LatticeAccountID)) {
             throw new IllegalArgumentException("Neither domain nor name nor lattice account id nor duns is provided.");
@@ -185,7 +286,7 @@ public class MatchInputValidator {
 
             Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             if (!iterator.hasNext()) {
-                throw new IllegalArgumentException("0 rows in input avro(s)");
+                throw new IllegalArgumentException("0 rows in input avro(s).");
             }
 
             Schema schema = extractSchema(avroDir, yarnConfiguration);
@@ -209,4 +310,21 @@ public class MatchInputValidator {
         }
     }
 
+    private static void validateInputData(MatchInput input, int maxRealTimeInput) {
+        if (CollectionUtils.isEmpty(input.getData())) {
+            throw new IllegalArgumentException("Empty input data.");
+        }
+
+        if (input.getData().size() > maxRealTimeInput) {
+            throw new IllegalArgumentException("Too many input data, maximum rows = " + maxRealTimeInput + ".");
+        }
+
+        // Check that each sub-list in input data is the same length as the number of fields.
+        for (List<Object> sublist : input.getData()) {
+            if (sublist.size() > input.getFields().size()) {
+                throw new IllegalArgumentException(
+                        "Input data length must be less than or equal to input fields length.");
+            }
+        }
+    }
 }

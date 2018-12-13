@@ -172,7 +172,7 @@ public class MatchInput implements Fact, Dimension {
     // ====================
 
     // ====================
-    // BEGIN CDL MATCH PROPERTIES
+    // BEGIN ENTITY MATCH PROPERTIES
     // ====================
 
     @JsonProperty("OperationalMode")
@@ -192,10 +192,10 @@ public class MatchInput implements Fact, Dimension {
     String targetEntity;
 
     @JsonProperty("EntityKeyMap")
-    private List<EntityKeyMap> entityKeyMap;
+    private List<EntityKeyMap> entityKeyMapList;
 
     // ====================
-    // END CDL MATCH PROPERTIES
+    // END ENTITY MATCH PROPERTIES
     // ====================
 
 
@@ -573,9 +573,9 @@ public class MatchInput implements Fact, Dimension {
 
     public void setTargetEntity(String targetEntity) { this.targetEntity = targetEntity; }
 
-    public List<EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
+    public List<EntityKeyMap> getEntityKeyMapList() { return entityKeyMapList; }
 
-    public void setEntityKeyMap(List<EntityKeyMap> entityKeyMap) { this.entityKeyMap = entityKeyMap; }
+    public void setEntityKeyMapList(List<EntityKeyMap> entityKeyMapList) { this.entityKeyMapList = entityKeyMapList; }
 
     @Override
     public String toString() {
