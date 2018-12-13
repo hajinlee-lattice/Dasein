@@ -33,6 +33,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         log.info("Inside ExportData execute()");
         if ("true".equals(getStringValueFromContext(SKIP_EXPORT_DATA))) {
             log.info("Skip flag is set, skip export.");
+            cleanupContext();
             return;
         }
         exportData();
