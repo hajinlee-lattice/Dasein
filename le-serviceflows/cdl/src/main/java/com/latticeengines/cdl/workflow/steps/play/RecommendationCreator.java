@@ -140,9 +140,9 @@ public class RecommendationCreator {
 
         // give preference to lattice data cloud field LDC_Name. If not found
         // then try to get company name from customer data itself.
-        recommendation.setCompanyName(checkAndGet(account, InterfaceName.LDC_Name.name()));
-        if (recommendation.getCompanyName() == null) {
-            recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName.name()));
+        recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName.name()));
+        if (StringUtils.isBlank(recommendation.getCompanyName())) {
+            recommendation.setCompanyName(checkAndGet(account, InterfaceName.LDC_Name.name()));
         }
 
         recommendation.setTenantId(tenant.getPid());
