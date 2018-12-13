@@ -21,17 +21,14 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
-import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -76,7 +73,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<Play> plays;
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
-        if (start < 90000000000L && start > 0) { // if request using second level timestamp
+        if (start < 90000000000L) { // if request using second level timestamp
             start = start*1000L;
         }
         PlayLaunchDashboard dashboard;
@@ -99,7 +96,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
 
-        if (start < 90000000000L && start > 0) { // if request using second level timestamp
+        if (start < 90000000000L) { // if request using second level timestamp
             start = start*1000L;
         }
         if (orgInfo == null) {
