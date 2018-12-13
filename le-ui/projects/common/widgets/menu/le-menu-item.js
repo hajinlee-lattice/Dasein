@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 const getImage = (image) => {
     if (image) {
         const classes = `${image} item-img`;
-        console.log(classes);
         return <span className={classes}></span>
     } else {
         return <span className="place-holder"></span>;

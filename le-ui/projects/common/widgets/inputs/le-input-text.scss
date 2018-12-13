@@ -5,9 +5,10 @@ $padding: 1em;
 $height: 30px;
 .input-icon-wrap {
   box-sizing: border-box;
-
-  border: 1px solid $white-gold;
-  border-radius: 10px;
+  padding-left: 1em;
+  padding-right: 1em;
+  border: 1px solid $silver;
+  border-radius: 3px;
   display: flex;
   flex-direction: row;
   height: $height;

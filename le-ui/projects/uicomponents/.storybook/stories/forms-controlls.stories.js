@@ -39,7 +39,7 @@ stories.add("link", () => (
   <form>
     <LeLink
       config={{
-        icon: text("config.icon", undefined),
+        icon: text("config.icon", "fa fa-info-circle"),
         label: text("config.lable", "Lattice Engines"),
         iconside: select('config.iconside', [LEFT, RIGHT], LEFT)
       }}

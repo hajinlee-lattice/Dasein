@@ -27,8 +27,8 @@ export default class LeLink extends Component {
     let customClasses = this.props.config.classes ? this.props.config.classes : '';
     return (
 
-      <div className={`le-flex-h-panel center-v le-link-container ${customClasses}`}>
-        <div className="wrapper" onClick={this.props.callback}>
+      <div className={`le-flex-h-panel center-v le-link-container ${customClasses}`} onClick={this.props.callback}>
+        <div className="wrapper" >
           {this.getIcon(LEFT)}
           <span className="le-link">{this.props.config.label}</span>
           {this.getIcon(RIGHT)}
