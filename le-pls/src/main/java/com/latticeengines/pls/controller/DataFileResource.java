@@ -187,11 +187,8 @@ public class DataFileResource {
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
-            log.info("name before decode " + fileName);
-            String decodedName = URLDecoder.decode(fileName, "UTF-8");
-            log.info("name after decode " + decodedName);
             dataFileProviderService.downloadFileByApplicationId(request, response, "application/csv", applicationId,
-                    decodedName);
+                    fileName);
         } catch (Exception e) {
             throw e;
         }
