@@ -3,5 +3,14 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <import resource="classpath:test-security-web-context.xml"/>
-    
+    <import resource="classpath:security-aspect-context.xml"/>
+
+    <bean id="setGAMultiTenantStrategyInSecurity" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.db.exposed.util.MultiTenantContext" />
+        <property name="targetMethod" value="setStrategy" />
+        <property name="arguments">
+            <bean class="com.latticeengines.security.exposed.util.GlobalAuthMultiTenantContextStrategy" />
+        </property>
+    </bean>
+
 </beans>

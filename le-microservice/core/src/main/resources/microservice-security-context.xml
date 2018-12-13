@@ -13,7 +13,7 @@
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:csrf disabled="true"/>
-        <security:intercept-url pattern="/health" access="permitAll" />
+        <security:intercept-url pattern="/health/**" access="permitAll" />
         <security:intercept-url pattern="/v2/api-docs" access="permitAll" />
         <security:intercept-url pattern="/**" access="hasRole('INTERNAL_USER')" />
         <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />

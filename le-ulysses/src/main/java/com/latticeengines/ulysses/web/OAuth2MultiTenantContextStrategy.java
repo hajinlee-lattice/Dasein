@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class OAuth2MultiTenantContextStrategy implements MultiTenantContextStrategy {
+
     @Override
     public Tenant getTenant() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

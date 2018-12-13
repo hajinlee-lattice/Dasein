@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 public class ThreadPoolUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolUtils.class);
+    private static final String DEBUG_GATEWAY = "DebugGateway";
 
     public static ExecutorService getFixedSizeThreadPool(String name, int size) {
         ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
@@ -59,11 +61,14 @@ public class ThreadPoolUtils {
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }
 
-    public static <T> List<T> runCallablesInParallel(ExecutorService executorService, List<Callable<T>> callables,
-            int timeoutInMinutes, int intervalInSeconds) {
+    public static <T> List<T> runCallablesInParallel(ExecutorService executorService,
+            List<Callable<T>> callables, int timeoutInMinutes, int intervalInSeconds) {
         if (CollectionUtils.isNotEmpty(callables)) {
             int numTasks = CollectionUtils.size(callables);
-            List<Future<T>> futures = callables.stream().map(executorService::submit).collect(Collectors.toList());
+            List<Callable<T>> wrappedCallables = callables.stream() //
+                    .map(ThreadPoolUtils::wrapForDebugGateway).collect(Collectors.toList());
+            List<Future<T>> futures = wrappedCallables.stream().map(executorService::submit) //
+                    .collect(Collectors.toList());
             List<T> results = new ArrayList<>();
             long startTime = System.currentTimeMillis();
             long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
@@ -87,7 +92,7 @@ public class ThreadPoolUtils {
                 toBeRemoved.forEach(futures::remove);
             }
             double duration = (System.currentTimeMillis() - startTime) * 0.001;
-            log.info("Finished all of " + numTasks + " callable futures in " + duration + " sec.");
+            log.debug("Finished all of " + numTasks + " callable futures in " + duration + " sec.");
             return results;
         } else {
             log.warn("Empty callables are submitted, skip execution and return empty list.");
@@ -95,11 +100,14 @@ public class ThreadPoolUtils {
         }
     }
 
-    public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService, List<T> runnables,
-            int timeoutInMinutes, int intervalInSeconds) {
+    public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService,
+            List<T> runnables, int timeoutInMinutes, int intervalInSeconds) {
         if (CollectionUtils.isNotEmpty(runnables)) {
             int numTasks = CollectionUtils.size(runnables);
-            List<Future<?>> futures = runnables.stream().map(executorService::submit).collect(Collectors.toList());
+            List<Runnable> wrappedRunnables = runnables.stream() //
+                    .map(ThreadPoolUtils::wrapForDebugGateway).collect(Collectors.toList());
+            List<Future<?>> futures = wrappedRunnables.stream() //
+                    .map(executorService::submit).collect(Collectors.toList());
             long startTime = System.currentTimeMillis();
             long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
             while (CollectionUtils.isNotEmpty(futures)) {
@@ -121,7 +129,7 @@ public class ThreadPoolUtils {
                 toBeRemoved.forEach(futures::remove);
             }
             double duration = (System.currentTimeMillis() - startTime) * 0.001;
-            log.info("Finished all of " + numTasks + " runnable futures in " + duration + " sec.");
+            log.debug("Finished all of " + numTasks + " runnable futures in " + duration + " sec.");
         } else {
             log.warn("Empty runnables are submitted, skip execution.");
         }
@@ -142,6 +150,36 @@ public class ThreadPoolUtils {
             pool.shutdownNow();
             // Preserve interrupt status
             Thread.currentThread().interrupt();
+        }
+    }
+
+    public static Runnable wrapForDebugGateway(Runnable runnable) {
+        if (ThreadContext.containsKey(DEBUG_GATEWAY)) {
+            return () -> {
+                ThreadContext.put(DEBUG_GATEWAY, "ON");
+                try {
+                    runnable.run();
+                } finally {
+                    ThreadContext.remove(DEBUG_GATEWAY);
+                }
+            };
+        } else {
+            return runnable;
+        }
+    }
+
+    public static <T> Callable<T> wrapForDebugGateway(Callable<T> callable) {
+        if (ThreadContext.containsKey(DEBUG_GATEWAY)) {
+            return () -> {
+                ThreadContext.put(DEBUG_GATEWAY, "ON");
+                try {
+                    return callable.call();
+                } finally {
+                    ThreadContext.remove(DEBUG_GATEWAY);
+                }
+            };
+        } else {
+            return callable;
         }
     }
 

@@ -18,6 +18,17 @@
                 <Pattern>${log.pattern}</Pattern>
             </PatternLayout>
         </Console>
+        <Console name="DebugGateway" target="SYSTEM_OUT">
+            <Filters>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ContextMapFilter onMatch="ACCEPT" onMismatch="DENY" operator="or">
+                    <KeyValuePair key="DebugGateway" value="ON"/>
+                </ContextMapFilter>
+            </Filters>
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+        </Console>
         <RollingFile
                 name="RollingFile"
                 fileName="${log.dir}/le-scoringapi.log"
@@ -42,6 +53,7 @@
         <Logger name="com.latticeengines" additivity="false" level="DEBUG">
             <AppenderRef ref="ConsoleInfo"/>
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="DebugGateway"/>
         </Logger>
         <Logger name="com.latticeengines.monitor.exposed.metrics.impl" additivity="false" level="DEBUG">
             <AppenderRef ref="ConsoleDebug"/>

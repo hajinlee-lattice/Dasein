@@ -67,6 +67,10 @@
                                     <value>file:///${project.basedir}/src/${jetty.dir}/resources/log4j.properties</value>
                                 </systemProperty>
                                 <systemProperty>
+                                    <name>log4j.configurationFile</name>
+                                    <value>file:///${project.basedir}/src/${jetty.dir}/resources/log4j2-test.xml</value>
+                                </systemProperty>
+                                <systemProperty>
                                     <name>com.latticeengines.registerBootstrappers</name>
                                     <value>true</value>
                                 </systemProperty>

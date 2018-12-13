@@ -35,14 +35,6 @@
             <AppenderRef ref="ColorConsole"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>
-        <Logger name="com.latticeengines.monitor.exposed.metrics.impl" additivity="false" level="DEBUG">
-            <AppenderRef ref="ColorConsole"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="com.latticeengines.monitor.metric.service.impl" additivity="false" level="DEBUG">
-            <AppenderRef ref="ColorConsole"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
     </Loggers>
 
 </Configuration>

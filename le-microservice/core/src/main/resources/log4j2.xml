@@ -9,6 +9,15 @@
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${web:servletContextName}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n"/>
         </Console>
+        <Console name="DebugGateway" target="SYSTEM_OUT">
+            <Filters>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ContextMapFilter onMatch="ACCEPT" onMismatch="DENY" operator="or">
+                    <KeyValuePair key="DebugGateway" value="ON"/>
+                </ContextMapFilter>
+            </Filters>
+            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${web:servletContextName}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n"/>
+        </Console>
         <RollingFile
                 name="RollingFile"
                 fileName="${log.dir}/le-$${web:servletContextName}.log"
@@ -33,14 +42,7 @@
         <Logger name="com.latticeengines" additivity="false" level="DEBUG">
             <AppenderRef ref="ColorConsole"/>
             <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="com.latticeengines.monitor.exposed.metrics.impl" additivity="false" level="DEBUG">
-            <AppenderRef ref="ColorConsole"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="com.latticeengines.monitor.metric.service.impl" additivity="false" level="DEBUG">
-            <AppenderRef ref="ColorConsole"/>
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="DebugGateway"/>
         </Logger>
     </Loggers>
 

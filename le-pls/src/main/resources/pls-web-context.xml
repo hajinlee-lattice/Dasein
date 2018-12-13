@@ -17,7 +17,7 @@
     <import resource="classpath:common-webapp-env-context.xml"/>
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:pls-security-context.xml"/>
-    <!--<import resource="classpath:common-jmx-component-context.xml"/>-->
+    <import resource="classpath:security-aspect-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
 
     <bean class="com.latticeengines.pls.swagger.SwaggerConfig"/>
