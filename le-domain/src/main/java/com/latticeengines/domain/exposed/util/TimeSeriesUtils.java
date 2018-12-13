@@ -51,7 +51,7 @@ public class TimeSeriesUtils {
                 periodSet.add(period);
             }
         } catch (Exception e) {
-            log.error("Failed to collect periods for period table", e);
+            throw new RuntimeException("Failed to collect periods", e);
         }
 
         return periodSet;
@@ -76,7 +76,7 @@ public class TimeSeriesUtils {
                 periods.get(periodName).add(period);
             }
         } catch (Exception e) {
-            log.error("Failed to collect periods for period table", e);
+            throw new RuntimeException("Failed to collect periods", e);
         }
 
         return periods;

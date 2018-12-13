@@ -36,6 +36,8 @@ public class PeriodDataCleaner
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         PeriodDataCleanerConfig config = getConfiguration(step.getConfig());
 
+        // Source to extract PeriodId
+        // For transaction, it's transaction raw store or raw diff
         String periodDir = getSourceHdfsDir(step, 0);
         if (StringUtils.isBlank(config.getPeriodField())) {
             config.setPeriodField(InterfaceName.PeriodId.name());
@@ -44,8 +46,10 @@ public class PeriodDataCleaner
             config.setPeriodNameField(InterfaceName.PeriodName.name());
         }
 
+        // Clean daily store
         if (!config.isMultiPeriod()) {
-            String transactionDir = getSourceHdfsDir(step, 1);
+            // Target daily store to clean
+            String periodStoreDir = getSourceHdfsDir(step, 1);
 
             Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
                     config.getPeriodField());
@@ -54,20 +58,20 @@ public class PeriodDataCleaner
                 log.info("Period to clean " + period);
             }
 
-            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, transactionDir, periods);
-        } else {
+            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, periodStoreDir, periods);
+        } else { // Clean period store
             if (MapUtils.isEmpty(config.getTransactionIdxes())) {
                 throw new RuntimeException(
                         "Please provide period name to transaction idx mapping for multi-period mode");
             }
-            Map<String, String> transactionDirs = new HashMap<>();
+            Map<String, String> periodStoreDirs = new HashMap<>();
             for (Map.Entry<String, Integer> ent : config.getTransactionIdxes().entrySet()) {
-                transactionDirs.put(ent.getKey(), getSourceHdfsDir(step, ent.getValue()));
+                periodStoreDirs.put(ent.getKey(), getSourceHdfsDir(step, ent.getValue()));
             }
             Map<String, Set<Integer>> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
                     config.getPeriodField(), config.getPeriodNameField());
             for (String periodName : periods.keySet()) {
-                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, transactionDirs.get(periodName),
+                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, periodStoreDirs.get(periodName),
                         periods.get(periodName));
             }
         }
@@ -96,6 +100,7 @@ public class PeriodDataCleaner
     }
 
 
+    @Override
     protected boolean validateConfig(PeriodDataCleanerConfig config, List<String> sourceNames) {
         return true;
     }

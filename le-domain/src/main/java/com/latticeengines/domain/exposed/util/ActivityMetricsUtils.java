@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,11 +17,9 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsUtils {
@@ -704,43 +701,4 @@ public class ActivityMetricsUtils {
         }
         return bounds;
     }
-
-    /*
-    // For testing purpose
-    public static List<ActivityMetrics> fakePurchaseMetrics(Tenant tenant) {
-        ActivityMetrics margin = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
-        margin.setMetrics(InterfaceName.Margin);
-        margin.setPeriodsConfig(
-                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-
-        ActivityMetrics shareOfWallet = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
-        shareOfWallet.setMetrics(InterfaceName.ShareOfWallet);
-        shareOfWallet.setPeriodsConfig(
-                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-
-        ActivityMetrics spendChange = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
-        spendChange.setMetrics(InterfaceName.SpendChange);
-        spendChange.setPeriodsConfig(
-                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name()),
-                        TimeFilter.between(2, 3, PeriodStrategy.Template.Quarter.name())));
-
-        ActivityMetrics avgSpendOvertime = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
-        avgSpendOvertime.setMetrics(InterfaceName.AvgSpendOvertime);
-        avgSpendOvertime.setPeriodsConfig(
-                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
-
-        return Arrays.asList(margin, shareOfWallet, spendChange, avgSpendOvertime);
-    }
-
-    private static ActivityMetrics createFakedMetrics(Tenant tenant, ActivityType type) {
-        ActivityMetrics metrics = new ActivityMetrics();
-        metrics.setType(type);
-        metrics.setTenant(tenant);
-        metrics.setEOL(false);
-        metrics.setDeprecated(null);
-        metrics.setCreated(new Date());
-        metrics.setUpdated(metrics.getCreated());
-        return metrics;
-    }
-    */
 }

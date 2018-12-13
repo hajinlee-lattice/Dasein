@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -39,6 +40,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
+        verifyCheckPoint();
 
         // To test deprecating curated metrics & action
         setupUpdatedPurchaseHistoryMetrics();
@@ -62,7 +64,14 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         Thread.sleep(2000);
     }
 
-    private void verifyProcess() {
+    private void verifyCheckPoint() throws Exception {
+        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS1, //
+                DateTimeUtils.dateToDayPeriod(MIN_TRANSACTION_DATE1), //
+                DateTimeUtils.dateToDayPeriod(MAX_TRANSACTION_DATE1), //
+                VERIFY_DAILYTXN_AMOUNT1, VERIFY_DAILYTXN_QUANTITY1, VERIFY_DAILYTXN_COST);
+    }
+
+    private void verifyProcess() throws Exception {
         runCommonPAVerifications();
 
         Map<String, Object> accountReport = new HashMap<>();
@@ -136,6 +145,11 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 //        );
         // TODO: use rating proxy
         // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+
+        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS2, //
+                DateTimeUtils.dateToDayPeriod(MIN_TRANSACTION_DATE2), //
+                DateTimeUtils.dateToDayPeriod(MAX_TRANSACTION_DATE2), //
+                VERIFY_DAILYTXN_AMOUNT1 * 2, VERIFY_DAILYTXN_QUANTITY1 * 2, VERIFY_DAILYTXN_COST * 2);
     }
 
     private void setupUpdatedPurchaseHistoryMetrics() {
@@ -149,4 +163,6 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         restTemplate.postForObject(deployedHostPort + "/pls/datacollection/metrics/PurchaseHistory", metrics,
                 List.class);
     }
+
+
 }

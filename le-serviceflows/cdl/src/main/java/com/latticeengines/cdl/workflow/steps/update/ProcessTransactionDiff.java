@@ -265,7 +265,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         baseTables.put(sourceName2, sourceTable2);
 
         step.setBaseTables(baseTables);
-        step.setInputSteps(Collections.singletonList(productAgrStep));
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));

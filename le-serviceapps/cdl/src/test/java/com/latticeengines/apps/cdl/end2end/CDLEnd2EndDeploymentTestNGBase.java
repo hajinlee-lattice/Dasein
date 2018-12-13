@@ -13,15 +13,19 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.zookeeper.ZooDefs;
@@ -46,6 +50,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -111,6 +116,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.ActivityMetricsTestUtils;
+import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -207,6 +213,24 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     static final int EARLIEST_TRANSACTION = 48033;
     static final int LATEST_TRANSACTION = 48929;
+
+    // 1: after 1st import (rebuild); 2: after 2nd import (update)
+    static final int DAILY_TRANSACTION_DAYS1 = 114;
+    static final int DAILY_TRANSACTION_DAYS2 = 260;
+    static final String MIN_TRANSACTION_DATE1 = "2016-03-16";
+    static final String MAX_TRANSACTION_DATE1 = "2017-06-03";
+    static final String MIN_TRANSACTION_DATE2 = "2016-03-16";
+    static final String MAX_TRANSACTION_DATE2 = "2018-01-01";
+
+    static final String VERIFY_DAILYTXN_ACCOUNTID = "10";
+    static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
+    // After 1st import (rebuild), verify date = 2017-06-03
+    // After 2nd import (update), 3 values will be doubled because 2nd import
+    // has same transactions as 1st import for VERIFY_ACCOUNTID &
+    // VERIFY_PRODUCTID
+    static final double VERIFY_DAILYTXN_AMOUNT1 = 20850;
+    static final double VERIFY_DAILYTXN_QUANTITY1 = 30;
+    static final double VERIFY_DAILYTXN_COST = 5552;
 
     int actionsNumber;
 
@@ -1194,6 +1218,38 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     boolean isLocalEnvironment() {
         return "dev".equals(leEnv);
+    }
+
+    void verifyTxnDailyStore(int totalDays, int minDay, int maxDay, double amount, double quantity, double cost)
+            throws IOException {
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
+        Table dailyTable = dataCollectionProxy.getTable(mainCustomerSpace,
+                TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion);
+        // Verify number of days
+        List<String> dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dailyTable.getExtractsDirectory());
+        Assert.assertEquals(dailyFiles.size(), totalDays);
+        // Verify max/min day period
+        Pair<Integer, Integer> minMaxPeriods = TimeSeriesUtils.getMinMaxPeriod(yarnConfiguration, dailyTable);
+        Assert.assertEquals((int) minMaxPeriods.getLeft(), minDay);
+        Assert.assertEquals((int) minMaxPeriods.getRight(), maxDay);
+        // Verify daily aggregated result
+        int dayPeriod = DateTimeUtils.dateToDayPeriod(MAX_TRANSACTION_DATE1);
+        Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, dailyFiles.stream()
+                .filter(f -> f.contains(String.valueOf(dayPeriod))).collect(Collectors.toList()).get(0));
+        GenericRecord verifyRecord = null;
+        while (iter.hasNext()) {
+            GenericRecord record = iter.next();
+            if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(InterfaceName.AccountId.name()).toString())
+                    && VERIFY_DAILYTXN_PRODUCTID.equals(record.get(InterfaceName.ProductId.name()).toString())) {
+                verifyRecord = record;
+                break;
+            }
+        }
+        Assert.assertNotNull(verifyRecord);
+        log.info("Verified record: " + verifyRecord.toString());
+        Assert.assertEquals((double) verifyRecord.get(InterfaceName.TotalAmount.name()), amount);
+        Assert.assertEquals((double) verifyRecord.get(InterfaceName.TotalQuantity.name()), quantity);
+        Assert.assertEquals((double) verifyRecord.get(InterfaceName.TotalCost.name()), cost);
     }
 
 }
