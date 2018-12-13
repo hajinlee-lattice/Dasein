@@ -17,6 +17,35 @@ describe("<LeLink /> rendering", () => {
     expect(wrapper.find(LeLink).text()).toContain("Lattice Engines");
     expect(wrapper.find('.fa-info-circle').exists()).toBeTruthy();
   });
+
+  
+  it("<LeLink /> with only label", () => {
+    const wrapper = mount(
+      <LeLink
+        config={{
+          label: "Lattice Engines"
+        }}
+      />
+    );
+    expect(wrapper.find(LeLink).exists()).toBeTruthy();
+    expect(wrapper.find(LeLink).text()).toContain("Lattice Engines");
+    expect(wrapper.find('.fa-info-circle').exists()).not.toBeTruthy();
+  });
+
+  
+  it("<LeLink /> with only icon", () => {
+    const wrapper = mount(
+      <LeLink
+        config={{
+            iconside: RIGHT,
+            icon: "fa fa-info-circle"
+        }}
+      />
+    );
+    expect(wrapper.find(LeLink).exists()).toBeTruthy();
+    expect(wrapper.find(LeLink).text()).not.toContain("Lattice Engines");
+    expect(wrapper.find('.fa-info-circle').exists()).toBeTruthy();
+  });
 });
 
 describe("<LeLink/> interactions", () => {
