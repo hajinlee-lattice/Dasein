@@ -104,7 +104,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     @AfterClass(groups = { "deployment-app" })
     public void teardown() throws Exception {
-        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts(true);
     }
 
     @Test(groups = "deployment-app")

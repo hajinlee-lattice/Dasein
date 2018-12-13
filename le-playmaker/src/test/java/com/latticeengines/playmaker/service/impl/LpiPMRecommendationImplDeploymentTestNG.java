@@ -184,7 +184,7 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
-        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts(true);
     }
 
     @Test(groups = "deployment")

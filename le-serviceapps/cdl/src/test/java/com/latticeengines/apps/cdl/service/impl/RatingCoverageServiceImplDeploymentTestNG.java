@@ -122,7 +122,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @AfterClass(groups = { "deployment-app" })
     public void teardown() throws Exception {
-        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts(true);
         log.info("Cleaned up all artifacts");
     }
 

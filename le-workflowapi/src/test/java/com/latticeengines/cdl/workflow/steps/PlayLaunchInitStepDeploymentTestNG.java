@@ -186,7 +186,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
-        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts(true);
 
         List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
         Assert.assertNotNull(recommendations);

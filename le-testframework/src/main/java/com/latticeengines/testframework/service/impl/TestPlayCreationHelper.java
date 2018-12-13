@@ -552,17 +552,17 @@ public class TestPlayCreationHelper {
         return entityProxy;
     }
 
-    public void cleanupArtifacts() {
+    public void cleanupArtifacts(boolean hardDelete) {
         try {
             log.info("Cleaning up play launch: " + playLaunch.getId());
-            deletePlayLaunch(play.getName(), playLaunch.getId());
+            deletePlayLaunch(play.getName(), playLaunch.getId(), hardDelete);
         } catch (Exception ex) {
             ignoreException(ex);
         }
 
         try {
             log.info("Cleaning up play: " + play.getName());
-            deletePlay(play.getName());
+            deletePlay(play.getName(), hardDelete);
         } catch (Exception ex) {
             ignoreException(ex);
         }
@@ -573,26 +573,26 @@ public class TestPlayCreationHelper {
             ratingEngineProxy.createOrUpdateRatingEngine(CustomerSpace.parse(tenantIdentifier).toString(),
                     play.getRatingEngine());
             ratingEngineProxy.deleteRatingEngine(CustomerSpace.parse(tenantIdentifier).toString(),
-                    play.getRatingEngine().getId());
+                    play.getRatingEngine().getId(), hardDelete, null);
         } catch (Exception ex) {
             ignoreException(ex);
         }
 
         try {
             log.info("Cleaning up segment: " + segment.getName());
-            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName(), true);
+            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName(),hardDelete);
         } catch (Exception ex) {
             ignoreException(ex);
         }
 
     }
 
-    public void deletePlay(String playName) {
-        playProxy.deletePlay(tenant.getId(), playName, false);
+    public void deletePlay(String playName, boolean hardDelete) {
+        playProxy.deletePlay(tenant.getId(), playName, hardDelete);
     }
 
-    public void deletePlayLaunch(String playName, String playLaunchId) {
-        playProxy.deletePlayLaunch(tenant.getId(), playName, playLaunchId, false);
+    public void deletePlayLaunch(String playName, String playLaunchId, boolean hardDelete) {
+        playProxy.deletePlayLaunch(tenant.getId(), playName, playLaunchId, hardDelete);
     }
 
     private void ignoreException(Exception ex) {

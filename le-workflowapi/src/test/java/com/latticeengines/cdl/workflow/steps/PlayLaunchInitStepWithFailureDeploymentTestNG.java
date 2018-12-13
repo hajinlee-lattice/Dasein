@@ -149,7 +149,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     // TODO - enable when we have a way to simulate full/partial failure
     @AfterClass(groups = { "deployment" }, enabled = false)
     public void teardown() throws Exception {
-        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts(true);
     }
 
     // TODO - enable when we have a way to simulate full/partial failure

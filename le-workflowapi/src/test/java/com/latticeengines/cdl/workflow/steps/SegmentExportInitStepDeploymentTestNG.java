@@ -218,6 +218,6 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
-        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupArtifacts(true);
     }
 }
