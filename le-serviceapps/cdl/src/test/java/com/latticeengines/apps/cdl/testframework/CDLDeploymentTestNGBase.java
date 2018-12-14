@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -217,17 +218,11 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
             throw new RuntimeException("Failed to untar model artifacts " + tarballResourceUrl, e);
         }
 
-        String appId = new File(stagingDir).list()[0];
+        String appId = Objects.requireNonNull(new File(stagingDir).list())[0];
 
         String modelSummaryPath = stagingDir + File.separator + appId + File.separator + "enhancements" + File.separator
                 + "modelsummary.json";
-        String modelSummaryContent;
-        try {
-            modelSummaryContent = FileUtils.readFileToString(new File(modelSummaryPath), Charset.forName("UTF-8"));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to read model summary content at " + modelSummaryPath, e);
-        }
-        modelSummaryContent = modelSummaryContent.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
+        String modelSummaryContent = readModelSummaryContent(modelSummaryPath);
 
         Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
         Matcher matcher = pattern.matcher(modelSummaryContent);
@@ -279,6 +274,17 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         FileUtils.deleteQuietly(new File(stagingDir));
 
         return newUuid;
+    }
+
+    private String readModelSummaryContent(String modelSummaryPath) {
+        String modelSummaryContent;
+        try {
+            modelSummaryContent = FileUtils.readFileToString(new File(modelSummaryPath), Charset.forName("UTF-8"));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read model summary content at " + modelSummaryPath, e);
+        }
+        modelSummaryContent = modelSummaryContent.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
+        return modelSummaryContent;
     }
 
     protected ModelSummary waitToDownloadModelSummaryWithUuid(ModelSummaryProxy modelSummaryProxy, String uuid)
