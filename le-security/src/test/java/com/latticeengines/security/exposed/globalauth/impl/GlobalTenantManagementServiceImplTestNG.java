@@ -17,8 +17,8 @@ public class GlobalTenantManagementServiceImplTestNG extends SecurityFunctionalT
     @Test(groups = "functional")
     public void registerThenDiscardTenant() {
         Tenant newTenant = new Tenant();
-        newTenant.setId("TEST_TENANT");
-        newTenant.setName("TEST_TENANT");
+        newTenant.setId("TEST_TENANT_NEW");
+        newTenant.setName("TEST_TENANT_NEW");
         
         assertTrue(globalTenantManagementService.registerTenant(newTenant));
         assertTrue(globalTenantManagementService.discardTenant(newTenant));
