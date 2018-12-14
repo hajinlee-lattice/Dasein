@@ -100,7 +100,7 @@
   },
   "scripts": {
     "test": "jest --coverage",
-    "dev-test": "jest --watchAll",
+    "dev-test": "jest --watchAll --colors",
     "build": "webpack --mode=production",
     "watch": "webpack --mode=development --watch"
   }
