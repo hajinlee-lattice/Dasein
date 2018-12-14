@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
@@ -15,6 +16,7 @@ public class ErrorController {
 
 
     @GetMapping(value = "errors")
+    @ResponseBody
     public JsonNode renderErrorPage(HttpServletRequest httpRequest) {
         int httpErrorCode = getErrorCode(httpRequest);
         switch (httpErrorCode) {
