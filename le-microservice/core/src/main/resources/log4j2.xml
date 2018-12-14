@@ -2,12 +2,17 @@
 <Configuration status="WARN">
     <Properties>
         <Property name="log.dir">/var/log/ledp</Property>
+        <Property name="pattern.console">%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${web:servletContextName}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n</Property>
     </Properties>
 
     <Appenders>
-        <Console name="ColorConsole" target="SYSTEM_OUT">
+        <Console name="ConsoleInfo" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${web:servletContextName}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n"/>
+            <PatternLayout pattern="${pattern.console}"/>
+        </Console>
+        <Console name="ConsoleWarn" target="SYSTEM_OUT">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${pattern.console}"/>
         </Console>
         <Console name="DebugGateway" target="SYSTEM_OUT">
             <Filters>
@@ -16,12 +21,12 @@
                     <KeyValuePair key="DebugGateway" value="ON"/>
                 </ContextMapFilter>
             </Filters>
-            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${web:servletContextName}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n"/>
+            <PatternLayout pattern="${pattern.console}"/>
         </Console>
         <RollingFile
                 name="RollingFile"
-                fileName="${log.dir}/le-$${web:servletContextName}.log"
-                filePattern="${log.dir}/le-$${web:servletContextName}-%d{yyyy-MM-dd}-%i.log.gz"
+                fileName="${log.dir}/le-${web:servletContextName}.log"
+                filePattern="${log.dir}/le-${web:servletContextName}-%d{yyyy-MM-dd}-%i.log.gz"
                 ignoreExceptions="false">
             <PatternLayout>
                 <Pattern>%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} [%t] %-5p %c{1.}:%L - %m%n</Pattern>
@@ -36,11 +41,11 @@
 
     <Loggers>
         <Root level="INFO">
-            <AppenderRef ref="ColorConsole"/>
+            <AppenderRef ref="ConsoleWarn"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
         <Logger name="com.latticeengines" additivity="false" level="DEBUG">
-            <AppenderRef ref="ColorConsole"/>
+            <AppenderRef ref="ConsoleInfo"/>
             <AppenderRef ref="RollingFile"/>
             <AppenderRef ref="DebugGateway"/>
         </Logger>

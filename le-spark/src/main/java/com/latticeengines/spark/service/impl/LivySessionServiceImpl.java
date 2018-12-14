@@ -140,7 +140,7 @@ public class LivySessionServiceImpl implements LivySessionService {
                 throw new RuntimeException(e);
             }
             current = getSession(session);
-            log.info("Current session state: " + current.getState());
+            log.debug("Current session state: " + current.getState());
         }
         if (state.equals(current.getState())) {
             return current;
