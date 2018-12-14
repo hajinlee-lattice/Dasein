@@ -64,8 +64,8 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
     }
 
     private void cleanHDFS() throws IOException {
-        HdfsUtils.rmdir(conf, BASE_DIR + "/testGenericFile1");
-        HdfsUtils.rmdir(conf, BASE_DIR + "/testGenericFile2");
+        HdfsUtils.rmdir(yarnConfiguration, BASE_DIR + "/testGenericFile1");
+        HdfsUtils.rmdir(yarnConfiguration, BASE_DIR + "/testGenericFile2");
     }
 
     @AfterClass(groups = "functional")
@@ -259,10 +259,11 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
         waitInSeconds(batchId, 10);
 
-        long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+        long count1 = AvroUtils.count(yarnConfiguration, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertEquals(count1, RECORD_COUNT);
 
-        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(yarnConfiguration,
+                BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertEquals(records1.get(0).get("latticeId").toString(), "latticeId1");
 
     }
@@ -278,7 +279,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         List<GenericRecordRequest> recordRequests = new ArrayList<>();
         List<GenericRecord> records = new ArrayList<>();
         // schema 1
-        getRecords(batchId1, recordRequests, records, RECORD_COUNT, 1, 2);
+        getRecords(batchId1, recordRequests, records, RECORD_COUNT, 1);
         for (int i = 0; i < records.size(); i++) {
             entityManager.publishRecord(recordRequests.get(i), records.get(i));
         }
@@ -288,7 +289,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         records.clear();
         String batchId2 = entityManager.createUniqueBatchId(RECORD_COUNT);
         batchIds.add(batchId2);
-        getRecords(batchId2, recordRequests, records, RECORD_COUNT, 2, 1);
+        getRecords(batchId2, recordRequests, records, RECORD_COUNT, 2);
         for (int i = 0; i < records.size(); i++) {
             entityManager.publishRecord(recordRequests.get(i), records.get(i));
         }
@@ -296,19 +297,21 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         waitInSeconds(batchId1, 20);
         waitInSeconds(batchId2, 20);
 
-        long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
-        long count2 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
+        long count1 = AvroUtils.count(yarnConfiguration, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+        long count2 = AvroUtils.count(yarnConfiguration, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
         Assert.assertEquals(count1, count2);
         Assert.assertEquals(count1, RECORD_COUNT);
 
-        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(yarnConfiguration,
+                BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertTrue(records1.get(0).get("age") == null);
-        List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
+        List<GenericRecord> records2 = AvroUtils.getDataFromGlob(yarnConfiguration,
+                BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
         Assert.assertTrue(records2.get(0).get("age") != null);
 
     }
 
-    @Test(groups = "manual", enabled = false)
+    @Test(groups = "manual", enabled = true)
     public void performance() throws Exception {
 
         cleanHDFS();
@@ -328,15 +331,15 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
                 Assert.assertTrue(result);
             }
 
-            long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
-            long count2 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
+            long count1 = AvroUtils.count(yarnConfiguration, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+            long count2 = AvroUtils.count(yarnConfiguration, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
             Assert.assertEquals(count1, count2);
             Assert.assertEquals(count1, LARGE_RECORD_COUNT);
 
-            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf,
+            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(yarnConfiguration,
                     BASE_DIR + "/testGenericFile1/Snapshot/*/*.avro");
             Assert.assertTrue(records1.get(0).get("age") == null);
-            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf,
+            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(yarnConfiguration,
                     BASE_DIR + "/testGenericFile2/Snapshot/*/*.avro");
             Assert.assertTrue(records2.get(0).get("age") != null);
 
@@ -357,7 +360,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         batchIds.add(batchId);
         List<GenericRecordRequest> recordRequests = new ArrayList<>();
         List<GenericRecord> records = new ArrayList<>();
-        getRecords(batchId, recordRequests, records, recordCount, type, 1);
+        getRecords(batchId, recordRequests, records, recordCount, type);
         ConnectorCallable callable = new ConnectorCallable(batchId, recordRequests, records);
         futures.add(pool.submit(callable));
     }
@@ -383,7 +386,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
     }
 
     private List<GenericRecord> getRecords(String batchId, List<GenericRecordRequest> recordRequests,
-            List<GenericRecord> records, long count, int type, int repositoryCount) {
+            List<GenericRecord> records, long count, int type) {
         GenericRecordBuilder builder = null;
         if (type == 1) {
             builder = new GenericRecordBuilder(buildSchem1());
@@ -399,18 +402,18 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
             records.add(builder.build());
 
             GenericRecordRequest recordRequest = new GenericRecordRequest();
-            if (repositoryCount == 1) {
+            if (type == 1) {
                 String testFile = "testGenericFile" + type;
                 List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS);
                 List<String> repositories = Arrays.asList(testFile);
                 recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
                         .setRepositories(repositories).setId(i + "");
             }
-            if (repositoryCount == 2) {
-                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS);
-                List<String> repositories = Arrays.asList("testGenericFile" + type, "DataCloud");
+            if (type == 2) {
+                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS, FabricStoreEnum.S3);
+                List<String> repositories = Arrays.asList("testGenericFile" + type, "testGenericFile" + type);
                 recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
-                        .setRepositories(repositories).setId(i + "").setRecordType("DynamoConnector");
+                        .setRepositories(repositories).setId(i + "").setRecordType("S3Connector");
             }
             recordRequests.add(recordRequest);
         }

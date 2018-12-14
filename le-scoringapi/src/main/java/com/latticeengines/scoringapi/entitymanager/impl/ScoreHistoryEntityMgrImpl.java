@@ -69,7 +69,7 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
     private GenericRecordRequest getGenericRequest() {
         GenericRecordRequest recordRequest = new GenericRecordRequest();
-        recordRequest.setStores(Arrays.asList(FabricStoreEnum.HDFS))
+        recordRequest.setStores(Arrays.asList(FabricStoreEnum.S3))
                 .setRepositories(Arrays.asList(FABRIC_SCORE_HISTORY)).setBatchId(FABRIC_SCORE_HISTORY);
         return recordRequest;
     }

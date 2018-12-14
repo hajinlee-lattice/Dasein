@@ -731,7 +731,7 @@ public class AvroUtils {
 
     public static void appendToHdfsFile(Configuration configuration, String filePath,
             List<GenericRecord> data, boolean snappy) throws IOException {
-        FileSystem fs = FileSystem.get(configuration);
+        FileSystem fs = HdfsUtils.getFileSystem(configuration, filePath);
         Path path = new Path(filePath);
 
         if (!HdfsUtils.fileExists(configuration, filePath)) {
@@ -767,7 +767,7 @@ public class AvroUtils {
 
     public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
             List<GenericRecord> data, boolean snappy) throws IOException {
-        FileSystem fs = FileSystem.get(configuration);
+        FileSystem fs = HdfsUtils.getFileSystem(configuration, filePath);
         Path path = new Path(filePath);
 
         if (HdfsUtils.fileExists(configuration, filePath)) {

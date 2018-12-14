@@ -1,5 +1,6 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,9 +8,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -37,19 +41,23 @@ public class HDFSDataStoreImpl implements FabricDataStore {
     private Schema schema;
     private String repositoryDir;
     private String baseDir;
+    private String localDir;
+    private boolean appendable;
 
     static {
         dateFormat.setTimeZone(TIME_ZONE);
     }
 
-    public HDFSDataStoreImpl(Configuration config, String baseDir, String repositoryDir, String fileName,
-            String recordType, Schema schema) {
+    public HDFSDataStoreImpl(Configuration config, String baseDir, String localDir, String repositoryDir,
+            String fileName, String recordType, Schema schema, boolean appendable) {
         this.config = config;
         this.baseDir = baseDir;
+        this.localDir = localDir;
         this.repositoryDir = repositoryDir;
         this.fileName = fileName;
         this.recordType = recordType;
         this.schema = schema;
+        this.appendable = appendable;
 
     }
 
@@ -58,10 +66,16 @@ public class HDFSDataStoreImpl implements FabricDataStore {
 
         String fullPath = getFilePath();
         try {
-            if (!HdfsUtils.fileExists(config, fullPath)) {
-                AvroUtils.writeToHdfsFile(config, schema, fullPath, Arrays.asList(pair.getKey()));
+            if (appendable) {
+                if (!HdfsUtils.fileExists(config, fullPath)) {
+                    AvroUtils.writeToHdfsFile(config, schema, fullPath, Arrays.asList(pair.getKey()));
+                } else {
+                    AvroUtils.appendToHdfsFile(config, fullPath, Arrays.asList(pair.getKey()));
+                }
             } else {
-                AvroUtils.appendToHdfsFile(config, fullPath, Arrays.asList(pair.getKey()));
+                fullPath = FilenameUtils.removeExtension(fullPath) + UUID.randomUUID().toString() + "."
+                        + FilenameUtils.getExtension(fullPath);
+                AvroUtils.writeToHdfsFile(config, schema, fullPath, Arrays.asList(pair.getKey()));
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -88,14 +102,45 @@ public class HDFSDataStoreImpl implements FabricDataStore {
             records.add(pair.getValue().getKey());
         }
         try {
-            if (!HdfsUtils.fileExists(config, fullPath)) {
-                AvroUtils.writeToHdfsFile(config, schema, fullPath, records);
+            if (appendable) {
+                if (!HdfsUtils.fileExists(config, fullPath)) {
+                    AvroUtils.writeToHdfsFile(config, schema, fullPath, records);
+                } else {
+                    AvroUtils.appendToHdfsFile(config, fullPath, records);
+                }
             } else {
-                AvroUtils.appendToHdfsFile(config, fullPath, records);
+                if (StringUtils.isBlank(localDir)) {
+                    writeWithoutAppend(fullPath, records);
+                } else {
+                    simulateAppend(fullPath, records);
+                }
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private void simulateAppend(String fullPath, List<GenericRecord> records) throws IOException {
+        String localFilePath = localDir + "/" + FilenameUtils.getName(fullPath);
+        if (!HdfsUtils.fileExists(config, "file:" + localFilePath)) {
+            AvroUtils.writeToLocalFile(schema, records, localFilePath);
+        } else {
+            AvroUtils.appendToLocalFile(records, localFilePath);
+        }
+        if (HdfsUtils.getFileSize(config, "file:" + localFilePath) > 100_000) {
+            String newLocalFilePath = FilenameUtils.removeExtension(localFilePath) + "-" + System.currentTimeMillis()
+                    + "." + FilenameUtils.getExtension(localFilePath);
+            HdfsUtils.rename(config, localFilePath, newLocalFilePath);
+            String tgtFilePath = FilenameUtils.getFullPath(fullPath) + FilenameUtils.getName(newLocalFilePath);
+            HdfsUtils.copyFromLocalToHdfs(config, newLocalFilePath, tgtFilePath);
+            HdfsUtils.rmdir(config, newLocalFilePath);
+        }
+    }
+
+    private void writeWithoutAppend(String fullPath, List<GenericRecord> records) throws IOException {
+        fullPath = FilenameUtils.removeExtension(fullPath) + "-" + System.currentTimeMillis() + "."
+                + FilenameUtils.getExtension(fullPath);
+        AvroUtils.writeToHdfsFile(config, schema, fullPath, records);
     }
 
     @Override

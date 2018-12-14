@@ -153,7 +153,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             GenericRecordRequest recordRequest = new GenericRecordRequest();
             recordRequest.setId(UUID.randomUUID().toString());
             matchHistory.setId(recordRequest.getId());
-            recordRequest.setStores(Collections.singletonList(FabricStoreEnum.HDFS))
+            recordRequest.setStores(Collections.singletonList(FabricStoreEnum.S3))
                     .setRepositories(Collections.singletonList(FABRIC_MATCH_HISTORY))
                     .setBatchId(FABRIC_MATCH_HISTORY);
             fabricEntityManager.publishEntity(recordRequest, matchHistory, MatchHistory.class);

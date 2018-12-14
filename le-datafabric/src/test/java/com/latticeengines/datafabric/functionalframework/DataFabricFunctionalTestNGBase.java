@@ -26,7 +26,7 @@ public abstract class DataFabricFunctionalTestNGBase extends AbstractTestNGSprin
     protected FabricDataService dataService;
 
     @Autowired
-    protected Configuration conf;
+    protected Configuration yarnConfiguration;
 
 
 }

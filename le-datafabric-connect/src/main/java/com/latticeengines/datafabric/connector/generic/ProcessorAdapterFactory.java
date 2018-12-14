@@ -11,6 +11,7 @@ public class ProcessorAdapterFactory {
     private static Map<FabricStoreEnum, Class<? extends ProcessorAdapter>> storeAdapterClassMap = new HashMap<>();
     static {
         storeAdapterClassMap.put(FabricStoreEnum.HDFS, HDFSProcessorAdapter.class);
+        storeAdapterClassMap.put(FabricStoreEnum.S3, S3ProcessorAdapter.class);
         storeAdapterClassMap.put(FabricStoreEnum.DYNAMO, DynamoProcessorAdapter.class);
     }
 
