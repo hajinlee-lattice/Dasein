@@ -12,7 +12,7 @@
                ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
             </a>
-            <a ng-if="job.modelId && job.modelName && isPMML && !job.isDeleted && !isRatingEngine"
+            <a ng-if="job.modelId && job.modelName && isPMML && !job.isDeleted && !isRatingEngine && (job.status != 'Failed')"
                class="model-name"
                ui-sref="home.model.jobs({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
