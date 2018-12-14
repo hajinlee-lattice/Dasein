@@ -53,7 +53,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     private final static String LEAD_INPUT_BASE_TABLE_NAME = "ScoringDeploymentTestNG_Base_LeadsTable";
     private final static String LEAD_INPUT_TABLE_NAME = "ScoringDeploymentTestNG_LeadsTable";
 
-    // (YSong - M25) This is hacky, but since it is a retiring test, I think it is OK.
+    // (YSong - M25) This is hacky, but since it is a retiring test, I think it
+    // is OK.
     private final static String QUARTZ_EMR = "quartz";
 
     @Inject
@@ -105,7 +106,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     public ScoringDeploymentTestNG() {
     }
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         customer = getClass().getSimpleName();
         tenant = CustomerSpace.parse(customer).toString();
@@ -121,7 +122,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         }
 
         if (CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
-            throw new Exception("Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
+            throw new Exception(
+                    "Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
         }
 
         path = customerBaseDir + "/" + tenant + "/scoring";
@@ -134,15 +136,17 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         }
 
         String tenantId = CustomerSpace.parse(tenant).getTenantId();
-        String s3Path = new HdfsToS3PathBuilder().getS3AnalyticsModelTableDir(s3Bucket, tenantId, LEAD_INPUT_TABLE_NAME);
+        String s3Path = new HdfsToS3PathBuilder().getS3AnalyticsModelTableDir(s3Bucket, tenantId,
+                LEAD_INPUT_TABLE_NAME);
         s3Dir = s3Path.replace("s3n://" + s3Bucket + "/", "");
         String s3Key = s3Dir + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1425511391553_3007" + "/1_model.json";
         InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
+                .getResourceAsStream(
+                        "com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
         s3Service.uploadInputStream(s3Bucket, s3Key, is, true);
     }
 
-    @AfterClass(alwaysRun = true)
+    @AfterClass(alwaysRun = false)
     public void cleanup() throws Exception {
         if (outputTable != null) {
             dbMetadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
@@ -158,7 +162,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         s3Service.cleanupPrefix(s3Bucket, s3Dir);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         // insert one row into the leadInputQueue
         scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, LEAD_INPUT_TABLE_NAME, 0, 3891,
@@ -175,11 +179,10 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         }
 
         // get the information from scoring result table
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr.findByScoringCommandAndStep(
-                scoringCommand, ScoringCommandStep.EXPORT_DATA);
-        Assert.assertNotNull(scoringCommandState,
-                "Could not find a command state at step " + ScoringCommandStep.EXPORT_DATA
-                        + " for scoring command id=" + scoringCommand.getId());
+        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
+                .findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        Assert.assertNotNull(scoringCommandState, "Could not find a command state at step "
+                + ScoringCommandStep.EXPORT_DATA + " for scoring command id=" + scoringCommand.getId());
         scoringCommandResult = scoringCommandResultEntityMgr.findByKey(scoringCommandState.getLeadOutputQueuePid());
         if (scoringCommandResult == null || scoringCommandResult.getStatus() == ScoringCommandStatus.NEW) {
             List<ScoringCommandLog> scoringCommandLogs = scoringCommandLogEntityMgr.findAll();
