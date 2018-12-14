@@ -20,19 +20,18 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
-        businessCalendar = createBusinessCalendar();
+        businessCalendar = createBusinessCalendar(BusinessCalendar.Mode.STARTING_DATE);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", priority = 0)
     public void testSaveBusinessCalendar() {
         Assert.assertNull(periodProxy.getBusinessCalendar(mainCustomerSpace));
-
         BusinessCalendar calendar = periodProxy.saveBusinessCalendar(mainCustomerSpace, businessCalendar);
         Assert.assertNotNull(calendar);
         Assert.assertEquals(calendar.getStartingDate(), "JAN-15");
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testSaveBusinessCalendar")
+    @Test(groups = "deployment", priority = 1)
     public void testGetBusinessCalendar() {
         BusinessCalendar calendar = periodProxy.getBusinessCalendar(mainCustomerSpace);
         Assert.assertNotNull(calendar);
@@ -41,7 +40,7 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(calendar.getStartingDate(), "JAN-15");
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testSaveBusinessCalendar", "testGetBusinessCalendar" })
+    @Test(groups = "deployment", priority = 2)
     public void testDeleteBusinessCalendar() {
         try {
             periodProxy.deleteBusinessCalendar(mainCustomerSpace);
@@ -50,9 +49,29 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
     }
 
-    private BusinessCalendar createBusinessCalendar() {
+    @Test(groups = "deployment", priority = 3)
+    public void testStandardTypeForBusinessCalendar() {
+        Assert.assertNull(periodProxy.getBusinessCalendar(mainCustomerSpace));
+
+        businessCalendar = createBusinessCalendar(BusinessCalendar.Mode.STANDARD);
+        BusinessCalendar calendar = periodProxy.saveBusinessCalendar(mainCustomerSpace, businessCalendar);
+        Assert.assertNotNull(calendar);
+        Assert.assertNull(calendar.getStartingDate());
+
+        calendar = periodProxy.getBusinessCalendar(mainCustomerSpace);
+        Assert.assertNotNull(calendar);
+        Assert.assertEquals(calendar.getMode(), BusinessCalendar.Mode.STANDARD);
+        Assert.assertNull(calendar.getLongerMonth());
+        Assert.assertNull(calendar.getStartingDate());
+        Assert.assertNull(calendar.getStartingDay());
+
+        periodProxy.deleteBusinessCalendar(mainCustomerSpace);
+        Assert.assertNull(periodProxy.getBusinessCalendar(mainCustomerSpace));
+    }
+
+    private BusinessCalendar createBusinessCalendar(BusinessCalendar.Mode mode) {
         BusinessCalendar calendar = new BusinessCalendar();
-        calendar.setMode(BusinessCalendar.Mode.STARTING_DATE);
+        calendar.setMode(mode);
         calendar.setStartingDate("JAN-15");
         calendar.setLongerMonth(1);
         return calendar;

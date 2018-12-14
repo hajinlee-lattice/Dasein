@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -64,6 +64,7 @@ public class PurchaseHistoryResource {
     private PeriodProxy periodProxy;
 
     private final int DEFAULT_START_YEAR = 2000;
+    private final LocalDate DEFAULT_START_DATE = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
 
     @Inject
     @Qualifier(PurchaseHistoryDanteFormatter.Qualifier)
@@ -71,7 +72,7 @@ public class PurchaseHistoryResource {
 
     private String defaultPeriodName = PeriodStrategy.Template.Month.name();
 
-    @RequestMapping(value = "/account/{crmAccountId}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/account/{crmAccountId}/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for the given account")
     public FrontEndResponse<List<String>> getPurchaseHistoryAccountById(RequestEntity<String> requestEntity,
@@ -92,9 +93,8 @@ public class PurchaseHistoryResource {
                 }
                 BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
                 LocalDate startDate;
-                if (businessCalendar == null) {
-                    // Use Natural calendar since no Business calender has been defined
-                    startDate = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
+                if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+                    startDate = DEFAULT_START_DATE;
                 } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
                     startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
                             DEFAULT_START_YEAR);
@@ -115,7 +115,7 @@ public class PurchaseHistoryResource {
 
     }
 
-    @RequestMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for all the accounts in the given spend analytics segment")
     public FrontEndResponse<List<String>> getPurchaseHistoryAccountBySegment(
@@ -141,9 +141,8 @@ public class PurchaseHistoryResource {
 
             BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
             LocalDate startDate;
-            if (businessCalendar == null) {
-                // Use Natural calendar since no Business calender has been defined
-                startDate = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
+            if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+                startDate = DEFAULT_START_DATE;
             } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
                 startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
                         DEFAULT_START_YEAR);

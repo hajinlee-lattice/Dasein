@@ -41,8 +41,9 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
                 dateRange = BusinessCalendarUtils
                         .parseDateRangeFromStartDay(calendar.getStartingDay(), busiYear);
                 break;
+            case STANDARD:
             default:
-                String msg = "Unknown business calendar mode " + calendar.getMode();
+                String msg = "Invalid business calendar mode " + calendar.getMode();
                 throw new LedpException(LedpCode.LEDP_40015, msg,
                         new UnsupportedOperationException(msg));
         }
@@ -69,8 +70,9 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
                         51);
             case STARTING_DAY:
                 return (int) ChronoUnit.DAYS.between(busiYearDateRange.getLeft(), evalDate) / 7;
+            case STANDARD:
             default:
-                String msg = "Unknown business calendar mode " + calendar.getMode();
+                String msg = "Invalid business calendar mode " + calendar.getMode();
                 throw new LedpException(LedpCode.LEDP_40015, msg,
                         new UnsupportedOperationException(msg));
         }

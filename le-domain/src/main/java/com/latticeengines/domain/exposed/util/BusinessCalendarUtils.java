@@ -17,21 +17,30 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public final class BusinessCalendarUtils {
 
+    private static String STANDARD_MODE_NOTE = "Business calendar mode is STANDARD.";
+
     public static String validate(BusinessCalendar calendar) {
         if (!Arrays.asList(1, 2, 3).contains(calendar.getLongerMonth())) {
             String msg = "Longer Month can only be 1, 2 or 3.";
             Exception exception = new IllegalArgumentException(msg);
             throw new LedpException(LedpCode.LEDP_40015, msg, exception);
         }
+
         Integer evaluationYear = calendar.getEvaluationYear();
         if (evaluationYear == null || evaluationYear < 1990) {
             evaluationYear = getCurrentYear();
         }
+
         switch (calendar.getMode()) {
             case STARTING_DAY:
                 return validateStartingDay(calendar.getStartingDay(), evaluationYear);
             case STARTING_DATE:
                 return validateStartingDate(calendar.getStartingDate(), evaluationYear);
+            case STANDARD:
+                calendar.setStartingDate(null);
+                calendar.setStartingDay(null);
+                calendar.setLongerMonth(null);
+                return STANDARD_MODE_NOTE;
             default:
                 String msg = "Unknown business calendar mode " + calendar.getMode();
                 Exception exception = new UnsupportedOperationException(msg);
@@ -39,8 +48,7 @@ public final class BusinessCalendarUtils {
         }
     }
 
-    public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDay(String startingDay,
-            int evaluationYear) {
+    public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDay(String startingDay, int evaluationYear) {
         LocalDate startDate = parseLocalDateFromStartingDay(startingDay, evaluationYear);
         LocalDate endDate = parseLocalDateFromStartingDay(startingDay, evaluationYear + 1)
                 .minusDays(1);
@@ -89,16 +97,14 @@ public final class BusinessCalendarUtils {
         }
     }
 
-    public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDate(String startingDate,
-            int evaluationYear) {
+    public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDate(String startingDate, int evaluationYear) {
         LocalDate startDate = parseLocalDateFromStartingDate(startingDate, evaluationYear);
         LocalDate endDate = parseLocalDateFromStartingDate(startingDate, evaluationYear + 1)
                 .minusDays(1);
         return Pair.of(startDate, endDate);
     }
 
-    public static LocalDate parseLocalDateFromStartingDate(String startingDate,
-            int evaluationYear) {
+    public static LocalDate parseLocalDateFromStartingDate(String startingDate, int evaluationYear) {
         if (StringUtils.isBlank(startingDate)) {
             throw new LedpException(LedpCode.LEDP_40015, new String[] { startingDate });
         }

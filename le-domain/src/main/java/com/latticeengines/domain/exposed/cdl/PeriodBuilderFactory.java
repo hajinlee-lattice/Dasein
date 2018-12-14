@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.period.NaturalQuarterPeriodBuilder;
 import com.latticeengines.domain.exposed.period.NaturalWeekPeriodBuilder;
 import com.latticeengines.domain.exposed.period.NaturalYearPeriodBuilder;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public final class PeriodBuilderFactory {
 
@@ -29,35 +30,43 @@ public final class PeriodBuilderFactory {
     }
 
     private static PeriodBuilder buildWeekPeriod(PeriodStrategy strategy) {
-        if (strategy.getBusinessCalendar() != null) {
-            return new BusinessWeekPeriodBuilder(strategy.getBusinessCalendar());
+        BusinessCalendar businessCalendar = strategy.getBusinessCalendar();
+        if (!isNaturalCalendar(businessCalendar)) {
+            return new BusinessWeekPeriodBuilder(businessCalendar);
         } else {
             return new NaturalWeekPeriodBuilder(strategy.getStartTimeStr());
         }
     }
 
     private static PeriodBuilder buildMonthPeriod(PeriodStrategy strategy) {
-        if (strategy.getBusinessCalendar() != null) {
-            return new BusinessMonthPeriodBuilder(strategy.getBusinessCalendar());
+        BusinessCalendar businessCalendar = strategy.getBusinessCalendar();
+        if (!isNaturalCalendar(businessCalendar)) {
+            return new BusinessMonthPeriodBuilder(businessCalendar);
         } else {
             return new NaturalMonthPeriodBuilder(strategy.getStartTimeStr());
         }
     }
 
     private static PeriodBuilder buildQuarterPeriod(PeriodStrategy strategy) {
-        if (strategy.getBusinessCalendar() != null) {
-            return new BusinessQuarterPeriodBuilder(strategy.getBusinessCalendar());
+        BusinessCalendar businessCalendar = strategy.getBusinessCalendar();
+        if (!isNaturalCalendar(businessCalendar)) {
+            return new BusinessQuarterPeriodBuilder(businessCalendar);
         } else {
             return new NaturalQuarterPeriodBuilder(strategy.getStartTimeStr());
         }
     }
 
     private static PeriodBuilder buildYearPeriod(PeriodStrategy strategy) {
-        if (strategy.getBusinessCalendar() != null) {
-            return new BusinessYearPeriodBuilder(strategy.getBusinessCalendar());
+        BusinessCalendar businessCalendar = strategy.getBusinessCalendar();
+        if (!isNaturalCalendar(businessCalendar)) {
+            return new BusinessYearPeriodBuilder(businessCalendar);
         } else {
             return new NaturalYearPeriodBuilder(strategy.getStartTimeStr());
         }
+    }
+
+    private static boolean isNaturalCalendar(BusinessCalendar calendar) {
+        return calendar == null || calendar.getMode() == BusinessCalendar.Mode.STANDARD;
     }
 
 }

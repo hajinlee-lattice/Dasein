@@ -82,7 +82,7 @@ public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields, S
     @JsonProperty("updatedBy")
     private String updatedBy;
 
-    @Column(name = "LONGER_MONTH", nullable = false)
+    @Column(name = "LONGER_MONTH")
     @JsonProperty("longerMonth")
     private Integer longerMonth;
 
@@ -180,6 +180,6 @@ public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields, S
     }
 
     public enum Mode {
-        STARTING_DATE, STARTING_DAY
+        STARTING_DATE, STARTING_DAY, STANDARD
     }
 }
