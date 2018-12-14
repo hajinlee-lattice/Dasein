@@ -149,8 +149,6 @@ public class InfluxDbMetricWriter implements MetricWriter {
                             @Override
                             public void run() {
                                 getInfluxDB().write(batchPoints);
-                                log.debug("Write " + batchPoints.getPoints().size()
-                                        + " points to influxDB.");
                             }
                         });
                     }
