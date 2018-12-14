@@ -89,7 +89,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on empty key map.");
 
 
-        // Test 3:  Fail on missing Match Key value target field.
+        // Test 3:  Fail on missing Match Key value element not found in input fields.
         failed = false;
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
         keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
@@ -103,7 +103,7 @@ public class MatchInputValidatorUnitTestNG {
         } catch (Exception e) {
             failed = true;
         }
-        Assert.assertTrue(failed, "Should failed on missing target field.");
+        Assert.assertTrue(failed, "Should failed on missing MatchKey value element in input fields.");
 
 
         // Test 4:  Fail on empty input data.
@@ -297,11 +297,12 @@ public class MatchInputValidatorUnitTestNG {
         // Test 8:  Match Key key cannot be null.
         failed = false;
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        // Domain is allowed to map to an empty list.
+        // Empty MatchKey value should not be a problem.
         keyMap.put(MatchKey.Domain, new ArrayList<>());
         keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
         keyMap.put(null, Collections.singletonList("Street"));
-        keyMap.put(MatchKey.City, Collections.singletonList("City"));
+        // null MatchKey value should not be a problem.
+        keyMap.put(MatchKey.City, null);
         keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
@@ -330,7 +331,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (IllegalArgumentException e) {
             failed = true;
-            Assert.assertTrue(e.getMessage().contains("Cannot find target field ???? in claimed field list."),
+            Assert.assertTrue(e.getMessage().contains("Cannot find MatchKey value element ???? in claimed field list."),
                     "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
             Assert.fail("Failed on wrong exception: " + e.getMessage());
@@ -338,23 +339,22 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "All match keys should appear in the list of input fields.");
 
 
-        // Test 10:  Match Key value cannot be null or empty, except key MatchKey.Domain.
+        // Test 10:  Match Key value list cannot contain null or empty elements.
         failed = false;
         input.getEntityKeyMapList().get(0).getKeyMap().put(MatchKey.State,
                 Collections.singletonList("State_Province"));
-        input.getEntityKeyMapList().get(0).getKeyMap().put(MatchKey.SystemId,
-                new ArrayList<>());
+        input.getEntityKeyMapList().get(0).getKeyMap().put(MatchKey.SystemId, Arrays.asList("ID", null, "MktoId"));
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (IllegalArgumentException e) {
             failed = true;
-            Assert.assertTrue(e.getMessage().contains("MatchKey value must be non-null and non-empty."),
+            Assert.assertTrue(e.getMessage().contains("MatchKey value list elements must be non-null and non-empty."),
                     "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
             Assert.fail("Failed on wrong exception: " + e.getMessage());
         }
-        Assert.assertTrue(failed, "MatchKey value cannot be null or empty.");
+        Assert.assertTrue(failed, "MatchKey value list cannot contain null or empty elements.");
 
 
         // Test 11:  Should fail on System ID MatchKey values / System ID priority list length mismatch.

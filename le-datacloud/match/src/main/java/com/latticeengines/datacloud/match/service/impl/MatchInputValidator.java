@@ -11,6 +11,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,19 +206,25 @@ public class MatchInputValidator {
         }
 
         // Validate the MatchKeys by checking:
-        //   a) That all keys are non-null
-        //   b) That all values are non-null and non-empty lists.
+        //   a) That all keys are non-null.
+        //   b) That all values are either:
+        //      i) null
+        //      ii) empty lists
+        //      iii) lists composed of non-null and non-empty strings.
         //   c) That all value list elements are contained in the input fields.
+        // Note: Using a key with a null or empty list value is allowed as a way to indicate that this key should
+        //       be ignored in match as also a way to auto-resolution from populating that key.
         for (Map.Entry<MatchKey, List<String>> entry : newKeyMap.entrySet()) {
             if (entry.getKey() == null) {
                 throw new IllegalArgumentException("MatchKey key must be non-null.");
-            } else if (!MatchKey.Domain.equals(entry.getKey()) && CollectionUtils.isEmpty(entry.getValue())) {
-                throw new IllegalArgumentException("MatchKey value must be non-null and non-empty.");
-            } else {
+            } else if (CollectionUtils.isNotEmpty(entry.getValue())) {
                 for (String elem : entry.getValue()) {
-                    if (!inputFields.contains(elem)) {
+                    if (StringUtils.isBlank(elem)) {
                         throw new IllegalArgumentException(
-                                "Cannot find target field " + elem + " in claimed field list.");
+                                "MatchKey value list elements must be non-null and non-empty.");
+                    } else if (!inputFields.contains(elem)) {
+                        throw new IllegalArgumentException(
+                                "Cannot find MatchKey value element " + elem + " in claimed field list.");
                     }
                 }
             }
