@@ -297,6 +297,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                     logMsg += String.format(" %f ", finalStatus.getProgress() * 100);
                 }
                 log.info(logMsg);
+                // clear once we get status successfully
+                nContExceptions = 0;
             } catch (Exception e) {
                 nContExceptions++;
                 log.warn(
@@ -312,8 +314,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                     throw new RuntimeException(msg);
                 }
             }
-            // clear once we get status successfully
-            nContExceptions = 0;
 
             try {
                 Thread.sleep(5000L);
