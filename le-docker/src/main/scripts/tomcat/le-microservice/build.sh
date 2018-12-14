@@ -26,9 +26,9 @@ function build_docker() {
 	jar xvf ${DIR}/webapps/${SRC_WAR}.war
 	# replace log4j.properties
 	if [ "${SRC_WAR}" = "scoringapi" ]; then
-	    cp -f ${DIR}/log4j2-scoringapi.xml WEB-INF/log4j2.xml
+	    cp -f ${DIR}/log4j2-scoringapi.xml WEB-INF/classes/log4j2.xml
 	else
-	    cp -f ${DIR}/log4j2.xml WEB-INF/log4j2.xml
+	    cp -f ${DIR}/log4j2.xml WEB-INF/classes/log4j2.xml
 	fi
 	if [[ "${UNAME}" == 'Darwin' ]]; then
         sed -i '' "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j2.xml
