@@ -87,12 +87,12 @@ angular.module('lp.import')
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
-                    ImportWizardStore.saveDocument(nextState, function(){
-                        ImportWizardStore.setValidation('jobstatus', true); 
-                    });
-                    // ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
-                    //     ImportWizardStore.setValidation('jobstatus', true);                
+                    // ImportWizardStore.saveDocument(nextState, function(){
+                    //     ImportWizardStore.setValidation('jobstatus', true); 
                     // });
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
+                        ImportWizardStore.setValidation('jobstatus', true);                
+                    }, true);
                 }
             },{ 
                 label: 'Save Template', 
@@ -143,12 +143,12 @@ angular.module('lp.import')
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
-                    ImportWizardStore.saveDocument(nextState, function(){
-                        ImportWizardStore.setValidation('jobstatus', true); 
-                    });
-                    // ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
-                    //     ImportWizardStore.setValidation('jobstatus', true);                
+                    // ImportWizardStore.saveDocument(nextState, function(){
+                    //     ImportWizardStore.setValidation('jobstatus', true); 
                     // });
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true);                
+                    }, true);
                 }
             },{ 
                 label: 'Save Template', 
@@ -307,20 +307,30 @@ angular.module('lp.import')
      */
     this.saveDocument = function(nextState, callback){
         var callback = (typeof callback === 'function' ? callback : function(){});
+
         ImportWizardStore.fieldDocument.fieldMappings = this.getSavedDocumentCopy($state.current.name);
         if(ImportWizardStore.fieldDocument.ignoredFields === null){
             ImportWizardStore.fieldDocument.ignoredFields = [];
         }
-        // var doc = this.getSavedDocumentCopy($state.current.name);
+
         ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
             feedType: ImportWizardStore.getFeedType(),
             entity: ImportWizardStore.getEntityType()
         }).then(callback);
+
         $state.go(nextState);
     };
 
-    this.nextSaveFieldDocuments = function(nextState, callback) {
+    this.nextSaveFieldDocuments = function(nextState, callback, setIgnoredToArray) {
+        console.log(1111);
         var callback = (typeof callback === 'function' ? callback : function(){});
+
+        if(setIgnoredToArray) {
+            ImportWizardStore.fieldDocument.fieldMappings = this.getSavedDocumentCopy($state.current.name);
+            if(ImportWizardStore.fieldDocument.ignoredFields === null){
+                ImportWizardStore.fieldDocument.ignoredFields = [];
+            }
+        }
 
         ImportWizardStore.mergeFieldDocument().then(function(fieldDocument) {
             ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {

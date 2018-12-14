@@ -64,10 +64,10 @@
                         class="tile-metadata"
                         ng-if="!vm.current.tileStates[play.name].editPlay">
                         <ul>
-                            <li>Last Edited by: <span class="blue-text">{{play.updatedBy}}</span></li>
+                            <li>Last Edited by: <span class="blue-text">{{play.updatedBy || '--'}}</span></li>
                             <li>Last Edited: <span class="blue-text">{{play.updated | date}}</span></li>
-                            <li>Segment: <span class="blue-text">{{play.targetSegment.display_name}}</span></li>
-                            <li>Model: <span class="blue-text">{{play.ratingEngine.displayName}}</span></li>
+                            <li>Segment: <span class="blue-text">{{play.targetSegment.display_name || '--'}}</span></li>
+                            <li>Model: <span class="blue-text">{{play.ratingEngine.displayName || '--'}}</span></li>
 <!--
                              <li class="text-ellipsis">
                                 Segment: 

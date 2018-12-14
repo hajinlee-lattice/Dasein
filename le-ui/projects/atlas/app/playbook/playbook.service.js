@@ -206,12 +206,16 @@ angular.module('lp.playbook')
 
     }
 
-    this.setSettings = function(obj) {
+    this.setSettings = function(obj, unset) {
         var obj = obj || {};
         for(var i in obj) {
             var key = i,
                 value = obj[i];
-            this.settings[key] = value;
+            if(unset) {
+                delete this.settings[key];
+            } else {
+                this.settings[key] = value;
+            }
         }
     }
     
@@ -682,6 +686,8 @@ angular.module('lp.playbook')
                 }
             },
             state = (play.launchHistory && play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState ? play.launchHistory.mostRecentLaunch.launchState : null);
+
+        state = (play.launchHistory.lastCompletedLaunch ? 'Launched' : state);
 
         launchButton.state = launchedState || state;
 

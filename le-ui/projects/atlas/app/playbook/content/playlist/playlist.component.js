@@ -208,7 +208,7 @@ angular.module('lp.playbook.plays', [
         if(vm.current.tileStates[play.name].launching === true) {
             label = 'Launching...'; 
         }
-        if(play.lastTalkingPointPublishTime) {
+        if(play.launchHistory.lastCompletedLaunch) {
             label = 'ReLaunch';
         }
         return label;

@@ -323,7 +323,7 @@ angular.module('common.datacloud.query.results', [
                             vm.showAccountPagination = false;
                         }
 
-                        vm.topNCount = vm.counts.accounts.value;
+                        vm.topNCount = vm.accountsCoverage.accountCount; //vm.counts.accounts.value;
                         PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
                     });
                 } else if (vm.search) { 
@@ -359,8 +359,8 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.updateTopNCount = function() {
-        vm.maxTargetValue = vm.counts.accounts.value;
-        
+        vm.maxTargetValue = vm.accountsCoverage.accountCount; //vm.counts.accounts.value;
+
         if (vm.topNCount <= vm.maxTargetValue) {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);

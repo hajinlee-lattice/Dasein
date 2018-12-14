@@ -252,13 +252,24 @@ angular.module('lp.import.calendar', [])
                 console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
             } else {
                 vm.saving = true;
-                // this just deletes the calendar, then standard calendar is used by default
                 Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
+
+                // this just deletes the calendar, then standard calendar is used by default
                 ImportWizardService.deleteCalendar().then(function(result) {
-                    console.log(result);
                     vm.saving = false;
                     $state.go('home');
                 });
+                
+                // this sets a blank calendar in standard mode (new way to set it rather then delete)
+                // ImportWizardService.saveCalendar({
+                //     mode: 'STANDARD',
+                //     startingDate: '',
+                //     evaluationYear: year,
+                //     longerMonth: ''
+                // }).then(function(result) {
+                //     vm.saving = false;
+                //     $state.go('home');
+                // });
             }
         }
     }
