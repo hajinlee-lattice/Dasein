@@ -16,7 +16,15 @@ topic_stack=global
 repl_factor=1
 rest_port=8081
 partitions=100
+
 hadoop_conf_dir=/usr/hdp/current/hadoop-client/etc/hadoop
+#s3_access_key=AKIAIOGWTLKPB2N266OQ
+#s3_secret_key=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
+
+s3_access_key=bi0mpJJNxiYpEka5C6JO4ofA43zqN8j2DOdjzBK7RLkC0BCc3fYYA7HFzohW9BsMO/IEe1eKqoKw2N6ZvEyc+Q==
+s3_secret_key=bi0mpJJNxiYpEka5C6JO4o3n7vwNDkLYDbYIZ/UK9740iB0hI1GvrK0duaGVVenRGxa7sRLjMLjM0JQQfiGYLAJqncA1VGkUFkccVsa4sPE=
+s3_local_dir=/var/log/etl/history
+
 
 if [ $1 == dev ]; then
     hdfs_pod=Default
@@ -81,7 +89,8 @@ curl -X POST $rest_url -H "Content-type: Application/json" -d '{"name": "generic
 echo
 
 rest_url="http://localhost:8083/connectors/generic-sink-connector-${topic_env}/config"
-echo curl -X PUT $rest_url -H "Content-type: Application/json" -d '{"name": "generic-sink-connector-'${topic_env}'","connector.class": "com.latticeengines.datafabric.connector.generic.GenericSinkConnector","tasks.max": "'${partitions}'","topics": "'${topic_name}'", "hdfs.base.dir" : "/Pods/'${hdfs_pod}'/Services/PropData/Sources", "hadoop.conf.dir":"'${hadoop_conf_dir}'", "camille.zk.connectionString":"'${camille_zk_servers}'", "camille.zk.pod.id":"'${camille_zk_pod_id}'", "kafka.zkConnect" : "'${zk_servers}'"}'  2>> /tmp/errors.txt
-curl -X PUT $rest_url -H "Content-type: Application/json" -d '{"name": "generic-sink-connector-'${topic_env}'","connector.class": "com.latticeengines.datafabric.connector.generic.GenericSinkConnector","tasks.max": "'${partitions}'","topics": "'${topic_name}'", "hdfs.base.dir" : "/Pods/'${hdfs_pod}'/Services/PropData/Sources", "hadoop.conf.dir":"'${hadoop_conf_dir}'", "camille.zk.connectionString":"'${camille_zk_servers}'", "camille.zk.pod.id":"'${camille_zk_pod_id}'", "kafka.zkConnect" : "'${zk_servers}'"}'  2>> /tmp/errors.txt
+
+echo curl -X PUT $rest_url -H "Content-type: Application/json" -d '{"name": "generic-sink-connector-'${topic_env}'","connector.class": "com.latticeengines.datafabric.connector.generic.GenericSinkConnector","tasks.max": "'${partitions}'","topics": "'${topic_name}'", "hdfs.base.dir" : "/Pods/'${hdfs_pod}'/Services/PropData/Sources", "hadoop.conf.dir":"'${hadoop_conf_dir}'", "s3.base.dir":"s3a://latticeengines-dev/Pods/'${hdfs_pod}'/Services/PropData/Sources", "s3.access_key":"'$s3_access_key'", "s3.secret.key":"'$s3_secret_key'", "camille.zk.connectionString":"'${camille_zk_servers}'", "camille.zk.pod.id":"'${camille_zk_pod_id}'", "kafka.zkConnect" : "'${zk_servers}'"}'  2>> /tmp/errors.txt
+curl -X PUT $rest_url -H "Content-type: Application/json" -d '{"name": "generic-sink-connector-'${topic_env}'","connector.class": "com.latticeengines.datafabric.connector.generic.GenericSinkConnector","tasks.max": "'${partitions}'","topics": "'${topic_name}'", "hdfs.base.dir" : "/Pods/'${hdfs_pod}'/Services/PropData/Sources", "hadoop.conf.dir":"'${hadoop_conf_dir}'", "s3.base.dir":"s3a://latticeengines-etl-history/Pods/'${hdfs_pod}'/Services/PropData/Sources", "s3.local.dir":"'$s3_local_dir'", "s3.access.key":"'$s3_access_key'", "s3.secret.key":"'$s3_secret_key'", "camille.zk.connectionString":"'${camille_zk_servers}'", "camille.zk.pod.id":"'${camille_zk_pod_id}'", "kafka.zkConnect" : "'${zk_servers}'"}'  2>> /tmp/errors.txt
 echo
 

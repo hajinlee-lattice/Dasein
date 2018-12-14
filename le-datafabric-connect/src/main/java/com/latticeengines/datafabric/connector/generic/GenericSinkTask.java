@@ -113,7 +113,7 @@ public class GenericSinkTask extends SinkTask {
             if (log.isDebugEnabled()) {
                 log.warn("Failed to execute connector tasks!", e);
             }
-            log.error("Failed to execute connector tasks, error=" + e.getMessage(), e);
+            log.error("Failed to execute connector tasks, error=" + e.getMessage());
         }
 
     }
