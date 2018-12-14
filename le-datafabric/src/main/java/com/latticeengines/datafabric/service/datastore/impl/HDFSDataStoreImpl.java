@@ -128,12 +128,10 @@ public class HDFSDataStoreImpl implements FabricDataStore {
             AvroUtils.appendToLocalFile(records, localFilePath);
         }
         if (HdfsUtils.getFileSize(config, "file:" + localFilePath) > 100_000) {
-            String newLocalFilePath = FilenameUtils.removeExtension(localFilePath) + "-" + System.currentTimeMillis()
-                    + "." + FilenameUtils.getExtension(localFilePath);
-            HdfsUtils.rename(config, localFilePath, newLocalFilePath);
-            String tgtFilePath = FilenameUtils.getFullPath(fullPath) + FilenameUtils.getName(newLocalFilePath);
-            HdfsUtils.copyFromLocalToHdfs(config, newLocalFilePath, tgtFilePath);
-            HdfsUtils.rmdir(config, newLocalFilePath);
+            String tgtFilePath = FilenameUtils.removeExtension(fullPath) + "-" + System.currentTimeMillis() + "."
+                    + FilenameUtils.getExtension(fullPath);
+            HdfsUtils.copyFromLocalToHdfs(config, localFilePath, tgtFilePath);
+            HdfsUtils.rmdir(config, localFilePath);
         }
     }
 
