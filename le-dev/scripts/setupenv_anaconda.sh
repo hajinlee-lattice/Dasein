@@ -162,15 +162,17 @@ ${ANACONDA_HOME}/bin/conda install -y \
 	sparkmagic \
 	jupyter_contrib_nbextensions \
 	jupyter_nbextensions_configurator \
+	ipython \
+	prompt_toolkit \
 	pyyaml \
 	jinja2
 
-pip uninstall ipython prompt_toolkit
+pip uninstall -y ipython prompt_toolkit
 pip install --upgrade ipython prompt_toolkit
 
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
-jupyter-kernelspec install ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/sparkkernel
-jupyter-kernelspec install ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pyspark3kernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/sparkkernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pyspark3kernel
 
 source ${ANACONDA_HOME}/bin/deactivate
