@@ -37,7 +37,7 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
     protected void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext, File localFile)
             throws IOException {
         long segmentContactsCount = contactFetcher.getCount(segmentExportContext, version);
-        log.info("contactCount = ", segmentContactsCount);
+        log.info("contactCount = %d", segmentContactsCount);
 
         if (segmentContactsCount > 0) {
             // process contacts that exists in segment
@@ -54,21 +54,22 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
                 for (int pageNo = 0; pageNo < pages; pageNo++) {
                     // fetch and process a single page
                     processedSegmentContactsCount = fetchAndProcessContactsPage(segmentExportContext,
-                            segmentContactsCount, processedSegmentContactsCount, pageNo, dataFileWriter, schema, version);
+                            segmentContactsCount, processedSegmentContactsCount, pageNo, dataFileWriter, schema,
+                            version);
                 }
             }
         }
     }
 
     protected long fetchAndProcessContactsPage(SegmentExportContext segmentExportContext, long segmentContactsCount,
-            long processedSegmentContactsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version)
-            throws IOException {
+            long processedSegmentContactsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema,
+            DataCollection.Version version) throws IOException {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch contacts in current page
         DataPage contactsPage = //
-                contactFetcher.fetch(segmentExportContext, segmentContactsCount,
-                        processedSegmentContactsCount, version);
+                contactFetcher.fetch(segmentExportContext, segmentContactsCount, processedSegmentContactsCount,
+                        version);
 
         // process accounts in current page
         processedSegmentContactsCount += processContactsPage(segmentExportContext, contactsPage, dataFileWriter,
