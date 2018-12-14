@@ -1043,9 +1043,17 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven.checkstyle.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
                     <configuration>
                         <configLocation>checkstyle/${checker}.xml</configLocation>
                         <encoding>UTF-8</encoding>
+                        <includes>**\/com\/latticeengines\/**\/*.java</includes>
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     </configuration>
                 </plugin>

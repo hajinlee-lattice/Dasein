@@ -2,11 +2,11 @@ package com.latticeengines.datacloud.madison.service;
 
 public interface PropDataMadisonService {
 
-    public static final String TODAY_KEY = "today";
-    public static final String RECORD_KEY = "record";
-    public static final String RESULT_KEY = "result";
-    public static final String STATUS_KEY = "status";
-    public static final String STATUS_OK = "OK";
+    String TODAY_KEY = "today";
+    String RECORD_KEY = "record";
+    String RESULT_KEY = "result";
+    String STATUS_KEY = "status";
+    String STATUS_OK = "OK";
 
     PropDataContext importFromDB(PropDataContext requestContext);
 

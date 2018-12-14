@@ -35,8 +35,8 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
-        List<String> latticeAdmins = Collections
-                .singletonList(NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
+        List<String> latticeAdmins = Collections.singletonList(
+                NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
         List<String> externalAdmins = Collections.singletonList("latticeengines8@gmail.com");
         List<String> thirdPartyUsers = Collections.singletonList("thirdPartyUser1@gmail.com");
         componentManager.provisionTenant(tenant, superAdmins, latticeAdmins, externalAdmins,
@@ -67,8 +67,9 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
 
         tenant = createTestTenant();
         tenant.setName("new name");
-        componentManager.provisionTenant(tenant, Collections.<String> emptyList(), Collections.<String> emptyList(),
-                Collections.<String> emptyList(), Collections.<String> emptyList(), "PLSComponentManagerTest");
+        componentManager.provisionTenant(tenant, Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyList(), Collections.emptyList(),
+                "PLSComponentManagerTest");
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         newTenant = tenantService.findByTenantId(tenant.getId());

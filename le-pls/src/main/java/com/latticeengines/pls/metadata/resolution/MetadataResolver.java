@@ -451,7 +451,7 @@ public class MetadataResolver {
             statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
             break;
         }
-        log.info(String.format("The statistical type is %s", statisticalType));
+        log.debug(String.format("The statistical type is %s", statisticalType));
         return statisticalType;
     }
 
@@ -465,7 +465,7 @@ public class MetadataResolver {
             InputStream is = fs.open(new Path(csvPath));
             columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is, closeableResourcePool);
 
-            log.info(String.format("column with header %s is: %s", columnHeaderName, columnFields.toString()));
+            log.debug(String.format("column with header %s is: %s", columnHeaderName, columnFields.toString()));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         } finally {

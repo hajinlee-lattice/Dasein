@@ -1,14 +1,14 @@
 package com.latticeengines.apps.cdl.testframework;
 
+import static org.testng.Assert.assertEquals;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.client.YarnClient;
@@ -24,8 +24,6 @@ import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePostproc
 import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePreprocessingStepConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
-
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-workflow-context.xml" })
 public abstract class CDLWorkflowFrameworkTestNGBase extends AbstractTestNGSpringContextTests {
@@ -51,13 +49,13 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends AbstractTestNGSprin
     @Autowired
     protected WorkflowService workflowService;
 
-    abstract public void setup() throws Exception;
+    public abstract void setup() throws Exception;
 
-    abstract public void testWorkflow() throws Exception;
+    public abstract void testWorkflow() throws Exception;
 
-    abstract protected void verifyTest();
+    protected abstract void verifyTest();
 
-    abstract public void tearDown() throws Exception;
+    public abstract void tearDown() throws Exception;
 
     // This version of generateConfiguration is used for setting up a test for a single Workflow Step rather than a
     // full Workflow.

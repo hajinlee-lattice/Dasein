@@ -31,4 +31,4 @@ fi
 # if project argument is not specified, an empty string will be passed to --proj flag
 shift 2
 echo "Generating aggregated report ..."
-python $WSHOME/le-dev/scripts/checkstyle_report_generator.py ${PROJ_OPT} $@
+python $WSHOME/le-dev/scripts/checkstyle_report_generator.py ${PROJ_OPT} ${@:2}

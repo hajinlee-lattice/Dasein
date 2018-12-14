@@ -1,12 +1,19 @@
 package com.latticeengines.pls.service.impl;
 
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.NAME;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.REST_CLIENT_ID;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.REST_CLIENT_SECRET;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.REST_ENDPOINT;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.REST_IDENTITY_ENDPOINT;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.SOAP_ENCRYPTION_KEY;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.SOAP_ENDPOINT;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.SOAP_USER_ID;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -306,5 +313,5 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         assertEquals(marketoCredential1.getSoapUserId(), marketoCredential.getSoapUserId());
         assertEquals(marketoCredential1.getEnrichment().getPid(), marketoCredential.getEnrichment().getPid());
     }
-    
+
 }
