@@ -14,8 +14,10 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
+import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
+import com.latticeengines.oauth2db.exposed.web.OAuth2MultiTenantContextStrategy;
 import com.latticeengines.scoringapi.exposed.exception.ExceptionEncodingTranslator;
 
 @Configuration
@@ -50,6 +52,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        MultiTenantContext.setStrategy(new OAuth2MultiTenantContextStrategy());
         // define URL patterns to enable OAuth2 security
 
         // @formatter:off
