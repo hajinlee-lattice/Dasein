@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,12 +67,10 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
     List<ColumnMetadata> parseColumnMetadata(MatchInput input) {
         // For now, we only handle the Column Metadata case for a predefined column selection of ID.
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
-            List<ColumnMetadata> columnMetadataList = new ArrayList<>();
             ColumnMetadata atlasIdColumnMetadata = new ColumnMetadata();
             atlasIdColumnMetadata.setAttrName(InterfaceName.AtlasId.name());
             atlasIdColumnMetadata.setJavaClass(String.class.getSimpleName());
-            columnMetadataList.add(atlasIdColumnMetadata);
-            return columnMetadataList;
+            return Collections.singletonList(atlasIdColumnMetadata);
         } else {
             throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
         }
