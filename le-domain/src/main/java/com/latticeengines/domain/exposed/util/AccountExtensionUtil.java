@@ -23,11 +23,13 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class AccountExtensionUtil {
@@ -92,6 +94,11 @@ public class AccountExtensionUtil {
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
+        List<AttributeLookup> sortLookups = new ArrayList<>();
+        sortLookups.add(new AttributeLookup(BusinessEntity.Account,InterfaceName.CDLUpdatedTime.name()));
+        sortLookups.add(new AttributeLookup(BusinessEntity.Account,InterfaceName.AccountId.name()));
+        FrontEndSort sort = new FrontEndSort(sortLookups,false);
+        frontEndQuery.setSort(sort);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.addLookups(BusinessEntity.Account,
                 attributes.toArray(new String[attributes.size()]));
