@@ -45,29 +45,38 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
 
         if (segmentAccountsCount > 0) {
             // process accounts that exists in segment
-            long processedSegmentAccountsCount = 0;
+            long total = 0;
+            long offset = 0;
             // find total number of pages needed
             int pages = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
-            log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
+            log.info("Number of minimum required loops: " + pages + ", with pageSize: " + pageSize);
 
             try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
                     new GenericDatumWriter<GenericRecord>(schema))) {
                 dataFileWriter.create(schema, localFile);
 
-                // loop over to required number of pages
-                for (int pageNo = 0; pageNo < pages; pageNo++) {
-                    // fetch and process a single page
-                    processedSegmentAccountsCount = fetchAndProcessPage(segmentExportContext, segmentAccountsCount,
-                            processedSegmentAccountsCount, pageNo, dataFileWriter, schema, version);
+                int pageNo = 0;
+                while (true) {
+                    total = fetchAndProcessPage(segmentExportContext, segmentAccountsCount, offset, pageNo,
+                            dataFileWriter, schema, version);
+                    if (total == offset) {
+                        break;
+                    } else {
+                        offset = total;
+                    }
+                    pageNo++;
                 }
             }
-            log.info(String.format("processedSegmentAccountsCount = %d", processedSegmentAccountsCount));
+            if (total < segmentAccountsCount) {
+                log.warn("Export number less than expected.");
+            }
+            log.info(String.format("processedSegmentAccountsCount = %d", total));
         }
     }
 
     private long fetchAndProcessPage(SegmentExportContext segmentExportContext, long segmentAccountsCount,
-            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version)
-            throws IOException {
+            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, Schema schema,
+            DataCollection.Version version) throws IOException {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch accounts in current page
@@ -76,13 +85,14 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                         segmentExportContext, segmentAccountsCount, processedSegmentAccountsCount, version);
 
         // process accounts in current page
-        processedSegmentAccountsCount += processAccountsPage(segmentExportContext, accountsPage, dataFileWriter,
-                schema, version);
+        processedSegmentAccountsCount += processAccountsPage(segmentExportContext, accountsPage, dataFileWriter, schema,
+                version);
         return processedSegmentAccountsCount;
     }
 
     private long processAccountsPage(SegmentExportContext segmentExportContext, DataPage accountsPage,
-            DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version) throws IOException {
+            DataFileWriter<GenericRecord> dataFileWriter, Schema schema, DataCollection.Version version)
+            throws IOException {
         List<Object> modifiableAccountIdCollectionForContacts = segmentExportContext
                 .getModifiableAccountIdCollectionForContacts();
 
