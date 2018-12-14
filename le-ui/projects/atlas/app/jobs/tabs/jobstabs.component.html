@@ -4,7 +4,9 @@
             <div class="tab-container">
                 <h2>Data Processing & Analysis</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.importJobs.length}}</span>
+                    <span class="count">{{
+                        vm.JobsStore.data.importJobs.length
+                    }}</span>
                 </div>
             </div>
         </li>
@@ -12,7 +14,9 @@
             <div class="tab-container">
                 <h2>Model Jobs</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.jobs.length}}</span>
+                    <span class="count">{{
+                        vm.JobsStore.data.jobs.length
+                    }}</span>
                 </div>
             </div>
         </li>
@@ -20,7 +24,19 @@
             <div class="tab-container">
                 <h2>Segment Export</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.exportJobs.length}}</span>
+                    <span class="count">{{
+                        vm.JobsStore.data.exportJobs.length
+                    }}</span>
+                </div>
+            </div>
+        </li>
+        <li ui-sref="home.jobs.orphan" ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Orphan Export</h2>
+                <div>
+                    <span class="count">{{
+                        (vm.JobsStore.data.orphanJobs || []).length
+                    }}</span>
                 </div>
             </div>
         </li>

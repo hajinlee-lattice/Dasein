@@ -1,77 +1,102 @@
 /* jshint -W014 */
-angular.module('common.attributes.activate', [])
-.config(function($stateProvider) {
-    $stateProvider
-        .state('home.attributes.activate', {
-            url: '/activate/:category/:subcategory',
+
+angular
+    .module("common.attributes.activate", ["mainApp.core.redux"])
+    .config(function($stateProvider) {
+        $stateProvider.state("home.attributes.activate", {
+            url: "/activate/:category/:subcategory",
             params: {
                 category: {
                     dynamic: false,
-                    value: 'Intent'
+                    value: "Intent"
                 },
                 subcategory: {
                     dynamic: true,
-                    value: ''
+                    value: ""
                 }
             },
-            onExit: ['AttrConfigStore', function(AttrConfigStore) {
-                AttrConfigStore.init();
-            }],
+            onExit: [
+                "AttrConfigStore",
+                function(AttrConfigStore) {
+                    AttrConfigStore.init();
+                }
+            ],
             resolve: {
-                overview: ['$q', 'AttrConfigService', function($q, AttrConfigService) {
-                    var deferred = $q.defer();
-                    
-                    AttrConfigService.getOverview('activation').then(function(response) {
-                        deferred.resolve(response.data || []);
-                    });
+                overview: [
+                    "$q",
+                    "AttrConfigService",
+                    function($q, AttrConfigService) {
+                        var deferred = $q.defer();
 
-                    return deferred.promise;
-                }],
-                config: ['$q', '$stateParams', 'AttrConfigService', 'AttrConfigStore', function($q, $stateParams, AttrConfigService, AttrConfigStore) {
-                    var deferred = $q.defer();
-                    var category = $stateParams.category;
+                        AttrConfigService.getOverview("activation").then(
+                            function(response) {
+                                deferred.resolve(response.data || []);
+                            }
+                        );
 
-                    AttrConfigStore.set('category', category);
-                    
-                    AttrConfigService.getConfig('activation', category).then(function(response) {
-                        AttrConfigStore.setData('config', response.data || []);
-                        deferred.resolve(response.data || []);
-                    });
+                        return deferred.promise;
+                    }
+                ],
+                config: [
+                    "$q",
+                    "$stateParams",
+                    "AttrConfigService",
+                    "AttrConfigStore",
+                    function(
+                        $q,
+                        $stateParams,
+                        AttrConfigService,
+                        AttrConfigStore
+                    ) {
+                        var deferred = $q.defer();
+                        var category = $stateParams.category;
 
-                    return deferred.promise;
-                }]
+                        AttrConfigStore.set("category", category);
+
+                        AttrConfigService.getConfig(
+                            "activation",
+                            category
+                        ).then(function(response) {
+                            AttrConfigStore.setData(
+                                "config",
+                                response.data || []
+                            );
+                            deferred.resolve(response.data || []);
+                        });
+
+                        return deferred.promise;
+                    }
+                ]
             },
             views: {
                 "subsummary@": "attrSubheader",
                 "main@": "attrActivate"
             }
         });
-})
-.component('attrActivate', {
-    templateUrl: '/components/datacloud/attributes/activate/activate.component.html',
-    bindings: {
-        overview: '<',
-        config: '<'
-    },
-    controller: function ($q, $timeout, AttrConfigStore, Banner) {
-        var vm = this;
+    })
+    .component("attrActivate", {
+        templateUrl:
+            "/components/datacloud/attributes/activate/activate.component.html",
+        bindings: {
+            overview: "<",
+            config: "<"
+        },
+        controller: function($state, AttrConfigStore, $ngRedux) {
+            let vm = this;
 
-        vm.store = AttrConfigStore;
-        vm.filters = vm.store.get('filters');
-        vm.uiCanExit = vm.store.uiCanExit;
+            vm.store = AttrConfigStore;
+            vm.filters = vm.store.get("filters");
+            vm.uiCanExit = vm.store.uiCanExit;
+            vm.redux = $state.get("home.attributes").data.redux;
 
-        // Banner.error({name: 'Test_Error', message: 'This is a test'});
-        // $timeout(function() {
-        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
-        // }, 1349);
-        // $timeout(function() {
-        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
-        // }, 14333);
-        // $timeout(function() {
-        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
-        // }, 57500);
-        // $timeout(function() {
-        //     Banner.error({name: 'Test_Error', message: 'This is a test'});
-        // }, 117777);
-    }
-});
+            console.log("init", this, $state.get("home.attributes"));
+
+            vm.$onInit = function() {
+                $ngRedux.subscribe(state => {
+                    console.log("changed", vm.redux.store);
+                });
+
+                vm.redux.get();
+            };
+        }
+    });

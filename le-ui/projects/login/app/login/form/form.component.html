@@ -1,71 +1,97 @@
 <form class="form form-signin" name="login-form" ng-if="$ctrl.visible">
-    <!-- <h1>{{$ctrl.ResourceUtility.getString('COMPANY_REGMARK')}}&reg;</h1> -->
+    <!--
+        <h1>{{$ctrl.ResourceUtility.getString('COMPANY_REGMARK')}}&reg;</h1>
+    -->
     <div class="form-group">
-        <label>{{$ctrl.ResourceUtility.getString('LOGIN_USERNAME')}}</label>
-        <input  type="text"
-                id="username"
-                autocomplete="on"
-                name="le-login_username"
-                data-ng-model="$ctrl.username"
-                data-ng-enter="$ctrl.loginClick()"
-                title="{{$ctrl.ResourceUtility.getString('LOGIN_USERNAME')}}"
-                class="form-control {{$ctrl.usernameInvalid ? 'error' : ''}}"
-                autofocus>
+        <label>{{ $ctrl.ResourceUtility.getString("LOGIN_USERNAME") }}</label>
+        <input
+            type="text"
+            id="username"
+            autocomplete="on"
+            name="le-login_username"
+            data-ng-model="$ctrl.username"
+            data-ng-enter="$ctrl.loginClick()"
+            title="{{$ctrl.ResourceUtility.getString('LOGIN_USERNAME')}}"
+            class="form-control {{$ctrl.usernameInvalid ? 'error' : ''}}"
+            autofocus
+        />
     </div>
     <div class="form-group">
-        <label>{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
-        <input  type="password"
-                id="password"
-                name="le-login_password"
-                autocomplete="on"
-                data-ng-model="$ctrl.password"
-                data-ng-enter="$ctrl.loginClick()"
-                title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}"
-                class="form-control {{$ctrl.passwordInvalid ? 'error' : ''}}">
+        <label>{{ $ctrl.ResourceUtility.getString("LOGIN_PASSWORD") }}</label>
+        <input
+            type="password"
+            id="password"
+            name="le-login_password"
+            autocomplete="on"
+            data-ng-model="$ctrl.password"
+            data-ng-enter="$ctrl.loginClick()"
+            title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}"
+            class="form-control {{$ctrl.passwordInvalid ? 'error' : ''}}"
+        />
     </div>
     <div class="form-actions">
         <button
-                id="loginButton"
-                type="submit"
-                data-ng-click="$ctrl.loginClick()"
-                class="button orange-button"
-                ng-disabled="$ctrl.loginInProgress">
-            {{$ctrl.ResourceUtility.getString('LOGIN_LABEL_REGMARK')}}&reg;
+            id="loginButton"
+            type="submit"
+            data-ng-click="$ctrl.loginClick()"
+            class="button blue-button"
+            ng-disabled="$ctrl.loginInProgress"
+        >
+            {{ $ctrl.ResourceUtility.getString("LOGIN_LABEL_REGMARK") }}&reg;
         </button>
-        <!-- <span class="login-label">{{$ctrl.ResourceUtility.getString('LOGIN_TO_LATTICE')}}&reg;</span> -->
-        <i ng-show="$ctrl.loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
+        <!--
+            <span class="login-label">{{$ctrl.ResourceUtility.getString('LOGIN_TO_LATTICE')}}&reg;</span>
+        -->
+        <i
+            ng-show="$ctrl.loginInProgress"
+            class="fa fa-spinner fa-pulse fa-fw"
+        ></i>
         <div class="secondary-actions_">
-            <a href="javascript:void(0)" data-ng-click="$ctrl.forgotPasswordClick($event)">
-                {{$ctrl.ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}
+            <a
+                href="javascript:void(0)"
+                data-ng-click="$ctrl.forgotPasswordClick($event)"
+            >
+                {{
+                    $ctrl.ResourceUtility.getString(
+                        "LOGIN_FORGOT_PASSWORD_LABEL"
+                    )
+                }}
             </a>
         </div>
     </div>
 
-<!--     <div class="form-group">
-        <label>Tenant Name</label>
-        <input  type="text"
-                id="tenant"
-                name="tenant-name"
-                autocomplete="on"
-                data-ng-model="$ctrl.tenantName"
-                title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}"
-                class="form-control {{$ctrl.tenantNameInvalid ? 'error' : ''}}">
-    </div>
-    <div class="form-actions">
-        <button
-                id="loginSSOButton"
-                type="submit"
-                data-ng-click="$ctrl.ssoClick()"
-                class="button orange-button"
-                ng-disabled="$ctrl.loginInProgress">
-            Login Using SSO
-        </button>
-    </div> -->
+    <!--
+        <div class="form-group">
+            <label>Tenant Name</label>
+            <input  type="text"
+                    id="tenant"
+                    name="tenant-name"
+                    autocomplete="on"
+                    data-ng-model="$ctrl.tenantName"
+                    title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}"
+                    class="form-control {{$ctrl.tenantNameInvalid ? 'error' : ''}}">
+        </div>
+        <div class="form-actions">
+            <button
+                    id="loginSSOButton"
+                    type="submit"
+                    data-ng-click="$ctrl.ssoClick()"
+                    class="button orange-button"
+                    ng-disabled="$ctrl.loginInProgress">
+                Login Using SSO
+            </button>
+        </div>
+    -->
 
-    <p class="footer login-footer">&copy; {{$ctrl.ResourceUtility.getString('LOGIN_COPYRIGHT', [$ctrl.dateString])}}
+    <p class="footer login-footer">
+        &copy;
+        {{
+            $ctrl.ResourceUtility.getString("LOGIN_COPYRIGHT", [
+                $ctrl.dateString
+            ])
+        }}
         <a href="http://lattice-engines.com/about-us/privacy-policy">
-            {{$ctrl.ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
+            {{ $ctrl.ResourceUtility.getString("HEADER_PRIVACY_POLICY") }}
         </a>
     </p>
-
 </form>

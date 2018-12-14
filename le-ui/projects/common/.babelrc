@@ -1,6 +1,4 @@
 {
-  "presets": [
-      "env",
-      "react"
-  ]
+    "presets": ["env", "react", "stage-2"],
+    "plugins": ["transform-es2015-spread"]
 }

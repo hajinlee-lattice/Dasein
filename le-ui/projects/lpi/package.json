@@ -20,6 +20,7 @@
     "enzyme-adapter-react-16": "1.6.0",
     "expose-loader": "^0.7.5",
     "file-loader": "^1.1.11",
+    "hard-source-webpack-plugin": "0.12.0",
     "html-minifier": "^3.3.1",
     "html-webpack-plugin": "^3.2.0",
     "jest": "23.6.0",

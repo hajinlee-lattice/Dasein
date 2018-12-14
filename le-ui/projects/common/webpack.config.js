@@ -2,6 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const webpack = require("webpack");
+//const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
 
 module.exports = {
     resolve: {
@@ -18,6 +19,7 @@ module.exports = {
     },
     devtool: "module-source-map",
     plugins: [
+        //new HardSourceWebpackPlugin(),
         new CleanWebpackPlugin(["dist"]),
         new HtmlWebpackPlugin({
             filename: "index.html",

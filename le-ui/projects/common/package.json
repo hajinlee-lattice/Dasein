@@ -1,5 +1,5 @@
 {
-  "name": "LE-UI_Common",
+  "name": "le_ui-common",
   "description": "shared libraries and resources for le-ui web apps",
   "version": "1.0.0",
   "license": "ISC",
@@ -29,6 +29,7 @@
     "jstorage": "^0.4.8",
     "lodash": "^4.17.10",
     "ng-annotate-loader": "^0.6.1",
+    "ng-redux": "4.1.0",
     "node-sass": "^4.8.3",
     "nodemon": "^1.9.1",
     "pako": "^1.0.6",
@@ -37,6 +38,8 @@
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react2angular": "^4.0.4",
+    "redux": "4.0.1",
+    "redux-thunk": "2.3.0",
     "rxjs": "^6.3.3",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
@@ -48,8 +51,11 @@
     "babel-jest": "23.6.0",
     "babel-loader": "^7.1.5",
     "babel-plugin-module-resolver": "^3.1.1",
+    "babel-plugin-transform-es2015-spread": "6.22.0",
     "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "6.24.1",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "6.24.1",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.6.0",
     "expose-loader": "^0.7.5",
@@ -60,8 +66,8 @@
     "grunt-contrib-uglify": "^0.11.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-ng-annotate": "^2.0.1",
+    "hard-source-webpack-plugin": "0.12.0",
     "jest": "23.6.0",
-    "jest-enzyme": "^7.0.1",
     "webpack": "^4.16.0",
     "webpack-cli": "^3.0.8"
   },
@@ -82,11 +88,9 @@
       "bower_components",
       "shared"
     ],
-    "setupTestFrameworkScriptFile": "jest-enzyme",
-    "testEnvironment": "enzyme",
-    "testEnvironmentOptions": {
-      "enzymeAdapter": "react16"
-    },
+    "setupFiles": [
+      "./setupTests.js"
+    ],
     "moduleNameMapper": {
       "^common(.*)$": "<rootDir>/$1",
       "^widgets(.*)$": "<rootDir>/widgets/$1",
@@ -99,8 +103,7 @@
     }
   },
   "scripts": {
-    "test": "jest --coverage",
-    "dev-test": "jest --watchAll --colors",
+    "test": "jest",
     "build": "webpack --mode=production",
     "watch": "webpack --mode=development --watch"
   }

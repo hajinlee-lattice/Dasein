@@ -1,10 +1,10 @@
-angular.module('common.attributes.header', [])
-.component('attrHeader', {
-    templateUrl: '/components/datacloud/attributes/header/header.component.html',
+angular.module("common.attributes.header", []).component("attrHeader", {
+    templateUrl:
+        "/components/datacloud/attributes/header/header.component.html",
     bindings: {
-        tabs: '<'
+        tabs: "<"
     },
-    controller: function ($state, $stateParams, StateHistory) {
+    controller: function($state, $stateParams, StateHistory) {
         var vm = this;
 
         vm.$onInit = function() {
@@ -12,9 +12,7 @@ angular.module('common.attributes.header', [])
         };
 
         vm.click = function(category) {
-            angular
-                .element('div#subSummaryView')
-                .addClass('inactive-disabled');
+            angular.element("div#subSummaryView").addClass("inactive-disabled");
         };
 
         vm.getTo = function() {
@@ -29,7 +27,7 @@ angular.module('common.attributes.header', [])
             var x = $state.current.name == sref;
             var y = vm.getTo() == sref;
             var z = vm.getFrom() != sref || vm.getTo() == $state.current.name;
-            
+
             return (x || y) && z;
         };
     }

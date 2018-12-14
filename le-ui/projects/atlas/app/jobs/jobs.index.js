@@ -1,18 +1,18 @@
+import "./JobsRoutes";
+import "./controllers/ListController";
+import "./controllers/RowController";
+import "./controllers/DataImportJobsController";
 
-import './JobsRoutes';
-import './controllers/ListController';
-import './controllers/RowController';
-import './controllers/DataImportJobsController';
+import "./export/export.component";
+import "./orphan/orphan.component";
 
-import './export/export.component';
+import "./modals/CancelJobModal";
 
-import './modals/CancelJobModal';
+import "./processing/processing.index";
 
-import './processing/processing.index';
+import "./report/report.index";
 
-import './report/report.index';
+import "./services/JobsService";
+import "./services/JobsStore";
 
-import './services/JobsService';
-import './services/JobsStore';
-
-import './tabs/jobstabs.component';
+import "./tabs/jobstabs.component";

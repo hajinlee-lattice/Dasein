@@ -1,0 +1,123 @@
+<section class="export-jobs">
+    <div class="jobs-page container">
+        <div data-ng-if="$ctrl.showDownloadMessage" class="success-message">
+            <h3>Your download has now begun.</h3>
+            <i
+                class="fa fa-times fa-inverse"
+                data-ng-click="$ctrl.hideDownloadMessage()"
+            ></i>
+        </div>
+        <div class="table-header">
+            <div class="row list-header">
+                <div class="pull-left">
+                    <menu-dropdown
+                        config="$ctrl.header.maxperpage"
+                    ></menu-dropdown>
+                    <menu-sort-by
+                        config="$ctrl.header.sort"
+                        store="jobs.orphan.sort"
+                    ></menu-sort-by>
+                    <search-filter
+                        query="$ctrl.query"
+                        current="$ctrl.currentPage"
+                    ></search-filter>
+                </div>
+                <div class="pull-right">
+                    <menu-dropdown
+                        config="$ctrl.header.orphanExport"
+                        class="button export-button"
+                    ></menu-dropdown>
+                </div>
+            </div>
+        </div>
+        <div class="le-grid">
+            <div class="le-header le-row">
+                <div class="le-cell le-col-start-1 le-col-span-3">
+                    Time Stamp
+                </div>
+                <div class="le-cell le-col-start-6 le-col-span-4">
+                    orphan Type
+                </div>
+                <div class="le-cell le-col-start-8 le-col-span-3">User</div>
+                <div class="le-cell le-col-start-11 le-col-span-2">Status</div>
+            </div>
+
+            <div
+                class="le-row export-row"
+                ng-if="$ctrl.jobs.length != 0"
+                ng-repeat="orphan in $ctrl.jobs | 
+                                            orderBy:'-startTimestamp'|
+                                            orderBy: $ctrl.header.sort.order + $ctrl.header.sort.property |
+                                            filter: $ctrl.query | 
+                                            startFrom: ($ctrl.currentPage - 1) * $ctrl.pagesize |
+                                            limitTo: $ctrl.pagesize"
+                index="$index"
+                ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}"
+            >
+                <div class="le-cell le-col-start-1 le-col-span-3">
+                    {{ orphan.startTimestamp | date: "MM/dd/yyyy h:mma" }}
+                </div>
+                <div class="le-cell le-col-start-6 le-col-span-4">
+                    {{ orphan.inputs["EXPORT_OBJECT_TYPE"] || "--" }}
+                </div>
+                <div class="le-cell le-col-start-8 le-col-span-3">
+                    {{ orphan.user }}
+                </div>
+                <div class="le-cell le-col-start-11 le-col-span-2">
+                    <a
+                        ng-if="orphan.jobStatus == 'Completed' && !$ctrl.isExpired(orphan)"
+                        href="javascript:void(0)"
+                        ng-click="$ctrl.downloadSegmentExport(orphan.inputs['SEGMENT_EXPORT_ID'])"
+                        class="blue-text text-ellipsis"
+                    >
+                        <span>Download</span>
+                    </a>
+                    <span
+                        ng-if="orphan.jobStatus != 'Completed' || $ctrl.isExpired(orphan)"
+                    >
+                        <span class="text-ellipsis">{{
+                            $ctrl.getStatus(orphan)
+                        }}</span>
+                        <i
+                            class="fa fa-spinner fa-spin spinner-icon"
+                            aria-hidden="true"
+                            ng-if="orphan.jobStatus != 'Failed' && !$ctrl.isExpired(orphan)"
+                        ></i>
+                    </span>
+                </div>
+            </div>
+            <div
+                class="le-row info-row"
+                ng-if="$ctrl.loading && $ctrl.jobs.length == 0"
+            >
+                <div
+                    class="le-cell le-cell-centered le-col-start-1 le-col-span-12"
+                >
+                    <span> <span class="loading-small"></span> </span>
+                </div>
+            </div>
+            <div
+                class="le-row info-row"
+                ng-if="$ctrl.jobs.length == 0 && !$ctrl.loading"
+            >
+                <div
+                    class="le-cell le-cell-centered le-col-start-1 le-col-span-12"
+                >
+                    <span> There are no jobs to show at the moment </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="le-grid grid-footer" ng-show="max > 1">
+            <div class="le-row">
+                <div class="le-col-span-12">
+                    <pd-pagination-controls
+                        current="$ctrl.currentPage"
+                        max="max = ($ctrl.jobs | filter: $ctrl.query).length / $ctrl.pagesize"
+                    >
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
