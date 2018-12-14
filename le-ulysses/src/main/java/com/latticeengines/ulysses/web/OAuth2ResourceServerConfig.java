@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
+import com.latticeengines.oauth2db.exposed.web.OAuth2MultiTenantContextStrategy;
 
 @Configuration
 @EnableResourceServer

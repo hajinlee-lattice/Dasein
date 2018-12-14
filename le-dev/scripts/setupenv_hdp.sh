@@ -82,6 +82,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         done
         wait
     fi
+    hdfs dfs -mkdir /spark-history
 
     echo "Uploading TEZ ..."
     TEZ_VERSION=0.9.0

@@ -175,4 +175,7 @@ jupyter nbextension enable --py --sys-prefix widgetsnbextension
 jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/sparkkernel
 jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pyspark3kernel
 
+pip uninstall -y ipython prompt_toolkit
+pip install --upgrade ipython prompt_toolkit
+
 source ${ANACONDA_HOME}/bin/deactivate

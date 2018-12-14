@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestNGBase {
-    
+
     private String token;
 
     @SuppressWarnings("unchecked")
@@ -49,7 +49,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
         Credentials creds = new Credentials();
         creds.setUsername("testuser1");
         creds.setPassword("Lattice1");
-        
+
         Map<String, String> map = restTemplate.postForObject(getRestAPIHostPort() + "/adlogin", creds, Map.class);
         token = map.get("Token");
         assertNotNull(token);

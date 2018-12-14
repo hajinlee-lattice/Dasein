@@ -45,7 +45,7 @@ public class DebugGatewayWatcherUnitTestNG {
     private Runnable simpleCheck(String tenantId, String duration, long wait2) {
         return () -> {
             try {
-                Thread.sleep(new Random().nextInt(1000));
+                Thread.sleep(new Random().nextInt(10000));
                 Assert.assertFalse(DebugGatewayWatcher.hasPassport(tenantId));
                 DebugGatewayWatcher.applyForPassportAsync(tenantId, duration);
                 RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate( //
