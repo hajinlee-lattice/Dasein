@@ -77,6 +77,14 @@ angular.module('common.datacloud.query.results', [
                     percentage: NumberUtility.MakePercentage(vm.accountsCoverage.unscoredAccountCount, (vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount), '%', 1)
                 }
 
+                if (PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch != null){
+                    vm.launchUnscored = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.launchUnscored;
+                    vm.topNCount = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.topNCount;
+                    vm.topNClicked = vm.topNCount ? true : false;
+                    vm.launchUnscoredClick();
+                    vm.makeRecommendationCounts();
+                }
+
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
@@ -323,8 +331,12 @@ angular.module('common.datacloud.query.results', [
                             vm.showAccountPagination = false;
                         }
 
-                        vm.topNCount = vm.accountsCoverage.accountCount; //vm.counts.accounts.value;
-                        PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
+                        //only sets topNCount here if coming in for the first time
+                        if(vm.topNCount){
+                            vm.topNCount = vm.counts.accounts.value;
+                            PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
+                        }
+                        vm.updateTopNCount();
                     });
                 } else if (vm.search) { 
                     var countsQuery = { 
@@ -358,24 +370,24 @@ angular.module('common.datacloud.query.results', [
         vm.checkSaveButtonState();
     };
 
-    vm.updateTopNCount = function(clicked) {
-        vm.maxTargetValue = vm.accountsCoverage.accountCount; //vm.counts.accounts.value;
-
-        if (vm.topNCount <= vm.maxTargetValue) {
+    vm.updateTopNCount = function() {
+        //sync issue with vm.counts.accounts, using vm.recommendationCounts.selected instead
+        vm.maxTargetValue = vm.recommendationCounts.selected;
+        if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
-            PlaybookWizardStore.setTopNCount(vm.topNCount);
+            vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
         } else if (!vm.topNCount) {
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', clicked);
         } else {
             vm.showError = true;
-            PlaybookWizardStore.setValidation('targets', false || vm.launchUnscored);
+            PlaybookWizardStore.setValidation('targets', false || (vm.launchUnscored && !vm.topNClicked));
         }
     }
 
     vm.topNInputClick = function($event) {
-        $scope.topNCount = true;
+        vm.topNClicked = true;
         $event.target.select();
     }
 
@@ -402,14 +414,16 @@ angular.module('common.datacloud.query.results', [
         }
 
         PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
-
+        //reset topNcount on bucket click, issue with sync and faster update speed
         updatePage();
-        vm.makeRecommendationCounts();
+        vm.makeRecommendationCounts(true);
     }
 
     vm.launchUnscoredClick = function() {
         PlaybookWizardStore.setValidation('targets', (vm.topNCount || vm.launchUnscored));
         PlaybookWizardStore.setLaunchUnscored(vm.launchUnscored);
+        updatePage();
+        vm.makeRecommendationCounts();
     }
 
     vm.showNoResultsText = function(accounts, contacts) {
@@ -543,8 +557,8 @@ angular.module('common.datacloud.query.results', [
         };
     };
 
-    vm.makeRecommendationCounts = function(opts) {
-        var opts = opts || {};
+    vm.makeRecommendationCounts = function(resetTopNCount) {
+        //var opts = opts || {};
 
         if(!vm.accountsCoverage && !vm.accountsCoverage.bucketCoverageCounts) {
             vm.recommendationCounts = null;
@@ -563,8 +577,7 @@ angular.module('common.datacloud.query.results', [
         // vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
         //     sections.total += parseInt(count.count);
         // });
-        
-        sections.total = vm.accountsCoverage.accountCount + vm.unscoredAccounts.total;
+        sections.total = vm.accountsCoverage.accountCount + vm.accountsCoverage.unscoredAccountCount;
 
         sections.unscored = (vm.launchUnscored ? vm.unscoredAccounts.total : 0);
         sections.selected += sections.unscored;
@@ -580,17 +593,31 @@ angular.module('common.datacloud.query.results', [
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
+        if(resetTopNCount){
+            vm.topNCount = sections.selected;
+        }
+
+        sections.launched = vm.launchUnscored ? vm.accountsCoverage.unscoredAccountCount + sections.selected : sections.selected;
+
+        if(vm.topNClicked) {
+            sections.launched = vm.topNCount;
+        }
+
+        console.log("contact count" + vm.accountsCoverage.contactCount);
+        console.log("unscored contact count" + vm.accountsCoverage.unscoredContactCount);
+
+        sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
         sections.contacts = _contacts; //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 
-        sections.suppressed = parseInt(sections.total - sections.selected);
+        // sections.suppressed = parseInt(sections.total - sections.selected);
 
-        sections.launched = (vm.topNCount && opts.suppressed ? vm.topNCount : (sections.selected > sections.suppressed ? sections.total - sections.suppressed : sections.selected));
+        // sections.launched = vm.topNCount && opts.suppressed ? vm.topNCount : sections.selected;//(sections.selected > sections.suppressed ? sections.total - sections.suppressed : sections.selected));
 
-        var $topNCountEl = angular.element('input#topNCount');
+        // var $topNCountEl = angular.element('input#topNCount');
         
-        if($topNCountEl.is(':checked')) {
-            sections.suppressed = Math.max(vm.accountsCoverage.accountCount - vm.topNCount, sections.suppressed) || 0;
-        }
+        // if($topNCountEl.is(':checked')) {
+        //     sections.suppressed = Math.max(sections.total - vm.topNCount, sections.suppressed) || 0;
+        // }
 
         vm.recommendationCounts = sections;
         PlaybookWizardStore.setRecommendationCounts(sections);
