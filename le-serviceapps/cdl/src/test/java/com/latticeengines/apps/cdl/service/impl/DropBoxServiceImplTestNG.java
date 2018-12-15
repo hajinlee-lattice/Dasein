@@ -113,6 +113,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
         request.setAccessMode(LatticeUser);
         GrantDropBoxAccessResponse response = dropboxService.grantAccess(request);
+        Assert.assertNotNull(response.getRegion());
         Assert.assertEquals(response.getAccessMode(), LatticeUser);
 
         BasicAWSCredentialsProvider creds = //
@@ -126,6 +127,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         GrantDropBoxAccessResponse newResponse = dropboxService.refreshAccessKey();
         Assert.assertNotNull(newResponse.getBucket());
         Assert.assertNotNull(newResponse.getDropBox());
+        Assert.assertNotNull(newResponse.getRegion());
         BasicAWSCredentialsProvider newCreds = //
                 new BasicAWSCredentialsProvider(newResponse.getAccessKey(), newResponse.getSecretKey());
         verifyAccessWithRetries(newCreds, false);

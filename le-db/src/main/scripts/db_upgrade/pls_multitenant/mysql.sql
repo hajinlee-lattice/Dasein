@@ -9,6 +9,7 @@ DELIMITER
 
 CREATE PROCEDURE `UpdatePLSTables`()
   BEGIN
+  alter table PLS_MultiTenant.ATLAS_DROPBOX add column REGION varchar(255);
   END;
 //
 DELIMITER;

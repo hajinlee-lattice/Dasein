@@ -62,7 +62,7 @@ public class DropBoxEntityMgrImpl //
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public DropBox createDropBox() {
+    public DropBox createDropBox(String region) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (writerRepository.existsByTenant(tenant)) {
             log.warn("Tenant " + CustomerSpace.parse(tenant.getId()).getTenantId()
@@ -71,6 +71,7 @@ public class DropBoxEntityMgrImpl //
         } else {
             DropBox dropbox = new DropBox();
             dropbox.setTenant(tenant);
+            dropbox.setRegion(region);
             dropbox.setDropBox(findAvailableRandomStr());
             dao.create(dropbox);
             return dropbox;

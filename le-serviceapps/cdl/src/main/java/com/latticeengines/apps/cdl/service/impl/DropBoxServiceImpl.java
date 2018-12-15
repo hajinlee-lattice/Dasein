@@ -71,12 +71,15 @@ public class DropBoxServiceImpl implements DropBoxService {
     @Value("${aws.customer.s3.bucket}")
     private String customersBucket;
 
+    @Value("${aws.customer.s3.region}")
+    private String region;
+
     @Value("${aws.customer.account.id}")
     private String customerAccountId;
 
     @Override
     public DropBox create() {
-        DropBox dropbox = entityMgr.createDropBox();
+        DropBox dropbox = entityMgr.createDropBox(region);
         String prefix = toPrefix(dropbox);
         if (!s3Service.isNonEmptyDirectory(customersBucket, prefix)) {
             s3Service.createFolder(customersBucket, prefix);
@@ -106,6 +109,10 @@ public class DropBoxServiceImpl implements DropBoxService {
     @Override
     public String getDropBoxBucket() {
         return customersBucket;
+    }
+
+    private String getRegion() {
+        return region;
     }
 
     @Override
@@ -296,6 +303,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         }
         GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
         response.setDropBox(dropbox.getDropBox());
+        response.setRegion(dropbox.getRegion());
         response.setBucket(customersBucket);
         response.setAccessMode(DropBoxAccessMode.LatticeUser);
         response.setLatticeUser(userName);
@@ -334,6 +342,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private GrantDropBoxAccessResponse grantAccessToLatticeUser(String existingUser) {
         String bucket = getDropBoxBucket();
         String prefix = getDropBoxPrefix();
+        String region = getRegion();
         String dropBoxId = prefix.substring(prefix.indexOf(SLASH) + 1);
         String userName = existingUser;
         if (StringUtils.isBlank(userName)) {
@@ -352,6 +361,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             response.setAccessKey(accessKey.getAccessKeyId());
             response.setSecretKey(accessKey.getSecretAccessKey());
             response.setBucket(bucket);
+            response.setRegion(region);
             response.setDropBox(dropBoxId);
         }
         return response;
@@ -420,7 +430,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
-                ));
+        ));
     }
 
     private String listDropBoxStmtId(String dropBoxId) {
@@ -524,11 +534,12 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withId(accountId + "_" + dropBoxId + "_list") //
                 .withPrincipals(new Principal(accountId)) //
                 .withActions(S3Actions.ListObjects) //
-                .withResources(new Resource(ARN_PREFIX + bucketName)).withConditions(new StringCondition(//
+                .withResources(new Resource(ARN_PREFIX + bucketName))
+                .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
-                ));
+        ));
     }
 
     private void revokeAccountFromDropBox(Policy policy, String dropBoxId, String accountId) {

@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,6 +19,9 @@ public class DropBoxEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private DropBoxEntityMgr entityMgr;
 
+    @Value("${aws.customer.s3.region}")
+    private String region;
+
     private Tenant tenant1;
     private Tenant tenant2;
 
@@ -31,13 +35,15 @@ public class DropBoxEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCrud() {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant1.getId()));
-        DropBox dropbox1 = entityMgr.createDropBox();
+        DropBox dropbox1 = entityMgr.createDropBox(region);
         Assert.assertNotNull(dropbox1.getPid());
+        Assert.assertNotNull(dropbox1.getRegion());
         Assert.assertEquals(dropbox1.getTenant().getId(), tenant1.getId());
 
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant2.getId()));
-        DropBox dropbox2 = entityMgr.createDropBox();
+        DropBox dropbox2 = entityMgr.createDropBox(region);
         Assert.assertNotNull(dropbox2.getPid());
+        Assert.assertNotNull(dropbox2.getRegion());
         Assert.assertEquals(dropbox2.getTenant().getId(), tenant2.getId());
 
         DropBox dropbox = entityMgr.getDropBox();

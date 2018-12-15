@@ -71,6 +71,7 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
         response = new GrantDropBoxAccessResponse();
         response.setAccessKey("accessKey");
         response.setSecretKey("secretKey");
+        response.setRegion("us-east1");
         Mockito.doNothing().when(emailService).sendS3CredentialEmail(Mockito.any(User.class), Mockito.any(Tenant.class),
                 Mockito.any(GrantDropBoxAccessResponse.class), Mockito.any(String.class));
         Mockito.doReturn(response).when(dropBoxProxy).grantAccess(Mockito.any(String.class),

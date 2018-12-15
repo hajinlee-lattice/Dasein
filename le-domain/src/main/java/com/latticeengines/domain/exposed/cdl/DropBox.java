@@ -48,6 +48,10 @@ public class DropBox implements HasPid, HasTenant {
     @Column(name = "DROPBOX", length = 8)
     private String dropBox;
 
+    @JsonProperty("region")
+    @Column(name = "REGION")
+    private String region;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "ACCESS_MODE", length = 20)
     private DropBoxAccessMode accessMode;
@@ -84,6 +88,14 @@ public class DropBox implements HasPid, HasTenant {
 
     public void setDropBox(String dropBox) {
         this.dropBox = dropBox;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public DropBoxAccessMode getAccessMode() {

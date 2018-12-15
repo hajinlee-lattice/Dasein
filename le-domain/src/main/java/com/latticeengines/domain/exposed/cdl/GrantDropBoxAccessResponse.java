@@ -31,6 +31,9 @@ public class GrantDropBoxAccessResponse {
     @JsonProperty("DropBox")
     private String dropBox;
 
+    @JsonProperty("Region")
+    private String region;
+
     public DropBoxAccessMode getAccessMode() {
         return accessMode;
     }
@@ -85,6 +88,14 @@ public class GrantDropBoxAccessResponse {
 
     public void setDropBox(String dropBox) {
         this.dropBox = dropBox;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
 }

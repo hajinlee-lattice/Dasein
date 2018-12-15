@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface DropBoxEntityMgr extends BaseEntityMgrRepository<DropBox, Long> {
 
-    DropBox createDropBox();
+    DropBox createDropBox(String region);
 
     DropBox getDropBox();
 
