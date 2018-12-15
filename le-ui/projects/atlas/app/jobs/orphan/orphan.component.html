@@ -67,7 +67,7 @@
                     <a
                         ng-if="orphan.jobStatus == 'Completed' && !$ctrl.isExpired(orphan)"
                         href="javascript:void(0)"
-                        ng-click="$ctrl.downloadOrphanExport(orphan.exportId)"
+                        ng-click="$ctrl.downloadOrphanExport(orphan.inputs['EXPORT_ID'])"
                         class="blue-text text-ellipsis"
                     >
                         <span>Download</span>

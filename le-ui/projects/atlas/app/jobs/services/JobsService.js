@@ -441,20 +441,6 @@ angular
             return deferred.promise;
         };
 
-        this.getOrphanCounts = function() {
-            var deferred = $q.defer();
-            console.log(`get getOrphanCounts`);
-
-            $http({
-                method: "GET",
-                url: `/pls/datacollection/orphans/count`
-            }).then(res => {
-                console.log("request sent", res);
-                deferred.resolve(res);
-            });
-            return deferred.promise;
-        };
-
         this.rescoreTrainingData = function(performEnrichment) {
             var deferred = $q.defer();
             var result = {
@@ -496,22 +482,6 @@ angular
                 method: "POST",
                 url: "/pls/jobs/" + jobId + "/restart"
             });
-        };
-
-        this.postOrphanWorkflow = function(orphanType) {
-            var deferred = $q.defer();
-
-            console.log(`post orphan workflow ${orphanType}`);
-
-            $http({
-                method: "POST",
-                url: `pls/datacollection/orphans/type/${orphanType}/submit`
-            }).then(res => {
-                console.log("request sent", res);
-                deferred.resolve(res);
-            });
-
-            return deferred.promise;
         };
 
         function getCompletedStepTimes(job, runningStep, completedSteps) {
@@ -710,4 +680,30 @@ angular
             numStepsInGroup.create_global_target_market = 0;
             numStepsInGroup.score_training_set = 0;
         }
+
+        this.getOrphanCounts = function() {
+            var deferred = $q.defer();
+
+            $http({
+                url: `/pls/datacollection/orphans/count`
+            }).then(res => deferred.resolve(res));
+
+            return deferred.promise;
+        };
+
+        this.postOrphanWorkflow = function(type) {
+            var deferred = $q.defer();
+
+            console.log(`post orphan workflow ${type}`);
+
+            $http({
+                method: "POST",
+                url: `pls_alt/datacollection/orphans/type/${type}/submit`
+            }).then(res => {
+                console.log("request end", res);
+                deferred.resolve(res);
+            });
+
+            return deferred.promise;
+        };
     });
