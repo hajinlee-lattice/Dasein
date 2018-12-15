@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
@@ -616,7 +617,11 @@ public class BatonServiceImpl implements BatonService {
     }
 
     private boolean hasAtLeastOneProduct(CustomerSpace customerSpace, Collection<LatticeProduct> products) {
-        return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
+        if (CollectionUtils.isNotEmpty(products)) {
+            return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
+        } else {
+            return false;
+        }
     }
 
     /**
