@@ -406,6 +406,18 @@ angular
             }
         };
 
+        this.addOrphanJob = function(job) {
+            var jobId = job.id;
+            var inMap = JobsStore.orphanJobsMap[jobId];
+            if (inMap === undefined) {
+                JobsStore.data.orphanJobs.push(job);
+                JobsStore.orphanJobsMap[jobId] =
+                    JobsStore.data.orphanJobs.length - 1;
+            } else {
+                JobsStore.data.orphanJobs[inMap].jobStatus = job.jobStatus;
+            }
+        };
+
         this.getDisplayName = function(type) {
             switch (type) {
                 case "import":

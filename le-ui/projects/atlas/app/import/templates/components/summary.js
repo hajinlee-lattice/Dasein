@@ -82,7 +82,7 @@ export default class SummaryContainer extends Component {
                             name="Product Purchases"
                             loading={this.state.loading}
                             count={this.state.productPurchasesCount}
-                            asidename="Transactions"
+                            asidename="Orphaned"
                             asidecount={this.state.OrphanTransactions}
                         />
                         <SummaryBox

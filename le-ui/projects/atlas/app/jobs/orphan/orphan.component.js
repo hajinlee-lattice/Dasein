@@ -108,7 +108,10 @@ angular.module("lp.jobs.orphan", []).component("orphanExportList", {
                         } Unmatched Accounts`,
                         icon: "fa fa-building-o",
                         disabledif: vm.orphanCounts["Unmatched Accounts"] === 0,
-                        click: postOrphanWorkflow.bind(null, "UnmatchedAccount")
+                        click: postOrphanWorkflow.bind(
+                            null,
+                            "UNMATCHED_ACCOUNT"
+                        )
                     },
                     {
                         label: `Export ${
@@ -116,7 +119,7 @@ angular.module("lp.jobs.orphan", []).component("orphanExportList", {
                         } Orphaned Contacts`,
                         icon: "fa fa-briefcase",
                         disabledif: vm.orphanCounts["Orphan Contacts"] === 0,
-                        click: postOrphanWorkflow.bind(null, "OrphanContacts")
+                        click: postOrphanWorkflow.bind(null, "CONTACT")
                     },
                     {
                         label: `Export ${
@@ -125,10 +128,7 @@ angular.module("lp.jobs.orphan", []).component("orphanExportList", {
                         icon: "fa fa-users",
                         disabledif:
                             vm.orphanCounts["Orphan Transactions"] === 0,
-                        click: postOrphanWorkflow.bind(
-                            null,
-                            "OrphanTransactions"
-                        )
+                        click: postOrphanWorkflow.bind(null, "TRANSACTION")
                     }
                 ]
             }

@@ -36,7 +36,7 @@
                     Time Stamp
                 </div>
                 <div class="le-cell le-col-start-6 le-col-span-4">
-                    orphan Type
+                    Orphan Type
                 </div>
                 <div class="le-cell le-col-start-8 le-col-span-3">User</div>
                 <div class="le-cell le-col-start-11 le-col-span-2">Status</div>
@@ -58,7 +58,7 @@
                     {{ orphan.startTimestamp | date: "MM/dd/yyyy h:mma" }}
                 </div>
                 <div class="le-cell le-col-start-6 le-col-span-4">
-                    {{ orphan.inputs["EXPORT_OBJECT_TYPE"] || "--" }}
+                    {{ orphan.inputs["ARTIFACT_TYPE"] || "--" }}
                 </div>
                 <div class="le-cell le-col-start-8 le-col-span-3">
                     {{ orphan.user }}
@@ -67,7 +67,7 @@
                     <a
                         ng-if="orphan.jobStatus == 'Completed' && !$ctrl.isExpired(orphan)"
                         href="javascript:void(0)"
-                        ng-click="$ctrl.downloadSegmentExport(orphan.inputs['SEGMENT_EXPORT_ID'])"
+                        ng-click="$ctrl.downloadOrphanExport(orphan.exportId)"
                         class="blue-text text-ellipsis"
                     >
                         <span>Download</span>
