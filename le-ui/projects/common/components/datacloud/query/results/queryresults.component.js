@@ -358,13 +358,16 @@ angular.module('common.datacloud.query.results', [
         vm.checkSaveButtonState();
     };
 
-    vm.updateTopNCount = function() {
+    vm.updateTopNCount = function(clicked) {
         vm.maxTargetValue = vm.accountsCoverage.accountCount; //vm.counts.accounts.value;
 
         if (vm.topNCount <= vm.maxTargetValue) {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
             PlaybookWizardStore.setTopNCount(vm.topNCount);
+        } else if (!vm.topNCount) {
+            vm.showError = true;
+            PlaybookWizardStore.setValidation('targets', clicked);
         } else {
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', false || vm.launchUnscored);
@@ -560,7 +563,11 @@ angular.module('common.datacloud.query.results', [
         // vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
         //     sections.total += parseInt(count.count);
         // });
-        sections.total = vm.accountsCoverage.accountCount;
+        
+        sections.total = vm.accountsCoverage.accountCount + vm.unscoredAccounts.total;
+
+        sections.unscored = (vm.launchUnscored ? vm.unscoredAccounts.total : 0);
+        sections.selected += sections.unscored;
 
         var _contacts = 0;
         for(var i in vm.selectedBuckets) {
@@ -568,6 +575,7 @@ angular.module('common.datacloud.query.results', [
             var count = vm.accountsCoverage.bucketCoverageCounts.find(function(value) {
                 return value.bucket === bucket;
             });
+
             sections.selected += parseInt(count.count);
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
@@ -581,7 +589,7 @@ angular.module('common.datacloud.query.results', [
         var $topNCountEl = angular.element('input#topNCount');
         
         if($topNCountEl.is(':checked')) {
-            sections.suppressed = Math.max(sections.total - vm.topNCount, sections.suppressed) || 0;
+            sections.suppressed = Math.max(vm.accountsCoverage.accountCount - vm.topNCount, sections.suppressed) || 0;
         }
 
         vm.recommendationCounts = sections;

@@ -46,8 +46,8 @@
                 type="checkbox"
                 ng-model="topNCount"
                 id="topNCount"
-                ng-change="topNCount && vm.updateTopNCount(); vm.topNClicked = !vm.topNClicked" 
-                ng-click="vm.makeRecommendationCounts({suppressed: topNCount})" />
+                ng-change="topNCount; vm.topNClicked = !vm.topNClicked" 
+                ng-click="vm.makeRecommendationCounts({suppressed: topNCount}); vm.updateTopNCount(vm.topNClicked);" />
             <label for="topNCount">Limit to only </label>
             <input 
                 type="number" 
@@ -56,7 +56,7 @@
                 ng-focus="vm.topNInputClick($event)"
                 min="1"
                 ng-max="::vm.topNCount"
-                ng-change="topNCount && vm.updateTopNCount(); vm.makeRecommendationCounts({suppressed: topNCount})"
+                ng-change="topNCount && vm.updateTopNCount(vm.topNClicked); vm.makeRecommendationCounts({suppressed: topNCount})"
                 class="form-control" />
             <span> highest rated {{vm.section === 'wizard.targets' ? 'recommendations' : 'targets'}}</span>
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
@@ -96,7 +96,7 @@
                 </li>
             </ul>
             <div class="unscored-accounts" ng-if="vm.unscoredAccounts.total">
-                <input type="checkbox" ng-model="vm.launchUnscored" ng-click="vm.launchUnscoredClick()" /> Include the <strong>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</strong> Unscored Accounts?
+                <input type="checkbox" ng-model="vm.launchUnscored" ng-click="vm.launchUnscoredClick(); vm.makeRecommendationCounts();" /> Include the <strong>{{vm.unscoredAccounts.total | number}} ({{vm.unscoredAccounts.percentage}})</strong> Unscored Accounts?
             </div>
         </div>
     </div><!-- End .targets-filters -->
