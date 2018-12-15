@@ -26,9 +26,9 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
             { "A002", "Alaskan Malamute", "Lattice_002" },
             { "A003", "Collie", "Lattice_003" },
             { "A004", "Chihuahua", null },
-            { "A005", "Labrador Retriever", "" },
+            { "A005", "Labrador Retriever", null },
             { "A006", "Corky", "Lattice_004" },
-            { "A007", "Alaskan Cod", "" },
+            { "A007", "Alaskan Cod", null },
             { "A008", "Japanese Tofu", null },
             { "A009", "Corky", "Lattice_005" }
     };
@@ -36,8 +36,8 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
     private Object[][] expectedData = new Object[][] {
             // "AccountId", "Name", "LatticeAccountId"
             { "A004", "Chihuahua", null },
-            { "A005", "Labrador Retriever", "" },
-            { "A007", "Alaskan Cod", "" },
+            { "A005", "Labrador Retriever", null },
+            { "A007", "Alaskan Cod", null },
             { "A008", "Japanese Tofu", null }
     };
 
