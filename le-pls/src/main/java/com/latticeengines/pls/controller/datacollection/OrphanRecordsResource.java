@@ -57,7 +57,7 @@ public class OrphanRecordsResource {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Log.info("Received call to launch orphan records workflow for tenant=" + customerSpace);
         OrphanRecordsExportRequest request = new OrphanRecordsExportRequest();
-        request.setOrphanRecordsType(OrphanRecordsType.valueOf(orphanType));
+        request.setOrphanRecordsType(OrphanRecordsType.valueOf(orphanType.toUpperCase()));
         request.setOrphanRecordsArtifactStatus(DataCollectionArtifact.Status.NOT_SET);
         request.setCreatedBy(MultiTenantContext.getEmailAddress());
         request.setExportId(UUID.randomUUID().toString());
@@ -118,7 +118,7 @@ public class OrphanRecordsResource {
         DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, active);
         Map<String, Long> result = new HashMap<>();
         if (StringUtils.isNotBlank(orphanType)) {
-            switch (OrphanRecordsType.valueOf(orphanType)) {
+            switch (OrphanRecordsType.valueOf(orphanType.toUpperCase())) {
                 case CONTACT:
                     result.put(OrphanRecordsType.CONTACT.getDisplayName(), status.getOrphanContactCount());
                     break;

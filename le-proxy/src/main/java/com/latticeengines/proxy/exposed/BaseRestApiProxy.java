@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -387,6 +388,22 @@ public abstract class BaseRestApiProxy {
         return retry.execute(context -> {
             logInvocation(method, url, verb, context.getRetryCount() + 1);
             return exchange(url, verb, null, returnValueClazz, false, useKryo).getBody();
+        });
+    }
+
+    protected <T> T getGenericBinary(final String method, final String url, final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.GET, url, false, null);
+        return retry.execute(retryContext -> {
+            logInvocation(method, url, HttpMethod.GET, retryContext.getRetryCount() + 1);
+            ContentDisposition contentDisposition = ContentDisposition
+                    .builder("attachment")
+                    .filename("downloaded_file.csv")
+                    .build();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
+            headers.setContentDisposition(contentDisposition);
+            HttpEntity<T> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
         });
     }
 

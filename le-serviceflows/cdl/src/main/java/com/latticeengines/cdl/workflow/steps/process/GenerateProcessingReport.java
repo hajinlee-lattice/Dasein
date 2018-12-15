@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -34,8 +34,12 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -150,6 +154,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private void updateReportEntitiesSummaryReport(ObjectNode report) {
         Map<BusinessEntity, Long> currentCnts = retrieveCurrentEntityCnts();
         Map<BusinessEntity, Long> deleteCnts = getDeletedCount();
+        Map<OrphanRecordsType, Long> orphanCnts = retrieveOrphanEntityCnts();
 
         ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
         if (entitiesSummaryNode == null) {
@@ -187,6 +192,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         }
 
         updateCollectionStatus(currentCnts);
+        updateCollectionStatusWithOrphans(orphanCnts);
     }
 
     private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts) {
@@ -200,6 +206,14 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
     }
 
+    private void updateCollectionStatusWithOrphans(Map<OrphanRecordsType, Long> orphanCnts) {
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setOrphanContactCount(orphanCnts.get(OrphanRecordsType.CONTACT));
+        detail.setUnmatchedAccountCount(orphanCnts.get(OrphanRecordsType.UNMATCHED_ACCOUNT));
+        log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, active);
+    }
+
     private Map<BusinessEntity, Long> retrieveCurrentEntityCnts() {
         Map<BusinessEntity, Long> currentCnts = new HashMap<>();
         currentCnts.put(BusinessEntity.Account, countInRedshift(BusinessEntity.Account));
@@ -209,6 +223,14 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         currentCnts.put(BusinessEntity.Product, countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedProduct));
 
         return currentCnts;
+    }
+
+    private Map<OrphanRecordsType, Long> retrieveOrphanEntityCnts() {
+        Map<OrphanRecordsType, Long> orphanCnts = new HashMap<>();
+        orphanCnts.put(OrphanRecordsType.UNMATCHED_ACCOUNT, countOrphansInRedshift(OrphanRecordsType.UNMATCHED_ACCOUNT));
+        orphanCnts.put(OrphanRecordsType.CONTACT, countOrphansInRedshift(OrphanRecordsType.CONTACT));
+
+        return orphanCnts;
     }
 
     private long countRawEntitiesInHdfs(TableRoleInCollection tableRoleInCollection) {
@@ -244,6 +266,41 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         } catch (Exception ex) {
             log.error("Fail to count raw entities in table.", ex);
             return 0L;
+        }
+    }
+
+    private long countOrphansInRedshift(OrphanRecordsType orphanRecordsType) {
+        FrontEndQuery frontEndQuery;
+        switch (orphanRecordsType) {
+            case UNMATCHED_ACCOUNT:
+                Restriction nullLatticeAccountId = Restriction.builder()
+                        .let(BusinessEntity.Account, InterfaceName.LatticeAccountId.name())
+                        .isNull()
+                        .build();
+
+                FrontEndRestriction accountRestriction = new FrontEndRestriction();
+                accountRestriction.setRestriction(nullLatticeAccountId);
+
+                frontEndQuery = new FrontEndQuery();
+                frontEndQuery.setMainEntity(BusinessEntity.Account);
+                frontEndQuery.setAccountRestriction(accountRestriction);
+                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+            case CONTACT:
+                Restriction nullAccountId = Restriction.builder()
+                        .let(BusinessEntity.Account, InterfaceName.AccountId.name())
+                        .isNull()
+                        .build();
+
+                FrontEndRestriction contactRestriction = new FrontEndRestriction();
+                contactRestriction.setRestriction(nullAccountId);
+
+                frontEndQuery = new FrontEndQuery();
+                frontEndQuery.setMainEntity(BusinessEntity.Contact);
+                frontEndQuery.setAccountRestriction(contactRestriction);
+                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+            case TRANSACTION:
+                default:
+                return 0;
         }
     }
 

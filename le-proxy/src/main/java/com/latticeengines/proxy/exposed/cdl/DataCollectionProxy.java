@@ -421,6 +421,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         String requestUrl = constructUrl(
                 "/customerspaces/{customerSpace}/datacollection/artifact/{exportId}/download",
                 shortenCustomerSpace(customerSpace), exportId);
-        return get("downloaDataCollectionArtifact", requestUrl, byte[].class);
+        return getGenericBinary("downloaDataCollectionArtifact", requestUrl, byte[].class);
     }
 }

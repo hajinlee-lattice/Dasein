@@ -15,8 +15,7 @@ public class UnmatchedAccountExportFlow extends TypesafeDataFlowBuilder<Unmatche
     @Override
     public Node construct(UnmatchedAccountExportParameters parameters) {
         Node srcAccount = addSource(parameters.getAccountTable());
-        return srcAccount.filter(String.format("%s == null || %s.length() == 0",
-                InterfaceName.LatticeAccountId.name(), InterfaceName.LatticeAccountId.name()),
+        return srcAccount.filter(String.format("%s == null", InterfaceName.LatticeAccountId.name()),
                 new FieldList(InterfaceName.LatticeAccountId.name()));
     }
 }

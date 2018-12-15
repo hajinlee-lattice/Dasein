@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;

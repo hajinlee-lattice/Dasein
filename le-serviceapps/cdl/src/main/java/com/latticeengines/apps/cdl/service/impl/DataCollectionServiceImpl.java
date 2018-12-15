@@ -86,6 +86,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Qualifier(value = "awsCredentials")
     private BasicAWSCredentials basicAWSCredentials;
 
+    @Value("${aws.region}")
+    private String region;
+
     @Resource(name = "localCacheService")
     private CacheService localCacheService;
 
@@ -630,11 +633,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             return IOUtils.toByteArray(s3Object.getObjectContent());
         } catch (AmazonS3Exception exc) {
             throw new RuntimeException(String.format(
-                    "Failed to download artifact from S3. Bucket=%s. Object key=%s.", s3Bucket, artifactKey));
+                    "Failed to download artifact from S3. Bucket=%s. Object key=%s.", s3Bucket, artifactKey), exc);
         } catch (IOException exc) {
             throw new RuntimeException(String.format(
                     "Failed to get content of data collection artifact. Bucket=%s. Object key=%s.",
-                    s3Bucket, artifactKey));
+                    s3Bucket, artifactKey), exc);
         }
     }
 
@@ -643,7 +646,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         clientConfiguration.setSocketTimeout(120000);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials)) //
-                .withRegion("us-east-1") //
+                .withRegion(region) //
                 .withClientConfiguration(clientConfiguration) //
                 .enableAccelerateMode() //
                 .build();
