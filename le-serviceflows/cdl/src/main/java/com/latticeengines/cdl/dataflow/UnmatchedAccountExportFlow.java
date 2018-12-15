@@ -3,8 +3,8 @@ package com.latticeengines.cdl.dataflow;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.UnmatchedAccountExportParameters;
 
@@ -15,7 +15,8 @@ public class UnmatchedAccountExportFlow extends TypesafeDataFlowBuilder<Unmatche
     @Override
     public Node construct(UnmatchedAccountExportParameters parameters) {
         Node srcAccount = addSource(parameters.getAccountTable());
-        return srcAccount.filter(String.format("%s == null", InterfaceName.LatticeAccountId.name()),
-                new FieldList(InterfaceName.LatticeAccountId.name()));
+        String lattceId = InterfaceName.LatticeAccountId.name();
+        return srcAccount.filter(String.format("%s == null || %s == \"\"", lattceId, lattceId),
+                new FieldList(lattceId));
     }
 }
