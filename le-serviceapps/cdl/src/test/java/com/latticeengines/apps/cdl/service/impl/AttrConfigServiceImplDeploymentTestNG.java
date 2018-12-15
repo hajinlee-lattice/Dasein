@@ -22,6 +22,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.mds.RawSystemMetadataStore;
+import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.AttrConfigService;
@@ -43,6 +45,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -52,7 +55,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 /**
- * $ dpltc deploy -a admin,matchapi,microservice,pls -m metadata,cdl,lp
+ * $ dpltc deploy -a admin,matchapi,pls,metadata,cdl,lp
  */
 public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -108,9 +111,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(() -> {
             setupTestEnvironment();
+            cdlTestDataService.populateMetadata(mainTestTenant.getId(), 5);
             batonService.setFeatureFlag(CustomerSpace.parse(mainTestTenant.getId()), //
                     LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
-            cdlTestDataService.populateMetadata(mainTestTenant.getId(), 5);
         });
         runnables.add(() -> {
             List<ColumnMetadata> amCols = columnMetadataProxy.getAllColumns();
@@ -162,7 +165,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         Assert.assertTrue(newModelingAttrs.all(p).block());
 
         Flux<ColumnMetadata> allModelingAttrs = servingStoreProxy.getAllowedModelingAttrs(mainTestTenant.getId());
-        p = attr -> attr.getCanModel();
+        p = ColumnMetadata::getCanModel;
         Assert.assertTrue(allModelingAttrs.all(p).block());
     }
 
@@ -272,15 +275,38 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
-            verifyFlags(config, cat, null, //
-                    Active, false, //
-                    true, true, //
-                    false, true, //
-                    true, true, //
-                    false, false, //
-                    false, false);
+            String partition = getProductSpentPartition(attrName);
+            switch (partition) {
+                case Partition.HAS_PURCHASED:
+                    verifyFlags(config, cat, partition, //
+                            Active, false, //
+                            true, true, //
+                            false, false, //
+                            false, false, //
+                            false, false, //
+                            false, false);
+                    break;
+                case Partition.OTHERS:
+                    verifyFlags(config, cat, partition, //
+                            Active, false, //
+                            true, true, //
+                            false, true, //
+                            true, true, //
+                            false, true, //
+                            false, false);
+            }
             return true;
         });
+    }
+
+    private String getProductSpentPartition(String attrName) {
+        String partiion;
+        if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
+            partiion = Partition.HAS_PURCHASED;
+        } else {
+            partiion = Partition.OTHERS;
+        }
+        return partiion;
     }
 
     private void testCuratedAccountAttributes() {
@@ -468,6 +494,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     private void checkAndVerifyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
         List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
+//        System.out.println(attrConfigs);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
                 .map(verifier).sequential().count().block();
@@ -538,6 +565,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         static final String SYSTEM = "System";
         static final String STD_ATTRS = "StdAttrs";
         static final String EXTERNAL_ID = "ExternalID";
+        static final String HAS_PURCHASED = "HasPurchased";
         static final String OTHERS = "Others";
 
         // skip verification on these attributes

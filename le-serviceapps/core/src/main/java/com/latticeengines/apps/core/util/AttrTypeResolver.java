@@ -15,8 +15,13 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AttrTypeResolver {
+    private static final Logger log = LoggerFactory.getLogger(AttrTypeResolver.class);
+
     private static Map<BusinessEntity, Set<String>> internalMap = new HashMap<>();
     private static Map<BusinessEntity, Set<String>> standardMap = new HashMap<>();
 
@@ -46,6 +51,9 @@ public class AttrTypeResolver {
         } else {
             type = AttrType.Custom;
         }
+        if ("HG_ASTEA_0275690354".equals(metadata.getAttrName())) {
+            log.info("Resolved HG_ASTEA_0275690354 to " + type);
+        }
         return type;
     }
 
@@ -69,7 +77,12 @@ public class AttrTypeResolver {
                 if (BusinessEntity.Rating.equals(entity)) {
                     subType = AttrSubType.Rating;
                 } else if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                    subType = AttrSubType.ProductBundle;
+                    String attrName = metadata.getAttrName();
+                    if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
+                        subType = AttrSubType.HasPurchased;
+                    } else {
+                        subType = AttrSubType.ProductBundle;
+                    }
                 } else if (BusinessEntity.CuratedAccount.equals(entity)) {
                     subType = AttrSubType.CuratedAccount;
                 }
@@ -87,6 +100,9 @@ public class AttrTypeResolver {
             default:
                 throw new UnsupportedOperationException(
                         String.format("Unsupported AttrType %s.", type));
+        }
+        if ("HG_ASTEA_0275690354".equals(metadata.getAttrName())) {
+            log.info("Resolved HG_ASTEA_0275690354 to " + subType);
         }
         return subType;
     }

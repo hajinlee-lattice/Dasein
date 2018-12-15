@@ -68,6 +68,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
 
     @Override
     public ColumnMetadata postDecorate(ColumnMetadata cm) {
+        cm.setCategory(Category.RATING);
         if (StringUtils.isBlank(cm.getDisplayName()) //
                 && cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX + "_")) {
             cm.disableGroup(ColumnSelection.Predefined.Segment);

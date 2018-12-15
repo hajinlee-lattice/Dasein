@@ -200,10 +200,10 @@ public class AbstractAttrConfigServiceUnitTestNG {
                 .getStrongTypedProperty(ColumnSelection.Predefined.TalkingPoint.name(), String.class);
         AttrConfigProp<String> enrichmentProp = config
                 .getStrongTypedProperty(ColumnSelection.Predefined.Enrichment.name(), String.class);
-        Assert.assertEquals(segmentProp.isAllowCustomization(), Boolean.FALSE);
-        Assert.assertEquals(companyProfileProp.isAllowCustomization(), Boolean.FALSE);
-        Assert.assertEquals(talkingPointProp.isAllowCustomization(), Boolean.FALSE);
-        Assert.assertEquals(enrichmentProp.isAllowCustomization(), Boolean.FALSE);
+        Assert.assertEquals(segmentProp.isAllowCustomization(), Boolean.TRUE);
+        Assert.assertEquals(companyProfileProp.isAllowCustomization(), Boolean.TRUE);
+        Assert.assertEquals(talkingPointProp.isAllowCustomization(), Boolean.TRUE);
+        Assert.assertEquals(enrichmentProp.isAllowCustomization(), Boolean.TRUE);
         data.setCanEnrich(true);
         data.setCanSegment(true);
         dataList = Collections.singletonList(data);

@@ -169,13 +169,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     /*
                      * DP-6630 For Activate/Deactivate page, hide attributes
                      * that are: Inactive and AllowCustomization=FALSE
-                     * 
+                     *
                      * For Enable/Disable page, hide attributes that are:
                      * disabled and AllowCustomization=FALSE.
-                     * 
+                     *
                      * PLS-11145 For Enable/Disable page, hide attributes that
                      * are: disabled and Deprecated
-                     * 
+                     *
                      * 'onlyActivateAttrs=false' indicates it is
                      * Activate/Deactivate page, otherwise it is Usage
                      * Enable/Disable page
@@ -560,6 +560,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
                 continue;
             }
+
+            if ("HG_ASTEA_0275690354".equals(metadata.getAttrName())) {
+                System.out.println("Stop here");
+            }
+
             AttrSpecification attrSpec = AttrSpecification.getAttrSpecification(type, subType, metadata.getEntity());
             if (attrSpec == null) {
                 log.warn(String.format("Cannot get Attr Specification for Type %s, SubType %s", type.name(),
@@ -660,20 +665,21 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     private void overwriteAttrSpecsByColMetadata(AttrSpecification attrSpec, ColumnMetadata cm) {
-        if (!Boolean.TRUE.equals(cm.getCanEnrich())) {
+        // do not overwrite anything if can flag is empty
+        if (Boolean.FALSE.equals(cm.getCanEnrich())) {
             attrSpec.setEnrichmentChange(false);
             attrSpec.setTalkingPointChange(false);
             attrSpec.setCompanyProfileChange(false);
         }
-        if (!Boolean.TRUE.equals(cm.getCanSegment())) {
+        if (Boolean.FALSE.equals(cm.getCanSegment())) {
             attrSpec.setSegmentationChange(false);
         }
-        if (!Boolean.TRUE.equals(cm.getCanEnrich()) //
-                && !Boolean.TRUE.equals(cm.getCanSegment()) //
-                && !Boolean.TRUE.equals(cm.getCanModel())) {
+        if (Boolean.FALSE.equals(cm.getCanEnrich()) //
+                && Boolean.FALSE.equals(cm.getCanSegment()) //
+                && Boolean.FALSE.equals(cm.getCanModel())) {
             attrSpec.disableStateChange();
         }
-        if (!Boolean.TRUE.equals(cm.getCanModel())) {
+        if (Boolean.FALSE.equals(cm.getCanModel())) {
             attrSpec.setModelChange(false);
         }
     }

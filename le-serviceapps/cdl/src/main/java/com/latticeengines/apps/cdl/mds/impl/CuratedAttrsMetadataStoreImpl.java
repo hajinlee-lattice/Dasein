@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.mds.DerivedAttrsMetadataStore;
+import com.latticeengines.apps.cdl.mds.CuratedAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -22,7 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 @Component
-public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore {
+public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore {
 
     @Inject
     private TableRoleTemplate tableRoleTemplate;
@@ -58,10 +58,6 @@ public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore 
                 cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 cm.disableGroup(ColumnSelection.Predefined.Model);
-
-                cm.setCanSegment(true);
-                cm.setCanEnrich(true);
-                cm.setCanModel(false);
 
                 cm.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
                 return cm;

@@ -79,14 +79,18 @@ public class ActivityMetricsUtils {
         metricsDisplayNames.put(InterfaceName.AvgSpendOvertime, "Average Spend");
         metricsDisplayNames.put(InterfaceName.TotalSpendOvertime, "Total Spend");
         metricsDisplayNames.put(InterfaceName.HasPurchased, "Has Purchased");
+    }
 
+    static {
         metricsAbbr.put(InterfaceName.Margin, "MG");
         metricsAbbr.put(InterfaceName.SpendChange, "SC");
         metricsAbbr.put(InterfaceName.ShareOfWallet, "SW");
         metricsAbbr.put(InterfaceName.AvgSpendOvertime, "AS");
         metricsAbbr.put(InterfaceName.TotalSpendOvertime, "TS");
         metricsAbbr.put(InterfaceName.HasPurchased, "HP");
+    }
 
+    static {
         metricsDescription.put(InterfaceName.Margin,
                 "This curated attribute is calculated by analyzing cost of sell & revenue for a given product of a given account in the specified time window. "
                         + "The insights are useful to drive sales & marketing campaigns for the accounts where the profit margins are below expected levels.");
@@ -101,31 +105,41 @@ public class ActivityMetricsUtils {
                 "This curated attribute is calculated by aggregating total spend for a given product of a given account over a specified time window.");
         metricsDescription.put(InterfaceName.HasPurchased,
                 "Indicates if this product ever was purchased by this account.");
+    }
 
+    static {
         metricsAbbrRev.put("MG", InterfaceName.Margin);
         metricsAbbrRev.put("SC", InterfaceName.SpendChange);
         metricsAbbrRev.put("SW", InterfaceName.ShareOfWallet);
         metricsAbbrRev.put("AS", InterfaceName.AvgSpendOvertime);
         metricsAbbrRev.put("TS", InterfaceName.TotalSpendOvertime);
         metricsAbbrRev.put("HP", InterfaceName.HasPurchased);
+    }
 
+    static {
         periodAbbr.put(PeriodStrategy.Template.Year.name(), "Y");
         periodAbbr.put(PeriodStrategy.Template.Quarter.name(), "Q");
         periodAbbr.put(PeriodStrategy.Template.Month.name(), "M");
         periodAbbr.put(PeriodStrategy.Template.Week.name(), "W");
+    }
 
+    static {
         periodAbbrRev.put("Y", PeriodStrategy.Template.Year);
         periodAbbrRev.put("Q", PeriodStrategy.Template.Quarter);
         periodAbbrRev.put("M", PeriodStrategy.Template.Month);
         periodAbbrRev.put("W", PeriodStrategy.Template.Week);
+    }
 
+    static {
         nullImputation.put(InterfaceName.Margin, NullMetricsImputation.NULL);
         nullImputation.put(InterfaceName.SpendChange, NullMetricsImputation.ZERO);
         nullImputation.put(InterfaceName.ShareOfWallet, NullMetricsImputation.NULL);
         nullImputation.put(InterfaceName.AvgSpendOvertime, NullMetricsImputation.ZERO);
         nullImputation.put(InterfaceName.TotalSpendOvertime, NullMetricsImputation.ZERO);
         nullImputation.put(InterfaceName.HasPurchased, NullMetricsImputation.FALSE);
+    }
 
+    static {
         comparisonType.put(InterfaceName.Margin,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.WITHIN))));
         comparisonType.put(InterfaceName.SpendChange,
@@ -141,10 +155,14 @@ public class ActivityMetricsUtils {
                         buildComparisonTypeLookupKey(ComparisonType.BETWEEN))));
         comparisonType.put(InterfaceName.HasPurchased,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.EVER))));
+    }
 
+    static {
         comparisonTypePeriodCnt.put(ComparisonType.WITHIN, 1);
         comparisonTypePeriodCnt.put(ComparisonType.BETWEEN, 2);
+    }
 
+    static {
         maxCnt.put(InterfaceName.Margin, 1);
         maxCnt.put(InterfaceName.SpendChange, 1);
         maxCnt.put(InterfaceName.ShareOfWallet, 1);
@@ -158,18 +176,18 @@ public class ActivityMetricsUtils {
 
     /**
      * Check whether it is HasPurchase attr
-     * 
+     *
      * @param fullName
      * @return
      */
     public static boolean isHasPurchasedAttr(String fullName) {
-        return fullName.startsWith(ActivityMetricsUtils.HEADER) && fullName.endsWith(
-                ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
+        return StringUtils.isNotBlank(fullName) && fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
     }
 
     /**
      * Check whether it is SpendChange attr
-     * 
+     *
      * @param fullName
      * @return
      */
@@ -224,7 +242,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Extract prefix like ProductId from full metrics name
-     * 
+     *
      * @param fullName
      * @return
      */
@@ -238,7 +256,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get metrics enum from full name
-     * 
+     *
      * @param fullName
      * @return
      */
@@ -253,7 +271,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Find null imputation strategy by full metrics name
-     * 
+     *
      * @param fullName
      * @return
      */
@@ -263,7 +281,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Extract period names with values from full metrics name
-     * 
+     *
      * @param fullName
      * @return
      */
@@ -278,7 +296,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Find metrics description by full name
-     * 
+     *
      * @param fullName
      * @return
      */
@@ -292,7 +310,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Check whether a metrics is deprecated
-     * 
+     *
      * @param fullName:
      *            full name of the metrics to check deprecation
      * @param metrics:
@@ -309,7 +327,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get metrics display name by metrics enum
-     * 
+     *
      * @param metrics
      * @return
      */
@@ -320,7 +338,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get metrics display name and secondary display name
-     * 
+     *
      * @param fullName
      * @param evaluationDate
      * @param strategies
@@ -342,7 +360,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get HasPurchased metrics abbr name
-     * 
+     *
      * @return
      */
     public static String getHasPurchasedAbbr() {
@@ -351,7 +369,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get SpendChange metrics abbr name
-     * 
+     *
      * @return
      */
     public static String getSpendChangeAbbr() {
@@ -360,7 +378,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Convert period names + values metrics to secondary display name
-     * 
+     *
      * @param period
      * @param metrics
      * @param currentTxnDate
@@ -406,7 +424,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Convert period names + values metrics to display name
-     * 
+     *
      * @param period
      * @param metrics
      * @return
@@ -437,7 +455,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get period display name for BETWEEN comparison type
-     * 
+     *
      * @param period
      * @return
      */
@@ -449,7 +467,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Get period display name for WITHIN comparison type
-     * 
+     *
      * @param period
      * @return
      */
@@ -474,7 +492,7 @@ public class ActivityMetricsUtils {
 
     /**
      * To validate a list of metrics
-     * 
+     *
      * @param metrics
      * @return
      */
@@ -510,7 +528,7 @@ public class ActivityMetricsUtils {
 
     /**
      * To validate a single metrics
-     * 
+     *
      * @param metrics
      * @return
      */
@@ -545,11 +563,11 @@ public class ActivityMetricsUtils {
 
     /**
      * Check whether number of time filters is expected
-     * 
+     *
      * Check whether period names are all valid as period name is weak typed
-     * 
+     *
      * Check whether period names are consistent among time filters
-     * 
+     *
      * @param metricsName
      * @param timeFilters
      * @param expectedCnt
@@ -578,7 +596,7 @@ public class ActivityMetricsUtils {
 
     /**
      * Validate whether period value is compatible with comparison type
-     * 
+     *
      * @param metricsName
      * @param timeFilter
      * @return
@@ -620,7 +638,7 @@ public class ActivityMetricsUtils {
     /**
      * Validate comparison type in time filter for metrics with single time
      * filter
-     * 
+     *
      * @param metricsName
      * @param type
      * @return
@@ -642,7 +660,7 @@ public class ActivityMetricsUtils {
     /**
      * Validate comparison types in a list of time filters for metrics with
      * multiple time filters
-     * 
+     *
      * @param metricsName
      * @param timeFilters
      * @return
@@ -681,7 +699,7 @@ public class ActivityMetricsUtils {
      * For numerical boundaries for SpendChange, if there is positive boundaries
      * together with negative boundaries (numerical boundaries are sorted),
      * force to insert a zero in between
-     * 
+     *
      * @param bounds
      * @return
      */

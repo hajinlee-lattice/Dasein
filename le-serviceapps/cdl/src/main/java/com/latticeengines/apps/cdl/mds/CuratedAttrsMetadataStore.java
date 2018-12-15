@@ -6,5 +6,5 @@ import com.latticeengines.domain.exposed.metadata.mds.MetadataStore2;
 /**
  * TenantId, Version
  */
-public interface DerivedAttrsMetadataStore extends MetadataStore2<String, DataCollection.Version> {
+public interface CuratedAttrsMetadataStore extends MetadataStore2<String, DataCollection.Version> {
 }

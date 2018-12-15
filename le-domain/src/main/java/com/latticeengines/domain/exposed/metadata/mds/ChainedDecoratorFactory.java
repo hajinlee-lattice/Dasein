@@ -13,7 +13,7 @@ public abstract class ChainedDecoratorFactory<N extends Namespace> implements De
     private final List<DecoratorFactory<Namespace>> factories;
 
     @SuppressWarnings("unchecked")
-    public ChainedDecoratorFactory(String decoratorName,
+    protected ChainedDecoratorFactory(String decoratorName,
             List<DecoratorFactory<? extends Namespace>> factories) {
         this.decoratorName = decoratorName;
         this.factories = factories.stream().map(factory -> (DecoratorFactory<Namespace>) factory) //

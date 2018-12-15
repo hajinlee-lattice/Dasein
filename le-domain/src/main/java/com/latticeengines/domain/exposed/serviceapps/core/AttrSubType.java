@@ -2,6 +2,15 @@ package com.latticeengines.domain.exposed.serviceapps.core;
 
 public enum AttrSubType {
 
-    Premium, InternalEnrich, Normal, Standard, LookupId, Extension, Rating, ProductBundle, CuratedAccount
+    Premium, //
+    InternalEnrich, //
+    Normal, //
+    Standard, //
+    LookupId, //
+    Extension, //
+    Rating, //
+    ProductBundle, //
+    HasPurchased, //
+    CuratedAccount
 
 }

@@ -29,12 +29,12 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
     }
 
     public synchronized void load() {
-        AtomicLong start = new AtomicLong();
-        log.info(getLoggerName() + ": Start loading.");
+        long start = System.currentTimeMillis();
+        log.debug(getLoggerName() + ": Start loading.");
         Collection<ColumnMetadata> cms = loadInternal();
         cms.forEach(cm -> filterMap.put(cm.getAttrName(), cm));
-        long duration = System.currentTimeMillis() - start.getAndIncrement();
-        log.info(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
+        long duration = System.currentTimeMillis() - start;
+        log.debug(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
                 + " msecs.");
     }
 
@@ -58,7 +58,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
                 }) //
                 .doOnComplete(() -> {
                     if (counter.get() > 0) {
-                        log.info(getLoggerName() + ": Rendered " + counter.get() + " attributes.");
+                        log.debug(getLoggerName() + ": Rendered " + counter.get() + " attributes.");
                     }
                 }) //
                 .doOnError(t -> log.error(getLoggerName() + ": Failed to render.", t));
@@ -86,7 +86,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
                         count = counter.get().get();
                     }
                     if (count > 0) {
-                        log.info(getLoggerName() + ": Rendered " + count + " attributes.");
+                        log.debug(getLoggerName() + ": Rendered " + count + " attributes.");
                     }
                 }) //
                 .doOnError(t -> log.error(getLoggerName() + ": Failed to render.", t));

@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class AttrTypeResolverUnitTestNG {
 
     @Test(groups = "unit", dependsOnMethods = { "testType" })
     public void testSubType() {
-        assertEquals(AttrTypeResolver.resolveSubType(internal), null);
+        assertNull(AttrTypeResolver.resolveSubType(internal));
 
         dataCloud.setCanInternalEnrich(Boolean.TRUE);
         assertEquals(AttrTypeResolver.resolveSubType(dataCloud), AttrSubType.InternalEnrich);

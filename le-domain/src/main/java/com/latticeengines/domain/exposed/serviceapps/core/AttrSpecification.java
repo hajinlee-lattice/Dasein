@@ -73,9 +73,38 @@ public class AttrSpecification {
                 true, true, true, false, true, false);
     }
 
+    // Product Spent Profile
     public static AttrSpecification CDL_DERIVED_PB() {
-        return new AttrSpecification("CDL Derived Attributes for Product Bundles", true, true,
-                false, true, false, false, false, false, false, false, false, false);
+        return new AttrSpecification("CDL Derived Attributes for Product Bundles",  //
+                true, // segment
+                true, // enrich
+                true, // company profile
+                true, // talking point
+                false,  // model
+                false,  // type
+                false, // display name
+                false, // description
+                false, // category
+                false, // icon
+                false, // state
+                false); // approved usage
+    }
+
+    // Has Purchased in Product Spent Profile
+    public static AttrSpecification CDL_DERIVED_PB_HP() {
+        return new AttrSpecification("CDL Derived Attributes for Product Bundles (Has Purchased)", //
+                true, // segment
+                false, // enrich
+                false, // company profile
+                false, // talking point
+                false,  // model
+                false,  // type
+                false, // display name
+                false, // description
+                false, // category
+                false, // icon
+                false, // state
+                false); // approved usage
     }
 
     public static AttrSpecification CDL_DERIVED_WBC() {
@@ -151,6 +180,8 @@ public class AttrSpecification {
                 switch (attrSubType) {
                     case ProductBundle:
                         return AttrSpecification.CDL_DERIVED_PB();
+                    case HasPurchased:
+                        return AttrSpecification.CDL_DERIVED_PB_HP();
                     case Rating:
                         return AttrSpecification.CDL_RATING();
                     case CuratedAccount:

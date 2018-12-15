@@ -13,26 +13,25 @@ import com.latticeengines.domain.exposed.metadata.mds.DecoratedMetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-@Component
+@Component("customizedMetadataStore")
 public class CustomizedMetadataStoreImpl extends
-        DecoratedMetadataStore<Namespace2<BusinessEntity, DataCollection.Version>, Namespace2<BusinessEntity,
-                DataCollection.Version>,
-                Namespace2<String, BusinessEntity>>
+        DecoratedMetadataStore<Namespace2<BusinessEntity, DataCollection.Version>, Namespace2<BusinessEntity, DataCollection.Version>, Namespace2<String, BusinessEntity>>
         implements CustomizedMetadataStore {
 
     private final CDLNamespaceService cdlNamespaceService;
 
     @Inject
     public CustomizedMetadataStoreImpl(//
-                                        SystemMetadataStore systemMetadataStore, //
-                                        AttrConfigDecorator attrConfigDecorator, //
-                                        CDLNamespaceService cdlNamespaceService) {
+            SystemMetadataStore systemMetadataStore, //
+            AttrConfigDecorator attrConfigDecorator, //
+            CDLNamespaceService cdlNamespaceService) {
         super(systemMetadataStore, attrConfigDecorator);
         this.cdlNamespaceService = cdlNamespaceService;
     }
 
     @Override
-    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(
+            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
         return cdlNamespaceService.prependTenantId(namespace);
     }
 

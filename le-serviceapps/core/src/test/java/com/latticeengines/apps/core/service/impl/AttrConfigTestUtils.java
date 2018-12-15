@@ -152,6 +152,8 @@ public class AttrConfigTestUtils {
         data.enableGroup(ColumnSelection.Predefined.CompanyProfile);
         data.enableGroup(ColumnSelection.Predefined.TalkingPoint);
         data.setCanModel(true);
+        data.setCanSegment(true);
+        data.setCanEnrich(true);
         return data;
     }
 
