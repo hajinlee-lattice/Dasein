@@ -11,6 +11,7 @@ import {
 import "common/assets/css/font-awesome.min.css";
 import LeInputText from "common/widgets/inputs/le-input-text";
 import LeLink, { LEFT, RIGHT } from "common/widgets/link/le-link";
+import LeChip from "common/widgets/chip/le-chip";
 
 const stories = storiesOf("Form Controls", module);
 
@@ -59,7 +60,11 @@ stories.add("date picker", () => (
 
 
 stories.add("chip", () => (
-  <p>TODO</p>
+  <form>
+    <LeChip
+      
+    />
+  </form>
 ));
 
 

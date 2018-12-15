@@ -214,7 +214,7 @@ angular.module('lp.segments.segments', [
 
         if (args.action === 'cancel') {
 
-            console.log("cancel");            
+            // console.log("cancel");            
             Modal.modalRemoveFromDOM(modal, args);
 
         } else if (args.action === 'ok') {
@@ -279,11 +279,11 @@ angular.module('lp.segments.segments', [
                     switch (operatorType) {
                         case 'Enum': 
                             var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType);
-                            
                             if (vals.length > 1) {
                                 attrs.push({label: enrichment.DisplayName + ': ', value: vals.length + ' Values Selected'});
                             } else {
-                                attrs.push({label: enrichment.DisplayName + ': ', value: vals[0]});
+                                attrs.push({label: enrichment.DisplayName + ': ', value:  
+                                `${vals[0] != undefined ? `${vals[0]}` : `${QueryTreeService.cmpMap[restriction.bucketRestriction.bkt.Cmp]}`}`});
                             }
                             
                             break;
@@ -292,11 +292,10 @@ angular.module('lp.segments.segments', [
                             if (QueryTreeService.two_inputs.indexOf(restriction.bucketRestriction.bkt.Cmp) < 0) {
                                 let label = QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp];
                                 let operation = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0);
-                                // console.log('LABEL ',label, ' OPERATION ', operation);
                                 attrs.push({
                                     label: enrichment.DisplayName + ': ', 
                                     value: QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + 
-                                    `${operation ? operation : ''}`});
+                                    `${operation != undefined ? operation : ''}`});
                             } else {
                                 attrs.push({
                                     label: enrichment.DisplayName + ': '
