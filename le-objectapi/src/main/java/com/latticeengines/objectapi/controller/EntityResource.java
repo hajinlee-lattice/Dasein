@@ -55,16 +55,12 @@ public class EntityResource {
     @PostMapping(value = "/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public Mono<DataPage> getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+    public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
             @RequestParam(value = "sqlUser", required = false) String sqlUser,
             @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
         final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
-        final Tenant tenant = MultiTenantContext.getTenant();
-        return Mono.fromCallable(() -> {
-            MultiTenantContext.setTenant(tenant);
-            return entityQueryService.getData(frontEndQuery, version, finalSqlUser, enforceTranslation);
-        });
+        return entityQueryService.getData(frontEndQuery, version, finalSqlUser, enforceTranslation);
 
     }
 

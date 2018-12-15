@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -396,6 +395,9 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 .collectList().block();
         if (retainAttrNames == null) {
             retainAttrNames = new ArrayList<>();
+        }
+        if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
+            retainAttrNames.add(InterfaceName.LatticeAccountId.name());
         }
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());

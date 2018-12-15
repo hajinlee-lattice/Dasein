@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -33,13 +35,11 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -286,18 +286,29 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 frontEndQuery.setAccountRestriction(accountRestriction);
                 return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
             case CONTACT:
+                frontEndQuery = new FrontEndQuery();
+                frontEndQuery.setMainEntity(BusinessEntity.Contact);
+                long allContacts = ratingProxy
+                        .getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                log.debug("There are " + allContacts + " contacts in total.");
+
                 Restriction nullAccountId = Restriction.builder()
                         .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                        .isNull()
+                        .isNotNull()
                         .build();
-
                 FrontEndRestriction contactRestriction = new FrontEndRestriction();
                 contactRestriction.setRestriction(nullAccountId);
-
                 frontEndQuery = new FrontEndQuery();
                 frontEndQuery.setMainEntity(BusinessEntity.Contact);
                 frontEndQuery.setAccountRestriction(contactRestriction);
-                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                long nonOrphanContacts = ratingProxy
+                        .getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                log.debug("There are " + nonOrphanContacts + " non-orphan contacts.");
+
+                long orphanContacts = allContacts - nonOrphanContacts;
+                log.debug("There are " + orphanContacts + " orphan contacts.");
+
+                return orphanContacts;
             case TRANSACTION:
                 default:
                 return 0;
