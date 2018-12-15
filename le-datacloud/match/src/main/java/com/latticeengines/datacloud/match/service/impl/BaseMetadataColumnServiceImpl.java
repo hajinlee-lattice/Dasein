@@ -13,8 +13,10 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
@@ -156,7 +158,14 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     private void refreshCacheForVersion(String dataCloudVersion) {
         new Thread(() -> {
             log.info("Start loading black and white column caches for version " + dataCloudVersion);
-            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion).sequential().collectList().block();
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10);
+            List<E> columns = retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt=" + (ctx.getRetryCount() + 1) //
+                            + " get all columns for version " + dataCloudVersion);
+                }
+                return getMetadataColumnEntityMgr().findAll(dataCloudVersion).sequential().collectList().block();
+            });
             log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);
             ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
             for (E column : columns) {
