@@ -9,7 +9,6 @@ function set_version() {
     exit -1
   fi
   CURRENT_VERSION=$(get_version)
-  CURRENT_VERSION="4.13.0-SNAPSHOT"
   echo "Change version from ${CURRENT_VERSION} to ${TARGET_VERSION}"
   for i in $(grep -rnl "${CURRENT_VERSION}" --include "*.xml" --exclude-dir .git .);
   do
