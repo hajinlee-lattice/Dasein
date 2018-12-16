@@ -8,13 +8,13 @@
     <description>LE Oauth2 TOMCAT RPM</description>
 
     <properties>
-        <le.rpm.version>4.13.0-SNAPSHOT</le.rpm.version>
+        <le.rpm.version>4.14.0-SNAPSHOT</le.rpm.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.13.0-SNAPSHOT</version>
+        <version>4.14.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
