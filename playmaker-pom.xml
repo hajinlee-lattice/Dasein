@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-playmaker-toplevel</artifactId>
-    <version>4.13.0-SNAPSHOT</version>
+    <version>4.14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Lattice Playmaker Module</name>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.13.0-SNAPSHOT</version>
+        <version>4.14.0-SNAPSHOT</version>
         <relativePath>le-parent</relativePath>
     </parent>
 
