@@ -18,10 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -381,16 +379,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
-        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
-        filterGroups.add(ColumnSelection.Predefined.ID);
-        filterGroups.add(ColumnSelection.Predefined.LookupId);
-
         List<String> retainAttrNames = servingStoreProxy
                 .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
                         tableFromActiveVersion ? active : inactive) //
                 .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
-                .filter(cm -> Boolean.TRUE.equals(cm.getCanSegment())
-                        || filterGroups.stream().anyMatch(cm::isEnabledFor)) //
+                .filter(cm -> !Boolean.FALSE.equals(cm.getCanSegment())) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
         if (retainAttrNames == null) {

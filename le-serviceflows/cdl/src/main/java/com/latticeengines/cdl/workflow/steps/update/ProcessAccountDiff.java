@@ -207,7 +207,8 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
-        List<String> retainAttrNames = servingStoreProxy.getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
+        List<String> retainAttrNames = servingStoreProxy //
+                .getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
         if (retainAttrNames == null) {
