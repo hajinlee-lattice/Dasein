@@ -61,14 +61,11 @@
             <AppenderRef ref="RollingFile"/>
             <AppenderRef ref="DebugGateway"/>
         </Logger>
-        <Logger name="com.latticeengines.monitor.exposed.metrics.impl" additivity="false" level="DEBUG">
+        <Logger name="com.latticeengines.security.provider.internal.RestInternalFilter" additivity="false" level="INFO">
             <AppenderRef ref="ConsoleDebug"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>
-        <Logger name="com.latticeengines.monitor.metric.service.impl" additivity="false" level="DEBUG">
-            <AppenderRef ref="ConsoleDebug"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
+
     </Loggers>
 
 </Configuration>
