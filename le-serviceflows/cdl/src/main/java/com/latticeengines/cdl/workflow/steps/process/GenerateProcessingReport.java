@@ -227,9 +227,16 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     private Map<OrphanRecordsType, Long> retrieveOrphanEntityCnts() {
         Map<OrphanRecordsType, Long> orphanCnts = new HashMap<>();
-        orphanCnts.put(OrphanRecordsType.UNMATCHED_ACCOUNT, countOrphansInRedshift(OrphanRecordsType.UNMATCHED_ACCOUNT));
-        orphanCnts.put(OrphanRecordsType.CONTACT, countOrphansInRedshift(OrphanRecordsType.CONTACT));
-
+        try {
+            orphanCnts.put(OrphanRecordsType.UNMATCHED_ACCOUNT, countOrphansInRedshift(OrphanRecordsType.UNMATCHED_ACCOUNT));
+        } catch (Exception e) {
+            log.warn("Failed to get the number of unmatched accounts", e);
+        }
+        try {
+            orphanCnts.put(OrphanRecordsType.CONTACT, countOrphansInRedshift(OrphanRecordsType.CONTACT));
+        } catch (Exception e) {
+            log.warn("Failed to get the number of orphan contacts", e);
+        }
         return orphanCnts;
     }
 
@@ -273,42 +280,62 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         FrontEndQuery frontEndQuery;
         switch (orphanRecordsType) {
             case UNMATCHED_ACCOUNT:
-                Restriction nullLatticeAccountId = Restriction.builder()
-                        .let(BusinessEntity.Account, InterfaceName.LatticeAccountId.name())
-                        .isNull()
-                        .build();
-
-                FrontEndRestriction accountRestriction = new FrontEndRestriction();
-                accountRestriction.setRestriction(nullLatticeAccountId);
-
-                frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Account);
-                frontEndQuery.setAccountRestriction(accountRestriction);
-                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                        BusinessEntity.Account.getServingStore(), inactive);
+                if (StringUtils.isNotBlank(tableName)) {
+                    Restriction nullLatticeAccountId = Restriction.builder()
+                            .let(BusinessEntity.Account, InterfaceName.LatticeAccountId.name())
+                            .isNull()
+                            .build();
+                    FrontEndRestriction accountRestriction = new FrontEndRestriction();
+                    accountRestriction.setRestriction(nullLatticeAccountId);
+                    frontEndQuery = new FrontEndQuery();
+                    frontEndQuery.setMainEntity(BusinessEntity.Account);
+                    frontEndQuery.setAccountRestriction(accountRestriction);
+                    return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                } else {
+                    log.info("There is no account serving store, return 0 as the number of unmatched accounts.");
+                    return 0L;
+                }
             case CONTACT:
-                frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                long allContacts = ratingProxy
-                        .getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
-                log.debug("There are " + allContacts + " contacts in total.");
+                String contactTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                        BusinessEntity.Contact.getServingStore(), inactive);
+                if (StringUtils.isNotBlank(contactTable)) {
+                    frontEndQuery = new FrontEndQuery();
+                    frontEndQuery.setMainEntity(BusinessEntity.Contact);
+                    long allContacts = ratingProxy
+                            .getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                    log.debug("There are " + allContacts + " contacts in total.");
 
-                Restriction nullAccountId = Restriction.builder()
-                        .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                        .isNotNull()
-                        .build();
-                FrontEndRestriction contactRestriction = new FrontEndRestriction();
-                contactRestriction.setRestriction(nullAccountId);
-                frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                frontEndQuery.setAccountRestriction(contactRestriction);
-                long nonOrphanContacts = ratingProxy
-                        .getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
-                log.debug("There are " + nonOrphanContacts + " non-orphan contacts.");
+                    String accountTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                            BusinessEntity.Account.getServingStore(), inactive);
+                    if (StringUtils.isNotBlank(accountTable)) {
+                        Restriction nullAccountId = Restriction.builder()
+                                .let(BusinessEntity.Account, InterfaceName.AccountId.name())
+                                .isNotNull()
+                                .build();
+                        FrontEndRestriction contactRestriction = new FrontEndRestriction();
+                        contactRestriction.setRestriction(nullAccountId);
+                        frontEndQuery = new FrontEndQuery();
+                        frontEndQuery.setMainEntity(BusinessEntity.Contact);
+                        frontEndQuery.setAccountRestriction(contactRestriction);
+                        long nonOrphanContacts = ratingProxy
+                                .getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                        log.debug("There are " + nonOrphanContacts + " non-orphan contacts.");
 
-                long orphanContacts = allContacts - nonOrphanContacts;
-                log.debug("There are " + orphanContacts + " orphan contacts.");
+                        long orphanContacts = allContacts - nonOrphanContacts;
+                        log.debug("There are " + orphanContacts + " orphan contacts.");
 
-                return orphanContacts;
+                        return orphanContacts;
+                    } else {
+                        log.info("There is only contact serving store but no account serving store, all " //
+                                + allContacts + " contacts are orphan.");
+                        return allContacts;
+                    }
+                } else {
+                    log.info("There is no contact serving store, return 0 as the number of orphan contacts.");
+                    return 0L;
+                }
             case TRANSACTION:
                 default:
                 return 0;
