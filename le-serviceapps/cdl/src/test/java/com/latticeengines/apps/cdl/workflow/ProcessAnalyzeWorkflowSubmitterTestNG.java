@@ -48,6 +48,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long COMPLETE_ACTION_1_PID = 4L;
     private static final Long COMPLETE_ACTION_2_PID = 5L;
     private static final Long PROBLEMATIC_ACTION_NO_TRACKING_ID_PID = 6L;
+    private static final Long CANCEL_ACTION_1_PID = 7L;
+    private static final Long CANCEL_ACTION_2_PID = 8L;
     private static final Long RUNNING_ACTION_1_TRACKING_PID = 101L;
     private static final Long RUNNING_ACTION_2_TRACKING_PID = 102L;
     private static final Long RUNNING_ACTION_1_TRACKING_ID = 1101L;
@@ -58,6 +60,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long COMPLETE_ACTION_2_TRACKING_ID = 1104L;
     private static final Long DEFAULT_WORKFLOW_ID = 200L;
     private static final Long DEFAULT_WORKFLOW_PID = 201L;
+    private static final boolean IS_CANCEL = true;
 
     @Mock
     private ActionService actionService;
@@ -82,6 +85,19 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
         Assert.assertNotNull(list);
         Assert.assertTrue(CollectionUtils.isEmpty(list));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
+    public void testGetNoCancelActionAndJobIds() {
+        when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
+        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        Assert.assertNotNull(list);
+        log.info(String.format("actionIds=%s", list));
+
+        Assert.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assert.assertEquals(list.size(), 1);
+        Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
     }
 
     @Test(groups = "functional")
@@ -273,5 +289,24 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         actions.add(action);
         return actions;
     }
+
+    private List<Action> generateCancelActions() {
+        List<Action> actions = new ArrayList<>(generateMetadataChangeActions());
+        Action cancelAction1 = new Action();
+        cancelAction1.setPid(CANCEL_ACTION_1_PID);
+        cancelAction1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        cancelAction1.setActionConfiguration(new ImportActionConfiguration());
+        cancelAction1.setCanceled(IS_CANCEL);
+        Action cancelAction2 = new Action();
+        cancelAction2.setPid(CANCEL_ACTION_2_PID);
+        cancelAction2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        cancelAction2.setActionConfiguration(new ImportActionConfiguration());
+        cancelAction2.setCanceled(IS_CANCEL);
+
+        actions.add(cancelAction1);
+        actions.add(cancelAction2);
+        return actions;
+    }
+
 
 }

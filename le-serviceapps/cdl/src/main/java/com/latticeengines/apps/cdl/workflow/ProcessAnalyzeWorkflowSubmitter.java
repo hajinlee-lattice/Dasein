@@ -189,7 +189,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ActionType.CDL_OPERATION_WORKFLOW);
         // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobPidStrs = actions.stream()
-                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null)
+                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null && !action.getCanceled())
                 .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
         log.info(String.format("importAndDeleteJobPidStrs are %s", importAndDeleteJobPidStrs));
         List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
