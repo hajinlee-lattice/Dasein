@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.testframework.SparkFunctionalTestNGBase;
 
+import java.util.Collections;
+
 public class LivySessionServiceImplTestNG extends SparkFunctionalTestNGBase {
 
     @Inject
@@ -32,7 +34,7 @@ public class LivySessionServiceImplTestNG extends SparkFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCrud() {
-        LivySession session = sessionService.startSession(livyHost, this.getClass().getSimpleName());
+        LivySession session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), Collections.emptyMap());
         Assert.assertNotNull(session);
         Assert.assertNotNull(session.getSessionId());
 

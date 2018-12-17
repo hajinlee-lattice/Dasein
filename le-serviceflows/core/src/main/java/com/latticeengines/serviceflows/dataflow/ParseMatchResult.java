@@ -22,6 +22,9 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 
+/**
+ * For the time being, changes made to this dataflow should also be made to ParseMatchResultJob
+ */
 @Component("parseMatchResult")
 public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultParameters> {
 

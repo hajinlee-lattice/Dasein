@@ -16,7 +16,7 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
 
   override def runJob(spark: SparkSession, stageInput: List[DataFrame]): (Map[Integer, DataFrame], String) = {
     // read input
-    val matchResult: DataFrame = stageInput(0)
+    val matchResult: DataFrame = stageInput.head
     val sourceTable: DataFrame = if (stageInput.size == 2) stageInput(1) else null
 
     val config: ParseMatchResultJobConfig = getConfig

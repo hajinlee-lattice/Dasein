@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +39,17 @@ public class LivySessionServiceImpl implements LivySessionService {
     private ObjectMapper om = new ObjectMapper();
 
     @Override
-    public LivySession startSession(String host, String name) {
+    public LivySession startSession(@NotNull String host, @NotNull String name, Map<String, String> sparkConf) {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
         if (StringUtils.isNotBlank(name)) {
             payLoad.put("name", name);
         }
         Map<String, String> conf = new HashMap<>();
-        conf.put("spark.dynamicAllocation.maxExecutors", "16");
         conf.put("spark.jars.packages", getSparkPackages());
+        if (MapUtils.isNotEmpty(sparkConf)) {
+            conf.putAll(sparkConf);
+        }
         payLoad.put("conf", conf);
         WebClient webClient = getWebClient(host);
         String resp = webClient.method(HttpMethod.POST).uri(URI_SESSIONS).syncBody(payLoad) //

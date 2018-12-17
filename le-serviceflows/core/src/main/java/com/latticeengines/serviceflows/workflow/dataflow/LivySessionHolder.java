@@ -1,5 +1,7 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -24,6 +26,21 @@ public class LivySessionHolder {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${dataflowapi.spark.driver.cores}")
+    private String driverCores;
+
+    @Value("${dataflowapi.spark.driver.mem}")
+    private String driverMem;
+
+    @Value("${dataflowapi.spark.executor.cores}")
+    private String executorCores;
+
+    @Value("${dataflowapi.spark.executor.mem}")
+    private String executorMem;
+
+    @Value("${dataflowapi.spark.max.executors}")
+    private String maxExecutors;
+
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
     public LivySession getOrCreateLivySession(String jobName) {
@@ -39,7 +56,7 @@ public class LivySessionHolder {
             if (StringUtils.isBlank(jobName)) {
                 jobName = "Workflow";
             }
-            session = sessionService.startSession(livyHost,jobName);
+            session = sessionService.startSession(livyHost, jobName, getSparkConf());
             livySessionHolder.set(session);
         }
         return session;
@@ -51,6 +68,16 @@ public class LivySessionHolder {
             livySessionHolder.set(null);
             sessionService.stopSession(session);
         }
+    }
+
+    private Map<String, String> getSparkConf() {
+        Map<String, String> conf = new HashMap<>();
+        conf.put("spark.driver.cores", driverCores);
+        conf.put("spark.driver.memory", driverMem);
+        conf.put("spark.executor.cores", executorCores);
+        conf.put("spark.executor.memory", executorMem);
+        conf.put("spark.dynamicAllocation.maxExecutors", maxExecutors);
+        return conf;
     }
 
 }

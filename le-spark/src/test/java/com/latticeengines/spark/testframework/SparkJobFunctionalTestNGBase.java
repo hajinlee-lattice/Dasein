@@ -40,9 +40,9 @@ import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.SparkScript;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
-import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
@@ -90,7 +90,7 @@ abstract public class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         } else {
             livyHost = "http://localhost:8998";
         }
-        session = sessionService.startSession(livyHost, this.getClass().getSimpleName());
+        session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), Collections.emptyMap());
     }
 
     protected void reuseLivyEnvironment(int sessionId) {
