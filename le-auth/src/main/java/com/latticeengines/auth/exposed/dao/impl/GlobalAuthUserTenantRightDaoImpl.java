@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.dao.GlobalAuthUserTenantRightDao;
+import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
@@ -72,7 +73,8 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         } else {
             for (int i = 0; i < list.size(); i++) {
                 GlobalAuthUserTenantRight gaTenantRight = (GlobalAuthUserTenantRight) list.get(i);
-                users.add(gaTenantRight.getGlobalAuthUser());
+                GlobalAuthUser gaUser = HibernateUtils.inflateDetails(gaTenantRight.getGlobalAuthUser());
+                users.add(gaUser);
             }
             return users;
         }
