@@ -10,6 +10,8 @@ public interface ActionProxy {
 
     Action updateAction(String customerSpace, Action action);
 
+    Action cancelAction(String customerSpace, Long actionPid);
+
     List<Action> getActions(String customerSpace);
 
     List<Action> getActionsByOwnerId(String customerSpace, Long ownerId);

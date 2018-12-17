@@ -76,7 +76,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
-            Collection<String> bccRecipients) {
+                                   Collection<String> bccRecipients) {
         if (emailEnabled) {
             EmailUtils.sendMultiPartEmail(subject, content, recipients, bccRecipients, emailsettings);
         }
@@ -437,7 +437,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName,
-            boolean internal) {
+                                                  boolean internal) {
         try {
             log.info("Sending PLS create model (" + modelName + ") complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -469,7 +469,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName,
-            boolean internal) {
+                                             boolean internal) {
         try {
             log.info("Sending PLS create model (" + modelName + ") error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -500,7 +500,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName,
-            boolean internal) {
+                                            boolean internal) {
         try {
             log.info("Sending PLS scoring (" + modelName + ") complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -532,7 +532,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName,
-            boolean internal) {
+                                       boolean internal) {
         try {
             log.info("Sending PLS scoring (" + modelName + ") error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -586,7 +586,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
-            String emailAddress, EmailSettings settings) {
+                                               String emailAddress, EmailSettings settings) {
         try {
             log.info("Sending global auth forget creds email to " + emailAddress + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -610,7 +610,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsEnrichInternalAttributeCompletionEmail(User user, String hostport, String tenantName,
-            String modelName, boolean internal, List<String> internalAttributes) {
+                                                              String modelName, boolean internal, List<String> internalAttributes) {
         try {
             log.info("Sending PLS enrich internal attribute (" + modelName + ") complete email to " + user.getEmail()
                     + " started.");
@@ -628,7 +628,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsEnrichInternalAttributeErrorEmail(User user, String hostport, String tenantName,
-            String modelName, boolean internal, List<String> internalAttributes) {
+                                                         String modelName, boolean internal, List<String> internalAttributes) {
         try {
             log.info("Sending PLS enrich internal attribute (" + modelName + ") error email to " + user.getEmail()
                     + " started.");
@@ -688,16 +688,16 @@ public class EmailServiceImpl implements EmailService {
             EmailTemplateBuilder builder;
             String inProgressSubject;
             switch (type) {
-            case EXPORT_TYPE_SEGMENT:
-                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_RUNNING);
-                inProgressSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT;
-                break;
-            case EXPORT_TYPE_ORPHANS:
-                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_RUNNING);
-                inProgressSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT;
-                break;
-            default:
-                throw new RuntimeException("Unknown export type. Type=" + type);
+                case EXPORT_TYPE_SEGMENT:
+                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_RUNNING);
+                    inProgressSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT;
+                    break;
+                case EXPORT_TYPE_ORPHANS:
+                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_RUNNING);
+                    inProgressSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT;
+                    break;
+                default:
+                    throw new RuntimeException("Unknown export type. Type=" + type);
             }
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{requestType}}", requestType);
@@ -711,22 +711,22 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendPlsExportSuccessEmail(User user, String hostport, String exportId, String exportType,
-            String requestType) {
+                                           String requestType) {
         try {
             log.info(String.format("Sending %s export complete email to %s started.", exportType, user.getEmail()));
             EmailTemplateBuilder builder;
             String successSubject;
             switch (exportType) {
-            case EXPORT_TYPE_SEGMENT:
-                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_SUCCESS);
-                successSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT;
-                break;
-            case EXPORT_TYPE_ORPHANS:
-                builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_SUCCESS);
-                successSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT;
-                break;
-            default:
-                throw new RuntimeException("Unknown export type. Type=" + exportType);
+                case EXPORT_TYPE_SEGMENT:
+                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_SEGMENT_SUCCESS);
+                    successSubject = EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT;
+                    break;
+                case EXPORT_TYPE_ORPHANS:
+                    builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_SUCCESS);
+                    successSubject = EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT;
+                    break;
+                default:
+                    throw new RuntimeException("Unknown export type. Type=" + exportType);
             }
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
@@ -748,8 +748,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendEmailForEnrichInternalAttribute(User user, String hostport, String tenantName, String modelName,
-            boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,
-            String emailSubject) throws IOException, MessagingException {
+                                                     boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,
+                                                     String emailSubject) throws IOException, MessagingException {
         EmailTemplateBuilder builder;
         if (internal) {
             builder = new EmailTemplateBuilder(internalEmailTemplate);
@@ -980,6 +980,29 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send s3 template update notification to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsActionCancelSuccessEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS action cancel success email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{completemsg}}", EmailSettings.PLS_ACTION_CANCEL_SUCCESS_MSG);
+            builder.replaceToken("{{currentstep}}", "");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail(EmailSettings.PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT, mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending PLS action cancel success email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error(
+                    "Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 }

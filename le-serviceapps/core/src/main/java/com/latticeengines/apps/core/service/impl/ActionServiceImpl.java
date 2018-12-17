@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("actionService")
@@ -101,6 +102,20 @@ public class ActionServiceImpl implements ActionService {
     @Override
     public List<Action> findByPidIn(List<Long> actionPids) {
         return actionEntityMgr.findByPidIn(actionPids);
+    }
+
+
+    @Override
+    public Action cancel(Long actionPid) {
+        if (actionPid != null) {
+            Action action = findByPid(actionPid);
+            if (action != null && action.getOwnerId() == null && ActionType.CDL_DATAFEED_IMPORT_WORKFLOW == action.getType()) {
+                actionEntityMgr.cancel(actionPid);
+            }
+            action = findByPid(actionPid);
+            return action;
+        }
+        return null;
     }
 
 }

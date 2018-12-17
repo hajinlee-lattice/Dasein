@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -64,11 +65,17 @@ public class ActionResource {
         return actionService.update(action);
     }
 
+    @GetMapping(value = "")
+    @ApiOperation(value = "Save purchase metrics")
+    public Action cancel(@PathVariable String customerSpace, @RequestParam(name = "actionPid") Long actionPid) {
+        return actionService.cancel(actionPid);
+    }
+
     @PutMapping(value = "/ownerid")
     @ApiOperation(value = "Save purchase metrics")
     public void patchOwnerId(@PathVariable String customerSpace, //
-            @RequestParam(name = "pids", required = false) List<Long> pids, //
-            @RequestParam(name = "ownerId", required = false) Long ownerId) {
+                             @RequestParam(name = "pids", required = false) List<Long> pids, //
+                             @RequestParam(name = "ownerId", required = false) Long ownerId) {
         actionService.patchOwnerIdByPids(ownerId, pids);
     }
 

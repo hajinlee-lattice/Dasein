@@ -23,4 +23,6 @@ public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
 
     List<Action> findByPidIn(List<Long> actionPids);
 
+    void cancel(Long actionPid);
+
 }

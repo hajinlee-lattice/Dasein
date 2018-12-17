@@ -63,6 +63,8 @@ public class EmailSettings {
     public static final String S3_TEMPLATE_UPDATE_SUBJECT = " Template %s has been updated";
     public static final String S3_TEMPLATE_CREATE_SUBJECT = " Template %s has been created";
     public static final String LATTICE_HELP_CENTER_URL = "http://help.lattice-engines.com";
+    public static final String PLS_ACTION_CANCEL_SUCCESS_MSG = "This action is canceled successfully.";
+    public static final String PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT = "Lead Prioritization - Action Cancel Successfully";
     private String from;
     private String password;
     private int port;

@@ -11,4 +11,6 @@ public interface ActionDao extends BaseDao<Action> {
 
     void updateOwnerIdIn(Long ownerId, List<Long> actionPids);
 
+    void cancel(Long actionPid);
+
 }

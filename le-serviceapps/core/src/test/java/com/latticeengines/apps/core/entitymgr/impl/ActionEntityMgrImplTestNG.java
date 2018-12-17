@@ -71,32 +71,32 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
     private ActionConfiguration generateActionConfig(int n) {
         ActionConfiguration ac;
         switch (n) {
-        case 0:
-            ac = new SegmentActionConfiguration();
-            ((SegmentActionConfiguration) ac).setSegmentName("Segment_abc");
-            break;
-        case 1:
-            ac = new RatingEngineActionConfiguration();
-            ((RatingEngineActionConfiguration) ac).setRatingEngineId("RatingEngine_abc");
-            ((RatingEngineActionConfiguration) ac)
-                    .setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
-            ((RatingEngineActionConfiguration) ac).setModelId("RatingModel_abc");
-            break;
-        case 2:
-            ac = new ActivityMetricsActionConfiguration();
-            ((ActivityMetricsActionConfiguration) ac).setActivated(Collections.emptyList());
-            ((ActivityMetricsActionConfiguration) ac).setUpdated(Collections.emptyList());
-            ((ActivityMetricsActionConfiguration) ac).setDeactivated(Collections.emptyList());
-            break;
-        case 3:
-            ac = new AttrConfigLifeCycleChangeConfiguration();
-            ((AttrConfigLifeCycleChangeConfiguration) ac)
-                    .setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
-            ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
-            ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
-        default:
-            ac = null;
-            break;
+            case 0:
+                ac = new SegmentActionConfiguration();
+                ((SegmentActionConfiguration) ac).setSegmentName("Segment_abc");
+                break;
+            case 1:
+                ac = new RatingEngineActionConfiguration();
+                ((RatingEngineActionConfiguration) ac).setRatingEngineId("RatingEngine_abc");
+                ((RatingEngineActionConfiguration) ac)
+                        .setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+                ((RatingEngineActionConfiguration) ac).setModelId("RatingModel_abc");
+                break;
+            case 2:
+                ac = new ActivityMetricsActionConfiguration();
+                ((ActivityMetricsActionConfiguration) ac).setActivated(Collections.emptyList());
+                ((ActivityMetricsActionConfiguration) ac).setUpdated(Collections.emptyList());
+                ((ActivityMetricsActionConfiguration) ac).setDeactivated(Collections.emptyList());
+                break;
+            case 3:
+                ac = new AttrConfigLifeCycleChangeConfiguration();
+                ((AttrConfigLifeCycleChangeConfiguration) ac)
+                        .setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
+                ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
+                ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
+            default:
+                ac = null;
+                break;
         }
         return ac;
     }
@@ -111,7 +111,21 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         Assert.assertEquals(retrievedActions.size(), 3);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreate" })
+    @Test(groups = "functional", dependsOnMethods = {"testCreate"})
+    public void testCancel() {
+        for (Action action : actions) {
+            System.out.println(JsonUtils.serialize(action));
+            cancelAction(action.getPid());
+        }
+        List<Action> retrievedActions = findAll();
+        for (Action action : retrievedActions) {
+            System.out.println(JsonUtils.serialize(action));
+            if (action.getOwnerId() == null)
+                Assert.assertTrue(action.getCanceled());
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testCancel"})
     public void testGet() {
         List<Action> actionsWithOwner = findByOwnerId(OWNER_ID);
         Assert.assertEquals(actionsWithOwner.size(), 1);
@@ -129,7 +143,7 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
                 actionsWithoutOwner.get(1).getActionConfiguration() instanceof ActivityMetricsActionConfiguration);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGet" })
+    @Test(groups = "functional", dependsOnMethods = {"testGet"})
     public void testUpdate() {
         Action actionWithoutOwner = findByOwnerId(null).get(0);
         actionWithoutOwner.setOwnerId(OWNER_ID);
@@ -148,7 +162,7 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         log.info(String.format("All actions are %s", Arrays.toString(actions.toArray())));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    @Test(groups = "functional", dependsOnMethods = {"testUpdate"})
     public void testDelete() {
         for (Action action : actions) {
             delete(action);
@@ -159,6 +173,10 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
     protected void createAction(Action action) {
         actionEntityMgr.create(action);
+    }
+
+    protected void cancelAction(Long actionPid) {
+        actionEntityMgr.cancel(actionPid);
     }
 
     protected List<Action> findAll() {

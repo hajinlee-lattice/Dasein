@@ -92,4 +92,9 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
         return actionRepository.findByPidIn(actionPids);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void cancel(Long actionPid) {
+        actionDao.cancel(actionPid);
+    }
 }

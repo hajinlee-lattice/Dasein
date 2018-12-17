@@ -10,6 +10,8 @@ DELIMITER
 CREATE PROCEDURE `UpdatePLSTables`()
   BEGIN
   alter table PLS_MultiTenant.ATLAS_DROPBOX add column REGION varchar(255);
+  ALTER TABLE `PLS_MultiTenant`.`ACTION`
+  ADD COLUMN `CANCELED` BIT(1) NULL DEFAULT b'0' COMMENT '0 Default 1 cancel' AFTER `FK_TENANT_ID`;
   END;
 //
 DELIMITER;

@@ -61,7 +61,7 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     private String actionInitiator;
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -85,6 +85,10 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "ACTION_CONFIGURATION", columnDefinition = "'JSON'")
     @Type(type = "json")
     private ActionConfiguration actionConfiguration;
+
+    @JsonProperty("canceled")
+    @Column(name = "CANCELED")
+    private Boolean canceled = false;
 
     @Override
     public Long getPid() {
@@ -172,6 +176,14 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
 
     public void setActionConfiguration(ActionConfiguration actionConfiguration) {
         this.actionConfiguration = actionConfiguration;
+    }
+
+    public Boolean getCanceled() {
+        return canceled;
+    }
+
+    public void setCanceled(Boolean canceled) {
+        this.canceled = canceled;
     }
 
     @Override

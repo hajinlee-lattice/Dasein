@@ -14,6 +14,8 @@ import com.latticeengines.domain.exposed.pls.Action;
 @Component("actionDao")
 public class ActionDaoImpl extends BaseDaoImpl<Action> implements ActionDao {
 
+    private static final Boolean is_CANCEL = true;
+
     @Override
     protected Class<Action> getEntityClass() {
         return Action.class;
@@ -42,6 +44,18 @@ public class ActionDaoImpl extends BaseDaoImpl<Action> implements ActionDao {
         Query query = session.createQuery(queryStr);
         query.setParameter("ownerId", ownerId);
         query.setParameterList("actionPids", actionPids);
+        query.executeUpdate();
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public void cancel(Long actionPid) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("update %s set canceled = :canceled where PID = :actionPid",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("canceled", is_CANCEL);
+        query.setParameter("actionPid", actionPid);
         query.executeUpdate();
     }
 

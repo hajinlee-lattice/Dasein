@@ -38,6 +38,13 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
     }
 
     @Override
+    public Action cancelAction(String customerSpace, Long actionPid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/actions?actionPid={actionPid}", //
+                shortenCustomerSpace(customerSpace), String.valueOf(actionPid));
+        return get("cancel action", url, Action.class);
+    }
+
+    @Override
     public List<Action> getActions(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/actions/find", shortenCustomerSpace(customerSpace));
         Map<String, Object> actionParameter = new HashMap<>();
