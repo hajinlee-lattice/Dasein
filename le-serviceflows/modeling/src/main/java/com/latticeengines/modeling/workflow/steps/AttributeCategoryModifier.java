@@ -55,6 +55,7 @@ public class AttributeCategoryModifier extends BaseWorkflowStep<AttributeCategor
         List<Attribute> attributes = eventTable.getAttributes();
         if (CollectionUtils.isNotEmpty(attributes)) {
             modifyAttributeCategoryIfNeeded(attributes);
+            modifyMyAttributeToAccountCategory(attributes);
             markLDCCategoryHiddenIfNeeded(excludeDataCloudAttributes, attributes);
             metadataProxy.updateTable(customerSpace, eventTable.getName(), eventTable);
             putObjectInContext(EVENT_TABLE, eventTable);
@@ -72,17 +73,34 @@ public class AttributeCategoryModifier extends BaseWorkflowStep<AttributeCategor
             if (category.isHiddenFromUi()) {
                 if (fullAttributeDropForCategories.contains(category)) {
                     log.info(String.format("Marking attribute '%s' (category '%s') hidden from remodeling UI",
-                            atr.getName(), category));
+                            atr.getName(), category.name()));
                     atr.setIsHiddenForRemodelingUI(true);
                 } else {
                     Category accAttributeCategory = Category.ACCOUNT_ATTRIBUTES;
                     log.info(String.format("Moving attribute %s of Category '%s' under '%s' category", atr.getName(),
-                            category.getName(), accAttributeCategory));
+                            category.name(), accAttributeCategory.name()));
 
-                    atr.setCategory(accAttributeCategory.getName());
+                    atr.setCategory(accAttributeCategory.name());
                 }
             }
         });
+    }
+
+    private void modifyMyAttributeToAccountCategory(List<Attribute> attributes) {
+        // workaround for PLS-11330 - if attribute category conflicts with
+        // display name of ACCOUNT_ATTRIBUTES category then change attribute
+        // category to ACCOUNT_ATTRIBUTES
+        String myAttributeCategory = Category.ACCOUNT_ATTRIBUTES.getName();
+
+        attributes.stream() //
+                .filter(atr -> myAttributeCategory.equals(atr.getCategory())) //
+                .forEach(atr -> {
+                    Category accAttributeCategory = Category.ACCOUNT_ATTRIBUTES;
+                    log.info(String.format("Moving attribute %s of Category '%s' under '%s' category", atr.getName(),
+                            myAttributeCategory, accAttributeCategory.name()));
+
+                    atr.setCategory(accAttributeCategory.name());
+                });
     }
 
     private void markLDCCategoryHiddenIfNeeded(boolean excludeDataCloudAttributes, List<Attribute> attributes) {
@@ -95,7 +113,7 @@ public class AttributeCategoryModifier extends BaseWorkflowStep<AttributeCategor
                 if (category.isLdcReservedCategory()) {
                     log.info(String.format(
                             "Marking attribute '%s' (category '%s') hidden from remodeling UI as data stores has excluded LDC sttributes",
-                            atr.getName(), category));
+                            atr.getName(), category.name()));
                     atr.setIsHiddenForRemodelingUI(true);
                 }
             });
