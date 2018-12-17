@@ -332,7 +332,7 @@ angular.module('common.datacloud.query.results', [
                         }
 
                         //only sets topNCount here if coming in for the first time
-                        if(vm.topNCount){
+                        if(vm.topNCount == null){
                             vm.topNCount = vm.counts.accounts.value;
                             PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
                         }
@@ -579,8 +579,8 @@ angular.module('common.datacloud.query.results', [
         // });
         sections.total = vm.accountsCoverage.accountCount + vm.accountsCoverage.unscoredAccountCount;
 
-        sections.unscored = (vm.launchUnscored ? vm.unscoredAccounts.total : 0);
-        sections.selected += sections.unscored;
+        // sections.unscored = (vm.launchUnscored ? vm.unscoredAccounts.total : 0);
+        // sections.selected += sections.unscored;
 
         var _contacts = 0;
         for(var i in vm.selectedBuckets) {
