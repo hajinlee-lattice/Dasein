@@ -157,7 +157,11 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true
                 : this.enableDebugSlowSql;
         if (enableDebugSlowSql) {
-            cpds.setUnreturnedConnectionTimeout(30);
+            int timeoutInSeconds = 30;
+            if (Environment.AppMaster == currentEnv) {
+                timeoutInSeconds = 120;
+            }
+            cpds.setUnreturnedConnectionTimeout(timeoutInSeconds);
             cpds.setDebugUnreturnedConnectionStackTraces(true);
         }
 
