@@ -79,7 +79,7 @@
                         class="text-right"
                         ng-if="expectedValueModel && averageRevenue">
                         <p>
-                            ${{averageRevenue}}<br/>
+                            ${{averageRevenue | number: 2}}<br/>
                             Average Revenue
                         </p>
                     </div>

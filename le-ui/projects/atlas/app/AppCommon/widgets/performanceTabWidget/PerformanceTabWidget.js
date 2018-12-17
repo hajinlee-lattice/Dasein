@@ -7,13 +7,17 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
 .directive('performanceTabWidget', function () {
     return {
         templateUrl: 'app/AppCommon/widgets/performanceTabWidget/PerformanceTabTemplate.html',
-        controller: ['$scope', '$filter', 'ResourceUtility', function ($scope, $filter, ResourceUtility) {
+        controller: ['$scope', '$filter', 'ResourceUtility', 'RatingsEngineStore', function ($scope, $filter, ResourceUtility, RatingsEngineStore) {
             //if ($scope.data == null) return;
 
+            var ratingEngine = RatingsEngineStore.getCurrentRating(),
+                expectedValueModel = ratingEngine.latest_iteration.AI.predictionType == "EXPECTED_VALUE" ? true : false;
+
+            $scope.conversionsOrRevenue = expectedValueModel ? 'Revenue' : 'Conversions';
             $scope.threasholdData = $scope.data.ThresholdChartData;
             $scope.sourceSchemaType = $scope.data.ModelDetails.SourceSchemaInterpretation;
 
-            $scope.decileData = [[ ResourceUtility.getString("DECILE_GRID_CONVERSIONS") ]];
+            $scope.decileData = [[ "% Total " + $scope.conversionsOrRevenue ]];
             $scope.data.ThresholdDecileData.forEach(function(d){
                 $scope.decileData[0].push($filter("number")(d, 0) + "%");
             });

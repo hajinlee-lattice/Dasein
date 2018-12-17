@@ -6,6 +6,8 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     var widgetConfig = $scope.widgetConfig;
     var modelSummary = $scope.data;
 
+    console.log($scope);
+
     if (modelSummary == null) {
         return;
     }

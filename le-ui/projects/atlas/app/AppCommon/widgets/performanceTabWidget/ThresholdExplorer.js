@@ -5,12 +5,23 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
     return {
         template: '<div id="thresholdExplorerChart" class="threshold-explorer-chart"></div>',
         scope: {data: "=", source: '='},
-        controller: function ($scope, ResourceUtility) {
+        controller: function ($scope, ResourceUtility, RatingsEngineStore) {
             if ($scope.data == null) {
                 return;
             }
 
-            var data = $scope.data;
+            var data = $scope.data,
+                ratingEngine = RatingsEngineStore.getCurrentRating(),
+                expectedValueModel = ratingEngine.latest_iteration.AI.predictionType == "EXPECTED_VALUE" ? true : false,
+                THRESHOLD_EXPLORER_CONVERSION_LABEL = ResourceUtility.getString("THRESHOLD_EXPLORER_CONVERSION_LABEL"),
+                THRESHOLD_EXPLORER_Y_AXIS_LABEL = ResourceUtility.getString("THRESHOLD_EXPLORER_Y_AXIS_LABEL");
+
+            if (expectedValueModel){
+                THRESHOLD_EXPLORER_CONVERSION_LABEL = "% Rev";
+                THRESHOLD_EXPLORER_Y_AXIS_LABEL = "% Total Revenue"
+            }
+
+
             var targetSet = true;
             //==================================================
             // Specify Dimensions
@@ -160,7 +171,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 .style("font-size", "12px")
                 .style("font-family", "ProximaNova-Semibold")
                 .style("fill", "#aaa")
-                .text(ResourceUtility.getString("THRESHOLD_EXPLORER_Y_AXIS_LABEL"));
+                .text(THRESHOLD_EXPLORER_Y_AXIS_LABEL);
 
             //==================================================
             // Apply Tick Coloring
@@ -286,7 +297,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 .style("fill", "#333")
                 .style("font-size", "11px")
                 .style("font-family", "ProximaNova-Bold")
-                .text(ResourceUtility.getString("THRESHOLD_EXPLORER_CONVERSION_LABEL"));
+                .text(THRESHOLD_EXPLORER_CONVERSION_LABEL);
 
             infoElements.append("text")
                 .attr("class", "xtext")

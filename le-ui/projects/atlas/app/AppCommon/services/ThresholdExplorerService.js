@@ -1,8 +1,7 @@
 angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.service('ThresholdExplorerService', function (ResourceUtility) {
-
+.service('ThresholdExplorerService', function (ResourceUtility, RatingsEngineStore) {
     this.PrepareData = function (modelSummary) {
 
         if (modelSummary == null ||
@@ -24,11 +23,24 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         //==================================================
         // Prepare
         //==================================================
-        var totalLeads = modelSummary.ModelDetails.TestingLeads;
-        var totalConversions = modelSummary.ModelDetails.TestingConversions;
-        var avgConversion = totalConversions / totalLeads;
+        // var totalLeads = modelSummary.ModelDetails.TestingLeads;
+        // var totalConversions = modelSummary.ModelDetails.TestingConversions;
+
+        Array.prototype.sum = function (prop) {
+            var total = 0
+            for ( var i = 0, _len = this.length; i < _len; i++ ) {
+                total += this[i][prop]
+            }
+            return total
+        }
 
         var segments = modelSummary.Segmentations[0].Segments;
+
+        console.log(segments);
+        var totalLeads = segments.sum("Count");
+        var totalConversions = segments.sum("Converted");
+
+        var avgConversion = totalConversions / totalLeads;
 
         var percentLeads = []; for (i = 0; i < 101; i++) percentLeads.push(i);
 
@@ -74,7 +86,6 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
                 "leftLift": leftLift[i],
                 "rightLift": rightLift[i]});
         }
-
         return data;
     };
 
@@ -106,10 +117,18 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
 
         var segments = modelSummary.Segmentations[0].Segments;
 
+        var ratingEngine = RatingsEngineStore.getCurrentRating(),
+            expectedValueModel = ratingEngine.latest_iteration.AI.predictionType == "EXPECTED_VALUE" ? true : false,
+            percentTotalLabel = expectedValueModel ? '% Total Revenue' : '% Total Conversions';
+
+        console.log(ratingEngine);
+        console.log(expectedValueModel);
+        console.log(percentTotalLabel);
+
         var columns = [
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_SCORE_LABEL"),
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_LEADS_LABEL"),
-            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_CONVERSIONS_LABEL"),
+            percentTotalLabel,
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_LEFT_LIFT_LABEL"),
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_RIGHT_LIFT_LABEL"),
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_COUNT_LABEL"),
