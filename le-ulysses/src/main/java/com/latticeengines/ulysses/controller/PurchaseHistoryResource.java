@@ -88,9 +88,7 @@ public class PurchaseHistoryResource {
                 String accountId = accountData.getData().get(0).get(InterfaceName.AccountId.name()).toString();
                 List<PeriodTransaction> periodTransactions = periodTransactionProxy.getPeriodTransactionsByAccountId(
                         customerSpace, accountId, defaultPeriodName, ProductType.Spending);
-                if (CollectionUtils.isEmpty(periodTransactions)) {
-                    throw new LedpException(LedpCode.LEDP_39006, new String[] { crmAccountId, customerSpace });
-                }
+
                 BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
                 LocalDate startDate;
                 if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
@@ -134,10 +132,6 @@ public class PurchaseHistoryResource {
         try {
             List<PeriodTransaction> periodTransactions = periodTransactionProxy
                     .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment, defaultPeriodName);
-
-            if (CollectionUtils.isEmpty(periodTransactions)) {
-                throw new LedpException(LedpCode.LEDP_39006, new String[] { spendAnalyticsSegment, customerSpace });
-            }
 
             BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
             LocalDate startDate;
