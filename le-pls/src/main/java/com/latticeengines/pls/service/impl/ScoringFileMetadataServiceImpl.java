@@ -235,6 +235,11 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation()).apply(function);
         }
 
+        if (sourceFile.getTableName() != null) {
+            String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+            metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
+        }
+
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
 
