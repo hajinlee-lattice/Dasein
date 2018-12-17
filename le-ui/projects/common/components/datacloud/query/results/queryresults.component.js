@@ -603,9 +603,6 @@ angular.module('common.datacloud.query.results', [
             sections.launched = vm.topNCount;
         }
 
-        console.log("contact count" + vm.accountsCoverage.contactCount);
-        console.log("unscored contact count" + vm.accountsCoverage.unscoredContactCount);
-
         sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
         sections.contacts = _contacts; //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 
