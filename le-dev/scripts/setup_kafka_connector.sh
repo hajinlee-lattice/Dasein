@@ -23,7 +23,8 @@ hadoop_conf_dir=/usr/hdp/current/hadoop-client/etc/hadoop
 
 s3_access_key=bi0mpJJNxiYpEka5C6JO4ofA43zqN8j2DOdjzBK7RLkC0BCc3fYYA7HFzohW9BsMO/IEe1eKqoKw2N6ZvEyc+Q==
 s3_secret_key=bi0mpJJNxiYpEka5C6JO4o3n7vwNDkLYDbYIZ/UK9740iB0hI1GvrK0duaGVVenRGxa7sRLjMLjM0JQQfiGYLAJqncA1VGkUFkccVsa4sPE=
-s3_local_dir=/var/log/etl/history
+#s3_local_dir=/var/log/etl/history
+s3_local_dir=""
 
 
 if [ $1 == dev ]; then

@@ -121,7 +121,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
     }
 
     private void simulateAppend(String fullPath, List<GenericRecord> records) throws IOException {
-        String localFilePath = localDir + "/" + FilenameUtils.getName(fullPath);
+        String localFilePath = localDir + "/" + repositoryDir + "/" + FilenameUtils.getName(fullPath);
         if (!HdfsUtils.fileExists(config, "file:" + localFilePath)) {
             AvroUtils.writeToLocalFile(schema, records, localFilePath);
         } else {
