@@ -46,17 +46,17 @@ angular.module('lp.ratingsengine.remodel.list', [])
 
         vm.searchFilter = function(attr) {
 
-            var text = vm.filters.queryText;
+            var text = vm.filters.queryText.toLowerCase();
             if (text) {
 
-                var chkName = attr.DisplayName.indexOf(text) >= 0,
-                    chkCategory = (attr.Category || '').indexOf(text) >= 0;
+                var chkName = attr.DisplayName.toLowerCase().indexOf(text) >= 0,
+                    chkCategory = (attr.Category.toLowerCase() || '').indexOf(text) >= 0;
                 
                 if (chkName || chkCategory) {
                     return true;
                 } else if (attr.Attributes) {
                     for (var i=0; i<attr.Attributes.length; i++) {
-                        if (attr.Attributes[i].DisplayName.indexOf(text) >= 0) {
+                        if (attr.Attributes[i].DisplayName.toLowerCase().indexOf(text) >= 0) {
                             return true;
                         }
                     }
