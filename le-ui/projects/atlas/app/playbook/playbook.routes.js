@@ -757,14 +757,20 @@ angular
             },
             onEnter: function($stateParams, PlaybookWizardStore) {
                 var play = PlaybookWizardStore.getCurrentPlay() || {};
+                
                 if(play.name) {
-                    PlaybookWizardStore.setSettings({
+                    var settings = {
                         name: play.name,
-                        createdBy: play.createdBy,
-                        ratingEngine: {
-                            id: play.ratingEngine.id,
+                        createdBy: play.createdBy
+                    };
+
+                    if(play.ratingEngine) {
+                        settings.ratingEngine = {
+                            id: play.ratingEngine.id
                         }
-                    });
+                    }
+
+                    PlaybookWizardStore.setSettings(settings);
                 }
             },
             onExit: function($transition$, PlaybookWizardStore){
@@ -917,6 +923,10 @@ angular
                     var deferred = $q.defer();
 
                     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(play){
+                        if(!play.ratingEngine) {
+                            deferred.resolve(null);
+                            return false;
+                        }
 
                         var engineId = play.ratingEngine.id,
                             query = { 
@@ -941,74 +951,71 @@ angular
                     return deferred.promise;
 
                 }],
-                //
-                //
-                //
-                // Keep this commented out code for future use with the "Exclude accounts without SalesForce ID checkbox"
-                //
-                //
-                //
-                // NoSFIdsCount: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
-                    
-                //     var deferred = $q.defer();
-
-                //     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
-
-                //         var engineId = data.ratingEngine.id,
-                //             query = {
-                //                 free_form_text_search: '',
-                //                 restrictNotNullSalesforceId: true,
-                //                 entityType: 'Account',
-                //                 bucketFieldName: 'ScoreBucket',
-                //                 maximum: 1000000,
-                //                 offset: 0,
-                //                 sortBy: 'CompanyName',
-                //                 descending: false
-                //             };
-
-                //         PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
-                //             deferred.resolve(data.data.length);
-                //         });
-
-                //     });
-
-                //     return deferred.promise;
-
-                // }],
                 NoSFIdsCount: [function(){
                     return null;
                 }],
-                AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', 'PlaybookWizardService', function($q, $stateParams, PlaybookWizardStore, PlaybookWizardService) {
+                AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', 'PlaybookWizardService', 'QueryStore', function($q, $stateParams, PlaybookWizardStore, PlaybookWizardService, QueryStore) {
 
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data) {
+                        if(data.ratingEngine && data.ratingEngine.id) {
+                            var engineId = data.ratingEngine.id,
+                                engineIdObject = [{id: engineId}], 
+                                getExcludeItems = PlaybookWizardStore.getExcludeItems(),
+                                getSegmentsOpts = {
+                                    loadContactsCount: true,
+                                    loadContactsCountByBucket: true
+                                };
 
-                        var engineId = data.ratingEngine.id,
-                            engineIdObject = [{id: engineId}], 
-                            getExcludeItems = PlaybookWizardStore.getExcludeItems(),
-                            getSegmentsOpts = {
-                                loadContactsCount: true,
-                                loadContactsCountByBucket: true
+                            if(getExcludeItems) {
+                                getSegmentsOpts.lookupId = PlaybookWizardStore.getDestinationAccountId();
+                                getSegmentsOpts.restrictNullLookupId = true;
+                            }
+
+                            var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
+                            PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], getSegmentsOpts).then(function(result) {
+                                var accountsCoverage = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
+                                deferred.resolve(accountsCoverage);
+                            });
+                        } else {
+                            // this should look like the return of getRatingSegmentCounts (this.host + '/ratingengines/coverage/segment/' +  segmentName)
+                            var segment = PlaybookWizardStore.getCurrentPlay().targetSegment,
+                                accountId = PlaybookWizardStore.crmselection_form.crm_selection.accountId,
+                                template = {
+                                account_restriction: {
+                                    restriction: {
+                                        logicalRestriction: {
+                                            operator: "AND",
+                                            restrictions: []
+                                        }
+                                    }
+                                },
+                                page_filter: {  
+                                    num_rows: 10,
+                                    row_offset: 0
+                                }
                             };
-
-                        if(getExcludeItems) {
-                            getSegmentsOpts.lookupId = PlaybookWizardStore.getDestinationAccountId();
-                            getSegmentsOpts.restrictNullLookupId = true;
+                            template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
+                            template.account_restriction.restriction.logicalRestriction.restrictions.push({
+                                bucketRestriction: {
+                                    attr: 'Account.' + accountId,
+                                    bkt: {
+                                        Cmp: 'IS_NULL',
+                                        Id: 1,
+                                        ignored: false,
+                                        Vals: []
+                                    }
+                                }
+                            });
+                            QueryStore.getEntitiesCounts(template).then(function(result) {
+                                deferred.resolve({
+                                    accountCount: 0,
+                                    unscoredAccountCount: result.Account || 0,
+                                    bucketCoverageCounts: []
+                                });
+                            });
                         }
-
-                        var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
-                        PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], getSegmentsOpts).then(function(result) {
-                            var accountsCoverage = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
-                            deferred.resolve(accountsCoverage);
-                        });
-
-                        // PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                        //     var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
-                        //     console.log(accountsCoverage);
-                        //     deferred.resolve(accountsCoverage);
-                        // });
-                    
                     });
 
                     return deferred.promise;

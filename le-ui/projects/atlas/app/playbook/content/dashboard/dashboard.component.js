@@ -68,7 +68,7 @@ angular.module('lp.playbook.dashboard', [
     }
 
     vm.hasLiftChart = function(play) {
-        return play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine.type === 'CUSTOM_EVENT';
+        return play.ratingEngine && (play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine && play.ratingEngine.type === 'CUSTOM_EVENT');
     }
 
     vm.removeSegment = function(play) {
@@ -240,10 +240,11 @@ angular.module('lp.playbook.dashboard', [
             // vm.ratingsGraph = makeSimpleGraph(play.ratings && play.ratings, 'count');
 
             // PLS-8472 Using play.ratingEngine.bucketMetadata instead of play.ratings to generate play ratings graph once ratings object is more stable
-            var buckets = reformatBucketMetadata(play.ratingEngine.bucketMetadata);
+            var buckets = (play.ratingEngine ? reformatBucketMetadata(play.ratingEngine.bucketMetadata) : []);
             vm.ratingsGraph = makeSimpleGraph(buckets, 'count');
    
-            if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
+            if(play.ratingEngine) {
+                if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
                     play.ratingEngine.tileClass = play.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy;
                 } else {
                     play.ratingEngine.tileClass = play.ratingEngine.type;
@@ -264,7 +265,7 @@ angular.module('lp.playbook.dashboard', [
                     });
                 }
                 play.ratingEngine.newBucketMetadata = newBucketMetadata;
-
+            }
             vm.launchGraph = makeLaunchGraph(play.launchHistory);
 
             if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking

@@ -90,42 +90,63 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         entityType: 'Account',
                         selectedBuckets: PlaybookWizardStore.getBucketsToLaunch(),
                     },
-                    engineId = vm.ratingEngine.id;
+                    engineId = (vm.ratingEngine && vm.ratingEngine.id ? vm.ratingEngine.id : '');
 
 
-                var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
-                PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId]).then(function(result) {
-                    vm.totalCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount; // small
-                    PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], {
-                    lookupId: accountId, 
-                    restrictNullLookupId: true
-                    }).then(function(result) {
+                var segment = PlaybookWizardStore.getCurrentPlay().targetSegment,
+                    segmentName = segment.name;
+
+                if(engineId) {
+                    PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId]).then(function(result) {
+                        vm.totalCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount; // small
+                        PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], {
+                            lookupId: accountId, 
+                            restrictNullLookupId: true
+                        }).then(function(result) {
+                            PlaybookWizardStore.setValidation('crmselection', form.$valid);
+
+                            vm.loadingCoverageCounts = false;
+                            vm.nonNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount; // big
+                            vm.nullCount = (vm.totalCount - vm.nonNullCount);
+                        });
+                    });
+                } else {
+                    var template = {
+                        //lookupId: accountId, 
+                        account_restriction: {
+                            restriction: {
+                                logicalRestriction: {
+                                    operator: "AND",
+                                    restrictions: []
+                                }
+                            }
+                        },
+                        page_filter: {  
+                            num_rows: 10,
+                            row_offset: 0
+                        }
+                    };
+                    template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
+                    template.account_restriction.restriction.logicalRestriction.restrictions.push({
+                        bucketRestriction: {
+                            attr: 'Account.' + accountId,
+                            bkt: {
+                                Cmp: 'IS_NULL',
+                                Id: 1,
+                                ignored: false,
+                                Vals: []
+                            }
+                        }
+                    });
+                    vm.totalCount = segment.accounts // small
+                    QueryStore.getEntitiesCounts(template).then(function(result) {
                         PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
                         vm.loadingCoverageCounts = false;
-                        vm.nonNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount; // big
+                        vm.nonNullCount = result.Account; //big
                         vm.nullCount = (vm.totalCount - vm.nonNullCount);
                     });
-                });
-
-                // PlaybookWizardService.getTargetCount(engineId, allCountsQuery).then(function(result) {
-                //     vm.totalCount = result;
-
-                //     var accountIdCountQuery = { 
-                //         freeFormTextSearch: vm.search || '',
-                //         restrictNotNullSalesforceId: true,
-                //         entityType: 'Account',
-                //         selectedBuckets: PlaybookWizardStore.getBucketsToLaunch(),
-                //         lookupIdColumn: accountId
-                //     };
-                //     PlaybookWizardService.getTargetCount(engineId, accountIdCountQuery).then(function(result){
-                //         PlaybookWizardStore.setValidation('crmselection', form.$valid);
-
-                //         vm.loadingCoverageCounts = false;
-                //         vm.nonNullCount = result;
-                //         vm.nullCount = (vm.totalCount - vm.nonNullCount);
-                //     });
-                // });
+                }
             } else {
                 PlaybookWizardStore.setValidation('crmselection', form.$valid);                
             }

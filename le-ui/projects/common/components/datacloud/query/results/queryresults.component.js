@@ -238,30 +238,18 @@ angular.module('common.datacloud.query.results', [
             PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
             
                 // Get play rating engine and create array object literal for getting the counts.
-                var engineId = data.ratingEngine.id,
-                    engineIdObject = [{id: engineId}];
+                var engineId = (data.ratingEngine && data.ratingEngine.id ? data.ratingEngine.id : ''),
+                    engineIdObject = (engineId ? [{id: engineId}] : []);
+                    
+                vm.hasModel = (engineId ? true : false);
 
-                // Get Account Data             
-                PlaybookWizardService.getTargetData(engineId, dataQuery).then(function(data){ 
-                    PlaybookWizardStore.setTargetData(data.data);
-                    vm.accounts = PlaybookWizardStore.getTargetData();
-                });
-
-                // -----------------------------------------
-                // Uncomment this when backend supports 
-                // the checkbox 'Exclude non SalesForce accounts' 
-                // from target's list
-
-                // var filtered = [];
-                // console.log(vm.accounts);
-                // for (var i = 0; i < vm.accounts.length; i++) {
-                //     if (vm.accounts[i].SalesforceAccountID === "" || vm.accounts[i].SalesforceAccountID === null || vm.accounts[i].SalesforceAccountID === undefined) {
-                //         filtered.push(vm.accounts[i]);
-                //         vm.noSFCount = filtered.length;
-                //     }
-                // }
-                // vm.noSFCount = filtered.length;
-                // -----------------------------------------
+                // Get Account Data
+                if(engineId) {
+                    PlaybookWizardService.getTargetData(engineId, dataQuery).then(function(data){ 
+                        PlaybookWizardStore.setTargetData(data.data);
+                        vm.accounts = PlaybookWizardStore.getTargetData();
+                    });
+                }
 
                 // Get Account Counts for Pagination
                 if (!vm.search) {
@@ -285,7 +273,7 @@ angular.module('common.datacloud.query.results', [
                             bucket: 'F',
                             count: 0,
                         }];
-                        var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
+                        var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : {bucketCoverageCounts: []});
                         
                         var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
                               return vm.selectedBuckets.indexOf(bucket.bucket) >= 0; 
@@ -337,6 +325,9 @@ angular.module('common.datacloud.query.results', [
                             PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
                         }
                         vm.updateTopNCount();
+                        if(!vm.hasModel) {
+                            PlaybookWizardStore.setValidation('targets', true);
+                        }
                     });
                 } else if (vm.search) { 
                     var countsQuery = { 
@@ -372,11 +363,14 @@ angular.module('common.datacloud.query.results', [
 
     vm.updateTopNCount = function() {
         //sync issue with vm.counts.accounts, using vm.recommendationCounts.selected instead
-        vm.maxTargetValue = vm.recommendationCounts.selected;
+        vm.maxTargetValue = vm.recommendationCounts.total;
         if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
             vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
+        } else if (!vm.topNCount) {
+            vm.showError = false;
+            PlaybookWizardStore.setValidation('targets', true);
         } else {
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', false || (vm.launchUnscored && !vm.topNClicked));
@@ -561,7 +555,6 @@ angular.module('common.datacloud.query.results', [
             vm.recommendationCounts = null;
             return false;
         }
-
         var sections = {
                 total: 0,
                 selected: 0,
@@ -590,11 +583,14 @@ angular.module('common.datacloud.query.results', [
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
-        if(resetTopNCount){
-            vm.topNCount = sections.selected;
-        }
 
         sections.launched = vm.launchUnscored ? vm.accountsCoverage.unscoredAccountCount + sections.selected : sections.selected;
+
+        vm.topNCount = sections.launched;
+        if(resetTopNCount){
+            console.log();
+            vm.topNCount = sections.selected;
+        }
 
         if(vm.topNClicked) {
             sections.launched = vm.topNCount;

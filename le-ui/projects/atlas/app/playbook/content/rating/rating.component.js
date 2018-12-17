@@ -3,7 +3,7 @@ angular.module('lp.playbook.wizard.rating', [])
     $state, $stateParams, $scope, $filter, ResourceUtility, Ratings, PlaybookWizardStore, PlaybookWizardService
 ) {
     var vm = this,
-        deselectable = false; // whether or not you can deselect a model or not have one
+        requireModel = false; // whether or not you can deselect a model or not have one
 
     angular.extend(vm, {
         stored: PlaybookWizardStore.rating_form,
@@ -39,7 +39,7 @@ angular.module('lp.playbook.wizard.rating', [])
     }
 
     vm.init = function() {
-        PlaybookWizardStore.setValidation('rating', deselectable); // model is no longer required as per PLS-11534 (is toggable)
+        PlaybookWizardStore.setValidation('rating', !requireModel); // model is no longer required as per PLS-11534 (is toggable)
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setValidation('rating', true);
         }
@@ -109,7 +109,7 @@ angular.module('lp.playbook.wizard.rating', [])
         var current_rating = PlaybookWizardStore.getSavedRating();
         current_rating = current_rating || {};
 
-        if(deselectable && vm.stored.rating_selection && vm.stored.rating_selection === current_rating.id) {
+        if(!requireModel && vm.stored.rating_selection && vm.stored.rating_selection === current_rating.id) {
             vm.stored.rating_selection = null;
             PlaybookWizardStore.setRating(null);
             PlaybookWizardStore.setSettings({
