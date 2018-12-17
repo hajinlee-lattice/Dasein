@@ -23,7 +23,7 @@ public class EntityAssociateActor extends DataSourceWrapperActorTemplate {
 
     @Inject
     @Qualifier("entityAssociateService")
-    private DataSourceLookupServiceBase cdlAssociateService;
+    private DataSourceLookupServiceBase entityAssociateService;
 
     @PostConstruct
     public void postConstruct() {
@@ -32,7 +32,7 @@ public class EntityAssociateActor extends DataSourceWrapperActorTemplate {
 
     @Override
     protected DataSourceLookupService getDataSourceLookupService() {
-        return cdlAssociateService;
+        return entityAssociateService;
     }
 
     @Override

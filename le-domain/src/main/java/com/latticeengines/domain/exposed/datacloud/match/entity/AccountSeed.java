@@ -62,7 +62,7 @@ public class AccountSeed {
     }
 
     /**
-     * Convert this CDL Account seed to raw seed for internal operations.
+     * Convert this account seed to raw seed for internal operations.
      * TODO find out if we need this method or not (probably not)
      *
      * @param comparator sort lookup entries by their priority, in DESC order (from high to low)
@@ -112,7 +112,7 @@ public class AccountSeed {
         Preconditions.checkNotNull(rawSeed);
         Preconditions.checkArgument(rawSeed.getEntity() == ENTITY);
         AccountSeedBuilder builder = new AccountSeedBuilder();
-        // set CDL account ID and lattice account ID
+        // set account ID and lattice account ID
         builder.withId(rawSeed.getId()).withLatticeAccountId(rawSeed.getAttributes().get(KEY_LATTICE_ACCOUNT_ID));
         rawSeed.getLookupEntries().forEach(entry -> {
             // TODO check for data integrity
