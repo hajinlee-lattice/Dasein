@@ -322,13 +322,13 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountAfterSecondSave() {
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count.intValue(), 3);
+        Assert.assertEquals(count.intValue(), 2);
     }
 
     @Test(groups = "deployment", enabled = false, dependsOnMethods = {
