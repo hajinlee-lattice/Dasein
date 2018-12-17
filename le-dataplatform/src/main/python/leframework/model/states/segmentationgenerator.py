@@ -9,6 +9,7 @@ from leframework.util.pdversionutil import pd_before_17
 import numpy as np
 import pandas as pd
 import math
+import json
 
 class SegmentationGenerator(State):
 
@@ -163,7 +164,8 @@ class EVSegmentationGenerator(State):
         schema = mediator.schema
         revenueScoreColumn = schema["reserved"]["predictedrevenue"]
         probScoreColumn = schema["reserved"]["score"]
-        testScoreDf = self.mediator.data[[revenueScoreColumn, probScoreColumn]]
+        revenueColumn = mediator.revenueColumn
+        testScoreDf = self.mediator.data[[revenueScoreColumn, probScoreColumn, revenueColumn]]
         scoreDerivation = mediator.score_derivation
         revenueScoreDerivation = mediator.revenue_score_derivation
         bucketsProb, upperBoundsProb = self.getPercScoreBounds(scoreDerivation)
@@ -183,11 +185,12 @@ class EVSegmentationGenerator(State):
                                                                                                     gammaRev,
                                                                                                     maxRevRate))
         testScoreDf['ev'] = testScoreDf['mappedProb'] * testScoreDf['mappedRev']
-        orderedScore = ScoringUtil.sortWithRandom(testScoreDf[['ev']], 0).copy().reset_index(drop=True)
+        orderedScore = ScoringUtil.sortWithRandom(testScoreDf, testScoreDf.columns.get_loc('ev')).copy().reset_index(drop=True)
         numLeads = orderedScore.shape[0]
         apxBlockSize = numLeads / 100.0
         orderedScore['Score'] = orderedScore.index.map(lambda x: min(int(x / apxBlockSize) + 1, 100))
-        revRateChartDf = orderedScore.groupby('Score')['ev'].agg(
+
+        revRateChartDf = orderedScore.groupby('Score')[revenueColumn].agg(
             ['min', 'max', 'mean', 'sum', 'count'])
         revRateChartDf.columns = ['Min', 'Max', 'Mean', 'Sum', 'Count']
         new_segments = []
