@@ -279,7 +279,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
 
         Set<EntityLookupEntry> set1 = new HashSet<>(seed1.getLookupEntries());
-        Set<EntityLookupEntry> set2 = new HashSet<>(seed1.getLookupEntries());
+        Set<EntityLookupEntry> set2 = new HashSet<>(seed2.getLookupEntries());
         return Objects.equals(seed1.getId(), seed2.getId()) && Objects.equals(seed1.getEntity(), seed2.getEntity())
                 && Objects.equals(seed1.getAttributes(), seed2.getAttributes())
                 && Objects.equals(set1, set2);

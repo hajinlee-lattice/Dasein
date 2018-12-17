@@ -14,6 +14,7 @@ import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
 import com.amazonaws.services.dynamodbv2.xspec.ScanExpressionSpec;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -320,11 +321,11 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         }
     }
 
-    // TODO unit test this
     /*
      * Transform attribute value map to raw seed
      */
-    private EntityRawSeed fromAttributeMap(Map<String, AttributeValue> map) {
+    @VisibleForTesting
+    protected EntityRawSeed fromAttributeMap(Map<String, AttributeValue> map) {
         if (MapUtils.isEmpty(map)) {
             return null;
         }
@@ -332,7 +333,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         String seedId = map.get(ATTR_SEED_ID).getS();
         String entity = map.get(ATTR_SEED_ENTITY).getS();
         int version = map.containsKey(ATTR_SEED_VERSION)
-            ? INITIAL_SEED_VERSION : Integer.parseInt(map.get(ATTR_SEED_VERSION).getN());
+            ? Integer.parseInt(map.get(ATTR_SEED_VERSION).getN()) : INITIAL_SEED_VERSION;
         List<EntityLookupEntry> entries = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
         map.forEach((seedAttrName, value) -> {
@@ -353,11 +354,11 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         return new EntityRawSeed(seedId, entity, version, entries, attributes);
     }
 
-    // TODO unit test this
     /*
      * Transform item to raw seed
      */
-    private EntityRawSeed fromItem(Item item) {
+    @VisibleForTesting
+    protected EntityRawSeed fromItem(Item item) {
         if (item == null) {
             return null;
         }
@@ -425,9 +426,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     /*
      * Build all string attributes. Returns Map<attributeName, attributeValue>.
-     * TODO unit test this
      */
-    private Map<String, String> getStringAttributes(@NotNull EntityRawSeed seed) {
+    @VisibleForTesting
+    protected Map<String, String> getStringAttributes(@NotNull EntityRawSeed seed) {
         Map<String, String> attrs = seed.getLookupEntries()
                 .stream()
                 .filter(entry -> entry.getType().mapping == ONE_TO_ONE || entry.getType().mapping == MANY_TO_ONE)
@@ -442,9 +443,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     /*
      * Build all string set attributes. Returns Map<attributeName, Set<attributeValue>>.
-     * TODO unit test this
      */
-    private Map<String, Set<String>> getStringSetAttributes(@NotNull EntityRawSeed seed) {
+    @VisibleForTesting
+    protected Map<String, Set<String>> getStringSetAttributes(@NotNull EntityRawSeed seed) {
         return seed.getLookupEntries()
                 .stream()
                 .filter(entry -> entry.getType().mapping == MANY_TO_MANY)
@@ -455,9 +456,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     /*
      * build seed attribute name/value for lookup entries
-     * TODO unit test this
      */
-    private Pair<String, String> buildAttrPairFromLookupEntry(@NotNull EntityLookupEntry entry) {
+    @VisibleForTesting
+    protected Pair<String, String> buildAttrPairFromLookupEntry(@NotNull EntityLookupEntry entry) {
         String attrName = entry.getType().name();
         if (!entry.getSerializedKeys().isEmpty()) {
             attrName += DELIMITER + entry.getSerializedKeys();
@@ -468,7 +469,6 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     /*
      * Transform from dynamo attribute value to a list of lookup entries
      * (String -> single item, String Set -> multiple items)
-     * TODO unit test this
      */
     private List<EntityLookupEntry> parseLookupEntries(
             @NotNull String entity, @NotNull String attributeName, Object value) {
@@ -533,7 +533,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
      *
      * - original attribute name => dynamo attribute name
      */
-    private String buildSeedAttrName(@NotNull String attrName) {
+    @VisibleForTesting
+    protected String buildSeedAttrName(@NotNull String attrName) {
         return PREFIX_SEED_ATTRIBUTES + attrName;
     }
 
