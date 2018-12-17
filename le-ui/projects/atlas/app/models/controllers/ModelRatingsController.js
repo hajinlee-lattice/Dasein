@@ -134,8 +134,6 @@ angular.module('lp.models.ratings', [
         $timeout(function() {
             renderChart();
         }, 500);
-
-        console.log(vm.currentConfiguration);
     }
 
     vm.init();
