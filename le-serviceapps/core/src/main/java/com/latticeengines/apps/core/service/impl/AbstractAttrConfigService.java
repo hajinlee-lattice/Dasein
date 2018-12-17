@@ -545,6 +545,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             customConfigs = new ArrayList<>();
         }
         Map<String, AttrConfig> map = new HashMap<>();
+        Map<String, AttrConfig> renderedMap = new HashMap<>();
         for (AttrConfig config : customConfigs) {
             map.put(config.getAttrName(), config);
         }
@@ -556,7 +557,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             if (AttrType.Internal.equals(type)) {
                 if (renderedAttrNames.contains(metadata.getAttrName())) {
                     renderedAttrNames.remove(metadata.getAttrName());
-                    map.remove(metadata.getAttrName());
                 }
                 continue;
             }
@@ -651,17 +651,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 mergeConfig.putProperty(group.name(), usageProp);
             }
 
-            map.put(metadata.getAttrName(), mergeConfig);
+            renderedMap.put(metadata.getAttrName(), mergeConfig);
         }
         // make sure the system metadata include the customer config
         if (CollectionUtils.isNotEmpty(renderedAttrNames)) {
             log.warn(String.format("Wrong customer config, system can't render these attributes %s for tenant %s",
                     renderedAttrNames.toString(), MultiTenantContext.getCustomerSpace()));
-            // filter out non-existing customer config from map
-            map = map.entrySet().stream().filter(e -> !renderedAttrNames.contains(e.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
-        return new ArrayList<>(map.values());
+        return new ArrayList<>(renderedMap.values());
     }
 
     private void overwriteAttrSpecsByColMetadata(AttrSpecification attrSpec, ColumnMetadata cm) {
