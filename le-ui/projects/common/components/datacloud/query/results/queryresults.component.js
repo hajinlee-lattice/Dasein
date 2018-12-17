@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function(
-    $q, $scope, $state, $stateParams, $filter, $rootScope,
+    $q, $scope, $state, $stateParams, $filter, $rootScope, $timeout, 
     BrowserStorageUtility, NumberUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts,
     AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount
@@ -325,7 +325,7 @@ angular.module('common.datacloud.query.results', [
                             PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
                         }
                         vm.updateTopNCount();
-                        if(!vm.hasModel) {
+                        if(!vm.hasModel && vm.launchedUnscored) {
                             PlaybookWizardStore.setValidation('targets', true);
                         }
                     });
@@ -369,8 +369,8 @@ angular.module('common.datacloud.query.results', [
             PlaybookWizardStore.setValidation('targets', true);
             vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
         } else if (!vm.topNCount) {
-            vm.showError = false;
-            PlaybookWizardStore.setValidation('targets', true);
+            vm.showError = true;
+            PlaybookWizardStore.setValidation('targets', false);
         } else {
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', false || (vm.launchUnscored && !vm.topNClicked));
@@ -411,10 +411,12 @@ angular.module('common.datacloud.query.results', [
     }
 
     vm.launchUnscoredClick = function() {
-        PlaybookWizardStore.setValidation('targets', (vm.topNCount || vm.launchUnscored));
-        PlaybookWizardStore.setLaunchUnscored(vm.launchUnscored);
-        updatePage();
-        vm.makeRecommendationCounts();
+        $timeout(function() {
+            PlaybookWizardStore.setValidation('targets', vm.recommendationCounts.launched);
+            PlaybookWizardStore.setLaunchUnscored(vm.launchUnscored);
+            updatePage();
+            vm.makeRecommendationCounts();
+        });
     }
 
     vm.showNoResultsText = function(accounts, contacts) {
@@ -588,7 +590,6 @@ angular.module('common.datacloud.query.results', [
 
         vm.topNCount = sections.launched;
         if(resetTopNCount){
-            console.log();
             vm.topNCount = sections.selected;
         }
 
