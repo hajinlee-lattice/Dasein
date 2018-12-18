@@ -55,7 +55,7 @@
                 ng-model-options="{ debounce: 500 }"
                 ng-focus="vm.topNInputClick($event)"
                 min="1"
-                ng-max="::vm.topNCount"
+                ng-max="::vm.recommendationCounts.total"
                 ng-change="topNCount && vm.updateTopNCount(vm.topNClicked); vm.makeRecommendationCounts({suppressed: topNCount})"
                 class="form-control" />
             <span> highest rated {{vm.section === 'wizard.targets' ? 'recommendations' : 'targets'}}</span>
