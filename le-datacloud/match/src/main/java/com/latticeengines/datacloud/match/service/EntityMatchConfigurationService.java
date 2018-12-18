@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import org.springframework.retry.support.RetryTemplate;
 
 /**
  * Central place to manage all entity match related configurations
@@ -41,5 +42,13 @@ public interface EntityMatchConfigurationService {
      */
     long getExpiredAt(long timestampInSeconds);
 
-    // TODO add retry configuration methods
+    /**
+     * Return retry template that is configured for the given environment. Same environment will always get the same
+     * instance of retry template.
+     *
+     * @param env target environment
+     * @return non-null retry template
+     * @throws UnsupportedOperationException if the environment is not supported
+     */
+    RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env);
 }

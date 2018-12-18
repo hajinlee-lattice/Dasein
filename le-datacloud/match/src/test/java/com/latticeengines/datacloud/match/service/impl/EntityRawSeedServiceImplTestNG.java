@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
@@ -13,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -24,11 +26,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /*
  * TODO add more test cases
@@ -56,6 +55,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         MockitoAnnotations.initMocks(this);
         entityConfigurationService.setStagingTableName(TEST_STAGING_TABLE);
         entityConfigurationService.setServingTableName(TEST_SERVING_TABLE);
+        Mockito.when(entityConfigurationService.getRetryTemplate(Mockito.any())).thenCallRealMethod();
     }
 
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
@@ -178,7 +178,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // check the created seed
         EntityRawSeed updatedSeed = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         Assert.assertNotNull(updatedSeed);
-        Assert.assertTrue(equals(updatedSeed, seed));
+        Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(updatedSeed, seed));
 
         // cleanup afterwards
         cleanup(env, seedId);
@@ -208,7 +208,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // 3. Domains are merged and no duplicate
         Assert.assertNotNull(resultAfterUpdate2);
         Assert.assertEquals(resultAfterUpdate2.getLookupEntries().size(), 4);
-        Assert.assertTrue(equals(resultAfterUpdate2,
+        Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(resultAfterUpdate2,
                 newSeed(seedId, "sfdc_1", "marketo_1", "lattice_1", "domain1.com", "domain2.com")));
 
         // cleanup afterwards
@@ -251,7 +251,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // 2. Marketo ID does not exist, so clearing it has no effect
         // 3. One domain exists and is removed from set, the other one does not and is a no-op
         // 4. lattice account ID is not cleared
-        Assert.assertTrue(equals(
+        Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(
                 resultAfterClear,
                 newSeed(seedId, null, null, "lattice_1", "domain2.com")));
 
@@ -269,20 +269,6 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     private void cleanup(EntityMatchEnvironment env, String... seedIds) {
         Arrays.stream(seedIds).forEach(id -> entityRawSeedService.delete(env, TEST_TENANT, TEST_ENTITY, id));
-    }
-
-    private boolean equals(EntityRawSeed seed1, EntityRawSeed seed2) {
-        if (seed1 == null && seed2 == null) {
-            return true;
-        } else if (seed1 == null || seed2 == null) {
-            return false;
-        }
-
-        Set<EntityLookupEntry> set1 = new HashSet<>(seed1.getLookupEntries());
-        Set<EntityLookupEntry> set2 = new HashSet<>(seed2.getLookupEntries());
-        return Objects.equals(seed1.getId(), seed2.getId()) && Objects.equals(seed1.getEntity(), seed2.getEntity())
-                && Objects.equals(seed1.getAttributes(), seed2.getAttributes())
-                && Objects.equals(set1, set2);
     }
 
     /*

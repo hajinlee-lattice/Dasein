@@ -20,6 +20,11 @@ public interface DynamoItemService {
 
     Item getItem(String tableName, PrimaryKey key);
 
+    /*
+     * return whether the item exists before deletion
+     */
+    boolean deleteItem(@NotNull String tableName, @NotNull PrimaryKey key);
+
     void batchWrite(String tableName, List<Item> items);
 
     List<Item> batchGet(String tableName, List<PrimaryKey> primaryKeys);

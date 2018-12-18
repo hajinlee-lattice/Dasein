@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -60,6 +61,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
         MockitoAnnotations.initMocks(this);
         entityMatchConfigurationService.setServingTableName(TEST_SERVING_TABLE);
         entityMatchConfigurationService.setStagingTableName(TEST_STAGING_TABLE);
+        Mockito.when(entityMatchConfigurationService.getRetryTemplate(Mockito.any())).thenCallRealMethod();
     }
 
     @BeforeMethod(groups = "functional")

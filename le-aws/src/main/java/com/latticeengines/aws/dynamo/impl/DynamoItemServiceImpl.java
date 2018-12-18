@@ -15,6 +15,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
@@ -93,6 +94,20 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public void putItem(String tableName, Item item) {
         DynamoDB dynamoDB = dynamoService.getDynamo();
         dynamoDB.getTable(tableName).putItem(item);
+    }
+
+    @Override
+    public boolean deleteItem(@NotNull String tableName, @NotNull PrimaryKey key) {
+        Preconditions.checkNotNull(tableName);
+        Preconditions.checkNotNull(key);
+        DeleteItemSpec spec = new DeleteItemSpec()
+                .withPrimaryKey(key)
+                // return all old attributes to determine whether item is deleted
+                .withReturnValues(ReturnValue.ALL_OLD);
+        DeleteItemOutcome result = delete(tableName, spec);
+        Preconditions.checkNotNull(result);
+        Preconditions.checkNotNull(result.getDeleteItemResult());
+        return MapUtils.isNotEmpty(result.getDeleteItemResult().getAttributes());
     }
 
     @Override

@@ -1,15 +1,12 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.amazonaws.services.dynamodbv2.document.DeleteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
-import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
-import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
@@ -19,9 +16,9 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -42,9 +39,6 @@ import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNul
 @Component("entityLookupEntryService")
 public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
-    /*
-     * TODO add retries
-     */
     /* constants */
     private static final String PREFIX = DataCloudConstants.ENTITY_PREFIX_LOOKUP;
     private static final String ATTR_PARTITION_KEY = DataCloudConstants.ENTITY_ATTR_PID;
@@ -77,7 +71,8 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
         String tableName = getTableName(env);
-        return getSeedId(dynamoItemService.getItem(tableName, key));
+        Item item = getRetryTemplate(env).execute(ctx -> dynamoItemService.getItem(tableName, key));
+        return getSeedId(item);
     }
 
     @Override
@@ -94,12 +89,14 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
                 .collect(Collectors.toList());
         // dedup, batchGet does not allow duplicate entries
         Set<PrimaryKey> uniqueKeys = new HashSet<>(keys);
-        Map<PrimaryKey, Item> itemMap = dynamoItemService
-                .batchGet(getTableName(env), new ArrayList<>(uniqueKeys))
-                .stream()
-                .filter(Objects::nonNull)
-                .map(item -> Pair.of(getKey(env, item), item))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1)); // ignore duplicates
+        Map<PrimaryKey, Item> itemMap = getRetryTemplate(env).execute(ctx -> {
+            return dynamoItemService
+                    .batchGet(getTableName(env), new ArrayList<>(uniqueKeys))
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(item -> Pair.of(getKey(env, item), item))
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1)); // ignore duplicates
+        });
         return keys.stream().map(itemMap::get).map(this::getSeedId).collect(Collectors.toList());
     }
 
@@ -148,8 +145,11 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
                 .map(entry -> buildItem(Pair.of(entry.getKey(), entry.getValue()), expiredAt))
                 .collect(Collectors.toList());
 
-        // batch set
-        dynamoItemService.batchWrite(getTableName(env), items);
+        getRetryTemplate(env).execute(ctx -> {
+            // batch set
+            dynamoItemService.batchWrite(getTableName(env), items);
+            return null;
+        });
     }
 
     @Override
@@ -158,13 +158,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
         checkNotNull(env, tenant, lookupEntry);
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
-        DeleteItemOutcome result = dynamoItemService.delete(getTableName(env), new DeleteItemSpec()
-                .withPrimaryKey(key)
-                // return all old attributes to determine whether item is deleted
-                .withReturnValues(ReturnValue.ALL_OLD));
-        Preconditions.checkNotNull(result);
-        Preconditions.checkNotNull(result.getDeleteItemResult());
-        return MapUtils.isNotEmpty(result.getDeleteItemResult().getAttributes());
+        return getRetryTemplate(env).execute(ctx -> dynamoItemService.deleteItem(getTableName(env), key));
     }
 
     /*
@@ -186,7 +180,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
                 .withReturnValues(ReturnValue.NONE);
 
         try {
-            dynamoItemService.put(getTableName(env), spec);
+            getRetryTemplate(env).execute(ctx -> dynamoItemService.put(getTableName(env), spec));
         } catch (ConditionalCheckFailedException e) {
             // condition failed
             return false;
@@ -223,6 +217,10 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     private String getTableName(EntityMatchEnvironment environment) {
         return entityMatchConfigurationService.getTableName(environment);
+    }
+
+    private RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env) {
+        return entityMatchConfigurationService.getRetryTemplate(env);
     }
 
     /*

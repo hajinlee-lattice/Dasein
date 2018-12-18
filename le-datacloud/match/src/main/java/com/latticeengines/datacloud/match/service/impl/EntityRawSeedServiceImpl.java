@@ -1,10 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.amazonaws.services.dynamodbv2.document.DeleteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
-import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
@@ -32,6 +30,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -65,8 +64,6 @@ import reactor.core.scheduler.Schedulers;
 
 @Component("entityRawSeedService")
 public class EntityRawSeedServiceImpl implements EntityRawSeedService {
-
-    // TODO add retries
 
     /* constants */
     private static final String PREFIX = DataCloudConstants.ENTITY_PREFIX_SEED;
@@ -106,7 +103,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             @NotNull String entity, @NotNull String seedId) {
         checkNotNull(env, tenant, entity, seedId);
         Item item = getBaseItem(env, tenant, entity, seedId);
-        return conditionalSet(getTableName(env), item);
+        return getRetryTemplate(env).execute(ctx ->
+                conditionalSet(getTableName(env), item));
     }
 
     @Override
@@ -117,7 +115,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         // set attributes
         getStringAttributes(seed).forEach(item::withString);
         getStringSetAttributes(seed).forEach(item::withStringSet);
-        return conditionalSet(getTableName(env), item);
+        return getRetryTemplate(env).execute(ctx ->
+                conditionalSet(getTableName(env), item));
     }
 
     @Override
@@ -129,7 +128,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
 
-        Item item = dynamoItemService.getItem(getTableName(env), key);
+        Item item = getRetryTemplate(env).execute(ctx ->
+                dynamoItemService.getItem(getTableName(env), key));
         return fromItem(item);
     }
 
@@ -147,12 +147,14 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 .stream()
                 .map(id -> buildKey(env, tenant, version, entity, id))
                 .collect(Collectors.toList());
-        Map<String, Item> itemMap = dynamoItemService
-                .batchGet(getTableName(env), keys)
-                .stream()
-                .filter(Objects::nonNull)
-                .map(item -> Pair.of(item.getString(ATTR_SEED_ID), item))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1)); // ignore duplicates
+        Map<String, Item> itemMap = getRetryTemplate(env).execute(ctx -> {
+            return dynamoItemService
+                    .batchGet(getTableName(env), keys)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(item -> Pair.of(item.getString(ATTR_SEED_ID), item))
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1)); // ignore duplicates
+        });
         return seedIds.stream().map(itemMap::get).map(this::fromItem).collect(Collectors.toList());
     }
 
@@ -219,12 +221,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
         checkNotNull(env, tenant, rawSeed);
 
-        int version = getMatchVersion(env, tenant);
-        PrimaryKey key = buildKey(env, tenant, version, rawSeed.getEntity(), rawSeed.getId());
-
-        Map<String, String> strAttrs = getStringAttributes(rawSeed);
-        Map<String, Set<String>> setAttrs = getStringSetAttributes(rawSeed);
-
+        PrimaryKey key = getPrimaryKey(env, tenant, rawSeed);
         ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
                 .addUpdate(S(ATTR_SEED_ID).set(rawSeed.getId()))
                 .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity()))
@@ -233,15 +230,18 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 // set TTL (no effect on serving)
                 .addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
 
-        strAttrs.forEach((attrName, attrValue) -> builder.addUpdate(
+        getStringAttributes(rawSeed).forEach((attrName, attrValue) -> builder.addUpdate(
                 S(attrName).set(if_not_exists(attrName, attrValue)))); // update if the attr not exist
         // set does not matter, just add to set
-        setAttrs.forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).append(attrValue)));
+        getStringSetAttributes(rawSeed)
+                .forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).append(attrValue)));
 
-        UpdateItemOutcome result = dynamoItemService.update(getTableName(env), new UpdateItemSpec()
-                .withPrimaryKey(key)
-                .withExpressionSpec(builder.buildForUpdate())
-                .withReturnValues(ReturnValue.UPDATED_OLD));
+        UpdateItemOutcome result = getRetryTemplate(env).execute(ctx ->
+                dynamoItemService.update(getTableName(env),
+                        new UpdateItemSpec()
+                                .withPrimaryKey(key)
+                                .withExpressionSpec(builder.buildForUpdate())
+                                .withReturnValues(ReturnValue.UPDATED_OLD)));
         Preconditions.checkNotNull(result);
         Preconditions.checkNotNull(result.getUpdateItemResult());
         return fromAttributeMap(result.getUpdateItemResult().getAttributes());
@@ -266,13 +266,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
-        DeleteItemOutcome result = dynamoItemService.delete(getTableName(env), new DeleteItemSpec()
-                .withPrimaryKey(key)
-                // return all old attributes to determine whether item is deleted
-                .withReturnValues(ReturnValue.ALL_OLD));
-        Preconditions.checkNotNull(result);
-        Preconditions.checkNotNull(result.getDeleteItemResult());
-        return MapUtils.isNotEmpty(result.getDeleteItemResult().getAttributes());
+        return getRetryTemplate(env).execute(ctx -> dynamoItemService.deleteItem(getTableName(env), key));
     }
 
     /*
@@ -285,12 +279,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             @NotNull EntityRawSeed rawSeed, boolean useOptimisticLocking) {
         checkNotNull(env, tenant, rawSeed);
 
-        int version = getMatchVersion(env, tenant);
-        PrimaryKey key = buildKey(env, tenant, version, rawSeed.getEntity(), rawSeed.getId());
-
-        Map<String, String> strAttrs = getStringAttributes(rawSeed);
-        Map<String, Set<String>> setAttrs = getStringSetAttributes(rawSeed);
-
+        PrimaryKey key = getPrimaryKey(env, tenant, rawSeed);
         ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
                 // set TTL (no effect on serving)
                 .addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
@@ -301,17 +290,20 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         }
 
         // clear attributes
-        strAttrs.forEach((attrName, attrValue) -> builder.addUpdate(
+        getStringAttributes(rawSeed).forEach((attrName, attrValue) -> builder.addUpdate(
                 S(attrName).remove()));
         // remove from set
-        setAttrs.forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).delete(attrValue)));
+        getStringSetAttributes(rawSeed)
+                .forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).delete(attrValue)));
 
         try {
-            UpdateItemOutcome result = dynamoItemService.update(getTableName(env), new UpdateItemSpec()
-                    .withPrimaryKey(key)
-                    .withExpressionSpec(builder.buildForUpdate())
-                    // use all old because we are not updating seedID and entity
-                    .withReturnValues(ReturnValue.ALL_OLD));
+            UpdateItemOutcome result = getRetryTemplate(env).execute(ctx ->
+                    dynamoItemService.update(getTableName(env),
+                            new UpdateItemSpec()
+                                    .withPrimaryKey(key)
+                                    .withExpressionSpec(builder.buildForUpdate())
+                                    // use all old because we are not updating seedID and entity
+                                    .withReturnValues(ReturnValue.ALL_OLD)));
             Preconditions.checkNotNull(result);
             Preconditions.checkNotNull(result.getUpdateItemResult());
             return fromAttributeMap(result.getUpdateItemResult().getAttributes());
@@ -424,6 +416,12 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 .withNumber(ATTR_EXPIRED_AT, getExpiredAt());
     }
 
+    private PrimaryKey getPrimaryKey(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
+        int version = getMatchVersion(env, tenant);
+        return buildKey(env, tenant, version, rawSeed.getEntity(), rawSeed.getId());
+    }
+
     /*
      * Build all string attributes. Returns Map<attributeName, attributeValue>.
      */
@@ -522,6 +520,10 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    private RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env) {
+        return entityMatchConfigurationService.getRetryTemplate(env);
     }
 
     private long getExpiredAt() {
