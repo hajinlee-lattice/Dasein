@@ -163,7 +163,7 @@ public class EMRScalingRunnable implements Runnable {
                 scale(target);
                 resetScalingDownCounter();
             } else {
-                if (getLastScalingUp().get() + SCALING_DOWN_COOL_DOWN < System.currentTimeMillis()) {
+                if (getLastScalingUp().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
                     log.info("Still in cool down period, won't attempt to scaling in.");
                 } else {
                     log.info(String.format(
