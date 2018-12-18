@@ -109,7 +109,7 @@ public class GenericSinkTask extends SinkTask {
             processor.addAll(keyRecords, valueRecords, topicPartitions);
             processor.process();
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (log.isDebugEnabled()) {
                 log.warn("Failed to execute connector tasks!", e);
             }
