@@ -105,7 +105,7 @@
         <reflections.version>0.9.10</reflections.version>
         <apache.http.core.version>4.4.10</apache.http.core.version>
         <apache.http.client.version>4.5.5</apache.http.client.version>
-        <apache.directory.api.version>1.0.2</apache.directory.api.version>
+        <apache.directory.api.version>2.0.0.AM2</apache.directory.api.version>
         <argparse4j.version>0.5.0</argparse4j.version> <!-- to be removed, use commons cli instead -->
         <log4j.version>1.2.17</log4j.version> <!-- to be upgraded to log4j2 -->
         <log4j.extras.version>1.2.17</log4j.extras.version>
