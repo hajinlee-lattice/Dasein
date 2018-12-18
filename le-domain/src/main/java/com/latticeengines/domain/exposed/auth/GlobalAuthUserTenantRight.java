@@ -34,13 +34,13 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     private Long userTenantRightId;
 
     @JsonProperty("ga_user")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "User_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private GlobalAuthUser globalAuthUser;
 
     @JsonProperty("ga_tenant")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "Tenant_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private GlobalAuthTenant globalAuthTenant;
