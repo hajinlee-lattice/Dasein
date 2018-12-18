@@ -494,9 +494,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         ErrorDetails errorDetails = new ErrorDetails(failedJob.getErrorCode(), failedJob.getErrorMsg(), "");
         workflowJob.setErrorDetails(errorDetails);
         workflowJobEntityMgr.create(workflowJob);
-
-        workflowJob.setWorkflowId(workflowJob.getPid());
-        workflowJobEntityMgr.update(workflowJob);
         return workflowJob.getPid();
     }
 
