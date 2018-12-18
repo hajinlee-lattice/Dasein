@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.aws.EC2InstanceType;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
@@ -35,17 +36,8 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 public class EMRScalingRunnable implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
+
     private static final int MAX_TASK_NODES = 32;
-
-    private static final int CORE_MB = 24 * 1024;
-    private static final int CORE_VCORES = 4;
-
-    private static final int UNIT_MB = 56 * 1024;
-    private static final int UNIT_VCORES = 8;
-
-    private static final int MIN_AVAIL_MEM_MB = UNIT_MB;
-    private static final int MIN_AVAIL_VCORES = 2;
-
     private static final long MIN_SINGLE_NODE_MB = 51200;
     private static final int MIN_SINGLE_NODE_VCORES = 2;
 
@@ -64,18 +56,27 @@ public class EMRScalingRunnable implements Runnable {
                     YarnApplicationState.ACCEPTED //
             ), YarnApplicationState.class);
 
+    private long coreMb;
+    private int coreVCores;
+    private long taskMb;
+    private int taskVCores;
+    private long minAvailMemMb;
+    private int minAvailVCores;
+
     private final String emrCluster;
     private final String clusterId;
     private final EMRService emrService;
     private final EMREnvService emrEnvService;
+    private final int minTaskNodes;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
     private InstanceGroup taskGrp;
     private InstanceGroup coreGrp = null;
 
-    EMRScalingRunnable(String emrCluster, EMRService emrService, EMRCacheService emrCacheService, //
+    EMRScalingRunnable(String emrCluster, int minTaskNodes, EMRService emrService, EMRCacheService emrCacheService, //
             EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
+        this.minTaskNodes = minTaskNodes;
         this.emrService = emrService;
         this.emrEnvService = emrEnvService;
         this.clusterId = emrCacheService.getClusterId(emrCluster);
@@ -102,6 +103,13 @@ public class EMRScalingRunnable implements Runnable {
         }
 
         taskGrp = emrService.getTaskGroup(clusterId);
+        taskVCores = getInstanceVCores(taskGrp);
+        taskMb = getInstanceMemory(taskGrp);
+
+        // -512 mb to avoid flapping scaling out/in
+        // when available resource is right at the threshold
+        minAvailMemMb = minTaskNodes * taskMb - 512;
+        minAvailVCores = minTaskNodes * taskVCores - 512;
 
         if (needToScale()) {
             attemptScale();
@@ -128,15 +136,15 @@ public class EMRScalingRunnable implements Runnable {
             log.info(scaleLogPrefix + "there are " + reqResource.reqMb + " mb and " //
                     + reqResource.reqVCores + " pending requests.");
             scale = true;
-        } else if (availableMB < MIN_AVAIL_MEM_MB) {
+        } else if (availableMB < minAvailMemMb) {
             // low mem
             log.info(scaleLogPrefix + "available mb " + availableMB + " is not enough.");
             scale = true;
-        } else if (availableVCores < MIN_AVAIL_VCORES) {
+        } else if (availableVCores < minAvailVCores) {
             // low vcores
             log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
             scale = true;
-        } else if (availableMB >= getMaxAvailMemMb() && availableVCores >= getMaxAvailVcores()) {
+        } else if (availableMB >= getMaxAvailMemMb() && availableVCores >= getMaxAvailVCores()) {
             // too much mem and vcores
             log.info(scaleLogPrefix + "available mb " + availableMB + " and vcores " //
                     + availableVCores + " are both too high.");
@@ -263,16 +271,9 @@ public class EMRScalingRunnable implements Runnable {
         int targetByMb = determineTargetByMb(reqResource.reqMb);
         int targetByVCores = determineTargetByVCores(reqResource.reqVCores);
         int target = Math.max(targetByMb, targetByVCores);
-        MinNodeResource minNodeResource = getMinNodeResource();
+        target += determineNewByMinNodeResource(reqResource);
         if (reqResource.hangingApps > 0) {
             target += reqResource.hangingApps;
-        } else if (reqResource.maxMb > minNodeResource.mb || reqResource.maxVCores > minNodeResource.vcores) {
-            log.info("MinNodeResource=" + minNodeResource + ": no single node can host the max job");
-            target += 1;
-        } else if (minNodeResource.mb < MIN_SINGLE_NODE_MB || minNodeResource.vcores < MIN_SINGLE_NODE_VCORES) {
-            log.info("MinNodeResource=" + minNodeResource //
-                    + ": no single node is able to kick off a modeling python client.");
-            target += 1;
         }
         // to be removed to changed to debug
         log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource + " Target="
@@ -284,9 +285,9 @@ public class EMRScalingRunnable implements Runnable {
         int coreCount = getCoreCount();
         long avail = metrics.availableMB;
         long total = metrics.totalMB;
-        long newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
+        long newTotal = total - avail + req + minAvailMemMb;
         int target = (int) Math.max(1,
-                Math.ceil((1.0 * (newTotal - CORE_MB * coreCount)) / UNIT_MB));
+                Math.ceil((1.0 * (newTotal - coreMb * coreCount)) / taskMb));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " + "total="
                 + total + " avail=" + avail + " req=" + req);
         return target;
@@ -296,12 +297,26 @@ public class EMRScalingRunnable implements Runnable {
         int coreCount = getCoreCount();
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
-        int newTotal = total - avail + req + MIN_AVAIL_VCORES;
+        int newTotal = total - avail + req + minAvailVCores;
         int target = (int) Math.max(1,
-                Math.ceil((1.0 * (newTotal - CORE_VCORES * coreCount)) / UNIT_VCORES));
+                Math.ceil((1.0 * (newTotal - coreVCores * coreCount)) / taskVCores));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: "
                 + "total=" + total + " avail=" + avail + " req=" + req);
         return target;
+    }
+
+    private int determineNewByMinNodeResource(ReqResource reqResource) {
+        MinNodeResource minNodeResource = getMinNodeResource();
+        if (reqResource.maxMb > minNodeResource.mb || reqResource.maxVCores > minNodeResource.vcores) {
+            log.info("MinNodeResource=" + minNodeResource + ": no single node can host the max job");
+            return 1;
+        } else if (minNodeResource.mb < MIN_SINGLE_NODE_MB || minNodeResource.vcores < MIN_SINGLE_NODE_VCORES) {
+            log.info("MinNodeResource=" + minNodeResource //
+                    + ": no single node is able to kick off a modeling python client.");
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     private void resetScalingDownCounter() {
@@ -321,23 +336,39 @@ public class EMRScalingRunnable implements Runnable {
         return scalingDownAttemptMap.get(clusterId);
     }
 
+    private InstanceGroup getCoreGrp() {
+        if (coreGrp == null) {
+            coreGrp = emrService.getCoreGroup(clusterId);
+            coreMb = getInstanceMemory(coreGrp);
+            coreVCores = getInstanceVCores(coreGrp);
+        }
+        return coreGrp;
+    }
+
     private int getCoreCount() {
         return getCoreGrp().getRunningInstanceCount();
     }
 
-    private int getMaxAvailMemMb() {
-        return 2 * UNIT_MB + getCoreCount() * CORE_MB;
+    private long getMaxAvailMemMb() {
+        return (long) Math.floor((minTaskNodes + 0.5) * taskMb + getCoreCount() * coreMb);
     }
 
-    private int getMaxAvailVcores() {
-        return 2 * UNIT_VCORES + getCoreCount() * CORE_VCORES;
+    private int getMaxAvailVCores() {
+        return (int) Math.floor((minTaskNodes + 0.5) * taskVCores + getCoreCount() * coreVCores);
     }
 
-    private InstanceGroup getCoreGrp() {
-        if (coreGrp == null) {
-            coreGrp = emrService.getCoreGroup(clusterId);
+    private int getInstanceVCores(InstanceGroup grp) {
+        EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
+        return instanceType.getvCores();
+    }
+
+    private long getInstanceMemory(InstanceGroup grp) {
+        EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
+        long mem = (instanceType.getMemGb() - 8) * 1024;
+        if (mem < 1024 * 4) {
+            throw new IllegalArgumentException("Instance type " + grp.getInstanceType() + " is too small");
         }
-        return coreGrp;
+        return mem;
     }
 
     private static class MinNodeResource {

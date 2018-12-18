@@ -18,6 +18,9 @@ public class EMRScalingBean implements QuartzJobBean {
     @Value("${lp.emr.scaling.clusters}")
     private String scalingClusters;
 
+    @Value("${lp.emr.scaling.min.task.nodes}")
+    private int minTaskNodes;
+
     @Inject
     private EMRService emrService;
 
@@ -31,6 +34,7 @@ public class EMRScalingBean implements QuartzJobBean {
     public Callable<Boolean> getCallable(String jobArguments) {
         return EMRScalingCallable.builder() //
                 .scalingClusters(scalingClusters) //
+                .minTaskNodes(minTaskNodes) //
                 .emrEnvService(emrEnvService) //
                 .emrCacheService(emrCacheService)
                 .emrService(emrService) //

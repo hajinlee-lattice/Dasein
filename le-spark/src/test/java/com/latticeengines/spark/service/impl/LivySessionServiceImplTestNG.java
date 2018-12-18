@@ -1,5 +1,7 @@
 package com.latticeengines.spark.service.impl;
 
+import java.util.Collections;
+
 import javax.inject.Inject;
 
 import org.testng.Assert;
@@ -10,8 +12,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.testframework.SparkFunctionalTestNGBase;
-
-import java.util.Collections;
 
 public class LivySessionServiceImplTestNG extends SparkFunctionalTestNGBase {
 

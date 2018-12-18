@@ -23,6 +23,8 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private List<String> scalingClusters;
 
+    private int minTaskNodes;
+
     private EMRService emrService;
 
     private EMRCacheService emrCacheService;
@@ -31,6 +33,10 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private void setScalingClusters(List<String> scalingClusters) {
         this.scalingClusters = scalingClusters;
+    }
+
+    public void setMinTaskNodes(int minTaskNodes) {
+        this.minTaskNodes = minTaskNodes;
     }
 
     private void setEmrService(EMRService emrService) {
@@ -52,7 +58,7 @@ class EMRScalingCallable implements Callable<Boolean> {
                 log.info("Invoking EMRScalingCallable. Scaling clusters: " + StringUtils.join(scalingClusters));
                 List<Runnable> runnables = scalingClusters.stream() //
                         .filter(emrCluster -> StringUtils.isNotBlank(emrCacheService.getClusterId(emrCluster))) //
-                        .map(emrCluster -> new EMRScalingRunnable(emrCluster, emrService, emrCacheService, emrEnvService)) //
+                        .map(emrCluster -> new EMRScalingRunnable(emrCluster, minTaskNodes, emrService, emrCacheService, emrEnvService)) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.size(runnables) == 1) {
                     runnables.get(0).run();
@@ -74,6 +80,8 @@ class EMRScalingCallable implements Callable<Boolean> {
 
         private List<String> scalingClusters;
 
+        private int minTaskNodes;
+
         private EMRService emrService;
 
         private EMRCacheService emrCacheService;
@@ -84,6 +92,11 @@ class EMRScalingCallable implements Callable<Boolean> {
             if (StringUtils.isNotBlank(scalingClusters)) {
                 this.scalingClusters = Arrays.asList(scalingClusters.split(","));
             }
+            return this;
+        }
+
+        Builder minTaskNodes(int minTaskNodes) {
+            this.minTaskNodes = minTaskNodes;
             return this;
         }
 
@@ -105,6 +118,7 @@ class EMRScalingCallable implements Callable<Boolean> {
         EMRScalingCallable build() {
             EMRScalingCallable callable = new EMRScalingCallable();
             callable.setScalingClusters(scalingClusters);
+            callable.setMinTaskNodes(minTaskNodes);
             callable.setEmrService(emrService);
             callable.setEmrCacheService(emrCacheService);
             callable.setEmrEnvService(emrEnvService);
