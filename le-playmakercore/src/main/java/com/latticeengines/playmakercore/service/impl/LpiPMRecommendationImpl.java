@@ -59,15 +59,15 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     @Override
-    public List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, int offset, int maximum) {
-        List<Map<String, Object>> data = recommendationEntityMgr.findRecommendationsAsMapByLaunchIds(launchIds, offset,
+    public List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, long start, int offset, int maximum) {
+        List<Map<String, Object>> data = recommendationEntityMgr.findRecommendationsAsMapByLaunchIds(launchIds, start, offset,
                 maximum);
         return postProcess(data, offset);
     }
 
     @Override
-    public int getRecommendationCountByLaunchIds(List<String> launchIds) {
-        return recommendationEntityMgr.findRecommendationCountByLaunchIds(launchIds);
+    public int getRecommendationCountByLaunchIds(List<String> launchIds, long start) {
+        return recommendationEntityMgr.findRecommendationCountByLaunchIds(launchIds,start);
     }
 
     private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
@@ -276,12 +276,12 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     @Override
-    public List<String> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, int offset, int max) {
-        return recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, offset, max);
+    public List<Map<String, Object>> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, long start, int offset, int max) {
+        return recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, start, offset, max);
     }
 
     @Override
-    public int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds) {
-        return recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds);
+    public int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds, long start) {
+        return recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds, start);
     }
 }

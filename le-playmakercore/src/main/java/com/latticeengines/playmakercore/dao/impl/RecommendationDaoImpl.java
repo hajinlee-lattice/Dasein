@@ -3,6 +3,7 @@ package com.latticeengines.playmakercore.dao.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,11 +83,14 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         String queryStr = "SELECT count(*) " //
                 + "FROM %s " //
                 + "WHERE launchId in (:launchIds) " //
+                // + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >=
+                // :lastUpdatedTimestamp " //
                 + "AND deleted = :deleted ";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameterList("launchIds", launchIds);
         query.setParameter("deleted", Boolean.FALSE);
+        // query.setParameter("lastUpdatedTimestamp", start);
         return ((Long) query.uniqueResult()).intValue();
     }
 
@@ -101,7 +105,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "FROM %s " //
                 + "WHERE synchronizationDestination = :syncDestination " //
-                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp " //
+                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
                 + "AND deleted = :deleted ";
 
         queryStr = additionalWhereClause(playIds, effectiveOrgInfo, queryStr);
@@ -144,7 +148,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         String queryStr = "SELECT count(*) " //
                 + "FROM %s " //
                 + "WHERE synchronizationDestination = :syncDestination " //
-                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp " //
+                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
                 + "AND deleted = :deleted ";
 
         queryStr = additionalWhereClause(playIds, effectiveOrgInfo, queryStr);
@@ -209,7 +213,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + ") " //
                 + "FROM %s " //
                 + "WHERE synchronizationDestination = :syncDestination " //
-                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp " //
+                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
                 + "AND deleted = :deleted ";
 
         queryStr = additionalWhereClause(playIds, effectiveOrgInfo, queryStr);
@@ -232,7 +236,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, int offset, int max) {
+    public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset,
+            int max) {
         Session session = getSessionFactory().getCurrentSession();
 
         Class<Recommendation> entityClz = getEntityClass();
@@ -261,7 +266,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + "FROM %s " //
                 + "WHERE deleted = :deleted " //
                 + "AND launchId IN (:launchIds) " //
-                + "ORDER BY lastUpdatedTimestamp";
+                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
+                + "ORDER BY lastUpdatedTimestamp ";
 
         queryStr = String.format(queryStr, entityClz.getSimpleName());
 
@@ -271,6 +277,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setFirstResult(offset);
         query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
+        query.setParameter("lastUpdatedTimestamp", start);
         return query.list();
     }
 
@@ -394,7 +401,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
         String updateQueryStr = "UPDATE %s " //
                 + "SET deleted = :deleted " //
-                + "WHERE recommendationId IN (:recommendationIds) ";
+                + "WHERE recommendationId IN ( :recommendationIds ) ";
 
         updateQueryStr = String.format(updateQueryStr, entityClz.getSimpleName());
 
@@ -406,54 +413,85 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<String> findAccountIdsByLaunchIds(List<String> launchIds, int offset, int max) {
+    public List<Map<String, Object>> findAccountIdsByLaunchIds(List<String> launchIds, long start, int offset,
+            int max) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "SELECT DISTINCT accountId FROM %s " //
-                + "WHERE deleted = :deleted AND launchId in (:launchIds) ORDER BY accountId";
+        // String queryStr = "SELECT
+        // DISTINCT(accountId),UNIX_TIMESTAMP(lastUpdatedTimestamp)*1000 FROM %s
+        // " //
+        // + "WHERE deleted = :deleted AND launchId in (:launchIds) ORDER BY
+        // lastUpdatedTimestamp";
+
+        String queryStr = "SELECT " + "DISTINCT( accountId ), "//
+                + "UNIX_TIMESTAMP( lastUpdatedTimestamp ) as lastUpdatedUnixTimestamp " //
+                + "FROM %s " //
+                + "WHERE deleted = :deleted " //
+                + "AND launchId IN (:launchIds) " //
+                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
+                + "ORDER BY lastUpdatedUnixTimestamp, accountId";
 
         queryStr = String.format(queryStr, entityClz.getSimpleName());
 
-        Query<String> query = session.createQuery(queryStr);
+        @SuppressWarnings("rawtypes")
+        Query<Object[]> query = session.createQuery(queryStr);
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setParameter("deleted", Boolean.FALSE);
+        query.setParameter("lastUpdatedTimestamp", start);
         if (CollectionUtils.isNotEmpty(launchIds)) {
             query.setParameterList("launchIds", launchIds);
         } else {
             return null;
         }
-        return query.list();
-    }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<String> findAccountIdsByLaunchIds(List<String> launchIds) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "SELECT DISTINCT accountId FROM %s " //
-                + "WHERE deleted = :deleted " + "AND launchId in (:launchIds) " + "order by accountId";
+        List<Map<String, Object>> results = new ArrayList<>();
+        List<Object[]> queryResult = (List<Object[]>) query.list();
 
-        queryStr = String.format(queryStr, entityClz.getSimpleName());
-
-        Query<String> query = session.createQuery(queryStr);
-        query.setParameter("deleted", Boolean.FALSE);
-        if (CollectionUtils.isNotEmpty(launchIds)) {
-            query.setParameterList("launchIds", launchIds);
-        } else {
-            return null;
+        if (CollectionUtils.isNotEmpty(queryResult)) {
+            queryResult.stream().forEach(result -> {
+                String accountId = (String) result[0];
+                long lastModifyTs = (long) result[1];
+                Map<String, Object> obj = new HashMap<String, Object>();
+                obj.put(PlaymakerConstants.AccountID, accountId);
+                obj.put(PlaymakerConstants.LastModificationDate, lastModifyTs);
+                results.add(obj);
+            });
         }
-        return query.list();
+        return results;
     }
 
+    // @SuppressWarnings("unchecked")
+    // @Override
+    // public List<String> findAccountIdsByLaunchIds(List<String> launchIds) {
+    // Session session = getSessionFactory().getCurrentSession();
+    // Class<Recommendation> entityClz = getEntityClass();
+    // String queryStr = "SELECT DISTINCT accountId FROM %s " //
+    // + "WHERE deleted = :deleted " + "AND launchId in (:launchIds) " + "order
+    // by accountId";
+    //
+    // queryStr = String.format(queryStr, entityClz.getSimpleName());
+    //
+    // Query<String> query = session.createQuery(queryStr);
+    // query.setParameter("deleted", Boolean.FALSE);
+    // if (CollectionUtils.isNotEmpty(launchIds)) {
+    // query.setParameterList("launchIds", launchIds);
+    // } else {
+    // return null;
+    // }
+    // return query.list();
+    // }
+
     @Override
-    public int findAccountIdCountByLaunchIds(List<String> launchIds) {
+    public int findAccountIdCountByLaunchIds(List<String> launchIds, long start) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT COUNT(DISTINCT accountId) FROM %s " //
-                + "WHERE deleted = :deleted " + "AND launchId in (:launchIds) ";
+                + "WHERE deleted = :deleted " + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
+                + "AND launchId in (:launchIds) ";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
+        query.setParameter("lastUpdatedTimestamp", start);
         query.setParameter("deleted", Boolean.FALSE);
         if (CollectionUtils.isNotEmpty(launchIds)) {
             query.setParameterList("launchIds", launchIds);
@@ -465,7 +503,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, List<String> accountIds) {
+    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start,
+            List<String> accountIds) {
         log.info("contact requst with launchIds: " + launchIds.toString());
         if (CollectionUtils.isEmpty(launchIds)) {
             return null;
@@ -473,7 +512,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT accountId,contacts FROM %s " //
-                + "WHERE deleted = :deleted AND launchId in (:launchIds)";
+                + "WHERE deleted = :deleted AND launchId in (:launchIds) "
+                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp "; //
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
             queryStr += " AND accountId in (:accountIds)";
@@ -483,15 +523,16 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Query<Object[]> query = session.createQuery(queryStr);
         query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
+        query.setParameter("lastUpdatedTimestamp", start);
         if (CollectionUtils.isNotEmpty(accountIds)) {
             query.setParameterList("accountIds", accountIds);
         }
-        List<Object[]> queryResult = (List<Object[]>)query.list();
+        List<Object[]> queryResult = (List<Object[]>) query.list();
         List<Map<String, Object>> contacts = new ArrayList<Map<String, Object>>();
         String accountIdName = PlaymakerConstants.AccountID + PlaymakerConstants.V2;
         queryResult.stream().forEach(result -> {
-            String accountId = (String)result[0];
-            String contactStr = (String)result[1];
+            String accountId = (String) result[0];
+            String contactStr = (String) result[1];
             if (StringUtils.isNotBlank(contactStr)) {
                 List<Map<String, Object>> contactsList = PlaymakerUtils.getExpandedContacts(contactStr, Object.class);
                 contactsList.stream().forEach(c -> {
@@ -505,8 +546,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public int findContactsCountByLaunchIds(List<String> launchIds, List<String> accountIds) {
-        List<Map<String, Object>> contacts = findContactsByLaunchIds(launchIds, accountIds);
+    public int findContactsCountByLaunchIds(List<String> launchIds, long start, List<String> accountIds) {
+        List<Map<String, Object>> contacts = findContactsByLaunchIds(launchIds, start, accountIds);
         return contacts.size();
     }
 }

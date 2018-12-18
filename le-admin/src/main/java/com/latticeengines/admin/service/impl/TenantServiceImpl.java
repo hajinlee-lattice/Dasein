@@ -68,6 +68,7 @@ import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -100,6 +101,9 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private com.latticeengines.security.exposed.service.TenantService tenantService;
 
+    @Autowired
+    private Oauth2RestApiProxy oauthProxy;
+
     @Value("${common.pls.url}")
     private String plsEndHost;
 
@@ -129,8 +133,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public boolean createTenant(final String contractId, final String tenantId,
-                                TenantRegistration tenantRegistration, String userName) {
+    public boolean createTenant(final String contractId, final String tenantId, TenantRegistration tenantRegistration,
+            String userName) {
         final ContractInfo contractInfo = tenantRegistration.getContractInfo();
         final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -189,7 +193,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public boolean createTenantV2(String contractId, String tenantId, TenantRegistration tenantRegistration,  String userName) {
+    public boolean createTenantV2(String contractId, String tenantId, TenantRegistration tenantRegistration,
+            String userName) {
         final ContractInfo contractInfo = tenantRegistration.getContractInfo();
         final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -239,11 +244,13 @@ public class TenantServiceImpl implements TenantService {
             orchestrator.orchestrateForInstallV2(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
                     orchestratorProps, tenantProps, prodAndExternalAminInfo);
             // record tenant status after being created
-//            TenantDocument tenantDoc = getTenant(contractId, tenantId);
-//            if (tenantDoc != null && !BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state)) {
-//                tenantInfo.properties.status = TenantStatus.INACTIVE.name();
-//                updateTenantInfo(contractId, tenantId, tenantInfo);
-//            }
+            // TenantDocument tenantDoc = getTenant(contractId, tenantId);
+            // if (tenantDoc != null &&
+            // !BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state))
+            // {
+            // tenantInfo.properties.status = TenantStatus.INACTIVE.name();
+            // updateTenantInfo(contractId, tenantId, tenantInfo);
+            // }
         });
         return true;
     }
@@ -398,6 +405,13 @@ public class TenantServiceImpl implements TenantService {
                         orchestratorProps, prodAndExternalAminInfo, deleteZookeeper);
             }
         });
+
+        // delete oauth2 keys
+        try {
+            oauthProxy.deleteTenant(space.toString());
+        } catch (Exception e) {
+            log.info(String.format("No Oauth2 info related to this Tenant %s ", space.toString()));
+        }
         log.info(String.format("Tenant %s deleted by user %s", tenantId, userName));
         return true;
     }
@@ -462,8 +476,7 @@ public class TenantServiceImpl implements TenantService {
                 if (newState != null) {
                     if (state == null) {
                         state = newState;
-                    } else if (!serviceName.equals(DanteComponent.componentName)
-                            || danteIsEnabled(doc)) {
+                    } else if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(doc)) {
                         state = mergeBootstrapStates(state, newState, serviceName);
                     }
                 }

@@ -74,30 +74,31 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
         if (start < 90000000000L) { // if request using second level timestamp
-            start = start*1000L;
+            start = start * 1000L;
         }
         PlayLaunchDashboard dashboard;
         if (orgInfo == null) {
-            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, launchstates,
-                    start, 0L, 1000L, null, null, null, null, null);
+            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
+                    launchstates, start, 0L, 1000L, null, null, null, null, null);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
-            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null, launchstates,
-                    start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(), effectiveOrgInfo.getRight());
+            dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
+                    launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
+                    effectiveOrgInfo.getRight());
         }
         plays = dashboard.getUniquePlaysWithLaunches();
         return plays;
     }
 
     @Override
-    public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds,
-            int syncDestination, Map<String, String> orgInfo) {
+    public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds, int syncDestination,
+            Map<String, String> orgInfo) {
         PlayLaunchDashboard dashboard;
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
 
         if (start < 90000000000L) { // if request using second level timestamp
-            start = start*1000L;
+            start = start * 1000L;
         }
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
@@ -108,28 +109,34 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                     launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
                     effectiveOrgInfo.getRight());
         }
+        if (dashboard == null) {
+            return null;
+        }
         List<LaunchSummary> summaries = dashboard.getLaunchSummaries();
+        List<String> launchIds = new ArrayList<String>();
+        if (CollectionUtils.isEmpty(summaries)) {
+            return null;
+        }
         Map<String, String> activePlays = new HashMap<String, String>();
         if (CollectionUtils.isNotEmpty(playIds)) {
-            playIds.forEach(playId->{
+            playIds.forEach(playId -> {
                 if (!activePlays.containsKey(playId)) {
-                    activePlays.put(playId, playId); 
+                    activePlays.put(playId, playId);
                 }
             });
         }
-        List<String> launchIds = new ArrayList<String>();
+
         if (latest) {
             Map<String, String> match = new HashMap<String, String>();
             summaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
-                    if (!match.containsKey(launch.getPlayName()) ) {
+                    if (!match.containsKey(launch.getPlayName())) {
                         if (CollectionUtils.isNotEmpty(playIds)) {
-                            if (activePlays.containsKey(launch.getPlayName())){
+                            if (activePlays.containsKey(launch.getPlayName())) {
                                 match.put(launch.getPlayName(), launch.getLaunchId());
                                 launchIds.add(launch.getLaunchId());
                             }
-                        }
-                        else {
+                        } else {
                             match.put(launch.getPlayName(), launch.getLaunchId());
                             launchIds.add(launch.getLaunchId());
                         }
@@ -140,11 +147,10 @@ public class LpiPMPlayImpl implements LpiPMPlay {
             summaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
                     if (CollectionUtils.isNotEmpty(playIds)) {
-                        if (activePlays.containsKey(launch.getPlayName())){
+                        if (activePlays.containsKey(launch.getPlayName())) {
                             launchIds.add(launch.getLaunchId());
                         }
-                    }
-                    else {
+                    } else {
                         launchIds.add(launch.getLaunchId());
                     }
                 }
@@ -199,9 +205,9 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         playMap.put(PlaymakerConstants.AverageProbability, null);
         playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
         playMap.put(PlaymakerConstants.PlayGroups, null);
-        if(play.getRatingEngine() != null) {
-            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
-                    play.getRatingEngine().getId());
+        if (play.getRatingEngine() != null) {
+            RatingEngine ratingEngine = ratingEngineProxy
+                    .getRatingEngine(MultiTenantContext.getCustomerSpace().toString(), play.getRatingEngine().getId());
             playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine, allProducts));
         }
         playMap.put(PlaymakerConstants.Workflow, PlayType.getIdForBIS(play.getPlayType().getDisplayName()));

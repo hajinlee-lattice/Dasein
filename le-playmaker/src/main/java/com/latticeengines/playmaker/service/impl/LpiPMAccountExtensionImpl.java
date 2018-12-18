@@ -116,8 +116,10 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
             internalAccountIds = accountIds;
-        } else if (recStart > 0L) {
-            internalAccountIds = getAccountIdsByRecommendationsInfo(true, recStart, offset, maximum, orgInfo);
+        } else if (recStart > 0L) { // special case for query with
+                                    // recommendation launch time.
+            return getAccountExtensionsByLaunch(recStart, offset, maximum, orgInfo, customerSpace, attributes,
+                    lookupIdColumn);
         } else {
             internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace, accountIds, lookupIdColumn, start,
                     offset, maximum);
@@ -129,15 +131,55 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         } else {
             dataPage = AccountExtensionUtil.createEmptyDataPage();
         }
-
-        return postProcess(dataPage.getData(), offset, lookupIdColumn);
+        return postProcessForTimeBasedQuery(dataPage.getData(), offset, lookupIdColumn);
     }
 
+    private List<Map<String, Object>> getAccountExtensionsByLaunch(Long recStart, long offset, long maximum,
+            Map<String, String> orgInfo, String customerSpace, Set<String> attributes, String lookupIdColumn) {
+        List<Map<String, Object>> accountInfos = getAccountIdsByRecommendationsInfo(false, recStart, offset, maximum,
+                orgInfo);
+
+        List<String> accountIds = new ArrayList<>();
+
+        accountInfos.stream().forEach(info -> {
+            String accountName = (String) info.get(PlaymakerConstants.AccountID);
+            accountIds.add(accountName);
+        });
+
+        DataPage dataPage;
+
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            dataPage = getAccountByIdViaMatchApi(customerSpace, accountIds, attributes);
+            log.info(String.format("Accounts returned from matchapi: %s", JsonUtils.serialize(dataPage)));
+        } else {
+            dataPage = AccountExtensionUtil.createEmptyDataPage();
+        }
+
+        return postProcessForLaunchBased(dataPage.getData(), accountInfos, offset, lookupIdColumn);
+    }
+
+    // private List<Map<String, Object>>
+    // alignExtensionsByAccountIdSeq(List<Map<String, Object>> data,
+    // List<String> accountIds) {
+    // Map<String,Map<String, Object>> lookupMap = new HashMap<>();
+    // List<Map<String,Object>> sortedList = new ArrayList<>();
+    // data.stream().forEach(acc->{
+    // lookupMap.put((String) acc.get(PlaymakerConstants.AccountID), acc);
+    // });
+    // accountIds.stream().forEach(id->{
+    // if (lookupMap.containsKey(id)) {
+    // sortedList.add(lookupMap.get(id));
+    // }
+    // });
+    // return sortedList;
+    // }
+
     @Override
-    public List<String> getAccountIdsByRecommendationsInfo(boolean latest, Long recStart, long offset, long max,
-            Map<String, String> orgInfo) {
+    public List<Map<String, Object>> getAccountIdsByRecommendationsInfo(boolean latest, Long recStart, long offset,
+            long max, Map<String, String> orgInfo) {
         List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latest, recStart, null, 0, orgInfo);
-        return lpiRecommendationDao.getAccountIdsFromRecommendationByLaunchId(launchIds, (int) offset, (int) max);
+        return lpiRecommendationDao.getAccountIdsFromRecommendationByLaunchId(launchIds, recStart, (int) offset,
+                (int) max);
     }
 
     private void setPageFilter(FrontEndQuery frontEndQuery, Long offset, Long maximum) {
@@ -147,7 +189,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         frontEndQuery.setPageFilter(pageFilter);
     }
 
-    private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, long offset, String lookupIdColumn) {
+    private List<Map<String, Object>> postProcessForTimeBasedQuery(List<Map<String, Object>> data, long offset,
+            String lookupIdColumn) {
 
         if (CollectionUtils.isNotEmpty(data)) {
             long rowNum = offset + 1;
@@ -157,6 +200,44 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                     accExtRec.put(PlaymakerConstants.ID, accExtRec.get(InterfaceName.AccountId.name()));
                     accExtRec.put(PlaymakerConstants.LEAccountExternalID,
                             accExtRec.get(InterfaceName.AccountId.name()));
+                }
+
+                if (StringUtils.isNotBlank(lookupIdColumn) && accExtRec.containsKey(lookupIdColumn)) {
+                    accExtRec.put(PlaymakerConstants.SfdcAccountID, accExtRec.get(lookupIdColumn));
+                }
+
+                accExtRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
+                        accExtRec.get(InterfaceName.CDLUpdatedTime.name()));
+
+                accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
+            }
+        }
+
+        return data;
+    }
+
+    private List<Map<String, Object>> postProcessForLaunchBased(List<Map<String, Object>> data,
+            List<Map<String, Object>> accountInfos, long offset, String lookupIdColumn) {
+
+        if (CollectionUtils.isNotEmpty(data)) {
+            long rowNum = offset + 1;
+
+            Map<String, Object> lastModifyTimeLookups = new HashMap<>();
+            accountInfos.stream().forEach(info -> {
+                lastModifyTimeLookups.put((String) info.get(PlaymakerConstants.AccountID),
+                        info.get(PlaymakerConstants.LastModificationDate));
+            });
+
+            for (Map<String, Object> accExtRec : data) {
+                if (accExtRec.containsKey(InterfaceName.AccountId.name())) {
+                    accExtRec.put(PlaymakerConstants.ID, accExtRec.get(InterfaceName.AccountId.name()));
+                    accExtRec.put(PlaymakerConstants.LEAccountExternalID,
+                            accExtRec.get(InterfaceName.AccountId.name()));
+
+                    if (lastModifyTimeLookups.containsKey(accExtRec.get(InterfaceName.AccountId.name()))) {
+                        accExtRec.put(PlaymakerRecommendationEntityMgr.RECOMMENDATION_DATE,
+                                lastModifyTimeLookups.get(accExtRec.get(InterfaceName.AccountId.name())));
+                    }
                 }
 
                 if (StringUtils.isNotBlank(lookupIdColumn) && accExtRec.containsKey(lookupIdColumn)) {
@@ -218,7 +299,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             if (recStart > 0L) {
                 List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, recStart, null, 0, orgInfo);
                 if (CollectionUtils.isNotEmpty(launchIds)) {
-                    return lpiRecommendationDao.getAccountIdsCountFromRecommendationByLaunchId(launchIds);
+                    return lpiRecommendationDao.getAccountIdsCountFromRecommendationByLaunchId(launchIds, recStart);
                 } else {
                     return 0;
                 }

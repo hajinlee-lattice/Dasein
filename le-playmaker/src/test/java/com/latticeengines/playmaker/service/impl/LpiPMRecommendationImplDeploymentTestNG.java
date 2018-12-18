@@ -51,7 +51,7 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @Inject
     private RecommendationEntityMgr recommendationEntityMgr;
-    
+
     @Inject
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
 
@@ -78,7 +78,7 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     private Play play;
 
     private PlayLaunch playLaunch;
-    
+
     private CustomerSpace customerSpace;
 
     private Map<String, String> eloquaAppId1;
@@ -161,8 +161,29 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @Test(groups = "deployment", dependsOnMethods = { "testRecommendations" })
     public void testGetAccountIdsByLaunchIds() {
-        List<String> accounts = lpiAccountExt.getAccountIdsByRecommendationsInfo(false, 0L, 0L, 1000L, orgInfo);
+        List<Map<String, Object>> accounts = lpiAccountExt.getAccountIdsByRecommendationsInfo(false, 0L, 0L, 1000L,
+                orgInfo);
         System.out.println("\nThis is AccountID List:");
+        System.out.println(accounts.toString() + "\n");
+        Assert.assertTrue(accounts.size() > 0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testRecommendations" })
+    public void testCDLupdatetimeBasedAccountExt() {
+        String columns = "AccountID";
+        List<Map<String, Object>> accounts = lpiAccountExt.getAccountExtensions(0, 0, 1000, null, null, 0L, columns,
+                true, orgInfo);
+        System.out.println("\nThis is CDL_TIME based account List:");
+        System.out.println(accounts.toString() + "\n");
+        Assert.assertTrue(accounts.size() > 0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testRecommendations" })
+    public void testRecommendationBasedAccountExt() {
+        String columns = "AccountID";
+        List<Map<String, Object>> accounts = lpiAccountExt.getAccountExtensions(0, 0, 1000, null, null, 1L, columns,
+                true, orgInfo);
+        System.out.println("\nThis is Recommendation based account List:");
         System.out.println(accounts.toString() + "\n");
         Assert.assertTrue(accounts.size() > 0);
     }

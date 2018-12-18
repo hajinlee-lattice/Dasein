@@ -12,12 +12,12 @@ public interface LpiPMRecommendation {
             SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo,
             Map<String, String> appId);
 
-    List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, int offset, int maximum);
+    List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, long start, int offset, int maximum);
 
     int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination, List<String> playIds,
             Map<String, String> orgInfo, Map<String, String> appId);
 
-    int getRecommendationCountByLaunchIds(List<String> launchIds);
+    int getRecommendationCountByLaunchIds(List<String> launchIds, long start);
 
     Recommendation getRecommendationById(String recommendationId);
 
@@ -25,7 +25,7 @@ public interface LpiPMRecommendation {
 
     int cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate);
 
-    List<String> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, int offset, int max);
+    List<Map<String, Object>> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, long start, int offset, int max);
 
-    int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds);
+    int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds, long start);
 }

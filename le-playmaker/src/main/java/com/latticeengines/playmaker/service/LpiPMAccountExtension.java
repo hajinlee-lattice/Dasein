@@ -19,6 +19,6 @@ public interface LpiPMAccountExtension {
 
     int getContactExtensionColumnCount(String customerSpace);
 
-    List<String> getAccountIdsByRecommendationsInfo(boolean latest, Long recStart, long offset, long max,
+    List<Map<String,Object>> getAccountIdsByRecommendationsInfo(boolean latest, Long recStart, long offset, long max,
             Map<String, String> orgInfo);
 }

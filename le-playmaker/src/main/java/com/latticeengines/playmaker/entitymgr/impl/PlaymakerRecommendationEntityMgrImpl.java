@@ -223,8 +223,14 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {
         Map<String, Object> result = new HashMap<>();
         if (records != null && records.size() > 0) {
-            result.put(START_KEY, records.get(0).get(LAST_MODIFIATION_DATE_KEY));
-            result.put(END_KEY, records.get(records.size() - 1).get(LAST_MODIFIATION_DATE_KEY));
+            if (records.get(0).containsKey(RECOMMENDATION_DATE)) {
+                result.put(START_KEY, records.get(0).get(RECOMMENDATION_DATE));
+                result.put(END_KEY, records.get(records.size() - 1).get(RECOMMENDATION_DATE));
+            }
+            else {
+                result.put(START_KEY, records.get(0).get(LAST_MODIFIATION_DATE_KEY));
+                result.put(END_KEY, records.get(records.size() - 1).get(LAST_MODIFIATION_DATE_KEY));
+            }
             result.put(RECORDS_KEY, records);
         }
         return result;

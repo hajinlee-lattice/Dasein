@@ -369,14 +369,14 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     private void testGetAccountIdsByLaunchIds(List<String> launchIds) {
         MultiTenantContext.setTenant(tenant);
-        List<String> accountIds = recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, 0,
+        List<Map<String,Object>> accountInfos = recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, 0, 0,
                 1000);
-        int num = recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds);
+        int num = recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds, 0);
         System.out.print(launchIds);
-        Assert.assertNotNull(accountIds);
-        System.out.println(accountIds);
+        Assert.assertNotNull(accountInfos);
+        System.out.println(accountInfos);
         Assert.assertTrue(num > 0);
-        Assert.assertTrue(accountIds.size() > 0);
+        Assert.assertTrue(accountInfos.size() > 0);
     }
 
     private void testGetRecommendationByPlayId(Recommendation originalRecommendation) {

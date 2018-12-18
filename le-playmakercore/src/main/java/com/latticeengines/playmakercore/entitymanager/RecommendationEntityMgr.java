@@ -23,7 +23,7 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
     int findRecommendationCount(Date lastModificationDate, //
             String syncDestination, List<String> playIds, Map<String, String> orgInfo);
 
-    int findRecommendationCountByLaunchIds(List<String> launchIds);
+    int findRecommendationCountByLaunchIds(List<String> launchIds, long start);
 
     List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, //
             int offset, int max, String syncDestination, List<String> playIds, Map<String, String> orgInfo);
@@ -36,13 +36,13 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
 
     int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows);
 
-    List<String> findAccountIdsFromRecommendationByLaunchId(List<String> launchIds, int offset, int max);
+    List<Map<String, Object>> findAccountIdsFromRecommendationByLaunchId(List<String> launchIds, long start, int offset, int max);
 
-    int findAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds);
+    int findAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds, long start);
 
-    List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, int offset, int max);
+    List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset, int max);
 
-    List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, List<String> accountIds);
+    List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, List<String> accountIds);
 
-    int findContactsCountByLaunchIds(List<String> launchIds, List<String> accountIds);
+    int findContactsCountByLaunchIds(List<String> launchIds, long start, List<String> accountIds);
 }

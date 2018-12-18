@@ -11,6 +11,7 @@ public interface PlaymakerRecommendationEntityMgr {
     public static final String START_KEY = "startDatetime";
     public static final String LAST_MODIFIATION_DATE_KEY = "LastModificationDate";
     public static final String COUNT_KEY = "count";
+    public static final String RECOMMENDATION_DATE = "recommendationDate";
 
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName, String lookupSource);
 
