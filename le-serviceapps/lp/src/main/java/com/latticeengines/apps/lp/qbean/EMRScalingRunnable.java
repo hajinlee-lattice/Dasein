@@ -48,6 +48,7 @@ public class EMRScalingRunnable implements Runnable {
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
+    private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(45);
 
     private static final ConcurrentMap<String, AtomicLong> lastScalingUpMap = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, AtomicInteger> scalingDownAttemptMap = new ConcurrentHashMap<>();
@@ -139,7 +140,7 @@ public class EMRScalingRunnable implements Runnable {
             scale = true;
         } else if (requested < running) {
             // during scaling down, might need to adjust
-            log.info(scaleLogPrefix + "scaling down from " + running + " to " //
+            log.info(scaleLogPrefix + "scaling in from " + running + " to " //
                     + requested + ", might need to adjust.");
             scale = true;
         } else {
@@ -156,21 +157,25 @@ public class EMRScalingRunnable implements Runnable {
         int target = getTargetTaskNodes();
         if (target != requested) {
             if (target > requested) {
-                log.info(String.format("Scale up %s, running=%d, requested=%d, target=%d", //
+                log.info(String.format("Scale out %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
                 getLastScalingUp().set(System.currentTimeMillis());
                 scale(target);
                 resetScalingDownCounter();
             } else {
-                log.info(String.format(
-                        "Scale down %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                        emrCluster, getScalingDownAttempt().incrementAndGet(), running, requested,
-                        target));
-                if (requested <= running && getScalingDownAttempt().get() >= 3) {
-                    log.info("Going to scale down " + emrCluster + " from " + requested + " to " + target);
-                    // be conservative about terminating machines
-                    scale(target);
-                    resetScalingDownCounter();
+                if (getLastScalingUp().get() + SCALING_DOWN_COOL_DOWN < System.currentTimeMillis()) {
+                    log.info("Still in cool down period, won't attempt to scaling in.");
+                } else {
+                    log.info(String.format(
+                            "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
+                            emrCluster, getScalingDownAttempt().incrementAndGet(), running, requested,
+                            target));
+                    if (requested <= running && getScalingDownAttempt().get() >= 3) {
+                        log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
+                        // be conservative about terminating machines
+                        scale(target);
+                        resetScalingDownCounter();
+                    }
                 }
             }
         }
@@ -305,7 +310,7 @@ public class EMRScalingRunnable implements Runnable {
 
     private void resetScalingDownCounter() {
         if (getScalingDownAttempt().get() > 0) {
-            log.info("Reset " + emrCluster +" scaling down counter from " + getScalingDownAttempt().get());
+            log.info("Reset " + emrCluster +" scaling in counter from " + getScalingDownAttempt().get());
             getScalingDownAttempt().set(0);
         }
     }
