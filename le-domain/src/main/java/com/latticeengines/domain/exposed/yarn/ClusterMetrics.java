@@ -14,13 +14,13 @@ public class ClusterMetrics {
     public Integer appsRunning;
 
     @JsonProperty
-    public Integer reservedMB;
+    public Long reservedMB;
     @JsonProperty
-    public Integer availableMB;
+    public Long availableMB;
     @JsonProperty
-    public Integer allocatedMB;
+    public Long allocatedMB;
     @JsonProperty
-    public Integer totalMB;
+    public Long totalMB;
 
     @JsonProperty
     public Integer reservedVirtualCores;

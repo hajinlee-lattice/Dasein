@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleInfo" target="SYSTEM_OUT">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} [%t] %-5p %c{1.}:%L - %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="WARN">
+            <AppenderRef ref="ConsoleInfo"/>
+        </Root>
+        <Logger name="com.latticeengines" additivity="false" level="INFO">
+            <AppenderRef ref="ConsoleInfo"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>

@@ -113,7 +113,7 @@ public class EMRScalingRunnable implements Runnable {
         String scaleLogPrefix = "Might need to scale " + emrCluster + ": ";
         String noScaleLogPrefix = "No need to scale " + emrCluster + ": ";
 
-        int availableMB = metrics.availableMB;
+        long availableMB = metrics.availableMB;
         int availableVCores = metrics.availableVirtualCores;
         int running = taskGrp.getRunningInstanceCount();
         int requested = taskGrp.getRequestedInstanceCount();
@@ -236,7 +236,7 @@ public class EMRScalingRunnable implements Runnable {
                     // no resource usage after SLOW_START_THRESHOLD
                     // must be stuck
                     Resource asked = usageReport.getNeededResources();
-                    int mb = asked.getMemory();
+                    long mb = asked.getMemorySize();
                     int vcores = asked.getVirtualCores();
                     reqResource.reqMb += mb;
                     reqResource.reqVCores += vcores;
@@ -267,11 +267,11 @@ public class EMRScalingRunnable implements Runnable {
         return Math.min(target, MAX_TASK_NODES);
     }
 
-    private int determineTargetByMb(int req) {
+    private int determineTargetByMb(long req) {
         int coreCount = getCoreCount();
-        int avail = metrics.availableMB;
-        int total = metrics.totalMB;
-        int newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
+        long avail = metrics.availableMB;
+        long total = metrics.totalMB;
+        long newTotal = total - avail + req + MIN_AVAIL_MEM_MB;
         int target = (int) Math.max(1,
                 Math.ceil((1.0 * (newTotal - CORE_MB * coreCount)) / UNIT_MB));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " + "total="
@@ -291,7 +291,7 @@ public class EMRScalingRunnable implements Runnable {
         return target;
     }
 
-    private int determineNewTargetsByMinReq(int mb, int vcores) {
+    private int determineNewTargetsByMinReq(long mb, int vcores) {
         MinNodeResource minNodeResource = getMinNodeResource();
         // to be removed to changed to debug
         log.info("MinNodeResource=" + minNodeResource);
@@ -355,9 +355,9 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private static class ReqResource {
-        int reqMb = 0;
+        long reqMb = 0;
         int reqVCores = 0;
-        int maxMb = 0;
+        long maxMb = 0;
         int maxVCores = 0;
         int hangingApps = 0;
 
