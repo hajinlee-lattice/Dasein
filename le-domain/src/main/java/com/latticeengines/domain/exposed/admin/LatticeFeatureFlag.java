@@ -26,6 +26,7 @@ public enum LatticeFeatureFlag {
     ENABLE_PRODUCT_BUNDLE_IMPORT("EnableProductBundleImport", "Enable Product Bundle Import"), //
     ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport",
             "Enable Product Hierarchy Import"), //
+    ENABLE_EXTERNAL_INTEGRATION("EnableExternalIntegration", "Enable External Integration"), //
     PLAYBOOK_MODULE("PlaybookModule", "Playbook Module"), //
     LAUNCH_PLAY_TO_MAP_SYSTEM("LaunchPlayToMapSystem", "Launch Play to MAP System"), //
     AUTO_IMPORT_ON_INACTIVE("AutoImportOnInactive", "Run Auto Import on Inactive stack"),
