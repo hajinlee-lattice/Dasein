@@ -202,7 +202,6 @@ public abstract class BaseScoring extends CommonBase {
 
             ScoreResponse response = scoreRequestProcessor.process(scoreRequest, additionalScoreConfig);
             if (warnings.hasWarnings(requestId)) {
-                response.setWarnings(warnings.getWarnings(requestId));
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings(requestId)));
             }
             if (log.isDebugEnabled()) {
