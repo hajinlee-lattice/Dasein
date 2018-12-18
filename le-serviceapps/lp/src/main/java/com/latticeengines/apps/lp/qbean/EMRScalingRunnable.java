@@ -263,11 +263,16 @@ public class EMRScalingRunnable implements Runnable {
         int targetByMb = determineTargetByMb(reqResource.reqMb);
         int targetByVCores = determineTargetByVCores(reqResource.reqVCores);
         int target = Math.max(targetByMb, targetByVCores);
+        MinNodeResource minNodeResource = getMinNodeResource();
         if (reqResource.hangingApps > 0) {
             target += reqResource.hangingApps;
-        } else if (reqResource.maxMb > 0 || reqResource.maxVCores > 0) {
-            int newNodes = determineNewTargetsByMinReq(reqResource.maxMb, reqResource.maxVCores);
-            target += newNodes;
+        } else if (reqResource.maxMb > minNodeResource.mb || reqResource.maxVCores > minNodeResource.vcores) {
+            log.info("MinNodeResource=" + minNodeResource + ": no single node can host the max job");
+            target += 1;
+        } else if (minNodeResource.mb < MIN_SINGLE_NODE_MB || minNodeResource.vcores < MIN_SINGLE_NODE_VCORES) {
+            log.info("MinNodeResource=" + minNodeResource //
+                    + ": no single node is able to kick off a modeling python client.");
+            target += 1;
         }
         // to be removed to changed to debug
         log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource + " Target="
@@ -297,21 +302,6 @@ public class EMRScalingRunnable implements Runnable {
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: "
                 + "total=" + total + " avail=" + avail + " req=" + req);
         return target;
-    }
-
-    private int determineNewTargetsByMinReq(long mb, int vcores) {
-        MinNodeResource minNodeResource = getMinNodeResource();
-        // to be removed to changed to debug
-        log.info("MinNodeResource=" + minNodeResource);
-        if (mb > minNodeResource.mb || vcores > minNodeResource.vcores) {
-            log.info("no single node can host the max job");
-            return 1;
-        } else if (minNodeResource.mb < MIN_SINGLE_NODE_MB || minNodeResource.vcores < MIN_SINGLE_NODE_VCORES) {
-            log.info("Minimum single node might not be able to kick off a modeling python client.");
-            return 1;
-        } else {
-            return 0;
-        }
     }
 
     private void resetScalingDownCounter() {
