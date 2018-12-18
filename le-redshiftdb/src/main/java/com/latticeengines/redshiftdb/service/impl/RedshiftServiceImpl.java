@@ -113,6 +113,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void createStagingTable(String stageTableName, String targetTableName) {
         try {
+            dropTable(stageTableName);
             log.info("Creating staging redshift table " + stageTableName + " for target table " + targetTableName);
             redshiftJdbcTemplate.execute(RedshiftUtils.createStagingTableStatement(stageTableName, targetTableName));
         } catch (Exception e) {
