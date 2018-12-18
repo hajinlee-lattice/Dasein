@@ -215,21 +215,25 @@ public class EMRScalingRunnable implements Runnable {
         });
     }
 
-    private MinNodeResource getMinNodeResource() {
+    private SingleNodeResource getBestSingleNode() {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(context -> {
             try {
                 try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
                     yarnClient.start();
                     List<NodeReport> nodes = yarnClient.getNodeReports(NodeState.RUNNING);
-                    MinNodeResource res = new MinNodeResource();
+                    SingleNodeResource res = new SingleNodeResource();
                     nodes.forEach(node -> {
                         Resource cap = node.getCapability();
                         Resource used = node.getUsed();
                         long availMb = cap.getMemorySize() - used.getMemorySize();
                         int availVCores = cap.getVirtualCores() - used.getVirtualCores();
-                        res.mb = Math.min(res.mb, availMb);
-                        res.vcores = Math.min(res.vcores, availVCores);
+                        if (availMb > res.mb) {
+                            res.mb = availMb;
+                            res.vcores = availVCores;
+                        } else if (availMb == res.mb && availVCores > res.vcores) {
+                            res.vcores = availVCores;
+                        }
                     });
                     return res;
                 }
@@ -286,7 +290,7 @@ public class EMRScalingRunnable implements Runnable {
         long avail = metrics.availableMB;
         long total = metrics.totalMB;
         long newTotal = total - avail + req + minAvailMemMb;
-        int target = (int) Math.max(1,
+        int target = (int) Math.max(minTaskNodes,
                 Math.ceil((1.0 * (newTotal - coreMb * coreCount)) / taskMb));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " + "total="
                 + total + " avail=" + avail + " req=" + req);
@@ -298,7 +302,7 @@ public class EMRScalingRunnable implements Runnable {
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
         int newTotal = total - avail + req + minAvailVCores;
-        int target = (int) Math.max(1,
+        int target = (int) Math.max(minTaskNodes,
                 Math.ceil((1.0 * (newTotal - coreVCores * coreCount)) / taskVCores));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: "
                 + "total=" + total + " avail=" + avail + " req=" + req);
@@ -306,12 +310,12 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private int determineNewByMinNodeResource(ReqResource reqResource) {
-        MinNodeResource minNodeResource = getMinNodeResource();
-        if (reqResource.maxMb > minNodeResource.mb || reqResource.maxVCores > minNodeResource.vcores) {
-            log.info("MinNodeResource=" + minNodeResource + ": no single node can host the max job");
+        SingleNodeResource bestSingleNode = getBestSingleNode();
+        if (reqResource.maxMb > bestSingleNode.mb || reqResource.maxVCores > bestSingleNode.vcores) {
+            log.info("BestSingleNode=" + bestSingleNode + ": no single node can host the max job");
             return 1;
-        } else if (minNodeResource.mb < MIN_SINGLE_NODE_MB || minNodeResource.vcores < MIN_SINGLE_NODE_VCORES) {
-            log.info("MinNodeResource=" + minNodeResource //
+        } else if (bestSingleNode.mb < MIN_SINGLE_NODE_MB || bestSingleNode.vcores < MIN_SINGLE_NODE_VCORES) {
+            log.info("BestSingleNode=" + bestSingleNode //
                     + ": no single node is able to kick off a modeling python client.");
             return 1;
         } else {
@@ -371,14 +375,9 @@ public class EMRScalingRunnable implements Runnable {
         return mem;
     }
 
-    private static class MinNodeResource {
-        long mb;
-        int vcores;
-
-        MinNodeResource() {
-            this.mb = Long.MAX_VALUE;
-            this.vcores = Integer.MAX_VALUE;
-        }
+    private static class SingleNodeResource {
+        long mb = 0L;
+        int vcores = 0;
 
         @Override
         public String toString() {
