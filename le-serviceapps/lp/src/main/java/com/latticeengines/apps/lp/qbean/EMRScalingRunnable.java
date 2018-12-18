@@ -46,6 +46,9 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MIN_AVAIL_MEM_MB = UNIT_MB;
     private static final int MIN_AVAIL_VCORES = 2;
 
+    private static final long MIN_SINGLE_NODE_MB = 51200;
+    private static final int MIN_SINGLE_NODE_VCORES = 2;
+
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
     private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(45);
@@ -215,7 +218,7 @@ public class EMRScalingRunnable implements Runnable {
                     nodes.forEach(node -> {
                         Resource cap = node.getCapability();
                         Resource used = node.getUsed();
-                        int availMb = cap.getMemory() - used.getMemory();
+                        long availMb = cap.getMemorySize() - used.getMemorySize();
                         int availVCores = cap.getVirtualCores() - used.getVirtualCores();
                         res.mb = Math.min(res.mb, availMb);
                         res.vcores = Math.min(res.vcores, availVCores);
@@ -301,7 +304,10 @@ public class EMRScalingRunnable implements Runnable {
         // to be removed to changed to debug
         log.info("MinNodeResource=" + minNodeResource);
         if (mb > minNodeResource.mb || vcores > minNodeResource.vcores) {
-            // no single node can host the max job
+            log.info("no single node can host the max job");
+            return 1;
+        } else if (minNodeResource.mb < MIN_SINGLE_NODE_MB || minNodeResource.vcores < MIN_SINGLE_NODE_VCORES) {
+            log.info("Minimum single node might not be able to kick off a modeling python client.");
             return 1;
         } else {
             return 0;
@@ -345,11 +351,11 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private static class MinNodeResource {
-        int mb;
+        long mb;
         int vcores;
 
         MinNodeResource() {
-            this.mb = Integer.MAX_VALUE;
+            this.mb = Long.MAX_VALUE;
             this.vcores = Integer.MAX_VALUE;
         }
 
