@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.DateRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.MetricRestriction;
@@ -25,15 +26,13 @@ public class RestrictionOptimizer {
         if (frontEndQuery.getAccountRestriction() != null) {
             Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
             if (restriction != null) {
-                frontEndQuery.getAccountRestriction()
-                        .setRestriction(RestrictionOptimizer.optimize(restriction));
+                frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
         if (frontEndQuery.getContactRestriction() != null) {
             Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
             if (restriction != null) {
-                frontEndQuery.getContactRestriction()
-                        .setRestriction(RestrictionOptimizer.optimize(restriction));
+                frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
     }
@@ -41,8 +40,9 @@ public class RestrictionOptimizer {
     public static Restriction optimize(Restriction restriction) {
         if (restriction == null) {
             return null;
-        } else if (restriction instanceof ConcreteRestriction
-                || restriction instanceof TransactionRestriction
+        } else if (restriction instanceof ConcreteRestriction //
+                || restriction instanceof TransactionRestriction //
+                || restriction instanceof DateRestriction //
                 || restriction instanceof MetricRestriction) {
             return restriction;
         } else if (restriction instanceof BucketRestriction) {
@@ -50,8 +50,7 @@ public class RestrictionOptimizer {
         } else if (restriction instanceof LogicalRestriction) {
             return optimizeLogicalRestriction((LogicalRestriction) restriction);
         } else {
-            throw new RuntimeException(
-                    "Cannot optimize restriction of type " + restriction.getClass());
+            throw new RuntimeException("Cannot optimize restriction of type " + restriction.getClass());
         }
     }
 
@@ -66,8 +65,7 @@ public class RestrictionOptimizer {
     }
 
     private static Restriction optimizeLogicalRestriction(LogicalRestriction logicalRestriction) {
-        if (logicalRestriction.getRestrictions() == null
-                || logicalRestriction.getRestrictions().isEmpty()) {
+        if (logicalRestriction.getRestrictions() == null || logicalRestriction.getRestrictions().isEmpty()) {
             return null;
         }
 
@@ -75,8 +73,7 @@ public class RestrictionOptimizer {
         logicalRestriction.getRestrictions().forEach(restriction -> {
             if (restriction != null) {
                 Restriction flatRestriction;
-                if (restriction instanceof LogicalRestriction
-                        || restriction instanceof BucketRestriction) {
+                if (restriction instanceof LogicalRestriction || restriction instanceof BucketRestriction) {
                     flatRestriction = optimize(restriction);
                 } else {
                     flatRestriction = restriction;
@@ -85,8 +82,7 @@ public class RestrictionOptimizer {
                     if (flatRestriction instanceof LogicalRestriction) {
                         LogicalRestriction flattenLogic = (LogicalRestriction) flatRestriction;
                         if (flattenLogic.getOperator().equals(logicalRestriction.getOperator())) {
-                            children.addAll(
-                                    ((LogicalRestriction) flatRestriction).getRestrictions());
+                            children.addAll(((LogicalRestriction) flatRestriction).getRestrictions());
                         } else {
                             children.add(flattenLogic);
                         }
@@ -110,8 +106,7 @@ public class RestrictionOptimizer {
 
     public static Restriction groupMetrics(Restriction restriction) {
         Restriction optimized = restriction;
-        if (restriction instanceof ConcreteRestriction
-                || restriction instanceof BucketRestriction) {
+        if (restriction instanceof ConcreteRestriction || restriction instanceof BucketRestriction) {
             BusinessEntity metricEntity = getMetricEntity(restriction);
             if (metricEntity != null) {
                 MetricRestriction metricRestriction = new MetricRestriction();
@@ -142,8 +137,7 @@ public class RestrictionOptimizer {
                 if (MapUtils.isNotEmpty(groupByMetricEntity)) {
                     groupByMetricEntity.forEach((entity, restrictions) -> {
                         LogicalRestriction logicalRestriction = new LogicalRestriction();
-                        logicalRestriction
-                                .setOperator(((LogicalRestriction) restriction).getOperator());
+                        logicalRestriction.setOperator(((LogicalRestriction) restriction).getOperator());
                         List<Restriction> innerRestrictions = new ArrayList<>();
                         restrictions.forEach(r -> {
                             if (r instanceof MetricRestriction) {
