@@ -60,22 +60,26 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     }
 
     private void dropTableByTenant(Tenant tenant) {
-        MultiTenantContext.setTenant(tenant);
-        log.info("tenant name is : " + tenant.getName());
-        String customerspace = MultiTenantContext.getCustomerSpace().toString();
-        DataCollection dataCollection = dataCollectionService.getDefaultCollection(customerspace);
-        DataCollection.Version activeVersion = dataCollection.getVersion();
-        DataCollection.Version inactiveVersion = activeVersion.complement();
-        // 1. get all inused tablename in this tenant_id
-        Set<String> tableNames = new HashSet<>();
-        tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, activeVersion));
-        tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, inactiveVersion));
-        log.info("inuse tableNames:" + tableNames.toString());
-        // 2. get all tablename in this tenant_id on redshift
-        List<String> redshift_tableNames = redshiftService.getTables(tenant.getName());
-        log.info("redshift tablename under tenant is :" + redshift_tableNames.toString());
-        // 3.drop table
-        dropTable(redshift_tableNames, new ArrayList<>(tableNames));
+        try {
+            MultiTenantContext.setTenant(tenant);
+            log.info("tenant name is : " + tenant.getName());
+            String customerspace = MultiTenantContext.getCustomerSpace().toString();
+            DataCollection dataCollection = dataCollectionService.getDefaultCollection(customerspace);
+            DataCollection.Version activeVersion = dataCollection.getVersion();
+            DataCollection.Version inactiveVersion = activeVersion.complement();
+            // 1. get all inused tablename in this tenant_id
+            Set<String> tableNames = new HashSet<>();
+            tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, activeVersion));
+            tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, inactiveVersion));
+            log.info("inuse tableNames:" + tableNames.toString());
+            // 2. get all tablename in this tenant_id on redshift
+            List<String> redshift_tableNames = redshiftService.getTables(tenant.getName());
+            log.info("redshift tablename under tenant is :" + redshift_tableNames.toString());
+            // 3.drop table
+            dropTable(redshift_tableNames, new ArrayList<>(tableNames));
+        }catch (Exception e) {
+            log.info(e.toString());
+        }
     }
 
     private void dropTable(List<String> redshift_table, List<String> data_table) {
