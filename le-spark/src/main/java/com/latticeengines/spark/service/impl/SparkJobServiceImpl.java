@@ -70,9 +70,6 @@ public class SparkJobServiceImpl implements SparkJobService {
         cleanupTargetDirs(config.getTargets());
         job.configure(config);
         SparkJobResult result;
-        log.info("clientService=" + clientService);
-        log.info("session=" + JsonUtils.serialize(session));
-        log.info("extraJars=" + extraJars);
         LivyScalaClient client = clientService.createClient(session.getSessionUrl(), extraJars);
         try (PerformanceTimer timer = new PerformanceTimer()) {
             log.info("Submitting spark job " + job.name());
@@ -116,17 +113,20 @@ public class SparkJobServiceImpl implements SparkJobService {
         cleanupTargetDirs(config.getTargets());
         SparkScriptClient client = getClient(retrieved, script);
         client.runPreScript(config);
-        String output;
         switch (script.getType()) {
             case InputStream:
-                output = runInputStreamScript(client, (InputStreamSparkScript) script);
+                String output = runInputStreamScript(client, (InputStreamSparkScript) script);
+                if (StringUtils.isNotBlank(output)) {
+                    log.info("Script prints out: " + output);
+                }
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown script type " + script.getType());
         }
+        String outputStr = client.printOutputStr();
         List<HdfsDataUnit> targets = client.runPostScript();
         SparkJobResult result = new SparkJobResult();
-        result.setOutput(output);
+        result.setOutput(outputStr);
         result.setTargets(targets);
         return result;
     }

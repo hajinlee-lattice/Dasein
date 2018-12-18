@@ -69,13 +69,20 @@ class SparkScriptClient {
                 JsonUtils.serialize(input), //
                 JsonUtils.serialize(params));
         String result = runStatement(statement);
-        log.info("Initialized:\n" + result);
+        log.info("Script env initialized.");
+        log.debug("Initialized:\n" + result);
+    }
+
+    String printOutputStr() {
+        String statement = getPrintOutTemplate();
+        return runStatement(statement);
     }
 
     List<HdfsDataUnit> runPostScript() {
         String statement = getFinalizeTemplate();
         String result = runStatement(statement);
-        log.info("Finalize:\n" + result);
+        log.info("Script env finalized.");
+        log.debug("Finalize:\n" + result);
         try {
             return om.readValue(result, new TypeReference<List<HdfsDataUnit>>() {
             });
@@ -151,12 +158,8 @@ class SparkScriptClient {
         ));
     }
 
-    private String getLoadInputTemplate(String replace) {
-        return getTemplate("load_input", ImmutableMap.of("{{INPUT}}", replace));
-    }
-
-    private String getLoadParamsTemplate(String replace) {
-        return getTemplate("load_params", ImmutableMap.of("{{PARAMS}}", replace));
+    private String getPrintOutTemplate() {
+        return getTemplate("printout", Collections.emptyMap());
     }
 
     private String getFinalizeTemplate() {

@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.datacloud.`match`.MatchConstants
 import com.latticeengines.domain.exposed.datacloud.`match`.MatchConstants.{INT_LDC_DEDUPE_ID, INT_LDC_LID, INT_LDC_REMOVED}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig
-import com.latticeengines.spark.exposed.job.AbstractSparkJob
+import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -14,12 +14,12 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
 
   override val name = "parseMatchResultJob"
 
-  override def runJob(spark: SparkSession, stageInput: List[DataFrame]): (Map[Integer, DataFrame], String) = {
+  override def runJob(spark: SparkSession, lattice: LatticeContext[ParseMatchResultJobConfig]): Unit = {
     // read input
-    val matchResult: DataFrame = stageInput.head
-    val sourceTable: DataFrame = if (stageInput.size == 2) stageInput(1) else null
+    val matchResult: DataFrame = lattice.input.head
+    val sourceTable: DataFrame = if (lattice.input.size == 2) lattice.input(1) else null
 
-    val config: ParseMatchResultJobConfig = getConfig
+    val config: ParseMatchResultJobConfig = lattice.config
     val srcCols: List[String] = if (config.sourceColumns == null) Nil else config.sourceColumns.asScala.toList
 
     // calculation
@@ -43,8 +43,7 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     }
 
     // finish
-    val output: Map[Integer, DataFrame] = Map((0, result))
-    (output, "")
+    lattice.output = result::Nil
   }
 
   def resolveConflictingFields(result: DataFrame): DataFrame = {

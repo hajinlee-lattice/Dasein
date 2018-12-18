@@ -20,21 +20,21 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     serializedConfig = JsonUtils.serialize(jobConfig)
   }
 
-  def getConfig: C = {
+  private def getConfig: C = {
     JsonUtils.deserializeByTypeRef(serializedConfig, new TypeReference[C] {})
   }
 
   override def apply(ctx: ScalaJobContext): String = {
-    val (spark, stageInput, stageTargets) = initializeJob()
-    val (outputData, outputStr) = runJob(spark, stageInput)
-    val finalTargets = finalizeJob(stageTargets, outputData).asJava
+    val (spark, latticeCtx) = initializeJob()
+    runJob(spark, latticeCtx)
+    val finalTargets = finalizeJob(latticeCtx).asJava
     val result = new SparkJobResult()
     result.setTargets(finalTargets)
-    result.setOutput(outputStr)
+    result.setOutput(latticeCtx.outputStr)
     JsonUtils.serialize(result)
   }
 
-  def initializeJob(): (SparkSession, List[DataFrame], List[HdfsDataUnit]) = {
+  def initializeJob(): (SparkSession, LatticeContext[C]) = {
     val jobConfig: C = getConfig
     val spark = SparkSession.builder().appName(getClass.getSimpleName).getOrCreate()
     val stageInput: List[DataFrame] = if (CollectionUtils.isEmpty(jobConfig.getInput)) {
@@ -53,7 +53,8 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     } else {
       jobConfig.getTargets.asScala.toList
     }
-    (spark, stageInput, stageTargets)
+    val latticeCtx = new LatticeContext[C](stageInput, jobConfig, stageTargets)
+    (spark, latticeCtx)
   }
 
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
@@ -61,24 +62,23 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     spark.read.format("com.databricks.spark.avro").load("hdfs://" + path)
   }
 
-  def finalizeJob(targets: List[HdfsDataUnit], output: Map[Integer, DataFrame]): //
-  List[HdfsDataUnit] = {
-    targets.zipWithIndex map { t => {
-      val tgt = t._1
-      val idx = t._2
-      if (output.contains(idx)) {
-        val df = output.getOrElse(idx, null)
-        val path = tgt.getPath
-        df.write.format("com.databricks.spark.avro").save(path)
-        tgt.setCount(df.count())
-        tgt
-      } else {
-        throw new RuntimeException(s"Can not find $idx-th output dataframe: $output")
-      }
+  def finalizeJob(latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {
+    val targets: List[HdfsDataUnit] = latticeCtx.targets
+    val output: List[DataFrame] = latticeCtx.output
+    if (targets.length != output.length) {
+      throw new IllegalArgumentException(s"${targets.length} targets are declared " //
+        + s"but ${output.length} outputs are generated!")
     }
+    targets.zip(output).map { t =>
+      val tgt = t._1
+      val df = t._2
+      val path = tgt.getPath
+      df.write.format("com.databricks.spark.avro").save(path)
+      tgt.setCount(df.count())
+      tgt
     }
   }
 
-  def runJob(spark: SparkSession, stageInput: List[DataFrame]): (Map[Integer, DataFrame], String)
+  def runJob(spark: SparkSession, lattice: LatticeContext[C]): Unit
 
 }

@@ -1,5 +1,14 @@
 import json
 
+
+class LatticeContext:
+    def __init__(self, input, params, targets):
+        self.input = input
+        self.params = params
+        self.targets = targets
+        self.output = []
+        self.output_str = ""
+
 def load_data_unit(unit):
     storage = unit['StorageType'].lower()
     if storage == "hdfs":
@@ -12,7 +21,6 @@ def load_hdfs_unit(unit):
     return spark.read.format("com.databricks.spark.avro").load(path)
 
 script_targets = json.loads('''{{TARGETS}}''')
-script_output = {}
 print("----- BEGIN SCRIPT OUTPUT -----")
 print("Targets:", script_targets)
 print("----- END SCRIPT OUTPUT -----")
@@ -28,3 +36,5 @@ script_params = json.loads('''{{PARAMS}}''')
 
 print("----- BEGIN SCRIPT OUTPUT -----")
 print("Params: %s" % json.dumps(script_params))
+
+lattice = LatticeContext(input=script_input, params=script_params, targets=script_targets)

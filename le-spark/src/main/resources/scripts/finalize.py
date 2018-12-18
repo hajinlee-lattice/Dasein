@@ -1,12 +1,12 @@
-for idx, tgt in enumerate(script_targets):
-    if idx not in script_output:
-        raise ValueError("Cannot find %d-th output dataframe" % idx)
-    df = script_output[idx]
+if len(lattice.targets) != len(lattice.output):
+    raise ValueError(
+        "{} targets are declared but {} outputs are generated!".format(len(lattice.targets), len(lattice.output)))
+
+for tgt, df in zip(lattice.targets, lattice.output):
     df.write.format("com.databricks.spark.avro").save(tgt['Path'])
     count = df.count()
     tgt['StorageType'] = 'Hdfs'
     tgt['Count'] = count
 
 print("----- BEGIN SCRIPT OUTPUT -----")
-print(json.dumps(script_targets))
-
+print(json.dumps(lattice.targets))

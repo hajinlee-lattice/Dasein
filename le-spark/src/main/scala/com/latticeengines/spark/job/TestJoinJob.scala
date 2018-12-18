@@ -1,7 +1,7 @@
 package com.latticeengines.spark.job
 
 import com.latticeengines.domain.exposed.spark.TestJoinJobConfig
-import com.latticeengines.spark.exposed.job.AbstractSparkJob
+import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.functions.max
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -9,10 +9,10 @@ class TestJoinJob extends AbstractSparkJob[TestJoinJobConfig] {
 
   override val name = "testJoin"
 
-  override def runJob(spark: SparkSession, stageInput: List[DataFrame]): (Map[Integer, DataFrame], String) = {
+  override def runJob(spark: SparkSession, lattice: LatticeContext[TestJoinJobConfig]): Unit = {
     // read input
-    val table1: DataFrame = stageInput(0)
-    val table2: DataFrame = stageInput(1)
+    val table1: DataFrame = lattice.input.head
+    val table2: DataFrame = lattice.input(1)
 
     // calculation
     val joinKey = "Field1"
@@ -22,8 +22,8 @@ class TestJoinJob extends AbstractSparkJob[TestJoinJobConfig] {
     val out2 = df.agg(max(table1(aggKey)).as("Max1"), max(table2(aggKey)).as("Max2"))
 
     // finish
-    val output: Map[Integer, DataFrame] = Map((0, out1), (1, out2))
-    (output, "This is my output!")
+    lattice.output = out1::out2::Nil
+    lattice.outputStr = "This is my output!"
   }
 
 }

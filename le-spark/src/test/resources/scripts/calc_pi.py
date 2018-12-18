@@ -1,6 +1,6 @@
 import random
 
-NUM_SAMPLES = script_params['NUM_SAMPLES']
+NUM_SAMPLES = lattice.params['NUM_SAMPLES']
 
 def inside(p):
     x, y = random.random(), random.random()
@@ -10,5 +10,4 @@ def inside(p):
 
 count = sc.parallelize(range(0, NUM_SAMPLES)).filter(inside).count()
 
-print("----- BEGIN SCRIPT OUTPUT -----")
-print("Pi is roughly %f" % (4.0 * count / NUM_SAMPLES))
+lattice.output_str = "Pi is roughly %f" % (4.0 * count / NUM_SAMPLES)
