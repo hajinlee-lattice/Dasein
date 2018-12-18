@@ -949,6 +949,10 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         scoreResponse.setEnrichmentAttributeValues(singleMatchingConfig.getEnrichmentAttributes());
         scoreResponse.setId(recordId);
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
+
+        if (warnings.hasWarnings(additionalScoreConfig.getRequestId())) {
+            scoreResponse.setWarnings(warnings.getWarnings(additionalScoreConfig.getRequestId()));
+        }
         return scoreResponse;
     }
 
