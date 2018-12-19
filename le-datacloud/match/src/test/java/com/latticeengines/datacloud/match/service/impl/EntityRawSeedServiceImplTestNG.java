@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -29,10 +30,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*
- * TODO add more test cases
- * TODO retry on test method to guard against eventual consistency failure, retryAnalyzer is not working for some reason
- */
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_4;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_4;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_5;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_4;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_FACEBOOK_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_FACEBOOK_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_4;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_NETFLIX_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_NETFLIX_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.Seed.EMPTY;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
+
 public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
@@ -42,6 +70,8 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
     private static final String TEST_COUNTRY = "USA";
+    private static final String UINS_SEED_ID = "testUpdateIfNotSet";
+    private static final String CLR_SEED_ID = "testClear";
 
     @Inject
     @InjectMocks
@@ -178,7 +208,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // check the created seed
         EntityRawSeed updatedSeed = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
         Assert.assertNotNull(updatedSeed);
-        Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(updatedSeed, seed));
+        Assert.assertTrue(equalsDisregardPriority(updatedSeed, seed));
 
         // cleanup afterwards
         cleanup(env, seedId);
@@ -208,8 +238,90 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // 3. Domains are merged and no duplicate
         Assert.assertNotNull(resultAfterUpdate2);
         Assert.assertEquals(resultAfterUpdate2.getLookupEntries().size(), 4);
-        Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(resultAfterUpdate2,
+        Assert.assertTrue(equalsDisregardPriority(resultAfterUpdate2,
                 newSeed(seedId, "sfdc_1", "marketo_1", "lattice_1", "domain1.com", "domain2.com")));
+
+        // cleanup afterwards
+        cleanup(env, seedId);
+    }
+
+    /*
+     * more general test cases for update if not set
+     */
+    @Test(groups = "functional", dataProvider = "updateIfNotSet")
+    private void testUpdateIfNotSet(
+            EntityRawSeed currentState, @NotNull EntityRawSeed seedToUpdate,
+            @NotNull EntityRawSeed finalState) throws Exception {
+        if (currentState != null) {
+            Assert.assertEquals(currentState.getId(), seedToUpdate.getId());
+        }
+        Assert.assertEquals(seedToUpdate.getId(), finalState.getId());
+
+        String seedId = seedToUpdate.getId();
+        String entity = seedToUpdate.getEntity();
+        for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
+            // prepare current state
+            cleanup(env, seedId);
+            if (currentState != null) {
+                boolean currStateSet = entityRawSeedService.setIfNotExists(env, TEST_TENANT, currentState);
+                Assert.assertTrue(currStateSet);
+            }
+
+            // update
+            EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seedToUpdate);
+            // cannot check lookup entry because only attributes that we attempt to update will be in the seed
+            if (currentState == null) {
+                Assert.assertNull(seedBeforeUpdate);
+            } else {
+                Assert.assertNotNull(seedBeforeUpdate);
+                Assert.assertEquals(seedBeforeUpdate.getId(), seedId);
+                Assert.assertEquals(seedBeforeUpdate.getEntity(), entity);
+            }
+            Thread.sleep(500L);
+
+            // check state after update
+            EntityRawSeed seedAfterUpdate = entityRawSeedService.get(
+                    env, TEST_TENANT, entity, seedId);
+            Assert.assertTrue(equalsDisregardPriority(seedAfterUpdate, finalState));
+
+            cleanup(env, seedId);
+        }
+    }
+
+    @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
+    private void testClear(EntityMatchEnvironment env) throws Exception {
+        String seedId = "testClear";
+
+        // make sure we don't have this seed
+        cleanup(env, seedId);
+
+        EntityRawSeed seed = newSeed(seedId,
+                NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1, NC_NETFLIX_1, NC_GOOGLE_3, DC_GOOGLE_2,
+                DC_FACEBOOK_2, DUNS_5, DC_FACEBOOK_1, SFDC_1, MKTO_3, DC_FACEBOOK_4);
+        boolean seedSet = entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed);
+        Assert.assertTrue(seedSet);
+        Thread.sleep(500L);
+
+        // check current state
+        EntityRawSeed resultAfterUpdate = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        Assert.assertTrue(equalsDisregardPriority(resultAfterUpdate, seed));
+
+        EntityRawSeed seedToClear = newSeed(seedId,
+                NC_GOOGLE_1, NC_GOOGLE_3, NC_GOOGLE_4, DUNS_5, DC_FACEBOOK_1, DC_FACEBOOK_4);
+        EntityRawSeed currSeedBeforeClear = entityRawSeedService.clear(env, TEST_TENANT, seedToClear);
+        Assert.assertNotNull(currSeedBeforeClear);
+        // in clear, we get back the entire existing seed
+        Assert.assertTrue(equalsDisregardPriority(currSeedBeforeClear, resultAfterUpdate));
+        Thread.sleep(500L);
+
+        // check state after cleared
+        EntityRawSeed resultAfterClear = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
+        Assert.assertNotNull(resultAfterClear);
+        // check the lookup entries left
+        Assert.assertTrue(equalsDisregardPriority(
+                resultAfterClear,
+                newSeed(seedId, NC_GOOGLE_2, NC_FACEBOOK_1, NC_NETFLIX_1,
+                        DC_GOOGLE_2, DC_FACEBOOK_2, SFDC_1, MKTO_3)));
 
         // cleanup afterwards
         cleanup(env, seedId);
@@ -251,7 +363,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // 2. Marketo ID does not exist, so clearing it has no effect
         // 3. One domain exists and is removed from set, the other one does not and is a no-op
         // 4. lattice account ID is not cleared
-        Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(
+        Assert.assertTrue(equalsDisregardPriority(
                 resultAfterClear,
                 newSeed(seedId, null, null, "lattice_1", "domain2.com")));
 
@@ -264,6 +376,186 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         return new Object[][] {
                 { EntityMatchEnvironment.STAGING },
                 { EntityMatchEnvironment.SERVING },
+        };
+    }
+
+    @DataProvider(name = "updateIfNotSet")
+    private Object[][] provideUpdateIfNotSetTestData() {
+        return new Object[][] {
+                /*
+                 * Case #1: Update empty/null seed
+                 */
+                {
+                        null, EMPTY, EMPTY,
+                },
+                {
+                        EMPTY, EMPTY, EMPTY,
+                },
+                // lookup entries
+                {
+                        TestEntityMatchUtils.changeId(EMPTY, UINS_SEED_ID),
+                        newSeed(UINS_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1),
+                        newSeed(UINS_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1),
+                },
+                {
+                        null,
+                        newSeed(UINS_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1),
+                        newSeed(UINS_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1),
+                },
+                {
+                        TestEntityMatchUtils.changeId(EMPTY, UINS_SEED_ID),
+                        newSeed(UINS_SEED_ID, DUNS_1, SFDC_5, NC_FACEBOOK_1, DC_GOOGLE_1),
+                        newSeed(UINS_SEED_ID, DUNS_1, SFDC_5, NC_FACEBOOK_1, DC_GOOGLE_1),
+                },
+                {
+                        TestEntityMatchUtils.changeId(EMPTY, UINS_SEED_ID),
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_1, ELOQUA_1),
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_1, ELOQUA_1),
+                },
+                {
+                        null,
+                        newSeed(UINS_SEED_ID, DUNS_3, MKTO_2, ELOQUA_3),
+                        newSeed(UINS_SEED_ID, DUNS_3, MKTO_2, ELOQUA_3),
+                },
+                {
+                        null,
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5),
+                },
+                // extra attributes
+                {
+                        null,
+                        TestEntityMatchUtils.newSeed(UINS_SEED_ID, "key1", "val1", "key2", "val2"),
+                        TestEntityMatchUtils.newSeed(UINS_SEED_ID, "key1", "val1", "key2", "val2"),
+                },
+                /*
+                 * Case #2: no conflict with existing seed
+                 */
+                // adding domain/country, name/country
+                {
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_2, NC_NETFLIX_2, DC_FACEBOOK_1, DC_FACEBOOK_2),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5,
+                                NC_GOOGLE_2, NC_NETFLIX_2, DC_FACEBOOK_1, DC_FACEBOOK_2),
+                },
+                {
+                        newSeed(UINS_SEED_ID, DUNS_4, MKTO_1),
+                        newSeed(UINS_SEED_ID, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3),
+                        newSeed(UINS_SEED_ID, DUNS_4, MKTO_1, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3),
+                },
+                {
+                        newSeed(UINS_SEED_ID, SFDC_1, ELOQUA_3),
+                        newSeed(UINS_SEED_ID, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3),
+                        newSeed(UINS_SEED_ID, SFDC_1, ELOQUA_3, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3),
+                },
+                {
+                        // some overlap
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_2),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1, NC_FACEBOOK_2),
+                },
+                // adding duns
+                {
+                        // name country in current state
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1),
+                        newSeed(UINS_SEED_ID, DUNS_1),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, DUNS_1),
+                },
+                {
+                        // external system ID in current state
+                        newSeed(UINS_SEED_ID, MKTO_1, SFDC_5, ELOQUA_3),
+                        newSeed(UINS_SEED_ID, DUNS_4),
+                        newSeed(UINS_SEED_ID, MKTO_1, SFDC_5, ELOQUA_3, DUNS_4),
+                },
+                {
+                        // domain country in current state
+                        newSeed(UINS_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2),
+                        newSeed(UINS_SEED_ID, DUNS_2),
+                        newSeed(UINS_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2, DUNS_2),
+                },
+                {
+                        // all types in current state
+                        newSeed(UINS_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5, DC_GOOGLE_2, ELOQUA_4),
+                        newSeed(UINS_SEED_ID, DUNS_5),
+                        newSeed(UINS_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5,
+                                DC_GOOGLE_2, ELOQUA_4, DUNS_5),
+                },
+                // adding external system IDs
+                {
+                        // name country in current state
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1),
+                        newSeed(UINS_SEED_ID, SFDC_1),
+                        newSeed(UINS_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, SFDC_1),
+                },
+                {
+                        // external system ID in current state
+                        newSeed(UINS_SEED_ID, MKTO_1, SFDC_5),
+                        newSeed(UINS_SEED_ID, ELOQUA_1), // can still update other system
+                        newSeed(UINS_SEED_ID, MKTO_1, SFDC_5, ELOQUA_1),
+                },
+                {
+                        // DUNS in current state
+                        newSeed(UINS_SEED_ID, DUNS_5),
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_2), // can update multiple systems
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_2, DUNS_5),
+                },
+                {
+                        // domain country in current state
+                        newSeed(UINS_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2),
+                        newSeed(UINS_SEED_ID, SFDC_5, ELOQUA_3, MKTO_1),
+                        newSeed(UINS_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2, SFDC_5, ELOQUA_3, MKTO_1),
+                },
+                {
+                        // all types in current state
+                        newSeed(UINS_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5, DC_GOOGLE_2, DUNS_5),
+                        newSeed(UINS_SEED_ID, ELOQUA_4),
+                        newSeed(UINS_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5,
+                                DC_GOOGLE_2, ELOQUA_4, DUNS_5),
+                },
+                /*
+                 * Case #3: has conflict
+                 */
+                // conflict in DUNS
+                {
+                        newSeed(UINS_SEED_ID, DUNS_5),
+                        newSeed(UINS_SEED_ID, DUNS_1),
+                        newSeed(UINS_SEED_ID, DUNS_5), // DUNS_1 not updated
+                },
+                {
+                        newSeed(UINS_SEED_ID, DUNS_4, DC_GOOGLE_2, NC_FACEBOOK_1), // has other lookup entries
+                        newSeed(UINS_SEED_ID, DUNS_2),
+                        newSeed(UINS_SEED_ID, DUNS_4, DC_GOOGLE_2, NC_FACEBOOK_1), // DUNS_2 not updated
+                },
+                {
+                        newSeed(UINS_SEED_ID, DUNS_4, NC_GOOGLE_2, MKTO_1),
+                        newSeed(UINS_SEED_ID, DUNS_2, NC_GOOGLE_1, SFDC_1),
+                        // DUNS_2 not updated, SFDC_1 & NC_GOOGLE_1 updated
+                        newSeed(UINS_SEED_ID, DUNS_4, NC_GOOGLE_2, NC_GOOGLE_1, SFDC_1, MKTO_1),
+                },
+                // conflict in external system
+                {
+                        newSeed(UINS_SEED_ID, SFDC_1),
+                        newSeed(UINS_SEED_ID, SFDC_2),
+                        newSeed(UINS_SEED_ID, SFDC_1), // SFDC_2 not updated
+                },
+                {
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_1, ELOQUA_4, NC_GOOGLE_1, NC_GOOGLE_2, DC_FACEBOOK_2),
+                        newSeed(UINS_SEED_ID, SFDC_2, MKTO_3),
+                        // SFDC_2 & MKTO_3 not updated
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_1, ELOQUA_4, NC_GOOGLE_1, NC_GOOGLE_2, DC_FACEBOOK_2),
+                },
+                {
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_1, NC_GOOGLE_1),
+                        newSeed(UINS_SEED_ID, SFDC_2, MKTO_3, ELOQUA_1, DUNS_1, NC_GOOGLE_2, DC_GOOGLE_2),
+                        // SFDC_2, MKTO_3 not updated, DUNS_1, NC_GOOGLE_2, DC_GOOGLE_2, ELOQUA_1 updated
+                        newSeed(UINS_SEED_ID, SFDC_1, MKTO_1, NC_GOOGLE_1, ELOQUA_1, DUNS_1, NC_GOOGLE_2, DC_GOOGLE_2),
+                },
+                // conflict in DUNS & external system
+                {
+                        newSeed(UINS_SEED_ID, SFDC_1, DUNS_1, DC_GOOGLE_2, NC_GOOGLE_2),
+                        newSeed(UINS_SEED_ID, SFDC_2, DUNS_5, NC_FACEBOOK_1),
+                        newSeed(UINS_SEED_ID, SFDC_1, DUNS_1, DC_GOOGLE_2, NC_GOOGLE_2, NC_FACEBOOK_1),
+                },
         };
     }
 
@@ -293,11 +585,16 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         return new EntityRawSeed(seedId, TEST_ENTITY, 0, entries, attributes);
     }
 
+    private EntityRawSeed newSeed(String seedId, EntityLookupEntry... entries) {
+        return TestEntityMatchUtils.newSeed(seedId, entries);
+    }
+
     /*
      * copy raw seed and set the version
      */
     private EntityRawSeed copyAndSetVersion(EntityRawSeed seed, int version) {
-        return new EntityRawSeed(seed.getId(), seed.getEntity(), version, seed.getLookupEntries(), seed.getAttributes());
+        return new EntityRawSeed(
+                seed.getId(), seed.getEntity(), version, seed.getLookupEntries(), seed.getAttributes());
     }
 
     private static Tenant getTestTenant() {

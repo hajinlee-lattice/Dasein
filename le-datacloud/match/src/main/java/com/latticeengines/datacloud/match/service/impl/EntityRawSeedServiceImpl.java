@@ -30,6 +30,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -64,6 +66,7 @@ import reactor.core.scheduler.Schedulers;
 
 @Component("entityRawSeedService")
 public class EntityRawSeedServiceImpl implements EntityRawSeedService {
+    private static final Logger log = LoggerFactory.getLogger(EntityRawSeedServiceImpl.class);
 
     /* constants */
     private static final String PREFIX = DataCloudConstants.ENTITY_PREFIX_SEED;
@@ -236,6 +239,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         getStringSetAttributes(rawSeed)
                 .forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).append(attrValue)));
 
+        // TODO There is a trade-off on getting back the entire old item or only the updated attributes.
+        //      decide whether we want more detailed report or safe bandwidth
         UpdateItemOutcome result = getRetryTemplate(env).execute(ctx ->
                 dynamoItemService.update(getTableName(env),
                         new UpdateItemSpec()
@@ -340,8 +345,13 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 return;
             }
 
-            // TODO log error if failed to parse lookup entries here
-            entries.addAll(parseLookupEntries(entity, seedAttrName, value));
+            List<EntityLookupEntry> lookupEntries = parseLookupEntries(entity, seedAttrName, value);
+            if (CollectionUtils.isNotEmpty(lookupEntries)) {
+                entries.addAll(lookupEntries);
+            } else {
+                log.error("Failed to parse lookup entries. Seed ID = {}, entity = {}, attrName = {}, attrValue = {}",
+                        seedId, entity, seedAttrName, value);
+            }
         });
         return new EntityRawSeed(seedId, entity, version, entries, attributes);
     }
@@ -373,8 +383,14 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             }
 
             // parse lookup key
-            // TODO log error if failed to parse lookup entries here
-            entries.addAll(parseLookupEntries(entity, e.getKey(), item));
+            List<EntityLookupEntry> lookupEntries = parseLookupEntries(entity, e.getKey(), item);
+            if (CollectionUtils.isNotEmpty(lookupEntries)) {
+                entries.addAll(lookupEntries);
+            } else {
+                log.error("Failed to parse lookup entries in item." +
+                        " Seed ID = {}, entity = {}, attrName = {}, attrValue = {}",
+                        seedId, entity, e.getKey(), e.getValue());
+            }
         });
         return new EntityRawSeed(seedId, entity, version, entries, attributes);
     }

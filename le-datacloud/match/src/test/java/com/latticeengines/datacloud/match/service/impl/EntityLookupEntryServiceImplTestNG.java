@@ -24,10 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/*
- * TODO add more test cases
- * TODO retry on test method to guard against eventual consistency failure, retryAnalyzer is not working for some reason
- */
 public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
@@ -95,10 +91,11 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
     }
 
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
-    private void testBatchGet(EntityMatchEnvironment env) {
+    private void testBatchGet(EntityMatchEnvironment env) throws Exception {
         // create entries for batch get
         Assert.assertTrue(entityLookupEntryService.createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID));
         Assert.assertTrue(entityLookupEntryService.createIfNotExists(env, TEST_TENANT, TEST_ENTRY_4, OTHER_TEST_SEED_ID));
+        Thread.sleep(2000L);
 
         List<String> seedIds = entityLookupEntryService.get(env, TEST_TENANT, TEST_ENTRIES);
         Assert.assertNotNull(seedIds);

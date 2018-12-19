@@ -100,6 +100,10 @@ public class TestEntityMatchUtils {
         return new EntityRawSeed(seed1.getId(), seed1.getEntity(), entries, attributes);
     }
 
+    public static EntityRawSeed changeId(@NotNull EntityRawSeed seed, @NotNull String seedId) {
+        return new EntityRawSeed(seedId, seed.getEntity(), seed.getLookupEntries(), seed.getAttributes());
+    }
+
     /*
      * Namespace for pre-generated seed test data
      */
