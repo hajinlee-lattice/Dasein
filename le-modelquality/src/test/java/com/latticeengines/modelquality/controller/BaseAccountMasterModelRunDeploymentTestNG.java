@@ -44,7 +44,7 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
             thisDataset.setName(dataSetName);
             thisDataset.setTenant(mainTestTenant);
             thisDataset.setTrainingSetHdfsPath( //
-                    "/Pods/Default/Services/ModelQuality/" + csvFile);
+                    "s3n://latticeengines-test-artifacts/le-modelquality/end2end/csv/1/" + csvFile);
             thisDataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
             if (datasetAlreadyExists != null)

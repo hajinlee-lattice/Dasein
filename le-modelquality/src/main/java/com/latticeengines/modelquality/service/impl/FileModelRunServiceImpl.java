@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
@@ -53,7 +53,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     private static final Logger log = LoggerFactory.getLogger(FileModelRunServiceImpl.class);
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private Configuration distCpConfiguration;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -101,7 +101,8 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         }
 
         Resource resource;
-        try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(FileSystem.newInstance(yarnConfiguration))) {
+        try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(
+                HdfsUtils.getFileSystem(distCpConfiguration, dataSet.getTrainingSetHdfsPath()))) {
             resource = resourceLoader.getResource(dataSet.getTrainingSetHdfsPath());
         } catch (IOException ex) {
             log.error("Failed to load file!", ex);
