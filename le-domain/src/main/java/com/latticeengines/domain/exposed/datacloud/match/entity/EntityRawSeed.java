@@ -83,4 +83,14 @@ public class EntityRawSeed {
     public int hashCode() {
         return Objects.hashCode(id, entity, lookupEntries);
     }
+
+    @Override
+    public String toString() {
+        return "EntityRawSeed{" +
+                "id='" + id + '\'' +
+                ", entity='" + entity + '\'' +
+                ", lookupEntries=" + lookupEntries +
+                ", attributes=" + attributes +
+                '}';
+    }
 }

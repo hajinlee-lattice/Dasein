@@ -24,6 +24,7 @@ public final class DataCloudConstants {
     public static final String ENTITY_PREFIX_VERSION = "VERSION"; // entity match version prefix
     public static final String ENTITY_PREFIX_SEED_ATTRIBUTES = "ATTRS_";
     public static final String ENTITY_DELIMITER = "_";
+    public static final String ENTITY_ANONYMOUS_ID = "__YOU_KNOW_WHO__";
     // entity match attribute names
     public static final String ENTITY_ATTR_PID = "PID"; // primary id
     public static final String ENTITY_ATTR_SID = "SID"; // secondary id

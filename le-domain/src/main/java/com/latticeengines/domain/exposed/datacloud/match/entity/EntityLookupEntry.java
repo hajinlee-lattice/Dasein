@@ -177,4 +177,14 @@ public class EntityLookupEntry {
     public int hashCode() {
         return Objects.hashCode(type, entity, serializedKeys, serializedValues);
     }
+
+    @Override
+    public String toString() {
+        return "EntityLookupEntry{" +
+                "type=" + type +
+                ", entity='" + entity + '\'' +
+                ", serializedKeys='" + serializedKeys + '\'' +
+                ", serializedValues='" + serializedValues + '\'' +
+                '}';
+    }
 }
