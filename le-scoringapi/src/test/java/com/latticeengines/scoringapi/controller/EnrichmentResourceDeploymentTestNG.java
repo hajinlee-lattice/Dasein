@@ -36,24 +36,23 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     private int deselectCount = 0;
     private int totalLeadEnrichmentCount;
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void cleanupAttributeSelectionBeforeTest() {
         List<LeadEnrichmentAttribute> existingSelection = internalResourceRestApiProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, true, false);
         Assert.assertNotNull(existingSelection);
-        Assert.assertTrue(existingSelection.size() == 6);
+        Assert.assertEquals(existingSelection.size(), 6);
 
         LeadEnrichmentAttributesOperationMap deselectedAttributeMap = createDeselectionMap(existingSelection);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, deselectedAttributeMap);
         List<LeadEnrichmentAttribute> freshSelection = internalResourceRestApiProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, null, true, false);
         Assert.assertNotNull(freshSelection);
-        Assert.assertTrue(freshSelection.size() == 0);
+        Assert.assertEquals(freshSelection.size(), 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentCategories()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment")
+    public void testGetLeadEnrichmentCategories() throws IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
         String url = apiHostPort + "/score/enrichment/categories";
@@ -73,9 +72,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentSubcategories()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment")
+    public void testGetLeadEnrichmentSubcategories() {
         String url = apiHostPort + "/score/enrichment/subcategories?category=" + Category.TECHNOLOGY_PROFILE.toString();
         List<?> subcategoryListRaw = oAuth2RestTemplate.getForObject(url, List.class);
         List<String> subcategoryStrList = JsonUtils.convertList(subcategoryListRaw, String.class);
@@ -86,8 +84,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         System.out.println(subcategoryStrList.get(0));
     }
 
-    private Set<String> getExpectedCategorySet()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    private Set<String> getExpectedCategorySet() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         Assert.assertNotNull(combinedAttributeList);
         Assert.assertFalse(combinedAttributeList.isEmpty());
@@ -95,17 +92,14 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Set<String> expectedCategorySet = new HashSet<>();
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            if (!expectedCategorySet.contains(attr.getCategory())) {
-                expectedCategorySet.add(attr.getCategory());
-            }
+            expectedCategorySet.add(attr.getCategory());
         }
 
         return expectedCategorySet;
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "cleanupAttributeSelectionBeforeTest" })
-    public void testGetLeadEnrichmentAttributesBeforeSave()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupAttributeSelectionBeforeTest" })
+    public void testGetLeadEnrichmentAttributesBeforeSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         Assert.assertNotNull(combinedAttributeList);
         Assert.assertFalse(combinedAttributeList.isEmpty());
@@ -117,7 +111,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributesBeforeSave" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentAttributesBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributeCountBeforeSave() {
         String url = apiHostPort + "/score/enrichment/selectedattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
@@ -125,7 +119,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 0);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentSelectedAttributeCountBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave() {
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
@@ -134,16 +128,15 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 0);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
     public void testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave() {
         checkLimitation();
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
-    public void testSaveLeadEnrichmentAttributes()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    public void testSaveLeadEnrichmentAttributes() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
 
@@ -165,9 +158,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT, MAX_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributes" })
-    public void testSaveLeadEnrichmentAttributesFailure()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment", dependsOnMethods = { "testSaveLeadEnrichmentAttributes" })
+    public void testSaveLeadEnrichmentAttributesFailure() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
         String duplicateFieldName = attributesOperationMap.getSelectedAttributes().get(0);
@@ -209,9 +201,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesFailure" })
-    public void testGetLeadEnrichmentAttributes()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment", dependsOnMethods = { "testSaveLeadEnrichmentAttributesFailure" })
+    public void testGetLeadEnrichmentAttributes() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         Assert.assertNotNull(combinedAttributeList);
         Assert.assertFalse(combinedAttributeList.isEmpty());
@@ -239,12 +230,12 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentAttributes" })
     public void testGetLeadEnrichmentPremiumAttributesLimitation() {
         checkLimitation();
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentPremiumAttributesLimitation" })
     public void testGetLeadEnrichmentSelectedAttributeCount() {
         String url = apiHostPort + "/score/enrichment/selectedattributes/count";
@@ -253,7 +244,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), MAX_SELECT + MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCount" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCount" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCount() {
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
@@ -261,10 +252,9 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentSelectedAttributePremiumCount" })
-    public void testSaveLeadEnrichmentAttributesForSecondSave()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    public void testSaveLeadEnrichmentAttributesForSecondSave() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
 
@@ -289,9 +279,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT + 1, MAX_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesForSecondSave" })
-    public void testGetLeadEnrichmentAttributesAfterSecondSave()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment", dependsOnMethods = { "testSaveLeadEnrichmentAttributesForSecondSave" })
+    public void testGetLeadEnrichmentAttributesAfterSecondSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         Assert.assertNotNull(combinedAttributeList);
         Assert.assertFalse(combinedAttributeList.isEmpty());
@@ -307,13 +296,13 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentAttributesAfterSecondSave" })
     public void testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave() {
         checkLimitation();
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", dependsOnMethods = {
             "testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave() {
         String url = apiHostPort + "/score/enrichment/selectedattributes/count";
@@ -328,7 +317,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count.intValue(), 3);
+        Assert.assertEquals(count.intValue(), 2);
     }
 
     @Test(groups = "deployment", enabled = false, dependsOnMethods = {
@@ -605,7 +594,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     }
 
     private int getLeadEnrichmentAttributeListCount(boolean onlySelectedAttr, String attributeDisplayNameFilter,
-            Category category) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+            Category category) {
         String url = apiHostPort + "/score/enrichment/count";
         if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
                 || category != null) {
