@@ -22,11 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
@@ -208,14 +210,15 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             records.add(builder.build());
         }
         int randomSplit = random.nextInt(processorContext.getSplits());
-        if (!HdfsUtils.fileExists(yarnConfiguration, processorContext.getOutputAvro(randomSplit))) {
-            AvroUtils.writeToHdfsFile(yarnConfiguration, processorContext.getOutputSchema(),
-                    processorContext.getOutputAvro(randomSplit), records, useSnappy);
+        String splitAvro = processorContext.getOutputAvro(randomSplit);
+        FileUtils.forceMkdirParent(new File(splitAvro));
+        Schema schema = processorContext.getOutputSchema();
+        if (new File(splitAvro).exists()) {
+            AvroUtils.appendToLocalFile(records, splitAvro, useSnappy);
         } else {
-            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(randomSplit), records,
-                    useSnappy);
+            AvroUtils.writeToLocalFile(schema, records, splitAvro, useSnappy);
         }
-        log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro(randomSplit));
+        log.info("Write " + records.size() + " generic records to " + splitAvro);
     }
 
     private void buildAvroRecords(List<Object> allValues, GenericRecordBuilder builder, List<Schema.Field> fields) {
@@ -325,6 +328,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     private void finalizeBlock(ProcessorContext processorContext) throws IOException {
+        uploadOutput(processorContext);
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
         Long count = AvroUtils.count(yarnConfiguration, processorContext.getOutputAvroGlob());
@@ -375,6 +379,28 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
             log.error("Failed to extract output metric.", e);
+        }
+    }
+
+    @MatchStep
+    private void  uploadOutput(ProcessorContext processorContext) {
+        String hdfsDir = processorContext.getHdfsOutputDir();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        try {
+            retry.execute(ctx -> {
+                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": uploading match block result to hdfs.");
+                try {
+                    if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir)) {
+                        HdfsUtils.rmdir(yarnConfiguration, hdfsDir);
+                    }
+                    HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, "output", hdfsDir);
+                } catch (IOException e) {
+                    throw new RuntimeException(" Failed to upload from local to hdfs.");
+                }
+                return true;
+            });
+        } finally {
+            FileUtils.deleteQuietly(new File("output"));
         }
     }
 

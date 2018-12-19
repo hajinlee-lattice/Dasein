@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.common.exposed.bean.BeanFactoryEnvironment.Environment.WebApp;
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
@@ -184,15 +186,19 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             log.info("ZK watcher " + AMRelease.name() + " changed, updating white and black columns caches ...");
             refreshCaches();
         });
-        refreshCaches();
+        BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
+        if (WebApp.equals(currentEnv)) {
+            log.warn("Eagerly initialize metadata cache in WebApp env.");
+            refreshCaches();
+        }
     }
 
-    abstract protected MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
+    protected abstract MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
 
-    abstract protected ConcurrentMap<String, ConcurrentMap<String, E>> getWhiteColumnCache();
+    protected abstract ConcurrentMap<String, ConcurrentMap<String, E>> getWhiteColumnCache();
 
-    abstract protected ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache();
+    protected abstract ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache();
 
-    abstract protected String getLatestVersion();
+    protected abstract String getLatestVersion();
 
 }

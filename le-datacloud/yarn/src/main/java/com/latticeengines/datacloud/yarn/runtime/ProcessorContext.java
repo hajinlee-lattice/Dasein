@@ -179,7 +179,11 @@ public class ProcessorContext {
     }
 
     public String getOutputAvro(int split) {
-        return hdfsPathBuilder.constructMatchBlockSplitAvro(rootOperationUid, blockOperationUid, split).toString();
+        return "output/block_" + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d.avro", split);
+    }
+
+    public String getHdfsOutputDir() {
+        return hdfsPathBuilder.constructMatchBlockDir(rootOperationUid, blockOperationUid).toString();
     }
 
     public String getErrorOutputAvro(int split) {

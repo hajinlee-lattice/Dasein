@@ -5,14 +5,18 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.match.dao.AccountMasterColumnDao;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.repository.reader.AccountMasterColumnReaderRepository;
@@ -31,8 +35,11 @@ import reactor.core.scheduler.Schedulers;
 public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AccountMasterColumn, Long>
         implements MetadataColumnEntityMgr<AccountMasterColumn> {
 
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterColumnEntityMgrImpl.class);
+
     private static final int PAGE_SIZE = 10000;
-    private static final Scheduler scheduler = Schedulers.newParallel("am-metadata");
+
+    private Scheduler scheduler;
 
     @Resource(name = "accountMasterColumnDao")
     private AccountMasterColumnDao accountMasterColumnDao;
@@ -68,17 +75,24 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
     public ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion) {
         long count;
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            count = repository.numAttrsInVersion(dataCloudVersion);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+            count = retry.execute(ctx -> repository.numAttrsInVersion(dataCloudVersion));
             String msg = "Got the count of AMColumns for version " + dataCloudVersion + ": " + count;
             timer.setTimerMessage(msg);
         }
         int pages = (int) Math.ceil(1.0 * count / PAGE_SIZE);
-        return Flux.range(0, pages).parallel().runOn(scheduler) //
+        return Flux.range(0, pages).parallel().runOn(getScheduler()) //
                 .map(k -> {
                     try (PerformanceTimer timer = new PerformanceTimer()) {
                         PageRequest pageRequest = PageRequest.of(k, PAGE_SIZE, Sort.by("amColumnId"));
-                        List<AccountMasterColumn> attrs = repository.findByDataCloudVersion(dataCloudVersion,
-                                pageRequest);
+                        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+                        List<AccountMasterColumn> attrs = retry.execute(ctx -> {
+                            if (ctx.getRetryCount() > 0) {
+                                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": get " //
+                                        + k + "-th page of AM metadata.");
+                            }
+                            return repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+                        });
                         timer.setTimerMessage("Fetched a page of " + attrs.size() + " AM attrs.");
                         return attrs;
                     }
@@ -88,8 +102,14 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
     @Override
     public Flux<AccountMasterColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
         return Mono.fromCallable(() -> {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(5);
             PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("amColumnId"));
-            return repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+            return retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": get a page of AM metadata.");
+                }
+                return repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+            });
         }).flatMapMany(Flux::fromIterable);
     }
 
@@ -102,6 +122,17 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
     @Override
     public Long count(String dataCloudVersion) {
         return repository.countByDataCloudVersion(dataCloudVersion);
+    }
+
+    private Scheduler getScheduler() {
+        if (scheduler == null) {
+            synchronized (this) {
+                if (scheduler == null) {
+                    scheduler = Schedulers.newParallel("am-metadata");
+                }
+            }
+        }
+        return scheduler;
     }
 
 }

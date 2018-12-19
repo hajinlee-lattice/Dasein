@@ -46,7 +46,7 @@ public class SourceAttributeEntityMgrImpl implements SourceAttributeEntityMgr {
             List<CustomerSourceAttribute> csaList = customerSourceAttributeDao.getAttributes(source, stage, transform,
                     dataCloudVersion);
             List<SourceAttribute> saList = new ArrayList<>();
-            csaList.stream().forEach(csa -> saList.add(csa.toSourceAttribute()));
+            csaList.forEach(csa -> saList.add(csa.toSourceAttribute()));
             return saList;
         }
 
