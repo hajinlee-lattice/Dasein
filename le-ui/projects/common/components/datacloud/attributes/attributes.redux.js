@@ -1,4 +1,4 @@
-import axios from "axios";
+/*import axios from "axios";
 
 const FETCH_ATTRIBUTES = "FETCH_ATTRIBUTES";
 const CLEAR_ATTRIBUTES = "CLEAR_ATTRIBUTES";
@@ -37,3 +37,4 @@ export const reducer = (state = initialState, action) => {
             return state;
     }
 };
+*/

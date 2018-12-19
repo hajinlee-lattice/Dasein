@@ -1,5 +1,3 @@
-import { actions, reducer } from "./attributes.redux.js";
-
 const Dependencies = [
     "common.attributes.header",
     "common.attributes.subheader",
@@ -18,7 +16,7 @@ const States = $stateProvider => {
         params: {
             pageIcon: "ico-analysis",
             pageTitle: "Attribute Admin"
-        },
+        } /*
         onEnter: (ReduxService, $state, $stateParams) => {
             ReduxService.connect(
                 "attributes",
@@ -31,7 +29,7 @@ const States = $stateProvider => {
         onExit: $state => {
             console.log("onExit", $state.get("home.attributes"));
             $state.get("home.attributes").data.redux.unsubscribe();
-        },
+        },*/,
         resolve: {
             tabs: () => [
                 {

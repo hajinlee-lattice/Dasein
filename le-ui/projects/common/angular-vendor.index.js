@@ -9,7 +9,7 @@ require("angular");
 /** UI-router library */
 require("@uirouter/angularjs");
 /** redux */
-require("./app/store");
+//require("./app/store");
 
 /** ngRoute -- */
 require("./lib/js/angular/angular-route.js");

@@ -7,7 +7,9 @@
     "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
   "version": "0.0.1",
-  "dependencies": {},
+  "dependencies": {
+    "ng-annotate-webpack-plugin": "0.3.0"
+  },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-jest": "23.6.0",

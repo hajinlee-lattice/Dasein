@@ -1,4 +1,4 @@
-console.log("Utilities module");
+console.log('Utilities module');
 // import angular from "angular";
 import * as jStorage from 'jstorage';
 
@@ -17,8 +17,7 @@ import './StringUtility';
 import './TimestampIntervalUtility';
 import './URLUtility';
 
-
-export default angular.module("com.le.common.utilities", [
+export default angular.module('com.le.common.utilities', [
     'mainApp.core.utilities.AuthorizationUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',

@@ -1,7 +1,8 @@
 /* jshint -W014 */
-
 angular
-    .module("common.attributes.activate", ["mainApp.core.redux"])
+    .module("common.attributes.activate", [
+        /*"mainApp.core.redux"*/
+    ])
     .config(function($stateProvider) {
         $stateProvider.state("home.attributes.activate", {
             url: "/activate/:category/:subcategory",
@@ -81,12 +82,13 @@ angular
             overview: "<",
             config: "<"
         },
-        controller: function($state, AttrConfigStore, $ngRedux) {
+        controller: function(AttrConfigStore /*, $state, $ngRedux*/) {
             let vm = this;
 
             vm.store = AttrConfigStore;
             vm.filters = vm.store.get("filters");
             vm.uiCanExit = vm.store.uiCanExit;
+            /*
             vm.redux = $state.get("home.attributes").data.redux;
 
             console.log("init", this, $state.get("home.attributes"));
@@ -98,5 +100,6 @@ angular
 
                 vm.redux.get();
             };
+            */
         }
     });
