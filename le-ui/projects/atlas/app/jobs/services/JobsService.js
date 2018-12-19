@@ -696,12 +696,30 @@ angular
 
             console.log(`post orphan workflow ${type}`);
 
+            // var evtSource = new EventSource(
+            //     `/sse/datacollection/orphans/type/${type}/submit?Authorization=ad9c454a-f3f7-446b-8d84-6037c43ffddb.ESmLqV6gNxfgvXLk&TenantId=QA_CDL_Auto_Demo_1212.QA_CDL_Auto_Demo_1212.Production&Method=POST`
+            // );
+
+            // evtSource.onopen = function(e) {
+            //     console.log("-!- event onopen:", e.data, e);
+            //     deferred.resolve(e);
+            // };
+
+            // evtSource.onmessage = function(e) {
+            //     console.log("-!- event onmessage:", e.data, e);
+            //     deferred.resolve(e);
+            // };
+
+            // evtSource.onerror = function(e) {
+            //     console.log("-!- event onerror:", e.data, e);
+            //     deferred.resolve(e);
+            // };
+
             $http({
                 method: "POST",
-                url: `pls_alt/datacollection/orphans/type/${type}/submit`
+                url: `/pls/datacollection/orphans/type/${type}/submit`
             }).then(res => {
                 console.log("request end", res);
-                deferred.resolve(res);
             });
 
             return deferred.promise;
