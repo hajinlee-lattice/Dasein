@@ -25,17 +25,15 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.*;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDomainCountry;
 
@@ -296,26 +294,6 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 Assert.assertEquals(seeds.get(idx).getId(), expectedIds[idx]);
             }
         });
-    }
-
-    /*
-     * compare seed ID, entity, and check if seed 1 & 2 have the same set of lookup entries
-     */
-    private boolean equalsDisregardPriority(EntityRawSeed seed1, EntityRawSeed seed2) {
-        if (seed1 == null && seed2 == null) {
-            return true;
-        } else if (seed1 == null || seed2 == null) {
-            return false;
-        }
-
-        if (!Objects.equals(seed1.getId(), seed2.getId())
-                || !Objects.equals(seed1.getEntity(), seed2.getEntity())) {
-            return false;
-        }
-
-        Set<EntityLookupEntry> entries1 = new HashSet<>(seed1.getLookupEntries());
-        Set<EntityLookupEntry> entries2 = new HashSet<>(seed2.getLookupEntries());
-        return entries1.equals(entries2);
     }
 
     private static EntityRawSeed newSeed(String seedId, String sfdcId, String... domains) {

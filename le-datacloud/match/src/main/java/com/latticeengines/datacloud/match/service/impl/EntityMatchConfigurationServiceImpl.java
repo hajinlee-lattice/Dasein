@@ -16,11 +16,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component("entityMatchConfigurationService")
 public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigurationService {
+
+    /*
+     * TODO put these in property file after cache setting is finalized
+     */
+    private static final long LOOKUP_CACHE_MAX_IDLE_SECONDS = 3600; // 1 hr
+    private static final long LOOKUP_CACHE_MAX_MEMORY_MB = 1024; // 1G
+    private static final long SEED_CACHE_MAX_IDLE_SECONDS = 3600; // 1 hr
+    private static final long SEED_CACHE_MAX_MEMORY_MB = 2048; // 2G
 
     private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
 
@@ -84,6 +93,26 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     @Override
     public long getExpiredAt(long timestampInSeconds) {
         return timestampInSeconds + stagingTTLInSeconds;
+    }
+
+    @Override
+    public Duration getMaxLookupCacheIdleDuration() {
+        return Duration.ofSeconds(LOOKUP_CACHE_MAX_IDLE_SECONDS);
+    }
+
+    @Override
+    public long getMaxLookupCacheMemoryInMB() {
+        return LOOKUP_CACHE_MAX_MEMORY_MB;
+    }
+
+    @Override
+    public Duration getMaxSeedCacheIdleDuration() {
+        return Duration.ofSeconds(SEED_CACHE_MAX_IDLE_SECONDS);
+    }
+
+    @Override
+    public long getMaxSeedCacheMemoryInMB() {
+        return SEED_CACHE_MAX_MEMORY_MB;
     }
 
     @Override

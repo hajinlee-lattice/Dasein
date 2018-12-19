@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
@@ -63,6 +64,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     private final EntityLookupEntryService entityLookupEntryService;
     private final EntityRawSeedService entityRawSeedService;
+    private final EntityMatchConfigurationService entityMatchConfigurationService;
 
     // flag to indicate whether background workers should keep running
     private volatile boolean shouldTerminate = false;
@@ -76,7 +78,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private boolean isRealTimeMode = false;
     // [ tenant PID, lookup entry ] => seed ID
     private volatile Cache<Pair<Long, EntityLookupEntry>, String> lookupCache;
-    // [ tenant PID, seed ID ] => raw seed
+    // [ [ tenant PID, entity ], seed ID ] => raw seed
     private volatile Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> seedCache;
 
     private BlockingQueue<Triple<Tenant, EntityLookupEntry, String>> lookupQueue = new LinkedBlockingQueue<>();
@@ -84,9 +86,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     @Inject
     public EntityMatchInternalServiceImpl(
-            EntityLookupEntryService entityLookupEntryService, EntityRawSeedService entityRawSeedService) {
+            EntityLookupEntryService entityLookupEntryService, EntityRawSeedService entityRawSeedService,
+            EntityMatchConfigurationService entityMatchConfigurationService) {
         this.entityLookupEntryService = entityLookupEntryService;
         this.entityRawSeedService = entityRawSeedService;
+        this.entityMatchConfigurationService = entityMatchConfigurationService;
     }
 
     @Override
@@ -226,11 +230,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     /*
-     * TODO put this in some util class
      * Map: [ type, serializedKey ] => Set(serializedValue)
      * NOTE use set for all lookup entries to make code shorter, even though one to one should have at most one value
      */
-    private Map<Pair<EntityLookupEntry.Type, String>, Set<String>> getExistingLookupPairs(EntityRawSeed seedBeforeUpdate) {
+    private Map<Pair<EntityLookupEntry.Type, String>, Set<String>> getExistingLookupPairs(
+            EntityRawSeed seedBeforeUpdate) {
         if (seedBeforeUpdate == null) {
             return Collections.emptyMap();
         }
@@ -247,7 +251,6 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     /*
-     * TODO put into some util class
      * get all entries that (a) is one to one and (b) already has a different value in current seed
      */
     private Set<EntityLookupEntry> getLookupEntriesFailedToAssociate(
@@ -375,11 +378,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         List<EntityLookupEntry> entries = new ArrayList<>(uniqueEntries);
         List<String> seedIds = entityLookupEntryService
                 .get(env, tenant, entries);
-        return IntStream
-                .range(0, entries.size())
-                .filter(idx -> seedIds.get(idx) != null)
-                .mapToObj(idx -> Pair.of(entries.get(idx), seedIds.get(idx)))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getRight));
+        return listToMap(entries, seedIds);
     }
 
     /*
@@ -458,11 +457,15 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             @NotNull String entity, @NotNull Set<String> uniqueSeedIds) {
         List<String> seedIds = new ArrayList<>(uniqueSeedIds);
         List<EntityRawSeed> seeds = entityRawSeedService.get(env, tenant, entity, seedIds);
-        return IntStream
-                .range(0, seedIds.size())
-                .filter(idx -> seeds.get(idx) != null)
-                .mapToObj(idx -> Pair.of(seedIds.get(idx), seeds.get(idx)))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getRight));
+        return listToMap(seedIds, seeds);
+    }
+
+    private <K, V> Map<K, V> listToMap(List<K> keys, List<V> values) {
+        Preconditions.checkArgument(keys.size() == values.size());
+        return IntStream.range(0, keys.size())
+                .filter(idx -> values.get(idx) != null)
+                .mapToObj(idx -> Pair.of(keys.get(idx), values.get(idx)))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     /*
@@ -544,11 +547,41 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
         synchronized (this) {
             if (seedCache == null) {
-                log.info("Instantiating raw seed cache");
-                // TODO tune the cache setting
-                seedCache = Caffeine.newBuilder().build();
+                log.info("Instantiating raw seed cache, maxWeight = {}, maxIdleDuration = {}",
+                        getMaxSeedCacheWeight(), entityMatchConfigurationService.getMaxSeedCacheIdleDuration());
+                seedCache = Caffeine
+                        .newBuilder()
+                        // use weight instead of number of entry because the number of lookup entries in seed can vary
+                        .weigher(this::getWeight)
+                        .maximumWeight(getMaxSeedCacheWeight())
+                        // expire after idle for a certain amount of time
+                        .expireAfterAccess(entityMatchConfigurationService.getMaxSeedCacheIdleDuration())
+                        .build();
             }
         }
+    }
+
+    /*
+     * NOTE this is a rough estimate which the method is described below.
+     *
+     * 1. Seed used for testing is an seed with empty lookup entries and extra attributes (not used atm)
+     * 2. Using ObjectSizeCalculator#getObjectSize we get around 230 bytes for empty seed
+     * 3. Cache key ([ [ tenantPid, entity ], seedId ] takes around 200 bytes
+     * 4. Insert 1M ~ 10M seeds to memory cache and calculate the memory usage using
+     *    RunTime#totalMemory - RunTime#freeMemory
+     * 5. Average of 4 is around 290 bytes
+     * 6. Decide to use 400 bytes per entry for now (easier to calculate). Therefore 1MiB => 2500 entries
+     */
+    private long getMaxSeedCacheWeight() {
+        return entityMatchConfigurationService.getMaxSeedCacheMemoryInMB() * 2500;
+    }
+
+    /*
+     * Memory used by one raw seed cache and one lookup cache is pretty close.
+     * Currently, to make things simpler, use 1 (seed) + # of lookup entries as weight
+     */
+    private int getWeight(Pair<Pair<Long, String>, String> key, EntityRawSeed val) {
+        return 1 + (val == null ? 0 : val.getLookupEntries().size());
     }
 
     /*
@@ -561,11 +594,33 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
         synchronized (this) {
             if (lookupCache == null) {
-                log.info("Instantiating lookup entry cache");
-                // TODO tune the cache setting
-                lookupCache = Caffeine.newBuilder().build();
+                log.info("Instantiating lookup entry cache, maxSize = {}, maxIdleDuration = {}",
+                        getMaxLookupCacheSize(), entityMatchConfigurationService.getMaxLookupCacheIdleDuration());
+                lookupCache = Caffeine
+                        .newBuilder()
+                        // max number of lookup entries allowed in cache
+                        .maximumSize(getMaxLookupCacheSize())
+                        // expire after idle for a certain amount of time
+                        .expireAfterAccess(entityMatchConfigurationService.getMaxLookupCacheIdleDuration())
+                        .build();
             }
         }
+    }
+
+    /*
+     * NOTE this is a rough estimate which the method is described below.
+     *
+     * 1. Lookup entry used for testing is a domain/country entry, with domain length = 16 & country length = 10
+     *    values are random & seedID is random as well
+     * 2. Using ObjectSizeCalculator#getObjectSize we get around 400 bytes for lookup entry
+     * 3. Seed ID mapped by the lookup entry takes 16 bytes
+     * 4. Insert 1M ~ 10M random entries to memory cache and calculate the memory usage using
+     *    RunTime#totalMemory - RunTime#freeMemory
+     * 5. Average of 4 is around 300 bytes
+     * 6. Decide to use 400 bytes per entry for now. Therefore 1MiB => 2500 entries
+     */
+    private long getMaxLookupCacheSize() {
+        return entityMatchConfigurationService.getMaxLookupCacheMemoryInMB() * 2500;
     }
 
     /*
