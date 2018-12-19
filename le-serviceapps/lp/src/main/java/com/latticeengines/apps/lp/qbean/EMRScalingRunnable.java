@@ -368,7 +368,7 @@ public class EMRScalingRunnable implements Runnable {
 
     private long getInstanceMemory(InstanceGroup grp) {
         EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
-        long mem = (instanceType.getMemGb() - 8) * 1024;
+        long mem = (long) (instanceType.getMemGb() - 8) * 1024;
         if (mem < 1024 * 4) {
             throw new IllegalArgumentException("Instance type " + grp.getInstanceType() + " is too small");
         }

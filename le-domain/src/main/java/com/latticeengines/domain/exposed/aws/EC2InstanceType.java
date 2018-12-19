@@ -13,6 +13,7 @@ public enum EC2InstanceType {
     m5_2xlarge("m5.2xlarge", 8, 32), //
     m5_4xlarge("m5.4xlarge", 16, 64), //
 
+    r4_xlarge("r4.xlarge", 4, 30.5), //
     r4_2xlarge("r4.2xlarge", 8, 61), //
 
     r5_xlarge("r5.xlarge", 4, 32), //
@@ -30,9 +31,9 @@ public enum EC2InstanceType {
 
     private final String name;
     private final int vCores;
-    private final int memGb;
+    private final double memGb;
 
-    EC2InstanceType(String name, int vCores, int memGb) {
+    EC2InstanceType(String name, int vCores, double memGb) {
         this.name = name;
         this.vCores = vCores;
         this.memGb = memGb;
@@ -57,7 +58,7 @@ public enum EC2InstanceType {
         return vCores;
     }
 
-    public int getMemGb() {
+    public double getMemGb() {
         return memGb;
     }
 }
