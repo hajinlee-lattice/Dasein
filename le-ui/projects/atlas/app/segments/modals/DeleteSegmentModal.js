@@ -10,6 +10,7 @@ angular.module('mainApp.segments.modals.DeleteSegmentModal', [
 
             var scope = $rootScope.$new();
             scope.segmentName = segment.name;
+            scope.displayName = segment.displayName;
             scope.inModel = inModel;
 
             var modalElement = $("#modalContainer");

@@ -7,7 +7,9 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
     this.show = function (rating) {
         $http.get('app/ratingsengine/content/ratingslist/modals/deleteratingmodal.component.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
+            console.log(rating)
             scope.ratingId = rating.id;
+            scope.displayName = rating.displayName;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);

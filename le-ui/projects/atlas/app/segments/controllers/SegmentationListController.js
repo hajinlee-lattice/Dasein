@@ -246,7 +246,7 @@ angular.module('lp.segments.segments', [
         Modal.warning({
             name: 'deleteSegmentWarning',
             title: "Delete Segment",
-            message: "Are you sure you want to delete this segment?",
+            message: "Are you sure you want to delete this segment: " + segment.name + "?",
             confirmtext: "Delete Segment"
         }, vm.callbackModalWindow);
     };

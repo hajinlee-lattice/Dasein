@@ -10,6 +10,7 @@ angular.module('mainApp.playbook.content.playlist.modals.deletePlayModal', [
 
             var scope = $rootScope.$new();
             scope.playName = play.name;
+            scope.displayName = play.displayName;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
