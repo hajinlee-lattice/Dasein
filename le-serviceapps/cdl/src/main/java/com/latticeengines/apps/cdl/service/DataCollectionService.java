@@ -65,14 +65,17 @@ public interface DataCollectionService {
     List<DataCollectionArtifact> getArtifacts(String customerSpace, DataCollectionArtifact.Status status,
                                               DataCollection.Version version);
 
-    DataCollectionArtifact getArtifact(String customerSpace, String name, DataCollection.Version version);
+    DataCollectionArtifact getLatestArtifact(String customerSpace, String name, DataCollection.Version version);
+
+    DataCollectionArtifact getOldestArtifact(String customerSpace, String name, DataCollection.Version version);
 
     DataCollectionArtifact createArtifact(String customerSpace, String artifactName, String artifactUrl,
                                           DataCollectionArtifact.Status status, DataCollection.Version version);
 
     DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact);
 
-    DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version);
+    DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version,
+                                          boolean deleteLatest);
 
     byte[] downloadDataCollectionArtifact(String customerSpace, String exportId);
 }

@@ -13,5 +13,6 @@ public interface DataCollectionArtifactEntityMgr extends BaseEntityMgrRepository
     List<DataCollectionArtifact> findByTenantAndStatusAndVersion(Tenant tenant, DataCollectionArtifact.Status status,
                                                                  DataCollection.Version version);
 
-    DataCollectionArtifact findByTenantAndNameAndVersion(Tenant tenant, String name, DataCollection.Version version);
+    List<DataCollectionArtifact> findByTenantAndNameAndVersion(Tenant tenant, String name,
+                                                               DataCollection.Version version);
 }

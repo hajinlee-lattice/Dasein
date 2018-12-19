@@ -66,8 +66,8 @@ public class DataCollectionArtifactEntityMgrImplTestNG extends CDLFunctionalTest
                 mainTestTenant, testVersion);
         Assert.assertNotNull(artifacts);
         Assert.assertEquals(artifacts.size(), 2);
-        Assert.assertEquals(artifacts.get(0).getName(), artifactName1);
-        Assert.assertEquals(artifacts.get(1).getName(), artifactName2);
+        Assert.assertEquals(artifacts.get(0).getName(), artifactName2);
+        Assert.assertEquals(artifacts.get(1).getName(), artifactName1);
 
         String newArtifactName = "artifact 1000";
         String newArtifactUrl = "https://s3.amazon.com/artifact1000/Blue";
@@ -77,10 +77,11 @@ public class DataCollectionArtifactEntityMgrImplTestNG extends CDLFunctionalTest
         dataCollectionArtifactEntityMgr.createOrUpdate(artifact1);
         Thread.sleep(500L);
 
-        DataCollectionArtifact retrieved = dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(
+        List<DataCollectionArtifact> retrieved = dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(
                 mainTestTenant, newArtifactName, testVersion);
         Assert.assertNotNull(retrieved);
-        Assert.assertEquals(retrieved.getName(), newArtifactName);
-        Assert.assertEquals(retrieved.getUrl(), newArtifactUrl);
+        Assert.assertEquals(retrieved.size(), 1);
+        Assert.assertEquals(retrieved.get(0).getName(), newArtifactName);
+        Assert.assertEquals(retrieved.get(0).getUrl(), newArtifactUrl);
     }
 }

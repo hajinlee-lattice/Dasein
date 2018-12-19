@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,21 +17,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,8 +32,10 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -83,20 +77,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Inject
-    @Qualifier(value = "awsCredentials")
-    private BasicAWSCredentials basicAWSCredentials;
-
-    @Value("${aws.region}")
-    private String region;
+    private S3Service s3Service;
 
     @Resource(name = "localCacheService")
     private CacheService localCacheService;
 
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
-
-    @Value("${camille.zk.pod.id:Default}")
-    protected String podId;
 
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
@@ -546,13 +533,33 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollectionArtifact getArtifact(String customerSpace, String name, Version version) {
+    public DataCollectionArtifact getLatestArtifact(String customerSpace, String name, Version version) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (version == null) {
             version = dataCollectionEntityMgr.findActiveVersion();
         }
+        List<DataCollectionArtifact> artifacts =
+                dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(tenant, name, version);
+        if (artifacts != null && artifacts.size() > 0) {
+            return artifacts.get(0);
+        } else {
+            return null;
+        }
+    }
 
-        return dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(tenant, name, version);
+    @Override
+    public DataCollectionArtifact getOldestArtifact(String customerSpace, String name, Version version) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (version == null) {
+            version = dataCollectionEntityMgr.findActiveVersion();
+        }
+        List<DataCollectionArtifact> artifacts =
+                dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(tenant, name, version);
+        if (artifacts != null && artifacts.size() > 0) {
+            return artifacts.get(artifacts.size() - 1);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -578,7 +585,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public DataCollectionArtifact updateArtifact(String customerSpace, DataCollectionArtifact artifact) {
-        DataCollectionArtifact existing = getArtifact(customerSpace, artifact.getName(), artifact.getVersion());
+        DataCollectionArtifact existing = getLatestArtifact(customerSpace, artifact.getName(), artifact.getVersion());
         if (existing == null) {
             existing = createArtifact(customerSpace, artifact.getName(), artifact.getUrl(), artifact.getStatus(),
                     artifact.getVersion());
@@ -591,15 +598,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version) {
+    public DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version,
+                                                 boolean deleteLatest) {
         if (version == null) {
-            throw new UnsupportedOperationException("Data collection version cannot be null.");
+            version = getActiveVersion(customerSpace);
         }
-
-        Tenant tenant = MultiTenantContext.getTenant();
-        DataCollectionArtifact artifact = dataCollectionArtifactEntityMgr.findByTenantAndNameAndVersion(
-                tenant, name, version);
-        log.info(String.format("Removing artifact %s at version %s in collection.", name, version));
+        DataCollectionArtifact artifact;
+        if (deleteLatest) {
+            artifact = getLatestArtifact(customerSpace, name, version);
+        } else {
+            artifact = getOldestArtifact(customerSpace, name, version);
+        }
+        log.info(String.format("Deleting artifact %s at version %s in collection.",
+                JsonUtils.serialize(artifact), version));
         dataCollectionArtifactEntityMgr.delete(artifact);
         return artifact;
     }
@@ -612,51 +623,33 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info(String.format("Download data collection artifact. Version=%s, ExportId=%s",
                 activeVersion, exportId));
-        List<DataCollectionArtifact> artifacts = getArtifacts(
-                customerSpace, DataCollectionArtifact.Status.READY, activeVersion)
-                .stream().filter(artifact -> {
+        List<DataCollectionArtifact> artifacts =
+                getArtifacts(customerSpace, DataCollectionArtifact.Status.READY, activeVersion)
+                .stream()
+                .filter(artifact -> {
                     return artifact.getUrl().contains(exportId);
                 }).collect(Collectors.toList());
         if (artifacts.isEmpty()) {
-            throw new RuntimeException(String.format(
+            log.info(String.format(
                     "No artifact available for downloading. Tenant=%s, ExportId=%s.", customerSpace, exportId));
+            return null;
         }
+
         DataCollectionArtifact artifact = artifacts.get(0);
-//        String filename = artifact.getName() + ".csv";
-        AmazonS3 s3 = buildAmazonS3(basicAWSCredentials);
-//        String s3bucket = extractS3Bucket(artifact.getUrl());
         String artifactKey = getArtifactKey(customerSpace, exportId, artifact.getName());
-        GetObjectRequest getObjectRequest = new GetObjectRequest(s3Bucket, artifactKey);
-        S3Object s3Object;
+        InputStream inputStream = s3Service.readObjectAsStream(s3Bucket, artifactKey);
         try {
-            s3Object = s3.getObject(getObjectRequest);
-            return IOUtils.toByteArray(s3Object.getObjectContent());
-        } catch (AmazonS3Exception exc) {
-            throw new RuntimeException(String.format(
-                    "Failed to download artifact from S3. Bucket=%s. Object key=%s.", s3Bucket, artifactKey), exc);
+            if (inputStream != null) {
+                return IOUtils.toByteArray(inputStream);
+            } else {
+                return null;
+            }
         } catch (IOException exc) {
             throw new RuntimeException(String.format(
                     "Failed to get content of data collection artifact. Bucket=%s. Object key=%s.",
                     s3Bucket, artifactKey), exc);
         }
     }
-
-    private AmazonS3 buildAmazonS3(BasicAWSCredentials basicAWSCredentials) {
-        ClientConfiguration clientConfiguration = new ClientConfiguration();
-        clientConfiguration.setSocketTimeout(120000);
-        return AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials)) //
-                .withRegion(region) //
-                .withClientConfiguration(clientConfiguration) //
-                .enableAccelerateMode() //
-                .build();
-    }
-
-//    private String extractS3Bucket(String artifactUrl) {
-//        String s3Prefix = "s3n://";
-//        int pos = artifactUrl.indexOf('/', s3Prefix.length());
-//        return artifactUrl.substring(s3Prefix.length(), pos);
-//    }
 
     private String getArtifactKey(String customerSpace, String exportId, String artifactName) {
         return String.format("%s/atlas/Data/Files/Exports/%s/%s.csv", customerSpace, exportId, artifactName)

@@ -35,8 +35,8 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void cleanup() {
-        dataCollectionService.deleteArtifact(mainCustomerSpace, name1, version);
-        dataCollectionService.deleteArtifact(mainCustomerSpace, name2, version);
+        dataCollectionService.deleteArtifact(mainCustomerSpace, name1, version, true);
+        dataCollectionService.deleteArtifact(mainCustomerSpace, name2, version, true);
         dataCollectionEntityMgr.delete(dataCollection);
     }
 
@@ -50,14 +50,16 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(artifact1.getName(), name1);
         Assert.assertEquals(artifact1.getVersion(), version);
         Assert.assertEquals(artifact1.getStatus(), DataCollectionArtifact.Status.NOT_SET);
+
         Assert.assertNotNull(artifact2);
+        Assert.assertEquals(artifact2.getName(), name2);
         Assert.assertEquals(artifact2.getUrl(), url2);
         Assert.assertEquals(artifact2.getStatus(), DataCollectionArtifact.Status.NOT_SET);
     }
 
     @Test(groups = "functional", priority = 1)
     public void testFindOneArtifact() {
-        DataCollectionArtifact artifact = dataCollectionService.getArtifact(mainCustomerSpace, name1, version);
+        DataCollectionArtifact artifact = dataCollectionService.getLatestArtifact(mainCustomerSpace, name1, version);
         Assert.assertNotNull(artifact);
         Assert.assertEquals(artifact.getName(), name1);
         Assert.assertEquals(artifact.getUrl(), url1);
@@ -70,9 +72,6 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         List<DataCollectionArtifact> artifacts = dataCollectionService.getArtifacts(mainCustomerSpace, null, version);
         Assert.assertNotNull(artifacts);
         Assert.assertEquals(artifacts.size(), 2);
-        Assert.assertEquals(artifacts.get(0).getName(), name1);
-        Assert.assertEquals(artifacts.get(1).getUrl(), url2);
-        Assert.assertEquals(artifacts.get(1).getStatus(), DataCollectionArtifact.Status.NOT_SET);
     }
 
     @Test(groups = "functional", priority = 3)
@@ -83,7 +82,7 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(artifact.getStatus(), artifact1.getStatus());
         Assert.assertEquals(artifact.getUrl(), artifact1.getUrl());
 
-        artifact = dataCollectionService.getArtifact(mainCustomerSpace, name1, version);
+        artifact = dataCollectionService.getLatestArtifact(mainCustomerSpace, name1, version);
         Assert.assertEquals(artifact.getStatus(), DataCollectionArtifact.Status.GENERATING);
     }
 
@@ -111,7 +110,7 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         DataCollectionArtifact artifact = dataCollectionService.createArtifact(mainCustomerSpace,
                 "test", "https://url.com", DataCollectionArtifact.Status.NOT_SET, version);
         Assert.assertNotNull(artifact);
-        artifact = dataCollectionService.deleteArtifact(mainCustomerSpace, artifact.getName(), artifact.getVersion());
+        artifact = dataCollectionService.deleteArtifact(mainCustomerSpace, artifact.getName(), artifact.getVersion(), true);
         Assert.assertNotNull(artifact);
     }
 }

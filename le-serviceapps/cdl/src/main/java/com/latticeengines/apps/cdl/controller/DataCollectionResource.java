@@ -298,9 +298,17 @@ public class DataCollectionResource {
     @GetMapping(value = "/artifact/{name}")
     @ApiOperation(value = "Get single data collection artifact by customer space, artifact name and version.")
     public DataCollectionArtifact getArtifact(@PathVariable String customerSpace, @PathVariable String name,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+            @RequestParam(value = "latest", required = false, defaultValue = "true") Boolean getLatest) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getArtifact(customerSpace, name, version);
+        if (getLatest == null) {
+            getLatest = true;
+        }
+        if (getLatest) {
+            return dataCollectionService.getLatestArtifact(customerSpace, name, version);
+        } else {
+            return dataCollectionService.getOldestArtifact(customerSpace, name, version);
+        }
     }
 
     @PutMapping(value = "/artifact")
@@ -327,9 +335,13 @@ public class DataCollectionResource {
     @DeleteMapping(value = "/artifact/{name}")
     @ApiOperation(value = "Delete a data collection artifact.")
     public DataCollectionArtifact deleteArtifact(@PathVariable String customerSpace, @PathVariable String name,
-            @RequestParam(value = "version") DataCollection.Version version) {
+            @RequestParam(value = "version") DataCollection.Version version,
+            @RequestParam(value = "latest", required = false, defaultValue = "true") Boolean deleteLatest) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.deleteArtifact(customerSpace, name, version);
+        if (deleteLatest == null) {
+            deleteLatest = true;
+        }
+        return dataCollectionService.deleteArtifact(customerSpace, name, version, deleteLatest);
     }
 
     @GetMapping(value = "/artifact/{exportId}/download", produces = MediaType.APPLICATION_OCTET_STREAM)

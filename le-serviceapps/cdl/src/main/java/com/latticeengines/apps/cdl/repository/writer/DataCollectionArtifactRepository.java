@@ -8,10 +8,12 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface DataCollectionArtifactRepository extends BaseJpaRepository<DataCollectionArtifact, Long> {
-    List<DataCollectionArtifact> findByTenantAndVersion(Tenant tenant, DataCollection.Version version);
+    List<DataCollectionArtifact> findByTenantAndVersionOrderByCreateTimeDesc(
+            Tenant tenant, DataCollection.Version version);
 
-    List<DataCollectionArtifact> findByTenantAndStatusAndVersion(Tenant tenant, DataCollectionArtifact.Status status,
-                                                                 DataCollection.Version version);
+    List<DataCollectionArtifact> findByTenantAndStatusAndVersionOrderByCreateTimeDesc(
+            Tenant tenant, DataCollectionArtifact.Status status, DataCollection.Version version);
 
-    DataCollectionArtifact findByTenantAndNameAndVersion(Tenant tenant, String name, DataCollection.Version version);
+    List<DataCollectionArtifact> findByTenantAndNameAndVersionOrderByCreateTimeDesc(
+            Tenant tenant, String name, DataCollection.Version version);
 }
