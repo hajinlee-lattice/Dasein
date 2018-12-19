@@ -769,7 +769,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                     // as per requirement, we moved attributes from
                     // ModelingMetadata.CATEGORY_LEAD_INFORMATION to
                     // Category.ACCOUNT_ATTRIBUTES
-                    assertEquals(predictor.get("Category").textValue(), Category.ACCOUNT_ATTRIBUTES.getName());
+                    assertEquals(Category.fromName(predictor.get("Category").textValue()), Category.ACCOUNT_ATTRIBUTES);
                 } else if (predictor.get("Name").asText().equals("Industry")) {
                     JsonNode approvedUsages = predictor.get("ApprovedUsage");
                     assertEquals(approvedUsages.size(), 1);
