@@ -21,7 +21,7 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val tgt = t._1
   val df = t._2
   val path = tgt.get("Path").asText()
-  df.write.format("com.databricks.spark.avro").save(path)
+  df.write.format("avro").save(path)
   val json = mapper.createObjectNode()
   json.put("StorageType", "Hdfs")
   json.put("Path", path)

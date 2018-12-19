@@ -17,7 +17,7 @@ val rawInput = mapper.readValue[List[JsonNode]]("{{INPUT}}")
 
 def loadHdfsUnit(unit: JsonNode): DataFrame = {
   val path = unit.get("Path").asText()
-  spark.read.format("com.databricks.spark.avro").load("hdfs://" + path)
+  spark.read.format("avro").load("hdfs://" + path)
 }
 
 val scriptInput = rawInput map { input => {

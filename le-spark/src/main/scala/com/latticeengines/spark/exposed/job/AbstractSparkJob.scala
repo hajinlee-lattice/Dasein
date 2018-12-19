@@ -59,7 +59,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
 
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
     val path = unit.getPath
-    spark.read.format("com.databricks.spark.avro").load("hdfs://" + path)
+    spark.read.format("avro").load("hdfs://" + path)
   }
 
   def finalizeJob(latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {
@@ -73,7 +73,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val tgt = t._1
       val df = t._2
       val path = tgt.getPath
-      df.write.format("com.databricks.spark.avro").save(path)
+      df.write.format("avro").save(path)
       tgt.setCount(df.count())
       tgt
     }

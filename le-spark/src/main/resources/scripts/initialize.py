@@ -18,7 +18,7 @@ def load_data_unit(unit):
 
 def load_hdfs_unit(unit):
     path = "hdfs://%s" % unit['Path']
-    return spark.read.format("com.databricks.spark.avro").load(path)
+    return spark.read.format("avro").load(path)
 
 script_targets = json.loads('''{{TARGETS}}''')
 print("----- BEGIN SCRIPT OUTPUT -----")

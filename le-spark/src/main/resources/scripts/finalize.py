@@ -3,7 +3,7 @@ if len(lattice.targets) != len(lattice.output):
         "{} targets are declared but {} outputs are generated!".format(len(lattice.targets), len(lattice.output)))
 
 for tgt, df in zip(lattice.targets, lattice.output):
-    df.write.format("com.databricks.spark.avro").save(tgt['Path'])
+    df.write.format("avro").save(tgt['Path'])
     count = df.count()
     tgt['StorageType'] = 'Hdfs'
     tgt['Count'] = count
