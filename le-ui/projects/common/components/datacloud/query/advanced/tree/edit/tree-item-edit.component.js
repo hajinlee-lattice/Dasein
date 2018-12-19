@@ -69,8 +69,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.initVariables = function(){
                     vm.numericalConfiguration = {
-                        from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
-                        to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
+                        from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical', pattern:'\\\d+' },
+                        to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical', pattern:'\\\d+' }
                     };
     
                     vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);

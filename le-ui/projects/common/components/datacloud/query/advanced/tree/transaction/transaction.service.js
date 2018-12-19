@@ -4,15 +4,15 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
         QueryTreeTransactionStore.periods = [];
         this.getAmtConfig = function () {
             return {
-                from: { name: 'from-amt', value: undefined, position: 0, type: 'Amt', min: '0', max: '' },
-                to: { name: 'to-amt', value: undefined, position: 1, type: 'Amt', min: '0', max: '' }
+                from: { name: 'from-amt', value: undefined, position: 0, type: 'Amt', min: '0', max: '', pattern:'\\\d+' },
+                to: { name: 'to-amt', value: undefined, position: 1, type: 'Amt', min: '0', max: '', pattern:'\\\d+' }
             };
         }
 
         this.getQtyConfig = function () {
             return {
-                from: { name: 'from-qty', value: undefined, position: 0, type: 'Qty', min: '0' },
-                to: { name: 'to-qty', value: undefined, position: 1, type: 'Qty', min: '0' }
+                from: { name: 'from-qty', value: undefined, position: 0, type: 'Qty', min: '0', pattern:'\\\d+' },
+                to: { name: 'to-qty', value: undefined, position: 1, type: 'Qty', min: '0', pattern:'\\\d+' }
             };
         }
 
@@ -25,8 +25,8 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         this.getPeriodTimeConfig = function () {
             return {
-                from: { name: 'from-time', initial: undefined, position: 0, type: 'Time', visible: true },
-                to: { name: 'to-time', initial: undefined, position: 1, type: 'Time', visible: true }
+                from: { name: 'from-time', initial: undefined, position: 0, type: 'Time', visible: true, pattern:'\\\d+' },
+                to: { name: 'to-time', initial: undefined, position: 1, type: 'Time', visible: true, pattern:'\\\d+' }
             };
         }
 
