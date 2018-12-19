@@ -38,7 +38,7 @@ angular.module('lp.cg.talkingpoint.preview', [])
             vm.leadPreviewObject = leadPreviewObject;
             var opts = {
                 no_cache: true, 
-                account_restriction: $scope.play.ratingEngine.segment.account_restriction,
+                account_restriction: $scope.play.targetSegment.account_restriction,
                 lookups: [
                     {
                         attribute: {
