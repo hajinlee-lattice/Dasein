@@ -17,6 +17,9 @@ public final class ColumnMetadataUtils {
                     String.format("Cannot use the metadata of %s to overwrite %s",
                             overwriter.getAttrName(), overwritee.getAttrName()));
         }
+        if (StringUtils.isNotBlank(overwriter.getJavaClass())) {
+            overwritee.setJavaClass(overwriter.getJavaClass());
+        }
         if (StringUtils.isNotBlank(overwriter.getDisplayName())) {
             overwritee.setDisplayName(overwriter.getDisplayName());
         }
