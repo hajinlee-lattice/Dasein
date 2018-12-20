@@ -239,7 +239,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Map: [ type, serializedKey ] => Set(serializedValue)
      * NOTE use set for all lookup entries to make code shorter, even though one to one should have at most one value
      */
-    private Map<Pair<EntityLookupEntry.Type, String>, Set<String>> getExistingLookupPairs(
+    @VisibleForTesting
+    protected Map<Pair<EntityLookupEntry.Type, String>, Set<String>> getExistingLookupPairs(
             EntityRawSeed seedBeforeUpdate) {
         if (seedBeforeUpdate == null) {
             return Collections.emptyMap();
@@ -257,8 +258,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     /*
-     * TODO unit test this
-     * get all entries that (a) is one to one and (b) already has a different value in current seed
+     * get all entries that (a) is X to one and (b) already has a different value in current seed
      */
     @VisibleForTesting
     protected Set<EntityLookupEntry> getLookupEntriesFailedToAssociate(
@@ -267,8 +267,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         return seed
                 .getLookupEntries()
                 .stream()
-                // only one to one are possible fail to update
-                .filter(entry -> entry.getType().mapping == EntityLookupEntry.Mapping.ONE_TO_ONE)
+                // only X to one are possible fail to update seed
+                .filter(entry -> entry.getType().mapping == EntityLookupEntry.Mapping.ONE_TO_ONE
+                        || entry.getType().mapping == EntityLookupEntry.Mapping.MANY_TO_ONE)
                 .filter(entry -> {
                     Pair<EntityLookupEntry.Type, String> key = Pair.of(entry.getType(), entry.getSerializedKeys());
                     // not already have value or have value but not equals
