@@ -179,7 +179,13 @@ angular.module('lp.ratingsengine.dashboard', [
                         title: 'Deactivate Scoring', 
                         message: 'Your scoring has been '+msgStatus+'.'
                     });
+
+                    console.log("here");
+
                     RatingsEngineService.getRatingDashboard(newRating.id).then(function(data){
+
+                        console.log("here 2");
+
                         vm.dashboard.plays = data.plays;
                         vm.initDataModel();
                         deferred.resolve({success: true});
@@ -216,7 +222,7 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
-    vm.init = function() {
+    vm.initDataModel = function(){
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
             if (vm.dashboard.dependencies[type]) {
@@ -317,6 +323,10 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
         }
+    }
+
+    vm.init = function() {
+        vm.initDataModel();
     }
 
     vm.isIterationActive = function(iterationId){
