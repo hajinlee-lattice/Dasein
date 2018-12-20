@@ -447,54 +447,40 @@ angular.module('lp.configureattributes.configure', [])
 
             var goingTo = Transition.targetState().identifier(),
                 goingToBase = goingTo.substr(0, goingTo.lastIndexOf(".")),
-                comingFrom = $state.current.name,model,
+                comingFrom = $state.current.name,
                 comingFromBase = comingFrom.substr(0, comingFrom.lastIndexOf("."));
 
             if(goingToBase === comingFromBase || !vm.hasChanges) {
                 deferred.resolve(true);
             } else {
-                vm.toggleModal();
-
-                vm.modalCallback = function(args) {
-                    if(args.action === 'proceed') {
-                        deferred.resolve(true);
-                    } else {
-                        vm.toggleModal();
+                vm.modalCallbackExit = function(args) {
+                    console.log(args);
+                    var modal = Modal.get('configure_attributes');
+                    Modal.modalRemoveFromDOM(modal, {name: 'configure_attributes'});
+                    if ('cancel' === args.action) {
                         deferred.resolve(false);
+                    } else if ('ok' === args.action) {
+                        deferred.resolve(true);
                     }
                 }
+
+                Modal.warning({
+                    name: "configure_attributes",
+                    type: 'sm',
+                    title: 'Warning',
+                    titlelength: 100,
+                    dischargetext: 'Cancel',
+                    confirmtext: 'Yes, Confirm',
+                    icon: 'fa fa-exclamation-triangle',
+                    iconstyle: {'color': 'white'},
+                    confirmcolor: 'blue-button',
+                    showclose: true,
+                    headerconfig: {'background-color':'#FDC151', 'color':'white'},
+                    confirmstyle : {'background-color':'#FDC151'}
+                }, vm.modalCallbackExit);
+
             }
             return deferred.promise;
-        }
-
-        vm.initModalWindow = function () {
-            vm.modalConfig = {
-                'name': "configure_attributes",
-                'type': 'sm',
-                'title': 'Warning',
-                'titlelength': 100,
-                'dischargetext': 'Cancel',
-                'dischargeaction': 'cancel',
-                'confirmtext': 'Yes, Confirm',
-                'confirmaction': 'proceed',
-                'icon': 'fa fa-exclamation-triangle',
-                'iconstyle': {'color': 'white'},
-                'confirmcolor': 'blue-button',
-                'showclose': true,
-                'headerconfig': {'background-color':'#FDC151', 'color':'white'},
-                'confirmstyle' : {'background-color':'#FDC151'}
-            };
-
-            vm.toggleModal = function () {
-                var modal = Modal.get(vm.modalConfig.name);
-                if (modal) {
-                    modal.toggle();
-                }
-            }
-
-            $scope.$on("$destroy", function () {
-                Modal.remove(vm.modalConfig.name);
-            });
         }
 
         var makePeriodsObject = function(periods) {
@@ -511,7 +497,6 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.$onInit = function() {
-            vm.initModalWindow();
             makePeriodsObject(vm.periods);
             var completedSteps = ConfigureAttributesStore.getSaved(),
                 totalSpendOvertimeOptionsAr,
