@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.template.VisitorActorTemplate;
 import com.latticeengines.actors.utils.ActorUtils;
-import com.latticeengines.actors.visitor.VisitorActorTemplate;
 import com.latticeengines.actors.visitor.sample.SampleMatchTravelContext;
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchGuideBook;
 

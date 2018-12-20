@@ -1,13 +1,13 @@
-package com.latticeengines.domain.exposed.datacloud.match;
+package com.latticeengines.domain.exposed.actors;
 
-public enum MatchActorType {
+public enum ActorType {
     ANCHOR("AnchorActor"), //
     MICRO_ENGINE("MicroEngineActor"), //
     JUNCION("JunctionActor");
     
     private final String name;
 
-    MatchActorType(String name) {
+    ActorType(String name) {
         this.name = name;
     }
 

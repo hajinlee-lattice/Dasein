@@ -1,10 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -13,8 +9,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.template.AnchorActorTemplate;
 import com.latticeengines.actors.utils.ActorUtils;
-import com.latticeengines.actors.visitor.VisitorActorTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -23,13 +19,7 @@ import akka.actor.ActorRef;
 
 @Component("fuzzyMatchAnchorActor")
 @Scope("prototype")
-public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
-    private static final Logger log = LoggerFactory.getLogger(FuzzyMatchAnchorActor.class);
-
-    @PostConstruct
-    public void postConstruct() {
-        log.info("Started actor: " + self());
-    }
+public class FuzzyMatchAnchorActor extends AnchorActorTemplate {
 
     @Autowired
     @Qualifier("matchGuideBook")

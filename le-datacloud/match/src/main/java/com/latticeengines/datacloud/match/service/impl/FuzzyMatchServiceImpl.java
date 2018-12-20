@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -252,11 +251,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private Future<Object> askMatchAnchor(MatchTraveler traveler) {
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
-        try {
-            return actorSystem.askAnchor(traveler, timeout);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Fail to ask match anchor");
-        }
+        return actorSystem.askAnchor(traveler, timeout);
     }
 
     private void checkRecordType(List<? extends OutputRecord> matchRequests) {

@@ -1,4 +1,4 @@
-package com.latticeengines.actors.visitor;
+package com.latticeengines.actors.template;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

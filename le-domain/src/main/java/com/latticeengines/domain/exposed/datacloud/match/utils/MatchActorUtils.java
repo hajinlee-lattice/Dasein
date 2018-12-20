@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match.utils;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.MatchActorType;
+import com.latticeengines.domain.exposed.actors.ActorType;
 
 public class MatchActorUtils {
     /**
@@ -13,7 +13,7 @@ public class MatchActorUtils {
      * @param mode
      * @return
      */
-    public static String getFullActorName(@NotNull String actorName, @NotNull MatchActorType type) {
+    public static String getFullActorName(@NotNull String actorName, @NotNull ActorType type) {
         Preconditions.checkNotNull(actorName);
         Preconditions.checkNotNull(type);
 
@@ -28,7 +28,7 @@ public class MatchActorUtils {
      * @param mode
      * @return
      */
-    public static String getShortActorName(@NotNull String actorName, @NotNull MatchActorType type) {
+    public static String getShortActorName(@NotNull String actorName, @NotNull ActorType type) {
         Preconditions.checkNotNull(actorName);
         Preconditions.checkNotNull(type);
 

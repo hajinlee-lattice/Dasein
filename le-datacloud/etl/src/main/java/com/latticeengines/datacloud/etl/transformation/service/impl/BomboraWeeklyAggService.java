@@ -65,7 +65,6 @@ public class BomboraWeeklyAggService
             cal.setTime(baseVersionDate);
             cal.add(Calendar.DATE, -6);
             String cufOffVersion = HdfsPathBuilder.dateFormat.format(cal.getTime());
-            log.info("zdd" + cufOffVersion);
 
             List<String> versionPaths = HdfsUtils.getFilesForDir(yarnConfiguration, sourceDir);
             Collections.sort(versionPaths, Collections.reverseOrder());

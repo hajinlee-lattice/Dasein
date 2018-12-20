@@ -21,7 +21,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.domain.exposed.datacloud.match.MatchActorType;
+import com.latticeengines.domain.exposed.actors.ActorType;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -103,7 +103,7 @@ public class DecisionGraph implements HasPid, Serializable {
     }
 
     public String getAnchor() {
-        return MatchActorUtils.getFullActorName(anchor, MatchActorType.ANCHOR);
+        return MatchActorUtils.getFullActorName(anchor, ActorType.ANCHOR);
     }
 
     public void setAnchor(String anchor) {
@@ -119,7 +119,7 @@ public class DecisionGraph implements HasPid, Serializable {
     }
 
     public String getNextGraphForJunction(String junctionName) {
-        junctionName = MatchActorUtils.getShortActorName(junctionName, MatchActorType.JUNCION);
+        junctionName = MatchActorUtils.getShortActorName(junctionName, ActorType.JUNCION);
         return getJunctionGraphMap().get(junctionName);
     }
 
