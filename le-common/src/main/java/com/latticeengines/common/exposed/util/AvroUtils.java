@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,6 +37,7 @@ import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.FileReader;
+import org.apache.avro.file.SeekableFileInput;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -43,6 +45,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -845,6 +850,51 @@ public class AvroUtils {
             }
         }
         return data;
+    }
+
+    public static long countLocalDir(String dir) {
+        Collection<File> files = FileUtils.listFiles(new File(dir), new String[]{ "avro" }, false);
+        List<Callable<Long>> callables = new ArrayList<>();
+        files.forEach(file -> {
+            Callable<Long> callable = () -> {
+                RetryTemplate rety = RetryUtils.getRetryTemplate(3);
+                return rety.execute(ctx -> {
+                    if (ctx.getRetryCount() > 0) {
+                        log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry counting " + file.getAbsolutePath());
+                    }
+                    return countLocalFile(file);
+                });
+            };
+            callables.add(callable);
+        });
+        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("avro-count", Math.min(4, callables.size()));
+        try {
+            List<Long> counts = ThreadPoolUtils.runCallablesInParallel(tp, callables, 120, 1);
+            long total = 0L;
+            if (CollectionUtils.isNotEmpty(counts)) {
+                for (Long c : counts) {
+                    total += c;
+                }
+            }
+            return total;
+        } finally {
+            tp.shutdown();
+        }
+    }
+
+    private static long countLocalFile(File file) throws IOException {
+        long count = 0L;
+        try (DataFileStream<GenericRecord> stream = new DataFileStream<>(new SeekableFileInput(file), new GenericDatumReader<>()))
+        {
+            try {
+                while (stream.nextBlock() != null) {
+                    count += stream.getBlockCount();
+                }
+            } catch (NoSuchElementException expected) {
+                // skip
+            }
+        }
+        return count;
     }
 
     public static List<GenericRecord> readFromInputStream(InputStream inputStream)
