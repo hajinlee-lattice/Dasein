@@ -1,12 +1,12 @@
 angular.module('lp.ratingsengine.ratingslist', [
-    'mainApp.ratingsengine.deleteratingmodal',
     'mainApp.appCommon.directives.barchart',
     'mainApp.core.utilities.NavUtility',
-    'lp.tile.edit'
+    'lp.tile.edit',
+    'common.modal'
 ])
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
-    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore, JobsService, ModelRatingsService,
+    Modal, Banner, RatingsEngineStore, RatingsEngineService, NavUtility, StateHistory, JobsStore, JobsService, ModelRatingsService,
     ConfigureAttributesStore, FilterService, DataCloudStore
 ) {
     var vm = this;
@@ -339,13 +339,68 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     };
 
+
+    vm.callbackModalWindow = function(args) {
+        
+        var modal = Modal.get('deleteModelPrompt');
+
+        if (args.action === 'cancel') {
+         
+            Modal.modalRemoveFromDOM(modal, args);
+
+        } else if (args.action === 'ok') {
+
+            var ratingId = vm.rating.id;
+            if(modal){
+                modal.waiting(true);
+            }
+
+            RatingsEngineStore.deleteRating(ratingId).then(function(result) {
+
+                if (result != null && result === true) {
+                    
+                    Modal.modalRemoveFromDOM(modal, args);
+
+                    $state.go('home.ratingsengine.list', {}, { reload: true } );
+                } else {
+                    Banner.error({ message: result.errorMessage });
+                }
+            });
+
+            // SegmentService.DeleteSegment(segmentName).then(function(result) {
+            //     if (result != null && result.success === true) {
+                    
+            //         Modal.modalRemoveFromDOM(modal, args);
+
+            //         $state.go('home.segments', {}, { reload: true } );
+            //     } else {
+            //         Banner.error({ message: result.errorMessage });
+            //     }
+            // });
+        }
+    }
+
     vm.showDeleteRatingModalClick = function($event, rating){
         $event.preventDefault();
         $event.stopPropagation();
 
-        DeleteRatingModal.show(rating);
+        vm.rating = rating;
 
+        Modal.warning({
+            name: 'deleteModelPrompt',
+            title: "Delete Model",
+            message: "Are you sure you want to delete this model: " + rating.name + "?",
+            confirmtext: "Delete Model"
+        }, vm.callbackModalWindow);
     };
+
+    // vm.showDeleteRatingModalClick = function($event, rating){
+    //     $event.preventDefault();
+    //     $event.stopPropagation();
+
+    //     DeleteRatingModal.show(rating);
+
+    // };
 
     vm.canBeActivated = function(rating){
         var type = rating.type;
