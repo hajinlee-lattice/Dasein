@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
@@ -24,15 +26,33 @@ import org.testng.annotations.Test;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_4;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_NETFLIX_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.*;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDomainCountry;
@@ -66,6 +86,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     private static final String SEED_ID_3 = "seed_3";
     private static final String SEED_ID_4 = "seed_4"; // not exists
     private static final String SEED_ID_5 = "seed_5"; // not exists
+    private static final String ASSOCIATION_SEED_ID = "entity_association_seed_id";
+    private static final String ANOTHER_SEED_ID = "another_seed_id";
     private static final List<String> SEED_IDS = Arrays.asList(SEED_ID_1, SEED_ID_2, SEED_ID_3, SEED_ID_4, SEED_ID_5);
     private static final EntityRawSeed TEST_SEED_1 = newSeed(SEED_ID_1, "sfdc_1", "google.com");
     private static final EntityRawSeed TEST_SEED_2 = newSeed(SEED_ID_2, null, "fb.com", "abc.com");
@@ -231,11 +253,237 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         cleanupSeedAndLookup(env, seedId);
     }
 
+    /**
+     * Test association in detail (check actual seed & lookup entry set in staging)
+     *
+     * @param currSeed the seed that is currently in staging
+     * @param currLookupMappings lookup entries that are currently in staging
+     * @param seedToAssociate seed object that we want to associate to the current seed
+     * @param finalSeed expected final state of the seed
+     * @param entriesFailedToAssociate set of lookup entries that failed to associate with the seed
+     * @param entriesFailedToSetLookup set of lookup entries that have no conflict with the seed content
+     *                                 but not able to map to the seed
+     */
+    @Test(groups = "functional", dataProvider = "entityAssociation")
+    private void testAssociationDetail(
+            EntityRawSeed currSeed, @NotNull List<Pair<EntityLookupEntry, String>> currLookupMappings,
+            @NotNull EntityRawSeed seedToAssociate, @NotNull EntityRawSeed finalSeed,
+            @NotNull Set<EntityLookupEntry> entriesFailedToAssociate,
+            @NotNull Set<EntityLookupEntry> entriesFailedToSetLookup) throws Exception {
+        Assert.assertNotNull(seedToAssociate);
+        String seedId = seedToAssociate.getId();
+        String entity = seedToAssociate.getEntity();
+        // association happens in staging
+        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
+        // cleanup
+        entityRawSeedService.delete(env, TEST_TENANT, entity, seedId);
+        // prepare current state
+        if (currSeed != null) {
+            entityRawSeedService.setIfNotExists(env, TEST_TENANT, currSeed);
+        }
+        entityLookupEntryService.set(env, TEST_TENANT, currLookupMappings);
+
+        Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
+                entityMatchInternalService.associate(TEST_TENANT, seedToAssociate);
+        Assert.assertNotNull(result);
+        // currently, we only return updated old attribute, so no equals current seed
+        Assert.assertNotNull(result.getLeft());
+        Assert.assertNotNull(result.getMiddle());
+        Assert.assertNotNull(result.getRight());
+        Assert.assertEquals(new HashSet<>(result.getMiddle()), entriesFailedToAssociate);
+        Assert.assertEquals(new HashSet<>(result.getRight()), entriesFailedToSetLookup);
+
+        // just in case
+        Thread.sleep(1000L);
+
+        // verify final state
+        EntityRawSeed seedAfterAssociation = entityRawSeedService.get(env, TEST_TENANT, entity, seedId);
+        Assert.assertTrue(equalsDisregardPriority(seedAfterAssociation, finalSeed));
+        // check x to one lookup entries in seed that does not failed to set lookup
+        List<EntityLookupEntry> manyToXEntries = seedAfterAssociation.getLookupEntries()
+                .stream()
+                .filter(entry -> !result.getRight().contains(entry))
+                .filter(entry -> entry.getType().mapping != EntityLookupEntry.Mapping.MANY_TO_MANY)
+                .collect(Collectors.toList());
+        List<String> seedIdsForEntriesInSeed = entityLookupEntryService
+                .get(env, TEST_TENANT, manyToXEntries);
+        Assert.assertNotNull(seedIdsForEntriesInSeed);
+        Assert.assertEquals(seedIdsForEntriesInSeed.size(), manyToXEntries.size());
+        // make sure the mapped seed ID is correct
+        seedIdsForEntriesInSeed.forEach(id -> Assert.assertEquals(id, seedId));
+
+        // check lookup entries failed to set lookup
+        List<String> seedIdsForEntriesFailedToSetLookup = entityLookupEntryService
+                .get(env, TEST_TENANT, new ArrayList<>(result.getRight()));
+        Assert.assertNotNull(seedIdsForEntriesFailedToSetLookup);
+        Assert.assertEquals(seedIdsForEntriesFailedToSetLookup.size(), entriesFailedToSetLookup.size());
+        // should not mapped to the seed we try to associate
+        seedIdsForEntriesFailedToSetLookup.forEach(id -> Assert.assertNotEquals(id, seedId));
+
+        // cleanup both seed & entries
+        entityRawSeedService.delete(env, TEST_TENANT, entity, seedId);
+        currLookupMappings.forEach(pair -> entityLookupEntryService.delete(env, TEST_TENANT, pair.getKey()));
+    }
+
     // [ nAllocations, nThreads ]
     @DataProvider(name = "entityIdAllocation")
     private Object[][] provideEntityIdAllocationTests() {
         return new Object[][] {
                 { 50, 10 },
+        };
+    }
+
+    @DataProvider(name = "entityAssociation")
+    private Object[][] provideEntityAssociationTestData() {
+        return new Object[][] {
+                /*
+                 * conflict with DUNS
+                 */
+                {
+                        // already has DUNS in seed
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_1),
+                        Collections.singletonList(Pair.of(DUNS_1, ASSOCIATION_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_2),
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_1),
+                        Sets.newHashSet(DUNS_2),
+                        Sets.newHashSet(),
+                },
+                {
+                        // no DUNS in seed
+                        // the DUNS we try to associate already mapped to another seed
+                        fromEntries(ASSOCIATION_SEED_ID),
+                        Collections.singletonList(Pair.of(DUNS_2, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_2),
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_2),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(DUNS_2),
+                },
+                {
+                        // already has DUNS in seed
+                        // the DUNS we try to associate already mapped to another seed
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_1),
+                        Arrays.asList(Pair.of(DUNS_1, ASSOCIATION_SEED_ID), Pair.of(DUNS_2, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_2),
+                        fromEntries(ASSOCIATION_SEED_ID, DUNS_1),
+                        Sets.newHashSet(DUNS_2), // failed to associate, not try to set lookup
+                        Sets.newHashSet(),
+                },
+                /*
+                 * conflict with external system
+                 */
+                {
+                        fromEntries(ASSOCIATION_SEED_ID),
+                        Collections.singletonList(Pair.of(SFDC_1, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1),
+                        fromEntries(ASSOCIATION_SEED_ID), // SFDC_1 should be cleared in seed
+                        Sets.newHashSet(),
+                        Sets.newHashSet(SFDC_1),
+                },
+                {
+                        // already has another ID in the same system
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_2),
+                        Collections.singletonList(Pair.of(SFDC_2, ASSOCIATION_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_2), // SFDC_1 not be in the seed
+                        Sets.newHashSet(SFDC_1), // failed to associate SFDC_1, not even trying to set lookup
+                        Sets.newHashSet(),
+                },
+                {
+                        // already has another ID in the same system
+                        // system ID we want to associate already mapped to another seed
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_2),
+                        Arrays.asList(Pair.of(SFDC_1, ANOTHER_SEED_ID), Pair.of(SFDC_2, ASSOCIATION_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_2), // SFDC_1 not be in the seed
+                        Sets.newHashSet(SFDC_1), // failed to associate SFDC_1, not even trying to set lookup
+                        Sets.newHashSet(),
+                },
+                /*
+                 * conflict with domain/country & name/country (only possible in lookup)
+                 */
+                {
+                        // name/country
+                        fromEntries(ASSOCIATION_SEED_ID),
+                        Collections.singletonList(Pair.of(NC_GOOGLE_1, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, NC_GOOGLE_1),
+                        // association to seed still succeeded since the mapping is many to many
+                        fromEntries(ASSOCIATION_SEED_ID, NC_GOOGLE_1),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(NC_GOOGLE_1), // failed to set lookup since it already mapped to another ID
+                },
+                {
+                        // domain/country
+                        fromEntries(ASSOCIATION_SEED_ID),
+                        Collections.singletonList(Pair.of(DC_FACEBOOK_1, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, DC_FACEBOOK_1),
+                        // association to seed still succeeded since the mapping is many to many
+                        fromEntries(ASSOCIATION_SEED_ID, DC_FACEBOOK_1),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(DC_FACEBOOK_1), // failed to set lookup since it already mapped to another ID
+                },
+                {
+                        // name/country, no conflict with other entries in current seed
+                        fromEntries(ASSOCIATION_SEED_ID, NC_GOOGLE_2, NC_GOOGLE_3),
+                        Collections.singletonList(Pair.of(NC_GOOGLE_1, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, NC_GOOGLE_1),
+                        // association to seed still succeeded since the mapping is many to many
+                        fromEntries(ASSOCIATION_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_GOOGLE_3),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(NC_GOOGLE_1), // failed to set lookup since it already mapped to another ID
+                },
+                {
+                        // domain/country, no conflict with other entries in current seed
+                        fromEntries(ASSOCIATION_SEED_ID, DC_FACEBOOK_2),
+                        Collections.singletonList(Pair.of(DC_FACEBOOK_1, ANOTHER_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, DC_FACEBOOK_1),
+                        // association to seed still succeeded since the mapping is many to many
+                        fromEntries(ASSOCIATION_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(DC_FACEBOOK_1), // failed to set lookup since it already mapped to another ID
+                },
+                /*
+                 * no conflict
+                 */
+                {
+                        // SFDC_1 is set since it already maps to the same seed, no error
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1),
+                        Collections.singletonList(Pair.of(SFDC_1, ASSOCIATION_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(),
+                },
+                {
+                        // update different lookup entry types with the same value
+                        fromEntries(ASSOCIATION_SEED_ID, DC_GOOGLE_1, DC_GOOGLE_2,
+                                NC_NETFLIX_2, DUNS_1, MKTO_1, ELOQUA_4),
+                        Arrays.asList(
+                                Pair.of(DC_GOOGLE_1, ASSOCIATION_SEED_ID),
+                                Pair.of(DC_GOOGLE_2, ASSOCIATION_SEED_ID),
+                                Pair.of(NC_NETFLIX_2, ASSOCIATION_SEED_ID),
+                                Pair.of(MKTO_1, ASSOCIATION_SEED_ID),
+                                Pair.of(ELOQUA_4, ASSOCIATION_SEED_ID),
+                                Pair.of(DUNS_1, ASSOCIATION_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, DC_GOOGLE_1, NC_NETFLIX_2, DUNS_1, MKTO_1, ELOQUA_4),
+                        fromEntries(ASSOCIATION_SEED_ID,
+                                DC_GOOGLE_1, NC_NETFLIX_2, DUNS_1, MKTO_1, DC_GOOGLE_2, ELOQUA_4),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(),
+                },
+                {
+                        // happy path
+                        fromEntries(ASSOCIATION_SEED_ID, DC_GOOGLE_1, DC_GOOGLE_2, NC_NETFLIX_2, DUNS_1),
+                        Arrays.asList(
+                                Pair.of(DC_GOOGLE_1, ASSOCIATION_SEED_ID),
+                                Pair.of(DC_GOOGLE_2, ASSOCIATION_SEED_ID),
+                                Pair.of(NC_NETFLIX_2, ASSOCIATION_SEED_ID),
+                                Pair.of(DUNS_1, ASSOCIATION_SEED_ID)),
+                        fromEntries(ASSOCIATION_SEED_ID, SFDC_1, MKTO_1, ELOQUA_3),
+                        fromEntries(ASSOCIATION_SEED_ID,
+                                DC_GOOGLE_1, DC_GOOGLE_2, NC_NETFLIX_2, DUNS_1, SFDC_1, MKTO_1, ELOQUA_3),
+                        Sets.newHashSet(),
+                        Sets.newHashSet(),
+                },
         };
     }
 
@@ -313,6 +561,13 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
             }
         }
         Assert.fail(String.format("Max wait times (%d) for background lookup entries exceeded", MAX_WAIT_TIMES));
+    }
+
+    /*
+     * wrapper to make function call shorter
+     */
+    private static EntityRawSeed fromEntries(String seedId, EntityLookupEntry... entries) {
+        return TestEntityMatchUtils.newSeed(seedId, entries);
     }
 
     private static EntityRawSeed newSeed(String seedId, String sfdcId, String... domains) {
