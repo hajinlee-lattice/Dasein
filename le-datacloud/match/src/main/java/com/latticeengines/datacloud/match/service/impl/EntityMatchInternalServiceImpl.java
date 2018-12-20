@@ -35,6 +35,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,13 +48,11 @@ import static java.util.stream.Collectors.toSet;
 public class EntityMatchInternalServiceImpl implements EntityMatchInternalService {
     private static final Logger log = LoggerFactory.getLogger(EntityMatchInternalServiceImpl.class);
 
-    /*
-     * TODO unit test intermediate functions
-     */
-
     private static final String LOOKUP_BACKGROUND_THREAD_NAME = "entity-match-internal";
     private static final int ENTITY_ID_LENGTH = 16;
     private static final int MAX_ID_ALLOCATION_ATTEMPTS = 50;
+    // make the probability even for all characters since we want to have case insensitive ID
+    private static final char[] ENTITY_ID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     // TODO move this to property file or config service after the mechanism is finalized
     private static final int NUM_LOOKUP_BACKGROUND_THREADS = 3;
@@ -82,6 +81,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private volatile Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> seedCache;
 
     private BlockingQueue<Triple<Tenant, EntityLookupEntry, String>> lookupQueue = new LinkedBlockingQueue<>();
+    private AtomicLong nProcessingLookupEntries = new AtomicLong(0L);
     private volatile ExecutorService lookupExecutorService; // thread pool for populating lookup staging table
 
     @Inject
@@ -182,7 +182,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs =
                 getExistingLookupPairs(seedBeforeUpdate);
         Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs, seed);
-        List<EntityLookupEntry> entriesFailedToSetLookup = mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed);
+        List<EntityLookupEntry> entriesFailedToSetLookup =
+                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed);
 
         // clear one to one entries in seed that we failed to set in the lookup table
         List<EntityLookupEntry> entriesToClear = entriesFailedToSetLookup
@@ -215,6 +216,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @VisibleForTesting
     Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> getSeedCache() {
         return seedCache;
+    }
+
+    @VisibleForTesting
+    long getProcessingLookupEntriesCount() {
+        return nProcessingLookupEntries.get();
     }
 
     /*
@@ -251,9 +257,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     /*
+     * TODO unit test this
      * get all entries that (a) is one to one and (b) already has a different value in current seed
      */
-    private Set<EntityLookupEntry> getLookupEntriesFailedToAssociate(
+    @VisibleForTesting
+    protected Set<EntityLookupEntry> getLookupEntriesFailedToAssociate(
             @NotNull Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs,
             @NotNull EntityRawSeed seed) {
         return seed
@@ -275,7 +283,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * update lookup entries that need to be mapped to the seed and
      * return all entries that already mapped to another seed
      */
-    private List<EntityLookupEntry> mapLookupEntriesToSeed(
+    @VisibleForTesting
+    protected List<EntityLookupEntry> mapLookupEntriesToSeed(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs,
             @NotNull EntityRawSeed seed) {
@@ -352,6 +361,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // NOTE we can publish lookup entry asynchronously because we will not try to update
         //      lookup entry that is already in serving
 
+        // increase # of processing entries
+        nProcessingLookupEntries.addAndGet(missingResults.size());
         // populate missing seed IDs to staging layer (async, batch)
         missingResults
                 .entrySet()
@@ -516,8 +527,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * random an entity ID (return in lowercase)
      */
     private String newId() {
-        // TODO make the probability even for all characters
-        return RandomStringUtils.randomAlphanumeric(ENTITY_ID_LENGTH).toLowerCase();
+        return RandomStringUtils.random(ENTITY_ID_LENGTH, ENTITY_ID_CHARS);
     }
 
     private void check(@NotNull Tenant tenant, @NotNull List<?> list) {
@@ -674,6 +684,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     // triple == null means timeout
                     if (triple == null || total >= LOOKUP_BATCH_SIZE) {
                         populate(batches);
+                        // finishes total entries, decrease the same amount in processing entries counter
+                        nProcessingLookupEntries.addAndGet(-total);
                         // clear populated batches
                         total = 0;
                         batches.clear();

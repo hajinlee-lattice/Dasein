@@ -39,6 +39,8 @@ import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLoo
 
 public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
+    private static final long WAIT_INTERVAL = 500L;
+    private static final int MAX_WAIT_TIMES = 60; // 30s
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
@@ -100,7 +102,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     }
 
     @Test(groups = "functional")
-    private void testLookupSeedBulkMode() {
+    private void testLookupSeedBulkMode() throws Exception {
         entityMatchInternalService.setRealTimeMode(false);
         cleanup(TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
 
@@ -110,10 +112,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Assert.assertNotNull(seedIds);
         Assert.assertEquals(seedIds.size(), TEST_ENTRIES.size());
         // only entry 1 & 3 are set to serving
-        Assert.assertEquals(seedIds.get(0), SEED_ID_FOR_LOOKUP);
-        Assert.assertEquals(seedIds.get(2), SEED_ID_FOR_LOOKUP);
-        Assert.assertNull(seedIds.get(1));
-        Assert.assertNull(seedIds.get(3));
+        Assert.assertEquals(seedIds, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
 
         // check in-memory cache
         Cache<Pair<Long, EntityLookupEntry>, String> lookupCache = entityMatchInternalService.getLookupCache();
@@ -125,7 +124,12 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // clean cache
         lookupCache.invalidateAll();
 
-        // TODO check staging (currently its async update so need some work to check)
+        // check staging (async update)
+        waitForAllLookupEntriesPopulated();
+        List<String> seedIdsInStaging = entityLookupEntryService.get(
+                EntityMatchEnvironment.STAGING, TEST_TENANT, TEST_ENTRIES);
+        // only entry 1 & 3 are set to serving
+        Assert.assertEquals(seedIdsInStaging, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
     }
 
     @Test(groups = "functional")
@@ -294,6 +298,21 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 Assert.assertEquals(seeds.get(idx).getId(), expectedIds[idx]);
             }
         });
+    }
+
+    private void waitForAllLookupEntriesPopulated() {
+        for (int i = 0; i < MAX_WAIT_TIMES; i++) {
+            try {
+                Thread.sleep(WAIT_INTERVAL);
+            } catch (Exception e) {
+                Assert.fail("Failed to wait for all background lookup entries to be populated", e);
+            }
+
+            if (entityMatchInternalService.getProcessingLookupEntriesCount() == 0L) {
+                return;
+            }
+        }
+        Assert.fail(String.format("Max wait times (%d) for background lookup entries exceeded", MAX_WAIT_TIMES));
     }
 
     private static EntityRawSeed newSeed(String seedId, String sfdcId, String... domains) {
