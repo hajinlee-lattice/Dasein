@@ -280,7 +280,6 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     /*
-     * TODO unit test this
      * update lookup entries that need to be mapped to the seed and
      * return all entries that already mapped to another seed
      */
@@ -295,13 +294,14 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     // get all lookup entry that need to mapped to seed ID
                     Pair<EntityLookupEntry.Type, String> key = Pair.of(entry.getType(), entry.getSerializedKeys());
                     EntityLookupEntry.Mapping mapping = entry.getType().mapping;
-                    if (mapping == EntityLookupEntry.Mapping.ONE_TO_ONE) {
-                        // if mapping is 1 to 1, when key is in existing seed, either
+                    if (mapping == EntityLookupEntry.Mapping.ONE_TO_ONE
+                            || mapping == EntityLookupEntry.Mapping.MANY_TO_ONE) {
+                        // if mapping is x to 1, when key is in existing seed, either
                         //  (a) already have other value, cannot update
                         //  (b) have the same value, no need to update
                         return !existingLookupPairs.containsKey(key);
                     } else {
-                        // if mapping is many to X, only need to update if we don't have the exact lookup entry
+                        // if mapping is many to many, only need to update if we don't have the exact lookup entry
                         return !existingLookupPairs.containsKey(key)
                                 || !existingLookupPairs.get(key).contains(entry.getSerializedValues());
                     }

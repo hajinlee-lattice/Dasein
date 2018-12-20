@@ -2,15 +2,20 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import org.apache.commons.lang3.tuple.Pair;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_NETFLIX_2;
@@ -32,17 +37,16 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_4;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
+import static org.mockito.ArgumentMatchers.any;
 
 public class EntityMatchInternalServiceImplUnitTestNG {
     private static final String TGEFA_SEED_ID = "testGetLookupEntriesFailedToAssociate";
+    private static final String MLES_SEED_ID = "testMapLookupEntriesToSeed";
 
     @Test(groups = "unit", dataProvider = "getLookupEntriesFailedToAssociate")
     private void testGetLookupEntriesFailedToAssociate(
             @NotNull EntityRawSeed currentState, @NotNull EntityRawSeed seedToAssociate,
             @NotNull Set<EntityLookupEntry> expectedLookupEntries) {
-        Assert.assertNotNull(currentState);
-        Assert.assertNotNull(seedToAssociate);
-        Assert.assertNotNull(expectedLookupEntries);
         EntityMatchInternalServiceImpl service = newService();
         Assert.assertNotNull(service);
 
@@ -51,6 +55,29 @@ public class EntityMatchInternalServiceImplUnitTestNG {
         Assert.assertNotNull(existingLookupPairs);
         Set<EntityLookupEntry> result = service.getLookupEntriesFailedToAssociate(existingLookupPairs, seedToAssociate);
         Assert.assertEquals(result, expectedLookupEntries);
+    }
+
+    @Test(groups = "unit", dataProvider = "mapLookupEntriesToSeed")
+    private void testMapLookupEntriesToSeed(
+            @NotNull EntityRawSeed currentState, @NotNull EntityRawSeed seedToAssociate,
+            @NotNull Set<EntityLookupEntry> expectedLookupEntriesToUpdate) {
+        // map to store params to EntityLookupEntryService#setIfEquals
+        Map<EntityLookupEntry, String> entrySeedIdMap = new HashMap<>();
+        // mock entity lookup entry service
+        EntityMatchInternalServiceImpl service = newService(entrySeedIdMap);
+
+
+        Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs =
+                service.getExistingLookupPairs(currentState);
+        Assert.assertNotNull(existingLookupPairs);
+        List<EntityLookupEntry> result = service.mapLookupEntriesToSeed(
+                null, null, existingLookupPairs, seedToAssociate);
+        Assert.assertNotNull(result);
+        Map<EntityLookupEntry, String> expectedMap = expectedLookupEntriesToUpdate
+                .stream()
+                .map(entry -> Pair.of(entry, seedToAssociate.getId()))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        Assert.assertEquals(entrySeedIdMap, expectedMap);
     }
 
     @DataProvider(name = "getLookupEntriesFailedToAssociate")
@@ -131,6 +158,107 @@ public class EntityMatchInternalServiceImplUnitTestNG {
                         Sets.newHashSet(MKTO_1, ELOQUA_1, DUNS_5)
                 },
         };
+    }
+
+    /*
+     * NOTE the expected set is not exactly the complement of getLookupEntriesFailedToAssociate because
+     *      some of the entries already exist in seed and no need to update
+     * NOTE no need to set mapping for entries that has conflict or already exist in seed
+     */
+    @DataProvider(name = "mapLookupEntriesToSeed")
+    private Object[][] provideMapLookupEntriesToSeedTestData() {
+        return new Object[][] {
+                /*
+                 * Case #1: no entries failed to associate
+                 */
+                {
+                        newSeed(MLES_SEED_ID, new EntityLookupEntry[0]),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1),
+                        Sets.newHashSet(NC_FACEBOOK_1, NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1)
+                },
+                {
+                        // NC_FACEBOOK_1 already exists in current seed, no need to set lookup entry
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, NC_FACEBOOK_2, DUNS_1),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1),
+                        Sets.newHashSet(NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1)
+                },
+                {
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_5, MKTO_3, DUNS_1),
+                        newSeed(MLES_SEED_ID, DC_NETFLIX_2, NC_FACEBOOK_3, NC_FACEBOOK_1, ELOQUA_3),
+                        Sets.newHashSet(DC_NETFLIX_2, NC_FACEBOOK_3, ELOQUA_3)
+                },
+                {
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2),
+                        newSeed(MLES_SEED_ID, DC_NETFLIX_2, NC_FACEBOOK_3, NC_FACEBOOK_1, DUNS_5),
+                        Sets.newHashSet(DC_NETFLIX_2, NC_FACEBOOK_3, DUNS_5)
+                },
+                {
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_4),
+                        Sets.newHashSet(DUNS_4)
+                },
+                {
+                        newSeed(MLES_SEED_ID, DUNS_4),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_4),
+                        Sets.newHashSet(NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2)
+                },
+                /*
+                 * Case #2: conflict in DUNS
+                 */
+                {
+                        // no need to set lookup mapping for conflict DUNS
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_3),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_4),
+                        Sets.newHashSet()
+                },
+                {
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, NC_FACEBOOK_2, DUNS_1),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1, DUNS_3),
+                        Sets.newHashSet(NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1)
+                },
+                {
+                        // NC_FACEBOOK_1 already exists, DUNS_5 has conflict
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_2),
+                        newSeed(MLES_SEED_ID, DC_NETFLIX_2, NC_FACEBOOK_3, NC_FACEBOOK_1, DUNS_5),
+                        Sets.newHashSet(DC_NETFLIX_2, NC_FACEBOOK_3)
+                },
+                /*
+                 * Case #3: conflict in external systems
+                 */
+                {
+                        // MKTO_1, ELOQUA_1 has conflict, SFDC_4 already exists
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_3),
+                        newSeed(MLES_SEED_ID, MKTO_1, SFDC_4, ELOQUA_1),
+                        Sets.newHashSet()
+                },
+                {
+                        // SFDC_1 has conflict
+                        newSeed(MLES_SEED_ID, SFDC_5),
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, NC_FACEBOOK_3, DC_GOOGLE_1, SFDC_1, MKTO_1),
+                        Sets.newHashSet(NC_FACEBOOK_1, NC_FACEBOOK_3, DC_GOOGLE_1, MKTO_1)
+                },
+                /*
+                 * Case #4: conflict in both DUNS & external systems
+                 */
+                {
+                        // MKTO_1, ELOQUA_1, DUNS_5 has conflict, SFDC_4 already exists
+                        newSeed(MLES_SEED_ID, NC_FACEBOOK_1, SFDC_4, MKTO_2, ELOQUA_2, DUNS_3),
+                        newSeed(MLES_SEED_ID, MKTO_1, SFDC_4, ELOQUA_1, DUNS_5),
+                        Sets.newHashSet()
+                },
+        };
+    }
+
+    private EntityMatchInternalServiceImpl newService(@NotNull Map<EntityLookupEntry, String> paramMap) {
+        EntityLookupEntryService lookupEntryService = Mockito.mock(EntityLookupEntryService.class);
+        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any())).thenAnswer(invocation -> {
+            EntityLookupEntry entry = invocation.getArgument(2);
+            String seedId = invocation.getArgument(3);
+            paramMap.put(entry, seedId);
+            // result doesn't matter
+            return true;
+        });
+        return new EntityMatchInternalServiceImpl(lookupEntryService, null, null);
     }
 
     /*
