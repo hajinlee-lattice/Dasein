@@ -80,4 +80,14 @@ public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<Collecti
         List<CollectionWorker> resultList = collectionWorkerRepository.findByStatusInAndVendor(statusList, vendor);
         return resultList.size();
     }
+
+    @Override
+    public void cleanupWorkerBetween(Timestamp start, Timestamp end) {
+        collectionWorkerRepository.removeBySpawnTimeBetween(start, end);
+    }
+
+    @Override
+    public List<CollectionWorker> getWorkerBySpawnTimeBetween(Timestamp start, Timestamp end) {
+        return collectionWorkerRepository.findBySpawnTimeBetween(start, end);
+    }
 }

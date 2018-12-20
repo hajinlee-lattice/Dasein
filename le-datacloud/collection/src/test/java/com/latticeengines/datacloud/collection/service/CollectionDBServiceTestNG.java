@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +31,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 @DirtiesContext
 @ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})
@@ -43,8 +47,24 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     @Inject
     private CollectionDBService collectionDBService;
 
+    @Inject
+    private CollectionWorkerService collectionWorkerService;
     @Value("${datacloud.collection.test.domains}")
     private String testDomains;
+    private Timestamp start;
+    private Timestamp end;
+
+    @BeforeMethod(groups = "functional")
+    public void beforeMethod() {
+        start = new Timestamp(System.currentTimeMillis() - 1000);
+    }
+
+    @AfterMethod(groups = "functional")
+    public void afterMethod() {
+        end = new Timestamp(System.currentTimeMillis());
+        log.info("start clean up data records ");
+        collectionDBService.cleanup(start, end);
+    }
 
     private List<String> loadDomains(String path) throws Exception
     {
@@ -74,7 +94,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test(groups = "load_test")
+    @Test(groups = "functional")
     public void testLoad() throws Exception {
 
         List<String> pathSet = Arrays.asList(
@@ -93,7 +113,8 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         long lastTriggered = 0;
         int domainIdx = 0;
         long coolDownPeriod = TimeUnit.MINUTES.toMillis(10); // 10 min
-        while (true)
+        boolean finished = false;
+        while (!finished)
         {
 
             long curMillis = System.currentTimeMillis();
@@ -109,41 +130,34 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
                 domainIdx = (domainIdx + 1) % domainLists.size();
 
             }
-
-            collectionDBService.collect();
-
+            finished = collectionDBService.collect();
             Thread.sleep(15 * 1000);
-
         }
 
+        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
+                new Timestamp(System.currentTimeMillis()));
+        Assert.assertNotNull(workers);
     }
 
-    @Test(groups = "normal_test")
+    @Test(groups = "functional")
     public void testCollectionDBService() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
         collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
-
-
-        while (true)
-        {
-
-            collectionDBService.collect();
-
+        boolean finished = false;
+        while (!finished) {
+            finished = collectionDBService.collect();
             Thread.sleep(15000);
-
         }
 
-    }
-
-    @Test(groups = "ingestion_unit_test")
-    public void testIngestionUnit() {
-
         collectionDBService.ingest();
+        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
+                new Timestamp(System.currentTimeMillis()));
+        Assert.assertNotNull(workers);
 
     }
 
-    @Test(groups = "avro_avsc")
+    @Test(groups = "functional")
     public void testAvroSchema() throws Exception {
         String schemaStr = AvroUtils.buildSchema("builtwith.avsc");
         Assert.assertNotNull(schemaStr);
@@ -157,7 +171,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test(groups = "avro_test")
+    @Test(groups = "functional", enabled = false)
     public void testAvro() throws Exception {
 
         String schemaStr = AvroUtils.buildSchema("builtwith.avsc");
@@ -175,7 +189,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
         List<Schema.Field> fields = schema.getFields();
 
-        InputStream istream = Thread.currentThread().getContextClassLoader().getResourceAsStream("./part-00001.csv");
+        InputStream istream = Thread.currentThread().getContextClassLoader().getResourceAsStream("./part-00000.csv");
         //FileInputStream istream = new FileInputStream("./part-00000.csv");
         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
                 .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);

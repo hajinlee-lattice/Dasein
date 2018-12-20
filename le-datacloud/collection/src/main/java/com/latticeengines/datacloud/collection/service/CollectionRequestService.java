@@ -23,4 +23,5 @@ public interface CollectionRequestService {
 
     List<CollectionRequest> getReady(String vendor, int upperLimit);
 
+    void cleanupRequestsBetween(Timestamp start, Timestamp end);
 }

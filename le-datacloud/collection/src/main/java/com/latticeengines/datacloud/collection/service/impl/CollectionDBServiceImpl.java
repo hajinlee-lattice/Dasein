@@ -562,8 +562,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    public void collect() {
-
+    public boolean collect() {
         if (prevCollectMillis == 0) {
 
             log.info("datacloud collection job starts...");
@@ -571,9 +570,11 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
         long currentMillis = System.currentTimeMillis();
 
+        boolean finished = true;
+        int activeTasks = 0;
         try {
 
-            int activeTasks = getActiveTaskCount();
+            activeTasks = getActiveTaskCount();
             if (prevCollectMillis == 0 ||
                     prevCollectTasks != activeTasks ||
                     currentMillis - prevCollectMillis >= 3600 * 1000) {
@@ -586,32 +587,30 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             int reqs = transferRawRequests(true);
             if (reqs > 0) {
-
                 log.info(reqs + " requests transferred from raw requests to collection requests");
-
+                finished = false;
             }
             Thread.sleep(LATENCY_GAP_MS);
 
             int newTasks = spawnCollectionWorker();
             activeTasks += newTasks;
             if (newTasks > 0) {
-
                 log.info(newTasks + " new collection workers spawned, active tasks => " + activeTasks);
-
+                finished = false;
             }
             Thread.sleep(LATENCY_GAP_MS);
 
             int stoppedTasks = updateCollectingStatus();
             activeTasks -= stoppedTasks;
             if (stoppedTasks > 0) {
-
                 log.info(stoppedTasks + " tasks stopped, active tasks => " + activeTasks);
-
+                finished = false;
             }
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        return activeTasks == 0 && finished;
 
     }
 
@@ -1026,5 +1025,24 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         return CollectionUtils.size(consumedWorkers);
 
+    }
+
+    @Override
+    public void cleanup(Timestamp start, Timestamp end) {
+        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start, end);
+
+        // clean up the input and output csv
+        for (CollectionWorker worker : workers) {
+            String prefix = s3BucketPrefix + worker.getWorkerId();
+            s3Service.cleanupPrefix(s3Bucket, prefix);
+        }
+        for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
+            String ingestionPrefix = S3PathBuilder.constructIngestionDir(vendor + "_RAW").toString();
+            s3Service.cleanupPrefixByDateBetween(s3Bucket, ingestionPrefix, start, end);
+        }
+
+        rawCollectionRequestService.cleanupRequestsBetween(start, end);
+        collectionRequestService.cleanupRequestsBetween(start, end);
+        collectionWorkerService.cleanupWorkerBetween(start, end);
     }
 }

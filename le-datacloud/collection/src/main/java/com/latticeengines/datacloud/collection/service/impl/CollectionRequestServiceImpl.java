@@ -428,4 +428,9 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
     }
 
+    @Override
+    public void cleanupRequestsBetween(Timestamp start, Timestamp end) {
+        collectionRequestMgr.cleanupRequestBetween(start, end);
+    }
+
 }

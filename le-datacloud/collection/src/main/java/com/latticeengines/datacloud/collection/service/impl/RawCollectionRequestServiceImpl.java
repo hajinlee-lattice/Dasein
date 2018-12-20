@@ -167,4 +167,9 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     }
 
+    @Override
+    public void cleanupRequestsBetween(Timestamp start, Timestamp end) {
+        rawCollectionRequestMgr.cleanupRequestsBetween(start, end);
+    }
+
 }

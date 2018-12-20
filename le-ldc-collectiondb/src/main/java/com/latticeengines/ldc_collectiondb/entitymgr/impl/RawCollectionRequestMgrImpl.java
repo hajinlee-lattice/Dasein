@@ -61,4 +61,9 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
         }
 
     }
+
+    @Override
+    public void cleanupRequestsBetween(Timestamp start, Timestamp end) {
+        repository.removeByRequestedTimeBetween(start, end);
+    }
 }

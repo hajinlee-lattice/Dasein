@@ -16,4 +16,8 @@ public interface CollectionWorkerService {
 
     List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after);
 
+    void cleanupWorkerBetween(Timestamp start, Timestamp end);
+
+    List<CollectionWorker> getWorkerBySpawnTimeBetween(Timestamp start, Timestamp end);
+
 }

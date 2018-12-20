@@ -1,5 +1,6 @@
 package com.latticeengines.ldc_collectiondb.entitymgr;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
@@ -12,4 +13,6 @@ public interface RawCollectionRequestMgr extends BaseEntityMgrRepository<RawColl
     void saveRequests(Iterable<RawCollectionRequest> reqs);
 
     void saveDomains(Iterable<String> domains, String reqId);
+
+    void cleanupRequestsBetween(Timestamp start, Timestamp end);
 }

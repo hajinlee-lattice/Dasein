@@ -18,4 +18,8 @@ public interface CollectionWorkerMgr extends BaseEntityMgrRepository<CollectionW
 
     int getActiveWorkerCount(String vendor);
 
+    void cleanupWorkerBetween(Timestamp start, Timestamp end);
+
+    List<CollectionWorker> getWorkerBySpawnTimeBetween(Timestamp start, Timestamp end);
+
 }

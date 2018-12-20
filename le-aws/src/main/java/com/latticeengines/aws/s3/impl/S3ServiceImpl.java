@@ -103,6 +103,19 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public void cleanupPrefixByDateBetween(String bucket, String prefix, Date start, Date end) {
+        prefix = sanitizePathToKey(prefix);
+        List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
+        log.info("Deleting s3 objects under " + prefix + " from " + bucket + "between " + start + " and " + end);
+        for (S3ObjectSummary summary : objects) {
+            if (summary.getLastModified().before(end) && summary.getLastModified().after(start)) {
+                s3Client.deleteObject(bucket, summary.getKey());
+            }
+        }
+        // s3Client.deleteObject(bucket, prefix);
+    }
+
+    @Override
     public void cleanupPrefixByPattern(String bucket, String prefix, String pattern) {
         prefix = sanitizePathToKey(prefix);
         List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();

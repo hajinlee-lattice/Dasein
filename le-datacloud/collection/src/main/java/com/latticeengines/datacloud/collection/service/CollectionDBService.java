@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.collection.service;
 
+import java.sql.Timestamp;
 import java.util.List;
+
 
 public interface CollectionDBService {
     //int transferRawRequests(boolean deleteFilteredReqs);
@@ -13,9 +15,11 @@ public interface CollectionDBService {
 
     int getActiveTaskCount();
 
-    void collect();
+    boolean collect();
 
     int getIngestionTaskCount();
 
     void ingest();
+
+    void cleanup(Timestamp start, Timestamp end);
 }

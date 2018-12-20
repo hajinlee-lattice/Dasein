@@ -61,4 +61,15 @@ public class CollectionWorkerServiceImpl implements CollectionWorkerService {
         return collectionWorkerMgr.getWorkerStopped(vendor, after);
 
     }
+
+    @Override
+    public void cleanupWorkerBetween(Timestamp start, Timestamp end) {
+        collectionWorkerMgr.cleanupWorkerBetween(start, end);
+
+    }
+
+    @Override
+    public List<CollectionWorker> getWorkerBySpawnTimeBetween(Timestamp start, Timestamp end) {
+        return collectionWorkerMgr.getWorkerBySpawnTimeBetween(start, end);
+    }
 }
