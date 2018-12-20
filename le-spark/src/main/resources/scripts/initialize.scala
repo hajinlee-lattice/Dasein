@@ -16,7 +16,14 @@ val spark = SparkSession.builder().appName("SparkSession").getOrCreate()
 val rawInput = mapper.readValue[List[JsonNode]]("{{INPUT}}")
 
 def loadHdfsUnit(unit: JsonNode): DataFrame = {
-  val path = unit.get("Path").asText()
+  var path = unit.get("Path").asText()
+  if (!path.endsWith(".avro")) {
+    if (path.endsWith("/")) {
+      path += "*.avro"
+    } else {
+      path += "/*.avro"
+    }
+  }
   spark.read.format("avro").load("hdfs://" + path)
 }
 

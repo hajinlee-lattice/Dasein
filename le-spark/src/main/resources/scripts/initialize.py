@@ -17,7 +17,13 @@ def load_data_unit(unit):
         raise ValueError("Unsupported storage type %s" % storage)
 
 def load_hdfs_unit(unit):
-    path = "hdfs://%s" % unit['Path']
+    path = unit['Path']
+    if path[-5:] != ".avro":
+        if path[-1] == "/":
+            path += "*.avro"
+        else:
+            path += "/*.avro"
+    path = "hdfs://%s" % path
     return spark.read.format("avro").load(path)
 
 script_targets = json.loads('''{{TARGETS}}''')
