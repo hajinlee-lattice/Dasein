@@ -49,20 +49,22 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     }
 
     @Override
-    protected boolean match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config) {
+    protected Integer match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config) {
         MatchInput input = constructMatchInput(inputAvroPath, config);
         MatchCommand matchCommand = matchProxy.matchBulk(input, HdfsPodContext.getHdfsPodId());
         matchCommand = waitForMatchCommand(matchCommand);
-        return saveResult(matchCommand, outputAvroPath);
+        saveResult(matchCommand, outputAvroPath);
+        return matchCommand.getRowsRequested();
     }
 
     @Override
-    protected boolean match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config) {
+    protected Integer match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config) {
         log.info("Using table schema: " + schema.toString(true));
         MatchInput input = constructMatchInput(inputAvroPath, schema, config);
         MatchCommand matchCommand = matchProxy.matchBulk(input, HdfsPodContext.getHdfsPodId());
         matchCommand = waitForMatchCommand(matchCommand);
-        return saveResult(matchCommand, outputAvroPath);
+        saveResult(matchCommand, outputAvroPath);
+        return matchCommand.getRowsRequested();
     }
 
     private MatchInput constructMatchInput(String avroDir, MatchTransformerConfig config) {
@@ -124,7 +126,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
         return matchCommand;
     }
 
-    private boolean saveResult(MatchCommand matchCommand, String resultDir) {
+    private void saveResult(MatchCommand matchCommand, String resultDir) {
         String rootUid = matchCommand.getRootOperationUid();
         String outputDir = hdfsPathBuilder.constructMatchOutputDir(rootUid).toString();
         try {
@@ -139,8 +141,6 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
             log.info(String.format("Moved %d files from %s to %s", cnt, avroGlobs, resultDir));
         } catch (Exception e) {
             log.error("Failed to save match result", e);
-            return false;
         }
-        return true;
     }
 }

@@ -104,6 +104,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
                 try {
                     configuration = (T) configClass.newInstance();
                 } catch (Exception e) {
+                    // ignored
                 }
             }
         } else {

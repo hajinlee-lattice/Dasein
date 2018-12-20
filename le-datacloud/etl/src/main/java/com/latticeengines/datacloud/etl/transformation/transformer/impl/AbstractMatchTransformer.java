@@ -61,10 +61,11 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
         List<String> baseSourceVersions = step.getBaseVersions();
         String confStr = step.getConfig();
         String sourceDirInHdfs = null;
+        Integer matched;
         if (!(baseSources[0] instanceof TableSource)) {
             sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(baseSources[0],
                     baseSourceVersions.get(0)).toString();
-            return match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
+            matched = match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
         } else {
             TableSource tableSource = (TableSource) baseSources[0];
             Table table = (tableSource).getTable();
@@ -92,12 +93,17 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
                 schema = TableUtils.createSchema("input", table);
             }
 
-            return match(avroDir, schema, workflowDir, getConfiguration(confStr));
+            matched = match(avroDir, schema, workflowDir, getConfiguration(confStr));
         }
-
+        if (matched == null) {
+            return false;
+        } else {
+            step.setCount(matched.longValue());
+            return true;
+        }
     }
 
-    abstract boolean match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config);
+    abstract Integer match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config);
 
-    abstract boolean match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config);
+    abstract Integer match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config);
 }

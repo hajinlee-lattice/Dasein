@@ -181,7 +181,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         try {
             matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
 
-            Long startTime = matchOutput.getReceivedAt().getTime();
+            long startTime = matchOutput.getReceivedAt().getTime();
             matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
 
             try {
@@ -223,7 +223,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     private void setupErrorExport() {
         try {
-            if (AvroUtils.count(yarnConfiguration, matchErrorDir + "/*.avro") <= 0) {
+            if (!AvroUtils.iterator(yarnConfiguration, matchErrorDir + "/*.avro").hasNext()) {
                 putStringValueInContext(SKIP_EXPORT_DATA, "true");
                 return;
             }
