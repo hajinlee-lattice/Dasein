@@ -362,15 +362,12 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.updateTopNCount = function() {
-        //sync issue with vm.counts.accounts, using vm.recommendationCounts.selected instead
-        vm.maxTargetValue = vm.recommendationCounts.total;
+        //sync issue with vm.counts.accounts using vm.recommendationCounts.selected instead
+        vm.maxTargetValue = vm.recommendationCounts.selected;
         if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
             vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
-        } else if (!vm.topNCount) {
-            vm.showError = true;
-            PlaybookWizardStore.setValidation('targets', false);
         } else {
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', false || (vm.launchUnscored && !vm.topNClicked));
@@ -380,6 +377,8 @@ angular.module('common.datacloud.query.results', [
     vm.topNInputClick = function($event) {
         vm.topNClicked = true;
         $event.target.select();
+        vm.updateTopNCount();
+        vm.makeRecommendationCounts();
     }
 
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
@@ -585,17 +584,13 @@ angular.module('common.datacloud.query.results', [
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
-
-        sections.launched = vm.launchUnscored ? vm.accountsCoverage.unscoredAccountCount + sections.selected : sections.selected;
-
-        vm.topNCount = sections.launched;
         if(resetTopNCount){
             vm.topNCount = sections.selected;
         }
 
-        if(vm.topNClicked) {
-            sections.launched = vm.topNCount;
-        }
+        sections.selected = vm.launchUnscored ? vm.accountsCoverage.unscoredAccountCount + sections.selected : sections.selected;
+
+        sections.launched = vm.topNClicked ? vm.topNCount : sections.selected;
 
         sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
         sections.contacts = _contacts; //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
