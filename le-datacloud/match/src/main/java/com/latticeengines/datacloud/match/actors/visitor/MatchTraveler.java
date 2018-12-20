@@ -29,9 +29,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
     private Boolean isMatched = false;
-    // When the 1st time anchor receives the traveler, isProcessed will be set
-    // as true
-    private Boolean isProcessed = false;
 
     // only for metric purpose
     private Double totalTravelTime;
@@ -78,14 +75,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setMatched(Boolean isMatched) {
         this.isMatched = isMatched;
-    }
-
-    public Boolean isProcessed() {
-        return isProcessed;
-    }
-
-    public void setProcessed(Boolean processed) {
-        isProcessed = processed;
     }
 
     @MetricTag(tag = "DecisionGraph")

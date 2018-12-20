@@ -109,7 +109,9 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     }
 
     protected void setOriginalSender(Traveler traveler, ActorRef originalSender) {
-        // do nothing
+        if (traveler.getOriginalLocation() == null) {
+            traveler.setOriginalLocation(ActorUtils.getPath(originalSender));
+        }
     }
 
     protected String getActorName(ActorRef actorRef) {

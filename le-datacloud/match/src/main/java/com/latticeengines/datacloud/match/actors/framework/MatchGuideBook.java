@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.utils.ActorUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
@@ -35,15 +33,7 @@ public class MatchGuideBook extends GuideBook {
     @Override
     public String next(String currentLocation, Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        String anchorPath;
-        try {
-            anchorPath = actorSystem
-                    .getAnchorPath(matchDecisionGraphService.getDecisionGraph(matchTraveler).getAnchor());
-        } catch (ExecutionException e) {
-            traveler.warn("Fail to retrieve anchor path for match traveler " + JsonUtils.serialize(matchTraveler), e);
-            return traveler.getOriginalLocation();
-        }
-
+        String anchorPath = ActorUtils.getPath(actorSystem.getAnchor());
         if (anchorPath.equals(currentLocation)) {
             return nextMoveForAnchor(matchTraveler);
         } else {
@@ -66,7 +56,7 @@ public class MatchGuideBook extends GuideBook {
             traveler.clearLocationsToVisitingQueue();
             return;
         }
-        String anchorPath = actorSystem.getAnchorPath(decisionGraph.getAnchor());
+        String anchorPath = ActorUtils.getPath(actorSystem.getAnchor());
         if (anchorPath.equals(traversedActor)) {
             return;
         }

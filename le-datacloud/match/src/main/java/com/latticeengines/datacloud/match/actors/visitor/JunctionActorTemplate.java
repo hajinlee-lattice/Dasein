@@ -15,8 +15,6 @@ import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphSer
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 
-import akka.actor.ActorRef;
-
 public abstract class JunctionActorTemplate extends VisitorActorTemplate {
 
     @Autowired
@@ -59,9 +57,8 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
                         + " due to fail to retrieve jump-to decision graph for junction " + getClass().getSimpleName());
                 return false;
             }
-            ActorRef nextAnchorRef = matchActorSystem.getActorRef(nextDG.getAnchor());
             setupTravelerBeforeJump(matchTraveler, nextDG.getGraphName());
-            nextAnchorRef.tell(matchTraveler, self());
+            matchActorSystem.getAnchor().tell(matchTraveler, self());
             return true;
         } else {
             matchTraveler.debug("Rejected by " + getClass().getSimpleName());
@@ -76,13 +73,13 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
     }
 
     private void setupTravelerBeforeJump(MatchTraveler traveler, String nextDGName) {
-        traveler.setProcessed(Boolean.FALSE);
+        traveler.setProcessed(false);
         traveler.pushToTransitionHistory(getClass().getSimpleName(), traveler.getDecisionGraph(), true);
         traveler.setDecisionGraph(nextDGName);
     }
 
     private void recoverTraveler(MatchTraveler traveler) {
-        traveler.setProcessed(Boolean.TRUE);
+        traveler.setProcessed(true);
         String originalDGName = traveler.recoverTransitionHistory();
         DecisionGraph originalDG = null;
         try {
@@ -95,7 +92,7 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
             return;
         }
         traveler.setDecisionGraph(originalDGName);
-        traveler.setAnchorActorLocation(ActorUtils.getPath(matchActorSystem.getActorRef(originalDG.getAnchor())));
+        traveler.setAnchorActorLocation(ActorUtils.getPath(matchActorSystem.getAnchor()));
         traveler.setMatched(Boolean.FALSE);
     }
 }

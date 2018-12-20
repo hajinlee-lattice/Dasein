@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -13,6 +12,4 @@ public interface MatchDecisionGraphService {
 
     DecisionGraph findNextDecisionGraphForJunction(String currentGraphName, String junctionName)
             throws ExecutionException;
-
-    List<String> findAllAnchors();
 }

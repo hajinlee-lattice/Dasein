@@ -58,7 +58,9 @@ public abstract class Traveler {
     private Queue<String> visitingQueue = new LinkedList<>();
     private TravelException travelException;
     private Object result;
-
+    // When the 1st time anchor receives the traveler in current decision graph,
+    // isProcessed will be set as true
+    private boolean isProcessed = false;
     // Set with anchor location of current decision graph
     private String anchorActorLocation;
 
@@ -125,6 +127,14 @@ public abstract class Traveler {
 
     public Stack<TransitionHistory> getTransitionHistory() {
         return transitionHistory;
+    }
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void setProcessed(boolean isProcessed) {
+        this.isProcessed = isProcessed;
     }
 
     /********************
@@ -275,7 +285,6 @@ public abstract class Traveler {
         private Map<String, Long> checkpoints;
         private Queue<String> visitingQueue;
 
-        @SuppressWarnings("unused")
         public String getJunction() {
             return junction;
         }

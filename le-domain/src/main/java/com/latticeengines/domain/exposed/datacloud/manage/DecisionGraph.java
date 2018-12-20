@@ -53,9 +53,6 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "Edges", length = 1000)
     private String edges;
 
-    @Column(name = "Anchor", nullable = false, length = 100)
-    private String anchor;
-
 
     // Content format
     // JunctionActorNameAbbr1:DecisionGraph1,JunctionActorNameAbbr2:DecisionGraph2,...
@@ -100,14 +97,6 @@ public class DecisionGraph implements HasPid, Serializable {
 
     private String getEdges() {
         return edges;
-    }
-
-    public String getAnchor() {
-        return MatchActorUtils.getFullActorName(anchor, ActorType.ANCHOR);
-    }
-
-    public void setAnchor(String anchor) {
-        this.anchor = anchor;
     }
 
     public String getJunctionGraphs() {

@@ -41,7 +41,7 @@ public abstract class ActorSystemTemplate {
     // Preparation work besides actor bootstraps to initialize an actor system
     protected abstract void postInitialize();
 
-    protected abstract ActorRef getAnchor(Traveler traveler);
+    public abstract ActorRef getAnchor();
 
 
     /*********************
@@ -55,9 +55,6 @@ public abstract class ActorSystemTemplate {
     protected final ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
     // ActorPath -> ActorName
     protected final ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
-    // AnchorName -> AnchorPath
-    // Multiple anchors share same anchor class but with different anchor name
-    protected final ConcurrentMap<String, String> anchorPaths = new ConcurrentHashMap<>();
     // ActorName -> ActorType
     protected final ConcurrentMap<String, ActorType> actorNameToType = new ConcurrentHashMap<>();
     // ActorNameAbbr -> ActorType
@@ -112,16 +109,6 @@ public abstract class ActorSystemTemplate {
     }
 
     /**
-     * TODO(ZDD): probably not needed
-     * 
-     * @param anchorName
-     * @return
-     */
-    public String getAnchorPath(String anchorName) {
-        return getAnchorPaths().get(anchorName);
-    }
-
-    /**
      * Get actor type by actor name
      * 
      * @param actorName
@@ -158,7 +145,7 @@ public abstract class ActorSystemTemplate {
 
     public Future<Object> askAnchor(Traveler traveler, Timeout timeout) {
         initialize();
-        return Patterns.ask(getAnchor(traveler), traveler, timeout);
+        return Patterns.ask(getAnchor(), traveler, timeout);
     }
 
     public void sendResponse(Object response, String returnAddress) {
@@ -239,11 +226,6 @@ public abstract class ActorSystemTemplate {
     private ConcurrentMap<String, String> getActorPathMap() {
         initialize();
         return actorPathMap;
-    }
-
-    private ConcurrentMap<String, String> getAnchorPaths() {
-        initialize();
-        return anchorPaths;
     }
 
     private ConcurrentMap<String, ActorType> getActorNameToType() {

@@ -1,8 +1,6 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -21,10 +19,6 @@ import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.ActorFactory;
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.MetricActor;
-import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.actors.utils.ActorUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
@@ -48,12 +42,11 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateM
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
 import com.latticeengines.domain.exposed.actors.ActorType;
-import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 
 import akka.actor.ActorRef;
@@ -105,9 +98,6 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     private ExecutorService dataSourceServiceExecutor;
 
-    @Autowired
-    private MatchDecisionGraphService matchDecisionGraphService;
-
     /****************************
      * Initialization & Destroy
      ****************************/
@@ -130,25 +120,17 @@ public class MatchActorSystem extends ActorSystemTemplate {
     }
 
     @Override
-    protected ActorRef getAnchor(Traveler traveler) {
-        MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        DecisionGraph dg;
-        try {
-            dg = matchDecisionGraphService.getDecisionGraph(matchTraveler);
-            return getActorRef(dg.getAnchor());
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Fail to find anchor for traveler " + JsonUtils.serialize(traveler), e);
-        }
+    public ActorRef getAnchor() {
+        return getActorRef(MatchAnchorActor.class);
     }
 
     @Override
     protected void initAnchors() {
-        List<String> anchors = matchDecisionGraphService.findAllAnchors();
-        anchors.forEach(anchor -> {
-            initNamedActor(FuzzyMatchAnchorActor.class, false, 1,
-                    MatchActorUtils.getFullActorName(anchor, ActorType.ANCHOR));
-            anchorPaths.put(anchor, ActorUtils.getPath(getActorRef(anchor)));
-        });
+        initNamedActor(MatchAnchorActor.class);
+        actorNameToType.put(MatchAnchorActor.class.getSimpleName(), ActorType.ANCHOR);
+        actorNameAbbrToType.put(
+                MatchActorUtils.getShortActorName(MatchAnchorActor.class.getSimpleName(), ActorType.ANCHOR),
+                ActorType.ANCHOR);
     }
 
     @SuppressWarnings("unchecked")
