@@ -53,6 +53,8 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String PUT_POLICY_ID = "RequirementsOnPut";
     // Share folder for PS team
     private static final String PS_SHARE = "PS_SHARE";
+    private static final String PS_SHARE_INBOX = "INBOX";
+    private static final String PS_SHARE_OUTBOX = "OUTBOX";
     // Template prefix
     private static final String TEMPLATES = "Templates";
 
@@ -138,6 +140,8 @@ public class DropBoxServiceImpl implements DropBoxService {
         s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null, null));
 
         s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, null));
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, PS_SHARE_INBOX));
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, PS_SHARE_OUTBOX));
     }
 
     @Override
