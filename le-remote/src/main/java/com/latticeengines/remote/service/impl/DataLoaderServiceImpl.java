@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.vdb.SpecParser;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
@@ -63,7 +62,7 @@ import com.latticeengines.remote.util.CrmUtils;
 import com.latticeengines.remote.util.DlConfigUtils;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
-@SuppressWarnings("deprecation")
+
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
 
@@ -594,22 +593,10 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             stringifiedPayload = JsonUtils.serialize(payload);
         }
 
-        int retry = 0;
         log.info("Send POST to " + dlUrl + endpoint + " with payload = " + stringifiedPayload + " with header "
                 + Headers.getHeaders());
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                Headers.getHeaders(), stringifiedPayload);
-        while (retry < MAX_RETRIES && shouldRetry(response)) {
-            log.info("Retry #" + String.valueOf(++retry) + ": Send POST to " + dlUrl + endpoint + " with payload = "
-                    + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
-
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false, Headers.getHeaders(),
-                    stringifiedPayload);
-
-        }
-
+        String response = restTemplate.postForObject(dlUrl + endpoint, stringifiedPayload, String.class);
         log.info("Get response from " + dlUrl + endpoint + ": " + response);
-
         return response;
 
     }

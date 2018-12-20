@@ -24,8 +24,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <compiler.version>1.8</compiler.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- maven versions -->
         <maven.jar.version>3.1.0</maven.jar.version>
@@ -48,7 +46,6 @@
         <maven.rpm.version>2.1.5</maven.rpm.version> <!-- upgrade ? -->
         <maven.antrun.version>1.8</maven.antrun.version> <!-- Last update in 2014, we should move away -->
 
-
         <!-- javax mostly specification interfaces, keep up with implementations -->
         <javax.validation.version>2.0.1.Final</javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
         <javax.mail.version>1.5.4</javax.mail.version>
@@ -56,6 +53,9 @@
         <javax.jsr250.version>1.0</javax.jsr250.version> <!-- implemented by spring -->
         <javax.servlet.version>4.0.1</javax.servlet.version> <!-- implemented by tomcat -->
         <javax.jsp.version>2.3.3</javax.jsp.version> <!-- implemented by tomcat -->
+        <javax.annonation.version>1.3.1</javax.annonation.version> <!-- compile on java 11 -->
+        <javax.jaxb.version>2.3.0</javax.jaxb.version> <!-- compile on java 11 -->
+        <javax.ws.version>2.3.0</javax.ws.version> <!-- compile on java 11 -->
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.8.5</hadoop.version>
@@ -1192,17 +1192,41 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${maven.spotbugs.version}</version>
-            </plugin>
         </plugins>
     </reporting>
 
     <dependencyManagement>
         <dependencies>
             <!-- isolated dependencies -->
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annonation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.ws</groupId>
+                <artifactId>jaxws-api</artifactId>
+                <version>${javax.ws.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.sun.xml.ws/jaxws-ri -->
+            <dependency>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-ri</artifactId>
+                <version>${javax.ws.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${javax.jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-ri</artifactId>
+                <version>${javax.jaxb.version}</version>
+                <type>pom</type>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -2399,6 +2423,30 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-ri</artifactId>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-ri -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-ri</artifactId>
+            <type>pom</type>
+        </dependency>
+
         <!--Runtime only deps:do not want to use in our code -->
         <dependency>
             <groupId>commons-collections</groupId>

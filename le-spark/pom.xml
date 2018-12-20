@@ -132,6 +132,29 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <scalaVersion>${scala.version}</scalaVersion>
+                    <jvmArgs>
+                        <jvmArg>-Xmx512m</jvmArg>
+                    </jvmArgs>
+                    <args>
+                        <arg>-target:jvm-${compiler.version}</arg>
+                        <arg>-deprecation</arg>
+                        <!--arg>-optimise</arg-->
+                        <arg>-unchecked</arg>
+                        <arg>-uniqid</arg>
+                        <arg>-no-specialization</arg>
+                        <arg>-encoding</arg>
+                        <arg>UTF-8</arg>
+                        <arg>-feature</arg>
+                        <arg>-nobootcp</arg>
+
+                        <!-- prints a message when a method is generated that uses Reflection -->
+                        <arg>-Xlog-reflective-calls</arg>
+
+                        <arg>-Ywarn-adapted-args</arg>
+                    </args>
+                </configuration>
             </plugin>
         </plugins>
     </build>
