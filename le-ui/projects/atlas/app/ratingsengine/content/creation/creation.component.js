@@ -56,18 +56,14 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             if (vm.type === 'cross_sell') {
 
-                // console.log(model);
-                var keys = Object.keys(model.advancedModelingConfig.cross_sell.filters),
-                    purchasedBeforePeriod = model.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'],
-                    csFilters = Object.keys(model.advancedModelingConfig.cross_sell.filters).length,
+                var filtersLength = Object.keys(model.advancedModelingConfig.cross_sell.filters).length,
                     trainingSegment = model.trainingSegment,
                     trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts;
 
-                if((keys.length === 0 || (purchasedBeforePeriod && csFilters === 1)) && 
-                    (trainingSegment === null || trainingSegment === undefined) && 
-                    (trainingProducts === null || trainingProducts === undefined)) {
-                    vm.hasSettingsInfo = false;
-                }
+                vm.hasSettingsInfo =  (((trainingProducts && trainingProducts.length != 0) || trainingSegment) ||
+                    vm.modelingStrategy == 'CROSS_SELL_REPEAT_PURCHASE' && filtersLength > 1 ||
+                    vm.modelingStrategy == 'CROSS_SELL_FIRST_PURCHASE' && filtersLength != 0)
+                    ? true : false;
 
                 vm.targetProducts = model.advancedModelingConfig.cross_sell.targetProducts;
                 vm.modelingStrategy = model.advancedModelingConfig.cross_sell.modelingStrategy;
@@ -111,7 +107,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 if (vm.targetProducts !== null) {
                     vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
                 }
-                if (vm.trainingProducts !== null && vm.trainingProducts != undefined) {
+                if (vm.trainingProducts && vm.trainingProducts.length != 0) {
                     vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
                 }
 
