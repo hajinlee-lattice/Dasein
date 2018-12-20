@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -21,6 +20,7 @@ public class JoinScriptTestNG extends TestJoinTestNGBase {
 
     private ScriptJobConfig jobConfig;
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         setupLivyEnvironment();
@@ -31,13 +31,7 @@ public class JoinScriptTestNG extends TestJoinTestNGBase {
 
         jobConfig = new ScriptJobConfig();
         jobConfig.setParams(JsonUtils.convertValue(map, JsonNode.class));
-        jobConfig.setWorkspace(getWorkspace());
         jobConfig.setNumTargets(2);
-    }
-
-    @AfterClass(groups = "functional", alwaysRun = true)
-    public void tearDown() {
-        tearDownLivyEnvironment();
     }
 
     @Test(groups = "functional", dataProvider = "dataProvider")

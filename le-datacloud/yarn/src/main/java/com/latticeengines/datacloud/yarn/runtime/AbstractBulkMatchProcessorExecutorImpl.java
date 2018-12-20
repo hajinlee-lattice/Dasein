@@ -329,7 +329,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     @MatchStep
     private void finalizeBlock(ProcessorContext processorContext) throws IOException {
         Long count = uploadOutput(processorContext);
-        log.info("There are in total " + count + " records in the avros in output dir.");
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
         if (processorContext.getReturnUnmatched()) {
@@ -384,11 +383,12 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     @MatchStep
     private long uploadOutput(ProcessorContext processorContext) {
         long count = AvroUtils.countLocalDir("output");
+        log.info("There are in total " + count + " records in the avros in output dir.");
         String hdfsDir = processorContext.getHdfsOutputDir();
         RetryTemplate retry = RetryUtils.getRetryTemplate(5);
         try {
             retry.execute(ctx -> {
-                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": uploading match block result to hdfs.");
+                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": uploading match block result to " + hdfsDir);
                 try {
                     if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir)) {
                         HdfsUtils.rmdir(yarnConfiguration, hdfsDir);

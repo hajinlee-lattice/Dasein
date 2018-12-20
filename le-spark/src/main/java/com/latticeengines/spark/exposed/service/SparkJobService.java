@@ -12,6 +12,6 @@ public interface SparkJobService {
     SparkJobResult runScript(LivySession session, SparkScript script, ScriptJobConfig config);
 
     <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
-    SparkJobResult runJob(LivySession session, Class<J> jobClz, C jobConfig, Iterable<String> extraJars);
+    SparkJobResult runJob(LivySession session, Class<J> jobClz, C jobConfig);
 
 }

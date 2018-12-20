@@ -1245,7 +1245,7 @@ public class AvroUtils {
         if (HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
             HdfsUtils.rmdir(yarnConfiguration, dirPath);
         }
-        writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records);
+        writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records, true);
     }
 
     public static boolean isValidColumn(String column) {

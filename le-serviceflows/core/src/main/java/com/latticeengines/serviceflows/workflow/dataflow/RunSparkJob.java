@@ -2,8 +2,6 @@ package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -13,7 +11,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -36,12 +33,6 @@ public abstract class RunSparkJob<S extends SparkJobStepConfiguration, //
     @Inject
     private LivySessionHolder livySessionHolder;
 
-    @Inject
-    private VersionManager versionManager;
-
-    @Value("${dataplatform.hdfs.stack}")
-    private String stackName;
-
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -57,7 +48,7 @@ public abstract class RunSparkJob<S extends SparkJobStepConfiguration, //
         jobConfig.setWorkspace(workspace);
         LivySession session = livySessionHolder.getOrCreateLivySession(tenantId + "~" + getJobClz().getSimpleName());
         log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
-        SparkJobResult result = sparkJobService.runJob(session, getJobClz(), jobConfig, getSwLibJars());
+        SparkJobResult result = sparkJobService.runJob(session, getJobClz(), jobConfig);
         postJobExecution(result);
         livySessionHolder.killSession();
     }
@@ -69,7 +60,6 @@ public abstract class RunSparkJob<S extends SparkJobStepConfiguration, //
      */
     protected abstract C configureJob(S stepConfiguration);
 
-    protected abstract List<String> getSwLibs();
     protected abstract void postJobExecution(SparkJobResult result);
 
     protected Table toTable(String tableName, HdfsDataUnit jobTarget) {
@@ -94,26 +84,6 @@ public abstract class RunSparkJob<S extends SparkJobStepConfiguration, //
         table.setExtracts(Collections.singletonList(extract));
 
         return table;
-    }
-
-    private Iterable<String> getSwLibJars() {
-        return () -> new Iterator<String>() {
-            private final Iterator<String> itr = getSwLibs().iterator();
-            private final String version = versionManager.getCurrentVersion();
-
-            @Override
-            public boolean hasNext() {
-                return itr.hasNext();
-            }
-
-            @Override
-            public String next() {
-                String swlib = itr.next();
-                return "/app/" + stackName + "/" + version //
-                        + "/swlib/dataflowapi/le-serviceflows-" + swlib //
-                        + "/le-serviceflows-" + swlib + ".jar";
-            }
-        };
     }
 
 }

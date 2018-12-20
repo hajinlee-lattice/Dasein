@@ -27,19 +27,22 @@ public class LivySessionHolder {
     private Boolean useEmr;
 
     @Value("${dataflowapi.spark.driver.cores}")
-    private String driverCores;
+    private int driverCores;
 
     @Value("${dataflowapi.spark.driver.mem}")
     private String driverMem;
 
     @Value("${dataflowapi.spark.executor.cores}")
-    private String executorCores;
+    private int executorCores;
 
     @Value("${dataflowapi.spark.executor.mem}")
     private String executorMem;
 
     @Value("${dataflowapi.spark.max.executors}")
     private String maxExecutors;
+
+    @Value("${dataflowapi.spark.min.executors}")
+    private String minExecutors;
 
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
@@ -56,7 +59,7 @@ public class LivySessionHolder {
             if (StringUtils.isBlank(jobName)) {
                 jobName = "Workflow";
             }
-            session = sessionService.startSession(livyHost, jobName, getSparkConf());
+            session = sessionService.startSession(livyHost, jobName, getLivyConf(), getSparkConf());
             livySessionHolder.set(session);
         }
         return session;
@@ -70,12 +73,18 @@ public class LivySessionHolder {
         }
     }
 
+    private Map<String, Object> getLivyConf() {
+        Map<String, Object> conf = new HashMap<>();
+        conf.put("driverCores", driverCores);
+        conf.put("driverMemory", driverMem);
+        conf.put("executorCores", executorCores);
+        conf.put("executorMemory", executorMem);
+        return conf;
+    }
+
     private Map<String, String> getSparkConf() {
         Map<String, String> conf = new HashMap<>();
-        conf.put("spark.driver.cores", driverCores);
-        conf.put("spark.driver.memory", driverMem);
-        conf.put("spark.executor.cores", executorCores);
-        conf.put("spark.executor.memory", executorMem);
+        conf.put("spark.dynamicAllocation.minExecutors", minExecutors);
         conf.put("spark.dynamicAllocation.maxExecutors", maxExecutors);
         return conf;
     }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -60,6 +61,14 @@ public class SparkJobServiceImpl implements SparkJobService {
     private Configuration yarnConfiguration;
 
     public <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
+    SparkJobResult runJob(LivySession session, Class<J> jobClz, C config) {
+        return runJob(session, jobClz, config, Collections.emptyList());
+    }
+
+    /**
+     * No need to expose the ability of adding extra jars for now.
+     */
+    private <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     SparkJobResult runJob(LivySession session, Class<J> jobClz, C config, Iterable<String> extraJars) {
         J job;
         try {

@@ -39,7 +39,8 @@ public class LivySessionServiceImpl implements LivySessionService {
     private ObjectMapper om = new ObjectMapper();
 
     @Override
-    public LivySession startSession(@NotNull String host, @NotNull String name, Map<String, String> sparkConf) {
+    public LivySession startSession(@NotNull String host, @NotNull String name, //
+            Map<String, Object> livyConf, Map<String, String> sparkConf) {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
         if (StringUtils.isNotBlank(name)) {
@@ -51,6 +52,9 @@ public class LivySessionServiceImpl implements LivySessionService {
             conf.putAll(sparkConf);
         }
         payLoad.put("conf", conf);
+        if (MapUtils.isNotEmpty(livyConf)) {
+            payLoad.putAll(livyConf);
+        }
         WebClient webClient = getWebClient(host);
         String resp = webClient.method(HttpMethod.POST).uri(URI_SESSIONS).syncBody(payLoad) //
                 .retrieve().bodyToMono(String.class).block();
@@ -74,7 +78,8 @@ public class LivySessionServiceImpl implements LivySessionService {
         if (sessionId != null && sessionExists(session)) {
             WebClient webClient = getWebClient(session);
             String uri = URI_SESSIONS + "/" + String.valueOf(sessionId);
-            String resp = webClient.method(HttpMethod.DELETE).uri(uri).retrieve().bodyToMono(String.class).block();
+            String resp = webClient.method(HttpMethod.DELETE).uri(uri).retrieve()
+                    .bodyToMono(String.class).block();
             log.info("Stopped livy session: " + resp);
         }
     }
@@ -132,13 +137,14 @@ public class LivySessionServiceImpl implements LivySessionService {
             JsonNode jsonNode = om.readTree(response);
             return jsonNode.get("id").asInt();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse session id from livy response: " + response, e);
+            throw new RuntimeException("Failed to parse session id from livy response: " + response,
+                    e);
         }
     }
 
     private LivySession waitForSessionState(LivySession session, String state) {
         LivySession current = getSession(session);
-        while(!LivySession.TERMINAL_STATES.contains(current.getState())) {
+        while (!LivySession.TERMINAL_STATES.contains(current.getState())) {
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
@@ -150,7 +156,8 @@ public class LivySessionServiceImpl implements LivySessionService {
         if (state.equals(current.getState())) {
             return current;
         } else {
-            throw new RuntimeException("Session state ends up to be " + current.getState() + " instead of " + state);
+            throw new RuntimeException(
+                    "Session state ends up to be " + current.getState() + " instead of " + state);
         }
     }
 

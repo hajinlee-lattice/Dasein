@@ -273,7 +273,7 @@ public class HdfsPathBuilder {
     public Path constructMatchBlockErrorDir(String rootOperationUid, String blockOperationUid) {
         return constructMatchDir(rootOperationUid).append(BLOCKS_ERROR_SEGMENT).append(blockOperationUid);
     }
-    
+
     public String constructMatchBlockAvroGlob(String rootOperationUid, String blockOperationUid) {
         return constructMatchBlockDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
     }

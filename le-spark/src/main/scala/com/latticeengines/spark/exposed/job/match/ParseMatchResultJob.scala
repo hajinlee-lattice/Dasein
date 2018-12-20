@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.spark
+package com.latticeengines.spark.exposed.job.`match`
 
 import com.latticeengines.domain.exposed.datacloud.`match`.MatchConstants
 import com.latticeengines.domain.exposed.datacloud.`match`.MatchConstants.{INT_LDC_DEDUPE_ID, INT_LDC_LID, INT_LDC_REMOVED}

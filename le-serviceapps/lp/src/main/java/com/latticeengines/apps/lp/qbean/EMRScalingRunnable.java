@@ -42,7 +42,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MIN_SINGLE_NODE_VCORES = 2;
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
-    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
+    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
     private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(45);
 
     private static final ConcurrentMap<String, AtomicLong> lastScalingUpMap = new ConcurrentHashMap<>();
@@ -251,11 +251,11 @@ public class EMRScalingRunnable implements Runnable {
                 ApplicationResourceUsageReport usageReport = app
                         .getApplicationResourceUsageReport();
                 Resource used = usageReport.getUsedResources();
-                if (now - app.getStartTime() >= SLOW_START_THRESHOLD && used.getMemory() == 0
-                        && used.getVirtualCores() == 0) {
-                    // no resource usage after SLOW_START_THRESHOLD
+                Resource asked = usageReport.getNeededResources();
+                if (now - app.getStartTime() >= SLOW_START_THRESHOLD && used.getMemorySize() < asked.getMemorySize()
+                        && used.getVirtualCores() < asked.getVirtualCores()) {
+                    // resource not full-filled after SLOW_START_THRESHOLD
                     // must be stuck
-                    Resource asked = usageReport.getNeededResources();
                     long mb = asked.getMemorySize();
                     int vcores = asked.getVirtualCores();
                     reqResource.reqMb += mb;
@@ -275,7 +275,7 @@ public class EMRScalingRunnable implements Runnable {
         int targetByMb = determineTargetByMb(reqResource.reqMb);
         int targetByVCores = determineTargetByVCores(reqResource.reqVCores);
         int target = Math.max(targetByMb, targetByVCores);
-        target += determineNewByMinNodeResource(reqResource);
+//        target += determineNewByMinNodeResource(reqResource);
         if (reqResource.hangingApps > 0) {
             target += reqResource.hangingApps;
         }
@@ -309,19 +309,19 @@ public class EMRScalingRunnable implements Runnable {
         return target;
     }
 
-    private int determineNewByMinNodeResource(ReqResource reqResource) {
-        SingleNodeResource bestSingleNode = getBestSingleNode();
-        if (reqResource.maxMb > bestSingleNode.mb || reqResource.maxVCores > bestSingleNode.vcores) {
-            log.info("BestSingleNode=" + bestSingleNode + ": no single node can host the max job");
-            return 1;
-        } else if (bestSingleNode.mb < MIN_SINGLE_NODE_MB || bestSingleNode.vcores < MIN_SINGLE_NODE_VCORES) {
-            log.info("BestSingleNode=" + bestSingleNode //
-                    + ": no single node is able to kick off a modeling python client.");
-            return 1;
-        } else {
-            return 0;
-        }
-    }
+//    private int determineNewByMinNodeResource(ReqResource reqResource) {
+//        SingleNodeResource bestSingleNode = getBestSingleNode();
+//        if (reqResource.maxMb > bestSingleNode.mb || reqResource.maxVCores > bestSingleNode.vcores) {
+//            log.info("BestSingleNode=" + bestSingleNode + ": no single node can host the max job");
+//            return 1;
+//        } else if (bestSingleNode.mb < MIN_SINGLE_NODE_MB || bestSingleNode.vcores < MIN_SINGLE_NODE_VCORES) {
+//            log.info("BestSingleNode=" + bestSingleNode //
+//                    + ": no single node is able to kick off a modeling python client.");
+//            return 1;
+//        } else {
+//            return 0;
+//        }
+//    }
 
     private void resetScalingDownCounter() {
         if (getScalingDownAttempt().get() > 0) {

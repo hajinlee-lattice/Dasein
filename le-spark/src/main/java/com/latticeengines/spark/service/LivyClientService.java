@@ -4,6 +4,6 @@ import org.apache.livy.scalaapi.LivyScalaClient;
 
 public interface LivyClientService {
 
-    LivyScalaClient createClient(String host, Iterable<String> swLibs);
+    LivyScalaClient createClient(String host, Iterable<String> extraJars);
 
 }

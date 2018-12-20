@@ -28,6 +28,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -46,7 +48,7 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
-abstract public class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(SparkJobFunctionalTestNGBase.class);
 
@@ -68,6 +70,21 @@ abstract public class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     @Value("${common.le.stack}")
     private String leStack;
 
+    @Value("${dataflowapi.spark.driver.cores}")
+    private String driverCores;
+
+    @Value("${dataflowapi.spark.driver.mem}")
+    private String driverMem;
+
+    @Value("${dataflowapi.spark.executor.cores}")
+    private String executorCores;
+
+    @Value("${dataflowapi.spark.executor.mem}")
+    private String executorMem;
+
+    @Value("${dataflowapi.spark.max.executors}")
+    private String maxExecutors;
+
     protected LivySession session;
     private AtomicInteger inputSeq = new AtomicInteger(0);
     private Map<String, DataUnit> inputUnits = new HashMap<>();
@@ -83,6 +100,16 @@ abstract public class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     // override this to enforce ordering between inputs
     protected List<String> getInputOrder() { return null; }
 
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        setupLivyEnvironment();
+    }
+
+    @AfterClass(groups = "functional", alwaysRun = true)
+    public void teardown() {
+        tearDownLivyEnvironment();
+    }
+
     protected void setupLivyEnvironment() {
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
@@ -90,9 +117,11 @@ abstract public class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         } else {
             livyHost = "http://localhost:8998";
         }
-        session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), Collections.emptyMap());
+        session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), //
+                Collections.emptyMap(), Collections.emptyMap());
     }
 
+    @SuppressWarnings("unused")
     protected void reuseLivyEnvironment(int sessionId) {
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
@@ -171,14 +200,16 @@ abstract public class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
 
     protected <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
-    SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig, Iterable<String> extraJars) {
+    SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
         initializeScenario();
+        jobConfig.setWorkspace(getWorkspace());
         jobConfig.setInput(getInputUnits());
-        return sparkJobService.runJob(session, jobClz, jobConfig, extraJars);
+        return sparkJobService.runJob(session, jobClz, jobConfig);
     }
 
     protected SparkJobResult runSparkScript(SparkScript script, ScriptJobConfig jobConfig) {
         initializeScenario();
+        jobConfig.setWorkspace(getWorkspace());
         jobConfig.setInput(getInputUnits());
         return sparkJobService.runScript(session, script, jobConfig);
     }

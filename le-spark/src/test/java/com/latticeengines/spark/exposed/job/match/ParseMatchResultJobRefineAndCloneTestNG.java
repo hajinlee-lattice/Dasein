@@ -1,10 +1,11 @@
-package com.latticeengines.serviceflows.spark;
+package com.latticeengines.spark.exposed.job.match;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import com.latticeengines.spark.exposed.job.match.ParseMatchResultJob;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
@@ -13,9 +14,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsSparkJobFunctionalTestNGBase;
+import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class ParseMatchResultJobRefineAndCloneTestNG extends ServiceFlowsSparkJobFunctionalTestNGBase {
+public class ParseMatchResultJobRefineAndCloneTestNG extends SparkJobFunctionalTestNGBase {
 
     @Override
     protected String getJobName() {

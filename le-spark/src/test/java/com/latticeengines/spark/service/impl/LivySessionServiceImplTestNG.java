@@ -34,7 +34,8 @@ public class LivySessionServiceImplTestNG extends SparkFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCrud() {
-        LivySession session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), Collections.emptyMap());
+        LivySession session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), //
+                Collections.emptyMap(), Collections.emptyMap());
         Assert.assertNotNull(session);
         Assert.assertNotNull(session.getSessionId());
 

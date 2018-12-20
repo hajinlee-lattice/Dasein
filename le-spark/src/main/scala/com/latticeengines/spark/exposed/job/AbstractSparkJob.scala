@@ -58,8 +58,11 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   }
 
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
-    val path = unit.getPath
-    spark.read.format("avro").load("hdfs://" + path)
+    var path = unit.getPath
+    if (path.endsWith(".avro") || path.endsWith("/")) {
+      path = path.substring(0, path.lastIndexOf("/"))
+    }
+    spark.read.format("avro").load("hdfs://" + path + "/*.avro")
   }
 
   def finalizeJob(latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {

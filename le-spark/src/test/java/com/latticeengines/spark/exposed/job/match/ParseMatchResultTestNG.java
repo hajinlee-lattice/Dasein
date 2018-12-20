@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.spark;
+package com.latticeengines.spark.exposed.job.match;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.LID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.SOURCE_PREFIX;
@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.latticeengines.spark.exposed.job.match.ParseMatchResultJob;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -14,9 +15,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsSparkJobFunctionalTestNGBase;
+import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class ParseMatchResultTestNG extends ServiceFlowsSparkJobFunctionalTestNGBase {
+public class ParseMatchResultTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {

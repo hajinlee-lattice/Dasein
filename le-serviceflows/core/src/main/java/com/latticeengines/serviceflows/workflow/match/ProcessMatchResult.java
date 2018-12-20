@@ -26,12 +26,12 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchRes
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.spark.ParseMatchResultJob;
-import com.latticeengines.serviceflows.workflow.dataflow.BaseCoreSparkJobStep;
+import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
+import com.latticeengines.spark.exposed.job.match.ParseMatchResultJob;
 
 @Component("processMatchResult")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessMatchResult extends BaseCoreSparkJobStep<ProcessMatchResultConfiguration, //
+public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfiguration, //
         ParseMatchResultJobConfig, ParseMatchResultJob> {
 
     @Inject
@@ -52,10 +52,11 @@ public class ProcessMatchResult extends BaseCoreSparkJobStep<ProcessMatchResultC
         if (StringUtils.isBlank(inputDir)) {
             throw new RuntimeException("Cannot find match result dir.");
         }
+
         matchResultTable = MetadataConverter.getTable(yarnConfiguration, inputDir);
         HdfsDataUnit dataUnit = new HdfsDataUnit();
         dataUnit.setName("matchResult");
-        dataUnit.setPath(matchCommand.getResultLocation());
+        dataUnit.setPath(inputDir);
         List<DataUnit> inputUnits = new ArrayList<>();
         inputUnits.add(dataUnit);
 
@@ -65,14 +66,10 @@ public class ProcessMatchResult extends BaseCoreSparkJobStep<ProcessMatchResultC
             // TODO: move to Table.toHdfsDatUnit() method
             HdfsDataUnit eventTable = new HdfsDataUnit();
             eventTable.setName("eventTable");
-            String path = preMatchTable.getExtracts().get(0).getPath();
-            log.info("Extract=" + JsonUtils.serialize(preMatchTable.getExtracts().get(0)));
-            if (path.endsWith(".avro") || path.endsWith("/") ) {
-                path = path.substring(0, path.lastIndexOf("/"));
-            }
-            eventTable.setPath(path);
+            eventTable.setPath(preMatchTable.getExtracts().get(0).getPath());
             inputUnits.add(eventTable);
         }
+        log.info("InputUnits=" + JsonUtils.serialize(inputUnits));
         ParseMatchResultJobConfig jobConfig = new ParseMatchResultJobConfig();
         jobConfig.setInput(inputUnits);
         jobConfig.sourceColumns = sourceCols(preMatchTable);
