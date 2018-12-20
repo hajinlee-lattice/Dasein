@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.Level;
 
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
 /**
@@ -49,10 +50,12 @@ public abstract class Traveler {
 
     private StopWatch stopWatch;
     private Level logLevel = Level.DEBUG;
+    private String lastStop; // Only for metrics purpose
 
     /***********************************
      * Bound to current decision graph
      ***********************************/
+    private String decisionGraph;
     private Map<String, Set<String>> visitedHistory = new HashMap<>();
     private Map<String, Long> checkpoints = new HashMap<>();
     private Queue<String> visitingQueue = new LinkedList<>();
@@ -135,6 +138,24 @@ public abstract class Traveler {
 
     public void setProcessed(boolean isProcessed) {
         this.isProcessed = isProcessed;
+    }
+
+    @MetricTag(tag = "LastStop")
+    public String getLastStop() {
+        return lastStop;
+    }
+
+    public void setLastStop(String lastStop) {
+        this.lastStop = lastStop;
+    }
+
+    @MetricTag(tag = "DecisionGraph")
+    public String getDecisionGraph() {
+        return decisionGraph;
+    }
+
+    public void setDecisionGraph(String decisionGraph) {
+        this.decisionGraph = decisionGraph;
     }
 
     /********************

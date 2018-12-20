@@ -21,8 +21,6 @@ import akka.util.Timeout;
 public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final MatchKeyTuple matchKeyTuple;
     private String dataCloudVersion;
-    private String decisionGraph;
-    private String lastStop;
 
     private MatchInput matchInput;
 
@@ -77,15 +75,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         this.isMatched = isMatched;
     }
 
-    @MetricTag(tag = "DecisionGraph")
-    public String getDecisionGraph() {
-        return decisionGraph;
-    }
-
-    public void setDecisionGraph(String decisionGraph) {
-        this.decisionGraph = decisionGraph;
-    }
-
     @MetricFieldGroup
     public MatchKeyTuple getMatchKeyTuple() {
         return matchKeyTuple;
@@ -111,15 +100,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     @MetricField(name = "LatticeAccountId")
     public String getLatticeAccountId() {
         return (String) getResult();
-    }
-
-    @MetricTag(tag = "LastStop")
-    public String getLastStop() {
-        return lastStop;
-    }
-
-    public void setLastStop(String lastStop) {
-        this.lastStop = lastStop;
     }
 
     @MetricField(name = "TravelTime", fieldType = MetricField.FieldType.DOUBLE)

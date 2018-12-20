@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.utils.ActorUtils;
@@ -22,6 +23,7 @@ import com.latticeengines.actors.visitor.sample.impl.SampleDunsBasedMicroEngineA
 import com.latticeengines.actors.visitor.sample.impl.SampleDunsDomainBasedMicroEngineActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleLocationToDunsMicroEngineActor;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 
 import akka.actor.ActorRef;
 
@@ -100,6 +102,30 @@ public class SampleMatchGuideBook extends GuideBook {
         } else {
             return false;
         }
+    }
+
+    // TODO(ZDD): To make sample actor & guide book closer to current framework
+    @Override
+    protected ActorSystemTemplate getActorSystem() {
+        return actorSystem;
+    }
+
+    @Override
+    protected boolean stopTravel(Traveler traveler) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    protected String getSerializedTravelerContext(Traveler traveler) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected DecisionGraph getDecisionGraphFromTraveler(Traveler traveler) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

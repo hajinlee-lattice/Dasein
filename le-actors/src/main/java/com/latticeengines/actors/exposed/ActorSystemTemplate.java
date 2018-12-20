@@ -27,22 +27,31 @@ public abstract class ActorSystemTemplate {
     // Start anchor actors, initialize anchorPaths map
     protected abstract void initAnchors();
 
-    // Start junction actors, initialize actorNameToType &
-    // actorNameAbbrToType maps
-    protected abstract void initJunctions();
-
     // Start micro-engine actors, initialize actorNameToType &
     // actorNameAbbrToType maps
     protected abstract void initMicroEngines();
 
-    // Start metrics actors
-    protected abstract void initMetricActors();
-
-    // Preparation work besides actor bootstraps to initialize an actor system
-    protected abstract void postInitialize();
-
     public abstract ActorRef getAnchor();
 
+    /**********************************
+     * Methods to override optionally
+     **********************************/
+
+    // Start junction actors, initialize actorNameToType &
+    // actorNameAbbrToType maps
+    protected void initJunctions() {
+
+    }
+
+    // Start metrics actors
+    protected void initMetricActors() {
+
+    };
+
+    // Preparation work besides actor bootstraps to initialize an actor system
+    protected void postInitialize() {
+
+    };
 
     /*********************
      * Members

@@ -8,12 +8,10 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
-import com.latticeengines.actors.exposed.ActorFactory;
-import com.latticeengines.actors.exposed.RoutingLogic;
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleDomainBasedMicroEngineActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleDunsBasedMicroEngineActor;
@@ -21,6 +19,8 @@ import com.latticeengines.actors.visitor.sample.impl.SampleDunsDomainBasedMicroE
 import com.latticeengines.actors.visitor.sample.impl.SampleDynamoLookupActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleFuzzyMatchAnchorActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleLocationToDunsMicroEngineActor;
+import com.latticeengines.domain.exposed.actors.ActorType;
+import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -28,16 +28,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
 @Component("sampleMatchActorSystem")
-public class SampleMatchActorSystem {
+public class SampleMatchActorSystem extends ActorSystemTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(SampleMatchActorSystem.class);
 
     public static final int ACTOR_CARDINALITY = 5;
-
-    private ActorSystem system;
-
-    @Autowired
-    private ActorFactory actorFactory;
 
     private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
 
@@ -56,6 +51,7 @@ public class SampleMatchActorSystem {
         log.info("Completed shutdown of match actor system");
     }
 
+    @Override
     public <T extends ActorTemplate> ActorRef getActorRef(Class<T> actorClz) {
         return actorRefMap.get(actorClz.getCanonicalName());
     }
@@ -64,45 +60,48 @@ public class SampleMatchActorSystem {
         return getActorRef(SampleFuzzyMatchAnchorActor.class);
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public void sendResponse(Object response, String returnAddress) {
         ActorRef ref = system.actorFor(returnAddress);
         ref.tell(response, null);
     }
 
-    private void initActors() {
-        initNamedActor(SampleDynamoLookupActor.class, true);
-        initNamedActor(SampleDnbLookupActor.class, true);
-
-        initMicroEngines();
-
+    @Override
+    protected void initAnchors() {
         initNamedActor(SampleFuzzyMatchAnchorActor.class);
-
-        log.info("All match actors started");
+        actorNameToType.put(SampleFuzzyMatchAnchorActor.class.getSimpleName(), ActorType.ANCHOR);
+        actorNameAbbrToType.put(
+                MatchActorUtils.getShortActorName(SampleFuzzyMatchAnchorActor.class.getSimpleName(), ActorType.ANCHOR),
+                ActorType.ANCHOR);
     }
 
-    private void initMicroEngines() {
-        initNamedActor(SampleDunsDomainBasedMicroEngineActor.class);
-        initNamedActor(SampleDomainBasedMicroEngineActor.class);
-        initNamedActor(SampleDunsBasedMicroEngineActor.class);
-        initNamedActor(SampleLocationToDunsMicroEngineActor.class);
-    }
-
-    private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz) {
-        return initNamedActor(actorClz, false);
-    }
-
-    private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz, boolean useRouting) {
-        ActorRef actorRef = null;
-        if (useRouting) {
-            actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz,
-                    RoutingLogic.RoundRobinRoutingLogic, ACTOR_CARDINALITY);
-        } else {
-            actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz);
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void initMicroEngines() {
+        Class<? extends ActorTemplate>[] microEngineClz = new Class[] { //
+                SampleDunsDomainBasedMicroEngineActor.class, //
+                SampleDomainBasedMicroEngineActor.class, //
+                SampleDunsBasedMicroEngineActor.class, //
+                SampleLocationToDunsMicroEngineActor.class, //
+        };
+        for (Class<? extends ActorTemplate> clz : microEngineClz) {
+            initNamedActor(clz);
+            actorNameToType.put(clz.getSimpleName(), ActorType.MICRO_ENGINE);
+            actorNameAbbrToType.put(MatchActorUtils.getShortActorName(clz.getSimpleName(), ActorType.MICRO_ENGINE),
+                    ActorType.MICRO_ENGINE);
         }
-        actorRefMap.put(actorClz.getCanonicalName(), actorRef);
-        log.info("Add actor-ref " + actorClz.getSimpleName() + " to actorRefMap.");
-        return actorRef;
+    }
+
+    @Override
+    protected void initAssistantActors() {
+        initNamedActor(SampleDynamoLookupActor.class, true, 1);
+        initNamedActor(SampleDnbLookupActor.class, true, 1);
+    }
+
+    @Override
+    public ActorRef getAnchor() {
+        return getActorRef(SampleFuzzyMatchAnchorActor.class);
     }
 
 }
