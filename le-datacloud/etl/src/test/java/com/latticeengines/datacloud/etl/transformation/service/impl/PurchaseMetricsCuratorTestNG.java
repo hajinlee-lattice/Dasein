@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,8 +59,12 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private ActivityMetrics weekSW;
     private ActivityMetrics weekSWDepr;
     private ActivityMetrics weekSC;
-    private ActivityMetrics weekAS;
-    private ActivityMetrics weekTS;
+    private ActivityMetrics weekASDepr;
+    private ActivityMetrics weekAS1; // last 1 week
+    private ActivityMetrics weekAS2; // last 1-2 weeks
+    private ActivityMetrics weekTSDepr;
+    private ActivityMetrics weekTS1; // last 1 week
+    private ActivityMetrics weekTS2; // last 1-2 weeks
     private ActivityMetrics everHP;
 
     private List<ActivityMetrics> metricsList;
@@ -203,15 +208,33 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         weekSWDepr.setPeriodsConfig(Arrays.asList(TimeFilter.within(2, PeriodStrategy.Template.Week.name())));
         weekSWDepr.setEOL(true);
 
-        // Use AvgSpendOvertime to test BETWEEN relation (M25)
-        weekAS = new ActivityMetrics();
-        weekAS.setMetrics(InterfaceName.AvgSpendOvertime);
-        weekAS.setPeriodsConfig(Arrays.asList(TimeFilter.between(1, 1, PeriodStrategy.Template.Week.name())));
+        // Deprecated AvgSpendOvertime with WITHIN relation (before M25)
+        weekASDepr = new ActivityMetrics();
+        weekASDepr.setMetrics(InterfaceName.AvgSpendOvertime);
+        weekASDepr.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
 
-        // Use TotalSpendOvertime to test WITHIN relation
-        weekTS = new ActivityMetrics();
-        weekTS.setMetrics(InterfaceName.TotalSpendOvertime);
-        weekTS.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+        // AvgSpendOvertime with BETWEEN relation (after M25)
+        weekAS1 = new ActivityMetrics();
+        weekAS1.setMetrics(InterfaceName.AvgSpendOvertime);
+        weekAS1.setPeriodsConfig(Arrays.asList(TimeFilter.between(1, 1, PeriodStrategy.Template.Week.name())));
+
+        weekAS2 = new ActivityMetrics();
+        weekAS2.setMetrics(InterfaceName.AvgSpendOvertime);
+        weekAS2.setPeriodsConfig(Arrays.asList(TimeFilter.between(1, 2, PeriodStrategy.Template.Week.name())));
+
+        // Deprecated TotalSpendOvertime with WITHIN relation (before M25)
+        weekTSDepr = new ActivityMetrics();
+        weekTSDepr.setMetrics(InterfaceName.TotalSpendOvertime);
+        weekTSDepr.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+
+        // TotalSpendOvertime with BETWEEN relation (after M25)
+        weekTS1 = new ActivityMetrics();
+        weekTS1.setMetrics(InterfaceName.TotalSpendOvertime);
+        weekTS1.setPeriodsConfig(Arrays.asList(TimeFilter.between(1, 1, PeriodStrategy.Template.Week.name())));
+
+        weekTS2 = new ActivityMetrics();
+        weekTS2.setMetrics(InterfaceName.TotalSpendOvertime);
+        weekTS2.setPeriodsConfig(Arrays.asList(TimeFilter.between(1, 2, PeriodStrategy.Template.Week.name())));
 
         weekSC = new ActivityMetrics();
         weekSC.setMetrics(InterfaceName.SpendChange);
@@ -221,7 +244,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         everHP = new ActivityMetrics();
         everHP.setMetrics(InterfaceName.HasPurchased);
         everHP.setPeriodsConfig(Arrays.asList(TimeFilter.ever(PeriodStrategy.Template.Week.name())));
-        metricsList = Arrays.asList(weekMG, weekSW, weekSWDepr, weekAS, weekTS, weekSC, everHP);
+        metricsList = Arrays.asList(weekMG, weekSW, weekSWDepr, weekASDepr,
+                weekAS1, weekAS2, weekTSDepr, weekTS1, weekTS2, weekSC, everHP);
 
         metricsListLoadTest = new ArrayList<>();
         for (int i = 1; i <= 500; i++) {
@@ -456,110 +480,122 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     };
 
-    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1_1__AS, W_1__TS,
-    // W_1__W_2_2__SC, EVER__HP, W_2__SW
+    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_2__SW, W_1__AS,
+    // W_1_1__AS, W_1_2__AS, W_1__TS, W_1_2__TS,W_1_1__TS, W_1__W_2_2__SC,
+    // EVER__HP
     private Object[][] depivotedMetricsData = new Object[][] { //
-            { "AID1", "PID1", 33, 85, 45.0, 45.0, 125, true, 100 }, //
-            { "AID1", "PID2", 33, 85, 45.0, 45.0, 125, true, 81 }, //
-            { "AID1", "PID3", 33, 122, 45.0, 45.0, 125, true, 100 }, //
-            { "AID1", "PID4", 33, 122, 45.0, 45.0, 125, true, 131 }, //
+            { "AID1", "PID1", 33, 85, 100, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true }, //
+            { "AID1", "PID2", 33, 85, 81, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true }, //
+            { "AID1", "PID3", 33, 122, 100, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true }, //
+            { "AID1", "PID4", 33, 122, 131, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true }, //
 
-            { "AID2", "PID1", 25, 169, 20.0, 20.0, 100, true, 100 }, //
-            { "AID2", "PID2", 25, 169, 20.0, 20.0, 0, true, 162 }, //
-            { "AID2", "PID3", null, 0, 0.0, 0.0, -100, true, 100 }, //
-            { "AID2", "PID4", null, 0, 0.0, 0.0, 0, false, 0 }, //
+            { "AID2", "PID1", 25, 169, 100, 20.0, 20.0, 10.0, 20.0, 20.0, 20.0, 100, true }, //
+            { "AID2", "PID2", 25, 169, 162, 20.0, 20.0, 20.0, 20.0, 20.0, 40.0, 0, true }, //
+            { "AID2", "PID3", null, 0, 100, 0.0, 0.0, 10.0, 0.0, 0.0, 20.0, -100, true }, //
+            { "AID2", "PID4", null, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { "AID3", "PID1", -125, 150, 20.0, 20.0, 0, true, 140 }, //
-            { "AID3", "PID2", null, 0, 0.0, 0.0, 0, true, 0 }, //
-            { "AID3", "PID3", null, 0, 0.0, 0.0, 0, true, 0 }, //
-            { "AID3", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID3", "PID1", -125, 150, 140, 20.0, 20.0, 20.0, 20.0, 20.0, 40.0, 0, true }, //
+            { "AID3", "PID2", null, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true }, //
+            { "AID3", "PID3", null, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true }, //
+            { "AID3", "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { "AID4", "PID1", 75, 90, 60.0, 60.0, 100, true, 84 }, //
-            { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true, 140 }, //
-            { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true, 140 }, //
-            { "AID4", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID4", "PID1", 75, 90, 84, 60.0, 60.0, 30.0, 60.0, 60.0, 60.0, 100, true }, //
+            { "AID4", "PID2", null, 120, 140, 20.0, 20.0, 10.0, 20.0, 20.0, 20.0, 100, true }, //
+            { "AID4", "PID3", null, 120, 140, 20.0, 20.0, 10.0, 20.0, 20.0, 20.0, 100, true }, //
+            { "AID4", "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { "AID5", "PID1", null, null, 0.0, 0.0, 0, true, null }, //
-            { "AID5", "PID2", null, null, 0.0, 0.0, 0, true, null }, //
-            { "AID5", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
-            { "AID5", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID5", "PID1", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true }, //
+            { "AID5", "PID2", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true }, //
+            { "AID5", "PID3", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { "AID5", "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { "AID6", "PID1", 50, 100, 10.0, 10.0, 100, true, 100 }, //
-            { "AID6", "PID2", 50, 100, 10.0, 10.0, 100, true, 100 }, //
-            { "AID6", "PID3", null, null, 0.0, 0.0, 0, false , null}, //
-            { "AID6", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID6", "PID1", 50, 100, 100, 10.0, 10.0, 5.0, 10.0, 10.0, 10.0, 100, true }, //
+            { "AID6", "PID2", 50, 100, 100, 10.0, 10.0, 5.0, 10.0, 10.0, 10.0, 100, true }, //
+            { "AID6", "PID3", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { "AID6", "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { "AID7", "PID1", 50, null, 10.0, 10.0, 100, true, null }, //
-            { "AID7", "PID2", null, null, 0.0, 0.0, 0, false, null }, //
-            { "AID7", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
-            { "AID7", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID7", "PID1", 50, null, null, 10.0, 10.0, 5.0, 10.0, 10.0, 10.0, 100, true }, //
+            { "AID7", "PID2", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { "AID7", "PID3", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { "AID7", "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { "AID8", "PID1", null, null, 0.0, 0.0, -100, true, 100 }, //
-            { "AID8", "PID2", null, null, 0.0, 0.0, 0, false, null }, //
-            { "AID8", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
-            { "AID8", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID8", "PID1", null, null, 100, 0.0, 0.0, 10.0, 0.0, 0.0, 20.0, -100, true }, //
+            { "AID8", "PID2", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { "AID8", "PID3", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { "AID8", "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
-            { AID_NO_TXN, "PID1", null, null, 0.0, 0.0, 0, false, null }, //
-            { AID_NO_TXN, "PID2", null, null, 0.0, 0.0, 0, false, null }, //
-            { AID_NO_TXN, "PID3", null, null, 0.0, 0.0, 0, false, null }, //
-            { AID_NO_TXN, "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { AID_NO_TXN, "PID1", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID2", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID3", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID4", null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
     };
 
     // Schema: AccountId
-    // AM_PID1__W_1__MG, AM_PID1__W_1__SW, AM_PID2__W_2__SW, AM_PID1__W_1_1__AS,
-    // AM_PID1__W_1__TS, AM_PID1__W_1__W_2_2__SC, AM_PID1__EVER__HP
-    // AM_PID2__W_1__MG, AM_PID2__W_1__SW, AM_PID2__W_2__SW, AM_PID2__W_1_1__AS,
-    // AM_PID2__W_1__TS, AM_PID2__W_1__W_2_2__SC, AM_PID2__EVER__HP
-    // AM_PID3__W_1__MG, AM_PID3__W_1__SW, AM_PID3__W_2__SW, AM_PID3__W_1_1__AS,
-    // AM_PID3__W_1__TS, AM_PID3__W_1__W_2_2__SC, AM_PID3__EVER__HP
-    // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_2__SW, AM_PID4__W_1_1__AS,
-    // AM_PID4__W_1__TS, AM_PID4__W_1__W_2_2__SC, AM_PID4__EVER__HP
+    // AM_PID1__W_1__MG, AM_PID1__W_1__SW, AM_PID2__W_2__SW, AM_PID1__W_1__AS,
+    // AM_PID1__W_1_1__AS, AM_PID1__W_1_2__AS, AM_PID1__W_1__TS,
+    // AM_PID1__W_1_1__TS, AM_PID1__W_1_2__TS, AM_PID1__W_1__W_2_2__SC,
+    // AM_PID1__EVER__HP
+
+    // AM_PID2__W_1__MG, AM_PID2__W_1__SW, AM_PID2__W_2__SW, AM_PID2__W_1__AS,
+    // AM_PID2__W_1_1__AS, AM_PID2__W_1_2__AS, AM_PID2__W_1__TS,
+    // AM_PID2__W_1_1__TS, AM_PID2__W_1_2__TS, AM_PID2__W_1__W_2_2__SC,
+    // AM_PID2__EVER__HP
+
+    // AM_PID3__W_1__MG, AM_PID3__W_1__SW, AM_PID3__W_2__SW, AM_PID3__W_1__AS,
+    // AM_PID3__W_1_1__AS, AM_PID3__W_1_2__AS, AM_PID3__W_1__TS,
+    // AM_PID3__W_1_1__TS, AM_PID3__W_1_2__TS, AM_PID3__W_1__W_2_2__SC,
+    // AM_PID3__EVER__HP
+
+    // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_2__SW, AM_PID4__W_1__AS,
+    // AM_PID4__W_1_1__AS, AM_PID4__W_1_2__AS, AM_PID4__W_1__TS,
+    // AM_PID4__W_1_1__TS, AM_PID4__W_1_2__TS, AM_PID4__W_1__W_2_2__SC,
+    // AM_PID4__EVER__HP
     private Object[][] pivotMetricsData = new Object[][] {
             { "AID1", //
-                    33, 85, 100, 45.0, 45.0, 125, true, //
-                    33, 85, 81, 45.0, 45.0, 125, true, //
-                    33, 122, 100, 45.0, 45.0, 125, true, //
-                    33, 122, 131, 45.0, 45.0, 125, true }, //
+                    33, 85, 100, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true, //
+                    33, 85, 81, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true, //
+                    33, 122, 100, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true, //
+                    33, 122, 131, 45.0, 45.0, 32.5, 45.0, 45.0, 65.0, 125, true }, //
             { "AID2", //
-                    25, 169, 100, 20.0, 20.0, 100, true, //
-                    25, 169, 162, 20.0, 20.0, 0, true, //
-                    null, 0, 100, 0.0, 0.0, -100, true, //
-                    null, 0, 0, 0.0, 0.0, 0, false }, //
+                    25, 169, 100, 20.0, 20.0, 10.0, 20.0, 20.0, 20.0, 100, true, //
+                    25, 169, 162, 20.0, 20.0, 20.0, 20.0, 20.0, 40.0, 0, true, //
+                    null, 0, 100, 0.0, 0.0, 10.0, 0.0, 0.0, 20.0, -100, true, //
+                    null, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { "AID3", //
-                    -125, 150, 140, 20.0, 20.0, 0, true, //
-                    null, 0, 0, 0.0, 0.0, 0, true, //
-                    null, 0, 0, 0.0, 0.0, 0, true, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    -125, 150, 140, 20.0, 20.0, 20.0, 20.0, 20.0, 40.0, 0, true, //
+                    null, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true, //
+                    null, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { "AID4", //
-                    75, 90, 84, 60.0, 60.0, 100, true, //
-                    null, 120, 140, 20.0, 20.0, 100, true, //
-                    null, 120, 140, 20.0, 20.0, 100, true, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    75, 90, 84, 60.0, 60.0, 30.0, 60.0, 60.0, 60.0, 100, true, //
+                    null, 120, 140, 20.0, 20.0, 10.0, 20.0, 20.0, 20.0, 100, true, //
+                    null, 120, 140, 20.0, 20.0, 10.0, 20.0, 20.0, 20.0, 100, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { "AID5", //
-                    null, null, null, 0.0, 0.0, 0, true, //
-                    null, null, null, 0.0, 0.0, 0, true, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { "AID6", //
-                    50, 100, 100, 10.0, 10.0, 100, true, //
-                    50, 100, 100, 10.0, 10.0, 100, true, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    50, 100, 100, 10.0, 10.0, 5.0, 10.0, 10.0, 10.0, 100, true, //
+                    50, 100, 100, 10.0, 10.0, 5.0, 10.0, 10.0, 10.0, 100, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { "AID7", //
-                    50, null, null, 10.0, 10.0, 100, true, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    50, null, null, 10.0, 10.0, 5.0, 10.0, 10.0, 10.0, 100, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { "AID8", //
-                    null, null, 100, 0.0, 0.0, -100, true, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    null, null, 100, 0.0, 0.0, 10.0, 0.0, 0.0, 20.0, -100, true, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
             { AID_NO_TXN, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false }, //
 
     };
 
@@ -627,20 +663,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                     + record.get(InterfaceName.ProductId.name()).toString();
             Object[] expected = expectedMetrics.get(key);
             Assert.assertNotNull(expected);
-            Assert.assertTrue(
-                    isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekMG)), expected[2]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSW)), expected[3]));
-            Assert.assertTrue(isObjEquals(
-                    record.get(ActivityMetricsUtils.getNameWithPeriod(weekAS)), expected[4]));
-            Assert.assertTrue(isObjEquals(
-                    record.get(ActivityMetricsUtils.getNameWithPeriod(weekTS)), expected[5]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSC)),
-                    expected[6]));
-            Assert.assertTrue(
-                    isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(everHP)), expected[7]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(everHP)),
-                    expected[7]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSWDepr)), expected[8]));
+
+            IntStream.range(0, metricsList.size()).forEach(i -> {
+                Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(metricsList.get(i))),
+                        expected[i + 2]));
+            });
             cnt++;
         }
 

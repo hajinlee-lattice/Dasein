@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
     private static final long serialVersionUID = -7883873860033640700L;
 
     private List<ActivityMetrics> metrics;
+    // metrics name with period -> period boundaries
     private Map<String, List<Integer>> periodRanges;
     private List<String> groupByFields;
 
@@ -31,6 +33,56 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
         this.metrics = metrics;
         this.periodRanges = periodRanges;
         this.groupByFields = groupByFields;
+    }
+
+    public static class Context extends BaseAggregator.Context {
+        List<String> groupByVals;
+        MarginContext marginContext;
+        SpendChangeContext spendChangeContext;
+        // metrics name with period -> context
+        Map<String, TotalSpendOvertimeContext> totalSpendOvertimeContexts = new HashMap<>();
+        // metrics name with period -> context
+        Map<String, AvgSpendOvertimeContext> avgSpendOvertimeContexts = new HashMap<>();
+        HasPurchasedContext hasPurchasedContext;
+    }
+
+    /**
+     * Margin on product A purchase by a given account: Round (100* ((Revenue -
+     * Cost) of product A sell within last X weeks / cost of product A.)) If
+     * revenue or cost is not available, margin is not available
+     */
+    public static class MarginContext {
+        double totalAmount = 0;
+        double totalCost = 0;
+        Pair<Integer, Integer> periodRange;
+    }
+
+    /**
+     * Insight: % spend change is calculated by comparing average spend for a
+     * given product of a given account in the specified time window with that
+     * of the range in prior time window. If lastAvgSpend is not available,
+     * spend change is -100% If previousAvgSpend is not available, spend change
+     * is 100%
+     */
+    public static class SpendChangeContext {
+        double lastPeriodTotalSpend = 0;
+        double priorPeriodTotalSpend = 0;
+        Pair<Integer, Integer> lastPeriodRange;
+        Pair<Integer, Integer> priorPeriodRange;
+    }
+
+    public static class TotalSpendOvertimeContext {
+        double totalAmount = 0;
+        Pair<Integer, Integer> periodRange;
+    }
+
+    public static class AvgSpendOvertimeContext {
+        double totalAmount = 0;
+        Pair<Integer, Integer> periodRange;
+    }
+
+    public static class HasPurchasedContext {
+        boolean hasPurchased = false;
     }
 
     @Override
@@ -47,39 +99,42 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
         });
         for (ActivityMetrics m : metrics) {
             switch (m.getMetrics()) {
-                case Margin:
-                    context.marginContext = new MarginContext();
-                    context.marginContext.periodRange = Pair.of(
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
-                    break;
-                case SpendChange:
-                    context.spendChangeContext = new SpendChangeContext();
-                    context.spendChangeContext.lastPeriodRange = Pair.of(
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
-                    context.spendChangeContext.priorPeriodRange = Pair.of(
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(2),
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(3));
-                    break;
-                case TotalSpendOvertime:
-                    context.totalSpendOvertimeContext = new TotalSpendOvertimeContext();
-                    context.totalSpendOvertimeContext.periodRange = Pair.of(
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
-                    break;
-                case AvgSpendOvertime:
-                    context.avgSpendOvertimeContext = new AvgSpendOvertimeContext();
-                    context.avgSpendOvertimeContext.periodRange = Pair.of(
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
-                            periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
-                    break;
-                case HasPurchased:
-                    context.hasPurchasedContext = new HasPurchasedContext();
-                    break;
-                default:
-                    throw new UnsupportedOperationException(
-                            m.getMetrics() + " metrics is not supported");
+            case Margin:
+                context.marginContext = new MarginContext();
+                context.marginContext.periodRange = Pair.of(
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
+                break;
+            case SpendChange:
+                context.spendChangeContext = new SpendChangeContext();
+                context.spendChangeContext.lastPeriodRange = Pair.of(
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
+                context.spendChangeContext.priorPeriodRange = Pair.of(
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(2),
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(3));
+                break;
+            case TotalSpendOvertime:
+                TotalSpendOvertimeContext totalSpendOvertimeContext = new TotalSpendOvertimeContext();
+                totalSpendOvertimeContext.periodRange = Pair.of(
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
+                context.totalSpendOvertimeContexts.put(ActivityMetricsUtils.getNameWithPeriod(m),
+                        totalSpendOvertimeContext);
+                break;
+            case AvgSpendOvertime:
+                AvgSpendOvertimeContext avgSpendOvertimeContext = new AvgSpendOvertimeContext();
+                avgSpendOvertimeContext.periodRange = Pair.of(
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(0),
+                        periodRanges.get(ActivityMetricsUtils.getNameWithPeriod(m)).get(1));
+                context.avgSpendOvertimeContexts.put(ActivityMetricsUtils.getNameWithPeriod(m),
+                        avgSpendOvertimeContext);
+                break;
+            case HasPurchased:
+                context.hasPurchasedContext = new HasPurchasedContext();
+                break;
+            default:
+                throw new UnsupportedOperationException(m.getMetrics() + " metrics is not supported");
             }
         }
 
@@ -215,37 +270,44 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
 
     private Context updateTotalSpendOvertimeContext(Context context, TupleEntry arguments,
             ActivityMetrics metrics) {
-        if (!isValidPeriod(arguments, context.totalSpendOvertimeContext.periodRange)) {
+        TotalSpendOvertimeContext totalSpendOvertimeContext = context.totalSpendOvertimeContexts
+                .get(ActivityMetricsUtils.getNameWithPeriod(metrics));
+        if (!isValidPeriod(arguments, totalSpendOvertimeContext.periodRange)) {
             return context;
         }
         // treat null as 0 by design
         double amount = arguments.getDouble(InterfaceName.TotalAmount.name());
-        context.totalSpendOvertimeContext.totalAmount += amount;
+        totalSpendOvertimeContext.totalAmount += amount;
         return context;
     }
 
     private Tuple finalizeTotalSpendOvertime(Tuple result, Context context,
             ActivityMetrics metrics) {
+        TotalSpendOvertimeContext totalSpendOvertimeContext = context.totalSpendOvertimeContexts
+                .get(ActivityMetricsUtils.getNameWithPeriod(metrics));
         result.set(namePositionMap.get(ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                context.totalSpendOvertimeContext.totalAmount);
+                totalSpendOvertimeContext.totalAmount);
         return result;
     }
 
     private Context updateAvgSpendOvertimeContext(Context context, TupleEntry arguments,
             ActivityMetrics metrics) {
-        if (!isValidPeriod(arguments, context.avgSpendOvertimeContext.periodRange)) {
+        AvgSpendOvertimeContext avgSpendOvertimeContext = context.avgSpendOvertimeContexts
+                .get(ActivityMetricsUtils.getNameWithPeriod(metrics));
+        if (!isValidPeriod(arguments, avgSpendOvertimeContext.periodRange)) {
             return context;
         }
         // treat null as 0 by design
         double amount = arguments.getDouble(InterfaceName.TotalAmount.name());
-        context.avgSpendOvertimeContext.totalAmount += amount;
+        avgSpendOvertimeContext.totalAmount += amount;
         return context;
     }
 
     private Tuple finalizeAvgSpendOvertime(Tuple result, Context context, ActivityMetrics metrics) {
-        double avgSpendOvertime = context.avgSpendOvertimeContext.totalAmount
-                / (context.avgSpendOvertimeContext.periodRange.getRight()
-                        - context.avgSpendOvertimeContext.periodRange.getLeft() + 1);
+        AvgSpendOvertimeContext avgSpendOvertimeContext = context.avgSpendOvertimeContexts
+                .get(ActivityMetricsUtils.getNameWithPeriod(metrics));
+        double avgSpendOvertime = avgSpendOvertimeContext.totalAmount
+                / (avgSpendOvertimeContext.periodRange.getRight() - avgSpendOvertimeContext.periodRange.getLeft() + 1);
         result.set(namePositionMap.get(ActivityMetricsUtils.getNameWithPeriod(metrics)),
                 avgSpendOvertime);
         return result;
@@ -263,51 +325,5 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
         return result;
     }
 
-    public static class Context extends BaseAggregator.Context {
-        List<String> groupByVals;
-        MarginContext marginContext;
-        SpendChangeContext spendChangeContext;
-        TotalSpendOvertimeContext totalSpendOvertimeContext;
-        AvgSpendOvertimeContext avgSpendOvertimeContext;
-        HasPurchasedContext hasPurchasedContext;
-    }
 
-    /**
-     * Margin on product A purchase by a given account: Round (100* ((Revenue -
-     * Cost) of product A sell within last X weeks / cost of product A.)) If
-     * revenue or cost is not available, margin is not available
-     */
-    public static class MarginContext {
-        double totalAmount = 0;
-        double totalCost = 0;
-        Pair<Integer, Integer> periodRange;
-    }
-
-    /**
-     * Insight: % spend change is calculated by comparing average spend for a
-     * given product of a given account in the specified time window with that
-     * of the range in prior time window. If lastAvgSpend is not available,
-     * spend change is -100% If previousAvgSpend is not available, spend change
-     * is 100%
-     */
-    public static class SpendChangeContext {
-        double lastPeriodTotalSpend = 0;
-        double priorPeriodTotalSpend = 0;
-        Pair<Integer, Integer> lastPeriodRange;
-        Pair<Integer, Integer> priorPeriodRange;
-    }
-
-    public static class TotalSpendOvertimeContext {
-        double totalAmount = 0;
-        Pair<Integer, Integer> periodRange;
-    }
-
-    public static class AvgSpendOvertimeContext {
-        double totalAmount = 0;
-        Pair<Integer, Integer> periodRange;
-    }
-
-    public static class HasPurchasedContext {
-        boolean hasPurchased = false;
-    }
 }

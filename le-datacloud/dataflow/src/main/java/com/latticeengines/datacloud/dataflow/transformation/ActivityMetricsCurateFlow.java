@@ -386,6 +386,10 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
         return fms;
     }
 
+    /**
+     * @param metrics
+     * @return metrics name with period -> period boundaries
+     */
     private Map<String, List<Integer>> preparePeriodRanges(List<ActivityMetrics> metrics) {
         Map<String, List<Integer>> periodRanges = new HashMap<>();
         metrics.forEach(m -> {

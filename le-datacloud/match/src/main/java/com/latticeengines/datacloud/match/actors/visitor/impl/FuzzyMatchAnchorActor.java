@@ -57,7 +57,7 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
             return false;
         } else if (CollectionUtils.isNotEmpty(matchTraveler.getTransitionHistory())) {
             // Finished traveling around current decision graph but need to
-            // return to previoud junction actor
+            // return to previous junction actor
             String junction = matchTraveler.getTransitionHistory().peek().getJunction();
             ActorRef junctionRef = matchActorSystem.getActorRef(junction);
             Response response = new Response();
