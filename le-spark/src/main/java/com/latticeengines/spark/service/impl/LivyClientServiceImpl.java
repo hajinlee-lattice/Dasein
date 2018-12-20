@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
 import org.apache.livy.scalaapi.LivyScalaClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ import com.latticeengines.spark.service.LivyClientService;
 
 @Service("livyClientService")
 public class LivyClientServiceImpl implements LivyClientService {
+
+    private static final Logger log = LoggerFactory.getLogger(LivyClientServiceImpl.class);
 
     @Inject
     private VersionManager versionManager;
@@ -34,6 +38,7 @@ public class LivyClientServiceImpl implements LivyClientService {
             String version = versionManager.getCurrentVersion();
             String shadedJar = String.format("/app/%s/%s/spark/lib/le-spark-%s-shaded.jar",
                     stackName, version, version);
+            log.info("Adding spark shaded jar to client " + host + ": " + shadedJar);
             javaClient.addJar(new URI("hdfs://" + shadedJar));
             if (extraJars != null) {
                 extraJars.forEach(p -> {

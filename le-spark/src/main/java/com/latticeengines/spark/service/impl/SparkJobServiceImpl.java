@@ -94,7 +94,7 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     private <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     String submitJobWithRetry(LivyScalaClient client, J job) {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(20);
         return retry.execute(context -> {
             if (context.getRetryCount() > 0) {
                 log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry submit spark job " //
