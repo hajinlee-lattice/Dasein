@@ -53,7 +53,7 @@
         <javax.jsr250.version>1.0</javax.jsr250.version> <!-- implemented by spring -->
         <javax.servlet.version>4.0.1</javax.servlet.version> <!-- implemented by tomcat -->
         <javax.jsp.version>2.3.3</javax.jsp.version> <!-- implemented by tomcat -->
-        <javax.annonation.version>1.3.1</javax.annonation.version> <!-- compile on java 11 -->
+        <javax.annonation.version>1.3.2</javax.annonation.version> <!-- compile on java 11 -->
         <javax.jaxb.version>2.3.0</javax.jaxb.version> <!-- compile on java 11 -->
         <javax.ws.version>2.3.0</javax.ws.version> <!-- compile on java 11 -->
 
@@ -2282,11 +2282,6 @@
             </dependency>
 
             <!-- Web Applications -->
-            <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>jsr250-api</artifactId>
-                <version>${javax.jsr250.version}</version>
-            </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>

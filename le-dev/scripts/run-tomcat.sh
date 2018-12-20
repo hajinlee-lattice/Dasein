@@ -12,6 +12,10 @@ export LE_PROPDIR=$WSHOME/le-config/conf/env/${LE_ENVIRONMENT}
 echo "Using LE_PROPDIR=${LE_PROPDIR}"
 echo "Using LE_CLIENT_ADDRESS=${LE_CLIENT_ADDRESS}"
 
+if [ ! -z "${J11_HOME}" ]; then
+    export JAVA_HOME=${J11_HOME}
+fi
+
 export JAVA_OPTS="-Xmx4g -XX:ReservedCodeCacheSize=1g"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.net.preferIPv4Stack=true"
 export JAVA_OPTS="${JAVA_OPTS} -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
@@ -28,7 +32,7 @@ if [ "${ENABLE_JACOCO}" == "true" ]; then
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:${JACOCO_AGENT_FILE}=includes=com.latticeengines.*,destfile=${JACOCO_DEST_FILE},append=true,jmx=true"
 fi
 
-export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common
+export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$HADOOP_HOME/share/hadoop/common
 
 if [ $# -eq 0 ]; then
     echo "Starting tomcat normally..."

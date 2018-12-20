@@ -36,6 +36,7 @@ public class EnrichResource extends BaseEnrich {
     @ApiOperation(value = "Get enrichment values for one record")
     public EnrichResponse getLeadEnrichmentValues(HttpServletRequest request, @PathVariable String uuid,
             @RequestBody EnrichRequest enrichRequest) {
+        // TODO: M26 change to lookup Enrichment entity table
         Pair<String, String> unpacked = UuidUtils.unpackPairUuid(uuid);
         String tenantId = unpacked.getKey();
         String credentialId = unpacked.getValue();

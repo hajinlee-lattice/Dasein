@@ -13,6 +13,10 @@ rm -Rf $HADOOP_HOME/logs/userlogs/*
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5001,server=y,suspend=n"
 export YARN_NODEMANAGER_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5002,server=y,suspend=n"
 
+if [ ! -z "${J8_HOME}" ]; then
+    export JAVA_HOME=${J8_HOME}
+fi
+
 ${HADOOP_HOME}/sbin/hadoop-daemon.sh start namenode
 ${HADOOP_HOME}/sbin/hadoop-daemon.sh start datanode
 ${HADOOP_HOME}/sbin/yarn-daemon.sh start resourcemanager

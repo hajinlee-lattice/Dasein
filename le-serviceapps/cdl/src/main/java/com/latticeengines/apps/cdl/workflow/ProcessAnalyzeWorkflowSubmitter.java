@@ -157,7 +157,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
             updateActions(actionIds, pidWrapper.getPid());
 
-            String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
+            String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, actionIds,
                     initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 

@@ -94,6 +94,11 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         }
     }
 
+    public String latestBuildNumber() {
+        DataCloudVersion latest = requestLatestVersion("");
+        return latest.getDataCloudBuildNumber();
+    }
+
     public DataCloudVersion latestVersion() {
         return latestVersion("");
     }

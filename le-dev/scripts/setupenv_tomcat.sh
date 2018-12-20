@@ -6,7 +6,7 @@ ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.13
+    TOMCAT_VERSION=9.0.14
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
@@ -67,7 +67,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     chmod 600 /etc/ledp/tls/cacerts
 fi
 
-for file in 'server.xml' 'web.xml' 'context.xml' 'tomcat-users.xml'; do
+for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-users.xml'; do
     cp -f ${CATALINA_HOME}/conf/${file} ${CATALINA_HOME}/conf/${file}.BAK
     cp -f ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
 done

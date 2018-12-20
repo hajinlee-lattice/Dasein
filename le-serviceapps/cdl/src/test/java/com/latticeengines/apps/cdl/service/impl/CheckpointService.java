@@ -492,7 +492,7 @@ public class CheckpointService {
     }
 
     protected void updateDataCloudBuildNumber() {
-        String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
+        String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
         DataCollection.Version initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainTestTenant.getId(),
                 initialVersion);
