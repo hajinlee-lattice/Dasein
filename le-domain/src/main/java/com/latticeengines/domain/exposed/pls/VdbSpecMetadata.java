@@ -1,7 +1,12 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class VdbSpecMetadata {
@@ -170,4 +175,39 @@ public class VdbSpecMetadata {
     public void setExtensions(List<VdbMetadataExtension> extensions) {
         this.extensions = extensions;
     }
+
+    @JsonIgnore
+    private final static Set<String> NUMERIC_TYPE = new HashSet<>(Arrays.asList(
+            "byte", "int", "long", "float", "double"));
+
+    @JsonIgnore
+    private final static Set<String> BOOLEAN_TYPE = new HashSet<>(Collections.singletonList("bit"));
+
+    @JsonIgnore
+    private final static Set<String> DATE_TYPE = new HashSet<>(Arrays.asList("date", "datetime", "datetimeoffset"));
+
+    @JsonIgnore
+    public boolean isNumericType() {
+        if (this.dataType == null) {
+            return false;
+        }
+        return NUMERIC_TYPE.contains(this.dataType.toLowerCase());
+    }
+
+    @JsonIgnore
+    public boolean isDateType() {
+        if (this.dataType == null) {
+            return false;
+        }
+        return DATE_TYPE.contains(this.dataType.toLowerCase());
+    }
+
+    @JsonIgnore
+    public boolean isBooleanType() {
+        if (this.dataType == null) {
+            return false;
+        }
+        return BOOLEAN_TYPE.contains(this.dataType.toLowerCase());
+    }
+
 }

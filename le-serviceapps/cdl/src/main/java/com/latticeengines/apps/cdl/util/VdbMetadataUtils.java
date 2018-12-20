@@ -294,7 +294,7 @@ public class VdbMetadataUtils {
     private static FundamentalType resolveFundamentalType(VdbSpecMetadata metadata) {
         String vdbFundamentalType = metadata.getFundamentalType();
         if (StringUtils.isBlank(vdbFundamentalType)) {
-            return null;
+            return resolveFundamentalTypeFromDataType(metadata);
         }
 
         if ("Bit".equalsIgnoreCase(vdbFundamentalType)) {
@@ -311,6 +311,18 @@ public class VdbMetadataUtils {
             return FundamentalType.fromName(vdbFundamentalType);
         } catch (Exception e) {
             log.warn("Found unknown VDB fundamental type: FundamentalType=" + vdbFundamentalType);
+            return resolveFundamentalTypeFromDataType(metadata);
+        }
+    }
+
+    private static FundamentalType resolveFundamentalTypeFromDataType(VdbSpecMetadata metadata) {
+        if (metadata.isBooleanType()) {
+            return FundamentalType.BOOLEAN;
+        } else if (metadata.isDateType()) {
+            return FundamentalType.DATE;
+        } else if (metadata.isNumericType()) {
+            return FundamentalType.NUMERIC;
+        } else {
             return null;
         }
     }
