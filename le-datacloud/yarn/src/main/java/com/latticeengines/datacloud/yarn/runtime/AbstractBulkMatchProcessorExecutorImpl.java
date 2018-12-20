@@ -316,7 +316,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             String str = String.valueOf(value);
             if ("1".equals(str) || "yes".equalsIgnoreCase(str) || "Y".equalsIgnoreCase(str)) {
                 return true;
-            } else if ("1".equals(str) || "no".equalsIgnoreCase(str) || "N".equalsIgnoreCase(str)) {
+            } else if ("0".equals(str) || "no".equalsIgnoreCase(str) || "N".equalsIgnoreCase(str)) {
                 return false;
             } else {
                 return Boolean.valueOf(str);
@@ -328,11 +328,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     private void finalizeBlock(ProcessorContext processorContext) throws IOException {
-        uploadOutput(processorContext);
+        Long count = uploadOutput(processorContext);
+        log.info("There are in total " + count + " records in the avros in output dir.");
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
-        Long count = AvroUtils.count(yarnConfiguration, processorContext.getOutputAvroGlob());
-        log.info("There are in total " + count + " records in the avros " + processorContext.getOutputAvroGlob());
         if (processorContext.getReturnUnmatched()) {
             if (!processorContext.getExcludePublicDomain()
                     && !processorContext.getBlockSize().equals(count.intValue())) {
@@ -383,7 +382,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     }
 
     @MatchStep
-    private void  uploadOutput(ProcessorContext processorContext) {
+    private long uploadOutput(ProcessorContext processorContext) {
+        long count = AvroUtils.countLocalDir("output");
         String hdfsDir = processorContext.getHdfsOutputDir();
         RetryTemplate retry = RetryUtils.getRetryTemplate(5);
         try {
@@ -402,6 +402,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         } finally {
             FileUtils.deleteQuietly(new File("output"));
         }
+        return count;
     }
 
     private void finalizeMatchOutput(ProcessorContext processorContext) throws IOException {
