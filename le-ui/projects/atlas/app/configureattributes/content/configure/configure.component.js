@@ -454,7 +454,6 @@ angular.module('lp.configureattributes.configure', [])
                 deferred.resolve(true);
             } else {
                 vm.modalCallbackExit = function(args) {
-                    console.log(args);
                     var modal = Modal.get('configure_attributes');
                     Modal.modalRemoveFromDOM(modal, {name: 'configure_attributes'});
                     if ('cancel' === args.action) {
