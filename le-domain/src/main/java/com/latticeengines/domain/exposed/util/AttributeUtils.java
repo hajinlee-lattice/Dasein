@@ -232,4 +232,33 @@ public class AttributeUtils {
             // warn
         }
     }
+
+    public static String toJavaClass(String dataType) {
+        String javaClass = null;
+        if (StringUtils.isNotBlank(dataType)) {
+            switch (dataType.toLowerCase()) {
+                case "'string'":
+                    javaClass = String.class.getSimpleName();
+                    break;
+                case "int":
+                    javaClass = Integer.class.getSimpleName();
+                    break;
+                case "long":
+                    javaClass = Long.class.getSimpleName();
+                    break;
+                case "float":
+                    javaClass = Float.class.getSimpleName();
+                    break;
+                case "double":
+                    javaClass = Double.class.getSimpleName();
+                    break;
+                case "boolean":
+                    javaClass = Boolean.class.getSimpleName();
+                    break;
+                default:
+                    log.warn("Cannot convert data-type " + dataType + " to java class.");
+            }
+        }
+        return javaClass;
+    }
 }

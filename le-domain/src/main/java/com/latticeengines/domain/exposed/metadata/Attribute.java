@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
@@ -1145,6 +1146,7 @@ public class Attribute
         metadata.setDescription(getDescription());
         metadata.setLogicalDataType(getLogicalDataType());
         metadata.setIsHiddenForRemodelingUI(isHiddenForRemodelingUI());
+        metadata.setJavaClass(AttributeUtils.toJavaClass(getDataType()));
         if (StringUtils.isBlank(getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {
@@ -1236,4 +1238,6 @@ public class Attribute
             properties.put("Timezone", timezone);
         }
     }
+
 }
+
