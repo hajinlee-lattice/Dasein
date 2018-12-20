@@ -317,7 +317,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count.intValue(), 2);
+        Assert.assertEquals(count.intValue(), 3);
     }
 
     @Test(groups = "deployment", enabled = false, dependsOnMethods = {
