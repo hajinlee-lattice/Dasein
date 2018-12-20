@@ -91,9 +91,9 @@ angular.module('common.datacloud.query.results', [
                     if(bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
                         vm.selectedBuckets.push(bucket.bucket);
                     }
-                    if(!bucketsToLaunch.length) {
-                        vm.selectedBuckets.push(bucket.bucket);
-                    }
+                    // if(!bucketsToLaunch.length) {
+                    //     vm.selectedBuckets.push(bucket.bucket);
+                    // }
 
                     // Use this if you want to round up to nearest integer percentage
                     // If you do use this, use this in the view HTML ({{ ::bucket.percentage }}%)
