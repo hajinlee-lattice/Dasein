@@ -224,6 +224,7 @@ angular
                                     ? job.inputs.MODEL_DELETED == "true"
                                     : null,
                                 startTimestamp: job.startTimestamp,
+                                endTimestamp: job.endTimestamp,
                                 applicationLogUrl: job.outputs
                                     ? job.outputs.YARN_LOG_LINK_PATH
                                     : null,

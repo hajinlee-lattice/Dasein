@@ -1,7 +1,7 @@
 <div class="le-cell le-col-start-1 le-col-span-2">
 
-    <span ng-if="showScheduleTime(job)">
-        {{job.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
+    <span>
+        {{getTimeStamp(job)}}
     </span>
 </div>
 <div class="le-cell le-col-start-3 le-col-span-2">

@@ -28,7 +28,7 @@ module.exports = merge(common, {
                 ]
             }
         ]
-    } /*,
+    },
   optimization: {
     minimizer: [
       new UglifyJsPlugin({
@@ -39,5 +39,5 @@ module.exports = merge(common, {
     splitChunks: {
       // chunks: "all"
     }
-  }*/
+  }
 });

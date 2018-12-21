@@ -2,7 +2,7 @@ angular.module('lp.jobs.import.row', [
     'common.modal'
 ])
 .directive('importJobRow', [function () {
-    var controller = ['$scope', '$q', '$timeout', 'JobsStore', 'Modal', 'AuthorizationUtility', 'Banner', function ($scope, $q, $timeout, JobsStore, Modal, AuthorizationUtility, Banner) {
+    var controller = ['$scope', '$q', '$filter', 'JobsStore', 'Modal', 'AuthorizationUtility', 'Banner', function ($scope, $q, $filter, JobsStore, Modal, AuthorizationUtility, Banner) {
         $scope.thejob = $scope.job;
         $scope.disableButton = false;
         $scope.maxRowsTooltip = 3;
@@ -67,6 +67,8 @@ angular.module('lp.jobs.import.row', [
         }
         
         function init() {
+            // console.log('THE JOB ', $scope.job.startTimestamp, $scope.job.endTimestamp);
+
 
             if ($scope.vm.rowStatus[$scope.index] != undefined && $scope.vm.rowStatus[$scope.index] == true) {
                 $scope.expanded = true;
@@ -183,14 +185,25 @@ angular.module('lp.jobs.import.row', [
             }
             return !allCompleted;
         };
-
-        $scope.showScheduleTime = function(job){
-            if(!$scope.disableRunButton(job) && $scope.showRunButton(job)){
-                return true;
+        
+        $scope.getTimeStamp = function (job) {
+            if((job.endTimestamp !== null && job.jobStatus != 'Ready')){
+                let ret = $filter('date')(job.startTimestamp, 'MM/dd/yyyy h:mma');
+                return ret;
             }else{
-                return false;
+                return '';
             }
         };
+
+        // $scope.showScheduleTime = function(job){
+        //     console.log('TEST');
+        //     if((job.endTimestamp !== null)||(!$scope.disableRunButton(job) && $scope.showRunButton(job))){
+        //         return true;
+        //     }else{
+        //         console.log(job.endTimestamp);
+        //         return false;
+        //     }
+        // };
         
         $scope.mouseDownRun  = function(job){
             $scope.disableButton = true;
