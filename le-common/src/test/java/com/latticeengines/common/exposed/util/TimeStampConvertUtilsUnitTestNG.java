@@ -1,17 +1,20 @@
 package com.latticeengines.common.exposed.util;
 
+import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
 
 public class TimeStampConvertUtilsUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtilsUnitTestNG.class);
 
     @Test(groups = { "unit", "functional" })
     public void testConvertToLong() throws Exception {
+        String unsupportedDate = "13-Feb-17";
+        Assert.expectThrows(IllegalArgumentException.class, () -> TimeStampConvertUtils.convertToLong(unsupportedDate));
+
         String str = "4/13/2016";
         long expectedTimestamp = computeTimestamp(str, false, "M/d/yyyy", "");
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), expectedTimestamp);

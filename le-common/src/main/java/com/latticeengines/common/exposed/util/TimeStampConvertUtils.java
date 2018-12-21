@@ -96,6 +96,10 @@ public class TimeStampConvertUtils {
             //log.warn("Stack Trace is:\n" + sw.toString());
             log.warn("Attempting to use Natty Date Parser to process the date/time.");
 
+            // DO NOT trust natty parser with any month letters in date string!
+            if (date.chars().filter(Character::isLetter).count() >= 3) {
+                throw new IllegalArgumentException("Cannot parse date: " + date);
+            }
             LogManager.getLogger(Parser.class).setLevel(Level.OFF);
             // Create date/time parser with default timezone UTC.
             Parser parser = new Parser(TimeZone.getTimeZone("UTC"));
