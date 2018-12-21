@@ -594,7 +594,7 @@ angular.module('common.datacloud.query.results', [
 
         sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
 
-        sections.contacts = _contacts + (vm.launchUnscored ? (vm.accountsCoverage.unscoredContactCount ? vm.accountsCoverage.unscoredContactCount  : 0) + 100 : 0); //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
+        sections.contacts = _contacts + (vm.launchUnscored ? (vm.accountsCoverage.unscoredContactCount ? vm.accountsCoverage.unscoredContactCount  : 0) : 0); //vm.accountsCoverage.contactCount || 0; // need to find campaign with contactCount to test this
 
         // sections.suppressed = parseInt(sections.total - sections.selected);
 
