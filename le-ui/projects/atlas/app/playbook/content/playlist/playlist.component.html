@@ -113,16 +113,6 @@
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
-<!--                         
-                         <button 
-                            type="button"
-                            class="button blue-button pull-right"
-                            ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
-                            ui-sref="home.playbook.dashboard({play_name: play.name})">
-                            Continue
-                        </button>
-
- -->                     
                         <button 
                             type="button"
                             class="button blue-button pull-right"
@@ -133,8 +123,8 @@
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-disabled="vm.current.tileStates[play.name].launching == true || play.ratingEngine.status != 'ACTIVE'"
                             ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
+                            ng-disabled="vm.current.tileStates[play.name].launching == true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
                             {{vm.launchButtonLabel(play)}}
                         </button>

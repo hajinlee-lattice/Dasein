@@ -101,7 +101,9 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         vm.totalCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount; // small
                         PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], {
                             lookupId: accountId, 
-                            restrictNullLookupId: true
+                            restrictNullLookupId: true,
+                            loadContactsCount: true,
+                            loadContactsCountByBucket: true
                         }).then(function(result) {
                             PlaybookWizardStore.setValidation('crmselection', form.$valid);
 

@@ -1012,6 +1012,8 @@ angular
                                 deferred.resolve({
                                     accountCount: 0,
                                     unscoredAccountCount: result.Account || 0,
+                                    contactCount: 0,
+                                    unscoredContactCount: result.Contact || 0,
                                     bucketCoverageCounts: []
                                 });
                             });
