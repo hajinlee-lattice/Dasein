@@ -14,7 +14,7 @@
         <module name="SuppressWarningsHolder"/>
 
         <module name="ExecutableStatementCount">
-            <property name="max" value="40"/>
+            <property name="max" value="100"/>
         </module>
 
     </module>
