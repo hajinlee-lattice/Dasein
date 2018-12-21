@@ -322,7 +322,6 @@ angular.module('lp.import')
     };
 
     this.nextSaveFieldDocuments = function(nextState, callback, setIgnoredToArray) {
-        console.log(1111);
         var callback = (typeof callback === 'function' ? callback : function(){});
 
         if(setIgnoredToArray) {
