@@ -66,6 +66,7 @@ public class DataCollectionArtifactEntityMgrImplTestNG extends CDLFunctionalTest
                 mainTestTenant, testVersion);
         Assert.assertNotNull(artifacts);
         Assert.assertEquals(artifacts.size(), 2);
+        Assert.assertTrue(artifacts.get(0).getCreateTime() > artifacts.get(1).getCreateTime());
         Assert.assertEquals(artifacts.get(0).getName(), artifactName2);
         Assert.assertEquals(artifacts.get(1).getName(), artifactName1);
 

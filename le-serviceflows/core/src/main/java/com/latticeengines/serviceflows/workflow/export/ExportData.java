@@ -92,7 +92,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                     CSVWriter.NO_QUOTE_CHARACTER);
 
             File[] files = localCsvDir.listFiles(file -> {
-                return file.getName().matches("\\w+_part-\\d+.csv$|.*-p-\\d+.csv$");
+                return file.getName().matches("\\w+_part-[\\w\\d-]+.csv$|.*-p-\\d+.csv$");
             });
 
             if (files == null) {
