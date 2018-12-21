@@ -1,5 +1,5 @@
 import React, { Component } from "../../../../common/react-vendor";
-import { getAngularState } from "../react/states";
+import { getAngularState } from "./states";
 
 import httpService from "../../../../common/app/http/http-service";
 import { SUCCESS } from "../../../../common/app/http/response";

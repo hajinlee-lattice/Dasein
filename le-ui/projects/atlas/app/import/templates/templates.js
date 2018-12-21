@@ -8,10 +8,9 @@ import {
   VERTICAL
 } from "../../../../common/widgets/toolbar/le-toolbar";
 import "./templates.scss";
-import { clean, getRouter } from "../react/components/routing-test";
+import { clean, getRouter } from "./react-routing";
 import { UIRouter, UIView } from "../../../../common/react-vendor";
-import SummaryContainer from "./components/summary";
-import { setAngularState } from "../react/states";
+import { setAngularState } from "./states";
 import httpService from "../../../../common/app/http/http-service";
 import Observer from "../../../../common/app/http/observer";
 

@@ -3,7 +3,7 @@ import React, {
     servicesPlugin,
     hashLocationPlugin
 } from "common/react-vendor";
-import { hello, about, templatelist } from "../states";
+import {templatelist } from "./states";
 
 var router;
 
@@ -14,7 +14,7 @@ export const getRouter = () => {
         router.plugin(hashLocationPlugin);
 
         // Register each state
-        const states = [hello, about, templatelist];
+        const states = [templatelist];
         states.forEach(state => router.stateRegistry.register(state));
 
         // Set initial and fallback states

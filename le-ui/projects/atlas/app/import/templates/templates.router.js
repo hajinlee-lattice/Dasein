@@ -1,5 +1,5 @@
 import './templates';
-
+import './components/summary';
 angular
 .module('lp.importtemplates', [
     
