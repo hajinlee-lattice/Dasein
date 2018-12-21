@@ -130,7 +130,8 @@ public class PLSComponentManager {
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
             if (StringUtils.isNotBlank(info.properties.status)) {
-                tenant.setStatus(TenantStatus.valueOf(info.properties.status));
+                // change to inactive to avoid user visit tenant eagerly
+                tenant.setStatus(TenantStatus.INACTIVE);
             }
             if (StringUtils.isNotBlank(info.properties.tenantType)) {
                 tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));

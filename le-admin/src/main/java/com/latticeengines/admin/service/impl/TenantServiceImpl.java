@@ -184,8 +184,10 @@ public class TenantServiceImpl implements TenantService {
                     orchestratorProps, prodAndExternalAminInfo);
             // record tenant status after being created
             TenantDocument tenantDoc = getTenant(contractId, tenantId);
-            if (tenantDoc != null && !BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state)) {
-                tenantInfo.properties.status = TenantStatus.INACTIVE.name();
+            if (tenantDoc != null) {
+                if (!BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state)) {
+                    tenantInfo.properties.status = TenantStatus.INACTIVE.name();
+                }
                 updateTenantInfo(contractId, tenantId, tenantInfo);
             }
         });
