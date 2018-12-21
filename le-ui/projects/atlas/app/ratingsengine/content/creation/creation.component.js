@@ -47,14 +47,12 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             var model = vm.ratingEngine.latest_iteration.AI;
             vm.type = vm.ratingEngine.type.toLowerCase();
 
-            vm.periodType = vm.datacollectionstatus.ApsRollingPeriod;
-
-            console.log(model);
-
             vm.predictionType = model.predictionType;  
             vm.trainingSegment = model.trainingSegment;
 
             if (vm.type === 'cross_sell') {
+
+                vm.periodType = vm.datacollectionstatus.ApsRollingPeriod;
 
                 var filtersLength = Object.keys(model.advancedModelingConfig.cross_sell.filters).length,
                     trainingSegment = model.trainingSegment,
@@ -121,6 +119,9 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
                 var dataStore = model.advancedModelingConfig.custom_event.dataStores;
                 vm.availableAttributes = dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
+
+                console.log(vm.availableAttributes);
+                console.log(dataStore);
 
                 vm.updateSteps();
 
