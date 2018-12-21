@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_DYNAMO;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
@@ -8,6 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,10 +21,15 @@ import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -72,6 +80,12 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Inject
     private ExportToDynamo exportToDynamoStep;
+
+    @Inject
+    protected DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private YarnConfiguration yarnConfiguration;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -128,7 +142,8 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     private boolean inWorkflow(int seq, AbstractWorkflow<?> workflow) {
         String namespace = getStepNamespace(seq);
-        return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".") || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
+        return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
+                || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
     }
 
     private boolean isExportToRedshiftStep(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -156,12 +171,33 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean skipApsGeneration(AbstractStep<? extends BaseStepConfiguration> step) {
-        boolean skip = false;
-        if (!transactionChoreographer.update && !transactionChoreographer.rebuild && !rebuildAps(step)) {
-            log.info("Skip APS generation because there is no change in Transaction data or no enforced rebuild.");
-            skip = true;
+        boolean skip = true;
+        if ((transactionChoreographer.update || transactionChoreographer.rebuild || rebuildAps(step))
+                && hasAnalyticProduct(step)) {
+            skip = false;
+        } else {
+            log.info(
+                    "Skip APS generation because there is no change in Transaction data, has no analytic product or no enforced rebuild.");
         }
         return skip;
+    }
+
+    private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {
+        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
+        Table productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
+                active.complement());
+        if (productTable == null) {
+            log.info("Did not find product table in inactive version.");
+            productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
+                    active);
+            if (productTable == null) {
+                log.info("Did not find product table in active&inactive version.");
+                return false;
+            }
+        }
+        log.info(String.format("productTableName for customer %s is %s", customerSpace, productTable.getName()));
+        return ProductUtils.hasAnalyticProduct(yarnConfiguration, productTable);
     }
 
     private boolean rebuildAps(AbstractStep<? extends BaseStepConfiguration> step) {

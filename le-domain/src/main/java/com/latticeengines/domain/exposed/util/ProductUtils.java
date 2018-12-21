@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
@@ -227,6 +228,19 @@ public class ProductUtils {
         });
 
         return productMap;
+    }
+
+    public static boolean hasAnalyticProduct(Configuration yarnConfiguration, Table productTable) {
+        boolean foundAnalyticProduct = false;
+        List<Product> productList = new ArrayList<>(
+                loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
+        for (Product product : productList) {
+            if (ProductType.Analytic.name().equals(product.getProductType())) {
+                foundAnalyticProduct = true;
+                break;
+            }
+        }
+        return foundAnalyticProduct;
     }
 
     private static String getString(GenericRecord record, String field) {

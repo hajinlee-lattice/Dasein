@@ -4,7 +4,6 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACT
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,8 +29,6 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
@@ -318,15 +315,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
 
         log.info(String.format("productTableName for customer %s is %s", customerSpace, productTable.getName()));
-        boolean foundAnalyticProduct = false;
-        List<Product> productList = new ArrayList<>(
-                ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
-        for (Product product : productList) {
-            if (ProductType.Analytic.name().equals(product.getProductType())) {
-                foundAnalyticProduct = true;
-                break;
-            }
-        }
+        boolean foundAnalyticProduct = ProductUtils.hasAnalyticProduct(yarnConfiguration, productTable);
         if (!foundAnalyticProduct) {
             log.info("Didn't find Analytic Product in " + productTable.getName());
             String warning = "No analytic product found. Skip generating curated attributes.";
