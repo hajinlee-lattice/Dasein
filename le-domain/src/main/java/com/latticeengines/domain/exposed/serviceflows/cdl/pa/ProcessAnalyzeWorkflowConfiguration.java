@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoS
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CommitEntityMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
@@ -45,6 +46,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessTransactionWorkflowConfiguration.Builder processTransactionWorkflowBuilder = new ProcessTransactionWorkflowConfiguration.Builder();
         private CuratedAttributesWorkflowConfiguration.Builder curatedAttributesWorkflowBuilder = new CuratedAttributesWorkflowConfiguration.Builder();
         private ProcessRatingWorkflowConfiguration.Builder processRatingWorkflowBuilder = new ProcessRatingWorkflowConfiguration.Builder();
+        private CommitEntityMatchWorkflowConfiguration.Builder commitEntityWorkflowBuilder = new CommitEntityMatchWorkflowConfiguration.Builder();
 
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
@@ -66,6 +68,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.customer(customerSpace);
             curatedAttributesWorkflowBuilder.customer(customerSpace);
             processRatingWorkflowBuilder.customer(customerSpace);
+            commitEntityWorkflowBuilder.customer(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
@@ -94,6 +97,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             curatedAttributesWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            commitEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             exportToRedshift.setInternalResourceHostPort(internalResourceHostPort);
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
@@ -199,6 +203,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder matchEntities(Set<String> entitySet) {
+            commitEntityWorkflowBuilder.entitySet(entitySet);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
@@ -209,6 +218,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processTransactionWorkflowBuilder.build());
             configuration.add(curatedAttributesWorkflowBuilder.build());
             configuration.add(processRatingWorkflowBuilder.build());
+            configuration.add(commitEntityWorkflowBuilder.build());
             configuration.add(combineStatisticsConfiguration);
             configuration.add(exportToRedshift);
             configuration.add(exportToDynamo);

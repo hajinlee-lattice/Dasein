@@ -274,6 +274,23 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         return getRetryTemplate(env).execute(ctx -> dynamoItemService.deleteItem(getTableName(env), key));
     }
 
+    @Override
+    public boolean batchCreate(EntityMatchEnvironment env, Tenant tenant, List<EntityRawSeed> rawSeeds) {
+        checkNotNull(env, tenant);
+        if (CollectionUtils.isEmpty(rawSeeds)) {
+            return false;
+        }
+        List<Item> batchItems = rawSeeds.stream()
+                .map(seed -> {
+                    Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId());
+                    getStringAttributes(seed).forEach(item::withString);
+                    getStringSetAttributes(seed).forEach(item::withStringSet);
+                    return item;
+                }).collect(Collectors.toList());
+        dynamoItemService.batchWrite(getTableName(env), batchItems);
+        return true;
+    }
+
     /*
      * 1. clear all lookup entries & attributes that are in the input seed.
      * 2. if useOptimisticLocking, will only clear if the existing seed has the same internal version as the one

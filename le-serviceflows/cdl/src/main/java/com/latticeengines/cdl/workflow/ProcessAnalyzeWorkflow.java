@@ -19,6 +19,7 @@ import com.latticeengines.serviceflows.workflow.export.ExportProcessAnalyzeToS3;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
+import com.latticeengines.serviceflows.workflow.match.CommitEntityMatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -79,6 +80,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private ProcessAnalyzeChoreographer choreographer;
 
+    @Inject
+    private CommitEntityMatchWorkflow commitEntityMatchWorkflow;
+
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -94,6 +98,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(exportToDynamo) //
                 .next(processRatingWorkflow) //
                 .next(generateProcessingReport) //
+                .next(commitEntityMatchWorkflow)
                 .next(awsApsGeneratorStep) //
                 .next(exportProcessAnalyzeToS3) //
                 .next(finishProcessing) //

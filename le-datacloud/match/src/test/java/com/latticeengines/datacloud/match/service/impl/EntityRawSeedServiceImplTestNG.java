@@ -111,15 +111,19 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     }
 
     @Test(groups = "functional")
-    private void testScan() {
+    private void testScanAndBatchCreate() throws InterruptedException {
         List<String> seedIds = Arrays.asList("testScan1", "testScan2", "testScan3", "testScan4", "testScan5",
                 "testScan6", "testScan7");
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
+        EntityMatchEnvironment destEnv = EntityMatchEnvironment.SERVING;
 
         // make sure we don't have this seed
         for(String seedId : seedIds) {
             cleanup(env, seedId);
+        }
+        for(String seedId : seedIds) {
+            cleanup(destEnv, seedId);
         }
 
         // create successfully because no seed at the moment
@@ -185,8 +189,18 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(loopCount, 2);
         Assert.assertEquals(scanSeeds.size(), seedIds.size());
 
+        Assert.assertTrue(entityRawSeedService.batchCreate(destEnv, TEST_TENANT, scanSeeds));
+        Thread.sleep(1000L);
+        EntityRawSeed rawSeed = entityRawSeedService.get(destEnv, TEST_TENANT, TEST_ENTITY, seedIds.get(0));
+        Assert.assertNotNull(rawSeed);
+        List<EntityRawSeed> rawSeeds = entityRawSeedService.get(destEnv, TEST_TENANT, TEST_ENTITY, seedIds);
+        Assert.assertEquals(rawSeeds.size(), seedIds.size());
+
         for(String seedId : seedIds) {
             cleanup(env, seedId);
+        }
+        for(String seedId : seedIds) {
+            cleanup(destEnv, seedId);
         }
     }
 

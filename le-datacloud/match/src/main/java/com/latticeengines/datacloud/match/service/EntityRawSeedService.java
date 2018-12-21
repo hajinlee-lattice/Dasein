@@ -131,4 +131,15 @@ public interface EntityRawSeedService {
     boolean delete(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull String entity, @NotNull String seedId);
+
+    /**
+     * Batch create seeds.
+     *
+     * @param env environment to perform operation in
+     * @param tenant target tenant
+     * @param rawSeeds seed list to be created.
+     * @return true if the batch create succeeded
+     */
+    boolean batchCreate(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<EntityRawSeed> rawSeeds);
 }
