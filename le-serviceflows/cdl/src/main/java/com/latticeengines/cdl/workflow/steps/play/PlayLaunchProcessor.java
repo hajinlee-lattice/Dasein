@@ -354,9 +354,9 @@ public class PlayLaunchProcessor {
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
         RatingEngine ratingEngine = play.getRatingEngine();
-        ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
-        if (ratingEngine == null) {
-            throw new NullPointerException(String.format("Rating Engine for play %s cannot be null", play.getName()));
+        
+        if (ratingEngine != null) {
+            ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
         }
 
         MetadataSegment segment;
@@ -366,7 +366,10 @@ public class PlayLaunchProcessor {
             log.info(String.format(
                     "No Target segment defined for Play %s, falling back to target segment of Rating Engine %s",
                     play.getName(), ratingEngine.getSegment()));
-            segment = play.getRatingEngine().getSegment();
+            if (ratingEngine != null) {
+                segment = play.getRatingEngine().getSegment();
+            }
+            segment = null;
         }
 
         if (segment == null) {

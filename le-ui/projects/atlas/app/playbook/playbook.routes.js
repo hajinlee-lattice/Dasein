@@ -765,8 +765,13 @@ angular
                     };
 
                     if(play.ratingEngine) {
-                        settings.ratingEngine = {
-                            id: play.ratingEngine.id
+                        if(play.ratingEngine.id == null){
+                            settings.ratingEngine = null;
+                        }
+                        else{
+                            settings.ratingEngine = {
+                                id: play.ratingEngine.id
+                            }
                         }
                     }
 

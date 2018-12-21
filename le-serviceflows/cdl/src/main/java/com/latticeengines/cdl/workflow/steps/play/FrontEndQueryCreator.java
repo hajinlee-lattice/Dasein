@@ -76,10 +76,7 @@ public class FrontEndQueryCreator {
 
         if (ratingEngine != null) {
             prepareQueryUsingRatingsDefn(playLaunchContext);
-        } else {
-            throw new NullPointerException(String.format("Rating Engine is not set for the play %s", play.getName()));
-        }
-
+        } 
         if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
             contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
         }
