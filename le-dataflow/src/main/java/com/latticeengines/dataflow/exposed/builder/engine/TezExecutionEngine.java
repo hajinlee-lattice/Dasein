@@ -49,6 +49,7 @@ public class TezExecutionEngine extends ExecutionEngine {
             properties.put("tez.runtime.io.sort.mb", String.valueOf(sortmb));
             log.info("Automatically set tez.runtime.io.sort.mb = " + properties.get("tez.runtime.io.sort.mb"));
         }
+        properties.put("tez.runtime.unordered.output.buffer.size-mb", "512");
         properties.put("tez.lib.uris",
                 config.get(FileSystem.FS_DEFAULT_NAME_KEY) + PropertyUtils.getProperty("tez.lib.uris"));
         return properties;

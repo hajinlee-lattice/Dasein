@@ -11,12 +11,17 @@ function processErrors
 }
 
 
+if [ ! -z "${J8_HOME}" ]; then
+    export JAVA_HOME=${J8_HOME}
+fi
+
 PYTHON=${PYTHON:=python}
 
 # Test for required env variables
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
 printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among developers}"
 echo "You are using this python: ${PYTHON}"
+echo "You are using this java: ${JAVA_HOME}"
 
 # Expand aliases
 echo "Expanding aliases."
