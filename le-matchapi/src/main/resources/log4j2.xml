@@ -3,6 +3,7 @@
     <Properties>
         <Property name="app">matchapi</Property>
         <Property name="log.dir">/var/log/ledp</Property>
+        <Property name="pattern.console">%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} %highlight{[$${app}]}{FATAL=magenta, ERROR=magenta, WARN=magenta, INFO=magenta, DEBUG=magenta, TRACE=magenta} %highlight{[%t]}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} %highlight{%-5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=white, TRACE=black} %highlight{%c{1.}:%L}{FATAL=cyan, ERROR=cyan, WARN=cyan, INFO=cyan, DEBUG=cyan, TRACE=cyan} - %m%n</Property>
     </Properties>
 
     <Appenders>
