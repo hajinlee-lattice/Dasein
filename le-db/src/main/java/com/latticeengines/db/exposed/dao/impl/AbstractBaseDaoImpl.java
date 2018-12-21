@@ -181,12 +181,12 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             if (i > 0) {
                 sb.append(" and ");
             }
-            sb.append(String.format("%s = ?", fieldsAndValues[2 * i]));
+            sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
         }
         String queryStr = String.format("from %s where %s", getEntityClass().getSimpleName(), sb.toString());
         Query<T> query = session.createQuery(queryStr);
         for (int i = 0; i < fieldsAndValues.length / 2; i++) {
-            query.setParameter(i, fieldsAndValues[2 * i + 1]);
+            query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);
         }
         return query.list();
     }

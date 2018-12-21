@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -48,6 +49,42 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     public void cleanup() {
         // just in case
         TEST_PATCH_BOOK.setPid(null);
+    }
+
+    @Test(groups = "functional", dataProvider = "patchBookQuery")
+    private void testQuery(@NotNull PatchBook.Type type, Boolean hotFix) throws Exception {
+        // prepare state
+        PatchBook book = new PatchBook();
+        book.setCleanup(false);
+        if (hotFix != null) {
+            book.setHotFix(hotFix);
+        }
+        book.setType(type);
+        patchBookEntityMgr.create(book);
+
+        Thread.sleep(1000L);
+
+        Assert.assertNotNull(book.getPid());
+        List<PatchBook> books;
+        if (hotFix != null) {
+            books = patchBookEntityMgr.findByTypeAndHotFix(type, hotFix);
+            Assert.assertNotNull(books);
+
+        } else {
+            books = patchBookEntityMgr.findByType(type);
+        }
+        Assert.assertFalse(books.isEmpty()); // should at least have the book we created
+        books.forEach(b -> {
+            Assert.assertNotNull(b);
+            // make sure type & flag matches
+            Assert.assertEquals(b.getType(), type);
+            if (hotFix != null) {
+                Assert.assertEquals(b.isHotFix(), hotFix.booleanValue());
+            }
+        });
+
+        // cleanup
+        patchBookEntityMgr.delete(book);
     }
 
     /*
@@ -165,5 +202,20 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
             // use serialized form for verification
             Assert.assertEquals(JsonUtils.serialize(book), JsonUtils.serialize(expectedBook));
         }
+    }
+
+    @DataProvider(name = "patchBookQuery")
+    private Object[][] providePatchBookQueryTestData() {
+        return new Object[][] {
+                { PatchBook.Type.Attribute, true },
+                { PatchBook.Type.Attribute, false },
+                { PatchBook.Type.Attribute, null },
+                { PatchBook.Type.Lookup, true },
+                { PatchBook.Type.Lookup, false },
+                { PatchBook.Type.Lookup, null },
+                { PatchBook.Type.Domain, true },
+                { PatchBook.Type.Domain, false },
+                { PatchBook.Type.Domain, null },
+        };
     }
 }
