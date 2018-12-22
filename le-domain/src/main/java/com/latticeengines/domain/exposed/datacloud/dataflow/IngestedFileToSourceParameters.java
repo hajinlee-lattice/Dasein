@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 
@@ -24,6 +25,9 @@ public class IngestedFileToSourceParameters extends TransformationFlowParameters
 
     @JsonProperty("CompressType")
     private CompressType compressType;
+
+    @JsonIgnore
+    private String applicationId;
 
     public String getIngestionName() {
         return ingestionName;
@@ -79,6 +83,14 @@ public class IngestedFileToSourceParameters extends TransformationFlowParameters
 
     public void setCompressType(CompressType compressType) {
         this.compressType = compressType;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
 }

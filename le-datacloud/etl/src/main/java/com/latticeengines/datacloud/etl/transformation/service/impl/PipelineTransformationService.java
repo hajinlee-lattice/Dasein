@@ -18,11 +18,11 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
@@ -55,7 +55,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
-import com.latticeengines.monitor.exposed.service.SlackService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 /**
@@ -85,16 +84,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     private MetadataProxy metadataProxy;
 
     @Autowired
-    private SlackService slackService;
-
-    @Value("${datacloud.slack.webhook.url}")
-    private String slackWebHookUrl;
-
-    @Value("${common.le.environment}")
-    private String leEnv;
-
-    @Value("${common.le.stack}")
-    private String leStack;
+    private DataCloudNotificationService notificationService;
 
     private final String PIPELINE = DataCloudConstants.PIPELINE_TEMPSRC_PREFIX;
     private final String VERSION = "_version_";
@@ -251,7 +241,8 @@ public class PipelineTransformationService extends AbstractTransformationService
 
             if (inputSteps != null) {
                 for (Integer inputStep : inputSteps) {
-                    System.out.println("total steps " + steps.length + "stepidx " + stepIdx + " basesourcnt " + baseSourceCount + " input step " + inputStep);
+                    log.info("total steps " + steps.length + "stepidx " + stepIdx + " basesourcnt " + baseSourceCount
+                            + " input step " + inputStep);
                     baseSources[baseSourceIdx] = steps[inputStep].getTarget();
                     baseTemplates[baseSourceIdx] = steps[inputStep].getTargetTemplate();
                     baseVersions.add(steps[inputStep].getTargetVersion());
@@ -439,8 +430,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 slackMessage = String.format("Step %d finished after %s :smile:", i,
                         DurationFormatUtils.formatDurationHMS(stepDuration));
                 sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
-                        SlackSettings.Color.GOOD,
-                        transConf);
+                        SlackSettings.Color.GOOD, transConf);
 
                 if (i == steps.length - 1) {
                     slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:",
@@ -520,7 +510,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 log.info("Iterative step " + step.getName() + " converged, final count = "
                         + String.valueOf(step.getCount()));
                 // Disable hive table creation
-                //createSourceHiveTable(step.getTarget(), step.getTargetVersion());
+                // createSourceHiveTable(step.getTarget(),
+                // step.getTargetVersion());
                 return true;
             } else {
                 if (!converged) {
@@ -813,10 +804,8 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     private void sendSlack(String title, String text, SlackSettings.Color color,
             PipelineTransformationConfiguration transConf) {
-        if (StringUtils.isNotEmpty(slackWebHookUrl) && transConf.isEnableSlack()) {
-            slackService.sendSlack(
-                    new SlackSettings(slackWebHookUrl, title, "[" + leEnv + "-" + leStack + "]", text, SLACK_BOT,
-                            color));
+        if (transConf.isEnableSlack()) {
+            notificationService.sendSlack(title, text, SLACK_BOT, color);
         }
     }
 

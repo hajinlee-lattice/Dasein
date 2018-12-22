@@ -95,6 +95,7 @@ public class IngestedFileToSourceTransformer
             IngestedFileToSourceTransformerConfig configuration = getConfiguration(confStr);
             IngestedFileToSourceParameters parameters = getParameters(progress, baseSources, baseTemplates,
                     targetTemplate, configuration, confStr, baseSourceVersions);
+            parameters.setApplicationId(progress.getYarnAppId());
             dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersions.get(0), parameters);
         } catch (Exception e) {
             log.error("Failed to transform data", e);

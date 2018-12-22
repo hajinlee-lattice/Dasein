@@ -25,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
@@ -35,7 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.IngestedFileToSource
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-
+import com.latticeengines.domain.exposed.monitor.SlackSettings;
 
 @Component("ingestedFileToSourceDataFlowService")
 public class IngestedFileToSourceDataFlowService extends AbstractTransformationDataFlowService {
@@ -46,6 +47,9 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
 
     @Autowired
     private SimpleCascadingExecutor simpleCascadingExecutor;
+
+    @Autowired
+    private DataCloudNotificationService notificationService;
 
     public void executeDataFlow(Source source, String workflowDir, String baseVersion,
             IngestedFileToSourceParameters parameters) {
@@ -72,7 +76,8 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
                 List<String> compressedFiles = scanDir(ingestionDir, parameters.getCompressedFileNameOrExtension(),
                         true, false);
                 log.info("Found " + compressedFiles.size() + " compressed files.");
-                uncompress(compressedFiles, uncompressedDir, parameters.getCompressType());
+                uncompress(compressedFiles, uncompressedDir, parameters.getCompressType(),
+                        parameters.getApplicationId());
             }
             log.info("Searching if target files with name/extension " + parameters.getFileNameOrExtension()
                     + " exist in dir " + searchDir);
@@ -94,7 +99,7 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
         }
     }
 
-    private void uncompress(List<String> compressedFiles, Path uncompressedDir, CompressType type)
+    private void uncompress(List<String> compressedFiles, Path uncompressedDir, CompressType type, String applicationId)
             throws IOException {
         BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>();
         ExecutorService uncompressExecutor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.MINUTES, runnableQueue);
@@ -113,7 +118,14 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
                 throw new RuntimeException(e);
             }
             if (!Boolean.TRUE.equals(res.getRight())) {
-                throw new RuntimeException("Fail to uncompress file " + res.getLeft());
+                // Don't fail the entire job because some data provider (eg.
+                // Bombora) often provides 1 or 2 corrupted compressed file out
+                // of 50+ as total. Don't want manual operation every time. But
+                // send both email and slack message as alerts to raise
+                // attention.
+                // If by chance all the files are failed to be uncompressed,
+                // csv-to-avro job will fail.
+                sendUncompressFailureNotification(res.getLeft(), applicationId);
             }
         }
         uncompressExecutor.shutdown();
@@ -135,7 +147,6 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
         };
         return task;
     }
-
 
     private void uncompress(String compressedFile, Path uncompressedDir, CompressType type) throws IOException {
         Path compressedPath = new Path(compressedFile);
@@ -195,5 +206,13 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
             IngestedFileToSourceParameters parameters) throws IOException {
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, inputPath, outputPath, parameters.getDelimiter(),
                 parameters.getQualifier(), parameters.getCharset(), false);
+    }
+
+    private void sendUncompressFailureNotification(String file, String applicationId) {
+        String subject = "File process failure notification [" + applicationId + "]";
+        String content = "Fail to uncompress file " + file + ". Current job has skipped the file to proceed. "
+                + "No need manual operation now, but please pay attention or contact data provider.";
+        notificationService.sendSlack(subject, content, "IngestedFileToSourceTransformer", SlackSettings.Color.DANGER);
+        notificationService.sendEmail(subject, content, null);
     }
 }

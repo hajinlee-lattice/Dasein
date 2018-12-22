@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.collection.service;
 
 @Deprecated
-final public class CollectionDataFlowKeysDeprecated {
+public final class CollectionDataFlowKeysDeprecated {
 
     public static final String MOST_RECENT_FLOW = "MostRecentFlow";
     public static final String PIVOT_FLOW = "PivotFlow";

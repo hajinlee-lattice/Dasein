@@ -41,6 +41,8 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_052.OUT.gz", baseSourceVersion);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_053.OUT.gz", baseSourceVersion);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_054.OUT.gz", baseSourceVersion);
+        // 051 is a corrupted version to test skipping failure
+        uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_051.OUT.gz", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
