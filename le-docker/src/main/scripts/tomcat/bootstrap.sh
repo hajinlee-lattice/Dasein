@@ -17,6 +17,7 @@ docker run -d --net host \
     -e LE_ENVIRONMENT=dev \
     -e LE_STACK=${LE_STACK} \
     -e ENABLE_JACOCO=false \
+    -e CATALINA_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m" \
     -v ${WSHOME}/le-config/conf/env/dev/latticeengines.properties:/etc/ledp/latticeengines.properties \
     -v ${WSHOME}/le-docker/src/main/scripts/tomcat/jacoco:/mnt/efs/jacoco:rw \
     -v ${WSHOME}/le-docker/src/main/scripts/tomcat/logs:/opt/apache-tomcat-8.5.15/logs:rw \

@@ -118,11 +118,9 @@
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="600000" writeTimeout="600000"
                              compression="on" compressibleMimeType="text/plain,application/json"/>
-            <SSLHostConfig>
+            <SSLHostConfig protocols="TLSv1.2" insecureRenegotiation="true">
                 <Certificate certificateKeyFile="/etc/pki/tls/server.key"
                              certificateFile="/etc/pki/tls/server.crt"
-                             protocols="TLSv1.2"
-                             insecureRenegotiation="true"
                              type="RSA"/>
             </SSLHostConfig>
         </Connector>
@@ -178,7 +176,7 @@
                        resourceName="UserDatabase"/>
             </Realm>
 
-            <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="false"/>
         </Engine>
     </Service>
 </Server>
