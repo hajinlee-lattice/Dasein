@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,8 +58,6 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
         MatchOutput output = initializeMatchOutput(input, columnSelection, metadatas);
         context.setInput(input);
         context.setOutput(output);
-        // TODO(dzheng): I believe we skip input data processing here and do it in the Entity Match Planner Actor?
-        //context = scanInputData(input, context);
         return context;
     }
 
@@ -68,7 +65,7 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
         // For now, we only handle the Column Metadata case for a predefined column selection of ID.
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
             ColumnMetadata atlasIdColumnMetadata = new ColumnMetadata();
-            atlasIdColumnMetadata.setAttrName(InterfaceName.AtlasId.name());
+            atlasIdColumnMetadata.setAttrName(InterfaceName.EntityId.name());
             atlasIdColumnMetadata.setJavaClass(String.class.getSimpleName());
             return Collections.singletonList(atlasIdColumnMetadata);
         } else {

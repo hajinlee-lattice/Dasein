@@ -48,13 +48,7 @@ public class MatchOutput {
     // BEGIN CDL MATCH PROPERTIES
     // ====================
 
-    // $CDL$ Should we duplicate MatchInput fields for CDL Match here?  Looks like
-    // TODO(dzheng):  Looks like initializeMatchOutput at least needs keyMap.
-    @JsonProperty("EntityKeyMap")
     private List<MatchInput.EntityKeyMap> entityKeyMap;
-
-    @JsonProperty("OperationalMode")
-    private OperationalMode operationalMode;
 
     // ====================
     // END CDL MATCH PROPERTIES
@@ -210,11 +204,9 @@ public class MatchOutput {
         return getOutputFields().size();
     }
 
+    @JsonProperty("EntityKeyMap")
     public List<MatchInput.EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
 
+    @JsonProperty("EntityKeyMap")
     public void setEntityKeyMap(List<MatchInput.EntityKeyMap> entityKeyMap) { this.entityKeyMap = entityKeyMap; }
-
-    public OperationalMode getOperationalMode() { return operationalMode; }
-
-    public void setOperationalMode(OperationalMode operationalMode) { this.operationalMode = operationalMode; }
 }

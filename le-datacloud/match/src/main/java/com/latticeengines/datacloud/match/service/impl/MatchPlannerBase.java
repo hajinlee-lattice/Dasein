@@ -204,20 +204,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
-
-        // TODO(dzheng): Should we be copying EntityKeyMap to the MatchOutput?  What about the other Entity Match
-        //     specific fields?
-        output.setOperationalMode(input.getOperationalMode());
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
-            output.setEntityKeyMap(input.getEntityKeyMapList());
-        } else {
-            output.setKeyMap(input.getKeyMap());
-        }
+        output.setEntityKeyMap(input.getEntityKeyMapList());
+        output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
         if (CollectionUtils.isNotEmpty(metadatas)) {
             output = appendMetadata(output, metadatas);
         } else {
-            // TODO(dzheng): Does this case have to work for Entity Match?
+            if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+                throw new UnsupportedOperationException("Column metadatas should already be set for Entity Match");
+            }
             output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
         }
         output = parseOutputFields(output, input.getMetadataFields());

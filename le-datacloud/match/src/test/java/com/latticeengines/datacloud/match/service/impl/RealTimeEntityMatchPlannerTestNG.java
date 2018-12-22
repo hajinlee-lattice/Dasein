@@ -6,11 +6,9 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -50,7 +48,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
 
         // Check Column Metadata
         List<Column> expectedColumns = new ArrayList<>();
-        expectedColumns.add(new Column(InterfaceName.AtlasId.name()));
+        expectedColumns.add(new Column(InterfaceName.EntityId.name()));
         Assert.assertEquals(context.getColumnSelection().getColumns(), expectedColumns);
 
         // Test MatchOutput set up.
@@ -60,14 +58,11 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         MatchInput.EntityKeyMap entityKeyMap = output.getEntityKeyMap().get(0);
         Assert.assertEquals(entityKeyMap.getBusinessEntity(), "Account");
         Assert.assertEquals(entityKeyMap.getSystemIdPriority(), Arrays.asList("AccountId", "MktoId", "SfdcId"));
-        Assert.assertEquals(output.getOperationalMode(), OperationalMode.ENTITY_MATCH);
     }
 
     private MatchInput prepareMatchInput() {
         MatchInput input = new MatchInput();
-        if (StringUtils.isEmpty(input.getRootOperationUid())) {
-            input.setRootOperationUid(UUID.randomUUID().toString());
-        }
+        input.setRootOperationUid(UUID.randomUUID().toString());
         input.setTenant(new Tenant("PD_Test"));
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
