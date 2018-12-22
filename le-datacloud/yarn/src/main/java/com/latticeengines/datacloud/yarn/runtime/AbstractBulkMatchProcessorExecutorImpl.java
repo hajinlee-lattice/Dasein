@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -238,7 +239,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     private void writeErrorDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
             throws IOException {
-        if (!processorContext.getOriginalInput().isEntityMatch()
+        if (!OperationalMode.ENTITY_MATCH.equals(processorContext.getOriginalInput().getOperationalMode())
                 || !processorContext.getOriginalInput().isAllocateId()) {
             return;
         }

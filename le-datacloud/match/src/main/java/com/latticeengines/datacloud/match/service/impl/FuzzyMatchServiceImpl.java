@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
@@ -86,10 +87,14 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
-                matchRecord.setLatticeAccountId(result);
-                if (!traveler.getMatchInput().isEntityMatch()) {
-                    matchRecord.setCdlId(result);
+
+                if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
+                    matchRecord.setEntityId(result);
+                } else {
+                    // TODO(jwinter/lming): Add code to be able to return Lattice Account ID along with Atlas ID.
+                    matchRecord.setLatticeAccountId(result);
                 }
+
                 if (StringUtils.isNotEmpty(result)) {
                     matchRecord.setMatched(true);
                 }
@@ -212,25 +217,36 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @MatchStep
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
             MatchInput matchInput) {
-
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
+            // TODO(jwinter): Need to make sure InternalOutputRecord works for Entity Match.
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
             if (StringUtils.isNotEmpty(matchRecord.getLatticeAccountId())
-                    || StringUtils.isNotEmpty(matchRecord.getCdlId()) || matchRecord.isFailed()) {
+                    || StringUtils.isNotEmpty(matchRecord.getEntityId()) || matchRecord.isFailed()) {
                 matchFutures.add(null);
             } else {
-                MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
+                // For now, pass in a null MatchKeyTuple for Entity Match since this will be handled by the first Actor
+                // which is a Match Planner actor.
+                MatchKeyTuple matchKeyTuple = null;
+                if (!OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
+                    matchKeyTuple = createMatchKeyTuple(matchRecord);
+                }
                 MatchTraveler travelContext = new MatchTraveler(matchInput.getRootOperationUid(), matchKeyTuple);
                 matchRecord.setTravelerId(travelContext.getTravelerId());
                 travelContext.setMatchInput(matchInput);
+                if (OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
+                    // For Entity Match, set target entity in Match Traveler.
+                    travelContext.setTargetEntity(matchInput.getTargetEntity());
+                }
                 travelContext.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);
                 matchFutures.add(askMatchAnchor(travelContext));
 
-                // send to collector
-                String domain = matchKeyTuple.getDomain();
-                if (StringUtils.isNotBlank(domain)) {
-                    domainCollectService.enqueue(domain);
+                // Send all domains to collector.  For Entity Match this is done in Match Planner Actor.
+                if (!OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
+                    String domain = matchKeyTuple.getDomain();
+                    if (StringUtils.isNotBlank(domain)) {
+                        domainCollectService.enqueue(domain);
+                    }
                 }
             }
         }

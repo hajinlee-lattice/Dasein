@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -63,7 +62,6 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
     @Test(groups = "functional")
     public void testUnionSelection() {
         MatchInput input = prepareMatchInput();
-        input.setPredefinedSelection(Predefined.Model);
         ColumnSelection columnSelection = new ColumnSelection();
         List<Column> columns = Arrays.asList(new Column("TechIndicator_Dropbox"), new Column("TechIndicator_Box"),
                 new Column("TechIndicator_Splunk"));
@@ -75,16 +73,14 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
         unionSelection.setCustomSelection(columnSelection);
         input.setUnionSelection(unionSelection);
         MatchContext context = matchPlanner.plan(input);
-        Integer expectedColumns = columnSelectionService.parsePredefinedColumnSelection(Predefined.RTS, null).getColumns()
-                .size() + 3;
+        Integer expectedColumns = columnSelectionService.parsePredefinedColumnSelection(Predefined.RTS,
+                null).getColumns().size() + 3;
         Assert.assertEquals((Integer) context.getColumnSelection().getColumns().size(), expectedColumns);
     }
 
     private MatchInput prepareMatchInput() {
         MatchInput input = new MatchInput();
-        if (StringUtils.isEmpty(input.getRootOperationUid())) {
-            input.setRootOperationUid(UUID.randomUUID().toString());
-        }
+        input.setRootOperationUid(UUID.randomUUID().toString());
         input.setTenant(new Tenant("PD_Test"));
         input.setPredefinedSelection(Predefined.Model);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();

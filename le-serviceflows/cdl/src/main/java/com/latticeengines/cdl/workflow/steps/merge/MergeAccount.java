@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -201,6 +204,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(false);
         matchInput.setDataCloudVersion(getDataCloudVersion());
+        // TODO(lming): This won't work for Entity Match case.  Need to set entityKeyMapList instead.
         matchInput.setKeyMap(getMatchKeys());
         matchInput.setSkipKeyResolution(false);
         matchInput.setUseDnBCache(true);
@@ -209,7 +213,28 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setMatchDebugEnabled(false);
         matchInput.setPartialMatchEnabled(true);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-        matchInput.setEntityMatch(configuration.isEntityMatchEnabled());
+        // TODO(lming): We should set the correct operational mode for other match cases here.
+        if (configuration.isEntityMatchEnabled()) {
+            matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
+            // TODO(lming): Allocate ID should be set appropriately.
+            matchInput.setAllocateId(true);
+            // TODO(lming): Is it safe to assume here that the target entity is always Account?
+            matchInput.setTargetEntity("Account");
+
+            EntityKeyMap entityKeyMap = new EntityKeyMap();
+            entityKeyMap.setBusinessEntity("Account");
+            entityKeyMap.setKeyMap(getMatchKeys());
+            // TODO(lming): Not sure how the System ID priority is supposed to get set up.  For now, copy from the
+            //     Key Map.
+            if (MapUtils.isNotEmpty(entityKeyMap.getKeyMap())
+                    && entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
+                entityKeyMap.setSystemIdPriority(entityKeyMap.getKeyMap().get(MatchKey.SystemId));
+            }
+            List<EntityKeyMap> entityKeyMapList = new ArrayList<>();
+            entityKeyMapList.add(entityKeyMap);
+            matchInput.setEntityKeyMapList(entityKeyMapList);
+        }
+        // TODO(lming): Need to set targetEntity and allocateId.
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }

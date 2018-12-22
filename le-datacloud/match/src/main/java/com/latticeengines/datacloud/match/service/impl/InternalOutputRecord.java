@@ -30,7 +30,7 @@ public class InternalOutputRecord extends OutputRecord {
     private Boolean failed = false;
     private String travelerId;
     private String latticeAccountId;
-    private String cdlId;
+    private String entityId;
 
     private String lookupIdKey;
     private String lookupIdValue;
@@ -172,12 +172,12 @@ public class InternalOutputRecord extends OutputRecord {
         this.latticeAccountId = latticeAccountId;
     }
 
-    public String getCdlId() {
-        return cdlId;
+    public String getEntityId() {
+        return entityId;
     }
 
-    public void setCdlId(String cdlId) {
-        this.cdlId = cdlId;
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
 
     public String getLookupIdKey() {

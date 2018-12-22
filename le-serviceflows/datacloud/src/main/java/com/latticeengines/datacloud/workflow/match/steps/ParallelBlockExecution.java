@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -497,7 +498,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void mergeBlockErrorResult(ApplicationId appId) {
-        if (!jobConfigurations.get(0).getMatchInput().isEntityMatch()
+        if (!OperationalMode.ENTITY_MATCH.equals(jobConfigurations.get(0).getMatchInput().getOperationalMode())
                 || !jobConfigurations.get(0).getMatchInput().isAllocateId()) {
             return;
         }

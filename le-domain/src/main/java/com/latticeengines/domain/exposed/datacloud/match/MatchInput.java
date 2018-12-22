@@ -164,9 +164,6 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("PartialMatchEnabled")
     private boolean partialMatchEnabled;
 
-    @JsonProperty("EntityMatch")
-    private boolean entityMatch;
-
     // ====================
     // END FLAGS
     // ====================
@@ -485,14 +482,6 @@ public class MatchInput implements Fact, Dimension {
 
     public void setPartialMatchEnabled(boolean partialMatchEnabled) {
         this.partialMatchEnabled = partialMatchEnabled;
-    }
-
-    public boolean isEntityMatch() {
-        return entityMatch;
-    }
-
-    public void setEntityMatch(boolean entityMatch) {
-        this.entityMatch = entityMatch;
     }
 
     public Boolean getUseRealTimeProxy() {
