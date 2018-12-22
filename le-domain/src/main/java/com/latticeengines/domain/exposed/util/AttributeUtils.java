@@ -238,7 +238,7 @@ public class AttributeUtils {
         for (String dataType: dataTypes) {
             if (StringUtils.isNotBlank(dataType)) {
                 switch (dataType.toLowerCase()) {
-                    case "'string'":
+                    case "string":
                         javaClass = String.class.getSimpleName();
                         break;
                     case "int":
