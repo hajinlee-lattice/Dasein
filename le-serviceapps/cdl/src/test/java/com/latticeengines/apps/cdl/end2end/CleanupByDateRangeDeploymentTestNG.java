@@ -18,13 +18,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class CleanupByDateRangeDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CleanupByDateRangeDeploymentTestNG.class);

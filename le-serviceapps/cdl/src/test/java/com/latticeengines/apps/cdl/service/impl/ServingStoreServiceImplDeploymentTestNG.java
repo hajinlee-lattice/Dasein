@@ -9,6 +9,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.ServingStoreService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -16,7 +17,10 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
 
-public class ServingStoreImplDeploymentTestNG extends ServingStoreDeploymentTestNGBase {
+/**
+ * $ dpltc deploy -a admin,matchapi,pls,metadata,cdl,lp
+ */
+public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploymentTestNGBase {
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
@@ -26,7 +30,7 @@ public class ServingStoreImplDeploymentTestNG extends ServingStoreDeploymentTest
 
     @Test(groups = "deployment-app")
     public void testDecoratedMetadata() {
-//        testAccountMetadata();
+        testAccountMetadata();
     }
 
     @Test(groups = "deployment-app")
@@ -44,7 +48,8 @@ public class ServingStoreImplDeploymentTestNG extends ServingStoreDeploymentTest
     private void testAccountMetadata() {
         List<ColumnMetadata> cms = servingStoreService //
                 .getDecoratedMetadataFromCache(mainCustomerSpace, BusinessEntity.Account);
-        cms.forEach(cm -> Assert.assertNotNull(cm.getJavaClass()));
+        cms.forEach(cm -> Assert.assertNotNull(cm.getJavaClass(), //
+                String.format("[%s] does not have a java class: %s", cm.getAttrName(), JsonUtils.serialize(cm))));
     }
 
 }

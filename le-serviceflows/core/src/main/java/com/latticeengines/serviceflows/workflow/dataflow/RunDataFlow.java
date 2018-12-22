@@ -39,6 +39,12 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     @Value("${pls.cdl.transform.cascading.partitions}")
     protected int cascadingPartitions;
 
+    @Value("${pls.cdl.transform.tez.task.vcores}")
+    private int tezVCores;
+
+    @Value("${pls.cdl.transform.tez.task.mem.gb}")
+    private int tezMemGb;
+
     @Override
     public void execute() {
         log.info("Inside RunDataFlow execute() [" + configuration.getBeanName() + "]");
@@ -76,6 +82,8 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             Properties jobProperties = new Properties();
             jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions));
             jobProperties.put("mapred.reduce.tasks", String.valueOf(cascadingPartitions));
+            jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
+            jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
             dataFlowConfig.setJobProperties(jobProperties);
             dataFlowConfig.setPartitions(cascadingPartitions);
         } else {
