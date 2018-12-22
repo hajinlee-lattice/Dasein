@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import akka.util.Timeout;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -15,8 +17,6 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-
-import akka.util.Timeout;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final MatchKeyTuple matchKeyTuple;
@@ -35,6 +35,18 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private Timeout travelTimeout;
 
     private Map<String, String> dunsOriginMap;
+
+    // Target entity represents the ultimate Business Entity that this match request is trying to find an ID for.
+    // Since some entity matches will require matching other entities, eg. Contact might require Account, and
+    // Transaction requires Account, Contact, and Product, it won't necessarily be clear from the Entity Key Map
+    // what the ultimate match goal is.
+    private String targetEntity;
+
+    // Entity Match results.  Contains an ordered list of MatchKeyTuples used for lookup and the resulting lookup
+    // results.  Lookup result is a list of strings because the MatchKeyTuple for SystemId may contain multiple System
+    // IDs for lookup, giving multiple results.  If lookup failed, the result should be a list with one or more null
+    // string elements corresponding to the MatchKeyTuples for which the lookup failed.
+    private List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults;
 
     public MatchTraveler(String rootOperationUid, MatchKeyTuple matchKeyTuple) {
         super(rootOperationUid);
@@ -140,6 +152,18 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setTravelTimeout(Timeout travelTimeout) {
         this.travelTimeout = travelTimeout;
+    }
+
+    public String getTargetEntity() { return targetEntity; }
+
+    public void setTargetEntity(String targetEntity) { this.targetEntity = targetEntity; }
+
+    public List<Pair<MatchKeyTuple, List<String>>> getEntityMatchLookupResults() {
+        return entityMatchLookupResults;
+    }
+
+    public void setEntityMatchLookupResults(List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults) {
+        this.entityMatchLookupResults = entityMatchLookupResults;
     }
 
     @Override

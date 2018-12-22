@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -42,6 +45,10 @@ public class MatchKeyTuple implements Fact {
 
     @JsonProperty("Email")
     private String email;
+
+    // A list of pairs of System Id name and value.
+    @JsonProperty("SystemIds")
+    private List<Pair<String, String>> systemIds;
 
     @JsonIgnore
     private String serializedFormat;
@@ -153,6 +160,10 @@ public class MatchKeyTuple implements Fact {
         this.email = email;
         refreshCachedStrings();
     }
+
+    public List<Pair<String, String>> getSystemIds() { return systemIds; }
+
+    public void setSystemIds(List<Pair<String, String>> systemIds) { this.systemIds = systemIds; }
 
     public boolean hasDomain() {
         return StringUtils.isNotEmpty(domain);
