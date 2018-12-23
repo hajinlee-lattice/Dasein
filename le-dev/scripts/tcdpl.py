@@ -126,6 +126,7 @@ def cleanup_webapp_in_tc(app):
     if os.path.isfile(war_file):
         logger.info('removing %s' % war_file)
         os.remove(war_file)
+    undeploy_mgr_app(app)
 
 
 def cleanup_wars():
@@ -202,6 +203,14 @@ def deploy_mgr_app(app, wait=False):
                 for i in range(10):
                     logger.info("Wait %d sec for manager app to start ..." % (10 - i))
                     time.sleep(1)
+
+
+def undeploy_mgr_app(app):
+    mgr_app = get_mgr_app(app)
+    mgr_app_dir = os.path.join(CATALINA_HOME, 'webapps', mgr_app)
+    if os.path.isdir(mgr_app_dir):
+        logger.info("Removing manager app %s" % mgr_app_dir)
+        rmtree(mgr_app_dir)
 
 
 def undeploy_app(app):
