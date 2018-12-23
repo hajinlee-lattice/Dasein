@@ -10,6 +10,7 @@ fi
 
 if [[ -f "/etc/ledp/lattice.key" ]]; then
     echo "Copying /etc/ledp/lattice.key /etc/pki/tls/private/private.key"
+    mkdir -p /etc/pki/tls/private || true
     cp -f /etc/ledp/lattice.pem /etc/pki/tls/private/private.key
     cp -f /etc/ledp/lattice.pem /etc/pki/tls/server.key
 fi
