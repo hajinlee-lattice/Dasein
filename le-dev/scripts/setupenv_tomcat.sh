@@ -3,16 +3,16 @@
 BOOTSTRAP_MODE=$1
 ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
 
-if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
+if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.14
+    TOMCAT_VERSION=9.0.13
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
     sudo chown -R ${USER} ${CATALINA_HOME} || true
 
-    if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]; then
+    if [[ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]]; then
         APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
         TOMCAT_TGZ_URL="${APACHE_MIRROR}tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         wget "${TOMCAT_TGZ_URL}" -O "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"

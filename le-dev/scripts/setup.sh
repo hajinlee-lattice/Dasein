@@ -2,7 +2,7 @@
 
 function processErrors
 {
-  if [ $? -ne 0 ]
+  if [[ $? -ne 0 ]]
   then
       echo "Error!"
       cat /tmp/errors.txt
@@ -11,7 +11,7 @@ function processErrors
 }
 
 
-if [ ! -z "${J8_HOME}" ]; then
+if [[ ! -z "${J8_HOME}" ]]; then
     export JAVA_HOME=${J8_HOME}
 fi
 
@@ -55,13 +55,13 @@ echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
 
-if [ -d ${ANACONDA_HOME}/envs/p2 ]; then
+if [[ -d ${ANACONDA_HOME}/envs/p2 ]]; then
     source ${ANACONDA_HOME}/bin/activate p2
 else
     source ${ANACONDA_HOME}/bin/activate lattice
 fi
 
-if [ "${USE_QA_RTS}" == "true" ]; then
+if [[ "${USE_QA_RTS}" == "true" ]]; then
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py --qa-source-dbs
 else
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
