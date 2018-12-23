@@ -10,15 +10,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public class AttributeUtils {
     private static Logger log = LoggerFactory.getLogger(AttributeUtils.class);
@@ -231,6 +239,72 @@ public class AttributeUtils {
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // warn
         }
+    }
+
+    public static ColumnMetadata toColumnMetadata(Attribute attr) {
+        ColumnMetadata metadata = new ColumnMetadata();
+        metadata.setDisplayName(attr.getDisplayName());
+        metadata.setSecondaryDisplayName(attr.getSecondaryDisplayName());
+        metadata.setAttrName(attr.getName());
+        metadata.setDescription(attr.getDescription());
+        metadata.setLogicalDataType(attr.getLogicalDataType());
+        metadata.setIsHiddenForRemodelingUI(attr.isHiddenForRemodelingUI());
+        metadata.setJavaClass(AttributeUtils.toJavaClass(attr.getPhysicalDataType(), attr.getDataType()));
+        if (StringUtils.isBlank(attr.getCategory())) {
+            metadata.setCategory(Category.DEFAULT);
+        } else {
+            try {
+                metadata.setCategory(Category.fromName(attr.getCategory()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException(
+                        "Cannot parse category " + attr.getCategory() + " for attribute " + attr.getName());
+            }
+
+        }
+        if (StringUtils.isBlank(attr.getSubcategory())) {
+            metadata.setSubcategory("Other");
+        } else {
+            metadata.setSubcategory(attr.getSubcategory());
+        }
+        if (StringUtils.isBlank(attr.getFundamentalType())) {
+            metadata.setFundamentalType(FundamentalType.ALPHA);
+        } else {
+            try {
+                metadata.setFundamentalType(FundamentalType.fromName(attr.getFundamentalType()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Cannot parse fundamental type "
+                        + attr.getFundamentalType() + " for attribute " + attr.getName());
+            }
+        }
+
+        if (metadata.getTagList() != null && metadata.getTagList().isEmpty()) {
+            metadata.removeTagList();
+        }
+
+        if (metadata.getApprovedUsageList() != null && metadata.getApprovedUsageList().isEmpty()) {
+            metadata.removeApprovedUsageList();
+        }
+
+
+        if (CollectionUtils.isNotEmpty(attr.getGroupsAsList())) {
+            Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
+            attr.getGroupsAsList().forEach(g -> map.put(g, true));
+            metadata.setGroups(map);
+        }
+
+        metadata.setStatisticalType(StatisticalType.fromName(attr.getStatisticalType()));
+        metadata.setDiscretizationStrategy(attr.getDisplayDiscretizationStrategy());
+        metadata.setBitOffset(attr.getBitOffset());
+        metadata.setNumBits(attr.getNumOfBits());
+        metadata.setPhysicalName(attr.getPhysicalName());
+        if (CollectionUtils.isNotEmpty(attr.getApprovedUsage())) {
+            metadata.setApprovedUsageList(attr.getApprovedUsage().stream().map(ApprovedUsage::fromName)
+                    .collect(Collectors.toList()));
+        }
+        metadata.setIsCoveredByMandatoryRule(attr.getIsCoveredByMandatoryRule());
+        metadata.setIsCoveredByOptionalRule(attr.getIsCoveredByOptionalRule());
+        metadata.setAssociatedDataRules(attr.getAssociatedDataRules());
+        return metadata;
     }
 
     public static String toJavaClass(String... dataTypes) {

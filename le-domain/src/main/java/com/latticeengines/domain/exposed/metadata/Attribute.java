@@ -27,9 +27,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -48,11 +48,12 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Attribute
         implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
-    public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 300M
     private static final long serialVersionUID = -4779448415471374224L;
+
     /*
      * For batching to work, we need to make a schema change to take off
      * AutoIncrement from ID column. Because of code difference between
@@ -61,6 +62,8 @@ public class Attribute
      * from both Active and InActive stacks, we need to consider addition of new
      * column with backward compatibility support. As it is unnecessary at this
      * point, going back to Identity generator.
+     *
+     * public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 300M
      *
      * @TableGenerator(name = "MDAttribute_SEQ_GEN", table =
      * "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName
@@ -77,6 +80,7 @@ public class Attribute
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
 
@@ -100,27 +104,28 @@ public class Attribute
     @JsonProperty("physical_data_type")
     private String physicalDataType;
 
-    @Column(name = "SOURCE_LOGICAL_DATA_TYPE", nullable = true)
+    @Column(name = "SOURCE_LOGICAL_DATA_TYPE")
     @JsonProperty("source_logical_type")
     private String sourceLogicalDataType;
 
-    @Column(name = "LOGICAL_DATA_TYPE", nullable = true)
+    @Column(name = "LOGICAL_DATA_TYPE")
     @JsonProperty("logical_type")
     @Enumerated(EnumType.STRING)
     private LogicalDataType logicalDataType;
 
-    @Column(name = "PRECISION", nullable = true)
+    @Column(name = "PRECISION")
     @JsonProperty("precision")
     private Integer precision;
 
-    @Column(name = "SCALE", nullable = true)
+    @Column(name = "SCALE")
     @JsonProperty("scale")
     private Integer scale;
 
     @Transient
+    @JsonIgnore
     private List<String> cleanedUpEnumValues = new ArrayList<>();
 
-    @Column(name = "ENUM_VALUES", nullable = true, length = 2048)
+    @Column(name = "ENUM_VALUES", length = 2048)
     @JsonProperty("enum_values")
     private String cleanedUpEnumValuesAsString = "";
 
@@ -128,6 +133,7 @@ public class Attribute
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     @AttributePropertyBag
+    @JsonProperty("properties")
     private Map<String, Object> properties = new HashMap<>();
 
     @JsonIgnore
@@ -142,6 +148,7 @@ public class Attribute
     @Column(name = "VALIDATORS")
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
+    @JsonIgnore
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
 
     @Column(name = "GROUPS", length = 1000)
@@ -149,7 +156,6 @@ public class Attribute
     private String groups;
 
     public Attribute() {
-
     }
 
     public Attribute(String name) {
@@ -200,7 +206,6 @@ public class Attribute
         this.length = length;
     }
 
-    @JsonIgnore
     public Boolean isNullable() {
         return nullable;
     }
@@ -230,7 +235,6 @@ public class Attribute
         return logicalDataType;
     }
 
-    @JsonIgnore
     public void setLogicalDataType(String logicalDataTypeString) {
         LogicalDataType logicalDataType = null;
         try {
@@ -256,13 +260,10 @@ public class Attribute
         return sourceLogicalDataType;
     }
 
-    @JsonProperty("source_logical_type")
     public void setSourceLogicalDataType(String sourceLogicalDataType) {
         this.sourceLogicalDataType = sourceLogicalDataType;
     }
 
-    @Transient
-    @JsonIgnore
     public InterfaceName getInterfaceName() {
         Object raw = properties.get("InterfaceName");
         if (raw == null) {
@@ -275,8 +276,6 @@ public class Attribute
         }
     }
 
-    @Transient
-    @JsonIgnore
     public void setInterfaceName(String interfaceNameString) {
         InterfaceName interfaceName = null;
         try {
@@ -289,8 +288,6 @@ public class Attribute
         }
     }
 
-    @Transient
-    @JsonIgnore
     public void setInterfaceName(InterfaceName interfaceName) {
         if (interfaceName != null) {
             properties.put("InterfaceName", interfaceName.toString());
@@ -313,13 +310,10 @@ public class Attribute
         this.scale = scale;
     }
 
-    @Transient
-    @JsonIgnore
     public List<String> getCleanedUpEnumValues() {
         return cleanedUpEnumValues;
     }
 
-    @JsonIgnore
     public void setCleanedUpEnumValues(List<String> cleanedUpEnumValues) {
         this.cleanedUpEnumValues = cleanedUpEnumValues;
         setCleanedUpEnumValuesAsString(StringUtils.join(cleanedUpEnumValues, ","));
@@ -333,20 +327,16 @@ public class Attribute
         this.cleanedUpEnumValuesAsString = enumValues;
     }
 
-    @Transient
-    @JsonIgnore
     @Override
     public Object getPropertyValue(String key) {
         return properties.get(key);
     }
 
-    @JsonIgnore
     @Override
     public void setPropertyValue(String key, Object value) {
         properties.put(key, value);
     }
 
-    @JsonIgnore
     private void setListPropertyFromString(String key, String value) {
         Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
         if (value != null) {
@@ -370,12 +360,10 @@ public class Attribute
         }
     }
 
-    @JsonIgnore
     private String getGroups() {
         return groups;
     }
 
-    @JsonIgnore
     private void setGroups(String groups) {
         this.groups = groups;
     }
@@ -404,34 +392,17 @@ public class Attribute
         }
     }
 
-    @JsonIgnore
-    private Map<ColumnSelection.Predefined, Boolean> getGroupsAsMap() {
-        if (StringUtils.isNotBlank(groups)) {
-            Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
-            getGroupsAsList().forEach(g -> map.put(g, true));
-            return map;
-        } else {
-            return null;
-        }
-    }
-
-    @Transient
-    @JsonIgnore
     @Override
     public Set<Map.Entry<String, Object>> getEntries() {
         return properties.entrySet();
     }
 
-    @Transient
     @Override
-    @JsonIgnore
     public Collection<? extends GraphNode> getChildren() {
         return new ArrayList<>();
     }
 
-    @Transient
     @Override
-    @JsonIgnore
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         return new HashMap<>();
     }
@@ -440,24 +411,20 @@ public class Attribute
         return table;
     }
 
-    @JsonIgnore
     public void setTable(Table table) {
         this.table = table;
     }
 
     @Override
-    @JsonIgnore
     public Long getTenantId() {
         return tenantId;
     }
 
     @Override
-    @JsonIgnore
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    @JsonIgnore
     public void setTenant(Tenant tenant) {
         if (tenant != null) {
             setTenantId(tenant.getPid());
@@ -481,8 +448,6 @@ public class Attribute
         this.validatorWrappers = validatorWrappers;
     }
 
-    @JsonIgnore
-    @Transient
     public List<InputValidator> getValidators() {
         List<InputValidator> validators = new ArrayList<>();
         for (InputValidatorWrapper raw : validatorWrappers) {
@@ -499,52 +464,36 @@ public class Attribute
         validatorWrappers.add(wrapper);
     }
 
-    @Transient
-    @JsonIgnore
     public String getSourceAttrName() {
         return getPropertyValue("SourceAttrName") != null
                 ? getPropertyValue("SourceAttrName").toString() : null;
     }
 
-    @Transient
-    @JsonIgnore
     public void setSourceAttrName(String sourceAttrName) {
         setPropertyValue("SourceAttrName", sourceAttrName);
     }
 
-    @Transient
-    @JsonIgnore
     public void setApprovedUsage(String approvedUsage) {
         setListPropertyFromString("ApprovedUsage", approvedUsage);
     }
 
-    @Transient
-    @JsonIgnore
     public void setApprovedUsage(ApprovedUsage... approvedUsages) {
         properties.put("ApprovedUsage", getStringValuesFromEnums(approvedUsages));
     }
 
-    @Transient
-    @JsonIgnore
     public void setApprovedUsageFromEnumList(List<ApprovedUsage> approvedUsage) {
         properties.put("ApprovedUsage", approvedUsage);
     }
 
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getApprovedUsage() {
         return (List<String>) properties.get("ApprovedUsage");
     }
 
-    @Transient
-    @JsonIgnore
     public void setApprovedUsage(List<String> approvedUsage) {
         properties.put("ApprovedUsage", approvedUsage);
     }
 
-    @Transient
-    @JsonIgnore
     public boolean isHiddenForRemodelingUI() {
         if (properties.containsKey("IsHiddenForRemodelingUI")) {
             return (Boolean) properties.get("IsHiddenForRemodelingUI");
@@ -552,14 +501,10 @@ public class Attribute
         return false;
     }
 
-    @Transient
-    @JsonIgnore
     public void setIsHiddenForRemodelingUI(boolean isHiddenForRemodelingUI) {
         properties.put("IsHiddenForRemodelingUI", isHiddenForRemodelingUI);
     }
 
-    @Transient
-    @JsonIgnore
     public boolean getIsCoveredByOptionalRule() {
         if (properties.containsKey("IsCoveredByOptionalRule")) {
             return (Boolean) properties.get("IsCoveredByOptionalRule");
@@ -567,14 +512,10 @@ public class Attribute
         return false;
     }
 
-    @Transient
-    @JsonIgnore
     public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
         properties.put("IsCoveredByOptionalRule", isCoveredByOptionalRule);
     }
 
-    @Transient
-    @JsonIgnore
     public boolean getIsCoveredByMandatoryRule() {
         if (properties.containsKey("IsCoveredByMandatoryRule")) {
             return (Boolean) properties.get("IsCoveredByMandatoryRule");
@@ -582,14 +523,10 @@ public class Attribute
         return false;
     }
 
-    @Transient
-    @JsonIgnore
     public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
         properties.put("IsCoveredByMandatoryRule", isCoveredByMandatoryRule);
     }
 
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public void addAssociatedDataRuleName(String dataRuleName) {
         if (!properties.containsKey("AssociatedDataRules")) {
@@ -598,8 +535,6 @@ public class Attribute
         ((List<String>) properties.get("AssociatedDataRules")).add(dataRuleName);
     }
 
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getAssociatedDataRules() {
         if (!properties.containsKey("AssociatedDataRules")) {
@@ -611,8 +546,6 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setStatisticalType(String statisticalType) {
         if (StringUtils.isBlank(statisticalType)) {
             properties.remove("StatisticalType");
@@ -621,15 +554,11 @@ public class Attribute
         }
     }
 
-    @Transient
-    @JsonIgnore
     public String getStatisticalType() {
         return getPropertyValue("StatisticalType") != null
                 ? getPropertyValue("StatisticalType").toString() : null;
     }
 
-    @Transient
-    @JsonIgnore
     public void setStatisticalType(StatisticalType statisticalType) {
         if (statisticalType == null) {
             properties.remove("StatisticalType");
@@ -641,21 +570,15 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setFundamentalType(String fundamentalType) {
         properties.put("FundamentalType", fundamentalType);
     }
 
-    @Transient
-    @JsonIgnore
     public String getFundamentalType() {
         return getPropertyValue("FundamentalType") != null
                 ? getPropertyValue("FundamentalType").toString() : null;
     }
 
-    @Transient
-    @JsonIgnore
     public void setFundamentalType(FundamentalType fundamentalType) {
         if (fundamentalType == null) {
             properties.remove("FundamentalType");
@@ -664,8 +587,6 @@ public class Attribute
         }
     }
 
-    @Transient
-    @JsonIgnore
     public String getDataQuality() {
         return (String) properties.get("DataQuality");
     }
@@ -673,33 +594,23 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setDataQuality(String dataQuality) {
         properties.put("DataQuality", dataQuality);
     }
 
-    @Transient
-    @JsonIgnore
     public void setDataSource(String dataSource) {
         setListPropertyFromString("DataSource", dataSource);
     }
 
     @SuppressWarnings("unchecked")
-    @Transient
-    @JsonIgnore
     public List<String> getDataSource() {
         return (List<String>) properties.get("DataSource");
     }
 
-    @Transient
-    @JsonIgnore
     public void setDataSource(List<String> dataSource) {
         properties.put("DataSource", dataSource);
     }
 
-    @Transient
-    @JsonIgnore
     public String getDisplayDiscretizationStrategy() {
         return (String) properties.get("DisplayDiscretizationStrategy");
     }
@@ -707,20 +618,14 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setDisplayDiscretizationStrategy(String displayDiscretizationStrategy) {
         properties.put("DisplayDiscretizationStrategy", displayDiscretizationStrategy);
     }
 
-    @Transient
-    @JsonIgnore
     public String getDescription() {
         return (String) properties.get("Description");
     }
 
-    @Transient
-    @JsonIgnore
     public void setDescription(String description) {
         properties.put("Description", description);
     }
@@ -728,33 +633,23 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setTags(String tags) {
         setListPropertyFromString("Tags", tags);
     }
 
-    @Transient
-    @JsonIgnore
     public void setTags(Tag... tags) {
         properties.put("Tags", getStringValuesFromEnums(tags));
     }
 
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getTags() {
         return (List<String>) properties.get("Tags");
     }
 
-    @Transient
-    @JsonIgnore
     public void setTags(List<String> tags) {
         properties.put("Tags", tags);
     }
 
-    @Transient
-    @JsonIgnore
     public String getPhysicalName() {
         return (String) properties.get("PhysicalName");
     }
@@ -762,46 +657,32 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setPhysicalName(String physicalName) {
         properties.put("PhysicalName", physicalName);
     }
 
-    @Transient
-    @JsonIgnore
     public void setCategory(String category) {
         setPropertyValue("Category", category);
     }
 
-    @Transient
-    @JsonIgnore
     public String getCategory() {
         return getPropertyValue("Category") != null ? getPropertyValue("Category").toString()
                 : null;
     }
 
-    @Transient
-    @JsonIgnore
     public void setCategory(Category category) {
         setPropertyValue("Category", category.getName());
     }
 
-    @Transient
-    @JsonIgnore
     public String getSubcategory() {
         return getPropertyValue("Subcategory") != null ? getPropertyValue("Subcategory").toString()
                 : null;
     }
 
-    @Transient
-    @JsonIgnore
     public void setSubcategory(String subcategory) {
         setPropertyValue("Subcategory", subcategory);
     }
 
-    @Transient
-    @JsonIgnore
     public String getDataType() {
         return getPropertyValue("DataType") != null ? getPropertyValue("DataType").toString()
                 : null;
@@ -810,38 +691,26 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
-    @Transient
-    @JsonIgnore
     public void setDataType(String dataType) {
         setPropertyValue("DataType", dataType);
     }
 
-    @Transient
-    @JsonIgnore
     public String getRTSModuleName() {
         return (String) properties.get("RTSModuleName");
     }
 
-    @Transient
-    @JsonIgnore
     public void setRTSModuleName(String rtsModuleName) {
         properties.put("RTSModuleName", rtsModuleName);
     }
 
-    @Transient
-    @JsonIgnore
     public String getRTSArguments() {
         return (String) properties.get("RTSArguments");
     }
 
-    @Transient
-    @JsonIgnore
     public void setRTSArguments(String rtsArguments) {
         properties.put("RTSArguments", rtsArguments);
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getRTSAttribute() {
         Boolean rts = (Boolean) properties.get("RTSAttribute");
         if (rts == null) {
@@ -850,20 +719,14 @@ public class Attribute
         return rts;
     }
 
-    @Transient
-    @JsonIgnore
     public void setRTSAttribute(String rts) {
         properties.put("RTSAttribute", Boolean.valueOf(rts));
     }
 
-    @Transient
-    @JsonIgnore
     public void setRTSAttribute(Boolean rts) {
         properties.put("RTSAttribute", rts);
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getRequired() {
         Boolean required = (Boolean) properties.get("Required");
         if (required == null) {
@@ -872,52 +735,36 @@ public class Attribute
         return required;
     }
 
-    @Transient
-    @JsonIgnore
     public void setRequired(Boolean required) {
         properties.put("Required", required);
     }
 
-    @Transient
-    @JsonIgnore
     public String getDefaultValueStr() {
         return properties.get("DefaultValueStr") != null
                 ? properties.get("DefaultValueStr").toString() : null;
     }
 
-    @Transient
-    @JsonIgnore
     public void setDefaultValueStr(String defaultValueStr) {
         properties.put("DefaultValueStr", defaultValueStr);
     }
 
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getAllowedDisplayNames() {
         return (List<String>) properties.get("AllowedDisplayNames");
     }
 
-    @JsonIgnore
-    @Transient
     public void setAllowedDisplayNames(String allowedDisplayNamesString) {
         setListPropertyFromString("AllowedDisplayNames", allowedDisplayNamesString);
     }
 
-    @Transient
-    @JsonIgnore
     public void setAllowedDisplayNames(List<String> allowedDisplayNames) {
         properties.put("AllowedDisplayNames", allowedDisplayNames);
     }
 
-    @JsonIgnore
-    @Transient
     public void removeAllowedDisplayNames() {
         properties.remove("AllowedDisplayNames");
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getExcludeFromFiltering() {
         Boolean excludeFromFiltering = (Boolean) properties.get("ExcludeFromFiltering");
         if (excludeFromFiltering == null) {
@@ -926,14 +773,10 @@ public class Attribute
         return excludeFromFiltering;
     }
 
-    @JsonIgnore
-    @Transient
     public void setExcludeFromFiltering(String excludeFromFiltering) {
         properties.put("ExcludeFromFiltering", Boolean.valueOf(excludeFromFiltering));
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getExcludeFromPlaymakerExport() {
         Boolean excludeFromPlaymakerExport = (Boolean) properties.get("ExcludeFromPlaymakerExport");
         if (excludeFromPlaymakerExport == null) {
@@ -942,14 +785,10 @@ public class Attribute
         return excludeFromPlaymakerExport;
     }
 
-    @JsonIgnore
-    @Transient
     public void setExcludeFromPlaymakerExport(String excludeFromPlaymakerExport) {
         properties.put("ExcludeFromPlaymakerExport", Boolean.valueOf(excludeFromPlaymakerExport));
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getExcludeFromTalkingPoints() {
         Boolean excludeFromTalkingPoints = (Boolean) properties.get("ExcludeFromTalkingPoints");
         if (excludeFromTalkingPoints == null) {
@@ -958,14 +797,10 @@ public class Attribute
         return excludeFromTalkingPoints;
     }
 
-    @JsonIgnore
-    @Transient
     public void setExcludeFromTalkingPoints(String excludeFromTalkingPoints) {
         properties.put("ExcludeFromTalkingPoints", Boolean.valueOf(excludeFromTalkingPoints));
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getExcludeFromListView() {
         Boolean excludeFromListView = (Boolean) properties.get("ExcludeFromListView");
         if (excludeFromListView == null) {
@@ -974,14 +809,10 @@ public class Attribute
         return excludeFromListView;
     }
 
-    @JsonIgnore
-    @Transient
     public void setExcludeFromListView(String excludeFromListView) {
         properties.put("ExcludeFromListView", Boolean.valueOf(excludeFromListView));
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getExcludeFromDetailView() {
         Boolean excludeFromDetailView = (Boolean) properties.get("ExcludeFromDetailView");
         if (excludeFromDetailView == null) {
@@ -990,14 +821,10 @@ public class Attribute
         return excludeFromDetailView;
     }
 
-    @JsonIgnore
-    @Transient
     public void setExcludeFromDetailView(String excludeFromDetailView) {
         properties.put("ExcludeFromDetailView", Boolean.valueOf(excludeFromDetailView));
     }
 
-    @Transient
-    @JsonIgnore
     public Boolean getExcludeFromAll() {
         Boolean excludeFromAll = (Boolean) properties.get("ExcludeFromAll");
         if (excludeFromAll == null) {
@@ -1006,39 +833,27 @@ public class Attribute
         return excludeFromAll;
     }
 
-    @JsonIgnore
-    @Transient
     public void setExcludeFromAll(String excludeFromAll) {
         properties.put("ExcludeFromAll", Boolean.valueOf(excludeFromAll));
     }
 
-    @Transient
-    @JsonIgnore
     public Integer getBitOffset() {
         return (Integer) properties.get("BitOffset");
     }
 
-    @Transient
-    @JsonIgnore
     public void setBitOffset(Integer bitOffset) {
         properties.put("BitOffset", bitOffset);
     }
 
-    @Transient
-    @JsonIgnore
     public Integer getNumOfBits() {
         return (Integer) properties.get("NumOfBits");
     }
 
-    @Transient
-    @JsonIgnore
     public void setNumOfBits(Integer numOfBits) {
         properties.put("NumOfBits", numOfBits);
     }
 
     @Override
-    @Transient
-    @JsonIgnore
     public String toString() {
         return name;
     }
@@ -1052,8 +867,6 @@ public class Attribute
         return strs;
     }
 
-    @Transient
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getParentAttributeNames() {
         List<String> parents = new ArrayList<>();
@@ -1085,8 +898,6 @@ public class Attribute
         return parents;
     }
 
-    @Transient
-    @JsonIgnore
     public boolean isCustomerPredictor() {
         boolean isInternalAttributeOrTransform = false;
         List<String> tags = getTags();
@@ -1105,8 +916,6 @@ public class Attribute
         return getInterfaceName() == null;
     }
 
-    @Transient
-    @JsonIgnore
     public boolean isInternalAndInternalTransformField() {
         List<String> tags = getTags();
         if (tags != null) {
@@ -1120,8 +929,6 @@ public class Attribute
         return false;
     }
 
-    @Transient
-    @JsonIgnore
     public boolean isInternalPredictor() {
         boolean isInternalAttribute = false;
         List<String> tags = getTags();
@@ -1136,73 +943,10 @@ public class Attribute
         return isInternalAttribute;
     }
 
-    @Transient
-    @JsonIgnore
     public ColumnMetadata getColumnMetadata() {
-        ColumnMetadata metadata = new ColumnMetadata();
-        metadata.setDisplayName(getDisplayName());
-        metadata.setSecondaryDisplayName(getSecondaryDisplayName());
-        metadata.setAttrName(getName());
-        metadata.setDescription(getDescription());
-        metadata.setLogicalDataType(getLogicalDataType());
-        metadata.setIsHiddenForRemodelingUI(isHiddenForRemodelingUI());
-        metadata.setJavaClass(AttributeUtils.toJavaClass(getPhysicalDataType(), getDataType()));
-        if (StringUtils.isBlank(getCategory())) {
-            metadata.setCategory(Category.DEFAULT);
-        } else {
-            try {
-                metadata.setCategory(Category.fromName(getCategory()));
-            } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Cannot parse category " + getCategory() + " for attribute " + getName());
-            }
-
-        }
-        if (StringUtils.isBlank(getSubcategory())) {
-            metadata.setSubcategory("Other");
-        } else {
-            metadata.setSubcategory(getSubcategory());
-        }
-        if (StringUtils.isBlank(getFundamentalType())) {
-            metadata.setFundamentalType(FundamentalType.ALPHA);
-        } else {
-            try {
-                metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Cannot parse fundamental type "
-                        + getFundamentalType() + " for attribute " + getName());
-            }
-        }
-
-        if (metadata.getTagList() != null && metadata.getTagList().isEmpty()) {
-            metadata.removeTagList();
-        }
-
-        if (metadata.getApprovedUsageList() != null && metadata.getApprovedUsageList().isEmpty()) {
-            metadata.removeApprovedUsageList();
-        }
-
-        if (MapUtils.isNotEmpty(getGroupsAsMap())) {
-            metadata.setGroups(getGroupsAsMap());
-        }
-
-        metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
-        metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
-        metadata.setBitOffset(getBitOffset());
-        metadata.setNumBits(getNumOfBits());
-        metadata.setPhysicalName(getPhysicalName());
-        if (CollectionUtils.isNotEmpty(getApprovedUsage())) {
-            metadata.setApprovedUsageList(getApprovedUsage().stream().map(ApprovedUsage::fromName)
-                    .collect(Collectors.toList()));
-        }
-        metadata.setIsCoveredByMandatoryRule(getIsCoveredByMandatoryRule());
-        metadata.setIsCoveredByOptionalRule(getIsCoveredByOptionalRule());
-        metadata.setAssociatedDataRules(getAssociatedDataRules());
-        return metadata;
+        return AttributeUtils.toColumnMetadata(this);
     }
 
-    @Transient
-    @JsonIgnore
     public String getDateTimeFormatString() {
         Object raw = properties.get("DateTimeFormatString");
         if (raw == null) {
@@ -1212,16 +956,12 @@ public class Attribute
         return raw.toString();
     }
 
-    @Transient
-    @JsonIgnore
     public void setDateTimeFormatString(String dateTimeFormatString) {
         if (dateTimeFormatString != null) {
             properties.put("DateTimeFormatString", dateTimeFormatString);
         }
     }
 
-    @Transient
-    @JsonIgnore
     public String getTimezone() {
         Object raw = properties.get("Timezone");
         if (raw == null) {
@@ -1231,8 +971,6 @@ public class Attribute
         return raw.toString();
     }
 
-    @Transient
-    @JsonIgnore
     public void setTimezone(String timezone) {
         if (timezone != null) {
             properties.put("Timezone", timezone);
