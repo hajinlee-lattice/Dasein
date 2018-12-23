@@ -65,6 +65,11 @@ if [[ -f "/etc/internaladdr.txt" ]]; then
     echo "RMI_SERVER=${RMI_SERVER}"
 fi
 
+if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
+    echo "Java version: $(java -version), enabling ZGC"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions -XX:+UseZGC"
+fi
+
 export JAVA_OPTS="-Dfile.encoding=UTF8"
 export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=UTC"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
