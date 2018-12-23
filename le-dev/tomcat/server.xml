@@ -83,11 +83,9 @@
         </Connector>
         <Engine name="MatchApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -107,11 +105,9 @@
         </Connector>
         <Engine name="AdminEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/admin" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/admin" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -131,11 +127,9 @@
         </Connector>
         <Engine name="PlayMakerEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/playmaker" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/playmaker" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -155,11 +149,9 @@
         </Connector>
         <Engine name="OAuthEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/oauth" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/oauth" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -179,11 +171,9 @@
         </Connector>
         <Engine name="ScoringApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -203,11 +193,9 @@
         </Connector>
         <Engine name="SAMLEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/saml" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/saml" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -227,11 +215,9 @@
         </Connector>
         <Engine name="ApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/api" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/api" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -251,11 +237,9 @@
         </Connector>
         <Engine name="UlyssesEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
@@ -275,11 +259,9 @@
         </Connector>
         <Engine name="MicroserviceEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" undeployOldVersions="true"
-                  startStopThreads="4"/>
+            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" startStopThreads="4"/>
         </Engine>
     </Service>
 
@@ -299,10 +281,9 @@
         </Connector>
         <Engine name="PlsEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true" undeployOldVersions="true"/>
+            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true"/>
         </Engine>
     </Service>
 
