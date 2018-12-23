@@ -76,7 +76,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
-    private static final Tenant TEST_TENANT = getTestTenant();
+    private static final Tenant TEST_TENANT = new Tenant("entity_match_internal_service_test_tenant_1");
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
     private static final String TEST_COUNTRY = "USA";
@@ -171,10 +171,10 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Assert.assertEquals(seedIds, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
 
         // check in-memory cache
-        Cache<Pair<Long, EntityLookupEntry>, String> lookupCache = entityMatchInternalService.getLookupCache();
+        Cache<Pair<String, EntityLookupEntry>, String> lookupCache = entityMatchInternalService.getLookupCache();
         Assert.assertNotNull(lookupCache);
-        Assert.assertEquals(lookupCache.getIfPresent(Pair.of(TEST_TENANT.getPid(), TEST_ENTRY_1)), SEED_ID_FOR_LOOKUP);
-        Assert.assertEquals(lookupCache.getIfPresent(Pair.of(TEST_TENANT.getPid(), TEST_ENTRY_3)), SEED_ID_FOR_LOOKUP);
+        Assert.assertEquals(lookupCache.getIfPresent(Pair.of(TEST_TENANT.getId(), TEST_ENTRY_1)), SEED_ID_FOR_LOOKUP);
+        Assert.assertEquals(lookupCache.getIfPresent(Pair.of(TEST_TENANT.getId(), TEST_ENTRY_3)), SEED_ID_FOR_LOOKUP);
         Assert.assertNull(lookupCache.getIfPresent(TEST_ENTRY_2));
         Assert.assertNull(lookupCache.getIfPresent(TEST_ENTRY_4));
         // clean cache
@@ -208,8 +208,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         verifyEntityRawSeeds(results, SEED_ID_1, SEED_ID_2, SEED_ID_3, null, null);
 
         // check in-memory cache (should not use cache in bulk mode for seed)
-        Pair<Long, String> prefix = Pair.of(TEST_TENANT.getPid(), TEST_ENTITY);
-        Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService
+        Pair<String, String> prefix = Pair.of(TEST_TENANT.getId(), TEST_ENTITY);
+        Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService
                 .getSeedCache();
         Assert.assertNotNull(seedCache);
         SEED_IDS.stream().map(id -> seedCache.getIfPresent(Pair.of(prefix, id))).forEach(Assert::assertNull);
@@ -238,8 +238,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         verifyEntityRawSeeds(results, SEED_ID_1, SEED_ID_2, null, null, null);
 
         // check in-memory cache
-        Pair<Long, String> prefix = Pair.of(TEST_TENANT.getPid(), TEST_ENTITY);
-        Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService
+        Pair<String, String> prefix = Pair.of(TEST_TENANT.getId(), TEST_ENTITY);
+        Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService
                 .getSeedCache();
         Assert.assertNotNull(seedCache);
         Stream.of(SEED_ID_1, SEED_ID_2)
@@ -697,11 +697,5 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                     entries.add(fromDomainCountry(TEST_ENTITY, domain, TEST_COUNTRY)));
         }
         return new EntityRawSeed(seedId, TEST_ENTITY, 0, entries, attributes);
-    }
-
-    private static Tenant getTestTenant() {
-        Tenant tenant = new Tenant("entity_match_internal_service_test_tenant_1");
-        tenant.setPid(713399053L);
-        return tenant;
     }
 }

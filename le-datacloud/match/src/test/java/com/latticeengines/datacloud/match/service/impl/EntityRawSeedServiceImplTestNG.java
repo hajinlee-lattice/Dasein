@@ -65,7 +65,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
-    private static final Tenant TEST_TENANT = getTestTenant();
+    private static final Tenant TEST_TENANT = new Tenant("raw_seed_service_test_tenant_1");
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
@@ -609,11 +609,5 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     private EntityRawSeed copyAndSetVersion(EntityRawSeed seed, int version) {
         return new EntityRawSeed(
                 seed.getId(), seed.getEntity(), version, seed.getLookupEntries(), seed.getAttributes());
-    }
-
-    private static Tenant getTestTenant() {
-        Tenant tenant = new Tenant("raw_seed_service_test_tenant_1");
-        tenant.setPid(5798729L);
-        return tenant;
     }
 }

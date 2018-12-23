@@ -268,8 +268,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
         String sortKey = serialize(entry);
         int suffix = (sortKey.hashCode() & 0x7fffffff) % numStagingShards;
         String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version),
-                entry.getEntity(), String.valueOf(suffix));
+                PREFIX, tenant.getId(), String.valueOf(version), entry.getEntity(), String.valueOf(suffix));
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey, ATTR_RANGE_KEY, sortKey);
     }
 
@@ -281,7 +280,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
     private PrimaryKey buildServingKey(@NotNull Tenant tenant, @NotNull EntityLookupEntry entry, int version) {
         String lookupKey = serialize(entry);
         String partitionKey = String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entry.getEntity(), lookupKey);
+                PREFIX, tenant.getId(), String.valueOf(version), entry.getEntity(), lookupKey);
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey);
     }
 

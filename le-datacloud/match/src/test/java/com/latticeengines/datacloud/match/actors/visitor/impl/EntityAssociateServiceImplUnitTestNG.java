@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 
 public class EntityAssociateServiceImplUnitTestNG {
 
-    private static final Tenant TEST_TENANT = getTestTenant();
+    private static final Tenant TEST_TENANT = new Tenant("entity_associate_service_test_tenant_1");
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String TEST_ENTITY_ID = "associate_service_unit_test_entity_id";
     private static final String TEST_ENTITY_ID2 = "associate_service_unit_test_entity_id2";
@@ -46,7 +46,7 @@ public class EntityAssociateServiceImplUnitTestNG {
         Assert.assertEquals(response.getAssociatedEntityId(), expectedAssociatedEntityId);
         Assert.assertEquals(response.getEntity(), request.getEntity());
         Assert.assertNotNull(response.getTenant());
-        Assert.assertEquals(response.getTenant().getPid(), TEST_TENANT.getPid());
+        Assert.assertEquals(response.getTenant().getId(), TEST_TENANT.getId());
 
         // should make the expected number of calls (iterate through all the results)
         Assert.assertFalse(it.hasNext());
@@ -78,7 +78,8 @@ public class EntityAssociateServiceImplUnitTestNG {
 
     private EntityAssociateServiceImpl mock(
             @NotNull List<EntityRawSeed> params,
-            Iterator<Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>>> results) throws Exception {
+            Iterator<Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>>> results)
+            throws Exception {
         EntityAssociateServiceImpl service = new EntityAssociateServiceImpl();
         EntityMatchInternalService internalService = Mockito.mock(EntityMatchInternalService.class);
         Mockito.when(internalService.associate(Mockito.any(), Mockito.any())).thenAnswer(invocation -> {
@@ -86,18 +87,12 @@ public class EntityAssociateServiceImplUnitTestNG {
             EntityRawSeed seed = invocation.getArgument(1);
             Assert.assertNotNull(inputTenant);
             Assert.assertNotNull(seed);
-            Assert.assertEquals(inputTenant.getPid(), TEST_TENANT.getPid());
+            Assert.assertEquals(inputTenant.getId(), TEST_TENANT.getId());
             // capture parameter
             params.add(seed);
             return results.next();
         });
         FieldUtils.writeField(service, "entityMatchInternalService", internalService, true);
         return service;
-    }
-
-    private static Tenant getTestTenant() {
-        Tenant tenant = new Tenant("entity_associate_service_test_tenant_1");
-        tenant.setPid(825789853L);
-        return tenant;
     }
 }

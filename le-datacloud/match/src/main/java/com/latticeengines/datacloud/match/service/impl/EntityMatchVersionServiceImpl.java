@@ -87,9 +87,9 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     private PrimaryKey buildKey(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
         Preconditions.checkNotNull(environment);
         Preconditions.checkNotNull(tenant);
-        Preconditions.checkNotNull(tenant.getPid());
+        Preconditions.checkNotNull(tenant.getId());
 
-        String partitionKey = String.join(DELIMITER, PREFIX, environment.name(), tenant.getPid().toString());
+        String partitionKey = String.join(DELIMITER, PREFIX, environment.name(), tenant.getId());
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey);
     }
 }

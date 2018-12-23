@@ -16,6 +16,9 @@ import java.util.Map;
  * Request class for entity association.
  */
 public class EntityAssociationRequest {
+    /*
+     * all fields must be already standardized
+     */
     private final boolean allocateNewId;
     private final Tenant tenant;
     private final String entity;

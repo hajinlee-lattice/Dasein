@@ -28,7 +28,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
 
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
-    private static final Tenant TEST_TENANT = getTestTenant();
+    private static final Tenant TEST_TENANT = new Tenant("lookup_entry_service_test_tenant_1");
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String MAIN_TEST_SEED_ID = "123";
     private static final String OTHER_TEST_SEED_ID = "456";
@@ -142,11 +142,5 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
 
     private void cleanup(@NotNull EntityMatchEnvironment env, @NotNull EntityLookupEntry entry) {
         entityLookupEntryService.delete(env, TEST_TENANT, entry);
-    }
-
-    private static Tenant getTestTenant() {
-        Tenant tenant = new Tenant("lookup_entry_service_test_tenant_1");
-        tenant.setPid(429337581L);
-        return tenant;
     }
 }

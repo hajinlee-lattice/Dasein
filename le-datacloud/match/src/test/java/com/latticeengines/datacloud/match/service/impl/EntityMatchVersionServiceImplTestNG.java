@@ -12,7 +12,7 @@ import javax.inject.Inject;
 public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String TEST_TABLE = "CDLMatchServingDev_20181126";
-    private static final Tenant TEST_TENANT = getTestTenant();
+    private static final Tenant TEST_TENANT = new Tenant("test_tenant_1");
 
     @Inject
     private EntityMatchVersionServiceImpl entityMatchVersionService;
@@ -47,12 +47,5 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
         // cleanup
         entityMatchVersionService.clearVersion(env1, TEST_TENANT);
         entityMatchVersionService.clearVersion(env2, TEST_TENANT);
-    }
-
-
-    private static Tenant getTestTenant() {
-        Tenant tenant = new Tenant("test_tenant_1");
-        tenant.setPid(1L);
-        return tenant;
     }
 }

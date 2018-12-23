@@ -77,10 +77,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      *   (a) has allocation, (b) not caching seed, (c) lookup from cache, staging and serving table
      */
     private boolean isRealTimeMode = false;
-    // [ tenant PID, lookup entry ] => seed ID
-    private volatile Cache<Pair<Long, EntityLookupEntry>, String> lookupCache;
-    // [ [ tenant PID, entity ], seed ID ] => raw seed
-    private volatile Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> seedCache;
+    // [ tenant ID, lookup entry ] => seed ID
+    private volatile Cache<Pair<String, EntityLookupEntry>, String> lookupCache;
+    // [ [ tenant ID, entity ], seed ID ] => raw seed
+    private volatile Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache;
 
     private BlockingQueue<Triple<Tenant, EntityLookupEntry, String>> lookupQueue = new LinkedBlockingQueue<>();
     private AtomicLong nProcessingLookupEntries = new AtomicLong(0L);
@@ -159,8 +159,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 .findFirst();
         if (!allocatedId.isPresent()) {
             // fail to allocate
-            log.error("Failed to allocate ID for entity = {} in tenant PID = {} after {} attempts",
-                    entity, tenant.getPid(), MAX_ID_ALLOCATION_ATTEMPTS);
+            log.error("Failed to allocate ID for entity = {} in tenant ID = {} after {} attempts",
+                    entity, tenant.getId(), MAX_ID_ALLOCATION_ATTEMPTS);
             throw new IllegalStateException("Failed to allocate entity ID");
         }
         int nAttempts = allocatedId.get().getKey();
@@ -211,12 +211,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @VisibleForTesting
-    Cache<Pair<Long, EntityLookupEntry>, String> getLookupCache() {
+    Cache<Pair<String, EntityLookupEntry>, String> getLookupCache() {
         return lookupCache;
     }
 
     @VisibleForTesting
-    Cache<Pair<Pair<Long, String>, String>, EntityRawSeed> getSeedCache() {
+    Cache<Pair<Pair<String, String>, String>, EntityRawSeed> getSeedCache() {
         return seedCache;
     }
 
@@ -322,9 +322,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Start from local cache -> staging table -> serving table and perform synchronization between layers.
      */
     private List<String> getIdsInternal(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries) {
+        String tenantId = tenant.getId();
         Set<EntityLookupEntry> uniqueEntries = new HashSet<>(lookupEntries);
         // retrieve seed IDs from cache
-        Map<EntityLookupEntry, String> results =  getPresentCacheValues(tenant.getPid(), lookupEntries, lookupCache);
+        Map<EntityLookupEntry, String> results =  getPresentCacheValues(
+                tenantId, lookupEntries, lookupCache);
         if (results.size() == uniqueEntries.size()) {
             // have all the seed IDs
             return generateResult(lookupEntries, results);
@@ -337,7 +339,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // add to results
         results.putAll(missingResults);
         // populate in-memory cache
-        putInCache(tenant.getPid(), missingResults, lookupCache);
+        putInCache(tenantId, missingResults, lookupCache);
 
         return generateResult(lookupEntries, results);
     }
@@ -402,7 +404,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private List<EntityRawSeed> getSeedsInternal(
             @NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
         // need entity here because seed ID does not contain this info (unlike lookup entry)
-        Pair<Long, String> prefix = Pair.of(tenant.getPid(), entity);
+        String tenantId = tenant.getId();
+        Pair<String, String> prefix = Pair.of(tenantId, entity);
         Set<String> uniqueSeedIds = new HashSet<>(seedIds);
         if (!isRealTimeMode) {
             // in bulk mode, does not cache seed in-memory because seed will be updated and invalidating cache
@@ -579,7 +582,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      *
      * 1. Seed used for testing is an seed with empty lookup entries and extra attributes (not used atm)
      * 2. Using ObjectSizeCalculator#getObjectSize we get around 230 bytes for empty seed
-     * 3. Cache key ([ [ tenantPid, entity ], seedId ] takes around 200 bytes
+     * 3. Cache key ([ [ tenantId, entity ], seedId ] takes around 200 bytes
      * 4. Insert 1M ~ 10M seeds to memory cache and calculate the memory usage using
      *    RunTime#totalMemory - RunTime#freeMemory
      * 5. Average of 4 is around 290 bytes
@@ -594,7 +597,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Memory used by one raw seed cache and one lookup cache is pretty close.
      * Currently, to make things simpler, use 1 (seed) + # of lookup entries as weight
      */
-    private int getWeight(Pair<Pair<Long, String>, String> key, EntityRawSeed val) {
+    private int getWeight(Pair<Pair<String, String>, String> key, EntityRawSeed val) {
         return 1 + (val == null ? 0 : val.getLookupEntries().size());
     }
 
@@ -675,15 +678,15 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             // TODO add info log for reporting total populated entries (report every X entries populated)
             // TODO tune the polling mechanism
             int total = 0;
-            Map<Long, List<Triple<Tenant, EntityLookupEntry, String>>> batches = new HashMap<>();
+            Map<String, List<Triple<Tenant, EntityLookupEntry, String>>> batches = new HashMap<>();
             while (!shouldTerminate) {
                 try {
                     Triple<Tenant, EntityLookupEntry, String> triple = lookupQueue.poll(
                             LOOKUP_POLLING_TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
                     if (triple != null) {
-                        long pid = triple.getLeft().getPid(); // should not be null
-                        batches.putIfAbsent(pid, new ArrayList<>());
-                        batches.get(pid).add(triple); // add to local list
+                        String tenantId = triple.getLeft().getId(); // should not be null
+                        batches.putIfAbsent(tenantId, new ArrayList<>());
+                        batches.get(tenantId).add(triple); // add to local list
                         total++;
                     }
                     // triple == null means timeout
@@ -706,7 +709,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             }
         }
 
-        private void populate(Map<Long, List<Triple<Tenant, EntityLookupEntry, String>>> batches) {
+        private void populate(Map<String, List<Triple<Tenant, EntityLookupEntry, String>>> batches) {
             // since bulk mode should only have one tenant, map is probably not required, use map just in case
             batches.values().forEach(list -> {
                 if (CollectionUtils.isEmpty(list)) {

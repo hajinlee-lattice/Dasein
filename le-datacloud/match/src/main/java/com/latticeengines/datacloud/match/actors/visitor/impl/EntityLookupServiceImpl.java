@@ -78,13 +78,13 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
     @Override
     protected void handleRequests(List<String> requestIds) {
         // Retrieve requests and group them by tenant. Handle all requests for the same tenant afterwards.
-        Map<Long, List<Pair<String, EntityLookupRequest>>> params = requestIds
+        Map<String, List<Pair<String, EntityLookupRequest>>> params = requestIds
                 .stream()
                 .map(id -> Pair.of(id, getReq(id)))
                 .filter(pair -> pair.getValue() != null)
                 .map(pair -> Pair.of(pair.getKey(), (EntityLookupRequest) pair.getValue().getInputData()))
-                // group by tenant PID, put all lookupRequests in this tenant into a list
-                .collect(groupingBy(pair -> pair.getValue().getTenant().getPid(), mapping(pair -> pair, toList())));
+                // group by tenant ID, put all lookupRequests in this tenant into a list
+                .collect(groupingBy(pair -> pair.getValue().getTenant().getId(), mapping(pair -> pair, toList())));
         params.values().forEach(this::handleRequestForTenant);
     }
 
@@ -97,6 +97,7 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
         }
 
         Tenant tenant = pairs.get(0).getRight().getTenant(); // should all have the same tenant
+        String tenantId = tenant.getId();
         try {
             List<EntityLookupEntry> entries = pairs
                     .stream()
@@ -118,10 +119,10 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
                 removeReq(requestId);
                 sendResponse(requestId, lookupResponse, returnAddress);
             });
-            log.info("Lookup entity for tenant (PID={}), size = {} successfully", tenant.getPid(), pairs.size());
+            log.info("Lookup entity for tenant (ID={}), size = {} successfully", tenantId, pairs.size());
         } catch (Exception e) {
-            log.error("Lookup entity for tenant (PID={}), size = {} failed, error = {}",
-                    tenant.getPid(), pairs.size(), e.getMessage());
+            log.error("Lookup entity for tenant (ID={}), size = {} failed, error = {}",
+                    tenantId, pairs.size(), e.getMessage());
             // consider all requests failed
             sendFailureResponses(pairs.stream().map(Pair::getKey).collect(toList()), e);
         }

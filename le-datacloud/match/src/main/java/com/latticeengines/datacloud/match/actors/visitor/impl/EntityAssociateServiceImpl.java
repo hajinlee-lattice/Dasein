@@ -82,12 +82,12 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
     @Override
     protected void handleRequests(List<String> requestIds) {
-        Map<Long, List<Pair<String, EntityAssociationRequest>>> params = requestIds
+        Map<String, List<Pair<String, EntityAssociationRequest>>> params = requestIds
                 .stream()
                 .map(id -> Pair.of(id, getReq(id)))
                 .map(pair -> Pair.of(pair.getKey(), (EntityAssociationRequest) pair.getValue().getInputData()))
-                // group by tenant PID, put all lookupRequests in this tenant into a list
-                .collect(groupingBy(pair -> pair.getValue().getTenant().getPid(), mapping(pair -> pair, toList())));
+                // group by tenant ID, put all lookupRequests in this tenant into a list
+                .collect(groupingBy(pair -> pair.getValue().getTenant().getId(), mapping(pair -> pair, toList())));
         params.values().forEach(this::handleRequestsForTenant);
     }
 
@@ -115,7 +115,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         if (tenant == null) {
             return;
         }
-        Preconditions.checkNotNull(tenant.getPid());
+        Preconditions.checkNotNull(tenant.getId());
+        String tenantId = tenant.getId();
 
         try {
             List<String> targetSeedIds = pairs
@@ -128,9 +129,9 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             IntStream.range(0, pairs.size())
                     .forEach(idx ->
                             associateAsync(pairs.get(idx).getKey(), pairs.get(idx).getValue(), targetSeeds.get(idx)));
-            log.debug("Handled {} requests for tenant (PID={})", pairs.size(), tenant.getPid());
+            log.debug("Handled {} requests for tenant (ID={})", pairs.size(), tenantId);
         } catch (Exception e) {
-            log.error("Failed to handle {} requests for tenant (PID={})", pairs.size(), tenant.getPid());
+            log.error("Failed to handle {} requests for tenant (ID={})", pairs.size(), tenantId);
             // fail all requests
             sendFailureResponses(pairs.stream().map(Pair::getKey).collect(toList()), e);
         }
@@ -253,10 +254,12 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             // cannot associate to any entity
             return getResponse(request, null);
         }
+        Tenant tenant = request.getTenant();
+        String tenantId = tenant.getId();
         if (CollectionUtils.isEmpty(request.getLookupResults())) {
-            log.debug("No lookup entry for request (ID={}), attributes={}, tenant (PID={})," +
+            log.debug("No lookup entry for request (ID={}), attributes={}, tenant (ID={})," +
                     " entity={}, target entity ID={}", requestId, request.getExtraAttributes(),
-                    request.getTenant().getPid(), request.getEntity(), targetEntitySeed.getId());
+                    tenantId, request.getEntity(), targetEntitySeed.getId());
             if (MapUtils.isNotEmpty(request.getExtraAttributes())) {
                 EntityRawSeed seedToUpdate = new EntityRawSeed(
                         targetEntitySeed.getId(), targetEntitySeed.getEntity(),
@@ -269,7 +272,6 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
 
         // handling highest priority lookup entry
-        Tenant tenant = request.getTenant();
         String entity = request.getEntity();
         EntityLookupEntry maxPriorityEntry = EntityLookupEntryConverter.fromMatchKeyTuple(
                 entity, request.getLookupResults().get(0).getKey());
@@ -282,20 +284,20 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                             targetEntitySeed, Collections.singletonList(maxPriorityEntry), null));
             if (hasAssociationFailure(maxPriorityResult)) {
                 log.debug("Failed to associate highest priority lookup entry {} to target entity (ID={})," +
-                        " requestId={}, tenant (PID={}), entity={}",
-                        maxPriorityEntry, targetEntitySeed.getId(), request.getTenant().getPid(), request.getEntity());
+                        " requestId={}, tenant (ID={}), entity={}",
+                        maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
                 // fail to associate the highest priority entry
                 return getResponse(
                         request, null, getAssociationErrors(requestId, request, maxPriorityResult, null));
             }
 
             log.debug("Associate highest priority lookup entry successfully to target entity (ID={})," +
-                    " requestId={}, tenant (PID={}), entity={}",
-                    maxPriorityEntry, targetEntitySeed.getId(), request.getTenant().getPid(), request.getEntity());
+                    " requestId={}, tenant (ID={}), entity={}",
+                    maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
         } else {
             log.debug("Highest priority lookup entry {} already maps to target entity (ID={})," +
-                    " requestId={}, tenant (PID={}), entity={}",
-                    maxPriorityEntry, targetEntitySeed.getId(), request.getTenant().getPid(), request.getEntity());
+                    " requestId={}, tenant (ID={}), entity={}",
+                    maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
         }
 
         List<Pair<EntityLookupEntry, String>> mappingConflictEntries =
@@ -331,7 +333,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      * Check if the input association request contains any lookup entries or extra attributes that requires association
      * to target, need to be in sync with this#prepareSeedToAssociate
      */
-    private boolean needAdditionalAssociation(@NotNull EntityAssociationRequest request, @NotNull EntityRawSeed target) {
+    private boolean needAdditionalAssociation(
+            @NotNull EntityAssociationRequest request, @NotNull EntityRawSeed target) {
         Optional<Pair<EntityLookupEntry, String>> entryNeedUpdate = request.getLookupResults()
                 .stream()
                 // skip the highest priority one
@@ -352,7 +355,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      * Create a raw seed that contains all lookup entries that need association, need to be in sync with
      * this#needAdditionalAssociation
      */
-    private EntityRawSeed prepareSeedToAssociate(@NotNull EntityAssociationRequest request, @NotNull EntityRawSeed target) {
+    private EntityRawSeed prepareSeedToAssociate(
+            @NotNull EntityAssociationRequest request, @NotNull EntityRawSeed target) {
         List<EntityLookupEntry> entries = request
                 .getLookupResults()
                 .stream()
@@ -369,6 +373,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         return prepareSeedToAssociate(target, entries, request.getExtraAttributes());
     }
 
+    /*
+     * NOTE if entry is many to x and already mapped to another seed, technically we don't need to update lookup entry
+     *      but it is hard to pass in this info to associate method since associate method is fixed.
+     * TODO Modify associate interface later if there is performance problem due to this.
+     */
     private boolean needAssociation(@NotNull Pair<EntityLookupEntry, String> pair) {
         EntityLookupEntry.Mapping mapping = pair.getKey().getType().mapping;
         // we need to update either
@@ -378,7 +387,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
     }
 
     private EntityRawSeed prepareSeedToAssociate(
-            @NotNull EntityRawSeed target, @NotNull List<EntityLookupEntry> entries, Map<String, String> extraAttributes) {
+            @NotNull EntityRawSeed target, @NotNull List<EntityLookupEntry> entries,
+            Map<String, String> extraAttributes) {
         return new EntityRawSeed(target.getId(), target.getEntity(), entries, extraAttributes);
     }
 
@@ -397,18 +407,19 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             @NotNull String requestId, @NotNull EntityAssociationRequest request,
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result,
             List<Pair<EntityLookupEntry, String>> mappingConflictEntries) {
+        String tenantId = request.getTenant().getId();
         List<String> errors = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(mappingConflictEntries)) {
             // conflict known with look results
             String msg = String.format("Lookup entries already mapped to a different entity=%s," +
-                    " requestId=%s, tenantPid=%s", mappingConflictEntries, requestId, request.getTenant().getPid());
+                    " requestId=%s, tenantId=%s", mappingConflictEntries, requestId, tenantId);
             errors.add(msg);
         }
         if (hasAssociationFailure(result)) {
             // conflict occurs during association
             String msg = String.format("Failed to associate to target entity=%s, conflict in seed=%s," +
-                    " conflict in lookup=%s, requestId=%s, tenantPid=%s",
-                    result.getLeft(), result.getMiddle(), result.getRight(), requestId, request.getTenant().getPid());
+                    " conflict in lookup=%s, requestId=%s, tenantId=%s",
+                    result.getLeft(), result.getMiddle(), result.getRight(), requestId, tenantId);
             errors.add(msg);
         }
         return errors;
@@ -448,7 +459,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
     /*
      * helper to retrieve the first tenant in a list of requests (which are supposed to have the same tenants).
-     * return null is cannot retrieve tenant or tenant does not have PID
+     * return null is cannot retrieve tenant or tenant does not have ID
      */
     private Tenant getTenant(@NotNull List<Pair<String, EntityAssociationRequest>> pairs) {
         if (pairs.get(0) == null || pairs.get(0).getRight() == null) {
@@ -456,6 +467,6 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         }
 
         Tenant tenant = pairs.get(0).getRight().getTenant();
-        return tenant != null && tenant.getPid() != null ? tenant : null;
+        return tenant != null && tenant.getId() != null ? tenant : null;
     }
 }

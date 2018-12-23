@@ -603,7 +603,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     private PrimaryKey buildKey(
             EntityMatchEnvironment env, Tenant tenant, int version, String entity, String seedId) {
-        Preconditions.checkNotNull(tenant.getPid());
+        Preconditions.checkNotNull(tenant.getId());
         String partitionKey = getPartitionKey(env, tenant, version, entity, seedId);
         switch (env) {
             case SERVING:
@@ -617,7 +617,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     /*
      * Dynamo key format:
-     * - Partition Key: SEED_<TENANT_PID>_<STAGING_VERSION>_<ENTITY>_<CALCULATED_SUFFIX>
+     * - Partition Key: SEED_<TENANT_ID>_<STAGING_VERSION>_<ENTITY>_<CALCULATED_SUFFIX>
      *     - E.g., "SEED_123_5_Account_3"
      * - Sort Key: <ENTITY_ID>
      *     - E.g., "aabbabc123456789"
@@ -628,7 +628,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     /*
      * Dynamo key format:
-     * - Partition Key: SEED_<TENANT_PID>_<SERVING_VERSION>_<ENTITY>_<ENTITY_ID>
+     * - Partition Key: SEED_<TENANT_ID>_<SERVING_VERSION>_<ENTITY>_<ENTITY_ID>
      *     - E.g., "SEED_123_5_Account_aabbabc123456789"
      */
     private PrimaryKey buildServingKey(String partitionKey) {
@@ -642,7 +642,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 return getShardPartitionKey(tenant, version, entity, shardsId);
             case SERVING:
                 return String.join(DELIMITER,
-                    PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, seedId);
+                        PREFIX, tenant.getId(), String.valueOf(version), entity, seedId);
             default:
                 throw new UnsupportedOperationException("Unsupported environment: " + env);
         }
@@ -656,6 +656,6 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     private String getShardPartitionKey(Tenant tenant, int version, String entity, int shardId) {
         return String.join(DELIMITER,
-                PREFIX, tenant.getPid().toString(), String.valueOf(version), entity, String.valueOf(shardId));
+                PREFIX, tenant.getId(), String.valueOf(version), entity, String.valueOf(shardId));
     }
 }
