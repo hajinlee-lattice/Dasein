@@ -2,6 +2,8 @@
 
 echo "APP_ROOT=${APP_ROOT}"
 
+mkdir -p /etc/pki/tls/private
+
 if [[ -f "/etc/ledp/lattice.crt" ]]; then
     echo "Copying /etc/ledp/lattice.crt to /etc/pki/tls/star.lattice.local.crt"
     cp -f /etc/ledp/lattice.crt /etc/pki/tls/star.lattice.local.crt
@@ -45,5 +47,4 @@ sed -i "/export LOGGING=/d" ${APP_ROOT}/ENV_VARS
 source ${APP_ROOT}/ENV_VARS
 
 cd ${APP_ROOT}
-npm install debug
 node app.js
