@@ -12,25 +12,25 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class DataSchemaUnitTestNG {
 
     @Test(groups = "unit")
-    public void testSerDe() throws Exception {
+    public void testSerDe() {
         DataSchema schema = new DataSchema();
         schema.setName("IrisDataSet");
         schema.setType("record");
         Field sepalLength = new Field();
         sepalLength.setName("sepal_length");
-        sepalLength.setType(Arrays.<String> asList(new String[] { "float", "null" }));
+        sepalLength.setType(Arrays.asList("float", "null"));
         Field sepalWidth = new Field();
         sepalWidth.setName("sepal_width");
-        sepalWidth.setType(Arrays.<String> asList(new String[] { "float", "null" }));
+        sepalWidth.setType(Arrays.asList("float", "null"));
         Field petalLength = new Field();
         petalLength.setName("petal_length");
-        petalLength.setType(Arrays.<String> asList(new String[] { "float", "null" }));
+        petalLength.setType(Arrays.asList("float", "null"));
         Field petalWidth = new Field();
         petalWidth.setName("petal_width");
-        petalWidth.setType(Arrays.<String> asList(new String[] { "float", "null" }));
+        petalWidth.setType(Arrays.asList("float", "null"));
         Field category = new Field();
         category.setName("category");
-        category.setType(Arrays.<String> asList(new String[] { "string", "null" }));
+        category.setType(Arrays.asList("string", "null"));
 
         schema.addField(sepalLength);
         schema.addField(sepalWidth);
@@ -39,7 +39,7 @@ public class DataSchemaUnitTestNG {
         schema.addField(category);
 
         String jsonString = schema.toString();
-        
+
         // test that the generated schema is avro parseable
         new Schema.Parser().parse(jsonString);
         DataSchema deserializedSchema = JsonUtils.deserialize(jsonString, DataSchema.class);

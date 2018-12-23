@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Attribute
@@ -260,6 +262,7 @@ public class Attribute
         return sourceLogicalDataType;
     }
 
+    @JsonProperty("source_logical_type")
     public void setSourceLogicalDataType(String sourceLogicalDataType) {
         this.sourceLogicalDataType = sourceLogicalDataType;
     }
@@ -473,10 +476,12 @@ public class Attribute
         setPropertyValue("SourceAttrName", sourceAttrName);
     }
 
+    @JsonIgnore
     public void setApprovedUsage(String approvedUsage) {
         setListPropertyFromString("ApprovedUsage", approvedUsage);
     }
 
+    @JsonIgnore
     public void setApprovedUsage(ApprovedUsage... approvedUsages) {
         properties.put("ApprovedUsage", getStringValuesFromEnums(approvedUsages));
     }
@@ -490,6 +495,7 @@ public class Attribute
         return (List<String>) properties.get("ApprovedUsage");
     }
 
+    @JsonIgnore
     public void setApprovedUsage(List<String> approvedUsage) {
         properties.put("ApprovedUsage", approvedUsage);
     }
@@ -633,19 +639,23 @@ public class Attribute
     /**
      * Used for VisiDB/legacy systems
      */
+    @JsonIgnore
     public void setTags(String tags) {
         setListPropertyFromString("Tags", tags);
     }
 
+    @JsonIgnore
     public void setTags(Tag... tags) {
         properties.put("Tags", getStringValuesFromEnums(tags));
     }
 
     @SuppressWarnings("unchecked")
+    @JsonIgnore
     public List<String> getTags() {
         return (List<String>) properties.get("Tags");
     }
 
+    @JsonIgnore
     public void setTags(List<String> tags) {
         properties.put("Tags", tags);
     }
