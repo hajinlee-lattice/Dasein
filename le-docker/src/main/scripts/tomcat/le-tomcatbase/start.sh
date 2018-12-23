@@ -68,6 +68,9 @@ fi
 if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
     echo "Java version: $(java -version 2>&1), enabling ZGC"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions -XX:+UseZGC"
+else
+    echo "Java version: $(java -version 2>&1), enabling G1GC"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC -XX:+PrintGCTimeStamps"
 fi
 
 export JAVA_OPTS="-Dfile.encoding=UTF8"
