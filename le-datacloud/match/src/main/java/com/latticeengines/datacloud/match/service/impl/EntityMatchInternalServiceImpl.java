@@ -1,28 +1,10 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
-import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
-import com.latticeengines.datacloud.match.service.EntityRawSeedService;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toSet;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,10 +21,30 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toSet;
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.datacloud.match.service.EntityRawSeedService;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("entityMatchInternalService")
 public class EntityMatchInternalServiceImpl implements EntityMatchInternalService {
@@ -276,7 +278,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     return existingLookupPairs.containsKey(key)
                             && !existingLookupPairs.get(key).contains(entry.getSerializedValues());
                 })
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     /*
@@ -500,7 +502,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         Set<Pair<T, K>> keysForCache = keys
                 .stream()
                 .map(entry -> Pair.of(prefix, entry))
-                .collect(Collectors.toSet());
+                .collect(toSet());
         return cache
                 .getAllPresent(keysForCache)
                 .entrySet()
@@ -513,7 +515,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Helper to return a set of keys that does not exist in result map.
      */
     private <K, V> Set<K> getMissingKeys(@NotNull Set<K> keys, @NotNull Map<K, V> foundValues) {
-        return keys.stream().filter(key -> !foundValues.containsKey(key)).collect(Collectors.toSet());
+        return keys.stream().filter(key -> !foundValues.containsKey(key)).collect(toSet());
     }
 
     /*
@@ -583,7 +585,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * 5. Average of 4 is around 290 bytes
      * 6. Decide to use 400 bytes per entry for now (easier to calculate). Therefore 1MiB => 2500 entries
      */
-    private long getMaxSeedCacheWeight() {
+    @VisibleForTesting
+    protected long getMaxSeedCacheWeight() {
         return entityMatchConfigurationService.getMaxSeedCacheMemoryInMB() * 2500;
     }
 
@@ -630,7 +633,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * 5. Average of 4 is around 300 bytes
      * 6. Decide to use 400 bytes per entry for now. Therefore 1MiB => 2500 entries
      */
-    private long getMaxLookupCacheSize() {
+    @VisibleForTesting
+    protected long getMaxLookupCacheSize() {
         return entityMatchConfigurationService.getMaxLookupCacheMemoryInMB() * 2500;
     }
 
