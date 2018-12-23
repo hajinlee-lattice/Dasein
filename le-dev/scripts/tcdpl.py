@@ -207,7 +207,7 @@ def deploy_mgr_app(app, wait=False):
 
 def undeploy_mgr_app(app):
     mgr_app = get_mgr_app(app)
-    mgr_app_dir = os.path.join(CATALINA_HOME, 'webapps', mgr_app)
+    mgr_app_dir = os.path.join(CATALINA_HOME, 'webapps', mgr_app, 'manager')
     if os.path.isdir(mgr_app_dir):
         logger.info("Removing manager app %s" % mgr_app_dir)
         rmtree(mgr_app_dir)
