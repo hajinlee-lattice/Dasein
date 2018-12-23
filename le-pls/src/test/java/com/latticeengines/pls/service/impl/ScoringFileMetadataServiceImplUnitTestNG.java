@@ -138,7 +138,7 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
                 .getSystemResource(
                         "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedsavedtablePLS_7102.json")
                 .getPath()));
-        Assert.assertEquals(t.toString(), expected);
+        Assert.assertEquals(t.toString().trim(), expected.trim());
 
     }
 
