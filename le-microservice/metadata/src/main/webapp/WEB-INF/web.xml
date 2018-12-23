@@ -21,7 +21,7 @@
     <servlet>
         <servlet-name>metadata</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
+        <load-on-startup>1</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>
 
