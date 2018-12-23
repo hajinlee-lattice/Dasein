@@ -18,7 +18,12 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 public class AttributeLookup extends Lookup implements Comparable<AttributeLookup> {
 
     @JsonProperty("entity")

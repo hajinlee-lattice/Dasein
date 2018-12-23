@@ -17,13 +17,16 @@ import reactor.core.publisher.Flux;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "Name")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME),
+@JsonSubTypes({ @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME),
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME),
-        @JsonSubTypes.Type(value = WorkflowSparkJobConfig.class, name = "WorkflowSparkJobConfig"),
-})
+        @JsonSubTypes.Type(value = WorkflowSparkJobConfig.class, name = "WorkflowSparkJobConfig"), })
 public abstract class SparkJobConfig {
 
     @JsonProperty("Input")
@@ -63,7 +66,7 @@ public abstract class SparkJobConfig {
             root = workspace;
         }
         return Flux.range(1, getNumTargets()).map(idx -> //
-                HdfsDataUnit.fromPath(root + "/Output" + idx) //
+        HdfsDataUnit.fromPath(root + "/Output" + idx) //
         ).collectList().block();
     }
 

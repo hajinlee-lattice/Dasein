@@ -22,7 +22,12 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 public class AttrConfig implements IsColumnMetadata, Cloneable {
 
     private static final long serialVersionUID = -118514979620559934L;

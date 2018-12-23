@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 @JsonAutoDetect( //
         fieldVisibility = JsonAutoDetect.Visibility.NONE, //
         getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
         setterVisibility = JsonAutoDetect.Visibility.NONE //
 )
 public class Attribute

@@ -39,7 +39,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields, Serializable {
 
     private static final long serialVersionUID = -8569929129948247705L;
