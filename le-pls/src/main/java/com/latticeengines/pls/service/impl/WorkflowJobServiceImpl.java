@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -453,10 +454,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         List<Job> jobList = new ArrayList<>();
         List<String> workflowJobPids = new ArrayList<>();
+        List<String> canceled_workflowJobPids = new ArrayList<>();
         for (Action action : actions) {
             // this action is a workflow job
             if (action.getTrackingPid() != null) {
-                workflowJobPids.add(action.getTrackingPid().toString());
+                if (action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getActionStatus() ==
+                        ActionStatus.CANCELED)
+                    canceled_workflowJobPids.add(action.getTrackingPid().toString());
+                else
+                    workflowJobPids.add(action.getTrackingPid().toString());
             } else if (isVisibleAction(action)) {
                 Job job = new Job();
                 job.setName(action.getType().getDisplayName());
@@ -465,16 +471,30 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setStartTimestamp(action.getCreated());
                 job.setDescription(action.getDescription());
                 if (!ActionType.getNonWorkflowActions().contains(action.getType())) {
-                    job.setJobStatus(JobStatus.RUNNING);
+                    if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW == action.getType() && action.getActionStatus() == ActionStatus.CANCELED)
+                        job.setJobStatus(JobStatus.CANCELLED);
+                    else
+                        job.setJobStatus(JobStatus.RUNNING);
                 } else {
                     job.setJobStatus(JobStatus.COMPLETED);
                 }
                 jobList.add(job);
             }
         }
+        log.info("workflowJobPids:" + workflowJobPids.toString());
+        log.info("canceled_workflowJobPids:" + canceled_workflowJobPids.toString());
+
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
-            jobList.addAll(workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
-                    MultiTenantContext.getCustomerSpace().toString()));
+            List<Job> workflowJobs = workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
+                    MultiTenantContext.getCustomerSpace().toString());
+            if (CollectionUtils.isNotEmpty(canceled_workflowJobPids)) {
+                for (Job job : workflowJobs) {
+                    if (canceled_workflowJobPids.contains(job.getId().toString())) {
+                        job.setJobStatus(JobStatus.CANCELLED);
+                    }
+                }
+            }
+            jobList.addAll(workflowJobs);
         }
         return jobList;
     }

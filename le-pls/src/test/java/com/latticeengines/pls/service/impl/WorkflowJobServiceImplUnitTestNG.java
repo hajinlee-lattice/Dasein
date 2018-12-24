@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -319,6 +320,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         action3.setPid(3L);
         action3.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action3.setActionConfiguration(new ImportActionConfiguration());
+        action3.setActionStatus(ActionStatus.CANCELED);
         action3.setTrackingPid(jobIds[1]);
         Action action4 = new Action();
         action4.setPid(4L);
