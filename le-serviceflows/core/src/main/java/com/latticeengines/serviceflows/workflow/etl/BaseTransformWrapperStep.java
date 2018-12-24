@@ -98,7 +98,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
         engineConf.setEngine("TEZ");
         Map<String, String> jobProperties = new HashMap<>();
-        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * 2));
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * 2));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions / 2));
         engineConf.setJobProperties(jobProperties);

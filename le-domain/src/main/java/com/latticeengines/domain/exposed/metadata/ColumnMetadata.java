@@ -29,7 +29,12 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 public class ColumnMetadata implements HasAttributeCustomizations, Serializable {
     private static final long serialVersionUID = -8532367815438372761L;
 

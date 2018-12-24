@@ -77,6 +77,10 @@ PRESETS = {
                  'playmaker', 'dataflowapi', 'eai', 'modeling', 'scoring', 'workflowapi',
                  'quartz', 'sqoop']
     },
+    'benchmark': {
+        'apps': ['pls', 'lp', 'cdl', 'matchapi', 'metadata', 'dataflowapi', 'eai', 'modeling',
+                 'scoring', 'workflowapi', 'quartz', 'sqoop']
+    },
     'etl': {
         'apps': ['microservice', 'matchapi', 'metadata', 'workflowapi', 'datacloudapi', 'eai', 'sqoop']
     },
