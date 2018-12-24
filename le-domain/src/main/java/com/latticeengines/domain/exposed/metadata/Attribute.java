@@ -155,7 +155,7 @@ public class Attribute
     @Column(name = "VALIDATORS")
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
-    @JsonIgnore
+    @JsonProperty("validatorWrappers")
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
 
     @Column(name = "GROUPS", length = 1000)
