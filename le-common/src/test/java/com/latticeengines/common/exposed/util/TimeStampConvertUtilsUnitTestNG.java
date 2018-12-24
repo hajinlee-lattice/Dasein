@@ -12,7 +12,7 @@ public class TimeStampConvertUtilsUnitTestNG {
 
     @Test(groups = { "unit", "functional" })
     public void testConvertToLong() throws Exception {
-        String unsupportedDate = "13-Feb-17";
+        String unsupportedDate = "13-April-17";
         Assert.expectThrows(IllegalArgumentException.class, () -> TimeStampConvertUtils.convertToLong(unsupportedDate));
 
         String str = "4/13/2016";
@@ -23,6 +23,11 @@ public class TimeStampConvertUtilsUnitTestNG {
         expectedTimestamp = computeTimestamp(str2, false, "M/d/yy", "");
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str2), expectedTimestamp);
         Assert.assertEquals(TimeStampConvertUtils.convertToLong(str), TimeStampConvertUtils.convertToLong(str2));
+
+        String localeDate = "13-Feb-17";
+        String normalDate = "2/13/17";
+        long expected = TimeStampConvertUtils.convertToLong(normalDate);
+        Assert.assertEquals(TimeStampConvertUtils.convertToLong(localeDate), expected);
 
         // Test backup Natty Date Parser on date string that includes time.
         str = "2/22/2017 1:01:00 AM";

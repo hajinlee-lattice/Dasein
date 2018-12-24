@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -78,6 +79,16 @@ public class TimeStampConvertUtils {
                     .toFormatter()
                     .withZoneUTC();  // Set default timezone to UTC.
 
+    private static final DateTimeFormatter DATE_FORMATTER_LOCALE =
+            new DateTimeFormatterBuilder()
+                    .append(null, new DateTimeParser[]{
+                            DateTimeFormat.forPattern("dd-MMM-yy").withLocale(Locale.ENGLISH).getParser(),
+                            DateTimeFormat.forPattern("dd/MMM/yy").withLocale(Locale.ENGLISH).getParser(),
+                            DateTimeFormat.forPattern("dd-MMM-yyyy").withLocale(Locale.ENGLISH).getParser(),
+                            DateTimeFormat.forPattern("dd/MMM/yyyy").withLocale(Locale.ENGLISH).getParser()})
+                    .toFormatter()
+                    .withZoneUTC();
+
     // Simple method for date conversion which assumes one of five basic date only formats.
     public static long convertToLong(String date) {
         try {
@@ -98,7 +109,11 @@ public class TimeStampConvertUtils {
 
             // DO NOT trust natty parser with any month letters in date string!
             if (date.chars().filter(Character::isLetter).count() >= 3) {
-                throw new IllegalArgumentException("Cannot parse date: " + date);
+                if (date.matches("\\d{2}[-|/][a-zA-Z]{3}[-|/]\\d{2,4}")) {
+                    return DATE_FORMATTER_LOCALE.parseMillis(date);
+                } else {
+                    throw new IllegalArgumentException("Cannot parse date: " + date);
+                }
             }
             LogManager.getLogger(Parser.class).setLevel(Level.OFF);
             // Create date/time parser with default timezone UTC.
