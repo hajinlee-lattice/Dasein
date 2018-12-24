@@ -1,6 +1,5 @@
 package com.latticeengines.serviceflows.workflow.util;
 
-import com.latticeengines.common.exposed.util.ScalingUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -21,6 +20,7 @@ public class ScalingUtilsUnitTestNG {
                 { 500_000, 2 }, //
                 { 1_000_000, 3 }, //
                 { 10_000_000, 4 }, //
+                { 15_000_000, 4 }, //
         };
     }
 
