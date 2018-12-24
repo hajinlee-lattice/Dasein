@@ -86,9 +86,10 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     @Type(type = "json")
     private ActionConfiguration actionConfiguration;
 
-    @JsonProperty("canceled")
-    @Column(name = "CANCELED")
-    private Boolean canceled = false;
+    @JsonProperty("actionStatus")
+    @Column(name = "ACTION_STATUS", length = 20)
+    @Enumerated(EnumType.STRING)
+    private ActionStatus actionStatus = ActionStatus.ACTIVE;
 
     @Override
     public Long getPid() {
@@ -178,12 +179,12 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
         this.actionConfiguration = actionConfiguration;
     }
 
-    public Boolean getCanceled() {
-        return canceled;
+    public ActionStatus getActionStatus() {
+        return actionStatus;
     }
 
-    public void setCanceled(Boolean canceled) {
-        this.canceled = canceled;
+    public void setActionStatus(ActionStatus actionStatus) {
+        this.actionStatus = actionStatus;
     }
 
     @Override

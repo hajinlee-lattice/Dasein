@@ -20,6 +20,7 @@ import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBas
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsActionConfiguration;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
@@ -121,7 +122,7 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         for (Action action : retrievedActions) {
             System.out.println(JsonUtils.serialize(action));
             if (action.getOwnerId() == null)
-                Assert.assertTrue(action.getCanceled());
+                Assert.assertEquals(action.getActionStatus(), ActionStatus.CANCELED);
         }
     }
 

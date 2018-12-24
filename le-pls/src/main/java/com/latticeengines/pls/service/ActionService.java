@@ -7,6 +7,4 @@ public interface ActionService {
     Action create(Action action);
 
     Action cancel(Long actionPid);
-
-    void sendEmail(Action action);
 }

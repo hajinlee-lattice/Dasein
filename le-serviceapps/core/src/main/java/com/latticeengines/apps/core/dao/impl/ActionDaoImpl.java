@@ -10,11 +10,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.core.dao.ActionDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 
 @Component("actionDao")
 public class ActionDaoImpl extends BaseDaoImpl<Action> implements ActionDao {
-
-    private static final Boolean is_CANCEL = true;
 
     @Override
     protected Class<Action> getEntityClass() {
@@ -51,10 +50,10 @@ public class ActionDaoImpl extends BaseDaoImpl<Action> implements ActionDao {
     @Override
     public void cancel(Long actionPid) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("update %s set canceled = :canceled where PID = :actionPid",
+        String queryStr = String.format("update %s set ACTION_STATUS = :action_status where PID = :actionPid",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setParameter("canceled", is_CANCEL);
+        query.setParameter("action_status", ActionStatus.CANCELED.toString());
         query.setParameter("actionPid", actionPid);
         query.executeUpdate();
     }

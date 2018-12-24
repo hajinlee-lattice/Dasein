@@ -107,10 +107,21 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public Action cancel(Long actionPid) {
+        log.info("actionPid = " + actionPid);
         if (actionPid != null) {
             Action action = findByPid(actionPid);
             if (action != null && action.getOwnerId() == null && ActionType.CDL_DATAFEED_IMPORT_WORKFLOW == action.getType()) {
                 actionEntityMgr.cancel(actionPid);
+            } else {
+                String errMessage = "";
+                if (action == null)
+                    errMessage = "Can not find this action";
+                else if (action.getOwnerId() != null)
+                    errMessage = "This Action is running, can not be canceled.";
+                else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW != action.getType())
+                    errMessage = "This Action is not import action, can not be canceled.";
+                log.error(errMessage);
+                throw new RuntimeException(errMessage);
             }
             action = findByPid(actionPid);
             return action;

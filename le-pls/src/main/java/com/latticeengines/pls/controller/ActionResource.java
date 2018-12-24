@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
@@ -37,7 +38,6 @@ public class ActionResource {
     @Inject
     private ActionService actionService;
 
-    private static final Boolean IS_CANCEL = true;
     private static final String CANCELSUCCESS_MSG = "<p>Cancel this action success.</p>";
 
     @RequestMapping(value = "", method = RequestMethod.POST)
@@ -45,10 +45,10 @@ public class ActionResource {
     public Map<String, UIAction> cancelAction(@RequestParam(value = "actionPid") Long actionPid) {
         try {
             Action action = actionService.cancel(actionPid);
-            if (action.getCanceled() != IS_CANCEL) {
+            log.info("action status is :" + action.getActionStatus().toString());
+            if (action.getActionStatus() != ActionStatus.CANCELED) {
                 throw new RuntimeException("Cannot cancel this action!");
             }
-            actionService.sendEmail(action);
             UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
                     CANCELSUCCESS_MSG);
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
