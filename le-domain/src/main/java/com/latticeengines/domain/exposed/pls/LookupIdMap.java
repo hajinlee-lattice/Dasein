@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "ORG_ID", "EXT_SYS_TYPE", "FK_TENANT_ID" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
-@OnDelete(action = OnDeleteAction.CASCADE)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
