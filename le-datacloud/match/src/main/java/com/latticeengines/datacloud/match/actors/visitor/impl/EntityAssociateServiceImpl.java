@@ -1,17 +1,21 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
-import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import com.latticeengines.domain.exposed.security.Tenant;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,20 +26,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
  * Associate all the lookup entry for a single record to one entity.
@@ -273,8 +276,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
         // handling highest priority lookup entry
         String entity = request.getEntity();
-        EntityLookupEntry maxPriorityEntry = EntityLookupEntryConverter.fromMatchKeyTuple(
-                entity, request.getLookupResults().get(0).getKey());
+        EntityLookupEntry maxPriorityEntry = getEntry(entity, request.getLookupResults().get(0).getKey());
         String maxPrioritySeedId = request.getLookupResults().get(0).getValue();
         // only update the max priority if it is not mapped to target entity ID at the moment
         if (!targetEntitySeed.getId().equals(maxPrioritySeedId)) {
@@ -340,8 +342,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 // skip the highest priority one
                 .skip(1L)
                 .map(pair -> {
-                    EntityLookupEntry entry = EntityLookupEntryConverter
-                            .fromMatchKeyTuple(request.getEntity(), pair.getKey());
+                    EntityLookupEntry entry = getEntry(request.getEntity(), pair.getKey());
                     return Pair.of(entry, pair.getValue());
                 })
                 // entries not mapped to target (null or diff ID)
@@ -361,8 +362,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 .getLookupResults()
                 .stream()
                 .map(pair -> {
-                    EntityLookupEntry entry = EntityLookupEntryConverter
-                            .fromMatchKeyTuple(request.getEntity(), pair.getKey());
+                    EntityLookupEntry entry = getEntry(request.getEntity(), pair.getKey());
                     return Pair.of(entry, pair.getValue());
                 })
                 // entries not mapped to target (null or diff ID)
@@ -435,8 +435,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         return request.getLookupResults()
                 .stream()
                 .map(pair -> {
-                    EntityLookupEntry entry = EntityLookupEntryConverter
-                            .fromMatchKeyTuple(request.getEntity(), pair.getKey());
+                    EntityLookupEntry entry = getEntry(request.getEntity(), pair.getKey());
                     return Pair.of(entry, pair.getValue());
                 })
                 .filter(pair -> {
@@ -446,6 +445,16 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     return mapping == ONE_TO_ONE && StringUtils.isNotBlank(id) && !id.equals(target.getId());
                 })
                 .collect(toList());
+    }
+
+    /*
+     * Each tuple in EntityAssociationRequest should be transformed to a list of exactly ONE lookup entry.
+     */
+    private EntityLookupEntry getEntry(@NotNull String entity, @NotNull MatchKeyTuple tuple) {
+        List<EntityLookupEntry> entries = EntityLookupEntryConverter
+                .fromMatchKeyTuple(entity, tuple);
+        Preconditions.checkArgument(entries.size() == 1);
+        return entries.get(0);
     }
 
     private EntityAssociationResponse getResponse(

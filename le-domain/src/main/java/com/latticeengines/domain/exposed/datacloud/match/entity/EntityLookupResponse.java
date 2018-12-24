@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -10,13 +12,13 @@ public class EntityLookupResponse {
     private final Tenant tenant;
     private final String entity;
     private final MatchKeyTuple tuple;
-    private final String entityId;
+    private final List<String> entityIds;
 
-    public EntityLookupResponse(Tenant tenant, String entity, MatchKeyTuple tuple, String entityId) {
+    public EntityLookupResponse(Tenant tenant, String entity, MatchKeyTuple tuple, List<String> entityIds) {
         this.tenant = tenant;
         this.entity = entity;
         this.tuple = tuple;
-        this.entityId = entityId;
+        this.entityIds = entityIds;
     }
 
     public Tenant getTenant() {
@@ -31,7 +33,7 @@ public class EntityLookupResponse {
         return tuple;
     }
 
-    public String getEntityId() {
-        return entityId;
+    public List<String> getEntityIds() {
+        return entityIds;
     }
 }

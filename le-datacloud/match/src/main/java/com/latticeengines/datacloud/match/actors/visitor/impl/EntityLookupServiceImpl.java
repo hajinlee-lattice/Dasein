@@ -1,5 +1,23 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
@@ -8,21 +26,6 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Lookup entity ID with given {@link com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple}.
@@ -53,11 +56,11 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
     @Override
     protected EntityLookupResponse lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         EntityLookupRequest lookupRequest = (EntityLookupRequest) request.getInputData();
-        EntityLookupEntry entry = EntityLookupEntryConverter.fromMatchKeyTuple(
+        List<EntityLookupEntry> entries = EntityLookupEntryConverter.fromMatchKeyTuple(
                 lookupRequest.getEntity(), lookupRequest.getTuple());
-        String entityId = entityMatchInternalService.getId(lookupRequest.getTenant(), entry);
+        List<String> entityIds = entityMatchInternalService.getIds(lookupRequest.getTenant(), entries);
         return new EntityLookupResponse(
-                lookupRequest.getTenant(), lookupRequest.getEntity(), lookupRequest.getTuple(), entityId);
+                lookupRequest.getTenant(), lookupRequest.getEntity(), lookupRequest.getTuple(), entityIds);
     }
 
     @Override
@@ -99,20 +102,33 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
         Tenant tenant = pairs.get(0).getRight().getTenant(); // should all have the same tenant
         String tenantId = tenant.getId();
         try {
-            List<EntityLookupEntry> entries = pairs
+            List<List<EntityLookupEntry>> entryLists = pairs
                     .stream()
                     .map(Pair::getValue)
                     .map(entry -> EntityLookupEntryConverter.fromMatchKeyTuple(entry.getEntity(), entry.getTuple()))
                     .collect(toList());
+            List<EntityLookupEntry> entries = entryLists
+                    .stream()
+                    .flatMap(List::stream)
+                    .distinct()
+                    .collect(Collectors.toList());
             List<String> seedIds = entityMatchInternalService.getIds(tenant, entries);
+            Map<EntityLookupEntry, String> lookupResults = IntStream
+                    .range(0, entries.size())
+                    .mapToObj(idx -> Pair.of(entries.get(idx), seedIds.get(idx)))
+                    .filter(pair -> pair.getValue() != null)
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
             Preconditions.checkNotNull(seedIds);
-            Preconditions.checkArgument(seedIds.size() == pairs.size());
-            IntStream.range(0, seedIds.size()).forEach(idx -> {
+            IntStream.range(0, pairs.size()).forEach(idx -> {
                 String requestId = pairs.get(idx).getKey();
+                List<String> entityIds = entryLists.get(idx)
+                        .stream()
+                        .map(lookupResults::get)
+                        .collect(toList());
                 EntityLookupRequest lookupRequest = pairs.get(idx).getValue();
                 EntityLookupResponse lookupResponse = new EntityLookupResponse(
                         lookupRequest.getTenant(), lookupRequest.getEntity(),
-                        lookupRequest.getTuple(), seedIds.get(idx));
+                        lookupRequest.getTuple(), entityIds);
                 String returnAddress = getReqReturnAddr(requestId);
 
                 // remove request and send response

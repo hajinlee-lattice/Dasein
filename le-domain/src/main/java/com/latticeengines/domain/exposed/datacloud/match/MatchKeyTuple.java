@@ -412,6 +412,11 @@ public class MatchKeyTuple implements Fact {
             return this;
         }
 
+        public Builder withSystemIds(List<Pair<String, String>> systemIds) {
+            matchKeyTuple.setSystemIds(systemIds);
+            return this;
+        }
+
         public MatchKeyTuple build() {
             return matchKeyTuple;
         }
