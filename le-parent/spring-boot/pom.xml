@@ -27,7 +27,7 @@
         <jetty.stop.port>10999</jetty.stop.port>
         <jetty.use.test.cp>false</jetty.use.test.cp>
         <jetty.ks.path>/etc/ledp/tls/ledp_keystore.jks</jetty.ks.path>
-        <jetty.ks.password>welcome</jetty.ks.password>
+        <jetty.ks.password>Lattice1</jetty.ks.password>
         <jetty.xmx>2g</jetty.xmx>
         <alpn.version>8.1.11.v20170118</alpn.version>
         <tomcat.version>9.0.13</tomcat.version>
