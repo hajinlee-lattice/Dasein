@@ -20,18 +20,22 @@ if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
     echo "Java version: $(java -version 2>&1)"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseParallelGC"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseZGC"
+else
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC"
 fi
 
-export JAVA_OPTS="-Xmx4g -XX:ReservedCodeCacheSize=512m"
+export JAVA_OPTS="-server -Xmx4g -XX:ReservedCodeCacheSize=512m"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.net.preferIPv4Stack=true"
-export JAVA_OPTS="${JAVA_OPTS} -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.library.path=${CATALINA_HOME}/lib"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/ledp/tls/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1098"
 export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
+
+# uncomment this line to enable remote debugger
+# export JAVA_OPTS="${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4001"
 
 if [[ "${ENABLE_JACOCO}" == "true" ]]; then
     JACOCO_DEST_FILE="${WSHOME}/jacoco/tomcat.exec"

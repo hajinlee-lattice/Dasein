@@ -75,8 +75,7 @@ else
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC -XX:+PrintGCTimeStamps"
 fi
 
-export JAVA_OPTS="-Dfile.encoding=UTF8"
-export JAVA_OPTS="${JAVA_OPTS} -Duser.timezone=UTC"
+export JAVA_OPTS="-Dfile.encoding=UTF8 -Duser.timezone=UTC"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"
