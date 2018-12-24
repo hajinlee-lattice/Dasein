@@ -17,11 +17,13 @@ if [[ ! -z "${J11_HOME}" ]]; then
 fi
 
 if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
-    echo "Java version: $(java -version 2>&1), enabling ParallelGC"
+    echo "Java version: $(java -version 2>&1)"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseParallelGC"
 fi
 
-export JAVA_OPTS="-Xmx4g -XX:ReservedCodeCacheSize=1g"
+export JAVA_OPTS="-Xmx4g -XX:ReservedCodeCacheSize=512m"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.net.preferIPv4Stack=true"
 export JAVA_OPTS="${JAVA_OPTS} -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true"

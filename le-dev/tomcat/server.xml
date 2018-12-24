@@ -68,7 +68,8 @@
     </GlobalNamingResources>
 
     <Service name="MatchAPI">
-        <Connector port="9076" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9076" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -90,7 +91,8 @@
     </Service>
 
     <Service name="Admin">
-        <Connector port="9085" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9085" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -112,7 +114,8 @@
     </Service>
 
     <Service name="PlayMaker">
-        <Connector port="9071" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9071" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -134,7 +137,8 @@
     </Service>
 
     <Service name="OAuth">
-        <Connector port="9072" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9072" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -156,7 +160,8 @@
     </Service>
 
     <Service name="ScoringAPI">
-        <Connector port="9073" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9073" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -178,7 +183,8 @@
     </Service>
 
     <Service name="SAML">
-        <Connector port="9087" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9087" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -200,7 +206,8 @@
     </Service>
 
     <Service name="API">
-        <Connector port="9074" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9074" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -222,7 +229,8 @@
     </Service>
 
     <Service name="Ulysses">
-        <Connector port="9075" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9075" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -244,7 +252,8 @@
     </Service>
 
     <Service name="MS">
-        <Connector port="9080" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="16" maxThreads="256"/>
+        <Connector port="9080" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
@@ -266,7 +275,8 @@
     </Service>
 
     <Service name="PLS">
-        <Connector port="9081" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Executor name="tomcat" minSpareThreads="4" maxThreads="64"/>
+        <Connector port="9081" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="60000"
