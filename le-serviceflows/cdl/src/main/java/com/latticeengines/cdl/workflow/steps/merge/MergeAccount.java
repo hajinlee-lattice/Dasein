@@ -167,7 +167,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
         BulkMatchMergerTransformerConfig conf = new BulkMatchMergerTransformerConfig();
         conf.setJoinField(batchStorePrimaryKey);
-        String confStr = appendEngineConf(conf, heavyEngineConfig2());
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }

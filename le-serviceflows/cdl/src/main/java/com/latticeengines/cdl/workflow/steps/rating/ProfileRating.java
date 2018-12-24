@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(ProfileRating.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -85,6 +86,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         Table ruleRawTable = null;
         Table aiRawTable = null;
 
+        long maxCnt = 0L;
         ruleBaseRawRating = getStringValueFromContext(RULE_RAW_RATING_TABLE_NAME);
         if (StringUtils.isNotBlank(ruleBaseRawRating)) {
             ruleRawTable = metadataProxy.getTable(customerSpace.toString(), ruleBaseRawRating);
@@ -92,6 +94,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
                 log.warn("Cannot find rule based raw rating table " + ruleBaseRawRating);
             } else {
                 hasRuleRating = true;
+                maxCnt = ScalingUtils.getTableCount(ruleRawTable);
             }
         }
 
@@ -102,11 +105,16 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
                 log.warn("Cannot find AI based raw rating table " + aiBaseRawRating);
             } else {
                 hasAIRating = true;
+                maxCnt = Math.max(maxCnt, ScalingUtils.getTableCount(aiRawTable));
             }
         }
-
         if (aiRawTable == null && ruleRawTable == null) {
             throw new IllegalStateException("Cannot find any raw rating table");
+        }
+        int multiplier = ScalingUtils.getMultiplier(maxCnt);
+        if (multiplier > 1) {
+            log.info("Set multiplier=" + multiplier + " base on count=" + maxCnt);
+            scalingMultiplier = multiplier;
         }
         List<String> inactiveEngines = getListObjectFromContext(ITERATION_INACTIVE_ENGINES, String.class);
         if (CollectionUtils.isNotEmpty(inactiveEngines)) {

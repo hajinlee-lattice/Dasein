@@ -37,8 +37,6 @@ public class EMRScalingRunnable implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
 
-    private static final int MAX_TASK_NODES = 64;
-
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
     private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(45);
@@ -273,14 +271,14 @@ public class EMRScalingRunnable implements Runnable {
         int targetByMb = determineTargetByMb(reqResource.reqMb);
         int targetByVCores = determineTargetByVCores(reqResource.reqVCores);
         int target = Math.max(targetByMb, targetByVCores);
-//        target += determineNewByMinNodeResource(reqResource);
+        target += determineMomentumBuffer();
         if (reqResource.hangingApps > 0) {
             target += reqResource.hangingApps;
         }
         // to be removed to changed to debug
         log.info("Metrics=" + JsonUtils.serialize(metrics) + " Reqs=" + reqResource + " Target="
                 + target);
-        return Math.min(target, MAX_TASK_NODES);
+        return Math.min(target, getMaxTaskNodes());
     }
 
     private int determineTargetByMb(long req) {
@@ -307,19 +305,17 @@ public class EMRScalingRunnable implements Runnable {
         return target;
     }
 
-//    private int determineNewByMinNodeResource(ReqResource reqResource) {
-//        SingleNodeResource bestSingleNode = getBestSingleNode();
-//        if (reqResource.maxMb > bestSingleNode.mb || reqResource.maxVCores > bestSingleNode.vcores) {
-//            log.info("BestSingleNode=" + bestSingleNode + ": no single node can host the max job");
-//            return 1;
-//        } else if (bestSingleNode.mb < MIN_SINGLE_NODE_MB || bestSingleNode.vcores < MIN_SINGLE_NODE_VCORES) {
-//            log.info("BestSingleNode=" + bestSingleNode //
-//                    + ": no single node is able to kick off a modeling python client.");
-//            return 1;
-//        } else {
-//            return 0;
-//        }
-//    }
+    // use half of used resource as buffer
+    private int determineMomentumBuffer() {
+        long usedMb = metrics.totalMB - metrics.availableMB;
+        int buffer1 = (int) Math.ceil(0.5 * usedMb / taskMb);
+        int usedVCores = metrics.totalVirtualCores - metrics.availableVirtualCores;
+        int buffer2 = (int) Math.ceil(0.5 * usedVCores / taskVCores);
+        int buffer = Math.max(buffer1, buffer2);
+        log.info("Set momentum buffer to " + buffer + " for using " //
+                + usedMb + " mb and " + usedVCores + " vcores.");
+        return buffer;
+    }
 
     private void resetScalingDownCounter() {
         if (getScalingDownAttempt().get() > 0) {
@@ -345,6 +341,10 @@ public class EMRScalingRunnable implements Runnable {
             coreVCores = getInstanceVCores(coreGrp);
         }
         return coreGrp;
+    }
+
+    private int getMaxTaskNodes() {
+        return getCoreCount() * 4;
     }
 
     private int getCoreCount() {

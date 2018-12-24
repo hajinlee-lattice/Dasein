@@ -6,15 +6,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
@@ -24,6 +20,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepCon
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.dataflowapi.DataFlowApiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkflowStep<T> {
@@ -45,6 +42,8 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     @Value("${pls.cdl.transform.tez.task.mem.gb}")
     private int tezMemGb;
 
+    private int scalingMultiplier = 1;
+
     @Override
     public void execute() {
         log.info("Inside RunDataFlow execute() [" + configuration.getBeanName() + "]");
@@ -63,7 +62,6 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setTargetTableName(configuration.getTargetTableName());
         dataFlowConfig.setTargetPath(configuration.getTargetPath());
         dataFlowConfig.setPartitions(configuration.getPartitions());
-        setJobProperties(dataFlowConfig);
         dataFlowConfig.setEngine(configuration.getEngine());
         dataFlowConfig.setQueue(configuration.getQueue());
         dataFlowConfig.setSwlib(configuration.getSwlib());
@@ -74,18 +72,21 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setDataFlowParameters(configuration.getDataFlowParams());
         dataFlowConfig.setApplyTableProperties(configuration.isApplyTableProperties());
 
+        setJobProperties(dataFlowConfig);
+
         return dataFlowConfig;
     }
 
     private void setJobProperties(DataFlowConfiguration dataFlowConfig) {
         if (configuration.getJobProperties() == null) {
             Properties jobProperties = new Properties();
-            jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions));
-            jobProperties.put("mapred.reduce.tasks", String.valueOf(cascadingPartitions));
+            int partitions = cascadingPartitions * scalingMultiplier;
+            jobProperties.put("mapreduce.job.reduces", String.valueOf(partitions));
+            jobProperties.put("mapred.reduce.tasks", String.valueOf(partitions));
             jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
             jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
             dataFlowConfig.setJobProperties(jobProperties);
-            dataFlowConfig.setPartitions(cascadingPartitions);
+            dataFlowConfig.setPartitions(partitions);
         } else {
             dataFlowConfig.setJobProperties(configuration.getJobProperties());
         }
@@ -110,21 +111,20 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
         // Go through the extra sources and make sure that all are
         // registered and provided
+        long maxTotalCnt = 0L;
         for (final String extraSourceName : configuration.getExtraSources().keySet()) {
-            DataFlowSource extraSource = Iterables.find(sources, new Predicate<DataFlowSource>() {
-                @Override
-                public boolean apply(@Nullable DataFlowSource source) {
-                    return source.getName().equals(extraSourceName);
-                }
-            }, null);
+            DataFlowSource extraSource = sources.stream() //
+                    .filter(source -> source.getName().equals(extraSourceName)) //
+                    .findFirst().orElse(null);
             if (extraSource == null) {
-                registerTable(extraSourceName, configuration.getExtraSources().get(extraSourceName));
+                long maxCnt = registerTable(extraSourceName, configuration.getExtraSources().get(extraSourceName));
                 DataFlowSource source = new DataFlowSource();
                 source.setName(extraSourceName);
                 sources.add(source);
+                maxTotalCnt += maxCnt;
             }
         }
-
+        scalingMultiplier = getScalingMultiplier(maxTotalCnt);
         for (DataFlowSource source : sources) {
             log.info(String.format("Providing source %s to data flow %s", source.getName(),
                     configuration.getBeanName()));
@@ -132,11 +132,25 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         return sources;
     }
 
-    private void registerTable(String name, String path) {
+    private long registerTable(String name, String path) {
         Table table = MetadataConverter.getTable(yarnConfiguration, path, null, null);
         table.setName(name);
         if (metadataProxy.getTable(configuration.getCustomerSpace().toString(), table.getName()) == null) {
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), table.getName(), table);
         }
+        long count = ScalingUtils.getTableCount(table);
+        if (count > 0) {
+            log.info("Found count=" + count + " for table " + table.getName());
+        }
+        return count;
     }
+
+    private int getScalingMultiplier(long count) {
+        int multiplier = ScalingUtils.getMultiplier(count);
+        if (multiplier > 1) {
+            log.info("Set multiplier=" + multiplier + " base on count=" + count);
+        }
+        return multiplier;
+    }
+
 }

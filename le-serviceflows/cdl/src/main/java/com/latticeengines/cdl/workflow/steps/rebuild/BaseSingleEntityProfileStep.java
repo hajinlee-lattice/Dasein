@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntityStepConfiguration>
         extends ProfileStepBase<T> {
@@ -34,7 +35,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
     protected Boolean tableFromActiveVersion = false;
-    
+
     protected String profileTablePrefix;
     protected String statsTablePrefix;
     protected String servingStoreTablePrefix;
@@ -111,6 +112,12 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
             if (masterTable == null) {
                 throw new IllegalStateException("Cannot find the master table in default collection");
+            }
+            long count = ScalingUtils.getTableCount(masterTable);
+            int multiplier = ScalingUtils.getMultiplier(count);
+            if (multiplier > 1) {
+                log.info("Set multiplier=" + multiplier + " base on master table count=" + count);
+                scalingMultiplier = multiplier;
             }
         }
     }

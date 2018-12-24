@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseTransformWrapperStep<T> {
@@ -106,8 +107,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {
             List<Table> inputTables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
-
-            if (inputTables == null || inputTables.isEmpty()) {
+            if (CollectionUtils.isEmpty(inputTables)) {
                 throw new RuntimeException("There is no input tables to consolidate.");
             }
             Collections.reverse(inputTables);
@@ -118,6 +118,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             for (Table table : inputTables) {
                 inputTableNames.add(table.getName());
             }
+            setScalingMultiplier(inputTables);
         }
     }
 
@@ -264,6 +265,18 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         updateEntityValueMapInContext(entity, EXISTING_RECORDS, previousCnt, Long.class);
         log.info(String.format("Save previous count %d for entity %s to workflow context", previousCnt, entity));
+    }
+
+    private void setScalingMultiplier(List<Table> inputTables) {
+        long count = 0L;
+        for (Table table: inputTables) {
+            count += ScalingUtils.getTableCount(table);
+        }
+        int multiplier = ScalingUtils.getMultiplier(count);
+        if (multiplier > 1) {
+            log.info("Set multiplier=" + multiplier + " base on count=" + count);
+            scalingMultiplier = multiplier;
+        }
     }
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {

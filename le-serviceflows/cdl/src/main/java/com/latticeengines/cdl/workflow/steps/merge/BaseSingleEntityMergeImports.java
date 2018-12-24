@@ -117,7 +117,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    protected TransformationStepConfig diff(int mergeStep, int upsertMasterStep) {
+    TransformationStepConfig diff(int mergeStep, int upsertMasterStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(mergeStep, upsertMasterStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DELTA);
