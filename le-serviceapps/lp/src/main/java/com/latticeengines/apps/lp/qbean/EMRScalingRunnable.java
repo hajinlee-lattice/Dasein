@@ -37,9 +37,7 @@ public class EMRScalingRunnable implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
 
-    private static final int MAX_TASK_NODES = 32;
-    private static final long MIN_SINGLE_NODE_MB = 51200;
-    private static final int MIN_SINGLE_NODE_VCORES = 2;
+    private static final int MAX_TASK_NODES = 64;
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
