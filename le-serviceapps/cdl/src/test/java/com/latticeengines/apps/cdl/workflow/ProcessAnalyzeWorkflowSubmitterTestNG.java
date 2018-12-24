@@ -30,6 +30,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -60,7 +61,6 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long COMPLETE_ACTION_2_TRACKING_ID = 1104L;
     private static final Long DEFAULT_WORKFLOW_ID = 200L;
     private static final Long DEFAULT_WORKFLOW_PID = 201L;
-    private static final boolean IS_CANCEL = true;
 
     @Mock
     private ActionService actionService;
@@ -98,6 +98,18 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
         Assert.assertEquals(list.size(), 1);
         Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
+    public void testGetCancelActionAndJobIds() {
+        when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
+        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
+        List<Long> list = processAnalyzeWorkflowSubmitter.getCanceledActionIds(customerSpace);
+        Assert.assertNotNull(list);
+        log.info(String.format("actionIds=%s", list));
+
+        Assert.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assert.assertEquals(list.size(), 2);
     }
 
     @Test(groups = "functional")
@@ -296,12 +308,12 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         cancelAction1.setPid(CANCEL_ACTION_1_PID);
         cancelAction1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         cancelAction1.setActionConfiguration(new ImportActionConfiguration());
-        cancelAction1.setCanceled(IS_CANCEL);
+        cancelAction1.setActionStatus(ActionStatus.CANCELED);
         Action cancelAction2 = new Action();
         cancelAction2.setPid(CANCEL_ACTION_2_PID);
         cancelAction2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         cancelAction2.setActionConfiguration(new ImportActionConfiguration());
-        cancelAction2.setCanceled(IS_CANCEL);
+        cancelAction2.setActionStatus(ActionStatus.CANCELED);
 
         actions.add(cancelAction1);
         actions.add(cancelAction2);

@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -157,6 +158,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 actionIds.addAll(0, copiedActionIds);
             }
             updateActions(actionIds, pidWrapper.getPid());
+            List<Long> canceledActionPids = getCanceledActionIds(customerSpace);
+            updateActions(canceledActionPids, pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, actionIds,
@@ -190,7 +193,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ActionType.CDL_OPERATION_WORKFLOW);
         // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobPidStrs = actions.stream()
-                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null && !action.getCanceled())
+                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null && action.getActionStatus() != ActionStatus.CANCELED)
                 .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
         log.info(String.format("importAndDeleteJobPidStrs are %s", importAndDeleteJobPidStrs));
         List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
@@ -233,6 +236,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
         return completedActionIds;
+    }
+
+    @VisibleForTesting
+    List<Long> getCanceledActionIds(String customerSpace) {
+        List<Action> actions = actionService.findByOwnerId(null);
+        log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
+        List<Long> canceledActionPids = actions.stream()
+                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getOwnerId()== null && action.getActionStatus() == ActionStatus.CANCELED)
+                .map(Action::getPid).collect(Collectors.toList());
+        return canceledActionPids;
     }
 
     /*
