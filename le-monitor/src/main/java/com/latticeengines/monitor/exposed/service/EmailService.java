@@ -1,6 +1,7 @@
 package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.mail.Multipart;
@@ -8,6 +9,7 @@ import javax.mail.Multipart;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
+import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 
@@ -95,5 +97,5 @@ public interface EmailService {
 
     void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
 
-    void sendPlsActionCancelSuccessEmail(User user, String hostport);
+    void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo);
 }

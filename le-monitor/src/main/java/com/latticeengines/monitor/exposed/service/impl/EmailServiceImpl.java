@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.mail.MessagingException;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
+import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
@@ -984,16 +986,16 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsActionCancelSuccessEmail(User user, String hostport) {
+    public void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo) {
         try {
             log.info("Sending PLS action cancel success email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
+                    EmailTemplateBuilder.Template.PLS_CANCEL_ACTION_SUCCESS);
 
-            builder.replaceToken("{{firstname}}", user.getFirstName());
-            builder.replaceToken("{{lastname}}", user.getLastName());
-            builder.replaceToken("{{completemsg}}", EmailSettings.PLS_ACTION_CANCEL_SUCCESS_MSG);
-            builder.replaceToken("{{currentstep}}", "");
+            builder.replaceToken("{{tenantname}}", cancelActionEmailInfo.getTenantName());
+            builder.replaceToken("{{username}}", user.getUsername());
+            builder.replaceToken("{{actionname}}", cancelActionEmailInfo.getActionName());
+            builder.replaceToken("{{actionusername}}", cancelActionEmailInfo.getActionUserName());
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();

@@ -115,6 +115,7 @@ public class EmailTemplateBuilder {
                 "pls_export_segment_running.html"), //
         PLS_EXPORT_ORPHAN_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_ORPHAN_RUNNING(
                 "pls_export_segment_running.html"), //
+        PLS_CANCEL_ACTION_SUCCESS("pls_cancel_action_success.html"),
         CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html"), //
         POC_STATE_NOTICE("poc_state_notice.html"), //
         S3_CREDENTIALS("s3_credentials.html"), S3_EMPTY_CREDENTIALS("s3_empty_credentials.html"), //
