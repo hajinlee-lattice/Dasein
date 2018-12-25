@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
-import org.apache.hadoop.yarn.api.records.NodeReport;
-import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -211,34 +209,6 @@ public class EMRScalingRunnable implements Runnable {
         });
     }
 
-    private SingleNodeResource getBestSingleNode() {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(context -> {
-            try {
-                try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
-                    yarnClient.start();
-                    List<NodeReport> nodes = yarnClient.getNodeReports(NodeState.RUNNING);
-                    SingleNodeResource res = new SingleNodeResource();
-                    nodes.forEach(node -> {
-                        Resource cap = node.getCapability();
-                        Resource used = node.getUsed();
-                        long availMb = cap.getMemorySize() - used.getMemorySize();
-                        int availVCores = cap.getVirtualCores() - used.getVirtualCores();
-                        if (availMb > res.mb) {
-                            res.mb = availMb;
-                            res.vcores = availVCores;
-                        } else if (availMb == res.mb && availVCores > res.vcores) {
-                            res.vcores = availVCores;
-                        }
-                    });
-                    return res;
-                }
-            } catch (IOException | YarnException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
     private ReqResource getReqs(List<ApplicationReport> apps) {
         ReqResource reqResource = new ReqResource();
         if (CollectionUtils.isNotEmpty(apps)) {
@@ -305,13 +275,12 @@ public class EMRScalingRunnable implements Runnable {
         return target;
     }
 
-    // use half of used resource as buffer
     private int determineMomentumBuffer() {
         long usedMb = metrics.totalMB - metrics.availableMB;
-        int buffer1 = (int) Math.ceil(0.5 * usedMb / taskMb);
+        double buffer1 = 0.5 * usedMb / taskMb;
         int usedVCores = metrics.totalVirtualCores - metrics.availableVirtualCores;
-        int buffer2 = (int) Math.ceil(0.5 * usedVCores / taskVCores);
-        int buffer = Math.max(buffer1, buffer2);
+        double buffer2 = 0.5 * usedVCores / taskVCores;
+        int buffer = (int) Math.round(Math.max(buffer1, buffer2));
         log.info("Set momentum buffer to " + buffer + " for using " //
                 + usedMb + " mb and " + usedVCores + " vcores.");
         return buffer;

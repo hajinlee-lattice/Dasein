@@ -69,7 +69,7 @@ public interface EaiFunctionalTestNGInterface {
             assertTrue(headers.contains("ErrorMessage"));
 
             List<CSVRecord> records = parser.getRecords();
-            assertEquals(records.size(), 10);
+            assertEquals(records.size(), 11);
         }
     }
 }

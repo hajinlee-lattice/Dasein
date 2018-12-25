@@ -98,12 +98,12 @@ public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
 
         verifyAllDataNotNullWithNumRows(miniclusterConfiguration, //
                 tables.get(0), //
-                9);
+                8);
         Counters counters = mrJob.getCounters();
-        assertEquals(counters.findCounter(RecordImportCounter.IMPORTED_RECORDS).getValue(), 9);
-        assertEquals(counters.findCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 10);
+        assertEquals(counters.findCounter(RecordImportCounter.IMPORTED_RECORDS).getValue(), 8);
+        assertEquals(counters.findCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 11);
         assertEquals(counters.findCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
-        assertEquals(counters.findCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 5);
+        assertEquals(counters.findCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 6);
         assertEquals(counters.findCounter(RecordImportCounter.ROW_ERROR).getValue(), 0);
     }
 

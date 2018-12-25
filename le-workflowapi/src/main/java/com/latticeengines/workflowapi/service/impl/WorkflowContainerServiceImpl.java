@@ -296,11 +296,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         if (mem == null) {
             mem = 2048;
         }
-        log.info("Set container memory to " + mem + " mb.");
-
-        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "1");
+        int cores = Math.max(1, mem / 1024 / 8);
+        log.info("Set container memory to " + mem + " mb, cpu to " + cores + " cores.");
+        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(cores));
         appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(mem));
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(cores));
         containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(mem));
 
         Collection<String> swpkgNames = workflowConfig.getSwpkgNames();

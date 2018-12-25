@@ -9,14 +9,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public final class ScalingUtils {
 
     public static int getMultiplier(long count) {
-        double normalizedSize = count / 100_000.0;
-        return (int) Math.max(1, Math.ceil(Math.log10(normalizedSize)));
+        return (int) Math.max(1, Math.ceil(Math.log10((count + 1.D)) - 4));
     }
 
     public static long getTableCount(Table table) {
         AtomicLong maxCnt = new AtomicLong(0L);
         Long count = table.getCount();
-        if (count != null) {
+        if (count != null && count > 0) {
             maxCnt.set(count);
         } else if (CollectionUtils.isNotEmpty(table.getExtracts())) {
             table.getExtracts().forEach(extract -> {

@@ -10,6 +10,12 @@
                 <Pattern>${log.pattern}</Pattern>
             </PatternLayout>
         </Console>
+        <Console name="ConsoleWarn" target="SYSTEM_OUT">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+        </Console>
         <RollingFile
                 name="RollingFile"
                 fileName="${sys:LOG4J_DEBUG_DIR}/debug.log"
@@ -27,7 +33,7 @@
 
     <Loggers>
         <Root level="INFO">
-            <AppenderRef ref="ConsoleInfo"/>
+            <AppenderRef ref="ConsoleWarn"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
         <Logger name="com.latticeengines" additivity="false" level="DEBUG">

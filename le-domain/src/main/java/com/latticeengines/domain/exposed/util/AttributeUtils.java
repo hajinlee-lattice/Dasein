@@ -249,7 +249,7 @@ public class AttributeUtils {
         metadata.setDescription(attr.getDescription());
         metadata.setLogicalDataType(attr.getLogicalDataType());
         metadata.setIsHiddenForRemodelingUI(attr.isHiddenForRemodelingUI());
-        metadata.setJavaClass(AttributeUtils.toJavaClass(attr.getPhysicalDataType(), attr.getDataType()));
+        metadata.setJavaClass(toJavaClass(attr.getPhysicalDataType(), attr.getDataType()));
         if (StringUtils.isBlank(attr.getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {
