@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(ProfileTransaction.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -100,6 +101,13 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         rawTable = metadataProxy.getTable(customerSpace.toString(), rawTransactionTableName);
         if (rawTable == null) {
             throw new RuntimeException("Cannot find raw transaction table.");
+        }
+
+        long cnt = ScalingUtils.getTableCount(rawTable);
+        int multiplier = ScalingUtils.getMultiplier(cnt);
+        if (multiplier > 1) {
+            log.info("Set multiplier=" + multiplier + " base on raw txn table count=" + cnt);
+            scalingMultiplier = multiplier;
         }
 
         periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
