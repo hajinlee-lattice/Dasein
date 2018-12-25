@@ -11,7 +11,7 @@ public class ScalingUtilsUnitTestNG {
         Assert.assertEquals(ScalingUtils.getMultiplier(count), expectedMultiplier, String.format("%d", count));
     }
 
-    @DataProvider(name = "multiplierTestData", parallel = true)
+    @DataProvider(name = "multiplierTestData")
     public Object[][] provideMultiplierTestData() {
         return new Object[][] { //
                 { 1000, 1 }, //

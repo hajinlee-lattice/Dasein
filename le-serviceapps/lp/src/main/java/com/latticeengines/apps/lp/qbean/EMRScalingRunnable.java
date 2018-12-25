@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
+import org.apache.hadoop.yarn.api.records.NodeReport;
+import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -68,7 +70,7 @@ public class EMRScalingRunnable implements Runnable {
     private InstanceGroup coreGrp = null;
 
     EMRScalingRunnable(String emrCluster, int minTaskNodes, EMRService emrService, EMRCacheService emrCacheService, //
-            EMREnvService emrEnvService) {
+                       EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
         this.minTaskNodes = minTaskNodes;
         this.emrService = emrService;
@@ -100,10 +102,10 @@ public class EMRScalingRunnable implements Runnable {
         taskVCores = getInstanceVCores(taskGrp);
         taskMb = getInstanceMemory(taskGrp);
 
-        // -512 mb to avoid flapping scaling out/in
+        // -512 mb and -1 vcore to avoid flapping scaling out/in
         // when available resource is right at the threshold
         minAvailMemMb = minTaskNodes * taskMb - 512;
-        minAvailVCores = minTaskNodes * taskVCores - 512;
+        minAvailVCores = minTaskNodes * taskVCores - 1;
 
         if (needToScale()) {
             attemptScale();
@@ -209,6 +211,34 @@ public class EMRScalingRunnable implements Runnable {
         });
     }
 
+    private SingleNodeResource getBestSingleNode() {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(context -> {
+            try {
+                try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+                    yarnClient.start();
+                    List<NodeReport> nodes = yarnClient.getNodeReports(NodeState.RUNNING);
+                    SingleNodeResource res = new SingleNodeResource();
+                    nodes.forEach(node -> {
+                        Resource cap = node.getCapability();
+                        Resource used = node.getUsed();
+                        long availMb = cap.getMemorySize() - used.getMemorySize();
+                        int availVCores = cap.getVirtualCores() - used.getVirtualCores();
+                        if (availMb > res.mb) {
+                            res.mb = availMb;
+                            res.vcores = availVCores;
+                        } else if (availMb == res.mb && availVCores > res.vcores) {
+                            res.vcores = availVCores;
+                        }
+                    });
+                    return res;
+                }
+            } catch (IOException | YarnException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     private ReqResource getReqs(List<ApplicationReport> apps) {
         ReqResource reqResource = new ReqResource();
         if (CollectionUtils.isNotEmpty(apps)) {
@@ -255,11 +285,10 @@ public class EMRScalingRunnable implements Runnable {
         int coreCount = getCoreCount();
         long avail = metrics.availableMB;
         long total = metrics.totalMB;
-        long newTotal = total - avail + req + minAvailMemMb;
-        int target = (int) Math.max(minTaskNodes,
-                Math.ceil((1.0 * (newTotal - coreMb * coreCount)) / taskMb));
+        long newTotal = total - avail + req + minAvailMemMb - coreMb * coreCount;
+        int target = (int) Math.max(minTaskNodes, Math.ceil(1.0 * newTotal / taskMb));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " + "total="
-                + total + " avail=" + avail + " req=" + req);
+                + total + " avail=" + avail + " req=" + req +" newTaskTotal=" + newTotal);
         return target;
     }
 
@@ -267,19 +296,19 @@ public class EMRScalingRunnable implements Runnable {
         int coreCount = getCoreCount();
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
-        int newTotal = total - avail + req + minAvailVCores;
-        int target = (int) Math.max(minTaskNodes,
-                Math.ceil((1.0 * (newTotal - coreVCores * coreCount)) / taskVCores));
+        int newTotal = total - avail + req + minAvailVCores - coreVCores * coreCount;
+        int target = (int) Math.max(minTaskNodes, Math.ceil(1.0 * newTotal / taskVCores));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: "
-                + "total=" + total + " avail=" + avail + " req=" + req);
+                + "total=" + total + " avail=" + avail + " req=" + req+" newTaskTotal=" + newTotal);
         return target;
     }
 
+    // use 25% of used resource as buffer
     private int determineMomentumBuffer() {
         long usedMb = metrics.totalMB - metrics.availableMB;
-        double buffer1 = 0.5 * usedMb / taskMb;
+        double buffer1 = 0.25 * usedMb / taskMb;
         int usedVCores = metrics.totalVirtualCores - metrics.availableVirtualCores;
-        double buffer2 = 0.5 * usedVCores / taskVCores;
+        double buffer2 = 0.25 * usedVCores / taskVCores;
         int buffer = (int) Math.round(Math.max(buffer1, buffer2));
         log.info("Set momentum buffer to " + buffer + " for using " //
                 + usedMb + " mb and " + usedVCores + " vcores.");
@@ -294,7 +323,9 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private AtomicLong getLastScalingUp() {
-        lastScalingUpMap.putIfAbsent(clusterId, new AtomicLong(0L));
+        lastScalingUpMap.putIfAbsent(clusterId, //
+                // 10 min ago
+                new AtomicLong(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
         return lastScalingUpMap.get(clusterId);
     }
 
