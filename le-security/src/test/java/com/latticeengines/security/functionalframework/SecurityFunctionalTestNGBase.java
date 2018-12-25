@@ -69,6 +69,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     public final String adminUsername = NamingUtils.timestamp(this.getClass().getSimpleName())
             + "@lattice-engines.com";
+    public final String adminTenantName = this.getClass().getSimpleName() + "_AdminTenant";
     public static final String adminPassword = "tahoe";
     public static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
     public static final String generalUsername = "lming@lattice-engines.com";
@@ -227,16 +228,16 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected void createAdminTenant() {
         Tenant tenant = new Tenant();
-        tenant.setId("testAdminTenant");
-        tenant.setName("AdminTenant");
+        tenant.setId(adminTenantName);
+        tenant.setName(adminTenantName);
         globalTenantManagementService.registerTenant(tenant);
         tenantEntityMgr.create(tenant);
     }
 
     protected void deleteAdminTenant() {
         Tenant tenant = new Tenant();
-        tenant.setId("testAdminTenant");
-        tenant.setName("AdminTenant");
+        tenant.setId(adminTenantName);
+        tenant.setName(adminTenantName);
         tenantEntityMgr.delete(tenant);
         globalTenantManagementService.discardTenant(tenant);
     }
@@ -245,8 +246,8 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         globalUserManagementService.deleteUser(adminUsername);
         deleteAdminTenant();
         createAdminTenant();
-        createUser(adminUsername, adminUsername, "bngu", "yen", adminPasswordHash);
-        globalUserManagementService.grantRight(AccessLevel.SUPER_ADMIN.name(), "testAdminTenant", adminUsername);
+        createUser(adminUsername, adminUsername, "Lattice", "Admin", adminPasswordHash);
+        globalUserManagementService.grantRight(AccessLevel.SUPER_ADMIN.name(), adminTenantName, adminUsername);
     }
 
     protected void createUser(String username, String email, String firstName, String lastName) {
@@ -417,6 +418,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() throws Exception {
         globalUserManagementService.deleteUser(adminUsername);
+        deleteAdminTenant();
     }
 
 }

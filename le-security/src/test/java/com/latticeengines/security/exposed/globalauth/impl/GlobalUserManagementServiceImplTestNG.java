@@ -56,9 +56,10 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
     }
 
     @AfterClass(groups = { "functional", "deployment" })
-    public void tearDown() {
+    public void tearDown() throws Exception {
         globalUserManagementService.deleteUser(testUsername);
         globalAuthenticationService.discard(ticket);
+        super.tearDown();
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })
