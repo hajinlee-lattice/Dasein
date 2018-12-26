@@ -16,7 +16,7 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
         extends BaseWorkflowStep<T> {
 
     private static Logger log = LoggerFactory.getLogger(BaseWrapperStep.class);
-    private C workflowConf;
+    protected C workflowConf;
 
     @Override
     public void execute() {
@@ -70,7 +70,7 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
     protected void report(ReportPurpose purpose, String name, String json) {
         Report report = new Report();
         KeyValue kv = new KeyValue();
-        kv.setPayload(json.toString());
+        kv.setPayload(json);
         report.setJson(kv);
         report.setPurpose(purpose);
         report.setName(name);
