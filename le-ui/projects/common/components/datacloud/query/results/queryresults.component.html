@@ -57,7 +57,7 @@
                 ng-max="::vm.recommendationCounts.total"
                 ng-change="vm.updateTopNCount(); vm.makeRecommendationCounts()"
                 class="form-control" />
-            <span> highest rated {{vm.section === 'wizard.targets' ? 'recommendations' : 'targets'}}</span>
+            <span> {{vm.section === 'wizard.targets' ? 'recommendations' : 'targets'}}</span>
             <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
         </div>
 
