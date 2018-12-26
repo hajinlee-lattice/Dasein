@@ -205,7 +205,7 @@ public class FrontEndQueryCreator {
 
         Restriction ratingRestriction;
         if (CollectionUtils.isEmpty(playLaunchContext.getPlayLaunch().getBucketsToLaunch())) {
-            ratingRestriction = Restriction.builder().build();
+            ratingRestriction = null;
         } else {
             Collection<Object> allowedRatingsCollection = playLaunchContext.getPlayLaunch().getBucketsToLaunch()
                     .stream().map(RatingBucketName::getName).collect(Collectors.toList());
