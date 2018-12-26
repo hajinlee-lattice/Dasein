@@ -6,11 +6,13 @@ USE `LDC_CollectionDB`;
 
 SOURCE WSHOME/ddl_ldc_collectiondb_mysql5innodb.sql;
 
-insert into VendorConfig(PID, COLLECTING_FREQ, DOMAIN_CHECK_FIELD, DOMAIN_FIELD, MAX_ACTIVE_TASKS, VENDOR) values
-(1, 15552000, 'Technology_Name', 'Domain', 1, 'BUILTWITH'),
-(2, 7776000, 'OnlineSince', 'URL', 1, 'ALEXA'),
-(3, 2592000, '', '', 1, 'COMPETE'),
-(4, 15552000, '', '', 1, 'FEATURE'),
-(5, 15552000, '', '', 1, 'HPA_NEW'),
-(6, 77762000, 'orb_num', 'domain', 1, 'ORBINTELLIGENCEV2'),
-(7, 2592000, 'Rank', 'Domain', 1, 'SEMRUSH');
+insert into VendorConfig(PID, COLLECTING_FREQ, DOMAIN_CHECK_FIELD, DOMAIN_FIELD, MAX_ACTIVE_TASKS, GROUP_BY, SORT_BY,
+CONSOLIDATION_PERIOD, LAST_CONSOLIDATED, VENDOR) values
+(1, 15552000, 'Technology_Name', 'Domain', 1, 'Domain,Technology_Name', 'Last_Modification_Date', 15552000, null,
+'BUILTWITH'),
+(2, 7776000, 'OnlineSince', 'URL', 1, 'URL', 'Last_Modification_Date', 15552000, null, 'ALEXA'),
+(3, 2592000, '', '', 1, '', '', -1, null, 'COMPETE'),
+(4, 15552000, '', '', 1, '', '', -1, null, 'FEATURE'),
+(5, 15552000, '', '', 1, '', '', -1, null, 'HPA_NEW'),
+(6, 77762000, 'orb_num', 'domain', 1, 'domain', 'LE_Last_Upload_Date', 15552000, null, 'ORBINTELLIGENCEV2'),
+(7, 2592000, 'Rank', 'Domain', 1, 'Domain', 'Last_Modification_Date', 15552000, null, 'SEMRUSH');

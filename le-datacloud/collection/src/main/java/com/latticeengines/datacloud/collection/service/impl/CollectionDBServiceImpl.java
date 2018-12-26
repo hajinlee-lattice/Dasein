@@ -210,8 +210,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             int modified = collectionRequestService.handlePending(vendor, maxRetries, stoppedWorkers);
             if (modified > 0) {
 
-                log.info("find " + stoppedWorkers.size() + " workers recently stopped");
-                log.info(modified + " pending collection requests reset to ready");
+                log.info("find " + stoppedWorkers.size() + " " + vendor + " workers recently stopped");
+                log.info(modified + " pending " + vendor + " collection requests reset to ready");
 
             }
 
@@ -461,11 +461,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         //get corresponding aws ecs tasks
         Map<String, Task> activeTasks = getTasksByWorkers(activeWorkers);
-        if (MapUtils.isEmpty(activeTasks)) {
-
-            return 0;
-
-        }
+        activeTasks = MapUtils.emptyIfNull(activeTasks);
 
         //handling active worker/task
         int failedTasks = 0;

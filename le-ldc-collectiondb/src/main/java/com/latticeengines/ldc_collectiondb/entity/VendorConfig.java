@@ -1,5 +1,6 @@
 package com.latticeengines.ldc_collectiondb.entity;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,10 +49,22 @@ public class VendorConfig {
     private String domainCheckField;
 
     @Column(name = "COLLECTING_FREQ", nullable = false)
-    private long collectingFreq;
+    private long collectingFreq;//collection period in seconds
 
     @Column(name = "MAX_ACTIVE_TASKS", nullable = false)
     private int maxActiveTasks;
+
+    @Column(name = "GROUP_BY", nullable = false)
+    private String groupBy;
+
+    @Column(name = "SORT_BY", nullable = false)
+    private String sortBy;
+
+    @Column(name = "CONSOLIDATION_PERIOD", nullable = false)
+    private long consolidationPeriod;//in seconds
+
+    @Column(name = "LAST_CONSOLIDATED")
+    private Timestamp lastConsolidated;
 
     public long getPid() {
 
@@ -123,5 +136,37 @@ public class VendorConfig {
 
         this.maxActiveTasks = maxActiveTasks;
 
+    }
+
+    public String getGroupBy() {
+        return groupBy;
+    }
+
+    public String getSortBy() {
+        return sortBy;
+    }
+
+    public void setGroupBy(String groupBy) {
+        this.groupBy = groupBy;
+    }
+
+    public void setSortBy(String sortBy) {
+        this.sortBy = sortBy;
+    }
+
+    public long getConsolidationPeriod() {
+        return consolidationPeriod;
+    }
+
+    public Timestamp getLastConsolidated() {
+        return lastConsolidated;
+    }
+
+    public void setConsolidationPeriod(long consolidationPeriod) {
+        this.consolidationPeriod = consolidationPeriod;
+    }
+
+    public void setLastConsolidated(Timestamp lastConsolidated) {
+        this.lastConsolidated = lastConsolidated;
     }
 }

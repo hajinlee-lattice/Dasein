@@ -347,7 +347,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         if (failCount > 0) {
 
-            log.info(failCount + " pending requests marked as failed");
+            log.info(failCount + " pending " + vendor + " collection requests marked as failed");
 
         }
         resultList.clear();

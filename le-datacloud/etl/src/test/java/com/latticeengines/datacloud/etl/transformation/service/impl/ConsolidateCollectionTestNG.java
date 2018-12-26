@@ -27,7 +27,7 @@ public class ConsolidateCollectionTestNG extends PipelineTransformationTestNGBas
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionTestNG.class);
 
-    private static final String VENDOR_NAME = "BuiltWith";
+    private static final String VENDOR_NAME = "BUILTWITH";
     private static final String INGESTION_NAME = "BuiltWithRaw";
 
     @Inject

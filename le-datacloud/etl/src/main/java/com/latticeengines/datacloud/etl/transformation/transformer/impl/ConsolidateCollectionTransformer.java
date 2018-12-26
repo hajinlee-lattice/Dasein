@@ -4,13 +4,18 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.impl.C
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,6 +43,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 
 @Component(TRANSFORMER_NAME)
 public class ConsolidateCollectionTransformer extends AbstractDataflowTransformer<ConsolidateCollectionConfig, ConsolidateCollectionParameters> {
@@ -51,7 +58,14 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
 
+    @Value("${datacloud.collection.ingestion.partion.period}")
+    private long ingestionPeriod;//in seconds
+
+    @Inject
+    private VendorConfigMgr vendorConfigMgr;
+
     private Table inputTable;
+    private VendorConfig vendorConfig;
 
     @Override
     public String getName() {
@@ -83,6 +97,16 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
                                          ConsolidateCollectionParameters parameters, //
                                          ConsolidateCollectionConfig configuration) {
         String vendor = configuration.getVendor();
+        List<VendorConfig> vendors = vendorConfigMgr.findAll().stream().filter(config -> {
+            return config.getVendor().equals(vendor);
+        }).collect(Collectors.toList());
+        if (vendors.size() == 0) {
+
+            log.info("unable to find VendorConfig for vendor " + vendor);
+
+        }
+        vendorConfig = vendors.get(0);
+
         configParamsByVendor(vendor, parameters);
 
         String rawIngestion = configuration.getRawIngestion();
@@ -97,7 +121,9 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, //
                                           ConsolidateCollectionParameters paramters, //
                                           ConsolidateCollectionConfig configuration) {
-        // if nothing to do in post processing, can remove this override
+        //udpate the last consolidation time stamp
+        vendorConfig.setLastConsolidated(new Timestamp(System.currentTimeMillis()));
+        vendorConfigMgr.update(vendorConfig);
     }
 
     @Override
@@ -111,25 +137,61 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
      * read group by keys and sort key from vendor configuration
      */
     private void configParamsByVendor(String vendor, ConsolidateCollectionParameters parameters) {
-        //FIXME: configure based on vendor config table
-        List<String> groupBy = Arrays.asList("Domain", "Technology_Name");
-        String sortKey = "Last_Modification_Date";
+        List<String> groupBy = Arrays.asList(vendorConfig.getGroupBy().split(","));
+        String sortKey = vendorConfig.getSortBy();
         parameters.setGroupBy(groupBy);
         parameters.setSortBy(sortKey);
     }
 
     private Table getInputTable(String vendor, String rawIngestion, String workflowDir) {
+        //calc consolidation duration
+        long consolidationPeriodInMS = vendorConfig.getConsolidationPeriod() * 1000;
+        long ingestionPeriodInMS = ingestionPeriod * 1000;
+        long curMillis = System.currentTimeMillis();
+        long begMillis = curMillis - consolidationPeriodInMS;
+        long begMillisAdjusted = begMillis - begMillis % ingestionPeriodInMS;
+        Timestamp lastConsolidated = vendorConfig.getLastConsolidated();
+        if (lastConsolidated != null) {
+
+            log.info("last consolidation time for vendor " + vendor + ": " + lastConsolidated);
+            long lastConsolidatedMills = lastConsolidated.getTime();
+            lastConsolidatedMills -= lastConsolidatedMills % ingestionPeriodInMS;
+            if (begMillisAdjusted < lastConsolidatedMills) {
+
+                log.warn("notice: last consolidation  period is overlapped with current one");
+
+            }
+        }
+
+        //date time format
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         String ingestionDir = S3PathBuilder.constructIngestionDir(rawIngestion).toS3Key();
         List<S3ObjectSummary> summaries = s3Service.listObjects(s3Bucket, ingestionDir);
         List<String> avrosToCopy = summaries.stream().map(summary -> {
             String key = summary.getKey();
-            if (key.endsWith(".avro")) {
-                //FIXME: filter avros within the vendor's consolidation period.
-                return key.substring(key.lastIndexOf("/") + 1);
-            } else {
-                return "";
+            if (key.endsWith("_UTC.avro")) {
+                String fileName = key.substring(key.lastIndexOf("/") + 1);
+                String dateStr = fileName.substring(0, fileName.length() - "_UTC.avro".length());
+                try {
+
+                    Date date = dateFormat.parse(dateStr);
+                    long millis = date.getTime();
+                    if (millis >= begMillisAdjusted && millis < curMillis) {
+
+                        return fileName;
+
+                    }
+                } catch (Exception e) {
+
+                    log.error(key + " contains a malformed date");
+
+                }
             }
-        }).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+
+            return null;
+        }).filter(StringUtils::isNotEmpty).collect(Collectors.toList());
         log.info("Found " + CollectionUtils.size(avrosToCopy) + " avro files to copy.");
 
         String tableName = NamingUtils.timestamp("Input");
