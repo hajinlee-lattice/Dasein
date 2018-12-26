@@ -107,17 +107,17 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         if (skipTransformation) {
             log.warn("Resetting Curated Account Attributes Step context.");
             resetCuratedAttributesContext();
-        }
-
-        Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
-        Table contactTable = metadataProxy.getTable(customerSpace.toString(), contactTableName);
-        long accCnt = ScalingUtils.getTableCount(accountTable);
-        long ctcCnt = ScalingUtils.getTableCount(contactTable);
-        int multiplier = ScalingUtils.getMultiplier(Math.max(accCnt, ctcCnt));
-        if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on account table count=" //
-                    + accCnt + " and contact table count=" + ctcCnt);
-            scalingMultiplier = multiplier;
+        } else {
+            Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
+            Table contactTable = metadataProxy.getTable(customerSpace.toString(), contactTableName);
+            long accCnt = ScalingUtils.getTableCount(accountTable);
+            long ctcCnt = ScalingUtils.getTableCount(contactTable);
+            int multiplier = ScalingUtils.getMultiplier(Math.max(accCnt, ctcCnt));
+            if (multiplier > 1) {
+                log.info("Set multiplier=" + multiplier + " base on account table count=" //
+                        + accCnt + " and contact table count=" + ctcCnt);
+                scalingMultiplier = multiplier;
+            }
         }
     }
 
