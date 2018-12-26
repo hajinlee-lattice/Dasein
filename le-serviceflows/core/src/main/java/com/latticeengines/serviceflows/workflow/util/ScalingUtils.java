@@ -13,6 +13,9 @@ public final class ScalingUtils {
     }
 
     public static long getTableCount(Table table) {
+        if (table == null) {
+            return 0L;
+        }
         AtomicLong maxCnt = new AtomicLong(0L);
         Long count = table.getCount();
         if (count != null && count > 0) {

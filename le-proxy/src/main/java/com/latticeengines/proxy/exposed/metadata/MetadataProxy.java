@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
@@ -194,8 +195,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     }
 
     public Table getTable(String customerSpace, String tableName) {
+        if (StringUtils.isEmpty(tableName)) {
+            return null;
+        }
         Long columnCount = getTableAttributeCount(customerSpace, tableName);
-        
         if (ATTRIBUTE_BATCH_SIZE > columnCount) {
             String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
             return get("getTable", url, Table.class);
