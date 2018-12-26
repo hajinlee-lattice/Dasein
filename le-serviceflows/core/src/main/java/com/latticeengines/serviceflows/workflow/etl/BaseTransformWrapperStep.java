@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.YarnClient;
@@ -25,6 +27,8 @@ import com.latticeengines.workflow.exposed.build.BaseWrapperStep;
 
 public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfiguration>
         extends BaseWrapperStep<T, TransformationWorkflowConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseTransformWrapperStep.class);
 
     private static final ObjectMapper OM = new ObjectMapper();
 
@@ -79,15 +83,19 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
 
     private String getRootOperationId(TransformationWorkflowConfiguration workflowConf) {
         if (workflowConf != null) {
-            String prepareClz = PrepareTransformationStepInputConfiguration.class.getSimpleName();
-            String prepareConfStr = workflowConf.getStepConfigRegistry().getOrDefault(prepareClz, "");
-            if (StringUtils.isNotBlank(prepareConfStr)) {
-                PrepareTransformationStepInputConfiguration prepareConf = //
-                        JsonUtils.deserialize(prepareConfStr, PrepareTransformationStepInputConfiguration.class);
-                String transformationConfigurationStr = prepareConf.getTransformationConfiguration();
-                TransformationConfiguration transformationConf = JsonUtils.deserialize(transformationConfigurationStr,
-                        TransformationConfiguration.class);
-                return transformationConf.getRootOperationId();
+            try {
+                String prepareClz = PrepareTransformationStepInputConfiguration.class.getSimpleName();
+                String prepareConfStr = workflowConf.getStepConfigRegistry().getOrDefault(prepareClz, "");
+                if (StringUtils.isNotBlank(prepareConfStr)) {
+                    PrepareTransformationStepInputConfiguration prepareConf = //
+                            JsonUtils.deserialize(prepareConfStr, PrepareTransformationStepInputConfiguration.class);
+                    String transformationConfigurationStr = prepareConf.getTransformationConfiguration();
+                    TransformationConfiguration transformationConf = JsonUtils.deserialize(transformationConfigurationStr,
+                            TransformationConfiguration.class);
+                    return transformationConf.getRootOperationId();
+                }
+            } catch (Exception e) {
+                log.warn("Failed to extract root operation id from workflow conf.", e);
             }
         }
         return "";
