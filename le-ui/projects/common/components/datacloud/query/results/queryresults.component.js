@@ -56,11 +56,11 @@ angular.module('common.datacloud.query.results', [
 
             vm.selectedBuckets = [];
             if (vm.section === 'wizard.targets') {
-                var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
-                                        PlaybookWizardStore.currentPlay.launchHistory && 
-                                        PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch && 
-                                        PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch ? 
-                                        PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : []);
+                // var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
+                //                         PlaybookWizardStore.currentPlay.launchHistory && 
+                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch && 
+                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch ? 
+                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : []);
                 
                 // Get sum of non-suppressed buckets to calculate percentage for each bucket
                 // **Removed for below code**
@@ -77,7 +77,12 @@ angular.module('common.datacloud.query.results', [
                     percentage: NumberUtility.MakePercentage(vm.accountsCoverage.unscoredAccountCount, (vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount), '%', 1)
                 }
 
+                //setting defaults
+                var bucketsToLaunch = null;
+                vm.launchUnscored = PlaybookWizardStore.currentPlay.ratingEngine ? false : true;
+
                 if (PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch != null){
+                    bucketsToLaunch = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch;
                     vm.launchUnscored = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.launchUnscored;
                     vm.topNCount = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.topNCount;
                     vm.topNClicked = vm.topNCount ? true : false;
@@ -88,12 +93,13 @@ angular.module('common.datacloud.query.results', [
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
-                    if(bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
+                    if(bucketsToLaunch == null) {
                         vm.selectedBuckets.push(bucket.bucket);
                     }
-                    // if(!bucketsToLaunch.length) {
-                    //     vm.selectedBuckets.push(bucket.bucket);
-                    // }
+                    else if(bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
+                        vm.selectedBuckets.push(bucket.bucket);
+                    }
+
 
                     // Use this if you want to round up to nearest integer percentage
                     // If you do use this, use this in the view HTML ({{ ::bucket.percentage }}%)
@@ -569,6 +575,7 @@ angular.module('common.datacloud.query.results', [
         //     sections.total += parseInt(count.count);
         // });
         sections.total = vm.accountsCoverage.accountCount + vm.accountsCoverage.unscoredAccountCount;
+
 
         // sections.unscored = (vm.launchUnscored ? vm.unscoredAccounts.total : 0);
         // sections.selected += sections.unscored;
