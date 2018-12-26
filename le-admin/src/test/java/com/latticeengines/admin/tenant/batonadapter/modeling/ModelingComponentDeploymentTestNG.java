@@ -26,7 +26,7 @@ public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     private int userFeaturesThreshold = 10;
     private int defaultFeaturesThreshold = -1;
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testInstallation() throws InterruptedException, IOException {
         bootstrap(batonService.getDefaultConfiguration(ModelingComponent.componentName));
 
