@@ -76,7 +76,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final String CUSTOMER_SPACE = "CustomerSpace";
     private static final String INTERNAL_RESOURCE_HOST_PORT = "Internal_Resource_Host_Port";
     private static final String USER_ID = "User_Id";
-    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
+    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 36;
     public static final long HEARTBEAT_MILLIS = 1000 * 120;
 
     @Autowired

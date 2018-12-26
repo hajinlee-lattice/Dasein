@@ -344,7 +344,7 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private int getMaxTaskNodes() {
-        return getCoreCount() * 4;
+        return getCoreCount() * 3;
     }
 
     private int getCoreCount() {
