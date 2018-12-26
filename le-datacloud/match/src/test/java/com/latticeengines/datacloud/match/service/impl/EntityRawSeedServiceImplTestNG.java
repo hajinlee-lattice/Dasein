@@ -66,6 +66,8 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final Tenant TEST_TENANT = new Tenant("raw_seed_service_test_tenant_1");
+    // prevent scan tenant from being affected by other tests
+    private static final Tenant TEST_SCAN_TENANT = new Tenant("raw_seed_service_test_tenant_for_scan_1");
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
@@ -120,22 +122,23 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         // make sure we don't have this seed
         for(String seedId : seedIds) {
-            cleanup(env, seedId);
+            cleanupTenant(env, TEST_SCAN_TENANT, seedId);
         }
         for(String seedId : seedIds) {
-            cleanup(destEnv, seedId);
+            cleanupTenant(destEnv, TEST_SCAN_TENANT, seedId);
         }
 
         // create successfully because no seed at the moment
         for (String seedId : seedIds) {
-            Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+            Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_SCAN_TENANT, TEST_ENTITY, seedId));
         }
         // should already exists
         List<String> getSeedIds = new ArrayList<>();
         int loopCount = 0;
         do {
             loopCount++;
-            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 2);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(
+                    env, TEST_SCAN_TENANT, TEST_ENTITY, getSeedIds, 2);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -156,7 +159,8 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         loopCount = 0;
         do {
             loopCount++;
-            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 3);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(
+                    env, TEST_SCAN_TENANT, TEST_ENTITY, getSeedIds, 3);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -175,7 +179,8 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         loopCount = 0;
         do {
             loopCount++;
-            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(env, TEST_TENANT, TEST_ENTITY, getSeedIds, 4);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(
+                    env, TEST_SCAN_TENANT, TEST_ENTITY, getSeedIds, 4);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -189,18 +194,18 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(loopCount, 2);
         Assert.assertEquals(scanSeeds.size(), seedIds.size());
 
-        Assert.assertTrue(entityRawSeedService.batchCreate(destEnv, TEST_TENANT, scanSeeds));
+        Assert.assertTrue(entityRawSeedService.batchCreate(destEnv, TEST_SCAN_TENANT, scanSeeds));
         Thread.sleep(1000L);
-        EntityRawSeed rawSeed = entityRawSeedService.get(destEnv, TEST_TENANT, TEST_ENTITY, seedIds.get(0));
+        EntityRawSeed rawSeed = entityRawSeedService.get(destEnv, TEST_SCAN_TENANT, TEST_ENTITY, seedIds.get(0));
         Assert.assertNotNull(rawSeed);
-        List<EntityRawSeed> rawSeeds = entityRawSeedService.get(destEnv, TEST_TENANT, TEST_ENTITY, seedIds);
+        List<EntityRawSeed> rawSeeds = entityRawSeedService.get(destEnv, TEST_SCAN_TENANT, TEST_ENTITY, seedIds);
         Assert.assertEquals(rawSeeds.size(), seedIds.size());
 
         for(String seedId : seedIds) {
-            cleanup(env, seedId);
+            cleanupTenant(env, TEST_SCAN_TENANT, seedId);
         }
         for(String seedId : seedIds) {
-            cleanup(destEnv, seedId);
+            cleanupTenant(destEnv, TEST_SCAN_TENANT, seedId);
         }
     }
 
@@ -574,7 +579,11 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     }
 
     private void cleanup(EntityMatchEnvironment env, String... seedIds) {
-        Arrays.stream(seedIds).forEach(id -> entityRawSeedService.delete(env, TEST_TENANT, TEST_ENTITY, id));
+        cleanupTenant(env, TEST_TENANT, seedIds);
+    }
+
+    private void cleanupTenant(EntityMatchEnvironment env, Tenant tenant, String... seedIds) {
+        Arrays.stream(seedIds).forEach(id -> entityRawSeedService.delete(env, tenant, TEST_ENTITY, id));
     }
 
     /*
