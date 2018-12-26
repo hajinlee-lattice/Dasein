@@ -263,7 +263,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             log.debug("No lookup entry for request (ID={}), attributes={}, tenant (ID={})," +
                     " entity={}, target entity ID={}", requestId, request.getExtraAttributes(),
                     tenantId, request.getEntity(), targetEntitySeed.getId());
-            if (MapUtils.isNotEmpty(request.getExtraAttributes())) {
+            if (hasExtraAttributes(targetEntitySeed, request.getExtraAttributes())) {
                 EntityRawSeed seedToUpdate = new EntityRawSeed(
                         targetEntitySeed.getId(), targetEntitySeed.getEntity(),
                         Collections.emptyList(), request.getExtraAttributes());
@@ -349,7 +349,13 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 .filter(pair -> !target.getId().equals(pair.getValue()))
                 .filter(this::needAssociation)
                 .findFirst();
-        return entryNeedUpdate.isPresent() || MapUtils.isNotEmpty(request.getExtraAttributes());
+        return entryNeedUpdate.isPresent() || hasExtraAttributes(target, request.getExtraAttributes());
+    }
+
+    private boolean hasExtraAttributes(@NotNull EntityRawSeed target, Map<String, String> extraAttributes) {
+        // only check keys because currently we don't override attributes so there is no need to check values
+        return MapUtils.isNotEmpty(extraAttributes) &&
+                !target.getAttributes().keySet().containsAll(extraAttributes.keySet());
     }
 
     /*
