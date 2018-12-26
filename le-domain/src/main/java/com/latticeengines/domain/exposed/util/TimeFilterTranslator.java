@@ -123,7 +123,8 @@ public class TimeFilterTranslator {
         }
         int lastDays = parseSingleInteger(ComparisonType.LAST, vals);
         if (lastDays < 1) {
-            throw new IllegalArgumentException("Operand has to be larger than 1, but " + vals + " was provided.");
+            throw new IllegalArgumentException(
+                    "Operand has to be larger than or equal to 1, but " + vals + " was provided.");
         }
         LocalDate endDate = LocalDate.parse(getEvaluationDate(), DateTimeFormatter.ISO_DATE);
         LocalDate startDate = endDate.minusDays(lastDays - 1);
