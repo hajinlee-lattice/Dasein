@@ -13,9 +13,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -23,7 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("locationCacheBasedMicroEngineActor")
 @Scope("prototype")
-public class LocationToCachedDunsMicroEngineActor extends MicroEngineActorTemplate<DnBCacheLookupActor> {
+public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnBCacheLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(LocationToCachedDunsMicroEngineActor.class);
 
     private static final String HIT_WHITE_CACHE = "Retrieved a DUNS from white cache using Id=%s. Did not go to remote DnB API.";
@@ -41,16 +40,16 @@ public class LocationToCachedDunsMicroEngineActor extends MicroEngineActorTempla
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
-        
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
+
         // If already tried to get DUNS from LocationToCachedDunsActor or
         // LocationToDunsActor
-        if (triedDunsFromLocation((MatchTraveler) traveler)) {
+        if (triedDunsFromLocation(traveler)) {
             return false;
         }
 
-        MatchInput input = ((MatchTraveler) traveler).getMatchInput();
+        MatchInput input = traveler.getMatchInput();
         if (!Boolean.TRUE.equals(input.isUseDnBCache())) {
             return false;
         }
@@ -78,9 +77,8 @@ public class LocationToCachedDunsMicroEngineActor extends MicroEngineActorTempla
     protected void process(Response response) {
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         if (response.getResult() == null) {
-            traveler.debug(
-                    String.format("Encountered an issue with DUNS cache lookup at %s: %s.", getClass().getSimpleName(),
-                            "Result in response is empty"));
+            traveler.debug(String.format("Encountered an issue with DUNS cache lookup at %s: %s.",
+                    getClass().getSimpleName(), "Result in response is empty"));
             return;
         }
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();

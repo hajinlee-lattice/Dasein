@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
@@ -15,6 +16,15 @@ import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphSer
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 
+/**
+ * Actors in decision graph have 3 types: anchor, micro-engine & junction
+ * 
+ * Anchor is entry/exit actor
+ * 
+ * Micro-engine is actors where traveler travels around
+ * 
+ * Junction is the connecting point between decision graph/actor system
+ */
 public abstract class JunctionActorTemplate extends VisitorActorTemplate {
 
     @Autowired
@@ -28,11 +38,19 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
     @Autowired
     private MatchDecisionGraphService matchDecisionGraphService;
 
-    protected abstract boolean accept(Traveler traveler);
-
     @Override
     public GuideBook getGuideBook() {
         return guideBook;
+    }
+
+    @Override
+    protected ActorSystemTemplate getActorSystem() {
+        return matchActorSystem;
+    }
+
+    @Override
+    protected boolean needAssistantActor() {
+        return false;
     }
 
     @Override

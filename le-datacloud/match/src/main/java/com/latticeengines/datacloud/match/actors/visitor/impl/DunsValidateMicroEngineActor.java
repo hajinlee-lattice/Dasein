@@ -11,11 +11,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DnBMatchUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.datacloud.match.service.DnBMatchPostProcessor;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -27,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
  */
 @Component("dunsValidateMicroEngineActor")
 @Scope("prototype")
-public class DunsValidateMicroEngineActor extends MicroEngineActorTemplate<DynamoLookupActor> {
+public class DunsValidateMicroEngineActor extends DataSourceMicroEngineTemplate<DynamoLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(DunsValidateMicroEngineActor.class);
 
     @Inject
@@ -51,12 +50,11 @@ public class DunsValidateMicroEngineActor extends MicroEngineActorTemplate<Dynam
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        MatchKeyTuple matchKeyTuple = matchTraveler.getMatchKeyTuple();
-        MatchInput input = matchTraveler.getMatchInput();
-        DnBMatchContext context = DnBMatchUtils.getRemoteResult(matchTraveler);
-        return !alreadyValidated(matchTraveler)
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
+        MatchInput input = traveler.getMatchInput();
+        DnBMatchContext context = DnBMatchUtils.getRemoteResult(traveler);
+        return !alreadyValidated(traveler)
                 && dnBMatchPostProcessor.shouldPostProcessRemoteResult(context, input, matchKeyTuple);
     }
 
@@ -71,11 +69,10 @@ public class DunsValidateMicroEngineActor extends MicroEngineActorTemplate<Dynam
         traveler.getDunsOriginMap().put(getClass().getName(), context == null ? null : context.getDuns());
 
         boolean isDunsInAM = response.getResult() != null;
-        boolean isResultValid = dnBMatchPostProcessor.postProcessRemoteResult(
-                traveler, context, traveler.getDunsOriginMap(), isDunsInAM);
+        boolean isResultValid = dnBMatchPostProcessor.postProcessRemoteResult(traveler, context,
+                traveler.getDunsOriginMap(), isDunsInAM);
         if (!isResultValid) {
-            traveler.debug(String.format(
-                    "Invalid remote DnBMatchContext, DUNS=%s DnBCode=%s CurrentIsDunsInAM=%s",
+            traveler.debug(String.format("Invalid remote DnBMatchContext, DUNS=%s DnBCode=%s CurrentIsDunsInAM=%s",
                     tuple.getDuns(), context.getDnbCodeAsString(), isDunsInAM));
             tuple.setDuns(null);
         }

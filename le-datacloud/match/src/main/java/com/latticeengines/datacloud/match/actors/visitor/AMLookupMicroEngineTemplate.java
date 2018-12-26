@@ -5,7 +5,14 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
-public abstract class LookupMicroEngineActorTemplate extends MicroEngineActorTemplate<DynamoLookupActor> {
+public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineTemplate<DynamoLookupActor> {
+
+    /**
+     * @param keyTuple
+     * @return information of used match key as a string which is used for
+     *         traveler log
+     */
+    protected abstract String usedKeys(MatchKeyTuple keyTuple);
 
     @Override
     protected Class<DynamoLookupActor> getDataSourceActorClz() {
@@ -35,6 +42,4 @@ public abstract class LookupMicroEngineActorTemplate extends MicroEngineActorTem
                     + usedKeys(traveler.getMatchKeyTuple()));
         }
     }
-
-    protected abstract String usedKeys(MatchKeyTuple keyTuple);
 }

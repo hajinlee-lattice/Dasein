@@ -5,8 +5,19 @@ import com.latticeengines.actors.exposed.TimerMessage;
 import akka.actor.UntypedActor;
 
 public abstract class ActorTemplate extends UntypedActor {
+    /**
+     * Safe check whether the message is in valid type
+     * 
+     * @param msg
+     * @return
+     */
     protected abstract boolean isValidMessageType(Object msg);
 
+    /**
+     * Process message received in mail box
+     * 
+     * @param msg
+     */
     protected abstract void processMessage(Object msg);
 
     @Override

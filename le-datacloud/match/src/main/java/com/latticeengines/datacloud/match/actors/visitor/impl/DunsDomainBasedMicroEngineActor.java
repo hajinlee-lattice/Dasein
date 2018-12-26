@@ -7,14 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.datacloud.match.actors.visitor.LookupMicroEngineActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.AMLookupMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("dunsDomainBasedMicroEngineActor")
 @Scope("prototype")
-public class DunsDomainBasedMicroEngineActor extends LookupMicroEngineActorTemplate {
+public class DunsDomainBasedMicroEngineActor extends AMLookupMicroEngineTemplate {
     private static final Logger log = LoggerFactory.getLogger(DunsDomainBasedMicroEngineActor.class);
 
     @PostConstruct
@@ -28,8 +27,8 @@ public class DunsDomainBasedMicroEngineActor extends LookupMicroEngineActorTempl
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         return (matchKeyTuple.getDomain() != null && matchKeyTuple.getDuns() != null);
     }
 

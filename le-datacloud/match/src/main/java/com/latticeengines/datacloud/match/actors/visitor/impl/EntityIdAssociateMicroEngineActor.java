@@ -4,12 +4,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 
 @Component("entityIdAssociateMicroEngineActor")
 @Scope("prototype")
-public class EntityIdAssociateMicroEngineActor extends MicroEngineActorTemplate<EntityAssociateActor> {
+public class EntityIdAssociateMicroEngineActor extends DataSourceMicroEngineTemplate<EntityAssociateActor> {
 
     @Override
     protected Class<EntityAssociateActor> getDataSourceActorClz() {
@@ -17,7 +17,7 @@ public class EntityIdAssociateMicroEngineActor extends MicroEngineActorTemplate<
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
+    protected boolean accept(MatchTraveler traveler) {
         return false;
     }
 

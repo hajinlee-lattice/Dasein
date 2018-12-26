@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.actors.ActorTemplate;
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.utils.ActorUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
 import akka.actor.ActorRef;
@@ -17,31 +19,58 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     protected abstract GuideBook getGuideBook();
 
+    protected abstract ActorSystemTemplate getActorSystem();
+
+    /**
+     * Whether the actor need to call assistant actor to finish task
+     * 
+     * @return
+     */
+    protected abstract boolean needAssistantActor();
+
+    /**
+     * Whether the actor accept the traveler
+     * 
+     * @param traveler
+     * @return
+     */
+    protected abstract boolean accept(Traveler traveler);
+
     /**
      * @param traveler:
-     *            Message sent from actor within current decision graph
-     *            Eg of actor type: MicroEngine, Junction
-     * @return True: Pause/Stop travel for now. Do something else 
-     *         False: Continue traveling immediately
+     *            Message sent from actor within current decision graph Eg of
+     *            actor type: MicroEngine, Junction
+     * @return True: Pause/Stop travel for now. Do something else False:
+     *         Continue traveling immediately
      */
     protected abstract boolean process(Traveler traveler);
 
     /**
+     * Actor which needs assistant actor to finish some task should override
+     * this method
+     * 
      * @param response:
      *            Message sent from external/assistant actor outside of current
-     *            decision graph
-     *            Eg of external actor: Anchor of other decision graph
-     *            Eg of assistant actor: Lookup actor (match)
+     *            decision graph Eg of external actor: Anchor of other decision
+     *            graph Eg of assistant actor: Lookup actor (match)
      */
-    protected abstract void process(Response response);
-
-    protected String getNextLocation(Traveler traveler) {
-        return getGuideBook().next(ActorUtils.getPath(self()), traveler);
+    protected void process(Response response) {
+        if (!needAssistantActor()) {
+            log.error(String.format("Unexpected message recieved at %s: %s", ActorUtils.getPath(self()),
+                    JsonUtils.serialize(response)));
+            unhandled(response);
+        }
     }
 
-    @Override
-    protected boolean isValidMessageType(Object msg) {
-        return msg instanceof Traveler || msg instanceof Response;
+    /**
+     * Based on current status/location of traveler and guide book, decide next
+     * location to travel to
+     * 
+     * @param traveler
+     * @return
+     */
+    protected String getNextLocation(Traveler traveler) {
+        return getGuideBook().next(ActorUtils.getPath(self()), traveler);
     }
 
     @Override
@@ -115,7 +144,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     }
 
     protected String getActorName(ActorRef actorRef) {
-        return ActorUtils.getPath(actorRef);
+        return getActorSystem().getActorName(actorRef);
     }
 
     protected boolean logCheckInNOut() {

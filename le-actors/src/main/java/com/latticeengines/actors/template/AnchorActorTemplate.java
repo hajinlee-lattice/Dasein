@@ -6,18 +6,24 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.utils.ActorUtils;
 
 import akka.actor.ActorRef;
 
+/**
+ * Actors in decision graph have 3 types: anchor, micro-engine & junction
+ * 
+ * Anchor is entry/exit actor
+ * 
+ * Micro-engine is actors where traveler travels around
+ * 
+ * Junction is the connecting point between decision graph/actor system
+ */
 public abstract class AnchorActorTemplate extends VisitorActorTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(AnchorActorTemplate.class);
-
-    protected abstract ActorSystemTemplate getActorSystem();
 
     @PostConstruct
     public void postConstruct() {
@@ -44,14 +50,14 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
         return false;
     }
 
-
     @Override
-    protected void process(Response response) {
-        // If anchor has assistant actor, process response from assistant actor
+    protected boolean accept(Traveler traveler) {
+        return true;
     }
 
     @Override
-    protected String getActorName(ActorRef actorRef) {
-        return getActorSystem().getActorName(actorRef);
+    protected boolean needAssistantActor() {
+        return false;
     }
+
 }

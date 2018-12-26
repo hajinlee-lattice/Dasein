@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
@@ -53,5 +54,21 @@ public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
         if (traveler.getOriginalLocation() == null) {
             traveler.setOriginalLocation(ActorUtils.getPath(originalSender));
         }
+    }
+
+    @Override
+    protected ActorSystemTemplate getActorSystem() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected boolean needAssistantActor() {
+        return false;
+    }
+
+    @Override
+    protected boolean accept(Traveler traveler) {
+        return true;
     }
 }

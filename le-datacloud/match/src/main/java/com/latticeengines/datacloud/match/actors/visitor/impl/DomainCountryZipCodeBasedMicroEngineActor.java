@@ -7,15 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.datacloud.match.actors.visitor.LookupMicroEngineActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.AMLookupMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("domainCountryZipCodeBasedMicroEngineActor")
 @Scope("prototype")
-public class DomainCountryZipCodeBasedMicroEngineActor extends LookupMicroEngineActorTemplate {
+public class DomainCountryZipCodeBasedMicroEngineActor extends AMLookupMicroEngineTemplate {
     private static final Logger log = LoggerFactory.getLogger(DomainCountryZipCodeBasedMicroEngineActor.class);
 
     @PostConstruct
@@ -24,16 +23,15 @@ public class DomainCountryZipCodeBasedMicroEngineActor extends LookupMicroEngine
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         return (matchKeyTuple.getDomain() != null && matchKeyTuple.getZipcode() != null);
     }
 
     @Override
     protected String usedKeys(MatchKeyTuple keyTuple) {
         return String.format("( Domain=%s Country=%s ZipCode=%s )", keyTuple.getDomain(),
-                keyTuple.getCountry() != null ? keyTuple.getCountry() : LocationUtils.USA,
-                keyTuple.getZipcode());
+                keyTuple.getCountry() != null ? keyTuple.getCountry() : LocationUtils.USA, keyTuple.getZipcode());
     }
 
     @Override

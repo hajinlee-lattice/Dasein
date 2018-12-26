@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.actors.template.VisitorActorTemplate;
-import com.latticeengines.actors.utils.ActorUtils;
+import com.latticeengines.actors.template.ProxyMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
@@ -21,15 +21,23 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import akka.actor.ActorRef;
 
-public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorTemplate> extends VisitorActorTemplate {
+public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperActorTemplate>
+        extends ProxyMicroEngineTemplate {
 
-    private static final Logger log = LoggerFactory.getLogger(MicroEngineActorTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceMicroEngineTemplate.class);
 
+    /**
+     * @return class of data source actor
+     */
     protected abstract Class<T> getDataSourceActorClz();
 
-    protected abstract boolean accept(Traveler traveler);
-
-    protected abstract void process(Response response);
+    /**
+     * Whether match traveler is accepted
+     * 
+     * @param traveler
+     * @return
+     */
+    protected abstract boolean accept(MatchTraveler traveler);
 
     @Autowired
     @Qualifier("matchActorSystem")
@@ -45,38 +53,29 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     }
 
     @Override
+    protected ActorSystemTemplate getActorSystem() {
+        return matchActorSystem;
+    }
+
+    @Override
     protected boolean isValidMessageType(Object msg) {
         return msg instanceof MatchTraveler || msg instanceof Response;
     }
 
     @Override
-    protected boolean process(Traveler context) {
-        MatchTraveler matchTraveler = (MatchTraveler) context;
-        if (accept(matchTraveler)) {
-            ActorRef datasourceRef = matchActorSystem.getActorRef(getDataSourceActorClz());
-
-            DataSourceLookupRequest req = new DataSourceLookupRequest();
-            req.setMatchTravelerContext(matchTraveler);
-            req.setInputData(prepareInputData(matchTraveler.getMatchKeyTuple()));
-            guideBook.logVisit(ActorUtils.getPath(self()), matchTraveler);
-
-            datasourceRef.tell(req, self());
-            return true;
-        } else {
-            matchTraveler.debug("Rejected by " + getClass().getSimpleName());
-            guideBook.logVisit(ActorUtils.getPath(self()), matchTraveler);
-            return false;
-        }
+    protected boolean accept(Traveler traveler) {
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
+        return accept(matchTraveler);
     }
 
     @Override
-    protected String getNextLocation(Traveler traveler) {
-        return guideBook.next(ActorUtils.getPath(getSelf()), traveler);
-    }
-
-    @Override
-    protected String getActorName(ActorRef actorRef) {
-        return matchActorSystem.getActorName(actorRef);
+    protected void sendReqToAssistantActor(Traveler traveler) {
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
+        ActorRef datasourceRef = matchActorSystem.getActorRef(getDataSourceActorClz());
+        DataSourceLookupRequest req = new DataSourceLookupRequest();
+        req.setMatchTravelerContext(matchTraveler);
+        req.setInputData(prepareInputData(matchTraveler.getMatchKeyTuple()));
+        datasourceRef.tell(req, self());
     }
 
     @Override

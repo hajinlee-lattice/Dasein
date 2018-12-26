@@ -7,15 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.datacloud.match.actors.visitor.LookupMicroEngineActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.AMLookupMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("domainCountryBasedMicroEngineActor")
 @Scope("prototype")
-public class DomainCountryBasedMicroEngineActor extends LookupMicroEngineActorTemplate {
+public class DomainCountryBasedMicroEngineActor extends AMLookupMicroEngineTemplate {
     private static final Logger log = LoggerFactory.getLogger(DomainCountryBasedMicroEngineActor.class);
 
     @PostConstruct
@@ -24,8 +23,8 @@ public class DomainCountryBasedMicroEngineActor extends LookupMicroEngineActorTe
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         if (matchKeyTuple.getState() != null || matchKeyTuple.getZipcode() != null) {
             return (matchKeyTuple.getDomain() != null);
         } else {

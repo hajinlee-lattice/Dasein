@@ -3,6 +3,7 @@ package com.latticeengines.actors.visitor.sample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
@@ -18,8 +19,10 @@ public abstract class SampleMicroEngineActorTemplate<T extends SampleDataSourceW
 
     protected abstract Class<T> getDataSourceActorClz();
 
+    @Override
     protected abstract boolean accept(Traveler traveler);
 
+    @Override
     protected abstract void process(Response response);
 
     @Autowired
@@ -32,6 +35,16 @@ public abstract class SampleMicroEngineActorTemplate<T extends SampleDataSourceW
     @Override
     public GuideBook getGuideBook() {
         return guideBook;
+    }
+
+    @Override
+    protected ActorSystemTemplate getActorSystem() {
+        return matchActorSystem;
+    }
+
+    @Override
+    protected boolean needAssistantActor() {
+        return true;
     }
 
     @Override

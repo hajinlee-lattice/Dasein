@@ -13,9 +13,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -23,7 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
-public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
+public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
 
     private static final String REMOTE_API = "Went to remote DnB API.";
@@ -39,16 +38,16 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
 
         // If already tried to get DUNS from LocationToCachedDunsActor or
         // LocationToDunsActor
-        if (triedDunsFromLocation((MatchTraveler) traveler)) {
+        if (triedDunsFromLocation(traveler)) {
             return false;
         }
 
-        MatchInput input = ((MatchTraveler) traveler).getMatchInput();
+        MatchInput input = traveler.getMatchInput();
         if (!Boolean.TRUE.equals(input.getUseRemoteDnB())) {
             return false;
         }

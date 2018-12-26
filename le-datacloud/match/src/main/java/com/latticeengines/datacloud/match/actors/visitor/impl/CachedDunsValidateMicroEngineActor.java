@@ -11,11 +11,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DnBMatchUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.datacloud.match.service.DnBMatchPostProcessor;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -27,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
  */
 @Component("cachedDunsValidateMicroEngineActor")
 @Scope("prototype")
-public class CachedDunsValidateMicroEngineActor extends MicroEngineActorTemplate<DynamoLookupActor> {
+public class CachedDunsValidateMicroEngineActor extends DataSourceMicroEngineTemplate<DynamoLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(CachedDunsValidateMicroEngineActor.class);
 
     @Inject
@@ -51,12 +50,11 @@ public class CachedDunsValidateMicroEngineActor extends MicroEngineActorTemplate
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
-        MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        MatchKeyTuple matchKeyTuple = matchTraveler.getMatchKeyTuple();
-        DnBMatchContext context = DnBMatchUtils.getCacheResult(matchTraveler);
-        MatchInput input = matchTraveler.getMatchInput();
-        return !alreadyValidated(matchTraveler)
+    protected boolean accept(MatchTraveler traveler) {
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
+        DnBMatchContext context = DnBMatchUtils.getCacheResult(traveler);
+        MatchInput input = traveler.getMatchInput();
+        return !alreadyValidated(traveler)
                 && dnBMatchPostProcessor.shouldPostProcessCacheResult(context, input, matchKeyTuple);
     }
 
@@ -71,12 +69,12 @@ public class CachedDunsValidateMicroEngineActor extends MicroEngineActorTemplate
         traveler.getDunsOriginMap().put(getClass().getName(), context == null ? null : context.getDuns());
 
         boolean isDunsInAM = response.getResult() != null;
-        boolean isResultValid = dnBMatchPostProcessor.postProcessCacheResult(
-                traveler, context, traveler.getDunsOriginMap(), isDunsInAM);
+        boolean isResultValid = dnBMatchPostProcessor.postProcessCacheResult(traveler, context,
+                traveler.getDunsOriginMap(), isDunsInAM);
         if (!isResultValid) {
-            traveler.debug(String.format(
-                    "Invalid cached DnBMatchContext, CacheId=%s DUNS=%s DnBCode=%s CurrentIsDunsInAM=%s",
-                    context.getCacheId(), tuple.getDuns(), context.getDnbCodeAsString(), isDunsInAM));
+            traveler.debug(
+                    String.format("Invalid cached DnBMatchContext, CacheId=%s DUNS=%s DnBCode=%s CurrentIsDunsInAM=%s",
+                            context.getCacheId(), tuple.getDuns(), context.getDnbCodeAsString(), isDunsInAM));
             tuple.setDuns(null);
         }
     }

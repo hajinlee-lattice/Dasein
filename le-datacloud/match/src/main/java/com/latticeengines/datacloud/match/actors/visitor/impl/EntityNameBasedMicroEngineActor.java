@@ -4,19 +4,19 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 
 @Component("entityNameBasedMicroEngineActor")
 @Scope("prototype")
-public class EntityNameBasedMicroEngineActor extends MicroEngineActorTemplate<EntityLookupActor> {
+public class EntityNameBasedMicroEngineActor extends DataSourceMicroEngineTemplate<EntityLookupActor> {
     @Override
     protected Class<EntityLookupActor> getDataSourceActorClz() {
         return EntityLookupActor.class;
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
+    protected boolean accept(MatchTraveler traveler) {
         return false;
     }
 
