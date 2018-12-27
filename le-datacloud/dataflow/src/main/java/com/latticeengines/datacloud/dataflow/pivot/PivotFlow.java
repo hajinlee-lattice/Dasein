@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +33,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("pivotFlow")
 public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> {
 
     protected static ObjectMapper objectMapper = new ObjectMapper();
