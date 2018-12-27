@@ -21,6 +21,11 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import akka.actor.ActorRef;
 
+/**
+ * Template for micro-engines in the match which does data source lookup
+ *
+ * @param <T>
+ */
 public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperActorTemplate>
         extends ProxyMicroEngineTemplate {
 
