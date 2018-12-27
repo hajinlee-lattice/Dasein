@@ -17,7 +17,6 @@ const stories = storiesOf("Form Controls", module);
 
 stories.addDecorator(withKnobs);
 
-
 const defaultDebounce = 2000;
 stories.add("text field", () => (
   <form>
@@ -26,7 +25,7 @@ stories.add("text field", () => (
         placeholder: "Callback with debounce",
         icon: text("config.icon", "fa fa-search"),
         label: text("config.lable", "Lattice Engines text field"),
-        clearIcon: boolean('config.clearIcon', true),
+        clearIcon: boolean("config.clearIcon", true),
         debounce: number("config.debounce", defaultDebounce)
       }}
       callback={action("typed in text field")}
@@ -42,52 +41,36 @@ stories.add("link", () => (
       config={{
         icon: text("config.icon", "fa fa-info-circle"),
         label: text("config.lable", "Lattice Engines"),
-        iconside: select('config.iconside', [LEFT, RIGHT], LEFT)
+        iconside: select("config.iconside", [LEFT, RIGHT], LEFT)
       }}
       callback={action("clicked in the link")}
     />
   </form>
 ));
 
+stories.add("number field", () => <p>TODO</p>);
 
-stories.add("number field", () => (
-  <p>TODO</p>
-));
-
-stories.add("date picker", () => (
-  <p>TODO</p>
-));
-
+stories.add("date picker", () => <p>TODO</p>);
 
 stories.add("chip", () => (
   <form>
     <LeChip
-      
+      listItems={[
+        { id: 1, name: 'apples', displayName: "Apples" },
+        { id: 2, name: 'bananas', displayName: "Bananas" },
+        { id: 3, name: 'oranges', displayName: "Oranges" },
+        {id: 4, name: 'pineapples', displayName: 'Pineapples'}
+      ]}
     />
   </form>
 ));
 
+stories.add("dropdown", () => <p>TODO</p>);
 
-stories.add("dropdown", () => (
-  <p>TODO</p>
-));
+stories.add("radioButton", () => <p>TODO</p>);
 
+stories.add("checkbox", () => <p>TODO</p>);
 
-stories.add("radioButton", () => (
-  <p>TODO</p>
-));
+stories.add("switch", () => <p>TODO</p>);
 
-
-stories.add("checkbox", () => (
-  <p>TODO</p>
-));
-
-
-stories.add("switch", () => (
-  <p>TODO</p>
-));
-
-
-stories.add("toogleButton", () => (
-  <p>TODO</p>
-));
+stories.add("toogleButton", () => <p>TODO</p>);

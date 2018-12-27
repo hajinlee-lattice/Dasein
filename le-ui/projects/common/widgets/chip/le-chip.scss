@@ -52,5 +52,39 @@
       outline: none;
       border-bottom: 1px solid $gold-four;
     }
+
+    .le-chip-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .le-chip-dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: $white-gold;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px $cobalt;
+      padding: 0;
+      z-index: 1;
+      list-style-type: none;
+
+      .le-chips-list-item{
+        padding: 0.5em;
+        cursor: pointer;
+        &.selected{
+          background-color: $silver;
+        }
+      }
+      .le-chips-list-item:hover{
+        background-color: $palladium;
+      }
+      
+    }
+    .le-chip-dropdown-show {
+      margin-left: 0.7em;
+      margin-top: 0;
+      display: block;
+      max-width: 250px;
+    }
   }
 }
