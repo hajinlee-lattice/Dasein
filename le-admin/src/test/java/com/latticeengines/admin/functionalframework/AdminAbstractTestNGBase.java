@@ -34,6 +34,7 @@ import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExterna
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -124,6 +125,17 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         restTemplate.put(url, bootstrapProperties, new HashMap<>());
     }
 
+    protected void changeStatus(String contractId, String tenantId) {
+        TenantInfo info = null;
+        try {
+            info = TenantLifecycleManager.getInfo(contractId, tenantId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        info.properties.status = "ACTIVE";
+        String url = String.format("%s/admin/tenants/%s/%s", getRestHostPort(), tenantId, contractId);
+        restTemplate.put(url, info, new HashMap<>());
+    }
     protected void deleteTenant(String contractId, String tenantId) throws Exception {
         deleteTenant(contractId, tenantId, true);
     }
