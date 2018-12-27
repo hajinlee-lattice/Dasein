@@ -175,8 +175,8 @@ VALUES
   ('Honeycomb', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,5', 'Put DUNS validation functionality to a separate actor for better performance, have DUNS redirect, inherited from Pokemon2', NULL),
   ('IceCreamSandwich', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsValidate,LocationToDuns,DunsValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, no DUNS redirect', NULL),
   ('JellyBean', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, have DUNS redirect', NULL),
-  ('PetitFour', 'EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainBased,EntityNameBased,EntityIdAssociate', '0', '0:1,2,3,4,5', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich'),
-  ('Cupcake', 'EntitySystemIdBased,AccountMatch,EntityEmailBased,EntityNameBased,EntityIdAssociate', '0', '0:1,2,3,4', 'Default for Contact entity', 'AccountMatch:PetitFour');;
+  ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainBased,EntityNameBased,EntityIdAssociate', '0', '0:1,2,3,4,5,6', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich'),
+  ('Cupcake', 'MatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailBased,EntityNameBased,EntityIdAssociate', '0', '0:1,2,3,4,5', 'Default for Contact entity', 'AccountMatch:PetitFour');;
 
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`

@@ -108,7 +108,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                 throw new NullPointerException("Traveler object should not be null at this step.");
             }
 
-            travel(traveler, getSelf(), rejected);
+            travel(traveler, self(), rejected);
         } else {
             unhandled(msg);
         }
@@ -131,6 +131,27 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             log.debug(self() + " is sending traveler " + traveler + " to " + nextActorRef);
         }
         nextActorRef.tell(traveler, currentActorRef);
+    }
+
+    /**
+     * If unexpected/unhandled issue happens, force the traveler to return to
+     * anchor to quit traveling, otherwise the traveler might get lost in the
+     * actor system
+     * 
+     * @param traveler
+     */
+    @SuppressWarnings("deprecation")
+    protected void forceReturnToAnchor(Traveler traveler) {
+        // IsProcessed flag should already been set. Set again for safety
+        traveler.setProcessed(true);
+        // TODO: current implementation will return to anchor of current
+        // decision graph. Prefer to return to entry anchor if different
+        // decision graph has different anchor
+        ActorRef anchorRef = getContext().actorFor(traveler.getAnchorActorLocation());
+        if (log.isDebugEnabled()) {
+            log.debug(self() + " is sending traveler " + traveler + " to " + anchorRef);
+        }
+        anchorRef.tell(traveler, self());
     }
 
     protected void writeVisitingHistory(VisitingHistory history) {

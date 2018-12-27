@@ -73,6 +73,6 @@ public abstract class SampleMicroEngineActorTemplate<T extends SampleDataSourceW
 
     @Override
     protected String getNextLocation(Traveler traveler) {
-        return guideBook.next(ActorUtils.getPath(getSelf()), traveler);
+        return guideBook.next(ActorUtils.getPath(self()), traveler);
     }
 }
