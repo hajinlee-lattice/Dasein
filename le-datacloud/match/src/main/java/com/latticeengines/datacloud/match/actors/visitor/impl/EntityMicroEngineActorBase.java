@@ -1,0 +1,211 @@
+package com.latticeengines.datacloud.match.actors.visitor.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
+import com.latticeengines.domain.exposed.security.Tenant;
+
+/**
+ * Base micro engine class for entity match.
+ *
+ * @param <T> datasource actor used for lookup
+ */
+public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActorTemplate>
+        extends DataSourceMicroEngineTemplate<T> {
+    private static final Logger log = LoggerFactory.getLogger(EntityMicroEngineActorBase.class);
+
+    /**
+     * Hook to decide whether this actor should process current request. If this method is invoked, all
+     * fields required by entity match are guaranteed to exist.
+     *
+     * @param traveler current traveler instance
+     * @return true if this actor should process this tuple, false otherwise.
+     */
+    protected abstract boolean shouldProcess(@NotNull MatchTraveler traveler);
+
+    @Override
+    protected boolean accept(MatchTraveler traveler) {
+        if (traveler.getMatchKeyTuple() == null || traveler.getMatchInput() == null) {
+            log.error("Traveler missing MatchKeyTuple or MatchInput found in actor {}", self());
+            return false;
+        }
+        if (StringUtils.isBlank(traveler.getTargetEntity())) {
+            log.error("Traveler with empty target entity found in actor {}", self());
+            return false;
+        }
+        MatchInput input = traveler.getMatchInput();
+        if (input.getTenant() == null || StringUtils.isBlank(input.getTenant().getId())) {
+            log.error("Traveler missing tenant found in actor {}", self());
+            return false;
+        }
+        return shouldProcess(traveler);
+    }
+
+    @Override
+    protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
+        // not using legacy method
+        return null;
+    }
+
+    /**
+     * Prepare {@link EntityAssociationRequest} for entity match.
+     *
+     * @param traveler current match traveler instance
+     * @return created request object, will not be {@literal null}
+     */
+    protected EntityAssociationRequest prepareAssociationRequest(@NotNull MatchTraveler traveler) {
+        Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
+        String entity = traveler.getTargetEntity();
+        // TODO only allow allocation if in bulk mode
+        boolean allocateId = traveler.getMatchInput().isAllocateId();
+        List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getEntityMatchLookupResults()
+                .stream()
+                .flatMap(pair -> {
+                    MatchKeyTuple tuple = pair.getKey();
+                    if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
+                        // flatten system id, one system id name/value pair per result
+                        int size = tuple.getSystemIds().size();
+                        return IntStream.range(0, size).mapToObj(idx -> {
+                            MatchKeyTuple systemTuple = new MatchKeyTuple.Builder()
+                                    .withSystemIds(Collections.singletonList(tuple.getSystemIds().get(idx)))
+                                    .build();
+                            // resulting entity id list should have the same size as systemIds
+                            return Pair.of(systemTuple, pair.getValue().get(idx));
+                        });
+                    } else {
+                        // non system id result, should only have one entity ID in the list
+                        return Stream.of(Pair.of(pair.getKey(), pair.getValue().get(0)));
+                    }
+                })
+                .collect(Collectors.toList());
+        Map<String, String> extraAttributes = null;
+        if (StringUtils.isNotBlank(traveler.getLatticeAccountId())) {
+            extraAttributes = Collections.singletonMap(
+                    DataCloudConstants.LATTICE_ACCOUNT_ID, traveler.getLatticeAccountId());
+        }
+        return new EntityAssociationRequest(standardizedTenant, entity, allocateId, lookupResults, extraAttributes);
+    }
+
+    /**
+     * Process the response that should contain an {@link EntityAssociationResponse} as result.
+     *
+     * @param response response object
+     */
+    protected void handleAssociationResponse(@NotNull Response response) {
+        MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
+        if (response.getResult() instanceof EntityAssociationResponse) {
+            EntityAssociationResponse associationResponse = (EntityAssociationResponse) response.getResult();
+            if (StringUtils.isNotBlank(associationResponse.getAssociatedEntityId())) {
+                traveler.setMatched(true);
+                // TODO (ZDD) need to change the result after repeated run on decision graph is supported because
+                //           LatticeAccountId is actually serialized from result field and is overwritten here
+                traveler.setResult(associationResponse.getAssociatedEntityId());
+                traveler.debug(String.format(
+                        "Associate to entity successfully. Entity=%s, EntityId=%s, AssociationErrors=%s",
+                        associationResponse.getEntity(), associationResponse.getAssociatedEntityId(),
+                        associationResponse.getAssociationErrors()));
+            } else {
+                // TODO log mode (bulk/realtime) and allocateId flag
+                traveler.debug(String.format(
+                        "Cannot associate to existing entity. Entity=%s, AssociationErrors=%s",
+                        associationResponse.getEntity(), associationResponse.getAssociationErrors()));
+            }
+            // TODO retry if (a) association failed and (b) allocateId flag is true
+
+            if (CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors())) {
+                // TODO (to DZheng & JWinter) currently I use a list of string to represent errors. not sure
+                //                            if this is enough or need to be more structured.
+                // TODO set association error to traveler
+            }
+        } else {
+            log.error("Got invalid entity association response in actor {}, should not have happened", self());
+        }
+    }
+
+    /**
+     * Prepare {@link EntityLookupRequest} for entity match.
+     *
+     * @param traveler current match traveler instance
+     * @param tuple tuple that will be used for lookup
+     * @return generated request object, will not be {@literal null}
+     */
+    protected EntityLookupRequest prepareLookupRequest(
+            @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
+        Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
+        String entity = traveler.getTargetEntity();
+        return new EntityLookupRequest(standardizedTenant, entity, tuple);
+    }
+
+    /**
+     * Process the response that should contain an {@link EntityLookupResponse} as result.
+     *
+     * @param response response object
+     */
+    protected void handleLookupResponse(@NotNull Response response) {
+        MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
+        if (response.getResult() instanceof EntityLookupResponse) {
+            EntityLookupResponse lookupResponse = (EntityLookupResponse) response.getResult();
+            if (foundEntity(lookupResponse)) {
+                traveler.debug(String.format(
+                        "Found EntityIds=%s for Entity=%s with MatchKeyTuple=%s",
+                        lookupResponse.getEntityIds(), lookupResponse.getEntity(), lookupResponse.getTuple()));
+            } else {
+                traveler.debug(String.format(
+                        "Cannot find any Entity=%s with MatchKeyTuple=%s",
+                        lookupResponse.getEntity(), lookupResponse.getTuple()));
+            }
+            if (CollectionUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
+                // instantiate list
+                traveler.setEntityMatchLookupResults(new ArrayList<>());
+            }
+            // add lookup result
+            traveler.getEntityMatchLookupResults().add(
+                    Pair.of(lookupResponse.getTuple(), lookupResponse.getEntityIds()));
+        } else {
+            log.error("Got invalid entity lookup response in actor {}, should not have happened", self());
+        }
+    }
+
+    private boolean foundEntity(@NotNull EntityLookupResponse response) {
+        if (CollectionUtils.isEmpty(response.getEntityIds())) {
+            return false;
+        }
+
+        // see if we find any entity ID in the list
+        Optional<String> entityId = response.getEntityIds().stream().filter(Objects::nonNull).findAny();
+        return entityId.isPresent();
+    }
+
+    /*
+     * Create a new tenant instance with standardized tenantId
+     */
+    private Tenant newStandardizedTenant(@NotNull Tenant tenant) {
+        return new Tenant(CustomerSpace.parse(tenant.getId()).getTenantId());
+    }
+}

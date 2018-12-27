@@ -1,11 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,12 +8,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+
 /**
  * Class to represent seed for account entity.
  */
 public class AccountSeed {
     private static final String ENTITY = BusinessEntity.Account.name();
-    private static final String KEY_LATTICE_ACCOUNT_ID = "latticeAccountId";
+    private static final String KEY_LATTICE_ACCOUNT_ID = DataCloudConstants.LATTICE_ACCOUNT_ID;
 
     private final String id;
     private final String latticeAccountId;

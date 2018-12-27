@@ -29,6 +29,7 @@ public class EntityAssociationRequest {
     public EntityAssociationRequest(
             @NotNull Tenant tenant, @NotNull String entity, boolean allocateNewId,
             @NotNull List<Pair<MatchKeyTuple, String>> lookupResults, Map<String, String> extraAttributes) {
+        Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(lookupResults);
         this.tenant = tenant;

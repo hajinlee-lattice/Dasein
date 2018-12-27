@@ -79,7 +79,13 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
         ActorRef datasourceRef = matchActorSystem.getActorRef(getDataSourceActorClz());
         DataSourceLookupRequest req = new DataSourceLookupRequest();
         req.setMatchTravelerContext(matchTraveler);
-        req.setInputData(prepareInputData(matchTraveler.getMatchKeyTuple()));
+        // try to generate input data with legacy method first (using match key tuple)
+        Object inputData = prepareInputData(matchTraveler.getMatchKeyTuple());
+        if (inputData == null) {
+            // try new method with more flexible input data type
+            inputData = prepareInputData(matchTraveler);
+        }
+        req.setInputData(inputData);
         datasourceRef.tell(req, self());
     }
 
@@ -96,7 +102,18 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
         }
     }
 
+    /*
+     * Legacy method that takes a tuple and returns a tuple.
+     */
+    @Deprecated
     protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
         return input;
+    }
+
+    /*
+     * Method to prepare input data for DataSourceLookupService
+     */
+    protected Object prepareInputData(MatchTraveler traveler) {
+        return null;
     }
 }
