@@ -3,7 +3,7 @@ const search = (list, filter, fieldName) => {
         let result = list.filter(obj => {
             return obj[fieldName].toLowerCase().includes(filter.toLowerCase());
         });
-        console.log('RESULT ', result);
+        // console.log('RESULT ', result);
         return result;
     }else{
         return [];

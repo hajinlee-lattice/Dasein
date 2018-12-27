@@ -6,10 +6,16 @@ class LeChip extends Component {
   constructor(props) {
     super(props);
     this.removeChip = this.removeChip.bind(this);
+    this.addChip = this.addChip.bind(this);
+    this.keyPressedHandler = this.keyPressedHandler.bind(this);
+    this.removeChip = this.removeChip.bind(this);
+    this.getItem = this.getItem.bind(this);
+    this.getChipsSelected = this.getChipsSelected.bind(this);
+
+    this.itemsAvailable = [];
     this.state = {
       value: "",
       chipsSelected: [],
-      listElements: [],
       idSelected: {},
       show: false,
       selected: 0
@@ -24,35 +30,43 @@ class LeChip extends Component {
     this.setState({ chipsSelected: tmpChips, idSelected: idsCopy });
   }
 
+  getItem(item, index){
+    return (
+      <li
+        key={index}
+        className={`${"le-chips-list-item"} ${
+          this.state.selected == index ? "selected" : ""
+        }`}
+        onClick={event => {
+          //.log("Clicked");
+          this.addChip(item, index);
+        }}
+      >
+        {item.displayName}
+      </li>
+    );
+  }
+
   getListItems() {
-    let listItems = this.state.listElements.map((item, index) => {
-      if (!this.state.idSelected[item.id]) {
-        return (
-          <li
-            key={index}
-            className={`${"le-chips-list-item"} ${
-              this.state.selected == index ? "selected" : ""
-            }`}
-            onClick={event => {
-              console.log("Clicked");
-              this.addChip(item);
-            }}
-          >
-            {item.displayName}
-          </li>
-        );
+    let tmp = search(this.props.listItems, this.state.value, 'displayName');
+    let retUI = [];
+    this.itemsAvailable = [];
+    let id = 0;
+    tmp.forEach((element, index) => {
+      if (!this.state.idSelected[element.id]) {
+        this.itemsAvailable.push(element);
+        retUI.push(this.getItem(element, id));
+        id++;
       }
     });
-
-    return listItems;
+    return retUI;
   }
   keyPressedHandler(event) {
     event.stopPropagation();
-    // console.log(event.keyCode);
     switch (event.keyCode) {
       case 40:
       //ArrowDown
-        if (this.state.selected + 1 < this.state.listElements.length) {
+        if (this.state.selected + 1 < this.itemsAvailable.length) {
           this.setState({ selected: this.state.selected + 1 });
         }
         break;
@@ -75,7 +89,7 @@ class LeChip extends Component {
       case 32:
       //Space with ctrl
       if(event.ctrlKey){
-        this.setState({ show: true });
+        this.setState({ selected: 0, show: true });
       }
       break;
     }
@@ -83,18 +97,16 @@ class LeChip extends Component {
   }
   searchItems(event) {
     let val = event.target.value;
-    let itemsFiltered = search(this.props.listItems, val, "displayName");
-    this.setState({ value: val, listElements: itemsFiltered, show: true });
+    this.setState({ value: val, show: true });
   }
 
-  addChip(item) {
+  addChip(item, index) {
     let tmpChips = [...this.state.chipsSelected];
     tmpChips.push(item);
-    this.setState({ chipsSelected: tmpChips });
     const idsCopy = { ...this.state.idSelected };
     idsCopy[item.id] = item.name;
-    this.setState({ idSelected: idsCopy });
-    // console.log(this.state.chipsSelected);
+    
+    this.setState({ chipsSelected: tmpChips, idSelected: idsCopy, selected: 0 });
   }
 
   getChipsSelected() {
@@ -116,7 +128,6 @@ class LeChip extends Component {
   }
 
   render() {
-    console.log("Rendering ", this.state);
     return (
       <div className="le-chips">
         <ul className="le-chips-selected">{this.getChipsSelected()}</ul>
