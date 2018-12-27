@@ -41,14 +41,14 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 public class MetadataProxy extends MicroserviceRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataProxy.class);
-    
+
     private static final Integer ATTRIBUTE_BATCH_SIZE = 5000;
 
     @PostConstruct
     public void init() {
-        
+
     }
-    
+
     public MetadataProxy() {
         super("metadata");
     }
@@ -147,7 +147,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
             throw e;
         }
     }
-    
+
     public void updateTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         List<Attribute> attributes = null;
@@ -198,26 +198,31 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         if (StringUtils.isEmpty(tableName)) {
             return null;
         }
-        Long columnCount = getTableAttributeCount(customerSpace, tableName);
-        if (ATTRIBUTE_BATCH_SIZE > columnCount) {
+        long columnCount = getTableAttributeCount(customerSpace, tableName);
+        if (columnCount == 0) {
+            return null;
+        } else if (ATTRIBUTE_BATCH_SIZE > columnCount) {
             String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
             return get("getTable", url, Table.class);
         }
-        
+
         // Need to split the attributes into Chunks
         Table table = getTableSummary(customerSpace, tableName);
         table.setAttributes(getTableAttributes(customerSpace, tableName, columnCount));
         return table;
     }
-    
-    
-    public Long getTableAttributeCount(String customerSpace, String tableName) {
+
+
+    public long getTableAttributeCount(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attribute_count", customerSpace, tableName);
         Long count = get("getTableColumnCount", url, Long.class);
         log.info("GetTableAttributeCount for {}-{} , Count: {}", customerSpace, tableName, count);
-        return count;
+        if (count == null) {
+            new Thread(() -> deleteTable(customerSpace, tableName)).start();
+        }
+        return (count == null) ? 0 : count;
     }
-    
+
     /**
      * @param customerSpace
      * @param tableName
@@ -253,26 +258,26 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         }
         return attributes.stream().parallel().map(Attribute::getColumnMetadata).collect(Collectors.toList());
     }
-    
+
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, Long columnCount) {
         long attributeCount = columnCount == null ? getTableAttributeCount(customerSpace, tableName) : columnCount;
         List<Attribute> attributeLst = Collections.synchronizedList(new ArrayList<>());
-        
+
         log.info("Getting Table: {} with Attributes: {} in chunks of {} ", tableName, attributeCount, ATTRIBUTE_BATCH_SIZE);
-        
+
         IntStream.range(0, (int) (Math.ceil((double)attributeCount/ATTRIBUTE_BATCH_SIZE))).forEach(page -> {
             List<Attribute> attributePage = getTableAttributes(customerSpace, tableName, page+1, ATTRIBUTE_BATCH_SIZE);
             attributeLst.addAll(attributePage);
         });
         return attributeLst;
     }
-    
+
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, int page, long size) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace, tableName);
         url = String.format("%s?page=%d&size=%d", url, page, size);
         return JsonUtils.convertList(get("get table columns", url, List.class), Attribute.class);
     }
-    
+
     public List<Table> getTables(String customerSpace) {
         List<String> tableNames = getTableNames(customerSpace);
         List<Table> tables = new ArrayList<>();

@@ -16,7 +16,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
@@ -90,8 +90,8 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
                     PrepareTransformationStepInputConfiguration prepareConf = //
                             JsonUtils.deserialize(prepareConfStr, PrepareTransformationStepInputConfiguration.class);
                     String transformationConfigurationStr = prepareConf.getTransformationConfiguration();
-                    TransformationConfiguration transformationConf = JsonUtils.deserialize(transformationConfigurationStr,
-                            TransformationConfiguration.class);
+                    PipelineTransformationConfiguration transformationConf = JsonUtils.deserialize(transformationConfigurationStr,
+                            PipelineTransformationConfiguration.class);
                     return transformationConf.getRootOperationId();
                 }
             } catch (Exception e) {
