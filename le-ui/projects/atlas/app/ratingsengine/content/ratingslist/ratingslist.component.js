@@ -389,7 +389,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         Modal.warning({
             name: 'deleteModelPrompt',
             title: "Delete Model",
-            message: "Are you sure you want to delete this model: " + rating.name + "?",
+            message: "Are you sure you want to delete this model: " + rating.displayName + "?",
             confirmtext: "Delete Model"
         }, vm.callbackModalWindow);
     };
