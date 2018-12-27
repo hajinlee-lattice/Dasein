@@ -11,8 +11,8 @@
     <import resource="classpath:admin-bardjams-persistence-context.xml" />
     <import resource="classpath:security-api-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
-    <import resource="classpath:encryption-context.xml"/>
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
 

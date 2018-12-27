@@ -72,9 +72,6 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private void resetEnvironment() throws IOException {
-        if (!Boolean.TRUE.equals(useEmr) && HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
-            HdfsUtils.deleteKey(yarnConfiguration, hdfsKmsKey);
-        }
         if (HdfsUtils.fileExists(yarnConfiguration, "/tmp/HdfsUtilsTest")) {
             HdfsUtils.rmdir(yarnConfiguration, "/tmp/HdfsUtilsTest");
         }
@@ -100,22 +97,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional", enabled = false)
     public void testS3DistCp() throws Exception {
-        if (!Boolean.TRUE.equals(useEmr)) {
-            testS3DistCp(true);
-        }
-        testS3DistCp(false);
-    }
-
-    private void testS3DistCp(boolean encrypted) throws Exception {
         String queue = "default";
-
-        if (encrypted) {
-            if (!HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
-                HdfsUtils.createKey(yarnConfiguration, hdfsKmsKey);
-            }
-            HdfsUtils.mkdir(yarnConfiguration, "/tmp/HdfsUtilsTest");
-            HdfsUtils.createEncryptionZone(yarnConfiguration, "/tmp/HdfsUtilsTest", hdfsKmsKey);
-        }
 
         // from hdfs to s3
         String srcDir = "/tmp/HdfsUtilsTest/input";
@@ -130,12 +112,6 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         };
         AvroUtils.uploadAvro(yarnConfiguration, data, columns, "test", srcDir);
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
-
-        if (encrypted) {
-            // check distcp between hdfs
-            String srcDir2 = "/tmp/HdfsUtilsTest/input2";
-            HdfsUtils.distcp(distCpConfiguration, srcDir, srcDir2, queue);
-        }
 
         // clean up s3 target dir
         String tgtDir = "/" + leStack + "/HdfsUtilsTest/output";

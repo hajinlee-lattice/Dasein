@@ -40,7 +40,6 @@
         <module>le-hadoop</module>
         <module>le-yarn</module>
         <module>le-dataplatform</module>
-        <module>le-encryption</module>
         <module>le-scoring</module>
         <module>le-eai</module>
         <module>le-camille</module>

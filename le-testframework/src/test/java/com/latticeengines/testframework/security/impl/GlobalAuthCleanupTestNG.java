@@ -133,7 +133,6 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                 cleanupTenantInZK(CustomerSpace.parse(tenant.getId()).getContractId());
                 cleanupTenantInDL(CustomerSpace.parse(tenant.getId()).getContractId());
                 cleanupTenantInDocumentStores(tenant);
-                deleteKey(tenant);
             }
         }
 
@@ -144,14 +143,6 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         cleanupZK();
 
         log.info("Finished cleaning up test tenants.");
-    }
-
-    private void deleteKey(Tenant tenant) {
-        try {
-            HdfsUtils.deleteKey(yarnConfiguration, CustomerSpace.parse(tenant.getId()).getContractId());
-        } catch (Exception e) {
-            log.error(String.format("Failed to cleanup key for customer %s", tenant.getId()), e);
-        }
     }
 
     private void cleanupTenantInDocumentStores(Tenant tenant) {

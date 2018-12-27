@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
-import com.latticeengines.encryption.exposed.service.DataEncryptionService;
 
 @Component
 public class ModelingComponent extends LatticeComponent {
@@ -22,9 +21,6 @@ public class ModelingComponent extends LatticeComponent {
 
     @Value("${admin.modeling.dryrun}")
     private boolean dryrun;
-
-    @Autowired
-    private DataEncryptionService dataEncryptionService;
 
     @Autowired
     private ModelingComponentManager modelingComponentManager;
@@ -54,7 +50,6 @@ public class ModelingComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
-        installer.setDataEncryptionService(dataEncryptionService);
         installer.setBatonService(batonService);
         return installer;
     }
@@ -66,7 +61,6 @@ public class ModelingComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceDestroyer getDestroyer() {
-        destroyer.setDataEncryptionService(dataEncryptionService);
         destroyer.setModelingComponentManager(modelingComponentManager);
         return destroyer;
     }

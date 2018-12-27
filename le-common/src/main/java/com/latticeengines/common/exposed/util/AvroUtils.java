@@ -1012,7 +1012,7 @@ public class AvroUtils {
             for (String path : paths) {
                 matchedFiles.addAll(HdfsUtils.getFilesByGlob(configuration, path));
             }
-            if (matchedFiles == null || matchedFiles.isEmpty()) {
+            if (matchedFiles.isEmpty()) {
                 throw new IOException(
                         "Could not find any avro file that matches one of the path patterns [ "
                                 + StringUtils.join(paths, ", ") + " ]");

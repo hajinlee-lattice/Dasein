@@ -130,7 +130,6 @@ def cleanup_webapp_in_tc(app):
     if os.path.isfile(war_file):
         logger.info('removing %s' % war_file)
         os.remove(war_file)
-    undeploy_mgr_app(app)
 
 
 def cleanup_wars():

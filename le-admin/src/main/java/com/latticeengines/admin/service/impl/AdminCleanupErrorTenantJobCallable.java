@@ -44,7 +44,7 @@ public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Boolean call() {
         camille = CamilleEnvironment.getCamille();
         podId = CamilleEnvironment.getPodId();
 
@@ -57,7 +57,6 @@ public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
                 log.info("Found a error tenant to clean up: " + tenant.getId());
                 cleanupTenantInGA(tenant);
                 cleanupTenantInZK(customerSpace.getContractId());
-                deleteKey(customerSpace.getContractId());
                 cleanupTenantInHdfs(customerSpace.getContractId());
                 cleanupS3(customerSpace.getTenantId());
             }
@@ -77,7 +76,7 @@ public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
         }
     }
 
-    private void cleanupTenantInZK(String contractId) throws Exception {
+    private void cleanupTenantInZK(String contractId) {
         try {
             log.info("Clean up tenant in ZK: " + contractId);
             Path contractPath = PathBuilder.buildContractPath(podId, contractId);
@@ -89,16 +88,7 @@ public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
         }
     }
 
-    private void deleteKey(String contractId) {
-        try {
-            log.info("Clean up key for tenant: " + contractId);
-            HdfsUtils.deleteKey(yarnConfiguration, contractId);
-        } catch (Exception e) {
-            log.error("Failed to clean up key for tenant:" + contractId, e);
-        }
-    }
-
-    private void cleanupTenantInHdfs(String contractId) throws Exception {
+    private void cleanupTenantInHdfs(String contractId) {
         try {
             log.info("Clean up contract in HDFS: " + contractId);
             String customerSpace = CustomerSpace.parse(contractId).toString();

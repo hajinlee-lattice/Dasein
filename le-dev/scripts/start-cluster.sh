@@ -2,8 +2,8 @@
 
 # Test for required env variables
 printf "%s\n" "${HADOOP_HOME:?You must set HADOOP_HOME}"
-# printf "%s\n" "${SPARK_HOME:?You must set SPARK_HOME}"
-# printf "%s\n" "${LIVY_HOME:?You must set LIVY_HOME}"
+printf "%s\n" "${SPARK_HOME:?You must set SPARK_HOME}"
+printf "%s\n" "${LIVY_HOME:?You must set LIVY_HOME}"
 
 rm -f /tmp/*.out
 rm -Rf $HADOOP_HOME/logs/*.log*
@@ -26,14 +26,5 @@ ${HADOOP_HOME}/sbin/yarn-daemon.sh start nodemanager
 ${HADOOP_HOME}/sbin/yarn-daemon.sh start timelineserver
 ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh start historyserver
 
-OLD_CATALINA_HOME=${CATALINA_HOME}
-CATALINA_HOME=${HADOOP_HOME}/share/hadoop/kms/tomcat
-pushd ${HADOOP_HOME} && ${HADOOP_HOME}/sbin/kms.sh start && popd
-CATALINA_HOME=${OLD_CATALINA_HOME}
-
-if [[ "${SPARK_HOME}" != "" ]]; then
-    ${SPARK_HOME}/sbin/start-history-server.sh
-fi
-if [[ "${LIVY_HOME}" != "" ]]; then
-    ${LIVY_HOME}/bin/livy-server start
-fi
+${SPARK_HOME}/sbin/start-history-server.sh
+${LIVY_HOME}/bin/livy-server start

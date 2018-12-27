@@ -24,8 +24,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.crypto.key.KeyProvider;
-import org.apache.hadoop.crypto.key.KeyProviderFactory;
 import org.apache.hadoop.fs.FileChecksum;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -33,7 +31,6 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.EncryptionZone;
 import org.apache.hadoop.tools.DistCp;
 import org.apache.hadoop.tools.DistCpOptions;
@@ -152,12 +149,6 @@ public class HdfsUtils {
         DistCpOptions options = new DistCpOptions(new Path(srcPath), new Path(tgtPath));
         log.info("Running distcp from " + srcPath + " to " + tgtPath + " using queue " + queue);
         String[] args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-update", srcPath, tgtPath };
-        EncryptionZone srcZone = getEncryptionZone(configuration, srcPath);
-        EncryptionZone dstZone = getEncryptionZone(configuration, tgtPath);
-        if (srcZone != null || dstZone != null) {
-            log.info("Encryption zone is involved, skipping checksum check.");
-            args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update", srcPath, tgtPath };
-        }
         int exit = ToolRunner.run(new DistCp(configuration, options), args);
         if (exit != 0) {
             throw new RuntimeException("DistCp exited with code " + exit);
@@ -572,16 +563,6 @@ public class HdfsUtils {
 
     public static boolean inDifferentEncryptionZone(Configuration configuration, String src, String dst)
             throws IOException {
-        EncryptionZone dstZone = getEncryptionZone(configuration, dst);
-        if (dstZone != null) {
-            EncryptionZone srcZone = getEncryptionZone(configuration, src);
-            if (srcZone == null || !keyEquals(srcZone, dstZone)) {
-                String dstKey = "Key = " + dstZone.getKeyName();
-                String srcKey = srcZone == null ? "No Key" : srcZone.getKeyName();
-                log.info(String.format("Destination (%s) is encrypted differently than source (%s).", dstKey, srcKey));
-                return true;
-            }
-        }
         return false;
     }
 
@@ -663,107 +644,6 @@ public class HdfsUtils {
             FileStatus status = fs.getFileStatus(new Path(filePath));
             return status.getLen();
         }
-    }
-
-    public static List<EncryptionZone> getEncryptionZones(Configuration configuration) {
-        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem.newInstance(configuration)) {
-            List<EncryptionZone> zones = new ArrayList<>();
-            RemoteIterator<EncryptionZone> iter = fs.listEncryptionZones();
-            while (iter.hasNext()) {
-                zones.add(iter.next());
-            }
-            return zones;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void createEncryptionZone(Configuration configuration, String path, String keyname) {
-        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem.newInstance(configuration)) {
-            fs.createEncryptionZone(new Path(path), keyname);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static boolean isEncryptionZone(Configuration configuration, String path) {
-        return getEncryptionZone(configuration, path) != null;
-    }
-
-    private static EncryptionZone getEncryptionZone(Configuration configuration, String path) {
-        List<EncryptionZone> zones = getEncryptionZones(configuration);
-        for (EncryptionZone zone : zones) {
-            if (path.startsWith(zone.getPath())) {
-                return zone;
-            }
-        }
-        return null;
-    }
-
-    public static void deleteKey(Configuration configuration, String keyName) {
-        KeyProvider provider = getKeyProvider(configuration);
-        try {
-            provider.deleteKey(keyName);
-            provider.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Could not delete key %s with provider %s", keyName, provider), e);
-        }
-    }
-
-    public static void createKey(Configuration configuration, String keyName) {
-        KeyProvider provider = getKeyProvider(configuration);
-        try {
-            provider.createKey(keyName, new KeyProvider.Options(configuration));
-            provider.flush();
-        } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not create key %s with provider %s", keyName, provider), e);
-        }
-    }
-
-    public static void rollKey(Configuration configuration, String keyName) {
-        KeyProvider provider = getKeyProvider(configuration);
-        try {
-            provider.rollNewVersion(keyName);
-            provider.flush();
-        } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not roll key %s with provider %s", keyName, provider), e);
-        }
-    }
-
-    public static boolean keyExists(Configuration configuration, String keyName) {
-        KeyProvider provider = getKeyProvider(configuration);
-        try {
-            List<String> keys = provider.getKeys();
-            if (keys != null) {
-                return keys.contains(keyName);
-            }
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Could not check if key %s exists using provider %s", keyName, provider), e);
-        }
-    }
-
-    private static KeyProvider getKeyProvider(Configuration configuration) {
-        KeyProvider provider = null;
-        List<KeyProvider> providers;
-        try {
-            providers = KeyProviderFactory.getProviders(configuration);
-            for (KeyProvider p : providers) {
-                if (!p.isTransient()) {
-                    provider = p;
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (provider == null) {
-            throw new RuntimeException(
-                    "No KeyProvider has been specified.  Please check your core-site.xml (hadoop.security.key.provider.path) and hdfs-site.xml (dfs.encryption.key.provider.uri)");
-        }
-
-        return provider;
     }
 
     public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,

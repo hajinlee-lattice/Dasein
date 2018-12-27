@@ -90,7 +90,6 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         createExternalSystem();
 
         // TODO: setup rating engines and rating attrs
-
     }
 
     private void createExternalSystem() {
