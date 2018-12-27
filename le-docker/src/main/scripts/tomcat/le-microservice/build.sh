@@ -3,7 +3,7 @@
 function process_error() {
     IMAGE=$1 &&
 
-    if [ ! -z "$(cat /tmp/${IMAGE}-errors.txt)" ]
+    if [[ ! -z "$(cat /tmp/${IMAGE}-errors.txt)" ]]
     then
         echo "Error!";
         cat /tmp/${IMAGE}-errors.txt;
@@ -25,7 +25,7 @@ function build_docker() {
 	cd ${WORKSPACE}/webapps/${TGT_WAR}
 	jar xvf ${DIR}/webapps/${SRC_WAR}.war
 	# replace log4j.properties
-	if [ "${SRC_WAR}" = "scoringapi" ]; then
+	if [[ "${SRC_WAR}" = "scoringapi" ]]; then
 	    cp -f ${DIR}/log4j2-scoringapi.xml WEB-INF/classes/log4j2.xml
 	else
 	    cp -f ${DIR}/log4j2.xml WEB-INF/classes/log4j2.xml
@@ -43,7 +43,7 @@ function build_docker() {
     { head -n $(($line-1)) WEB-INF/web.xml; cat ${DIR}/tomcat_filters.xml; tail -n +$(($line+1)) WEB-INF/web.xml; } > WEB-INF/web2.xml
     mv -f WEB-INF/web2.xml WEB-INF/web.xml
 	cd ..
-	if [ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]; then
+	if [[ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]]; then
 	    echo "found MANIFEST.MF"
 	    cat ${TGT_WAR}/META-INF/MANIFEST.MF
 	    jar cvmf ${TGT_WAR}/META-INF/MANIFEST.MF ${TGT_WAR}.war -C ${TGT_WAR}/ .
@@ -70,7 +70,7 @@ function build_docker() {
 
 MICROSERVICES=$1
 
-if [ "${MICROSERVICES}" = "" ]; then
+if [[ "${MICROSERVICES}" = "" ]]; then
     MICROSERVICES="pls"
     MICROSERVICES="${MICROSERVICES},admin"
     MICROSERVICES="${MICROSERVICES},matchapi"
@@ -98,11 +98,11 @@ mkdir tmp || true
 
 for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     WAR=${service} &&
-    if [ "${WAR}" = "api" ] || [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" ] || [ "${WAR}" = "saml" ] || [ "${WAR}" = "playmaker" ]; then
+    if [[ "${WAR}" = "api" ]] || [[ "${WAR}" = "admin" ]] || [[ "${WAR}" = "pls" ]] || [[ "${WAR}" = "matchapi" ]] || [[ "${WAR}" = "scoringapi" ]] || [[ "${WAR}" = "ulysses" ]] || [[ "${WAR}" = "saml" ]] || [[ "${WAR}" = "playmaker" ]]; then
         WAR=ROOT
     fi &&
     IMAGE=latticeengines/${service} &&
-    if [ "${service}" != "oauth2" ]; then
+    if [[ "${service}" != "oauth2" ]]; then
         build_docker ${IMAGE} ${service} ${WAR}
     fi
 done
