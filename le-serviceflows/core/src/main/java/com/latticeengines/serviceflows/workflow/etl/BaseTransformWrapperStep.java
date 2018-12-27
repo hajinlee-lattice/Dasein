@@ -68,10 +68,12 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     @Override
     public void onPostProcessingCompleted() {
         String rootId = getRootOperationId(workflowConf);
-        TransformationProgress progress = transformationProxy.getProgress(rootId);
-        if (ProgressStatus.FAILED.equals(progress.getStatus())) {
-            throw new RuntimeException(
-                    "Transformation failed, check log for detail.: " + JsonUtils.serialize(progress));
+        if (StringUtils.isNotBlank(rootId)) {
+            TransformationProgress progress = transformationProxy.getProgress(rootId);
+            if (ProgressStatus.FAILED.equals(progress.getStatus())) {
+                throw new RuntimeException(
+                        "Transformation failed, check log for detail.: " + JsonUtils.serialize(progress));
+            }
         }
         pipelineVersion = getStringValueFromContext(TRANSFORM_PIPELINE_VERSION);
         onPostTransformationCompleted();
