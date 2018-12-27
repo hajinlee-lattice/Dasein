@@ -57,7 +57,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|md_in_svc\", #customerSpace, #entity)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|md_in_svc\", #tenantId, #entity)", unless="#result == null")
     public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
