@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -27,33 +26,35 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.apps.cdl.service.DataCollectionService;
-import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
+import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
-import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
+import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
@@ -95,12 +96,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Autowired
     private RatingProxy ratingProxy;
-
-    @Autowired
-    private PeriodService periodService;
-
-    @Autowired
-    private DataCollectionService dataCollectionService;
 
     private ForkJoinPool tpForParallelStream;
 
@@ -821,9 +816,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         entityFrontEndQuery.setMainEntity(entityType);
 
-        FrontEndRestriction accountRestriction = prepareFrontEndRestriction(prepareRestrctionList(
+        FrontEndRestriction accountRestriction = prepareFrontEndRestriction(prepareRestrictionList(
                 segment.getAccountRestriction(), segmentIdSingleRulePair.getAccountRestriction()));
-        FrontEndRestriction contactRestriction = prepareFrontEndRestriction(prepareRestrctionList(
+        FrontEndRestriction contactRestriction = prepareFrontEndRestriction(prepareRestrictionList(
                 segment.getContactRestriction(), segmentIdSingleRulePair.getContacttRestriction()));
 
         entityFrontEndQuery.setAccountRestriction(accountRestriction);
@@ -833,7 +828,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return entityFrontEndQuery;
     }
 
-    private List<Restriction> prepareRestrctionList(Restriction segmenEntitytRestriction,
+    private List<Restriction> prepareRestrictionList(Restriction segmenEntitytRestriction,
             Restriction ruleEntityRestriction) {
         List<Restriction> restrictionList = new ArrayList<>();
 
@@ -991,25 +986,53 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return response;
     }
 
-    @Override
     public RatingEnginesCoverageResponse getProductCoveragesForSegment(String customerSpace,
-            String segmentName, List<String> productIds) {
+            ProductsCoverageRequest productsCoverageRequest, Integer purchasedBeforePeriod) {
         RatingEnginesCoverageResponse response = null;
 
         Tenant tenant = MultiTenantContext.getTenant();
 
-        MetadataSegment targetSegment = segmentService.findByName(segmentName);
+        RatingEngine ratingEngine = productsCoverageRequest.getRatingEngine();
+        ModelingStrategy strategy = ((CrossSellRatingConfig) ratingEngine.getAdvancedRatingConfig())
+                .getModelingStrategy();
+
+        RatingModel ratingModel = ratingEngine.getLatestIteration();
+        List<String> productIds = productsCoverageRequest.getProductIds();
+
+        MetadataSegment targetSegment = ratingEngine.getSegment();
+        AIModel aiModel = (AIModel) ratingModel;
+
+        if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
+            CrossSellModelingConfig advancedConfig = (CrossSellModelingConfig) aiModel
+                    .getAdvancedModelingConfig();
+            advancedConfig.setModelingStrategy(strategy);
+            Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters = advancedConfig
+                    .getFilters();
+
+            if (filters == null) {
+                filters = new HashMap<CrossSellModelingConfigKeys, ModelingConfigFilter>();
+            }
+
+            filters.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD,
+                    new ModelingConfigFilter(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD,
+                            ComparisonType.PRIOR_ONLY, purchasedBeforePeriod));
+
+            advancedConfig.setFilters(filters);
+        }
+
         if (targetSegment == null) {
-            throw new LedpException(LedpCode.LEDP_40045, new String[] { segmentName });
+            throw new LedpException(LedpCode.LEDP_40045, new String[] { "" });
         }
 
         if (productIds.size() < thresholdForParallelProcessing) {
             Stream<String> stream = productIds.stream();
-            response = processProductIdsStream(tenant, stream, targetSegment);
+            response = processProductIdsStream(tenant, stream, ratingEngine, aiModel,
+                    purchasedBeforePeriod);
         } else {
             response = tpForParallelStream.submit(() -> {
                 Stream<String> parallelStream = productIds.stream().parallel();
-                return processProductIdsStream(tenant, parallelStream, targetSegment);
+                return processProductIdsStream(tenant, parallelStream, ratingEngine, aiModel,
+                        purchasedBeforePeriod);
             }).join();
         }
 
@@ -1018,12 +1041,13 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     // This method can accept parallel or sequential stream
     private RatingEnginesCoverageResponse processProductIdsStream(Tenant tenant,
-            Stream<String> stream, MetadataSegment targetSegment) {
+            Stream<String> stream, RatingEngine ratingEngine, AIModel aiModel,
+            Integer purchasedBeforePeriod) {
         RatingEnginesCoverageResponse response = new RatingEnginesCoverageResponse();
         stream.forEach(productId -> {
             try {
-                CoverageInfo coverageInfo = processSingleProductId(tenant, targetSegment,
-                        productId);
+                CoverageInfo coverageInfo = processSingleProductId(tenant, ratingEngine, aiModel,
+                        productId, purchasedBeforePeriod);
                 response.getRatingModelsCoverageMap().put(productId, coverageInfo);
             } catch (Exception ex) {
                 log.info("Ignoring exception in getting coverage info for product id: " + productId,
@@ -1034,28 +1058,19 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return response;
     }
 
-    private CoverageInfo processSingleProductId(Tenant tenant, MetadataSegment targetSegment,
-            String productId) {
+    private CoverageInfo processSingleProductId(Tenant tenant, RatingEngine ratingEngine,
+            AIModel aiModel, String productId, Integer purchasedBeforePeriod) {
         try {
             MultiTenantContext.setTenant(tenant);
-            DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(tenant.getId(), null);
-            TimeFilter timeFilter = TimeFilter.ever(status.getApsRollingPeriod());
+            MetadataSegment targetSegment = ratingEngine.getSegment();
 
-            Restriction accountRestriction = Restriction.builder()
-                    .and(targetSegment.getAccountRestriction(),
-                            new TransactionRestriction(productId, timeFilter, false, null, null))
-                    .build();
+            CrossSellModelingConfig advancedConfig = (CrossSellModelingConfig) aiModel
+                    .getAdvancedModelingConfig();
+            advancedConfig.setTargetProducts(Collections.singletonList(productId));
 
-            FrontEndQuery frontEndQuery = new FrontEndQuery();
-            frontEndQuery.setMainEntity(BusinessEntity.Account);
-            frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
-
-            frontEndQuery.setContactRestriction(targetSegment.getContactFrontEndRestriction());
-
-            log.info("Front end query for Account: " + JsonUtils.serialize(frontEndQuery));
-            Long count = entityProxy.getCount( //
-                    tenant.getId(), //
-                    frontEndQuery);
+            log.info("aiModel: " + JsonUtils.serialize(aiModel));
+            Long count = ratingEngineService.getModelingQueryCount(tenant.getId(), ratingEngine,
+                    aiModel, ModelingQueryType.TARGET, null);
 
             CoverageInfo coverageInfo = new CoverageInfo();
             coverageInfo.setAccountCount(count);

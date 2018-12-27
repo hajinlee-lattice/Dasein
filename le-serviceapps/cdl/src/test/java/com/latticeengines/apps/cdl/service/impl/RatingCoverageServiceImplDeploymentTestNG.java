@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -44,6 +45,7 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
+import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
@@ -521,8 +523,20 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotEquals(productIds.size(), 0);
 
         MetadataSegment currentSegment = ratingEngine.getSegment();
-        RatingEnginesCoverageResponse response = ratingCoverageService.getProductCoveragesForSegment(
-                testPlayCreationHelper.getTenant().getId(), currentSegment.getName(), productIds);
+        RatingEngine crossSellRatingEngine = new RatingEngine();
+        crossSellRatingEngine.setSegment(currentSegment);
+        crossSellRatingEngine.setCreatedBy("CREATED_BY");
+        crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
+
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(testPlayCreationHelper.getTenant().getId(),
+                crossSellRatingEngine);
+        Assert.assertNotNull(createdRatingEngine);
+        ProductsCoverageRequest productsCoverageRequest = new ProductsCoverageRequest();
+        productsCoverageRequest.setRatingEngine(createdRatingEngine);
+        productsCoverageRequest.setProductIds(productIds);
+        RatingEnginesCoverageResponse response = ratingCoverageService
+                .getProductCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
+                        productsCoverageRequest, 6);
 
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getRatingModelsCoverageMap());

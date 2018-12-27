@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
+import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
@@ -60,13 +62,14 @@ public class CoverageResource {
         return ratingCoverageService.getRatingCoveragesForSegment(customerSpace, segmentName, ratingCoverageRequest);
     }
 
-    @PostMapping("/segment/{segmentName}/products")
+    @PostMapping("/segment/products")
     @ResponseBody
     @ApiOperation(value = "Get Segments CoverageInfo for List of Rating Model Ids")
-    public RatingEnginesCoverageResponse getProductCoverageCountForSegment(
-            @PathVariable String customerSpace, @PathVariable String segmentName,
-            @RequestBody List<String> productIds) {
-        return ratingCoverageService.getProductCoveragesForSegment(customerSpace, segmentName,
-                productIds);
+    public RatingEnginesCoverageResponse getProductCoverageCountForSegments(
+            @PathVariable String customerSpace,
+            @RequestParam(value = "purchasedbeforeperiod", required = false) Integer purchasedBeforePeriod,
+            @RequestBody ProductsCoverageRequest productsCoverageRequest) {
+        return ratingCoverageService.getProductCoveragesForSegment(customerSpace,
+                productsCoverageRequest, purchasedBeforePeriod);
     }
 }

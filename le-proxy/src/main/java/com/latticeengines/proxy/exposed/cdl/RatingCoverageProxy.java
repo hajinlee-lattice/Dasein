@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
@@ -32,10 +33,11 @@ public class RatingCoverageProxy extends MicroserviceRestApiProxy {
     }
 
     public RatingEnginesCoverageResponse getProductCoverageInfoForSegment(String customerSpace,
-            String segmentName, List<String> productIds) {
-        String url = constructUrl(URL_PREFIX + "/segment/{segmentName}/products",
-                shortenCustomerSpace(customerSpace), segmentName);
-        return post("getRatingsCoverageForSegment", url, productIds,
+            ProductsCoverageRequest productsCoverageRequest, Integer purchasedBeforePeriod) {
+        String url = constructUrl(
+                URL_PREFIX + "/segment/products?purchasedbeforeperiod={purchasedBeforePeriod}",
+                shortenCustomerSpace(customerSpace), purchasedBeforePeriod);
+        return post("getRatingsCoverageForSegment", url, productsCoverageRequest,
                 RatingEnginesCoverageResponse.class);
     }
 }

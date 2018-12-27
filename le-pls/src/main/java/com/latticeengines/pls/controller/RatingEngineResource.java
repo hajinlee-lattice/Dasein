@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
@@ -263,14 +264,15 @@ public class RatingEngineResource {
         return ratingCoverageProxy.getCoverageInfoForSegment(tenant.getId(), segmentName, ratingEnginesCoverageRequest);
     }
 
-    @PostMapping(value = "/coverage/segment/{segmentName}/products")
+    @PostMapping(value = "/coverage/segment/products")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for productIds for accounts in a segment")
-    public RatingEnginesCoverageResponse getProductCoverageInfoForSegment(@PathVariable String segmentName,
-            @RequestBody List<String> productIds) {
+    public RatingEnginesCoverageResponse getProductCoverageInfoForSegment(
+            @RequestParam(value = "purchasedbeforeperiod", required = false) Integer purchasedBeforePeriod,
+            @RequestBody ProductsCoverageRequest productsCoverageRequest) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingCoverageProxy.getProductCoverageInfoForSegment(tenant.getId(), segmentName,
-                productIds);
+        return ratingCoverageProxy.getProductCoverageInfoForSegment(tenant.getId(),
+                productsCoverageRequest, purchasedBeforePeriod);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels")
