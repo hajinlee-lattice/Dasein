@@ -16,4 +16,4 @@ ${SPARK_HOME}/sbin/stop-history-server.sh
 ${LIVY_HOME}/bin/livy-server stop
 
 # to be removed, we don't run kms anymore
-${HADOOP_HOME}/sbin/kms.sh stop
+${HADOOP_HOME}/sbin/kms.sh stop || true
