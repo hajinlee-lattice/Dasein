@@ -136,12 +136,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         evaluationDateAsTimestamp = evaluationDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
         log.info("Evaluation date for Profile Account date attributes: " + evaluationDateStr);
         log.info("Evaluation timestamp for Profile Account date attributes: " + evaluationDateAsTimestamp);
-
-        // Convert current timestamp of PA pipeline run to human readable string.
-        //ZonedDateTime dateTime = Instant.ofEpochMilli(evaluationDateAsTimestamp).atZone(ZoneId.systemDefault());
-        //String dateTimeStr = dateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a"));
-        //log.info("Timestamp used for PA pipeline run is " + evaluationDateAsTimestamp + " translating to " + dateTimeStr);
-
     }
 
     @Override
@@ -469,11 +463,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         masterTable.getAttributes().forEach(attr -> {
             masterAttrs.put(attr.getName(), attr);
         });
-
-        // Convert current timestamp of PA pipeline run to human readable string.
-        //ZonedDateTime dateTime = Instant.ofEpochMilli(evaluationDateAsTimestamp).atZone(ZoneId.systemDefault());
-        //String dateTimeStr = dateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a"));
-        //log.info("Timestamp used for PA pipeline run is " + evaluationDateAsTimestamp + " translating to " + dateTimeStr);
 
         List<Attribute> attrs = new ArrayList<>();
         final AtomicLong dcCount = new AtomicLong(0);

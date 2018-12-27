@@ -140,7 +140,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    private static final int S3_CHECKPOINTS_VERSION = 21;
+    private static final int S3_CHECKPOINTS_VERSION = 22;
     private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 20;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -148,10 +148,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_VDB_VERSION = "2";
 
     protected static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
-    protected static final String S3_CSV_VERSION = "2";
+    protected static final String S3_CSV_VERSION = "4";
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
-    private static final String S3_AVRO_VERSION = "2";
+    private static final String S3_AVRO_VERSION = "4";
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
@@ -217,10 +217,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // 1: after 1st import (rebuild); 2: after 2nd import (update)
     static final int DAILY_TRANSACTION_DAYS1 = 114;
     static final int DAILY_TRANSACTION_DAYS2 = 260;
-    static final String MIN_TRANSACTION_DATE1 = "2016-03-16";
-    static final String MAX_TRANSACTION_DATE1 = "2017-06-03";
-    static final String MIN_TRANSACTION_DATE2 = "2016-03-16";
-    static final String MAX_TRANSACTION_DATE2 = "2018-01-01";
+    static final String MIN_TRANSACTION_DATE1 = "2016-03-15";
+    static final String MAX_TRANSACTION_DATE1 = "2017-06-02";
+    static final String MIN_TRANSACTION_DATE2 = "2016-03-15";
+    static final String MAX_TRANSACTION_DATE2 = "2017-12-31";
 
     static final String VERIFY_DAILYTXN_ACCOUNTID = "10";
     static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
@@ -230,7 +230,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // VERIFY_PRODUCTID
     static final double VERIFY_DAILYTXN_AMOUNT1 = 20850;
     static final double VERIFY_DAILYTXN_QUANTITY1 = 30;
-    static final double VERIFY_DAILYTXN_COST = 5552;
+    static final double VERIFY_DAILYTXN_COST = 5552.123186000001;
 
     int actionsNumber;
 
@@ -563,12 +563,36 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateTimeFormatString("MM/DD/YY");
+                    fieldMapping.setTimezone("UTC");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
+
+                    log.error("$JAW$ Setting Test Date field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateTimeFormatString("YYYY-MM-DD");
+                    fieldMapping.setTimezone("America/Los_Angeles");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
+
+                    log.error("$JAW$ Setting Test Date 2 field mapping.");
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 3")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateTimeFormatString("DD.MM.YY 00:00:00 24H");
+                    fieldMapping.setTimezone("GMT+8");
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.error("$JAW$ Setting Test Date 3 field mapping.");
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 4")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateTimeFormatString("MM/DD/YYYY 00-00-00 12H");
+                    fieldMapping.setTimezone("Asia/Kolkata");
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.error("$JAW$ Setting Test Date 4 field mapping.");
                 }
             }
         }
