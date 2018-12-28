@@ -1224,11 +1224,11 @@ angular
 
                         return deferred.promise;
                     },
-                    SegmentName: function(CurrentRatingEngine, RatingsEngineStore) {
+                    RatingEngine: function(CurrentRatingEngine, RatingsEngineStore) {
                         if (RatingsEngineStore.currentRating && RatingsEngineStore.currentRating.segment) {
-                            return RatingsEngineStore.currentRating.segment.name;
+                            return RatingsEngineStore.currentRating;
                         } else {
-                            return CurrentRatingEngine.segment.name;
+                            return CurrentRatingEngine;
                         }
                     }
                 },

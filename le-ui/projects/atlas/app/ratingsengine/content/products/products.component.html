@@ -17,7 +17,7 @@
                 ng-if="vm.engineType === 'CROSS_SELL_REPEAT_PURCHASE'"
                 form-on-change="vm.resellFormOnChange()">
                 <p>Only sell to accounts that have not purchased the selected products in the last</p>
-                <input type="number" ng-model="vm.timePeriod" class="form-control period-input" min="0" ng-class="{'invalid': vm.timePeriod < 0 || vm.timePeriod == undefined}" ng-change="vm.validateNextStep()" ng-model-options="{ debounce: 1000 }">
+                <input type="number" ng-model="vm.purchasedBeforePeriod" class="form-control period-input" min="0" ng-class="{'invalid': vm.purchasedBeforePeriod < 0 || vm.purchasedBeforePeriod == undefined}" ng-change="vm.clearProductCoverageAndValidate()" ng-model-options="{ debounce: 1000 }">
                 <p> {{vm.periodType|lowercase}} </p>
             </form>
 

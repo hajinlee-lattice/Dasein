@@ -1054,14 +1054,14 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     };
 
-    this.getProductCoverage = function(segmentName, productsList) {
+    this.getProductCoverage = function(ratingEngine, productsList, purchasedBeforePeriod) {
         var deferred = $q.defer();
 
         var productIds = productsList.map(function(product) {
             return product.ProductId;
         });
 
-        RatingsEngineService.getProductCoverage(segmentName, productIds).then(function(result) {
+        RatingsEngineService.getProductCoverage(ratingEngine, productIds, purchasedBeforePeriod).then(function(result) {
             deferred.resolve(result);
         });
 
@@ -1485,12 +1485,17 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-        this.getProductCoverage = function(segmentName, productIds){
+        this.getProductCoverage = function(ratingEngine, productIds, purchasedBeforePeriod){
             var deferred = $q.defer();
+
             $http({
                 method: 'POST',
-                url:  '/pls/ratingengines/coverage/segment/' + segmentName + '/products',
-                data: productIds
+                url: '/pls/ratingengines/coverage/segment/products',
+                data: {
+                    ratingEngine: ratingEngine,
+                    productIds: productIds
+                },
+                params: purchasedBeforePeriod ? {'purchasedbeforeperiod': purchasedBeforePeriod} : {}
             }).then(
                 function onSuccess(response) {
                     var result = response.data;

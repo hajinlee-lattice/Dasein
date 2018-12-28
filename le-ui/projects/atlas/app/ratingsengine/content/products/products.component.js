@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.wizard.products', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineProducts', function (
-    $scope, $stateParams, $timeout, $filter, RatingsEngineStore, RatingsEngineService, Products, PeriodType, SegmentName) {
+    $scope, $stateParams, $timeout, $filter, RatingsEngineStore, RatingsEngineService, Products, PeriodType, RatingEngine) {
         var vm = this;
         angular.extend(vm, {
             products: $filter('orderBy')(Products, 'ProductName'),
@@ -15,9 +15,9 @@ angular.module('lp.ratingsengine.wizard.products', [
             selectedAll: false,
             engineType: $stateParams.engineType,
             configFilters: {},
-            timePeriod: getPurchasedBeforePeriod(),
+            purchasedBeforePeriod: getPurchasedBeforePeriod(),
             periodType: PeriodType.ApsRollingPeriod + '(s)',
-            segmentName: SegmentName,
+            ratingEngine: RatingEngine,
             productCoverage: {}
         });
 
@@ -25,16 +25,13 @@ angular.module('lp.ratingsengine.wizard.products', [
             if(vm.search || oldValue) {
                 vm.currentPage = 1;
                 var products = vm.filteredProductsList.slice(0, 10);
-                vm.getProductCoverage(vm.segmentName, products);
+                vm.getProductCoverage(vm.ratingEngine, products);
             }
         });
 
         $scope.$watch('vm.currentPage', function(newValue, oldValue) {
-            var start = (vm.currentPage - 1) * vm.pageSize;
-            var end = start + vm.pageSize;
-
-            var products = vm.filteredProductsList ? vm.filteredProductsList : vm.products;
-            vm.getProductCoverage(vm.segmentName, products.slice(start, end));
+            var products = vm.getProductsToQuery();
+            vm.getProductCoverage(vm.ratingEngine, products);
         });
 
     vm.init = function () {
@@ -48,8 +45,18 @@ angular.module('lp.ratingsengine.wizard.products', [
 
         if (vm.engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
             vm.resellFormOnChange(); 
+        } else {
+            vm.purchasedBeforePeriod = null;
         };
 
+    }
+
+    vm.getProductsToQuery = function() {
+        var start = (vm.currentPage - 1) * vm.pageSize;
+        var end = start + vm.pageSize;
+
+        var products = vm.filteredProductsList ? vm.filteredProductsList : vm.products;
+        return products.slice(start, end);
     }
 
     vm.getSelectedProducts = function() {
@@ -123,8 +130,15 @@ angular.module('lp.ratingsengine.wizard.products', [
         // }
     }
 
+    vm.clearProductCoverageAndValidate = function() {
+        vm.productCoverage = {};
+        vm.validateNextStep();
+        vm.resellFormOnChange();
+        vm.getProductCoverage(vm.ratingEngine, vm.getProductsToQuery());
+    }
+
     vm.validateNextStep = function () {
-        if (Object.keys(vm.productsSelected).length > 0 && vm.timePeriod >= 0) {
+        if (Object.keys(vm.productsSelected).length > 0 && vm.purchasedBeforePeriod >= 0) {
             vm.setValidation('products', true);
         } else {
             vm.setValidation('products', false);
@@ -139,7 +153,7 @@ angular.module('lp.ratingsengine.wizard.products', [
         vm.configFilters.PURCHASED_BEFORE_PERIOD = {
             "configName": "PURCHASED_BEFORE_PERIOD",
             "criteria": "PRIOR_ONLY",
-            "value": vm.timePeriod
+            "value": vm.purchasedBeforePeriod
         };
 
         RatingsEngineStore.setConfigFilters(vm.configFilters);
@@ -158,8 +172,8 @@ angular.module('lp.ratingsengine.wizard.products', [
         }
     }
 
-    vm.getProductCoverage = function(segmentName, filteredProducts) {
-        RatingsEngineStore.getProductCoverage(vm.segmentName, filteredProducts).then(function (result) {
+    vm.getProductCoverage = function(ratingEngine, filteredProducts) {
+        RatingsEngineStore.getProductCoverage(ratingEngine, filteredProducts, vm.purchasedBeforePeriod).then(function (result) {
             for (var productId in result.ratingModelsCoverageMap) {
                 if (!vm.productCoverage.hasOwnProperty(productId)) {
                     vm.productCoverage[productId] = result.ratingModelsCoverageMap[productId].unscoredAccountCount;
