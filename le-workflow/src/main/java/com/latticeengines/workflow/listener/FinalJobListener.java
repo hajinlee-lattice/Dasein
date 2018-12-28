@@ -21,8 +21,8 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
     private static final Logger log = LoggerFactory.getLogger(FinalJobListener.class);
 
-    private LEJobCaller caller;
-    private Thread callerThread;
+    private volatile LEJobCaller caller;
+    private volatile Thread callerThread;
 
     @Autowired
     private WorkflowService workflowService;
@@ -48,8 +48,11 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
             clearJobCache(executionId);
         } finally {
             if (caller != null) {
+                log.info("Workflow finished (workflowId={})", executionId);
                 caller.callDone();
                 callerThread.interrupt();
+            } else {
+                log.error("Should not have a null LEJobCaller, cannot finish the job properly");
             }
         }
     }
@@ -77,9 +80,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     }
 
     @Override
-    public void regisger(Thread callerThread, LEJobCaller caller) {
+    public void register(Thread callerThread, LEJobCaller caller) {
+        log.info("Thread {} register LEJobCaller {}", callerThread, caller);
         this.callerThread = callerThread;
         this.caller = caller;
     }
-
 }
