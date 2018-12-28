@@ -64,21 +64,19 @@ public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
     @Test(groups = "functional")
     public void exploreS3FilePath() {
         String s3File = importFromS3Service.exploreS3FilePath(
-                "/user/s-analytics/customers/ImportFromS3ServiceImplTestNG.ImportFromS3ServiceImplTestNG.Production/data/folder1/fileA.csv",
-                tenantId);
+                "/user/s-analytics/customers/ImportFromS3ServiceImplTestNG.ImportFromS3ServiceImplTestNG.Production/data/folder1/fileA.csv");
         Assert.assertEquals(s3File,
                 protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv");
 
         s3File = importFromS3Service.exploreS3FilePath(
-                "hdfs://localhost/user/s-analytics/customers/ImportFromS3ServiceImplTestNG.ImportFromS3ServiceImplTestNG.Production/data/folder1/fileA.csv",
-                CUSTOMER_SPACE.getTenantId());
+                "hdfs://localhost/user/s-analytics/customers/ImportFromS3ServiceImplTestNG.ImportFromS3ServiceImplTestNG.Production/data/folder1/fileA.csv");
         Assert.assertEquals(s3File,
                 protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1/fileA.csv");
     }
 
     @Test(groups = "functional")
     public void getFilesForDir() {
-        final String filter = ".*.csv";
+        final String filter = "file.*.csv";
         List<String> files = importFromS3Service.getFilesForDir(
                 protocol + "://" + s3Bucket + "/ImportFromS3ServiceImplTestNG/analytics/data/folder1",
                 filename -> {

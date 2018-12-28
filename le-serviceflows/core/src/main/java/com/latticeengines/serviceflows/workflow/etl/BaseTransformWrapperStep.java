@@ -92,8 +92,8 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
                     PrepareTransformationStepInputConfiguration prepareConf = //
                             JsonUtils.deserialize(prepareConfStr, PrepareTransformationStepInputConfiguration.class);
                     String transformationConfigurationStr = prepareConf.getTransformationConfiguration();
-                    PipelineTransformationConfiguration transformationConf = JsonUtils.deserialize(transformationConfigurationStr,
-                            PipelineTransformationConfiguration.class);
+                    PipelineTransformationConfiguration transformationConf = JsonUtils
+                            .deserialize(transformationConfigurationStr, PipelineTransformationConfiguration.class);
                     return transformationConf.getRootOperationId();
                 }
             } catch (Exception e) {

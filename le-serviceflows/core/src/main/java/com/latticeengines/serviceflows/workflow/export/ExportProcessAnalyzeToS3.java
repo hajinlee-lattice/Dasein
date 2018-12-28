@@ -53,7 +53,7 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
     private void addMatchError(List<BaseImportExportS3<ImportExportS3StepConfiguration>.ImportExportRequest> requests) {
         String errorFile = getStringValueFromContext(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH);
         if (StringUtils.isNotBlank(errorFile)) {
-            String tgtPath = pathBuilder.exploreS3FilePath(errorFile, podId, s3Bucket);
+            String tgtPath = pathBuilder.exploreS3FilePath(errorFile, s3Bucket);
             requests.add(new ImportExportRequest(errorFile, tgtPath));
         }
     }

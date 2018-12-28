@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -106,6 +107,20 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(count, new Long(3165L));
     }
 
+    @Test(groups = "functional")
+    public void testContactCount() {
+        FrontEndQuery frontEndQuery = JsonUtils.deserialize("{\n" +
+                "  \"main_entity\": \"Contact\",\n" +
+                "  \"distinct\": false\n" +
+                "}", FrontEndQuery.class);
+//        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+//        frontEndQuery.setMainEntity(BusinessEntity.Contact);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
+//        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+//        Assert.assertNotNull(count);
+//        Assert.assertEquals(count, new Long(3165L));
+    }
+
     @Test(groups = "functional", enabled = false)
     public void testMetricRestriction() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
@@ -120,7 +135,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(716L));
+        Assert.assertEquals(count, Long.valueOf(716L));
     }
 
     @Test(groups = "functional", dataProvider = "timefilterProvider")

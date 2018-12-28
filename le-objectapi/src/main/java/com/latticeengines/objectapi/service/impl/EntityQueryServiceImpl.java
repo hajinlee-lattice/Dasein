@@ -117,10 +117,10 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     .getTimeFilterTranslator(transactionService, frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator,
                     timeTranslator, sqlUser);
-            if (query.getLookups() == null || query.getLookups().isEmpty()) {
+            if (CollectionUtils.isEmpty(query.getLookups())) {
                 query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
             }
-            query = preProcess(frontEndQuery.getMainEntity(), query);
+            preProcess(frontEndQuery.getMainEntity(), query);
 
             Map<String, Map<Long, String>> translationMapping = new HashMap<>();
 
@@ -235,7 +235,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return query;
     }
 
-    private Query preProcess(BusinessEntity entity, Query query) {
+    private void preProcess(BusinessEntity entity, Query query) {
         if (BusinessEntity.Contact == entity) {
             List<Lookup> lookups = query.getLookups();
             if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {
@@ -248,7 +248,6 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 query.setLookups(filtered);
             }
         }
-        return query;
     }
 
     private boolean notContactCompanyNameLookup(Lookup lookup) {
@@ -259,10 +258,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (lookup instanceof AttributeLookup) {
             AttributeLookup attrLookup = (AttributeLookup) lookup;
             String attributeName = attrLookup.getAttribute();
-            if (attributeName.equals(InterfaceName.CompanyName.toString())
-                    && BusinessEntity.Contact == attrLookup.getEntity()) {
-                return true;
-            }
+            return attributeName.equals(InterfaceName.CompanyName.toString())
+                    && BusinessEntity.Contact == attrLookup.getEntity();
         }
         return false;
     }
@@ -278,7 +275,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     .filter(translationMapping::containsKey) //
                     .forEach(key -> { //
                         Object val = tempProcessed.get(key);
-                        if (val != null && val instanceof Long) {
+                        if (val instanceof Long) {
                             Long enumNumeric = (Long) val;
                             if (enumNumeric == 0L) { // 0 is null
                                 tempProcessed.put(key, null);

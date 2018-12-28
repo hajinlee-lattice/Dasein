@@ -38,8 +38,7 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
 
     @Override
     protected InputStream getFileInputStream() throws Exception {
-
-        String newFilePath = importFromS3Service.exploreS3FilePath(filePath, customer);
+        String newFilePath = importFromS3Service.exploreS3FilePath(filePath);
         Path path = new Path(newFilePath);
         FileSystem fs = path.getFileSystem(yarnConfiguration);
         return fs.open(path);

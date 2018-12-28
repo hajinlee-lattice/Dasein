@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class RatingQueryTranslator extends QueryTranslator {
             });
         }
 
-        if (decorator != null) {
+        if (decorator != null && StringUtils.isNotBlank(frontEndQuery.getFreeFormTextSearch())) {
             if (decorator.isDataQuery()) {
                 if (frontEndQuery.getRatingModels() != null) {
                     appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);

@@ -5,15 +5,18 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -22,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ScoringJobService;
@@ -37,23 +41,31 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Value("${pls.scoring.use.rtsapi}")
     private boolean useRtsApiDefaultValue;
 
-    @Autowired
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
 
-    @Autowired
+    @Inject
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private ImportFromS3Service importFromS3Service;
+
+    private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
 
     @Override
     public List<Job> getJobs(String modelId) {
@@ -111,14 +123,41 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         try {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
-            if (CollectionUtils.isEmpty(paths)) {
-                throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
+            InputStream s3Stream = getResultStreamFromS3(hdfsDir, filePrefix);
+            if (s3Stream == null) {
+                List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
+                if (CollectionUtils.isEmpty(paths)) {
+                    throw new LedpException(LedpCode.LEDP_18103, new String[]{workflowJobId});
+                }
+                return HdfsUtils.getInputStream(yarnConfiguration, paths.get(0));
+            } else {
+                return s3Stream;
             }
-            return HdfsUtils.getInputStream(yarnConfiguration, paths.get(0));
-
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18102, e, new String[] { workflowJobId });
+        }
+    }
+
+    private InputStream getResultStreamFromS3(String hdfsDir, String filePrefix) {
+        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, "bucket");
+        if (s3Dir.endsWith("/Exports")) {
+            s3Dir = StringUtils.substringBeforeLast(s3Dir, "/");
+        }
+        HdfsUtils.HdfsFilenameFilter fileFilter = filePath -> {
+            if (filePath == null) {
+                return false;
+            }
+            String name = FilenameUtils.getName(filePath);
+            return name.matches(filePrefix + ".*.csv");
+        };
+        List<String> matchedFiles = importFromS3Service.getFilesForDir(s3Dir, fileFilter);
+        if (CollectionUtils.isNotEmpty(matchedFiles)) {
+            String key = pathBuilder.stripProtocolAndBucket(matchedFiles.get(0));
+            log.debug("Streaming out S3 object " + key);
+            return importFromS3Service.getS3FileInputStream(key);
+        } else {
+            log.warn("Did not find file with prefix " + filePrefix + " in s3 folder " + s3Dir + " either.");
+            return null;
         }
     }
 
@@ -168,8 +207,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
-        boolean enableDebug = debug == null ? false : debug.booleanValue();
+        boolean enableLeadEnrichment =  Boolean.TRUE.equals(performEnrichment);
+        boolean enableDebug = Boolean.TRUE.equals(debug);
         return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment, enableDebug);
     }
 
@@ -180,8 +219,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
-        boolean enableDebug = debug == null ? false : debug.booleanValue();
+        boolean enableLeadEnrichment =  Boolean.TRUE.equals(performEnrichment);
+        boolean enableDebug = Boolean.TRUE.equals(debug);
         return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
     }
 
@@ -191,7 +230,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment,
-            boolean debug) {
+                                                boolean debug) {
         if (modelSummary.getTrainingTableName() == null) {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
@@ -201,7 +240,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName, boolean enableLeadEnrichment,
-            boolean debug) {
+                                               boolean debug) {
         return importAndRTSBulkScoreWorkflowSubmitter
                 .submit(modelSummary.getId(), fileName, enableLeadEnrichment, debug).toString();
     }

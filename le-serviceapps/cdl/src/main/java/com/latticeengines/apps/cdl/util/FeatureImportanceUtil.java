@@ -106,7 +106,7 @@ public class FeatureImportanceUtil {
         String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        String s3Path = pathBuilder.exploreS3FilePath(featureImportanceFilePath, podId, s3Bucket);
+        String s3Path = pathBuilder.exploreS3FilePath(featureImportanceFilePath, s3Bucket);
         if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
             featureImportanceFilePath = s3Path;
         }

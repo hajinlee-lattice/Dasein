@@ -133,7 +133,7 @@ public class SourceFileServiceImpl implements SourceFileService {
         String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, podId, s3Bucket);
+        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, s3Bucket);
         if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
             hdfsPath = s3Path;
         }

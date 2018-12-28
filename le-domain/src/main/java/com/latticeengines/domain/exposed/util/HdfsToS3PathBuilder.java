@@ -170,7 +170,7 @@ public class HdfsToS3PathBuilder {
     }
 
     public String getS3AnalyticsMetaDataTableDir(String s3Bucket, String tenantId, String eventTable,
-            String eventColumn) {
+                                                 String eventColumn) {
         return getS3AnalyticsDataDir(s3Bucket, tenantId) + PATH_SEPARATOR
                 + getMetadataTableFolderName(eventTable, eventColumn);
     }
@@ -240,7 +240,7 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
-    public String exploreS3FilePath(String filePath, String pod, String s3Bucket) {
+    public String exploreS3FilePath(String filePath, String s3Bucket) {
         filePath = FilenameUtils.normalize(filePath);
         StringBuilder builder = new StringBuilder();
 
@@ -252,10 +252,12 @@ public class HdfsToS3PathBuilder {
             String tail = "/" + matcher.group("tail");
             String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
             return builder.append(getS3AnalyticsDir(s3Bucket, tenantId)).append(tail).toString();
+        } else {
+            log.warn(filePath + " does not match analytics pattern");
         }
 
         // try atlas
-        matcher = Pattern.compile("^/Pods/" + pod //
+        matcher = Pattern.compile("^/Pods/(?<podId>[^/]+)"//
                 + "/Contracts/(?<contractId>[^/]+)" //
                 + "/Tenants/(?<tenantId>[^/]+)" //
                 + "/Spaces/Production/(?<tail>.*)").matcher(filePath);
@@ -263,8 +265,29 @@ public class HdfsToS3PathBuilder {
             String tenantId = matcher.group("tenantId");
             String tail = "/" + matcher.group("tail");
             return builder.append(getS3AtlasDir(s3Bucket, tenantId)).append(tail).toString();
+        } else {
+            log.warn(filePath + " does not match pods pattern");
         }
+
         return filePath;
+    }
+
+    public String extractTenantId(String path) {
+        // try analytics
+        Matcher matcher = Pattern.compile("^/user/s-analytics/customers/(?<customerSpace>[^/]+)/.*").matcher(path);
+        if (matcher.matches()) {
+            String customerSpace = matcher.group("customerSpace");
+            return CustomerSpace.parse(customerSpace).getTenantId();
+        }
+
+        // try atlas
+        matcher = Pattern.compile("^/Pods/(?<podId>[^/]+)"//
+                + "/Contracts/(?<contractId>[^/]+)/Tenants/(?<tenantId>[^/]+)/.*").matcher(path);
+        if (matcher.matches()) {
+            return matcher.group("tenantId");
+        }
+
+        return null;
     }
 
     public String toParentDir(String dir) {
@@ -279,7 +302,7 @@ public class HdfsToS3PathBuilder {
     // Some ad hoc methods
     public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String podId, String s3Bucket) {
         try {
-            String s3Path = exploreS3FilePath(path, podId, s3Bucket);
+            String s3Path = exploreS3FilePath(path, s3Bucket);
             if (isGlob) {
                 if (CollectionUtils.isNotEmpty(HdfsUtils.getFilesByGlob(yarnConfiguration, s3Path))) {
                     path = s3Path;
@@ -322,6 +345,15 @@ public class HdfsToS3PathBuilder {
         String[] tokens = hdfsPath.split("/");
         CustomerSpace space = CustomerSpace.parse(tokens[4]);
         return space.toString();
+    }
+
+    public String stripProtocolAndBucket(String s3Path) {
+        Matcher matcher = Pattern.compile("^[^:]+://[^/]+/(?<tail>.*)").matcher(s3Path);
+        if (matcher.matches()) {
+            return matcher.group("tail");
+        } else {
+            return s3Path;
+        }
     }
 
     public void setProtocol(String protocol) {

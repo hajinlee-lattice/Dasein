@@ -264,7 +264,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     // need to rename to avoid copy failure due to name conflict
                     String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
                     if (singleFile) {
-                        srcPath = getS3Path(MultiTenantContext.getCustomerSpace(), srcPath);
+                        srcPath = getS3Path(srcPath);
                         log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
                         if (existing.getExtracts().size() > 1) {
@@ -476,9 +476,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
     }
 
-    private String getS3Path(CustomerSpace space, String hdfsPath) throws IOException {
+    private String getS3Path(String hdfsPath) throws IOException {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
-        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, podId, s3Bucket);
+        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, s3Bucket);
         if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
             hdfsPath = s3Path;
         }
@@ -488,10 +488,10 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     private String getS3Dir(String hdfsPath) throws IOException {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         String hdfsDir = pathBuilder.getFullPath(hdfsPath);
-        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, podId, s3Bucket);
+        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, s3Bucket);
         String original = hdfsPath;
         if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
-            hdfsPath = pathBuilder.exploreS3FilePath(hdfsPath, podId, s3Bucket);
+            hdfsPath = pathBuilder.exploreS3FilePath(hdfsPath, s3Bucket);
             //TODO: temp log to be removed
             log.info("Use s3 path " + hdfsPath + " instead of the original hdfs path " + original);
         } else {

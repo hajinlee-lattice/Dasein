@@ -116,7 +116,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());
             String hdfsDataDir = builder.getHdfsAtlasTablesDir(podId, space.getTenantId());
 
-            String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, podId, customerS3Bucket);
+            String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, customerS3Bucket);
             System.out.println("HDFS Path=" + hdfsDataDir);
             System.out.println("S3 Path=" + s3DataDir);
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*", s3DataDir, "");

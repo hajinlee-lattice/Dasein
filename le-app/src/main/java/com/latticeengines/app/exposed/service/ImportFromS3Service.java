@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface ImportFromS3Service {
 
-    String exploreS3FilePath(String inputFile, String customer);
+    String exploreS3FilePath(String inputFile);
 
     List<String> getFilesForDir(String prefix, HdfsFilenameFilter filter);
 

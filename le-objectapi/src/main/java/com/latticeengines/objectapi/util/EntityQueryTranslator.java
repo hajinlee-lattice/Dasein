@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class EntityQueryTranslator extends QueryTranslator {
             queryBuilder.select(decorator.getIdLookup());
         }
 
-        if (decorator != null) {
+        if (decorator != null && StringUtils.isNotBlank(frontEndQuery.getFreeFormTextSearch())) {
             List<AttributeLookup> attrs = new ArrayList<>();
             for (AttributeLookup attributeLookup: decorator.getFreeTextSearchAttrs()) {
                 if (repository != null && repository.getColumnMetadata(attributeLookup) != null) {
