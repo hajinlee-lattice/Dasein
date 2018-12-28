@@ -420,7 +420,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
     }
 
-    private void validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
+    @VisibleForTesting
+    void validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
                                 String customerSpace, S3ImportEmailInfo emailInfo) {
         Table template = dataFeedTask.getImportTemplate();
         String s3Bucket = importConfig.getS3Bucket();
@@ -648,7 +649,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         return true;
     }
 
-    private void updateAttrConfig(Table templateTable, List<AttrConfig> attrConfigs, String entity,
+    @VisibleForTesting
+    void updateAttrConfig(Table templateTable, List<AttrConfig> attrConfigs, String entity,
             CustomerSpace customerSpace) {
         try {
             if (CollectionUtils.isEmpty(attrConfigs) || templateTable == null

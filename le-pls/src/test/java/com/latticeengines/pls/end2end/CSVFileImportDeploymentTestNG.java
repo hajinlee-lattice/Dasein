@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -50,6 +51,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -90,7 +92,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
-    private static final String SLASH = "/";
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -663,7 +664,56 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "importBase")
+    @Test(groups = "deployment")
+    public void importS3Base() {
+
+        prepareS3BaseData(ENTITY_ACCOUNT, EntityType.Accounts);
+        prepareS3BaseData(ENTITY_CONTACT, EntityType.Contacts);
+        prepareS3BaseData(ENTITY_TRANSACTION, EntityType.ProductPurchases);
+    }
+
+    private void prepareS3BaseData(String entity, EntityType entityType) {
+        switch (entity) {
+        case ENTITY_ACCOUNT:
+            testS3ImportWithTemplateData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT, entityType);
+            testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT, entityType);
+            break;
+        case ENTITY_CONTACT:
+            testS3ImportWithTemplateData(CONTACT_SOURCE_FILE, ENTITY_CONTACT, entityType);
+            testS3ImportOnlyData(CONTACT_SOURCE_FILE, ENTITY_CONTACT, entityType);
+            break;
+        case ENTITY_TRANSACTION:
+            testS3ImportWithTemplateData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION, entityType);
+            testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION, entityType);
+            break;
+        }
+    }
+
+    private void testS3ImportWithTemplateData(String csvFileName, String entity, EntityType entityType) {
+        SourceFile sourceFile = uploadSourceFile(csvFileName, entity);
+        String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
+        String taskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, entity,
+                entity + FEED_TYPE_SUFFIX, subType, entityType.getDisplayName());
+        ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId,
+                sourceFile.getName());
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
+    }
+
+    private void testS3ImportOnlyData(String csvFileName, String entity, EntityType entityType) {
+        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(entity), entity, csvFileName,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SOURCE,
+                entityType.getDisplayName());
+        ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace.toString(),
+                dataFeedTask.getUniqueId(), sourceFile.getName());
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "importS3Base")
     public void testGetS3ImportDisplay() {
         // verify that the tenant has 5 template display by default
         Assert.assertNotNull(templates);
@@ -688,5 +738,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
             Assert.assertEquals(display.getExist(), Boolean.TRUE);
         }
     }
+
 
 }
