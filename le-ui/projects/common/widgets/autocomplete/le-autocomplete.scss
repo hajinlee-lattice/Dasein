@@ -1,34 +1,37 @@
 @import "../colors.scss";
 
-.le-chips {
+.le-autocomplete {
   display: inline-flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: flex-start;
 
-  .le-chips-selected {
+  .le-autocomplete-selected {
     padding: 0;
     list-style: none;
     margin: 0;
-    .le-chip {
+    display: inline-flex;
+    align-items: center;
+    .le-autocomplete {
       display: inline-flex;
+      flex-direction: row;
+      align-items: center;
       justify-content: space-around;
       align-items: center;
       margin: 0.1em;
       padding: 0.5em;
       background-color: $palladium;
       border-radius: 6px;
-      .le-chip-name {
+      .le-autocomplete-name {
         margin-right: 0.8em;
       }
-      .le-chip-remove {
+      .le-autocomplete-remove {
         cursor: pointer;
       }
     }
   }
 
-  .le-chip-input {
-    @extend .le-chip;
+  .le-autocomplete-input {
     background-color: $pearl-white;
     border-radius: 0px;
     justify-content: flex-end;
@@ -53,12 +56,12 @@
       border-bottom: 1px solid $gold-four;
     }
 
-    .le-chip-dropdown {
+    .le-autocomplete-dropdown {
       position: relative;
       display: inline-block;
     }
 
-    .le-chip-dropdown-content {
+    .le-autocomplete-dropdown-content {
       width: 100%;
       display: none;
       position: absolute;
@@ -69,19 +72,19 @@
       z-index: 1;
       list-style-type: none;
 
-      .le-chips-list-item{
+      .le-autocomplete-list-item{
         padding: 0.5em;
         cursor: pointer;
         &.selected{
           background-color: $silver;
         }
       }
-      .le-chips-list-item:hover{
+      .le-autocomplete-list-item:hover{
         background-color: $palladium;
       }
       
     }
-    .le-chip-dropdown-show {
+    .le-autocomplete-dropdown-show {
       margin-left: 0.7em;
       margin-top: 0;
       display: block;

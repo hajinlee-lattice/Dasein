@@ -1,8 +1,8 @@
 import React, { Component } from "common/react-vendor";
-import "./le-chip.scss";
+import "./le-autocomplete.scss";
 import search from "./le-search.utils";
 
-class LeChip extends Component {
+class LeAutocomplete extends Component {
   constructor(props) {
     super(props);
     this.removeChip = this.removeChip.bind(this);
@@ -25,16 +25,20 @@ class LeChip extends Component {
   removeChip(item, position) {
     let tmpChips = [...this.state.chipsSelected];
     tmpChips.splice(position, 1);
+    if(this.props.callback){
+      this.props.callback(tmpChips);
+    }
     const idsCopy = { ...this.state.idSelected };
     delete idsCopy[item.id];
     this.setState({ chipsSelected: tmpChips, idSelected: idsCopy });
+    
   }
 
   getItem(item, index) {
     return (
       <li
         key={index}
-        className={`${"le-chips-list-item"} ${
+        className={`${"le-autocomplete-list-item"} ${
           this.state.selected == index ? "selected" : ""
         }`}
         onClick={event => {
@@ -117,15 +121,18 @@ class LeChip extends Component {
       idSelected: idsCopy,
       selected: 0
     });
+    if(this.props.callback){
+      this.props.callback(tmpChips);
+    }
   }
 
   getChipsSelected() {
     let chipsUI = this.state.chipsSelected.map((item, index) => {
       return (
-        <li key={index} className="le-chip">
-          <span className="le-chip-name">{item.displayName}</span>
+        <li key={index} className="le-autocomplete">
+          <span className="le-autocomplete-name">{item.displayName}</span>
           <i
-            className="le-chip-remove fa fa-times"
+            className="le-autocomplete-remove fa fa-times"
             aria-hidden="true"
             onClick={() => {
               this.removeChip(item, index);
@@ -139,9 +146,9 @@ class LeChip extends Component {
 
   render() {
     return (
-      <div className="le-chips">
-        <ul className="le-chips-selected">{this.getChipsSelected()}</ul>
-        <div className="le-chip-input">
+      <div className="le-autocomplete">
+        <ul className="le-autocomplete-selected">{this.getChipsSelected()}</ul>
+        <div className="le-autocomplete-input">
           <i className="fa fa-search" aria-hidden="true" />
           <input
             type="text"
@@ -162,13 +169,13 @@ class LeChip extends Component {
             }}
           />
           <div
-            className={`${"le-chip-dropdown"} ${
-              this.state.show != "" ? "le-chip-dropdown-show" : ""
+            className={`${"le-autocomplete-dropdown"} ${
+              this.state.show != "" ? "le-autocomplete-dropdown-show" : ""
             }`}
           >
             <ul
-              className={`${"le-chip-dropdown-content"} ${
-                this.state.show != "" ? "le-chip-dropdown-show" : ""
+              className={`${"le-autocomplete-dropdown-content"} ${
+                this.state.show != "" ? "le-autocomplete-dropdown-show" : ""
               }`}
             >
               {this.getListItems()}
@@ -180,4 +187,4 @@ class LeChip extends Component {
   }
 }
 
-export default LeChip;
+export default LeAutocomplete;

@@ -12,7 +12,7 @@ import {
 import "common/assets/css/font-awesome.min.css";
 import LeInputText from "common/widgets/inputs/le-input-text";
 import LeLink, { LEFT, RIGHT } from "common/widgets/link/le-link";
-import LeChip from "common/widgets/chip/le-chip";
+import LeAutocomplete from "common/widgets/autocomplete/le-autocomplete";
 import LeSwitch from "common/widgets/switch/le-switch";
 
 const stories = storiesOf("Form Controls", module);
@@ -56,7 +56,8 @@ stories.add("date picker", () => <p>TODO</p>);
 
 stories.add("chip", () => (
   <form>
-    <LeChip
+    <LeAutocomplete
+      callback={action("chip added")}
       listItems={[
         { id: 1, name: "apples", displayName: "Apples" },
         { id: 2, name: "bananas", displayName: "Bananas" },
