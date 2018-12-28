@@ -211,7 +211,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         detail.setOrphanContactCount(orphanCnts.get(OrphanRecordsType.CONTACT));
         detail.setUnmatchedAccountCount(orphanCnts.get(OrphanRecordsType.UNMATCHED_ACCOUNT));
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, active);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
     }
 
     private Map<BusinessEntity, Long> retrieveCurrentEntityCnts() {
