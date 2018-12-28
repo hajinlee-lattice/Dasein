@@ -30,6 +30,7 @@ public class CalculateExpectedRevenuePercentileDataFlow
         params.setModelGuidField(modelGuidField);
         params.setPercentileLowerBound(percentileLowerBound);
         params.setPercentileUpperBound(percentileUpperBound);
+        params.setCustomerSpace(configuration.getCustomerSpace());
 
         if (MapUtils.isNotEmpty(originalScoreFieldMap)) {
             params.setOriginalScoreFieldMap(originalScoreFieldMap);

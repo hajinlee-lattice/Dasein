@@ -1,5 +1,8 @@
 package com.latticeengines.scoring.dataflow;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,13 +16,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-@ContextConfiguration(locations = {"classpath:serviceflows-scoring-dataflow-context.xml"})
-public class CalculateExpectedRevenuePercentileTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+@ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
+public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCalculationExpectedRevenuePercentile() {
@@ -34,12 +33,10 @@ public class CalculateExpectedRevenuePercentileTestNG extends ServiceFlowsDataFl
 
         assertEquals(outputRecords.size(), inputRecords.size());
 
-        String[] modelGuids = {
-            "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
-            "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
-            "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql",
-            "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm",
-        };
+        String[] modelGuids = { "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
+                "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
+                "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql",
+                "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", };
 
         Map<String, List<GenericRecord>> modelRecordMap = new HashMap<>();
         Stream.of(modelGuids).forEach((guid) -> modelRecordMap.put(guid, new ArrayList<>()));
@@ -54,9 +51,7 @@ public class CalculateExpectedRevenuePercentileTestNG extends ServiceFlowsDataFl
 
         assertEquals(3210, modelRecordMap.get("ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm").size());
 
-        String[] evModelGuids = {
-            "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm",
-        };
+        String[] evModelGuids = { "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", };
 
         for (String modelGuid : evModelGuids) {
             verifyPerModelOutput(modelGuid, modelRecordMap.get(modelGuid), true);
@@ -65,8 +60,8 @@ public class CalculateExpectedRevenuePercentileTestNG extends ServiceFlowsDataFl
 
     private void verifyPerModelOutput(String modelGuid, List<GenericRecord> outputRecords, boolean expectedValue) {
         Double prevRawScore = (expectedValue) ? Double.MAX_VALUE : 1.0;
-        String scoreFieldName = (expectedValue) ? ScoreResultField.ExpectedRevenue.displayName :
-            ScoreResultField.RawScore.displayName;
+        String scoreFieldName = (expectedValue) ? ScoreResultField.ExpectedRevenue.displayName
+                : ScoreResultField.RawScore.displayName;
         Integer prevPct = 99;
 
         for (GenericRecord record : outputRecords) {
@@ -110,6 +105,8 @@ public class CalculateExpectedRevenuePercentileTestNG extends ServiceFlowsDataFl
         parameters.setModelGuidField(modelGuidField);
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
+
+        setFitFunctionParametersMap(parameters);
 
         return parameters;
     }

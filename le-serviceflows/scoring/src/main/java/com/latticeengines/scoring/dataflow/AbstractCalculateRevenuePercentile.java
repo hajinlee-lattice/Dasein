@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -37,15 +36,14 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
     protected Map<String, String> originalScoreFieldMap;
     protected int minPct = 5;
     protected int maxPct = 99;
-    protected boolean renameNewPercentileToStandardPercentileField;
     protected String standardScoreField = ScoreResultField.Percentile.displayName;
+    protected Map<String, String> fitFunctionParametersMap;
 
     abstract void parseParamAndSetFields(T parameters);
 
     @Override
     public Node construct(T parameters) {
         log.info(String.format("%s = %s", parameters.getClass().getSimpleName(), JsonUtils.serialize(parameters)));
-
         parseParamAndSetFields(parameters);
 
         Node inputTable = addSource(inputTableName);
@@ -57,39 +55,14 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
             Node calculatePercentile = calculatePercentileByFieldMap(originalScoreFieldMap, modelGuidFieldName,
                     percentileFieldName, minPct, maxPct, mergedScoreCount);
             calculatePercentile = calculatePercentile.retain(retainedFields);
-            log.info(String.format(
-                    "renameNewPercentileToStandardPercentileField = %s, percentileFieldName '%s', standardScoreField '%s'",
-                    renameNewPercentileToStandardPercentileField, percentileFieldName, standardScoreField));
-            if (renameNewPercentileToStandardPercentileField //
-                    && !standardScoreField.equals(percentileFieldName)) {
-                String outputFieldName = "__TEMP__" + System.currentTimeMillis();
-                log.info(String.format("Using temporary ScoreField '%s' to merge values from %s and %s",
-                        outputFieldName, percentileFieldName, standardScoreField));
-
-                final String expression = "%s != null ? %s : %s";
-
-                calculatePercentile = calculatePercentile //
-                        .addFunction(
-                                String.format(expression, percentileFieldName, percentileFieldName, standardScoreField), //
-                                new FieldList(percentileFieldName, standardScoreField), //
-                                new FieldMetadata(outputFieldName, Integer.class));
-
-                log.info(String.format("Drop standardScoreField '%s'", standardScoreField));
-                calculatePercentile = calculatePercentile.discard(standardScoreField);
-                log.info(String.format("Rename temporary ScoreField '%s' to standardScoreField '%s'", outputFieldName,
-                        standardScoreField));
-
-                calculatePercentile = calculatePercentile.rename(new FieldList(outputFieldName),
-                        new FieldList(standardScoreField));
-                retainedFields = new FieldList( //
-                        addPercentileColumn.getFieldNames().stream() //
-                                .filter(field -> !field.equals(percentileFieldName)) //
-                                .collect(Collectors.toList()));
-                calculatePercentile.retain(retainedFields);
-            }
+            calculatePercentile = additionalProcessing(calculatePercentile);
             return calculatePercentile;
         }
         return addPercentileColumn;
+    }
+
+    protected Node additionalProcessing(Node calculatePercentile) {
+        return calculatePercentile;
     }
 
     private Node calculatePercentileByFieldMap(Map<String, String> originalScoreFieldMap, //
@@ -114,7 +87,7 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
         return merged;
     }
 
-    private Map<String, Node> splitNodes(Node input, Map<String, String> originalScoreFieldMap,
+    protected Map<String, Node> splitNodes(Node input, Map<String, String> originalScoreFieldMap,
             String modelGuidFieldName) {
         Map<String, Node> nodes = new HashMap<>();
         originalScoreFieldMap.forEach((modelGuid, scoreField) -> {

@@ -56,11 +56,11 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
         Integer predictedRevenuePercentile = arguments.getInteger(predictedRevenuePercentileFieldName);
         double probFit = probabilityFitter.calculate(percentile);
         double revenueFit = predictedRevenueFitter.calculate(predictedRevenuePercentile);
-        double expectedRevenue = probFit * revenueFit;
+        double expectedRevenueWithoutFitFunction = probFit * revenueFit;
         Tuple result = arguments.getTupleCopy();
-        result.set(expectedRevenueFieldPos, expectedRevenue);
-        log.info(String.format("percentile = %s, predictedRevenuePercentile = %s,  expectedRevenue = %s", percentile,
-                predictedRevenuePercentile, expectedRevenue));
+        result.set(expectedRevenueFieldPos, expectedRevenueWithoutFitFunction);
+        log.info(String.format("percentile = %s, predictedRevenuePercentile = %s,  expectedRevenueWithoutFitFunction = %s", percentile,
+                predictedRevenuePercentile, expectedRevenueWithoutFitFunction));
 
         functionCall.getOutputCollector().add(result);
     }

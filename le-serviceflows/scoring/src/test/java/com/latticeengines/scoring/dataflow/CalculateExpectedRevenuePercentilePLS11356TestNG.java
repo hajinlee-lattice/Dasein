@@ -15,10 +15,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
-public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ScoringServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Override
     protected String getFlowBeanName() {
@@ -48,10 +47,11 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ServiceFlo
             if (record.get(ScoreResultField.ExpectedRevenuePercentile.displayName) != null) {
                 Assert.assertEquals(record.get(ScoreResultField.Percentile.displayName),
                         record.get(ScoreResultField.ExpectedRevenuePercentile.displayName));
+                Assert.assertNotNull(record.get(ScoreResultField.ExpectedRevenue.displayName));
                 evRecordCount.getAndIncrement();
             } else {
+                Assert.assertNull(record.get(ScoreResultField.ExpectedRevenue.displayName));
                 nonEvRecordCount.getAndIncrement();
-                System.out.println(record);
             }
         });
         System.out.println("evRecordCount = " + evRecordCount.get());
@@ -70,6 +70,8 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ServiceFlo
                 .getResourceAsStream("calculateExpectedRevenuePercentile/PLS-11356/params.json");
         CalculateExpectedRevenuePercentileParameters parameters = JsonUtils.deserialize(inputStream,
                 CalculateExpectedRevenuePercentileParameters.class);
+
+        setFitFunctionParametersMap(parameters);
         return parameters;
     }
 
