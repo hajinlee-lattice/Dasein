@@ -1,7 +1,6 @@
 package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.mail.Multipart;
@@ -79,7 +78,7 @@ public interface EmailService {
 
     void sendPlsExportSegmentRunningEmail(User user, String exportID);
 
-    void sendPlsExportOrphanRecordsRunningEmail(User user, String exportID, String requestType);
+    void sendPlsExportOrphanRecordsRunningEmail(User user, String exportID, String type);
 
     void sendPlsExportOrphanRecordsSuccessEmail(User user, String url, String exportID, String type);
 

@@ -82,7 +82,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.CREATED_BY, request.getCreatedBy());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.EXPORT_ID, request.getExportId());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_TYPE,
-                request.getOrphanRecordsType().getOrphanType());
+                request.getOrphanRecordsType().name());
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, request.getOrphanRecordsType().getOrphanType());
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 

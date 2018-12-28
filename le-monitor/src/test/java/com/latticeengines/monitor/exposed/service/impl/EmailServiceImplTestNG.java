@@ -9,8 +9,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -47,8 +45,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
     public void setup() {
         origLog = EmailServiceImpl.log;
 
-        //emailService = new EmailServiceImpl();
-
         tenant = new Tenant();
         tenant.setName(TENANT_NAME);
 
@@ -61,13 +57,10 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         newLog = Mockito.mock(Logger.class);
         EmailServiceImpl.log = newLog;
 
-        Mockito.doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+        Mockito.doAnswer(invocation -> {
                 Object[] params = invocation.getArguments();
                 logs.add((String) params[0]);
                 return logs;
-            }
         }).when(newLog).info(any());
     }
 
@@ -355,6 +348,32 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("PLS export segment in-progress"));
+    }
+
+    @Test(groups = "functional")
+    public void sendPlsExportOrphanRunningEmail() {
+        emailService.sendPlsExportOrphanRecordsRunningEmail(user, "export_id", "Orphan Contacts");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("Orphan Contacts export in-progress"));
+
+        emailService.sendPlsExportOrphanRecordsRunningEmail(user, "export_id", "Orphan Contacts");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("Orphan Contacts export in-progress"));
+    }
+
+    @Test(groups = "functional")
+    public void sendPlsExportOrphanSuccessEmail() {
+        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, HOSTPORT, "export_id", "type");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("type export complet"));
+
+        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, HOSTPORT, "export_id", "type");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("type export complete"));
     }
 
     @Test(groups = "functional")

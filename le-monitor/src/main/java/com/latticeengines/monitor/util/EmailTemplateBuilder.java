@@ -110,11 +110,14 @@ public class EmailTemplateBuilder {
                 "pls_internal_attribute_enrich_error.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL(
                         "pls_internal_attribute_enrich_success_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL(
                                 "pls_internal_attribute_enrich_error_internal.html"), //
-        PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_SEGMENT_ERROR(
-                "pls_export_segment_error.html"), PLS_EXPORT_SEGMENT_RUNNING(
-                "pls_export_segment_running.html"), //
-        PLS_EXPORT_ORPHAN_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_ORPHAN_RUNNING(
-                "pls_export_segment_running.html"), //
+
+        PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), //
+        PLS_EXPORT_SEGMENT_ERROR("pls_export_segment_error.html"), //
+        PLS_EXPORT_SEGMENT_RUNNING("pls_export_segment_running.html"), //
+
+        PLS_EXPORT_ORPHAN_RUNNING("pls_export_orphan_running.html"), //
+        PLS_EXPORT_ORPHAN_SUCCESS("pls_export_orphan_success.html"), //
+
         PLS_CANCEL_ACTION_SUCCESS("pls_cancel_action_success.html"),
         CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html"), //
         POC_STATE_NOTICE("poc_state_notice.html"), //
@@ -124,7 +127,7 @@ public class EmailTemplateBuilder {
         S3_TEMPLATE_UPDATE("s3_template_update.html"),
         S3_TEMPLATE_CREATE("s3_template_create.html");
 
-        private final static String templateRoot = "com/latticeengines/monitor/";
+        private static final String templateRoot = "com/latticeengines/monitor/";
         private final String templateFile;
 
         Template(String tmpFile) {

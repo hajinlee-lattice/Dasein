@@ -52,9 +52,9 @@ public class EmailSettings {
     public static final String PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT = "SUCCESS - Segment Export - %s ";
     public static final String PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT = "FAILURE - Segment Export - %s ";
     public static final String PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT = "IN PROGRESS - Segment Export - %s ";
-    public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT = "SUCCESS - Orphan Records Export - %s ";
-    public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_ERROR_SUBJECT = "FAILURE - Orphan Records Export - %s ";
-    public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT = "IN PROGRESS - Orphan Records Export - %s ";
+    public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT = "SUCCESS - %s Export";
+    public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_ERROR_SUBJECT = "FAILURE - %s Export";
+    public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT = "IN PROGRESS - %s Export";
     public static final String CDL_PA_COMPLETION_EMAIL_SUBJECT = "SUCCESS - Lattice Platform Data Refresh";
     public static final String CDL_PA_ERROR_EMAIL_SUBJECT = "FAILURE - Lattice Platform Data Refresh";
     public static final String POC_STATE_NOTICE_EMAIL_SUBJECT = "POC Tenant State Change";
