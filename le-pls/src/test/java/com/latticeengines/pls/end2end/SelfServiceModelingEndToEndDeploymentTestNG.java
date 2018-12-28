@@ -747,8 +747,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         if (StringUtils.isNotBlank(expectedDiffCountStr)) {
             int expectedDiffCount = Integer.valueOf(expectedDiffCountStr);
             log.info("Checking if expected diff count is equal to " + expectedDiffCountStr);
-            assertTrue(Math.abs(diffRecords.size() - expectedDiffCount) < 2, //
-                    "Got actual diff: " + diffRecords.size());
+            assertTrue(Math.abs(diffRecords.size() - expectedDiffCount) <= 2, //
+                    "Got actual diff: " + diffRecords.size() //
+                            +" which is too far away from expected diff count " + expectedDiffCountStr);
         } else {
             log.info("Property DIFFCOUNT not set.");
         }
