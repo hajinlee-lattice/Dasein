@@ -63,14 +63,17 @@
 
     .le-autocomplete-dropdown-content {
       width: 100%;
+      min-width: 160px;
+      max-height: 250px;
+      overflow: auto;
       display: none;
       position: absolute;
       background-color: $white-gold;
-      min-width: 160px;
       box-shadow: 0px 8px 16px 0px $cobalt;
       padding: 0;
       z-index: 1;
       list-style-type: none;
+      
 
       .le-autocomplete-list-item{
         padding: 0.5em;
@@ -89,6 +92,7 @@
       margin-top: 0;
       display: block;
       max-width: 250px;
+      
     }
   }
 }

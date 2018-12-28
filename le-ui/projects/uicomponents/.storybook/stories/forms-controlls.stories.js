@@ -62,7 +62,14 @@ stories.add("chip", () => (
         { id: 1, name: "apples", displayName: "Apples" },
         { id: 2, name: "bananas", displayName: "Bananas" },
         { id: 3, name: "oranges", displayName: "Oranges" },
-        { id: 4, name: "pineapples", displayName: "Pineapples" }
+        { id: 4, name: "pineapples", displayName: "Pineapples" },
+        { id: 5, name: "peaches", displayName: "Peaches" },
+        { id: 6, name: "mangos", displayName: "Mangos" },
+        { id: 7, name: "mandarines", displayName: "Mandarines" },
+        { id: 8, name: "plums", displayName: "Plums" },
+        { id: 9, name: "staruberries", displayName: "Strauberries" },
+        { id: 10, name: "figs", displayName: "Figs" },
+        { id: 11, name: "pears", displayName: "Pears" }
       ]}
     />
   </form>
@@ -76,10 +83,10 @@ stories.add("checkbox", () => <p>TODO</p>);
 
 stories.add("switch", () => (
   <div className="switch-container">
-    <LeSwitch 
-    isChecked={false} 
-      callback={(state) => {
-        console.log('State ', state);
+    <LeSwitch
+      isChecked={false}
+      callback={state => {
+        console.log("State ", state);
       }}
     />
   </div>
