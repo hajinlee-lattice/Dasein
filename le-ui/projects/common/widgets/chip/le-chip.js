@@ -30,7 +30,7 @@ class LeChip extends Component {
     this.setState({ chipsSelected: tmpChips, idSelected: idsCopy });
   }
 
-  getItem(item, index){
+  getItem(item, index) {
     return (
       <li
         key={index}
@@ -48,7 +48,7 @@ class LeChip extends Component {
   }
 
   getListItems() {
-    let tmp = search(this.props.listItems, this.state.value, 'displayName');
+    let tmp = search(this.props.listItems, this.state.value, "displayName");
     let retUI = [];
     this.itemsAvailable = [];
     let id = 0;
@@ -65,35 +65,41 @@ class LeChip extends Component {
     event.stopPropagation();
     switch (event.keyCode) {
       case 40:
-      //ArrowDown
+        //ArrowDown
         if (this.state.selected + 1 < this.itemsAvailable.length) {
           this.setState({ selected: this.state.selected + 1 });
         }
         break;
       case 38:
-      //ArrowUp
+        //ArrowUp
         if (this.state.selected - 1 >= 0) {
           this.setState({ selected: this.state.selected - 1 });
         }
         break;
       case 27:
-      //Escape
+        //Escape
         this.setState({ show: false });
-      break;
+        break;
 
       case 8:
-      //Backspace
-      if(this.state.value == ''){
-        this.setState({ show: false });
-      }
+        //Backspace
+        if (this.state.value == "") {
+          this.setState({ show: false });
+        }
       case 32:
-      //Space with ctrl
-      if(event.ctrlKey){
-        this.setState({ selected: 0, show: true });
-      }
-      break;
+        //Space with ctrl
+        if (event.ctrlKey) {
+          this.setState({ selected: 0, show: true });
+        }
+        break;
+
+      case 13:
+        let item = this.itemsAvailable[this.state.selected];
+        let indexItem = this.state.selected;
+        this.addChip(item, indexItem);
+        this.setState({ selected: 0, show: false });
+        break;
     }
-    
   }
   searchItems(event) {
     let val = event.target.value;
@@ -105,8 +111,12 @@ class LeChip extends Component {
     tmpChips.push(item);
     const idsCopy = { ...this.state.idSelected };
     idsCopy[item.id] = item.name;
-    
-    this.setState({ chipsSelected: tmpChips, idSelected: idsCopy, selected: 0 });
+
+    this.setState({
+      chipsSelected: tmpChips,
+      idSelected: idsCopy,
+      selected: 0
+    });
   }
 
   getChipsSelected() {
@@ -135,7 +145,9 @@ class LeChip extends Component {
           <i className="fa fa-search" aria-hidden="true" />
           <input
             type="text"
-            ref={(input) => { this.chipsInput = input; }} 
+            ref={input => {
+              this.chipsInput = input;
+            }}
             value={this.state.value}
             onKeyUp={event => {
               this.keyPressedHandler(event);

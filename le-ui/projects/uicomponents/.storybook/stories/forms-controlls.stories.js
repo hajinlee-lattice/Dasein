@@ -1,3 +1,4 @@
+import "./form-controlls.scss";
 import React from "common/react-vendor";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
@@ -12,6 +13,7 @@ import "common/assets/css/font-awesome.min.css";
 import LeInputText from "common/widgets/inputs/le-input-text";
 import LeLink, { LEFT, RIGHT } from "common/widgets/link/le-link";
 import LeChip from "common/widgets/chip/le-chip";
+import LeSwitch from "common/widgets/switch/le-switch";
 
 const stories = storiesOf("Form Controls", module);
 
@@ -56,10 +58,10 @@ stories.add("chip", () => (
   <form>
     <LeChip
       listItems={[
-        { id: 1, name: 'apples', displayName: "Apples" },
-        { id: 2, name: 'bananas', displayName: "Bananas" },
-        { id: 3, name: 'oranges', displayName: "Oranges" },
-        {id: 4, name: 'pineapples', displayName: 'Pineapples'}
+        { id: 1, name: "apples", displayName: "Apples" },
+        { id: 2, name: "bananas", displayName: "Bananas" },
+        { id: 3, name: "oranges", displayName: "Oranges" },
+        { id: 4, name: "pineapples", displayName: "Pineapples" }
       ]}
     />
   </form>
@@ -71,6 +73,15 @@ stories.add("radioButton", () => <p>TODO</p>);
 
 stories.add("checkbox", () => <p>TODO</p>);
 
-stories.add("switch", () => <p>TODO</p>);
+stories.add("switch", () => (
+  <div className="switch-container">
+    <LeSwitch 
+    isChecked={false} 
+      callback={(state) => {
+        console.log('State ', state);
+      }}
+    />
+  </div>
+));
 
 stories.add("toogleButton", () => <p>TODO</p>);

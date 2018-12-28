@@ -1,0 +1,58 @@
+@import "../colors.scss";
+
+.le-switch {
+  position: relative;
+  display: inline-block;
+  width: 26px;
+  height: 14px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .le-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  .le-slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 1px;
+    top: 1px;
+    bottom: 1px;
+    background-color: white;
+    -webkit-transition: 0.2s;
+    transition: 0.2s;
+  }
+
+  input:checked + .le-slider {
+    background-color: $jade-three;
+  }
+
+  input:checked + .le-slider:before {
+    -webkit-transform: translateX(12px);
+    -ms-transform: translateX(12px);
+    transform: translateX(12px);
+  }
+
+  /* Rounded sliders */
+  .le-slider.round {
+    border-radius: 34px;
+  }
+
+  .le-slider.round:before {
+    border-radius: 50%;
+  }
+}
