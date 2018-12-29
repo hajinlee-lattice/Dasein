@@ -75,7 +75,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
         data.forEach(row -> {
-            Assert.assertTrue(row.containsKey("Score"));
+            Assert.assertTrue(row.containsKey("Score"), JsonUtils.serialize(row));
             String score = (String) row.get("Score");
             Assert.assertNotNull(score);
             Assert.assertTrue(

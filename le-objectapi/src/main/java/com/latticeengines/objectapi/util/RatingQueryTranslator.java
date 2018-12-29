@@ -76,12 +76,11 @@ public class RatingQueryTranslator extends QueryTranslator {
             });
         }
 
+        if (decorator != null && decorator.isDataQuery() && frontEndQuery.getRatingModels() != null) {
+            appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);
+        }
+
         if (decorator != null && StringUtils.isNotBlank(frontEndQuery.getFreeFormTextSearch())) {
-            if (decorator.isDataQuery()) {
-                if (frontEndQuery.getRatingModels() != null) {
-                    appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);
-                }
-            }
             List<AttributeLookup> attrs = new ArrayList<>();
             for (AttributeLookup attributeLookup: decorator.getFreeTextSearchAttrs()) {
                 if (repository != null && repository.getColumnMetadata(attributeLookup) != null) {
