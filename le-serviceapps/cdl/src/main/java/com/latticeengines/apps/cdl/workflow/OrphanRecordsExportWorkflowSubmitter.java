@@ -86,7 +86,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, request.getOrphanRecordsType().getOrphanType());
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 
-        String transactionTableName = getTable(TableRoleInCollection.ConsolidatedDailyTransaction,
+        String transactionTableName = getTable(TableRoleInCollection.ConsolidatedRawTransaction,
                 request.getArtifactVersion()).getName();
         String accountTableName = getTable(TableRoleInCollection.ConsolidatedAccount,
                 request.getArtifactVersion()).getName();
