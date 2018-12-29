@@ -96,7 +96,7 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
         Assert.assertEquals(taskId1, taskId2);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreateDataFeedTask")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateDataFeedTask", enabled = false)
     public void testImportVDB() {
         DataFeedTask task = dataFeedTaskService.getDataFeedTask(mainCustomerSpace, SOURCE,
                 ENTITY_ACCOUNT + FEED_TYPE_SUFFIX,
@@ -108,7 +108,7 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testImportVDB")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateDataFeedTask")
     public void testResetImport() {
         dataFeedTaskManagerService.resetImport(mainCustomerSpace, BusinessEntity.Account);
         List<DataFeedTask> tasks = dataFeedTaskService.getDataFeedTaskWithSameEntity(mainCustomerSpace, ENTITY_ACCOUNT);
