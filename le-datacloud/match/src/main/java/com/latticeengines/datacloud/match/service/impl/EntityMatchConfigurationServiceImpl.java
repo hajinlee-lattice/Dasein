@@ -64,6 +64,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     @Value("${proxy.retry.maxattempts:5}")
     private int maxAttempts;
     private volatile RetryTemplate retryTemplate;
+    private volatile boolean isAllocateMode = false;
 
     @Override
     public String getTableName(@NotNull EntityMatchEnvironment environment) {
@@ -127,6 +128,16 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
             }
         }
         return retryTemplate;
+    }
+
+    @Override
+    public void setIsAllocateMode(boolean isAllocateMode) {
+        this.isAllocateMode = isAllocateMode;
+    }
+
+    @Override
+    public boolean isAllocateMode() {
+        return isAllocateMode;
     }
 
     @VisibleForTesting

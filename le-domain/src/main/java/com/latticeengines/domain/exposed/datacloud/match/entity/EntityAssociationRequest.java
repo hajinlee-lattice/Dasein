@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * Request class for entity association.
  */
 public class EntityAssociationRequest {
-    private final boolean allocateNewId;
     private final Tenant tenant;
     private final String entity;
     // user need to sort the lookup results based on the priority (DESC)
@@ -27,7 +26,7 @@ public class EntityAssociationRequest {
     private final Map<String, String> extraAttributes;
 
     public EntityAssociationRequest(
-            @NotNull Tenant tenant, @NotNull String entity, boolean allocateNewId,
+            @NotNull Tenant tenant, @NotNull String entity,
             @NotNull List<Pair<MatchKeyTuple, String>> lookupResults, Map<String, String> extraAttributes) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
@@ -35,12 +34,7 @@ public class EntityAssociationRequest {
         this.tenant = tenant;
         this.entity = entity;
         this.lookupResults = lookupResults;
-        this.allocateNewId = allocateNewId;
         this.extraAttributes = extraAttributes == null ? Collections.emptyMap() : extraAttributes;
-    }
-
-    public boolean shouldAllocateNewId() {
-        return allocateNewId;
     }
 
     public Tenant getTenant() {

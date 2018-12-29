@@ -82,8 +82,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     protected EntityAssociationRequest prepareAssociationRequest(@NotNull MatchTraveler traveler) {
         Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
         String entity = traveler.getTargetEntity();
-        // TODO only allow allocation if in bulk mode
-        boolean allocateId = traveler.getMatchInput().isAllocateId();
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getEntityMatchLookupResults()
                 .stream()
                 .flatMap(pair -> {
@@ -109,7 +107,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             extraAttributes = Collections.singletonMap(
                     DataCloudConstants.LATTICE_ACCOUNT_ID, traveler.getLatticeAccountId());
         }
-        return new EntityAssociationRequest(standardizedTenant, entity, allocateId, lookupResults, extraAttributes);
+        return new EntityAssociationRequest(standardizedTenant, entity, lookupResults, extraAttributes);
     }
 
     /**

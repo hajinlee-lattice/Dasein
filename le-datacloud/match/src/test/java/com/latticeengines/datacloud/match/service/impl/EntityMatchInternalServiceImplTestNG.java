@@ -40,7 +40,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -111,14 +110,12 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     private EntityMatchInternalServiceImpl entityMatchInternalService;
 
     @Inject
-    @InjectMocks
     private EntityLookupEntryService entityLookupEntryService;
 
     @Inject
-    @InjectMocks
     private EntityRawSeedService entityRawSeedService;
 
-    @Mock
+    @Inject
     private EntityMatchConfigurationServiceImpl entityMatchConfigurationService;
 
     @BeforeClass(groups = "functional")
@@ -129,6 +126,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // mock cache limit
         Mockito.when(entityMatchInternalService.getMaxLookupCacheSize()).thenReturn(MAX_LOOKUP_CACHE_LIMIT);
         Mockito.when(entityMatchInternalService.getMaxSeedCacheWeight()).thenReturn(MAX_SEED_CACHE_LIMIT);
+
         cleanup(TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
     }
 
@@ -157,8 +155,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         testLookupSeed(false);
     }
 
-    private void testLookupSeed(boolean isRealTimeMode) throws Exception {
-        entityMatchInternalService.setRealTimeMode(isRealTimeMode);
+    private void testLookupSeed(boolean isAllocateMode) throws Exception {
+        entityMatchConfigurationService.setIsAllocateMode(isAllocateMode);
         cleanup(TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
 
         setupServing(TEST_ENTRY_1, TEST_ENTRY_3);
@@ -184,19 +182,19 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         waitForAllLookupEntriesPopulated();
         List<String> seedIdsInStaging = entityLookupEntryService.get(
                 EntityMatchEnvironment.STAGING, TEST_TENANT, TEST_ENTRIES);
-        if (isRealTimeMode) {
+        if (isAllocateMode) {
+            // only entry 1 & 3 are set to staging
+            Assert.assertEquals(seedIdsInStaging, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
+        } else {
             Assert.assertNotNull(seedIdsInStaging);
             Assert.assertEquals(seedIdsInStaging.size(), TEST_ENTRIES.size());
             seedIdsInStaging.forEach(Assert::assertNull);
-        } else {
-            // only entry 1 & 3 are set to staging
-            Assert.assertEquals(seedIdsInStaging, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
         }
     }
 
     @Test(groups = "functional")
-    private void testSeedBulkMode() throws Exception {
-        entityMatchInternalService.setRealTimeMode(false);
+    private void testSeedAllocateMode() throws Exception {
+        entityMatchConfigurationService.setIsAllocateMode(true);
         cleanup(SEED_IDS);
         setupServing(TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
         Thread.sleep(2000L);
@@ -225,8 +223,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     }
 
     @Test(groups = "functional")
-    private void testSeedRealTimeMode() throws Exception {
-        entityMatchInternalService.setRealTimeMode(true);
+    private void testSeedLookupMode() throws Exception {
+        entityMatchConfigurationService.setIsAllocateMode(false);
         cleanup(SEED_IDS);
         setupServing(TEST_SEED_1, TEST_SEED_2);
         Thread.sleep(2000L);
@@ -264,7 +262,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
      */
     @Test(groups = "functional", dataProvider = "entityIdAllocation")
     private void testIDAllocation(int nAllocations, int nThreads) {
-        entityMatchInternalService.setRealTimeMode(false);
+        entityMatchConfigurationService.setIsAllocateMode(true);
         ExecutorService service = Executors.newFixedThreadPool(nThreads);
         List<Future<String>> futures = IntStream
                 .range(0, nAllocations)
@@ -290,7 +288,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
     @Test(groups = "functional")
     private void testAssociation() throws Exception {
-        entityMatchInternalService.setRealTimeMode(false); // association only works with bulk mode
+        entityMatchConfigurationService.setIsAllocateMode(true); // association only works with allocate mode
         String seedId = "testAssociation"; // prevent conflict
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
         cleanupSeedAndLookup(env, seedId);
@@ -349,7 +347,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
             @NotNull EntityRawSeed seedToAssociate, @NotNull EntityRawSeed finalSeed,
             @NotNull Set<EntityLookupEntry> entriesFailedToAssociate,
             @NotNull Set<EntityLookupEntry> entriesFailedToSetLookup) throws Exception {
-        entityMatchInternalService.setRealTimeMode(false); // association only works with bulk mode
+        entityMatchConfigurationService.setIsAllocateMode(true); // association only works with allocate mode
         Assert.assertNotNull(seedToAssociate);
         String seedId = seedToAssociate.getId();
         String entity = seedToAssociate.getEntity();
@@ -407,7 +405,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
     @Test(groups = "functional")
     private void testLookupCacheLimit() throws Exception {
-        entityMatchInternalService.setRealTimeMode(true); // use real time mode so the test will be faster
+        entityMatchConfigurationService.setIsAllocateMode(false); // use lookup mode so the test will be faster
         setupServing(TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
         Thread.sleep(2000L);
 
@@ -424,7 +422,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
     @Test(groups = "functional")
     private void testSeedCacheLimit() throws Exception {
-        entityMatchInternalService.setRealTimeMode(true); // use real time mode so the test will be faster
+        entityMatchConfigurationService.setIsAllocateMode(false); // use lookup mode so the test will be faster
         cleanup(SEED_IDS);
         setupServing(TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
         Thread.sleep(2000L);

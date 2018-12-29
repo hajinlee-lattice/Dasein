@@ -81,4 +81,19 @@ public interface EntityMatchConfigurationService {
      * @throws UnsupportedOperationException if the environment is not supported
      */
     RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env);
+
+    /**
+     * Setter for isAllocateMode flag. See {@link this#isAllocateMode()} for the flag's meaning.
+     *
+     * @param isAllocateMode input flag to be set
+     */
+    void setIsAllocateMode(boolean isAllocateMode);
+
+    /**
+     * Return a flag to represent whether system is in allocate mode. True means we will allocate new entity ID and
+     * merge to existing entity. False means read only mode and will return no match in case of conflict.
+     *
+     * @return current value of the flag
+     */
+    boolean isAllocateMode();
 }

@@ -70,13 +70,6 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     // flag to indicate whether background workers should keep running
     private volatile boolean shouldTerminate = false;
 
-    /*
-     * TODO set this value at startup time (find a way to know whether we are in which env)
-     * isRealTimeMode = true means (a) no allocation, (b) cache seed, (c) only lookup from cache & serving table
-     * isRealTimeMode = false means
-     *   (a) has allocation, (b) not caching seed, (c) lookup from cache, staging and serving table
-     */
-    private boolean isRealTimeMode = false;
     // [ tenant ID, lookup entry ] => seed ID
     private volatile Cache<Pair<String, EntityLookupEntry>, String> lookupCache;
     // [ [ tenant ID, entity ], seed ID ] => raw seed
@@ -143,8 +136,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @Override
     public String allocateId(@NotNull Tenant tenant, @NotNull String entity) {
         checkNotNull(tenant, entity);
-        if (isRealTimeMode) {
-            throw new UnsupportedOperationException("Not allowed to allocate ID in realtime mode");
+        if (!isAllocateMode()) {
+            throw new UnsupportedOperationException("Not allowed to allocate ID in lookup mode");
         }
         // [ idx, seedId ]
         Optional<Pair<Integer, String>> allocatedId = IntStream
@@ -175,8 +168,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             @NotNull Tenant tenant, @NotNull EntityRawSeed seed) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
         checkNotNull(tenant, seed);
-        if (isRealTimeMode) {
-            throw new UnsupportedOperationException("Not allowed to associate entity in realtime mode");
+        if (!isAllocateMode()) {
+            throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
         }
 
         // update seed & lookup table and get all entries that cannot update
@@ -198,16 +191,6 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         return Triple.of(seedBeforeUpdate, new ArrayList<>(entriesFailedToAssociate), entriesFailedToSetLookup);
-    }
-
-    @VisibleForTesting
-    boolean isRealTimeMode() {
-        return isRealTimeMode;
-    }
-
-    @VisibleForTesting
-    void setRealTimeMode(boolean realTimeMode) {
-        isRealTimeMode = realTimeMode;
     }
 
     @VisibleForTesting
@@ -348,12 +331,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Retrieve seed IDs, starting at staging layer.
      */
     private Map<EntityLookupEntry, String> getIdsStaging(@NotNull Tenant tenant, @NotNull Set<EntityLookupEntry> keys) {
-        if (isRealTimeMode) {
-            // in real time mode, skip staging layer
+        if (!isAllocateMode()) {
+            // in lookup mode, skip staging layer
             return getIdsServing(tenant, keys);
         }
 
-        // now in bulk mode
+        // now in allocate mode
         Map<EntityLookupEntry, String> results = getIdsInEnvironment(tenant, EntityMatchEnvironment.STAGING, keys);
         if (results.size() == keys.size()) {
             return results;
@@ -407,19 +390,19 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         String tenantId = tenant.getId();
         Pair<String, String> prefix = Pair.of(tenantId, entity);
         Set<String> uniqueSeedIds = new HashSet<>(seedIds);
-        if (!isRealTimeMode) {
-            // in bulk mode, does not cache seed in-memory because seed will be updated and invalidating cache
+        if (isAllocateMode()) {
+            // in allocate mode, does not cache seed in-memory because seed will be updated and invalidating cache
             // for multiple processes will be difficult to do.
             return generateResult(seedIds, getSeedsStaging(tenant, entity, uniqueSeedIds));
         }
 
-        // NOTE in real time mode
+        // NOTE in lookup mode
 
         // results from cache
         Map<String, EntityRawSeed> results =  getPresentCacheValues(prefix, seedIds, seedCache);
 
         Set<String> missingSeedIds = getMissingKeys(uniqueSeedIds, results);
-        // real time mode goes directly to serving table (skip staging)
+        // lookup mode goes directly to serving table (skip staging)
         Map<String, EntityRawSeed> missingResults = getSeedsServing(tenant, entity, missingSeedIds);
 
         // add to results
@@ -435,11 +418,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private Map<String, EntityRawSeed> getSeedsStaging(
             @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds) {
-        if (isRealTimeMode) {
-            throw new IllegalStateException("Should not reach here in real time mode.");
+        if (!isAllocateMode()) {
+            throw new IllegalStateException("Should not reach here in lookup mode.");
         }
 
-        // bulk mode
+        // allocate mode
         Map<String, EntityRawSeed> results = getSeedsInEnvironment(tenant, EntityMatchEnvironment.STAGING, entity, seedIds);
         if (results.size() == seedIds.size()) {
             return results;
@@ -645,8 +628,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Lazily instantiate thread pools and runnables for populating staging seed/lookup table
      */
     private void initStagingWorkers() {
-        if (isRealTimeMode) {
-            // NOTE no need to populate staging table in real time mode
+        if (!isAllocateMode()) {
+            // NOTE only need to populate staging table in allocate mode
             return;
         }
         // TODO tune all pool size
@@ -663,6 +646,15 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 }
             }
         }
+    }
+
+    /*
+     * isAllocateMode = false means (a) no allocation, (b) cache seed, (c) only lookup from cache & serving table
+     * isAllocateMode = true means
+     *   (a) has allocation, (b) not caching seed, (c) lookup from cache, staging and serving table
+     */
+    private boolean isAllocateMode() {
+        return entityMatchConfigurationService.isAllocateMode();
     }
 
     /*
@@ -710,7 +702,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         private void populate(Map<String, List<Triple<Tenant, EntityLookupEntry, String>>> batches) {
-            // since bulk mode should only have one tenant, map is probably not required, use map just in case
+            // since allocate mode should only have one tenant, map is probably not required, use map just in case
             batches.values().forEach(list -> {
                 if (CollectionUtils.isEmpty(list)) {
                     return;
