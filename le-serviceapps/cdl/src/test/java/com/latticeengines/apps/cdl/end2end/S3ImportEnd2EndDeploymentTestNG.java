@@ -32,7 +32,7 @@ public class S3ImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "manual")
     public void runTest() {
         importData(BusinessEntity.Account, "Account_0_350.csv", "Account");
         S3FileToHdfsConfiguration config = new S3FileToHdfsConfiguration();

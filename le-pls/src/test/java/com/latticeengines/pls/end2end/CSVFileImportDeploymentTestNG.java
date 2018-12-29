@@ -676,15 +676,15 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         switch (entity) {
         case ENTITY_ACCOUNT:
             testS3ImportWithTemplateData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT, entityType);
-            testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT, entityType);
+            testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
             break;
         case ENTITY_CONTACT:
             testS3ImportWithTemplateData(CONTACT_SOURCE_FILE, ENTITY_CONTACT, entityType);
-            testS3ImportOnlyData(CONTACT_SOURCE_FILE, ENTITY_CONTACT, entityType);
+            testS3ImportOnlyData(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
             break;
         case ENTITY_TRANSACTION:
             testS3ImportWithTemplateData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION, entityType);
-            testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION, entityType);
+            testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
             break;
         }
     }
@@ -701,12 +701,12 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     }
 
-    private void testS3ImportOnlyData(String csvFileName, String entity, EntityType entityType) {
+    private void testS3ImportOnlyData(String csvFileName, String entity) {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SOURCE,
-                entityType.getDisplayName());
+                entity + FEED_TYPE_SUFFIX);
         ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace.toString(),
                 dataFeedTask.getUniqueId(), sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
