@@ -8,6 +8,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -67,6 +68,13 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
             { "A004", "P0003", "T08080", 150L },
             { "A006", "P0004", "T18888", 998L }
     };
+
+    @BeforeClass(groups = "functional")
+    public void setupOrphanTransactionExportFlowTestNG() {
+        uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
+        uploadAvro(productData, prepareProductData(), PRODUCT_TABLE, PRODUCT_DIR);
+        uploadAvro(transactionData, prepareTxnData(), TRANSACTION_TABLE, TRANSACTION_DIR);
+    }
 
     @Test(groups = "functional")
     public void testOrphanTransactionExportFlow() {
