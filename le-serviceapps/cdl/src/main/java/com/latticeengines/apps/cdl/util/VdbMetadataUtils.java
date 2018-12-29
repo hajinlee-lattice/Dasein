@@ -304,7 +304,7 @@ public class VdbMetadataUtils {
         } else if ("VarChar".equalsIgnoreCase(vdbFundamentalType)) {
             vdbFundamentalType = "alpha";
         } else if (unparsableFundamentalTypes.contains(vdbFundamentalType.toLowerCase())) {
-            return null;
+            return resolveFundamentalTypeFromDataType(metadata);
         }
 
         try {
