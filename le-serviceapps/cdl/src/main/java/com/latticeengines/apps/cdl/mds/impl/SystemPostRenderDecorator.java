@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -28,8 +27,6 @@ public class SystemPostRenderDecorator implements Decorator {
             if (StringUtils.isNotBlank(displayName)) {
                 cm.setDisplayName(displayName + " (DEPRECATED)");
             }
-        }
-        if (AttrState.Deprecated.equals(cm.getAttrState())) {
             // set Export init value to false, for deprecated attr
             cm.disableGroup(ColumnSelection.Predefined.Enrichment);
         }
