@@ -16,7 +16,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -40,9 +39,6 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Autowired
     private PlayEntityMgr playEntityMgr;
-
-    @Autowired
-    private PlayTypeEntityMgr playTypeEntityMgr;
 
     @Autowired
     private PlayTypeService playTypeService;
