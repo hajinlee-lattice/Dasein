@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -7,9 +8,14 @@ import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 
+import javax.inject.Inject;
+
 @Component("entityIdAssociateMicroEngineActor")
 @Scope("prototype")
 public class EntityIdAssociateMicroEngineActor extends EntityMicroEngineActorBase<EntityAssociateActor> {
+
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
 
     @Override
     protected Class<EntityAssociateActor> getDataSourceActorClz() {
@@ -18,8 +24,8 @@ public class EntityIdAssociateMicroEngineActor extends EntityMicroEngineActorBas
 
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
-        // accept every tuple since we need to handle association even if there is no lookup entries (anonymous entity)
-        return true;
+        // only accept if the system is in allocate mode
+        return entityMatchConfigurationService.isAllocateMode();
     }
 
     @Override

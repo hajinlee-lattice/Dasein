@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
@@ -126,7 +127,8 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                         EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDomainBasedMicroEngineActor.class.getSimpleName(), //
                         EntityNameBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName()), //
+                        EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
+                        EntityIdResolveMicroEngineActor.class.getSimpleName()), //
                         null, DOMAIN, DUNS }, //
                 { 50, contactMatchDG, String.join(",", //
                         MatchPlannerMicroEngineActor.class.getSimpleName(), //
@@ -140,9 +142,11 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                         EntityDomainBasedMicroEngineActor.class.getSimpleName(), //
                         EntityNameBasedMicroEngineActor.class.getSimpleName(), //
                         EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
+                        EntityIdResolveMicroEngineActor.class.getSimpleName(), //
                         EntityEmailBasedMicroEngineActor.class.getSimpleName(), //
                         EntityNameBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName()), //
+                        EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
+                        EntityIdResolveMicroEngineActor.class.getSimpleName()), //
                         null, DOMAIN, DUNS }, //
         };
     }

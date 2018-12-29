@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +167,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 DomainCountryStateBasedMicroEngineActor.class, //
                 DomainCountryBasedMicroEngineActor.class, //
                 EntityIdAssociateMicroEngineActor.class, //
+                EntityIdResolveMicroEngineActor.class,
                 EntityEmailBasedMicroEngineActor.class, //
                 EntityNameBasedMicroEngineActor.class, //
                 EntitySystemIdBasedMicroEngineActor.class, //

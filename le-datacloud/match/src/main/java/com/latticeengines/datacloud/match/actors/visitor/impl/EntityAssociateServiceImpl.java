@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -44,6 +45,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * Associate all the lookup entry for a single record to one entity.
  * The entity to associate to is decide by the result of lookups. If no entity found or there are conflicts
  * between the entity seed and lookup entries, a new entity will be created (and a new ID allocated).
+ *
+ * NOTE should only get request here if {@link EntityMatchConfigurationService#isAllocateMode()} is true.
  *
  * Input data: type={@link EntityAssociationRequest}
  * Output: {@link EntityAssociationResponse}
@@ -216,13 +219,10 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         if (CollectionUtils.isEmpty(request.getLookupResults())) {
             // no lookup entry in the request, associate to anonymous entity
             return new EntityRawSeed(ANONYMOUS_ENTITY_ID, entity, Collections.emptyList(), null);
-        }  else if (request.shouldAllocateNewId()) {
+        } else {
             // allocate new seed
             String seedId = entityMatchInternalService.allocateId(tenant, entity);
             return new EntityRawSeed(seedId, entity, Collections.emptyList(), null);
-        } else {
-            // no existing entity found and not going to allocate ID
-            return null;
         }
     }
 
