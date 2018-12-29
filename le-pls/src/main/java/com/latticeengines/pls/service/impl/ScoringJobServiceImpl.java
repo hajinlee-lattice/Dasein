@@ -1,7 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +13,14 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.QuoteMode;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -17,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -98,7 +111,35 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public InputStream getScoreResults(String workflowJobId) {
-        return getResultFile(workflowJobId, WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+        return quoteProtectionValues(getResultFile(workflowJobId, WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH));
+    }
+
+    private InputStream  quoteProtectionValues(InputStream inputStream) {
+        StringBuilder sb = new StringBuilder();
+        try (InputStreamReader reader = new InputStreamReader(
+                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
+                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                        ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)) {
+            try (CSVParser parser = new CSVParser(reader, LECSVFormat.format)) {
+                try (CSVPrinter printer = new CSVPrinter(sb,
+                        CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL)
+                                .withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
+                    for (CSVRecord record : parser) {
+                        for (String val : record) {
+                            printer.print(val != null ? val : "");
+                        }
+                        printer.println();
+                    }
+                }
+            }
+        }
+        catch (IOException e) {
+            log.error("Error reading the input stream.");
+            e.printStackTrace();
+            return inputStream;
+        }
+
+        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
     }
 
     @Override
