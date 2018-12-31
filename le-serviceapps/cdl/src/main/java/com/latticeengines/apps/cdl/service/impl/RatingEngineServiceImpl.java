@@ -559,6 +559,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             ModelingQueryType modelingQueryType, DataCollection.Version version) {
         EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType,
                 version);
+        log.info("getModelingQueryCount ratingEngine: " + JsonUtils.serialize(ratingEngine));
+        log.info("getModelingQueryCount ratingModel: " + JsonUtils.serialize(ratingModel));
+        log.info("getModelingQueryCount efeq: " + JsonUtils.serialize(efeq));
         switch (modelingQueryType) {
         case TARGET:
             return eventProxy.getScoringCount(customerSpace, efeq);

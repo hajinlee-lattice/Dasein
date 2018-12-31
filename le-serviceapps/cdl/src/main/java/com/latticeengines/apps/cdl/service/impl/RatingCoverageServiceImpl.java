@@ -1073,11 +1073,11 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     aiModel, ModelingQueryType.TARGET, null);
 
             CoverageInfo coverageInfo = new CoverageInfo();
-            coverageInfo.setAccountCount(count);
+            coverageInfo.setUnscoredAccountCount(count);
 
             if (targetSegment != null) {
                 if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
-                    coverageInfo.setUnscoredAccountCount(
+                    coverageInfo.setAccountCount(
                             targetSegment.getAccounts() - coverageInfo.getAccountCount());
                 }
             }
