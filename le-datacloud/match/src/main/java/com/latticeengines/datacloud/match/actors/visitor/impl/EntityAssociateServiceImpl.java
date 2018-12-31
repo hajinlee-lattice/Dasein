@@ -230,7 +230,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      * helper to associate single request and send response based on the result, guarding against exceptions
      */
     private void associateAsync(
-            @NotNull String requestId, @NotNull EntityAssociationRequest request, EntityRawSeed targetEntitySeed) {
+            @NotNull String requestId, @NotNull EntityAssociationRequest request,
+            @NotNull EntityRawSeed targetEntitySeed) {
         try {
             EntityAssociationResponse response = associate(requestId, request, targetEntitySeed);
             // send successful response
@@ -252,11 +253,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      */
     @VisibleForTesting
     protected EntityAssociationResponse associate(
-            @NotNull String requestId, @NotNull EntityAssociationRequest request, EntityRawSeed targetEntitySeed) {
-        if (targetEntitySeed == null) {
-            // cannot associate to any entity
-            return getResponse(request, null);
-        }
+            @NotNull String requestId, @NotNull EntityAssociationRequest request,
+            @NotNull EntityRawSeed targetEntitySeed) {
         Tenant tenant = request.getTenant();
         String tenantId = tenant.getId();
         if (CollectionUtils.isEmpty(request.getLookupResults())) {
@@ -389,7 +387,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         // we need to update either
         // (a) this entry is many to x or
         // (b) this entry is one to one but not mapped to any entity at the moment
-        return mapping != ONE_TO_ONE || StringUtils.isNotBlank(pair.getValue());
+        return mapping != ONE_TO_ONE || StringUtils.isBlank(pair.getValue());
     }
 
     private EntityRawSeed prepareSeedToAssociate(
