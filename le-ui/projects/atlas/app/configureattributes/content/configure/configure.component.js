@@ -510,49 +510,63 @@ angular.module('lp.configureattributes.configure', [])
             if(vm.step === 'spend_over_time') {
                 
                 if(vm.options.TotalSpendOvertime) {
-                    totalSpendOvertimeOptionsAr = [];
-                    for(var i in vm.options.TotalSpendOvertime) {
-                        var option = angular.copy(vm.options.TotalSpendOvertime[i]);
-                        var timestamp = new Date().valueOf(),
-                            obj = {
-                                eol: false,
-                                IsEOL: false,
-                                type: "PurchaseHistory",
-                                created: timestamp,
-                                updated: timestamp,
-                                metrics: null,
-                                periods: [{
-                                    Cmp: Object.keys(option)[0],
-                                    Vals: [option[Object.keys(option)[0]].Val[0], option[Object.keys(option)[0]].Val[1]],
-                                    Period: option[Object.keys(option)[0]].Period
-                                }]
-                            };
+                    var makeTotalSpendOvertime = function() {
+                        totalSpendOvertimeOptionsAr = [];
+                        for(var i in vm.options.TotalSpendOvertime) {
+                            var option = angular.copy(vm.options.TotalSpendOvertime[i]);
+                            if(option && Object.keys(option) && Object.keys(option)[0] && option[Object.keys(option)[0]]) {
+                                var timestamp = new Date().valueOf(),
+                                    obj = {
+                                        eol: false,
+                                        IsEOL: false,
+                                        type: "PurchaseHistory",
+                                        created: timestamp,
+                                        updated: timestamp,
+                                        metrics: null,
+                                        periods: [{
+                                            Cmp: Object.keys(option)[0],
+                                            Vals: [option[Object.keys(option)[0]].Val[0], option[Object.keys(option)[0]].Val[1]],
+                                            Period: option[Object.keys(option)[0]].Period
+                                        }]
+                                    };
 
-                        totalSpendOvertimeOptionsAr.push(obj);
+                                totalSpendOvertimeOptionsAr.push(obj);
+                            }
+                        }
                     }
+                    $timeout(function() {
+                        makeTotalSpendOvertime();
+                    });
                 }
 
                 if(vm.options.AvgSpendOvertime) {
-                    avgSpendOvertimeOptionsAr = [];
-                    for(var i in vm.options.AvgSpendOvertime) {
-                        var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
-                        var timestamp = new Date().valueOf(),
-                            obj = {
-                                eol: false,
-                                IsEOL: false,
-                                type: "PurchaseHistory",
-                                created: timestamp,
-                                updated: timestamp,
-                                metrics: null,
-                                periods: [{
-                                    Cmp: Object.keys(option)[0],
-                                    Vals: [option[Object.keys(option)[0]].Val],
-                                    Period: option[Object.keys(option)[0]].Period
-                                }]
-                            };
+                    var makeAvgSpendOvertime = function() {
+                        avgSpendOvertimeOptionsAr = [];
+                        for(var i in vm.options.AvgSpendOvertime) {
+                            var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
+                            if(option && Object.keys(option) && Object.keys(option)[0] && option[Object.keys(option)[0]]) {
+                                var timestamp = new Date().valueOf(),
+                                    obj = {
+                                        eol: false,
+                                        IsEOL: false,
+                                        type: "PurchaseHistory",
+                                        created: timestamp,
+                                        updated: timestamp,
+                                        metrics: null,
+                                        periods: [{
+                                            Cmp: Object.keys(option)[0],
+                                            Vals: [option[Object.keys(option)[0]].Val],
+                                            Period: option[Object.keys(option)[0]].Period
+                                        }]
+                                    };
 
-                        avgSpendOvertimeOptionsAr.push(obj);
+                                avgSpendOvertimeOptionsAr.push(obj);
+                            }
+                        }
                     }
+                    $timeout(function() {
+                        makeAvgSpendOvertime();
+                    });
                 }
             
                 vm.spendOvertime = {

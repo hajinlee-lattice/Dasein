@@ -582,11 +582,12 @@ angular.module('common.datacloud.query.results', [
 
         var _contacts = 0;
         for(var i in vm.selectedBuckets) {
-            var bucket = vm.selectedBuckets[i];
-            var count = vm.accountsCoverage.bucketCoverageCounts.find(function(value) {
-                return value.bucket === bucket;
-            });
+            var bucket = vm.selectedBuckets[i],
+                count = vm.accountsCoverage.bucketCoverageCounts.find(function(value) {
+                    return value.bucket === bucket;
+                });
 
+            count = count || {count: 0};
             sections.selected += parseInt(count.count);
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }

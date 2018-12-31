@@ -3,7 +3,7 @@ angular.module('lp.playbook.wizard.rating', [])
     $state, $stateParams, $scope, $filter, ResourceUtility, Ratings, PlaybookWizardStore, PlaybookWizardService
 ) {
     var vm = this,
-        requireModel = false; // whether or not you can deselect a model or not have one
+        requireModel = true; // whether or not you can deselect a model or not have one
 
     angular.extend(vm, {
         stored: PlaybookWizardStore.rating_form,
