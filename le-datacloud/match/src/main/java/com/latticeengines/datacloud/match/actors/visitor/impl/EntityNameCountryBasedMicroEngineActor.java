@@ -9,9 +9,9 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
-@Component("entityNameBasedMicroEngineActor")
+@Component("entityNameCountryBasedMicroEngineActor")
 @Scope("prototype")
-public class EntityNameBasedMicroEngineActor extends EntityMicroEngineActorBase<EntityLookupActor> {
+public class EntityNameCountryBasedMicroEngineActor extends EntityMicroEngineActorBase<EntityLookupActor> {
 
     @Override
     protected Class<EntityLookupActor> getDataSourceActorClz() {

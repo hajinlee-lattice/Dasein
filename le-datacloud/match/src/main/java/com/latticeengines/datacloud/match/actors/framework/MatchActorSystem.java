@@ -36,12 +36,12 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateM
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityAssociateActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityEmailBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDunsMicroEngineActor;
@@ -169,9 +169,9 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 EntityIdAssociateMicroEngineActor.class, //
                 EntityIdResolveMicroEngineActor.class,
                 EntityEmailBasedMicroEngineActor.class, //
-                EntityNameBasedMicroEngineActor.class, //
+                EntityNameCountryBasedMicroEngineActor.class, //
                 EntitySystemIdBasedMicroEngineActor.class, //
-                EntityDomainBasedMicroEngineActor.class, //
+                EntityDomainCountryBasedMicroEngineActor.class, //
                 EntityDunsBasedMicroEngineActor.class, //
         };
         for (Class<? extends ActorTemplate> clz : microEngineClz) {

@@ -7,9 +7,9 @@ import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 
-@Component("entityDomainBasedMicroEngineActor")
+@Component("entityDomainCountryBasedMicroEngineActor")
 @Scope("prototype")
-public class EntityDomainBasedMicroEngineActor extends DataSourceMicroEngineTemplate<EntityLookupActor> {
+public class EntityDomainCountryBasedMicroEngineActor extends DataSourceMicroEngineTemplate<EntityLookupActor> {
     @Override
     protected Class<EntityLookupActor> getDataSourceActorClz() {
         return EntityLookupActor.class;

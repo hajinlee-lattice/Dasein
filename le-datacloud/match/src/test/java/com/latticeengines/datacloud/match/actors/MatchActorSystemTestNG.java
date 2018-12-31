@@ -23,11 +23,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityEmailBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
@@ -125,8 +125,8 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                         FuzzyMatchJunctionActor.class.getSimpleName(), //
                         DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityDomainBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityNameBasedMicroEngineActor.class.getSimpleName(), //
+                        EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
+                        EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
                         EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
                         EntityIdResolveMicroEngineActor.class.getSimpleName()), //
                         null, DOMAIN, DUNS }, //
@@ -139,12 +139,12 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                         FuzzyMatchJunctionActor.class.getSimpleName(), //
                         DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityDomainBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityNameBasedMicroEngineActor.class.getSimpleName(), //
+                        EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
+                        EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
                         EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
                         EntityIdResolveMicroEngineActor.class.getSimpleName(), //
                         EntityEmailBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityNameBasedMicroEngineActor.class.getSimpleName(), //
+                        EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
                         EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
                         EntityIdResolveMicroEngineActor.class.getSimpleName()), //
                         null, DOMAIN, DUNS }, //
