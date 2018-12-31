@@ -159,7 +159,15 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
                     : compressedNameOnly;
             Path uncompressedPath = new Path(uncompressedDir, uncompressedNameOnly);
             log.info("UncompressedPath for gz file: " + uncompressedPath.toString());
-            HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedPath.toString());
+            try {
+                HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedPath.toString());
+            } catch (Exception e) {
+                // Delete partial uncompressed file
+                if (HdfsUtils.fileExists(yarnConfiguration, uncompressedPath.toString())) {
+                    HdfsUtils.rmdir(yarnConfiguration, uncompressedPath.toString());
+                }
+                throw e;
+            }
             break;
         case ZIP:
             log.info("UncompressedPath for zip file: " + uncompressedDir.toString());
