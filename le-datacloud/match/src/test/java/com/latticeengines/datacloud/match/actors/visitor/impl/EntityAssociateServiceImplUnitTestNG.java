@@ -1,13 +1,30 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_3;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_2;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -16,9 +33,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -30,10 +49,8 @@ public class EntityAssociateServiceImplUnitTestNG {
     private static final String TEST_ENTITY_ID = "associate_service_unit_test_entity_id";
     private static final String TEST_ENTITY_ID2 = "associate_service_unit_test_entity_id2";
     private static final String TEST_REQUEST_ID = "associate_service_unit_test_request_id";
-    private static final Map<String, String> TEST_EXTRA_ATTRIBUTES = Collections.singletonMap(
-            "test_extra_attribute_name", "test_extra_attribute_value");
 
-    @Test(groups = "unit", dataProvider = "entityAssociation", enabled = false)
+    @Test(groups = "unit", dataProvider = "entityAssociation")
     private void testAssociate(
             EntityAssociationRequest request, EntityRawSeed currentTargetSnapshot, List<EntityRawSeed> expectedParams,
             List<Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>>> results,
@@ -44,7 +61,6 @@ public class EntityAssociateServiceImplUnitTestNG {
 
         EntityAssociationResponse response = service.associate(TEST_REQUEST_ID, request, currentTargetSnapshot);
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getAssociatedEntityId(), expectedAssociatedEntityId);
         Assert.assertEquals(response.getEntity(), request.getEntity());
         Assert.assertNotNull(response.getTenant());
         Assert.assertEquals(response.getTenant().getId(), TEST_TENANT.getId());
@@ -54,9 +70,9 @@ public class EntityAssociateServiceImplUnitTestNG {
         // expected associated id matched
         Assert.assertEquals(response.getAssociatedEntityId(), expectedAssociatedEntityId);
         if (hasAssociationError) {
-            Assert.assertTrue(response.getAssociationErrors().isEmpty());
-        } else {
             Assert.assertFalse(response.getAssociationErrors().isEmpty());
+        } else {
+            Assert.assertTrue(response.getAssociationErrors().isEmpty());
         }
 
         // verify captured params
@@ -73,8 +89,235 @@ public class EntityAssociateServiceImplUnitTestNG {
     @DataProvider(name = "entityAssociation")
     private Object[][] provideAssociationTestData() {
         return new Object[][] {
-                // TODO add test cases when we have external system ID in match key tuple
+                /*
+                 * Case #1: empty target seed (newly allocated), one system ID in request
+                 */
+                {
+                        newRequest(new Object[][] {{ SFDC_1, null }}), // only SFDC_1 in request
+                        newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]), // target seed is a newly allocated one
+                        // should only call associate once with SFDC_1 (highest priority lookup entry)
+                        singletonList(newSeed(TEST_ENTITY_ID, SFDC_1)),
+                        // seed before association has no lookup entry (newly allocated)
+                        // therefore no association error
+                        singletonList(noConflictResult(newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]))),
+                        TEST_ENTITY_ID, false
+                },
+                /*
+                 * Case #2: empty target seed (newly allocated), more than 1 lookup entries in request
+                 */
+                {
+                        newRequest(new Object[][] {{ SFDC_1, null }, { MKTO_1, null }, { DC_FACEBOOK_1, null }}),
+                        newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]), // target seed is a newly allocated one
+                        // should call associate twice
+                        // first time with with SFDC_1 (highest priority lookup entry)
+                        // second time with the rest of lookup entries (actually we will update all entries
+                        // for simplicity, since it will be one update request either way)
+                        asList(newSeed(TEST_ENTITY_ID, SFDC_1), newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_1, DC_FACEBOOK_1)),
+                        // seed before first association has no lookup entry (newly allocated)
+                        // seed before second association only has the highest priority entry
+                        // therefore no association error
+                        asList(noConflictResult(newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0])),
+                                noConflictResult(newSeed(TEST_ENTITY_ID, SFDC_1))),
+                        TEST_ENTITY_ID, false
+                },
+                /*
+                 * Case #3: existing target seed, only one system ID, already mapped to target entity
+                 * NOTE: it is not possible this system ID mapped to a entity different than target entity in lookup
+                 *       results, otherwise that entity will be chosen as target.
+                 */
+                {
+                        // SFDC_1 already maps to TEST_ENTITY_ID
+                        newRequest(new Object[][] {{ SFDC_1, TEST_ENTITY_ID }}),
+                        newSeed(TEST_ENTITY_ID, SFDC_1),
+                        // no need to associate
+                        emptyList(),
+                        emptyList(),
+                        TEST_ENTITY_ID, false
+                },
+                /*
+                 * Case #4: existing seed already has some system ID, has association error
+                 */
+                {
+                        newRequest(new Object[][] {
+                                { SFDC_1, TEST_ENTITY_ID }, { MKTO_1, null }, { DC_FACEBOOK_1, null }}),
+                        newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_FACEBOOK_2),
+                        // no need to associate highest priority entry, so only one request
+                        // no SFDC_1 here because already mapped to other entity
+                        // not trying to update MKTO_1 because target seed already has MKTO_2
+                        singletonList(newSeed(TEST_ENTITY_ID, DC_FACEBOOK_1)),
+                        singletonList(Triple.of(
+                                newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_FACEBOOK_2),
+                                emptyList(),
+                                emptyList())),
+                        TEST_ENTITY_ID, true
+                },
+                {
+                        // only difference than the previous one is that now there is no DC_FACEBOOK_1 and there
+                        // is no need to associate since target entity already has MKTO_2
+                        newRequest(new Object[][] {
+                                { SFDC_1, TEST_ENTITY_ID }, { MKTO_1, null }}),
+                        newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2),
+                        emptyList(),
+                        emptyList(),
+                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                },
+                /*
+                 * Case #5: non-highest priority system ID already associated to other entity
+                 */
+                {
+                        // MKTO_1 already associated to another entity, no need to call underlying service
+                        // has association error since MKTO_1 mapped to TEST_ENTITY_ID2
+                        newRequest(new Object[][] {
+                                { SFDC_1, TEST_ENTITY_ID }, { MKTO_1, TEST_ENTITY_ID2 }}),
+                        newSeed(TEST_ENTITY_ID, SFDC_1),
+                        emptyList(),
+                        emptyList(),
+                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                },
+                /*
+                 * Case #6: non-highest priority lookup entry (many to X) already associate to other entity
+                 */
+                {
+                        // DUNS_1 & DC_FACEBOOK_1 already mapped to another entity
+                        // still associate because these entries has many to X mapping
+                        newRequest(new Object[][] {
+                                { SFDC_1, TEST_ENTITY_ID }, { DUNS_1, TEST_ENTITY_ID2 },
+                                { DC_FACEBOOK_1, TEST_ENTITY_ID2 }
+                        }),
+                        newSeed(TEST_ENTITY_ID, SFDC_1),
+                        singletonList(newSeed(TEST_ENTITY_ID, DUNS_1, DC_FACEBOOK_1)),
+                        singletonList(Triple.of(
+                                newSeed(TEST_ENTITY_ID, SFDC_1),
+                                emptyList(),
+                                asList(DUNS_1, DC_FACEBOOK_1))),
+                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                },
+                /*
+                 * Case #7: mixing #5 & #6 & some entries not mapped to any entity
+                 */
+                {
+                        newRequest(new Object[][] {
+                                { SFDC_1, TEST_ENTITY_ID }, { MKTO_1, TEST_ENTITY_ID2 },
+                                { DUNS_1, TEST_ENTITY_ID2 }, { DC_FACEBOOK_1, TEST_ENTITY_ID2 },
+                                { NC_GOOGLE_1, null }, { NC_GOOGLE_2, null }
+                        }),
+                        newSeed(TEST_ENTITY_ID, SFDC_1),
+                        singletonList(newSeed(TEST_ENTITY_ID, DUNS_1, DC_FACEBOOK_1, NC_GOOGLE_1, NC_GOOGLE_2)),
+                        singletonList(Triple.of(
+                                newSeed(TEST_ENTITY_ID, SFDC_1),
+                                emptyList(),
+                                asList(MKTO_1, DUNS_1, DC_FACEBOOK_1))),
+                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                },
+                /*
+                 * Case #8: two association required
+                 */
+                {
+                        // ELOQUA_3 already mapped to another entity
+                        // MKTO_1 has conflict in seed
+                        newRequest(new Object[][] {
+                                { SFDC_1, null }, { MKTO_1, null }, { ELOQUA_3, TEST_ENTITY_ID2 },
+                                { DUNS_1, TEST_ENTITY_ID2 }, { DC_FACEBOOK_1, TEST_ENTITY_ID2 },
+                                { NC_GOOGLE_1, null }, { NC_GOOGLE_2, null }
+                        }),
+                        newSeed(TEST_ENTITY_ID, MKTO_2),
+                        asList(newSeed(TEST_ENTITY_ID, SFDC_1), newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_1,
+                               DC_FACEBOOK_1, NC_GOOGLE_1, NC_GOOGLE_2)),
+                        asList(noConflictResult(newSeed(TEST_ENTITY_ID, MKTO_2)), Triple.of(
+                                newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2),
+                                emptyList(),
+                                asList(MKTO_1, DUNS_1, DC_FACEBOOK_1))),
+                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                },
+                /*
+                 * Case #9: highest priority entry is many to many
+                 */
+                {
+                        newRequest(new Object[][] {
+                                { DC_FACEBOOK_1, null }, { NC_GOOGLE_1, null }, { NC_GOOGLE_2, null }
+                        }),
+                        newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_GOOGLE_3),
+                        asList(newSeed(TEST_ENTITY_ID, DC_FACEBOOK_1),
+                                newSeed(TEST_ENTITY_ID, DC_FACEBOOK_1, NC_GOOGLE_1, NC_GOOGLE_2)),
+                        asList(noConflictResult(newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_GOOGLE_3)), Triple.of(
+                                newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_FACEBOOK_1, DC_GOOGLE_3),
+                                emptyList(), emptyList())),
+                        TEST_ENTITY_ID, false
+                },
+                /*
+                 * Case #10: conflict caused multiple processes trying to associate at the same time
+                 */
+                {
+                        // conflict during updating seed
+                        newRequest(new Object[][] {{ SFDC_1, null }}),
+                        newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]),
+                        singletonList(newSeed(TEST_ENTITY_ID, SFDC_1)),
+                        // seed before association has no lookup entry (newly allocated)
+                        // therefore no association error
+                        singletonList(Triple.of(
+                                newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]),
+                                singletonList(SFDC_1), emptyList())),
+                        // NOTE failed to associate highest priority entry, get null ID in response
+                        null, true
+                },
+                {
+                        // conflict during updating lookup mapping
+                        newRequest(new Object[][] {{ SFDC_1, null }}),
+                        newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]),
+                        singletonList(newSeed(TEST_ENTITY_ID, SFDC_1)),
+                        // seed before association has no lookup entry (newly allocated)
+                        // therefore no association error
+                        singletonList(Triple.of(
+                                newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]),
+                                emptyList(), singletonList(SFDC_1))),
+                        // NOTE failed to associate highest priority entry, get null ID in response
+                        null, true
+                },
+                /*
+                 * Case #11: entry many to one mapping
+                 */
+                {
+                        newRequest(new Object[][] {{ SFDC_1, TEST_ENTITY_ID }, { DUNS_1, null }}),
+                        // target seed already has SFDC_1 and DUNS_2 (conflict), no need to make association calls
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_2),
+                        emptyList(),
+                        emptyList(),
+                        // has conflict because DUNS_1 has conflict with DUNS_2 in target seed
+                        TEST_ENTITY_ID, true
+                },
+                {
+                        newRequest(new Object[][] {{ SFDC_1, TEST_ENTITY_ID }, { DUNS_1, TEST_ENTITY_ID2 }}),
+                        newSeed(TEST_ENTITY_ID, SFDC_1),
+                        // still try to update DUNS_1 because the mapping is many to one
+                        singletonList(newSeed(TEST_ENTITY_ID, DUNS_1)),
+                        singletonList(Triple.of(
+                                newSeed(TEST_ENTITY_ID, SFDC_1),
+                                emptyList(), emptyList())),
+                        // no conflict even if DUNS_1 already mapped to another entity (cuz mapping is many to one)
+                        TEST_ENTITY_ID, false
+                },
+                // TODO add more test cases
         };
+    }
+
+    private Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> noConflictResult(
+            EntityRawSeed seedBeforeAssociation) {
+        return Triple.of(seedBeforeAssociation, emptyList(), emptyList());
+    }
+
+    /*
+     * rows format: array of [ EntityLookupEntry, String ]
+     */
+    private EntityAssociationRequest newRequest(Object[][] rows) {
+        List<Pair<MatchKeyTuple, String>> lookupResults = Arrays
+                .stream(rows)
+                .map(row -> {
+                    EntityLookupEntry entry = (EntityLookupEntry) row[0];
+                    String seedId = (String) row[1];
+                    MatchKeyTuple tuple = EntityLookupEntryConverter.toMatchKeyTuple(entry);
+                    return Pair.of(tuple, seedId);
+                }).collect(Collectors.toList());
+        return new EntityAssociationRequest(TEST_TENANT, TEST_ENTITY, lookupResults, null);
     }
 
     private EntityAssociateServiceImpl mock(
