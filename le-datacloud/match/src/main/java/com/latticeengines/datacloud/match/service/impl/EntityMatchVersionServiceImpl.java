@@ -1,5 +1,15 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
+
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
@@ -8,6 +18,8 @@ import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.UpdateItemExpressionSpec;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -17,11 +29,6 @@ import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
 
 @Component("entityMatchVersionService")
 public class EntityMatchVersionServiceImpl implements EntityMatchVersionService {
@@ -33,8 +40,13 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     private static final String DELIMITER = DataCloudConstants.ENTITY_DELIMITER;
     // treat null item as version 0 because dynamo treat it this way (ADD on null item will result in 1)
     private static final int DEFAULT_VERSION = 0;
+    // use the limit just in case, will probably never exceeds this and the memory used by this cache is small anyways
+    private static final long MAX_CACHED_ENTRIES = 2000L;
 
     private final DynamoItemService dynamoItemService;
+    private volatile Cache<Pair<String, EntityMatchEnvironment>, Integer> versionCache;
+    @Value("${datacloud.match.entity.cache.version.ttl:1800}")
+    private long cacheTTLInSeconds;
     private String tableName; // currently store both version in serving for faster lookup
 
     @Inject
@@ -47,13 +59,25 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
 
     @Override
     public int getCurrentVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        initCache();
+        Pair<String, EntityMatchEnvironment> cacheKey = Pair.of(tenant.getId(), environment);
+        // try in memory cache first
+        Integer version = versionCache.getIfPresent(cacheKey);
+        if (version != null) {
+            return version;
+        }
+
+        // try dynamo and update cache
         PrimaryKey key = buildKey(environment, tenant);
         Item item = dynamoItemService.getItem(tableName, key);
-        return item == null ? DEFAULT_VERSION : item.getInt(ATTR_VERSION);
+        version = item == null ? DEFAULT_VERSION : item.getInt(ATTR_VERSION);
+        versionCache.put(cacheKey, version);
+        return version;
     }
 
     @Override
     public int bumpVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        initCache();
         PrimaryKey key = buildKey(environment, tenant);
         UpdateItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
                 .addUpdate(N(ATTR_VERSION).add(1)) // increase by one
@@ -65,19 +89,49 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
         UpdateItemOutcome result = dynamoItemService.update(tableName, spec);
         Preconditions.checkNotNull(result);
         Preconditions.checkNotNull(result.getItem());
+        // clear cache
+        versionCache.invalidate(Pair.of(tenant.getId(), environment));
         return result.getItem().getInt(ATTR_VERSION);
     }
 
     @Override
     public void clearVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        initCache();
         PrimaryKey key = buildKey(environment, tenant);
         dynamoItemService.delete(tableName, new DeleteItemSpec().withPrimaryKey(key));
+        // clear cache
+        versionCache.invalidate(Pair.of(tenant.getId(), environment));
     }
 
     @VisibleForTesting
     void setTableName(@NotNull String tableName) {
         Preconditions.checkNotNull(tableName);
         this.tableName = tableName;
+    }
+
+    @VisibleForTesting
+    Cache<Pair<String, EntityMatchEnvironment>, Integer> getVersionCache() {
+        return versionCache;
+    }
+
+    /*
+     * instantiate version cache lazily (on first request)
+     */
+    private void initCache() {
+        if (versionCache != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (versionCache == null) {
+                versionCache = Caffeine
+                        .newBuilder()
+                        // TTL starts after writes instead of access, limit the staleness of data just in case
+                        .expireAfterWrite(cacheTTLInSeconds, TimeUnit.SECONDS)
+                        .maximumSize(MAX_CACHED_ENTRIES)
+                        .build();
+            }
+        }
     }
 
     /*
