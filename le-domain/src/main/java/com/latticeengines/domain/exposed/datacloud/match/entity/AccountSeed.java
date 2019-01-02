@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,7 +21,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
  * Class to represent seed for account entity.
  */
 public class AccountSeed {
-    private static final String ENTITY = BusinessEntity.Account.name();
+    public static final String ENTITY = BusinessEntity.Account.name();
+
     private static final String KEY_LATTICE_ACCOUNT_ID = DataCloudConstants.LATTICE_ACCOUNT_ID;
 
     private final String id;
@@ -112,7 +114,7 @@ public class AccountSeed {
      */
     public static AccountSeed fromRawSeed(@NotNull EntityRawSeed rawSeed) {
         Preconditions.checkNotNull(rawSeed);
-        Preconditions.checkArgument(rawSeed.getEntity() == ENTITY);
+        Preconditions.checkArgument(rawSeed.getEntity().equals(ENTITY));
         AccountSeedBuilder builder = new AccountSeedBuilder();
         // set account ID and lattice account ID
         builder.withId(rawSeed.getId()).withLatticeAccountId(rawSeed.getAttributes().get(KEY_LATTICE_ACCOUNT_ID));
@@ -136,5 +138,31 @@ public class AccountSeed {
             }
         });
         return builder.build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AccountSeed that = (AccountSeed) o;
+        return Objects.equal(id, that.id) && Objects.equal(latticeAccountId, that.latticeAccountId) && Objects
+                .equal(externalSystemIdMap, that.externalSystemIdMap) && Objects.equal(duns, that.duns) && Objects
+                .equal(domainCountries, that.domainCountries) && Objects.equal(nameCountries, that.nameCountries);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id, latticeAccountId, externalSystemIdMap, duns, domainCountries, nameCountries);
+    }
+
+    @Override
+    public String toString() {
+        return "AccountSeed{" + "id='" + id + '\'' + ", latticeAccountId='" + latticeAccountId + '\''
+                + ", externalSystemIdMap=" + externalSystemIdMap + ", duns='" + duns + '\'' + ", domainCountries="
+                + domainCountries + ", nameCountries=" + nameCountries + '}';
     }
 }
