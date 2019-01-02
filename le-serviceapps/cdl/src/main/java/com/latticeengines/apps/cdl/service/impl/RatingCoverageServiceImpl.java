@@ -1078,7 +1078,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             if (targetSegment != null) {
                 if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
                     coverageInfo.setAccountCount(
-                            targetSegment.getAccounts() - coverageInfo.getAccountCount());
+                            targetSegment.getAccounts() - coverageInfo.getUnscoredAccountCount());
                 }
             }
 
