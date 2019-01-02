@@ -6,6 +6,8 @@ import com.latticeengines.datacloud.match.service.EntityMatchConfigurationServic
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -29,6 +31,8 @@ import java.util.Objects;
 @Component("entityIdResolveMicroEngineActor")
 @Scope("prototype")
 public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate {
+
+    private static final Logger log = LoggerFactory.getLogger(EntityIdResolveMicroEngineActor.class);
 
     @Inject
     @Qualifier("matchActorSystem")
@@ -70,6 +74,11 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
             traveler.debug(String.format(
                     "Resolve lookup results to EntityId=%s for Entity=%s", entityId, matchTraveler.getTargetEntity()));
         } else {
+            if (entityId != null) {
+                // should never happen, lookup actor should return either null or non-blank entity ID
+                log.warn("Blank entity ID found in entity lookup results = {}",
+                        matchTraveler.getEntityMatchLookupResults());
+            }
             traveler.debug(String.format(
                     "No entity found in lookup results for Entity=%s", matchTraveler.getTargetEntity()));
         }
