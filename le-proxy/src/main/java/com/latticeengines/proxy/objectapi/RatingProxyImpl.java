@@ -94,11 +94,11 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        Map<String, Long> map = _ratingProxy.getCoverageFromCache(customerSpace, frontEndQuery);
+        Map<String, Long> map = _ratingProxy.getCoverageFromCache(shortenCustomerSpace(customerSpace), frontEndQuery);
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)")
+    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", #customerSpace, #frontEndQuery)")
     public Map<String, Long> getCoverageFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         return getCoverageFromApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
