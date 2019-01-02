@@ -13,8 +13,10 @@ public class EaiJobUtil {
             throws IOException {
         String dependencyPath = "/app/";
         String jarDependencyPath = "/eai/lib";
+        String log4jXmlPath = "/conf/log4j2-yarn.xml";
         List<String> jarFilePaths = HdfsUtils.getFilesForDir(yarnConfiguration,
                 dependencyPath + currentVersionInStack + jarDependencyPath, ".*\\.jar$");
+        jarFilePaths.add(dependencyPath + currentVersionInStack + log4jXmlPath);
         return jarFilePaths;
     }
 }

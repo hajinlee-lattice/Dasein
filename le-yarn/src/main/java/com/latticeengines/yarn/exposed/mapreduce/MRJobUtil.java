@@ -1,6 +1,7 @@
 package com.latticeengines.yarn.exposed.mapreduce;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,12 +21,26 @@ public class MRJobUtil {
 
     public static String getPlatformShadedJarPath(Configuration yarnConfiguration, String version) {
          List<String> jarFilePaths = getPlatformShadedJarPathList(yarnConfiguration, version);
+         if (jarFilePaths == null) {
+             jarFilePaths = new ArrayList<>();
+         } else {
+             jarFilePaths = new ArrayList<>(jarFilePaths);
+         }
+         jarFilePaths.add(getLog4j2Xml(version));
          return commaJoiner.join(jarFilePaths);
     }
 
     public static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration, String version) {
         try {
             return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/dataplatform/lib", version), ".*\\.jar$");
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+    }
+
+    private static String getLog4j2Xml(String version) {
+        try {
+            return String.format("/app/%s/conf/log4j2-yarn.xml", version);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }

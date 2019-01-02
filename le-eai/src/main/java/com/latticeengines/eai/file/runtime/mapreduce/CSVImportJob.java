@@ -7,6 +7,7 @@ import org.apache.avro.mapreduce.AvroJob;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
@@ -80,6 +81,9 @@ public class CSVImportJob extends MRJobCustomizationBase {
             TextInputFormat.setMinInputSplitSize(mrJob, 100000000000L);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
+
+            String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
+            config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE
             // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");

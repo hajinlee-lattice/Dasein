@@ -174,11 +174,13 @@ public class ScoringJobUtil {
         String jarDependencyPath = "/scoring/lib";
         String scoringPythonPath = "/scoring/scripts/scoring.py";
         String pythonLauncherPath = "/dataplatform/scripts/pythonlauncher.sh";
+        String log4jXmlPath = "/conf/log4j2-yarn.xml";
 
         files.add(dependencyPath + currentVersionInStack + scoringPythonPath);
         files.add(dependencyPath + currentVersionInStack + pythonLauncherPath);
         files.addAll(HdfsUtils.getFilesForDir(yarnConfiguration,
                 dependencyPath + currentVersionInStack + jarDependencyPath, ".*\\.jar$"));
+        files.add(dependencyPath + currentVersionInStack + log4jXmlPath);
         return files;
 
     }

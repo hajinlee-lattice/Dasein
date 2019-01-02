@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -98,6 +99,8 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
             mrJob.setNumReduceTasks(0);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
+            String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
+            config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);

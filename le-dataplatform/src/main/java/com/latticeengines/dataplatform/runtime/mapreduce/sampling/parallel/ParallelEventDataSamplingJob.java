@@ -17,6 +17,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.util.ToolRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -71,6 +72,9 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
         customizeConfig(config, properties);
 
         MRJobUtil.setLocalizedResources(mrJob, properties);
+
+        String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
+        config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
 
         setInputFormat(mrJob, config, properties);
         setOutputFormat(mrJob, properties);

@@ -16,6 +16,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -129,6 +130,9 @@ public class EventDataSamplingJob extends MRJobCustomizationBase {
             mrJob.setOutputValueClass(NullWritable.class);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
+
+            String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
+            config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }

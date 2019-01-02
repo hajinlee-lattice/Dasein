@@ -43,7 +43,7 @@ import com.latticeengines.eai.service.impl.file.strategy.CSVFileExportStrategyBa
 
 public class FileExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
-    public static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("TestCustomer");
+    private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("TestCustomer");
 
     @Autowired
     private ExportService fileExportService;
