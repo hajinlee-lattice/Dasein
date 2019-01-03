@@ -54,21 +54,17 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
                 vm.periodType = vm.datacollectionstatus.ApsRollingPeriod;
 
-                var filtersLength = Object.keys(model.advancedModelingConfig.cross_sell.filters).length,
-                    trainingSegment = model.trainingSegment,
-                    trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts;
-
-                vm.hasSettingsInfo =  (((trainingProducts && trainingProducts.length != 0) || trainingSegment) ||
-                    vm.modelingStrategy == 'CROSS_SELL_REPEAT_PURCHASE' && filtersLength > 1 ||
-                    vm.modelingStrategy == 'CROSS_SELL_FIRST_PURCHASE' && filtersLength != 0)
-                    ? true : false;
-
+                var filtersLength = Object.keys(model.advancedModelingConfig.cross_sell.filters).length;
                 vm.targetProducts = model.advancedModelingConfig.cross_sell.targetProducts;
                 vm.modelingStrategy = model.advancedModelingConfig.cross_sell.modelingStrategy;
                 vm.configFilters = model.advancedModelingConfig.cross_sell.filters;
                 vm.trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts;
 
-                // console.log(vm.configFilters);
+                vm.hasSettingsInfo =  ((vm.trainingProducts || vm.trainingSegment) ||
+                    vm.modelingStrategy == 'CROSS_SELL_REPEAT_PURCHASE' && filtersLength > 1 ||
+                    vm.modelingStrategy == 'CROSS_SELL_FIRST_PURCHASE' && filtersLength != 0)
+                    ? true : false;
+
 
                 if (vm.targetProducts.length === 0) {
                     vm.modelSettingsSummary.cross_sell.products = false;
