@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -88,6 +89,10 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         importConfig.setProperty(ImportProperty.COLLECTION_IDENTIFIERS, JsonUtils.serialize(identifiers));
         importConfig.setBusinessEntity(BusinessEntity.getByName(dataFeedTask.getEntity()));
 
+        if (sourceType.equals(SourceType.FILE)) {
+            putStringValueInContext(WorkflowContextConstants.Outputs.EAI_JOB_INPUT_FILE_PATH,
+                    ((CSVToHdfsConfiguration) importConfig).getFilePath());
+        }
         return importConfig;
     }
 

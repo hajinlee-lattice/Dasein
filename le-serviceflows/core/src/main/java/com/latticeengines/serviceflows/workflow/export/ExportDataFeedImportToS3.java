@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -46,6 +47,11 @@ public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3S
             String tgtDir = pathBuilder.convertAtlasTableDir(p, podId, tenantId, s3Bucket);
             requests.add(new ImportExportRequest(p, tgtDir));
         });
+        String filePath = getStringValueFromContext(WorkflowContextConstants.Outputs.EAI_JOB_INPUT_FILE_PATH);
+        if (StringUtils.isNotBlank(filePath)) {
+            String tgtDir = pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket);
+            requests.add(new ImportExportRequest(filePath, tgtDir));
+        }
 
     }
 
