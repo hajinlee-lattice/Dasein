@@ -354,29 +354,14 @@ angular.module('lp.ratingsengine.ratingslist', [
             if(modal){
                 modal.waiting(true);
             }
-
             RatingsEngineStore.deleteRating(ratingId).then(function(result) {
-
                 if (result != null && result === true) {
-                    
-                    Modal.modalRemoveFromDOM(modal, args);
-
                     $state.go('home.ratingsengine.list', {}, { reload: true } );
                 } else {
-                    Banner.error({ message: result.errorMessage });
+                    console.log(result);
                 }
+                Modal.modalRemoveFromDOM(modal, args);
             });
-
-            // SegmentService.DeleteSegment(segmentName).then(function(result) {
-            //     if (result != null && result.success === true) {
-                    
-            //         Modal.modalRemoveFromDOM(modal, args);
-
-            //         $state.go('home.segments', {}, { reload: true } );
-            //     } else {
-            //         Banner.error({ message: result.errorMessage });
-            //     }
-            // });
         }
     }
 
