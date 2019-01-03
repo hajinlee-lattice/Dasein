@@ -50,10 +50,12 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
+import com.latticeengines.domain.exposed.ratings.coverage.ProductAndEventQueryPair;
 import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -67,6 +69,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndSingleRule
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 
 @Component("ratingCoverageService")
@@ -90,6 +93,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Autowired
     private EntityProxy entityProxy;
+
+    @Autowired
+    private EventProxy eventProxy;
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
@@ -1002,6 +1008,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         MetadataSegment targetSegment = ratingEngine.getSegment();
         AIModel aiModel = (AIModel) ratingModel;
 
+        if (targetSegment == null) {
+            throw new LedpException(LedpCode.LEDP_40045, new String[] { "" });
+        }
+
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
             CrossSellModelingConfig advancedConfig = (CrossSellModelingConfig) aiModel
                     .getAdvancedModelingConfig();
@@ -1020,66 +1030,61 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             advancedConfig.setFilters(filters);
         }
 
-        if (targetSegment == null) {
-            throw new LedpException(LedpCode.LEDP_40045, new String[] { "" });
-        }
+        List<ProductAndEventQueryPair> eventQueries = new ArrayList<ProductAndEventQueryPair>();
+        productIds.forEach(productId -> {
+            CrossSellModelingConfig advancedConfig = (CrossSellModelingConfig) aiModel
+                    .getAdvancedModelingConfig();
+            advancedConfig.setTargetProducts(Collections.singletonList(productId));
+            aiModel.setAdvancedModelingConfig(advancedConfig);
+            EventFrontEndQuery efeq = ratingEngineService.getModelingQuery(tenant.getId(),
+                    ratingEngine, aiModel, ModelingQueryType.TARGET, null);
+            eventQueries.add(new ProductAndEventQueryPair(productId, efeq));
+        });
 
         if (productIds.size() < thresholdForParallelProcessing) {
-            Stream<String> stream = productIds.stream();
-            response = processProductIdsStream(tenant, stream, ratingEngine, aiModel,
-                    purchasedBeforePeriod);
+            Stream<ProductAndEventQueryPair> stream = eventQueries.stream();
+            response = processEventFrontEndQueryStream(tenant, stream, targetSegment);
         } else {
             response = tpForParallelStream.submit(() -> {
-                Stream<String> parallelStream = productIds.stream().parallel();
-                return processProductIdsStream(tenant, parallelStream, ratingEngine, aiModel,
-                        purchasedBeforePeriod);
+                Stream<ProductAndEventQueryPair> parallelStream = eventQueries.stream().parallel();
+                return processEventFrontEndQueryStream(tenant, parallelStream, targetSegment);
             }).join();
         }
 
         return response;
     }
 
-    // This method can accept parallel or sequential stream
-    private RatingEnginesCoverageResponse processProductIdsStream(Tenant tenant,
-            Stream<String> stream, RatingEngine ratingEngine, AIModel aiModel,
-            Integer purchasedBeforePeriod) {
+    private RatingEnginesCoverageResponse processEventFrontEndQueryStream(Tenant tenant,
+            Stream<ProductAndEventQueryPair> stream, MetadataSegment targetSegment) {
         RatingEnginesCoverageResponse response = new RatingEnginesCoverageResponse();
-        stream.forEach(productId -> {
+        stream.forEach(query -> {
             try {
-                CoverageInfo coverageInfo = processSingleProductId(tenant, ratingEngine, aiModel,
-                        productId, purchasedBeforePeriod);
-                response.getRatingModelsCoverageMap().put(productId, coverageInfo);
+                log.info("Event front end query for products: " + JsonUtils.serialize(query));
+                CoverageInfo coverageInfo = processSingleQuery(tenant,
+                        query.getEventFrontEndQuery(), targetSegment);
+                response.getRatingModelsCoverageMap().put(query.getProductId(), coverageInfo);
             } catch (Exception ex) {
-                log.info("Ignoring exception in getting coverage info for product id: " + productId,
-                        ex);
-                response.getErrorMap().put(productId, ex != null ? ex.getMessage() : "null");
+                log.info("Ignoring exception in getting coverage info for product id: "
+                        + query.getProductId(), ex);
+                response.getErrorMap().put(query.getProductId(),
+                        ex != null ? ex.getMessage() : "null");
             }
         });
         return response;
     }
 
-    private CoverageInfo processSingleProductId(Tenant tenant, RatingEngine ratingEngine,
-            AIModel aiModel, String productId, Integer purchasedBeforePeriod) {
+    private CoverageInfo processSingleQuery(Tenant tenant, EventFrontEndQuery query,
+            MetadataSegment targetSegment) {
         try {
             MultiTenantContext.setTenant(tenant);
-            MetadataSegment targetSegment = ratingEngine.getSegment();
-
-            CrossSellModelingConfig advancedConfig = (CrossSellModelingConfig) aiModel
-                    .getAdvancedModelingConfig();
-            advancedConfig.setTargetProducts(Collections.singletonList(productId));
-
-            log.info("aiModel: " + JsonUtils.serialize(aiModel));
-            Long count = ratingEngineService.getModelingQueryCount(tenant.getId(), ratingEngine,
-                    aiModel, ModelingQueryType.TARGET, null);
+            Long count = eventProxy.getScoringCount(tenant.getId(), query);
 
             CoverageInfo coverageInfo = new CoverageInfo();
             coverageInfo.setUnscoredAccountCount(count);
 
-            if (targetSegment != null) {
-                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
-                    coverageInfo.setAccountCount(
-                            targetSegment.getAccounts() - coverageInfo.getUnscoredAccountCount());
-                }
+            if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
+                coverageInfo.setAccountCount(
+                        targetSegment.getAccounts() - coverageInfo.getUnscoredAccountCount());
             }
 
             return coverageInfo;
