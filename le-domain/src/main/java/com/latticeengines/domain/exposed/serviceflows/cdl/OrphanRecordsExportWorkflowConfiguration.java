@@ -17,6 +17,7 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String CREATED_BY = "CREATED_BY";
     public static final String EXPORT_ID = "EXPORT_ID";
     public static final String ARTIFACT_TYPE = "ARTIFACT_TYPE";
+    public static final String ARTIFACT_DISPLAY_NAME = "ARTIFACT_DISPLAY_NAME";
 
     public static class Builder {
         private OrphanRecordsExportWorkflowConfiguration configuration = new OrphanRecordsExportWorkflowConfiguration();

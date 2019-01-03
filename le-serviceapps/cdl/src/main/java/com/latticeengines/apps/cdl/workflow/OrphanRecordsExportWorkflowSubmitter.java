@@ -81,9 +81,10 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 OrphanRecordsExportWorkflowConfiguration.WORKFLOW_NAME);
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.CREATED_BY, request.getCreatedBy());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.EXPORT_ID, request.getExportId());
-        inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_TYPE,
-                request.getOrphanRecordsType().name());
-        inputProperties.put(ExportProperty.TARGET_FILE_NAME, request.getOrphanRecordsType().getOrphanType());
+        inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_TYPE, orphanRecordsType.name());
+        inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_DISPLAY_NAME,
+                orphanRecordsType.getDisplayName());
+        inputProperties.put(ExportProperty.TARGET_FILE_NAME, orphanRecordsType.getOrphanType());
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 
         String transactionTableName = getTable(TableRoleInCollection.ConsolidatedRawTransaction,
