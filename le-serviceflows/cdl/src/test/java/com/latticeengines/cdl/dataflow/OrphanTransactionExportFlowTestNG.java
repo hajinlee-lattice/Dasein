@@ -132,10 +132,10 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
         List<GenericRecord> records = readOutput();
         int rowNum = 0;
         for (GenericRecord record : records) {
-            Assert.assertEquals(record.get(0).toString(),expectedData[rowNum][0]);
-            Assert.assertEquals(record.get(1).toString(),expectedData[rowNum][1]);
-            Assert.assertEquals(record.get(2).toString(),expectedData[rowNum][2]);
-            Assert.assertEquals(record.get(3),expectedData[rowNum][3]);
+            Assert.assertEquals(record.get(0).toString(), expectedData[rowNum][0]);
+            Assert.assertEquals(record.get(1).toString(), expectedData[rowNum][1]);
+            Assert.assertEquals(record.get(2).toString(), expectedData[rowNum][2]);
+            Assert.assertEquals(record.get(3), expectedData[rowNum][3]);
             rowNum ++;
         }
         Assert.assertEquals(rowNum, expectNumOfRows);

@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,8 +12,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -26,6 +30,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -242,6 +248,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     private long countRawEntitiesInHdfs(TableRoleInCollection tableRoleInCollection) {
         try {
+            long result = -1L;
             String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                     tableRoleInCollection, inactive);
             if (StringUtils.isBlank(rawTableName)) {
@@ -269,7 +276,40 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     hdfsPath += "/*.avro";
                 }
             }
-            return AvroUtils.count(yarnConfiguration, hdfsPath);
+
+            if (tableRoleInCollection == TableRoleInCollection.ConsolidatedProduct) {
+                Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(hdfsPath));
+                List<Schema.Field> fields = schema.getFields();
+                int productIdIndex = -1, productTypeIndex = -1, productStatusIndex = -1;
+                for (Schema.Field field : fields) {
+                    if (field.name().equalsIgnoreCase(InterfaceName.ProductId.name())) {
+                        productIdIndex = field.pos();
+                    }
+                    if (field.name().equalsIgnoreCase(InterfaceName.ProductType.name())) {
+                        productTypeIndex = field.pos();
+                    }
+                    if (field.name().equalsIgnoreCase(InterfaceName.ProductStatus.name())) {
+                        productStatusIndex = field.pos();
+                    }
+                }
+                Set<String> uniqueSKUs = new HashSet<>();
+                List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(hdfsPath));
+                for (GenericRecord record : records) {
+                    String id = record.get(productIdIndex).toString();
+                    String type = record.get(productTypeIndex).toString();
+                    String status = record.get(productStatusIndex).toString();
+                    if ((type.equalsIgnoreCase(ProductType.Bundle.name())
+                            || type.equalsIgnoreCase(ProductType.Hierarchy.name()))
+                            && status.equalsIgnoreCase(ProductStatus.Active.name())) {
+                        uniqueSKUs.add(id);
+                    }
+                }
+                result = uniqueSKUs.size();
+            } else {
+                result = AvroUtils.count(yarnConfiguration, hdfsPath);
+            }
+            log.info(String.format("Table role %s has %d entities.", tableRoleInCollection.name(), result));
+            return result;
         } catch (Exception ex) {
             log.error("Fail to count raw entities in table.", ex);
             return 0L;

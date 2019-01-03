@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,9 +19,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -89,7 +96,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
             log.info("Local output CSV=" + localOutputCSV.toString());
 
             CSVWriter writer = new CSVWriter(new FileWriter(localOutputCSV), CSVWriter.DEFAULT_SEPARATOR,
-                    CSVWriter.NO_QUOTE_CHARACTER);
+                    CSVWriter.DEFAULT_QUOTE_CHARACTER);
 
             File[] files = localCsvDir.listFiles(file -> {
                 return file.getName().matches("\\w+_part-[\\w\\d-]+.csv$|.*-p-\\d+.csv$");
@@ -104,12 +111,36 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 log.info("Merging file " + file.getName());
                 CSVReader csvReader = new CSVReader(new FileReader(file));
                 List<String[]> records = csvReader.readAll();
+                String[] headerLine = records.get(0);
+                List<String[]> dataLines = records.subList(1, records.size());
+
+                // get index of TransactionDate field
+                int transactionDateIndex = -1;
+                for (int i = 0; i < headerLine.length; i++) {
+                    if (headerLine[i].equalsIgnoreCase(InterfaceName.TransactionDate.name())) {
+                        transactionDateIndex = i;
+                        break;
+                    }
+                }
+
+                Set<List<String>> recordsSet = new HashSet<>();
+                for (String[] line : dataLines) {
+                    if (transactionDateIndex > 0) {
+                        line[transactionDateIndex] = toDefaultDateFormat(line[transactionDateIndex]);
+                    }
+                    recordsSet.add(Arrays.asList(line));
+                }
+                List<String[]> dataRecords = new ArrayList<>();
+                recordsSet.forEach(record -> {
+                    String[] dataArr = new String[record.size()];
+                    dataRecords.add(dataArr);
+                });
                 if (!hasHeader) {
-                    writer.writeNext(records.get(0));
+                    writer.writeNext(headerLine);
                     hasHeader = true;
                 }
-                if (records.size() > 1) {
-                    writer.writeAll(records.subList(1, records.size()));
+                if (dataRecords.size() > 1) {
+                    writer.writeAll(dataRecords.subList(1, dataRecords.size()));
                 }
                 csvReader.close();
             }
@@ -143,6 +174,12 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
     protected String getExportOutputPath() {
         String outputPath = getStringValueFromContext(EXPORT_OUTPUT_PATH);
         return StringUtils.isNotBlank(outputPath) ? outputPath : null;
+    }
+
+    private String toDefaultDateFormat(String sourceDateString) throws Exception {
+        SimpleDateFormat srcFormat = new SimpleDateFormat(DateTimeUtils.DATE_ONLY_FORMAT_STRING);
+        SimpleDateFormat dstFormat = new SimpleDateFormat("M/d/yyyy");  // default format (M/d/yyyy)
+        return dstFormat.format(srcFormat.parse(sourceDateString));
     }
 
 }
