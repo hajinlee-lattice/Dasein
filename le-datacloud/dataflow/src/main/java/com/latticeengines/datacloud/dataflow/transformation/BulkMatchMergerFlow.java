@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -24,7 +25,7 @@ public class BulkMatchMergerFlow extends ConfigurableFlowBase<BulkMatchMergerTra
                 : addSource(parameters.getBaseTables().get(1));
 
         FieldList joinFields = new FieldList(config.getJoinField());
-        Node result = inputSource.leftJoin(joinFields, matchSource, joinFields);
+        Node result = matchSource.join(joinFields, inputSource, joinFields, JoinType.RIGHT);
         List<String> retainFields = getRetainFields(inputSource, matchSource);
         result = result.retain(new FieldList(retainFields));
         return result;
