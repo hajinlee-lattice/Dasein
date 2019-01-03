@@ -144,7 +144,7 @@
                                     Model with similar segment: {{ vm.trainingSegment.display_name }}
                                 </li>
                                 <li
-                                    ng-if="vm.trainingProducts !== undefined">
+                                    ng-if="vm.trainingProducts !== null">
                                     Model with similar product(s): 
                                     <br/>
                                     <span ng-if="vm.oneTrainingProduct">{{ vm.trainingProducts.ProductName }}</span>
