@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,6 +62,9 @@ public class FuzzyMatchHelper implements DbHelper {
     @Inject
     private CDLLookupService cdlLookupService;
 
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
+
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
@@ -88,6 +92,7 @@ public class FuzzyMatchHelper implements DbHelper {
     @MatchStep
     private void fetchInternal(MatchContext context, boolean isSync) {
         boolean fetchOnly = context.getInput().isFetchOnly();
+        setAllocateModeFlag(context);
         if (!fetchOnly) {
             try {
                 updateDecisionGraph(context.getInput());
@@ -106,6 +111,14 @@ public class FuzzyMatchHelper implements DbHelper {
                 log.error("Failed to run fuzzy match.", e);
             }
         }
+    }
+
+    private void setAllocateModeFlag(MatchContext context) {
+        if (context == null || context.getInput() == null) {
+            return;
+        }
+
+        entityMatchConfigurationService.setIsAllocateMode(context.getInput().isAllocateId());
     }
 
     private void preLookup(MatchContext context) {

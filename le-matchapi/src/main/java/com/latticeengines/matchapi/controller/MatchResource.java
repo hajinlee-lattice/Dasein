@@ -67,6 +67,7 @@ public class MatchResource {
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         matchValidationService.validateDataCloudVersion(input.getDataCloudVersion());
+        clearAllocateModeFlag(input);
 
         // Skip logic for setting up mock for CDL lookup if MatchInput has Operational Mode set to LDC Match or
         // Entity Match.
@@ -90,6 +91,7 @@ public class MatchResource {
         try {
             if (CollectionUtils.isNotEmpty(input.getInputList())) {
                 for (MatchInput matchInput : input.getInputList()) {
+                    clearAllocateModeFlag(matchInput);
                     matchValidationService.validateDataCloudVersion(matchInput.getDataCloudVersion());
                 }
             }
@@ -162,6 +164,22 @@ public class MatchResource {
             }
         }
         throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
+    }
+
+    /*
+     * set allocateId field to false (lookup mode) for real time match
+     */
+    private void clearAllocateModeFlag(MatchInput input) {
+        if (input == null) {
+            return;
+        }
+
+        if (input.isAllocateId()) {
+            // log warning if we get allocateId = true in realtime match
+            log.warn("Cannot be in allocate mode for realtime match, set to lookup mode. MatchInput={}", input);
+        }
+        // set to non-allocate (lookup) mode
+        input.setAllocateId(false);
     }
 
     private MatchInput mockForCDLLookup(MatchInput input) {
