@@ -132,7 +132,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MATCH_DEBUG, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.VDB_MIGRATION, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.LATTICE_MARKETO_SCORING, lpi).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.LATTICE_MARKETO_SCORING, lpi).setDefaultValue(true);
 
         // CG flags
         Collection<LatticeProduct> cg = Collections.singleton(LatticeProduct.CG);
