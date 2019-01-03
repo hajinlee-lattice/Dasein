@@ -33,7 +33,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
     private static final Logger log = LoggerFactory.getLogger(CommitEntityMatch.class);
 
     private static final EntityMatchEnvironment SOURCE_ENV = EntityMatchEnvironment.STAGING;
-    private static final EntityMatchEnvironment DEST_ENV = EntityMatchEnvironment.STAGING;
+    private static final EntityMatchEnvironment DEST_ENV = EntityMatchEnvironment.SERVING;
 
     @Inject
     private EntityRawSeedService entityRawSeedService;
