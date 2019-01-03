@@ -23,9 +23,6 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         //==================================================
         // Prepare
         //==================================================
-        // var totalLeads = modelSummary.ModelDetails.TestingLeads;
-        // var totalConversions = modelSummary.ModelDetails.TestingConversions;
-
         Array.prototype.sum = function (prop) {
             var total = 0
             for ( var i = 0, _len = this.length; i < _len; i++ ) {
@@ -36,10 +33,8 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
 
         var segments = modelSummary.Segmentations[0].Segments;
 
-        console.log(segments);
         var totalLeads = segments.sum("Count");
         var totalConversions = segments.sum("Converted");
-
         var avgConversion = totalConversions / totalLeads;
 
         var percentLeads = []; for (i = 0; i < 101; i++) percentLeads.push(i);

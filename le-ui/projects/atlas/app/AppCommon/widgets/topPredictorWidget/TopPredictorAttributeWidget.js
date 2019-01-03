@@ -12,8 +12,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var data = $scope.data;
     var modelData = ModelStore.data;
 
-    // console.log(modelData);
-
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
     $scope.attributeDescription = data.description;
@@ -342,6 +340,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         })
         .attr("dy", commonDy)
         .attr("font-weight", "semi-bold")
+        .attr("word-break", "break-word")
         .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .style("fill", "black")
@@ -349,9 +348,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .call(wrap, left_width - 20);
 
     function wrap(text, width) {
+
         text.each(function() {
             var text = d3.select(this),
-                words = text.text().split(/\s+/).reverse(),
+                words = text.text().split().reverse(),
                 wordLength = words.length,
                 word,
                 line = [],
