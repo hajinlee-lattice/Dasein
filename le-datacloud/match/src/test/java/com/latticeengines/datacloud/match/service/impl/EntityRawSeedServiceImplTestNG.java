@@ -1,35 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_4;
@@ -59,10 +30,38 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.Seed.EMPTY;
-import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
-
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final Tenant TEST_TENANT = new Tenant("raw_seed_service_test_tenant_1");
@@ -296,7 +295,9 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
                 Assert.assertEquals(seedBeforeUpdate.getId(), seedId);
                 Assert.assertEquals(seedBeforeUpdate.getEntity(), entity);
             }
-            Thread.sleep(500L);
+            System.out.println(String.format(
+                    "Waiting for update to take effect for env = %s, seedToUpdate = %s", env, seedToUpdate));
+            Thread.sleep(1000L);
 
             // check state after update
             EntityRawSeed seedAfterUpdate = entityRawSeedService.get(
