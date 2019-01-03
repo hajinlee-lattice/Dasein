@@ -4,15 +4,17 @@ angular
 .module('lp.importtemplates', [
     
     'le.import.templates',
-    'le.summary'
+    'le.summary',
+    'lp.import'
 ])
 .config(function($stateProvider) {
     $stateProvider
 
+
         .state('home.importtemplates', {
             url: '/templates',
-            onEnter: function(){
-                console.log('ENTERED');
+            onEnter: function(ImportWizardStore){
+                ImportWizardStore.clear();
             },
             params: {
                 tenantName: { dynamic: true, value: '' },
