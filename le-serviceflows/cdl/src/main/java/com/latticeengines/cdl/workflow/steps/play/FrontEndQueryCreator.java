@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
@@ -176,7 +177,7 @@ public class FrontEndQueryCreator {
             accountFrontEndQuery.setContactRestriction(contactRestriction);
 
             Restriction extractedContactRestriction = contactRestriction.getRestriction() == null
-                    ? new RestrictionBuilder().build() : contactRestriction.getRestriction();
+                    ? LogicalRestriction.builder().or(new ArrayList<>()).build() : contactRestriction.getRestriction();
             contactFrontEndQuery.setContactRestriction(
                     prepareContactRestriction(extractedContactRestriction, modifiableAccountIdCollectionForContacts));
         }
