@@ -133,6 +133,9 @@ public class ModelingFileUploadResource {
             @RequestBody FieldMappingDocument fieldMappingDocument) {
         boolean hasCgProduct = batonService.hasProduct(MultiTenantContext.getCustomerSpace(),
                 LatticeProduct.CG);
+        if (fieldMappingDocument != null) {
+            fieldMappingDocument.dedupFieldMappings();
+        }
         if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);
         } else {

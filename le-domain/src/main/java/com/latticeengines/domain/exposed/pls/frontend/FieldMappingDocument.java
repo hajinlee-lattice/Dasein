@@ -1,8 +1,14 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FieldMappingDocument {
@@ -37,6 +43,24 @@ public class FieldMappingDocument {
 
     public void setRequiredFields(List<String> requiredFields) {
         this.requiredFields = requiredFields;
+    }
+
+    @JsonIgnore
+    public void dedupFieldMappings() {
+        if (CollectionUtils.isEmpty(fieldMappings)) {
+            return;
+        }
+        Set<String> mappingKeys = new HashSet<>();
+        Iterator<FieldMapping> iterator = fieldMappings.iterator();
+        while(iterator.hasNext()) {
+            FieldMapping fieldMapping = iterator.next();
+            String key = fieldMapping.toString();
+            if (mappingKeys.contains(key)) {
+                iterator.remove();
+            } else {
+                mappingKeys.add(key);
+            }
+        }
     }
 
 }
