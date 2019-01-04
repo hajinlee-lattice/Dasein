@@ -146,7 +146,7 @@ public class StatsCubeUtils {
         bktCounts.forEach((bktId, bktCnt) -> updateBucket(bucketList.get(bktId - 1), algorithm,
                 bktId, bktCnt));
         if (bucketList.isEmpty()) {
-            return null;
+            return buckets;
         } else {
             buckets.setBucketList(bucketList);
             return buckets;

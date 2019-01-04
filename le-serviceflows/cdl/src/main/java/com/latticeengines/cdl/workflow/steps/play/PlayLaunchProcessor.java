@@ -271,7 +271,7 @@ public class PlayLaunchProcessor {
     }
 
     private boolean export(PlayLaunchContext playLaunchContext, String avroPath) {
-        String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        String queue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
         String tenant = playLaunchContext.getTenant().getId();
 
         log.info("Trying to submit sqoop job for exporting recommendations from " + avroPath);
@@ -294,7 +294,7 @@ public class PlayLaunchProcessor {
         log.info("Submitted sqoop jobs: " + appId);
 
         FinalApplicationStatus sqoopJobStatus = jobService
-                .waitFinalJobStatus(appId, (new Long(TimeUnit.MINUTES.toSeconds(60L))).intValue()).getStatus();
+                .waitFinalJobStatus(appId, (Long.valueOf(TimeUnit.MINUTES.toSeconds(60L))).intValue()).getStatus();
 
         log.info("Sqoop job final status: " + sqoopJobStatus.name());
 
@@ -354,7 +354,7 @@ public class PlayLaunchProcessor {
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
         RatingEngine ratingEngine = play.getRatingEngine();
-        
+
         if (ratingEngine != null) {
             ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
         }

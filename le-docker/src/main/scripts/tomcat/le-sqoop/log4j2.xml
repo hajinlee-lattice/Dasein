@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="log.dir">/var/log/ledp</Property>
+        <Property name="log.pattern">%d{yyyy-MM-dd'T'HH:mm:ss,SSSXXX}{UTC} [%t] %-5p %c{1.}:%L - %m%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="ConsoleWarn" target="SYSTEM_OUT">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+        </Console>
+        <Console name="ConsoleInfo" target="SYSTEM_OUT">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+        </Console>
+        <Console name="ConsoleDebug" target="SYSTEM_OUT">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+        </Console>
+        <Console name="DebugGateway" target="SYSTEM_OUT">
+            <Filters>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ContextMapFilter onMatch="ACCEPT" onMismatch="DENY" operator="or">
+                    <KeyValuePair key="DebugGateway" value="ON"/>
+                </ContextMapFilter>
+            </Filters>
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+        </Console>
+        <RollingFile
+                name="RollingFile"
+                fileName="${log.dir}/le-{{APP}}.log"
+                filePattern="${log.dir}/le-{{APP}}-%d{yyyy-MM-dd}-%i.log.gz"
+                ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>${log.pattern}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="ConsoleWarn"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <Logger name="com.latticeengines" additivity="false" level="DEBUG">
+            <AppenderRef ref="ConsoleInfo"/>
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="DebugGateway"/>
+        </Logger>
+        <Logger name="com.latticeengines.security.provider.internal.RestInternalFilter" additivity="false" level="INFO">
+            <AppenderRef ref="ConsoleDebug"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+
+    </Loggers>
+
+</Configuration>

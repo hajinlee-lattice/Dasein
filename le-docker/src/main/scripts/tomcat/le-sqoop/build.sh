@@ -4,7 +4,7 @@
 
 source ../../functions.sh
 
-if [ ! -f "hadoop-2.8.5.tar.gz" ]; then
+if [[ ! -f "hadoop-2.8.5.tar.gz" ]]; then
     wget http://apache.claz.org/hadoop/common/hadoop-2.8.5/hadoop-2.8.5.tar.gz -O hadoop-2.8.5.tar.gz
 fi
 
