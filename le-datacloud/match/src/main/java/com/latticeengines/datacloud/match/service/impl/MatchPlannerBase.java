@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
@@ -148,34 +149,61 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     // this is a dispatcher method
     MatchContext scanInputData(MatchInput input, MatchContext context) {
-        Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
+        boolean isEntityMatch = OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode());
+
+        Map<MatchKey, List<String>> keyMap = null;
+        if (isEntityMatch) {
+            // For now we assume that there is an Entity Match Key Map for Account.  This was checked during validation.
+            MatchInput.EntityKeyMap accountEntityKeyMap = null;
+            // Find the Entity Match Key Map for Account and create a key position map.  If not present, throw an
+            // exception.
+            for (MatchInput.EntityKeyMap entityKeyMap : input.getEntityKeyMapList()) {
+                if (BusinessEntity.Account.name().equalsIgnoreCase(entityKeyMap.getBusinessEntity())) {
+                    keyMap = entityKeyMap.getKeyMap();
+                }
+            }
+            if (keyMap == null) {
+                throw new UnsupportedOperationException("Entity Key Map must contain Account Key Map");
+            }
+        } else {
+            keyMap = input.getKeyMap();
+        }
+
+        Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input.getFields(), keyMap);
 
         List<InternalOutputRecord> records = new ArrayList<>();
         Set<String> domainSet = new HashSet<>();
         Set<NameLocation> nameLocationSet = new HashSet<>();
-        Set<String> keyFields = getKeyFields(input);
-        String lookupIdKey = getLookupIdKey(input);
+        Set<String> keyFields = getKeyFields(keyMap);
+        String lookupIdKey = null;
+        if (!isEntityMatch) {
+            lookupIdKey = getLookupIdKey(keyMap);
+        }
         for (int i = 0; i < input.getData().size(); i++) {
-            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
+            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(isEntityMatch, keyFields,
+                    input.getData().get(i), i,
                     input.getFields(), keyPositionMap, domainSet, nameLocationSet,
                     input.isPublicDomainAsNormalDomain());
             if (record != null) {
-                record.setLookupIdKey(lookupIdKey);
+                if (!isEntityMatch) {
+                    record.setLookupIdKey(lookupIdKey);
+                }
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);
             }
         }
 
         context.setInternalResults(records);
-        context.setDomains(domainSet);
-        context.setNameLocations(nameLocationSet);
-
+        if (!isEntityMatch) {
+            context.setDomains(domainSet);
+            context.setNameLocations(nameLocationSet);
+        }
         return context;
     }
 
-    private Set<String> getKeyFields(MatchInput input) {
+    private Set<String> getKeyFields(Map<MatchKey, List<String>> keyMap) {
         Set<String> keyFields = new HashSet<>();
-        for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {
+        for (Map.Entry<MatchKey, List<String>> entry : keyMap.entrySet()) {
             keyFields.addAll(entry.getValue());
         }
         keyFields.add(InterfaceName.Id.toString());
@@ -184,13 +212,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return keyFields;
     }
 
-    private String getLookupIdKey(MatchInput input) {
-        if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId)) {
-            return input.getKeyMap().get(MatchKey.LookupId).get(0);
+    private String getLookupIdKey(Map<MatchKey, List<String>> keyMap) {
+        if (MapUtils.isNotEmpty(keyMap) && keyMap.containsKey(MatchKey.LookupId)) {
+            return keyMap.get(MatchKey.LookupId).get(0);
         } else {
             return null;
         }
     }
+
 
     @MatchStep(threshold = 100L)
     MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
@@ -227,17 +256,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return statistics;
     }
 
-    public boolean isPublicDomainCheckRelaxed(String name, String duns) {
-        if (zkConfigurationService.isPublicDomainCheckRelaxed() && StringUtils.isBlank(name) && StringUtils.isBlank(duns)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private InternalOutputRecord scanInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
-            int rowNum, List<String> fields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
-            Set<NameLocation> nameLocationSet, boolean treatPublicDomainAsNormal) {
+    private InternalOutputRecord scanInputRecordAndUpdateKeySets(
+            boolean isEntityMatch, Set<String> keyFields, List<Object> inputRecord, int rowNum, List<String> fields,
+            Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet, Set<NameLocation> nameLocationSet,
+            boolean treatPublicDomainAsNormal) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -250,11 +272,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
 
-        parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
-        parseRecordForDuns(inputRecord, keyPositionMap, record);
-        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
-        parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
-        parseRecordForLookupId(inputRecord, keyPositionMap, record);
+        if (!isEntityMatch) {
+            parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
+            parseRecordForDuns(inputRecord, keyPositionMap, record);
+            parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
+            parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
+            parseRecordForLookupId(inputRecord, keyPositionMap, record);
+        } else {
+            record.setKeyPositionMap(keyPositionMap);
+        }
         profilingInputRecord(keyFields, inputRecord, fields, keyPositionMap, record);
 
         return record;
@@ -314,6 +340,11 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.addErrorMessages("Error when cleanup domain field: " + e.getMessage());
             }
         }
+    }
+
+    private boolean isPublicDomainCheckRelaxed(String name, String duns) {
+        return zkConfigurationService.isPublicDomainCheckRelaxed() && StringUtils.isBlank(name)
+                && StringUtils.isBlank(duns);
     }
 
     private void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
@@ -467,16 +498,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    private static Map<MatchKey, List<Integer>> getKeyPositionMap(MatchInput input) {
+    private static Map<MatchKey, List<Integer>> getKeyPositionMap(List<String> fields,
+                                                                  Map<MatchKey, List<String>> keyMap) {
         Map<String, Integer> fieldPos = new HashMap<>();
-        for (int pos = 0; pos < input.getFields().size(); pos++) {
-            fieldPos.put(input.getFields().get(pos).toLowerCase(), pos);
+        for (int pos = 0; pos < fields.size(); pos++) {
+            fieldPos.put(fields.get(pos).toLowerCase(), pos);
         }
 
         Map<MatchKey, List<Integer>> posMap = new HashMap<>();
-        for (MatchKey key : input.getKeyMap().keySet()) {
+        for (MatchKey key : keyMap.keySet()) {
             List<Integer> posList = new ArrayList<>();
-            for (String field : input.getKeyMap().get(key)) {
+            for (String field : keyMap.get(key)) {
                 posList.add(fieldPos.get(field.toLowerCase()));
             }
             posMap.put(key, posList);

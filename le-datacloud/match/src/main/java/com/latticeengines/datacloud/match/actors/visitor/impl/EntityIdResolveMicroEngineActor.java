@@ -72,7 +72,7 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
             matchTraveler.setMatched(true);
             matchTraveler.setResult(entityId);
             traveler.debug(String.format(
-                    "Resolve lookup results to EntityId=%s for Entity=%s", entityId, matchTraveler.getTargetEntity()));
+                    "Resolve lookup results to EntityId=%s for Entity=%s", entityId, matchTraveler.getEntity()));
         } else {
             if (entityId != null) {
                 // should never happen, lookup actor should return either null or non-blank entity ID
@@ -80,7 +80,7 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
                         matchTraveler.getEntityMatchLookupResults());
             }
             traveler.debug(String.format(
-                    "No entity found in lookup results for Entity=%s", matchTraveler.getTargetEntity()));
+                    "No entity found in lookup results for Entity=%s", matchTraveler.getEntity()));
         }
     }
 

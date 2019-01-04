@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class MatchInputValidatorUnitTestNG {
@@ -277,7 +278,7 @@ public class MatchInputValidatorUnitTestNG {
         failed = false;
         input.setEntityKeyMapList(new ArrayList<>());
         EntityKeyMap entityKeyMap = new EntityKeyMap();
-        entityKeyMap.setBusinessEntity("Account");
+        entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
         entityKeyMap.setSystemIdPriority(Arrays.asList("ID"));
         input.getEntityKeyMapList().add(entityKeyMap);
 
@@ -391,9 +392,27 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "System ID MatchKey values and System ID priority list must match.");
 
 
-        // Test 13:  Should fail on empty data.
+        // Test 13:  Entity Key Map must contain Account Key Map.
         failed = false;
         entityKeyMap.setSystemIdPriority(Arrays.asList("ID", "SfdcId", "MktoId"));
+        entityKeyMap.setBusinessEntity("Contact");
+
+        try {
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+        } catch (UnsupportedOperationException e) {
+            failed = true;
+            Assert.assertTrue(e.getMessage().contains(
+                    "Entity Map currently only supports Account match and requires this entity's key map."),
+                    "Wrong error message: " + e.getMessage());
+        } catch (Exception e) {
+            Assert.fail("Failed on wrong exception: " + e.getMessage());
+        }
+        Assert.assertTrue(failed, "Entity Key Map must contain Account Key Map.");
+
+
+        // Test 14:  Should fail on empty data.
+        failed = false;
+        entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
@@ -407,7 +426,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Input data must be non-empty.");
 
 
-        // Test 14:  Should fail on wrong size input data.
+        // Test 15:  Should fail on wrong size input data.
         failed = false;
         input.setData(generateMockData(100, true));
         // Add extra row to input data with two many elements.
@@ -426,7 +445,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Input data must not be longer than number of input fields.");
 
 
-        // Test 15:  Should pass on valid data.
+        // Test 16:  Should pass on valid data.
         failed = false;
         input.setData(generateMockData(100, true));
 

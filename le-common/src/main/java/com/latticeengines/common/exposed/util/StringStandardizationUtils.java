@@ -73,6 +73,15 @@ public class StringStandardizationUtils {
         }
     }
 
+    // TODO(jwinter): Complete implementation of this function according to PM requirements.
+    public static String getStandardizedSystemId(String systemId) {
+        if (StringUtils.isBlank(systemId)) {
+            return null;
+        }
+
+        return systemId;
+    }
+
     public static String getStandardizedOutputLatticeID(String latticeId) {
         if (StringUtils.isBlank(latticeId)) {
             return null;

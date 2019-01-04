@@ -2,12 +2,15 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
@@ -43,6 +46,10 @@ public class InternalOutputRecord extends OutputRecord {
     private DnBReturnCode dnbCode;
     private MatchHistory fabricMatchHistory = new MatchHistory();
     private Date requestTimeStamp = new Date();
+
+    // For Entity Match, the InternalOutputRecord must contain the map between the Match Keys and the position of the
+    // corresponding fields in the input record.  This will be used by the Match Planner actor.
+    private Map<MatchKey, List<Integer>> keyPositionMap;
 
     public String getParsedDomain() {
         return parsedDomain;
@@ -220,10 +227,12 @@ public class InternalOutputRecord extends OutputRecord {
         this.originalContextId = originalContextId;
     }
 
+    @Override
     public List<String> getDebugValues() {
         return debugValues;
     }
 
+    @Override
     public void setDebugValues(List<String> debugValues) {
         this.debugValues = debugValues;
     }
@@ -252,4 +261,11 @@ public class InternalOutputRecord extends OutputRecord {
         this.requestTimeStamp = requestTimeStamp;
     }
 
+    public Map<MatchKey, List<Integer>> getKeyPositionMap() {
+        return keyPositionMap;
+    }
+
+    public void setKeyPositionMap(Map<MatchKey, List<Integer>> keyPositionMap) {
+        this.keyPositionMap = keyPositionMap;
+    }
 }

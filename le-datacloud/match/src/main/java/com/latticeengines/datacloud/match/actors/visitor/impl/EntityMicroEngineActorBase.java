@@ -55,8 +55,8 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             log.error("Traveler missing MatchKeyTuple or MatchInput found in actor {}", self());
             return false;
         }
-        if (StringUtils.isBlank(traveler.getTargetEntity())) {
-            log.error("Traveler with empty target entity found in actor {}", self());
+        if (StringUtils.isBlank(traveler.getEntity())) {
+            log.error("Traveler with empty entity found in actor {}", self());
             return false;
         }
         MatchInput input = traveler.getMatchInput();
@@ -81,7 +81,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      */
     protected EntityAssociationRequest prepareAssociationRequest(@NotNull MatchTraveler traveler) {
         Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
-        String entity = traveler.getTargetEntity();
+        String entity = traveler.getEntity();
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getEntityMatchLookupResults()
                 .stream()
                 .flatMap(pair -> {
@@ -156,7 +156,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     protected EntityLookupRequest prepareLookupRequest(
             @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
         Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
-        String entity = traveler.getTargetEntity();
+        String entity = traveler.getEntity();
         return new EntityLookupRequest(standardizedTenant, entity, tuple);
     }
 

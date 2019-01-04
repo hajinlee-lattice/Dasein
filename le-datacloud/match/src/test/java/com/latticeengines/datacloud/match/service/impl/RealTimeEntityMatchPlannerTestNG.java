@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -56,7 +57,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         Assert.assertTrue(output.getEntityKeyMap() != null);
         Assert.assertEquals(output.getEntityKeyMap().size(), 1);
         MatchInput.EntityKeyMap entityKeyMap = output.getEntityKeyMap().get(0);
-        Assert.assertEquals(entityKeyMap.getBusinessEntity(), "Account");
+        Assert.assertEquals(entityKeyMap.getBusinessEntity(), BusinessEntity.Account.name());
         Assert.assertEquals(entityKeyMap.getSystemIdPriority(), Arrays.asList("AccountId", "MktoId", "SfdcId"));
     }
 
@@ -71,11 +72,11 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
                 "AccountId", "SfdcId", "MktoId"));
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setAllocateId(false);
-        input.setTargetEntity("Account");
+        input.setTargetEntity(BusinessEntity.Account.name());
         input.setEntityKeyMapList(new ArrayList<>());
 
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        entityKeyMap.setBusinessEntity("Account");
+        entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
         entityKeyMap.setSystemIdPriority(Arrays.asList("AccountId", "MktoId", "SfdcId"));
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));

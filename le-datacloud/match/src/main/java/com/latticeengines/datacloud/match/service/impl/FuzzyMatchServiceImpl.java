@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,7 +13,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +22,7 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -38,6 +39,8 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+
+
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
@@ -46,14 +49,17 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Timeout REALTIME_TIMEOUT = new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
     private static final Timeout BATCH_TIMEOUT = new Timeout(new FiniteDuration(3, TimeUnit.HOURS));
 
-    @Autowired
+    @Inject
     private MatchActorSystem actorSystem;
 
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
 
-    @Autowired
+    @Inject
     private DomainCollectService domainCollectService;
+
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
@@ -227,27 +233,35 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             } else {
                 // For now, pass in a null MatchKeyTuple for Entity Match since this will be handled by the first Actor
                 // which is a Match Planner actor.
-                MatchKeyTuple matchKeyTuple = null;
-                if (!OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
-                    matchKeyTuple = createMatchKeyTuple(matchRecord);
-                }
-                MatchTraveler travelContext = new MatchTraveler(matchInput.getRootOperationUid(), matchKeyTuple);
-                matchRecord.setTravelerId(travelContext.getTravelerId());
-                travelContext.setMatchInput(matchInput);
+                MatchTraveler matchTraveler = null;
                 if (OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
-                    // For Entity Match, set target entity in Match Traveler.
-                    travelContext.setTargetEntity(matchInput.getTargetEntity());
-                }
-                travelContext.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);
-                matchFutures.add(askMatchAnchor(travelContext));
-
-                // Send all domains to collector.  For Entity Match this is done in Match Planner Actor.
-                if (!OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
+                    // TODO (ZDD): Set here temporarily, otherwise
+                    // MatchActorSystemTestNG cannot test with allocateId mode.
+                    // Revisit later
+                    entityMatchConfigurationService.setIsAllocateMode(matchInput.isAllocateId());
+                    matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), null);
+                    // TODO(jwinter): Refactor code to avoid passing around large InternalOutputRecord object in
+                    //     Match Traveler.
+                    // For now, we pass in the InternalOutputRecord to the MatchTraveler so the
+                    // MatchPlannerMicroEngineActor can standardize the input and update the InternalOutputRecord.
+                    matchTraveler.setInternalOutputRecord(matchRecord);
+                    // TODO(dzheng): Implement this alternative way of passing the key position map.
+                    //matchTraveler.setKeyPosMap(MatchKeyUtils.getEntityKeyPositionMap(matchInput));
+                    matchTraveler.setInputRecord(matchRecord.getInput());
+                    // 1st decision graph's entity is just final target entity
+                    matchTraveler.setEntity(matchInput.getTargetEntity());
+                } else {
+                    MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
+                    matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), matchKeyTuple);
                     String domain = matchKeyTuple.getDomain();
                     if (StringUtils.isNotBlank(domain)) {
                         domainCollectService.enqueue(domain);
                     }
                 }
+                matchTraveler.setMatchInput(matchInput);
+                matchRecord.setTravelerId(matchTraveler.getTravelerId());
+                matchTraveler.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);
+                matchFutures.add(askMatchAnchor(matchTraveler));
             }
         }
         return matchFutures;

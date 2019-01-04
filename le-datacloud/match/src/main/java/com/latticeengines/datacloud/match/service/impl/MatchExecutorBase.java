@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -177,6 +179,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         int totalMatched = 0;
+
+        boolean isEntityMatch = OperationalMode.ENTITY_MATCH.equals(matchContext.getInput().getOperationalMode());
+        if (isEntityMatch) {
+            matchContext.setDomains(new HashSet<>());
+            matchContext.setNameLocations(new HashSet<>());
+        }
 
         for (InternalOutputRecord internalRecord : records) {
             if (internalRecord.isFailed()) {

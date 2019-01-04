@@ -115,6 +115,10 @@ public class MatchInputValidator {
                     + "Automatic match key resolution not yet supported.");
         }
 
+        // TODO(jwinter): Remove this constraint once we start supporting other entities.
+        // For now, require that the Entity Key Map has a Key Map for Account Entity.
+        boolean hasAccountKeyMap = false;
+
         for (EntityKeyMap entityKeyMap : input.getEntityKeyMapList()) {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
             entityKeyMap.setKeyMap(resolveKeyMap(keyMap, input.getFields(), true));
@@ -122,6 +126,8 @@ public class MatchInputValidator {
             // TODO(jwinter): Add support for other Business Entities.
             // For now, we only handle validation of Account Entity keys.
             if (BusinessEntity.Account.name().equalsIgnoreCase(entityKeyMap.getBusinessEntity())) {
+                hasAccountKeyMap = true;
+
                 validateAccountMatchKeys(keyMap.keySet());
 
                 // For the Account Entity Key Map, also validate that the System ID priority matches the
@@ -144,6 +150,11 @@ public class MatchInputValidator {
                     }
                 }
             }
+        }
+
+        if (!hasAccountKeyMap) {
+            throw new UnsupportedOperationException(
+                    "Entity Map currently only supports Account match and requires this entity's key map.");
         }
     }
 

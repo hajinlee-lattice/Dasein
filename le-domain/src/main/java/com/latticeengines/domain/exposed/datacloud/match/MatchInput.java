@@ -43,8 +43,21 @@ public class MatchInput implements Fact, Dimension {
     private List<List<Object>> data;
     @JsonIgnore
     private int numRows;
+
+    // For ldc match:
+    // If decisionGraph is empty, will load default ldc decision graph
+    // For entity match:
+    // Default behavior: set targetEntity and leave decisionGraph as empty and
+    // will
+    // use targetEntity's default decision graph.
+    // Also allow setting decisionGraph but leave targetEntity as empty, will
+    // use decisionGraph's corresponding entity as targetEntity.
+    // If both decisionGraph and targetEntity are set, will
+    // validate whether decisionGraph and targetEntity are matched. If not
+    // matched, fail the match request/job.
     @JsonProperty("DecisionGraph")
     private String decisionGraph;
+
     @JsonProperty("LogLevel")
     private String logLevel;
     @JsonProperty("RootOperationUid")
@@ -188,6 +201,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("TargetEntity")
     String targetEntity;
 
+    // TODO(jwinter): Change to map from BusinessEntity (as String) to EntityKeyMap.
     @JsonProperty("EntityKeyMap")
     private List<EntityKeyMap> entityKeyMapList;
 
@@ -550,21 +564,37 @@ public class MatchInput implements Fact, Dimension {
         this.matchResultPath = matchResultPath;
     }
 
-    public OperationalMode getOperationalMode() { return operationalMode; }
+    public OperationalMode getOperationalMode() {
+        return operationalMode;
+    }
 
-    public void setOperationalMode(OperationalMode operationalMode) { this.operationalMode = operationalMode; }
+    public void setOperationalMode(OperationalMode operationalMode) {
+        this.operationalMode = operationalMode;
+    }
 
-    public boolean isAllocateId() { return allocateId; }
+    public boolean isAllocateId() {
+        return allocateId;
+    }
 
-    public void setAllocateId(boolean allocateId) { this.allocateId = allocateId; }
+    public void setAllocateId(boolean allocateId) {
+        this.allocateId = allocateId;
+    }
 
-    public String getTargetEntity() { return targetEntity; }
+    public String getTargetEntity() {
+        return targetEntity;
+    }
 
-    public void setTargetEntity(String targetEntity) { this.targetEntity = targetEntity; }
+    public void setTargetEntity(String targetEntity) {
+        this.targetEntity = targetEntity;
+    }
 
-    public List<EntityKeyMap> getEntityKeyMapList() { return entityKeyMapList; }
+    public List<EntityKeyMap> getEntityKeyMapList() {
+        return entityKeyMapList;
+    }
 
-    public void setEntityKeyMapList(List<EntityKeyMap> entityKeyMapList) { this.entityKeyMapList = entityKeyMapList; }
+    public void setEntityKeyMapList(List<EntityKeyMap> entityKeyMapList) {
+        this.entityKeyMapList = entityKeyMapList;
+    }
 
     @Override
     public String toString() {
@@ -591,17 +621,29 @@ public class MatchInput implements Fact, Dimension {
         @JsonProperty("SystemIdPriority")
         private List<String> systemIdPriority;
 
-        public String getBusinessEntity() { return businessEntity; }
+        public String getBusinessEntity() {
+            return businessEntity;
+        }
 
-        public void setBusinessEntity(String businessEntity) { this.businessEntity = businessEntity; }
+        public void setBusinessEntity(String businessEntity) {
+            this.businessEntity = businessEntity;
+        }
 
-        public Map<MatchKey, List<String>> getKeyMap() { return keyMap; }
+        public Map<MatchKey, List<String>> getKeyMap() {
+            return keyMap;
+        }
 
-        public void setKeyMap(Map<MatchKey, List<String>> keyMap) { this.keyMap = keyMap; }
+        public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
+            this.keyMap = keyMap;
+        }
 
-        public List<String> getSystemIdPriority() { return systemIdPriority; }
+        public List<String> getSystemIdPriority() {
+            return systemIdPriority;
+        }
 
-        public void setSystemIdPriority(List<String> systemIdPriority) { this.systemIdPriority = systemIdPriority; }
+        public void setSystemIdPriority(List<String> systemIdPriority) {
+            this.systemIdPriority = systemIdPriority;
+        }
 
     }
 

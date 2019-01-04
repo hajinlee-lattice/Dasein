@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -219,10 +220,10 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             // TODO(lming): Allocate ID should be set appropriately.
             matchInput.setAllocateId(true);
             // TODO(lming): Is it safe to assume here that the target entity is always Account?
-            matchInput.setTargetEntity("Account");
+            matchInput.setTargetEntity(BusinessEntity.Account.name());
 
             EntityKeyMap entityKeyMap = new EntityKeyMap();
-            entityKeyMap.setBusinessEntity("Account");
+            entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
             entityKeyMap.setKeyMap(getMatchKeys());
             // TODO(lming): Not sure how the System ID priority is supposed to get set up.  For now, copy from the
             //     Key Map.

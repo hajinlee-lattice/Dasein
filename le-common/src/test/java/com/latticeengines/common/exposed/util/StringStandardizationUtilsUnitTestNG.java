@@ -76,6 +76,16 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    @DataProvider(name = "systemIdStringDataProvider")
+    Object[][] systemIdStringDataProvider() {
+        return new Object[][] { //
+                { null, null }, //
+                { "", null }, //
+                { "123456789", "123456789" }, //
+                { "1a2b3c4d5e", "1a2b3c4d5e" }
+        };
+    }
+
     @DataProvider(name = "outputLatticeIdStringDataProvider")
     Object[][] outputLatticeIdStringDataProvider() {
         return new Object[][] {
@@ -127,7 +137,7 @@ public class StringStandardizationUtilsUnitTestNG {
         String output = StringStandardizationUtils.getStandardString(input);
         Assert.assertEquals(output, expectedOutput);
     }
-    
+
     @Test(groups = "unit", dataProvider = "dunsStringDataProvider")
     public void testDunsStringStandardizeString(String input, String expectedOutput) {
         String output = StringStandardizationUtils.getStandardDuns(input);
@@ -137,6 +147,12 @@ public class StringStandardizationUtilsUnitTestNG {
     @Test(groups = "unit", dataProvider = "inputLatticeIdStringDataProvider")
     public void testLatticeIDStringStandardizeString(String input, String expectedOutput) {
         String output = StringStandardizationUtils.getStandardizedInputLatticeID(input);
+        Assert.assertEquals(output, expectedOutput);
+    }
+
+    @Test(groups = "unit", dataProvider = "systemIdStringDataProvider")
+    public void testSystemIdStringStandardizeString(String input, String expectedOutput) {
+        String output = StringStandardizationUtils.getStandardizedSystemId(input);
         Assert.assertEquals(output, expectedOutput);
     }
 
