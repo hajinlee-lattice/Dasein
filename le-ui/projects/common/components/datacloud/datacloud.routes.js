@@ -8,7 +8,8 @@ angular
     'common.datacloud.tabs.subheader',
     'common.datacloud.targettabs',
     'common.datacloud.query',
-    'common.datacloud.explorer.export'
+    'common.datacloud.explorer.export',
+    "lp.jobs.orphan.export"
 ])
 .run(function($transitions) {
     var setMetadataApiContext = function(trans, context) {
@@ -401,7 +402,7 @@ angular
         .state('home.exportSegment', {            
             url: '/export/:exportID',
             params: {
-                pageTitle: 'Export Segment',
+                pageTitle: 'Segment Export',
                 pageIcon: 'ico-analysis',
                 section: 'segment.analysis'               
             },
@@ -423,6 +424,16 @@ angular
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/segmentexport/segmentexport.component.html'
                 }
+            }
+        })
+        .state('home.orphanexport', {            
+            url: '/orphanexport/:exportID',
+            params: {
+                pageTitle: 'Orphan Export',
+                pageIcon: 'ico-analysis',
+            },
+            views: {
+                "main@": "orphanExport"
             }
         });
 });

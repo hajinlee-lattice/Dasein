@@ -1,0 +1,15 @@
+<div class="container">
+    <div class="row">
+        <div class="twelve columns">
+            <div data-ng-if="$ctrl.showDownloadMessage" class="success-message">
+			    <h3> Your download has now begun. </h3>
+			    <i class="fa fa-times fa-inverse" data-ng-click="$ctrl.hideDownloadMessage()"></i>
+            </div>
+            <div class="text-center" data-ng-show="!loading">
+				<a style="margin-top: 50px" class="button icon-button orange-button" ng-click="$ctrl.downloadOrphanExport()">
+                    Download Your Exported Orphans
+				</a>
+            </div>
+        </div>
+    </div>
+</div>
