@@ -27,7 +27,7 @@ public class SystemPostRenderDecorator implements Decorator {
             if (StringUtils.isNotBlank(displayName)) {
                 cm.setDisplayName(displayName + " (DEPRECATED)");
             }
-            // set Export init value to false, for deprecated attr
+            // PLS-11145 set Export init value to false, for deprecated attr
             cm.disableGroup(ColumnSelection.Predefined.Enrichment);
         }
         return cm;
