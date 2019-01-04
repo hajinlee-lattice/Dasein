@@ -38,6 +38,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -313,6 +314,11 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         newTable.setDisplayName(tableName);
         newTable.setTenant(mainTestTenant);
         newTable.setTableType(TableType.DATATABLE);
+        Attribute attr = new Attribute();
+        attr.setName("ID");
+        attr.setDisplayName("ID");
+        attr.setPhysicalDataType("String");
+        newTable.addAttribute(attr);
         metadataProxy.createTable(mainCustomerSpace, tableName, newTable);
     }
 
