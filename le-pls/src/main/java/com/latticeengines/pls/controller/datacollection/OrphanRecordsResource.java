@@ -93,7 +93,7 @@ public class OrphanRecordsResource {
         } while (System.currentTimeMillis() - start < maxWaitTime);
     }
 
-    @GetMapping(value = "/export/{exportId}/download", headers = "Accept=application/json")
+    @GetMapping(value = "/orphanexport/{exportId}", headers = "Accept=application/json")
     public void downloadOrphanArtifact(@PathVariable String exportId, HttpServletResponse response) {
         Log.info("Received call to download orphan artifact. ExportId=" + exportId);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();

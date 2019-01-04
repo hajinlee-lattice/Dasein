@@ -144,7 +144,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
 
     public void sendOrphanRecordsExportEmail(String result, String tenantId, OrphanRecordsExportRequest export) {
         try {
-            String url = constructUrl("pls/internal/emails/orphanrecordsexport/result", result, tenantId);
+            String url = constructUrl("pls/internal/emails/orphanexport/result", result, tenantId);
             log.info(String.format("Putting to %s", url));
             restTemplate.put(url, export);
         } catch (Exception e) {

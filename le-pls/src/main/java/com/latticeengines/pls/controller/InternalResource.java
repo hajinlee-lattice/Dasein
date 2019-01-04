@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -558,13 +559,12 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/orphanrecordsexport/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/emails/orphanexport/result/{result}/" + TENANT_ID_PATH, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after orphan records export")
-    public void sendOrphanRecordsExportEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, @RequestBody OrphanRecordsExportRequest exportRequest,
-            HttpServletRequest request) {
+    public void sendOrphanRecordsExportEmail(@PathVariable String result, @PathVariable String tenantId,
+                                             @RequestBody OrphanRecordsExportRequest exportRequest,
+                                             HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = exportRequest.getExportId();
         String exportType = exportRequest.getOrphanRecordsType().getDisplayName();
@@ -573,7 +573,9 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(exportRequest.getCreatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
+                    String url = String.format("%s/atlas/tenant/%s/orphanexport/%s",
+                            appPublicUrl, tenantName, exportID);
+                    log.info(String.format("URL=%s, result=%s", url, result));
                     switch (result) {
                         case "READY":
                             emailService.sendPlsExportOrphanRecordsSuccessEmail(user, url, exportID, exportType);

@@ -582,7 +582,7 @@ angular
         this.DownloadExportedOrphans = function(id) {
             var deferred = $q.defer(),
                 result,
-                url = `/pls/datacollection/orphans/export/${id}/download`;
+                url = `/pls/datacollection/orphans/orphanexport/${id}`;
 
             $http({
                 method: "GET",
