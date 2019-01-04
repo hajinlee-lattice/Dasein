@@ -87,7 +87,7 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
                         <!-- Created Play with no previous launch history -->
-                        <div ng-if="play.launchHistory.mostRecentLaunch === null || ['Launching','Launched'].indexOf(play.launchHistory.mostRecentLaunch.launchState) === -1">This campaign was started but not launched.</div>
+                        <div ng-if="play.launchHistory.lastCompletedLaunch === null || ['Launching','Launched'].indexOf(play.launchHistory.lastCompletedLaunch.launchState) === -1">This campaign was started but not launched.</div>
 
                         <!-- Created Play with no previous launch history -->
                         <!-- <div ng-if="
@@ -99,11 +99,11 @@
                         <div ng-if="vm.current.tileStates[play.name].launching == true">Launching...</div>
 
                         <!-- Failed Launch messaging -->
-                        <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Failed'" class="error-text">Your most recent launch, has failed.</div>
+                        <div ng-if="play.launchHistory.lastCompletedLaunch.launchState === 'Failed'" class="error-text">Your most recent launch, has failed.</div>
 
                         <!-- Ratings chart if play has Launched -->
                         <div 
-                            ng-if="['Launching','Launched'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 && vm.current.tileStates[play.name].launching != true"
+                            ng-if="['Launching','Launched'].indexOf(play.launchHistory.lastCompletedLaunch.launchState) !== -1 && vm.current.tileStates[play.name].launching != true"
                             class="{{ play.ratingEngine.tileClass }}">
                             <bar-chart
                                 config="play.ratingEngine.chartConfig" 
@@ -116,14 +116,14 @@
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
+                            ng-if="(play.launchHistory.lastCompletedLaunch.launchState !== 'Launched' && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
                             Launch
                         </button>
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="(play.launchHistory.mostRecentLaunch.launchState !== 'Launched' && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
+                            ng-if="(play.launchHistory.lastCompletedLaunch.launchState !== 'Launched' && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
                             ng-disabled="vm.current.tileStates[play.name].launching == true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
                             {{vm.launchButtonLabel(play)}}
@@ -131,7 +131,7 @@
                          <span ng-if="!vm.current.tileStates[play.name].launching">
                                 <span 
                                     class="launch-success pull-right"
-                                    ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
+                                    ng-if="play.launchHistory.lastCompletedLaunch.launchState === 'Launched'">
                                     <i class="fa fa-check" aria-hidden="true"></i>
                                     Launched {{play.launchHistory.lastCompletedLaunch.updated | date}}
                                 </span>

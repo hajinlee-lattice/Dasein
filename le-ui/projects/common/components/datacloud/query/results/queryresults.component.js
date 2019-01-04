@@ -375,7 +375,7 @@ angular.module('common.datacloud.query.results', [
             PlaybookWizardStore.setValidation('targets', true);
             vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
         } else {
-            vm.showError = true;
+            vm.showError = vm.maxTargetValue == 0 ? false : true;
             PlaybookWizardStore.setValidation('targets', false || (vm.recommendationCounts.selected && !vm.topNClicked));
         }
     }
