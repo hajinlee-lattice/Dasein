@@ -1,245 +1,282 @@
-angular.module('mainApp.appCommon.utilities.PurchaseHistoryUtility', [
-  'mainApp.appCommon.utilities.NumberUtility',
-  'mainApp.appCommon.utilities.ResourceUtility'
-])
-.service('PurchaseHistoryUtility', function (NumberUtility, ResourceUtility) {
-  var PERIOD_ENUMS = {
-    'M': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    'Q': ['1', '2', '3', '4']
-  };
+angular
+    .module('mainApp.appCommon.utilities.PurchaseHistoryUtility', [
+        'mainApp.appCommon.utilities.NumberUtility',
+        'mainApp.appCommon.utilities.ResourceUtility'
+    ])
+    .service('PurchaseHistoryUtility', function(
+        NumberUtility,
+        ResourceUtility
+    ) {
+        var PERIOD_ENUMS = {
+            M: [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec'
+            ],
+            Q: ['1', '2', '3', '4']
+        };
 
-  // period to momentjs format map
-  this.periodToMomentFormat = {
-    'D': 'YYYY MMM DD',
-    'M': 'YYYY MMM',
-    'Q': 'YYYY Q',
-    'Y': 'YYYY'
-  };
+        // period to momentjs format map
+        this.periodToMomentFormat = {
+            D: 'YYYY MMM DD',
+            M: 'YYYY MMM',
+            Q: 'YYYY Q',
+            Y: 'YYYY'
+        };
 
-  this.formatNumber = function (number, abbreviate) {
-    number = Math.ceil(number);
+        // set default timezone to GMT as per PLS-11875
+        moment.tz.setDefault('Etc/GMT');
 
-    if (abbreviate === true) {
-      if (number >= 1000000) {
-        return NumberUtility.AbbreviateLargeNumber(number, 2);
-      } else {
-        return NumberUtility.AbbreviateLargeNumber(number, 1);
-      }
-    } else {
-      return NumberUtility.NumberWithCommas(number);
-    }
-  };
+        this.formatNumber = function(number, abbreviate) {
+            number = Math.ceil(number);
 
-  this.formatDollar = function (number, abbreviate) {
-    var currencySymbol = ResourceUtility.getString("CURRENCY_SYMBOL");
-    var sign = number < 0 ? '- ' : '';
-  
-    return sign + currencySymbol + this.formatNumber(Math.abs(number), abbreviate);
-  };
+            if (abbreviate === true) {
+                if (number >= 1000000) {
+                    return NumberUtility.AbbreviateLargeNumber(number, 2);
+                } else {
+                    return NumberUtility.AbbreviateLargeNumber(number, 1);
+                }
+            } else {
+                return NumberUtility.NumberWithCommas(number);
+            }
+        };
 
-  this.formatPercent = function (number) {
-    if (typeof number !== 'number') {
-      return null;
-    }
+        this.formatDollar = function(number, abbreviate) {
+            var currencySymbol = ResourceUtility.getString('CURRENCY_SYMBOL');
+            var sign = number < 0 ? '- ' : '';
 
-    number = Math.round(number*10)/10;
+            return (
+                sign +
+                currencySymbol +
+                this.formatNumber(Math.abs(number), abbreviate)
+            );
+        };
 
-    var toReturn = (number === 0) ? 0 : number.toFixed(1);
-    return toReturn + '%';
-  };
-  
-  this.periodIdComparator = function(a, b) {
-      // even though Quarter (1-4) converts (Jan-Apr), its still ascending order
-      return new Date(a) - new Date(b);
-  };
+        this.formatPercent = function(number) {
+            if (typeof number !== 'number') {
+                return null;
+            }
 
-  this.getPrevYearPeriod = function (period) {
-      // period format should always begin with YYYY and a space
-      if (!period) { 
-          return;
-      }
-      var part = period.split(' ');
-      part[0] = parseInt(part[0]) - 1;
-      return isNaN(part[0]) ? period : part.join(' ');
-  };
+            number = Math.round(number * 10) / 10;
 
-  /*
-  * DantePurchaseHistory.PurchaseHistoryAttributes.PeriodOffSet property is time since DantePurchaseHistory.PeriodStartDate (epoch time in s, not ms) in the same units as DantePurchaseHistory.Period
-  * eg Period = 'M', PeriodStartDate = 1461792101, PeriodOffset = 3: is 1461792101 + 3 months
-  * converts this to momentjs object
-  */
-  this.convertPeriodOffsetToDate = function (period, periodStartDate, periodOffset) {
-      var key;
-      switch (period) {
-          case 'D':
-              key = 'days';
-              break;
-          case 'M': 
-              key = 'months';
-              break;
-          case 'Q':
-              key = 'quarters';
-              break;
-          case 'Y':
-              key = 'years';
-              break;
-          default:
-              key = 'days';
-              break;
-      }
+            var toReturn = number === 0 ? 0 : number.toFixed(1);
+            return toReturn + '%';
+        };
 
-      return moment(periodStartDate * 1000).add(periodOffset, key);
-  };
+        this.periodIdComparator = function(a, b) {
+            // even though Quarter (1-4) converts (Jan-Apr), its still ascending order
+            return new Date(a) - new Date(b);
+        };
 
-  this.isValidPeriodId = function (period, periodId) {
-    if (!period || !periodId) {
-      return false;
-    }
+        this.getPrevYearPeriod = function(period) {
+            // period format should always begin with YYYY and a space
+            if (!period) {
+                return;
+            }
+            var part = period.split(' ');
+            part[0] = parseInt(part[0]) - 1;
+            return isNaN(part[0]) ? period : part.join(' ');
+        };
 
-    var parts = periodId.split(' ');
-    var year = parseInt(parts[0]);
+        /*
+         * DantePurchaseHistory.PurchaseHistoryAttributes.PeriodOffSet property is time since DantePurchaseHistory.PeriodStartDate (epoch time in s, not ms) in the same units as DantePurchaseHistory.Period
+         * eg Period = 'M', PeriodStartDate = 1461792101, PeriodOffset = 3: is 1461792101 + 3 months
+         * converts this to momentjs object
+         */
+        this.convertPeriodOffsetToDate = function(
+            period,
+            periodStartDate,
+            periodOffset
+        ) {
+            var key;
+            switch (period) {
+                case 'D':
+                    key = 'days';
+                    break;
+                case 'M':
+                    key = 'months';
+                    break;
+                case 'Q':
+                    key = 'quarters';
+                    break;
+                case 'Y':
+                    key = 'years';
+                    break;
+                default:
+                    key = 'days';
+                    break;
+            }
 
-    var periodEnums = PERIOD_ENUMS[period];
-    if (!periodEnums) {
-      return false;
-    }
+            return moment(periodStartDate * 1000).add(periodOffset, key);
+        };
 
-    if (!year || year > (new Date()).getFullYear() ||
-      periodEnums.indexOf(parts[1]) === -1) {
-      return false;
-    }
+        this.isValidPeriodId = function(period, periodId) {
+            if (!period || !periodId) {
+                return false;
+            }
 
-    return true;
-  };
+            var parts = periodId.split(' ');
+            var year = parseInt(parts[0]);
 
-  this.formatDisplayPeriodId = function (period, periodId, long) {
-    var periodIdParts = periodId.split(' ');
-    var formatted = periodIdParts[1];
-    formatted += ' ';
-    if (long) {
-      formatted += periodIdParts[0];
-    } else {
-      formatted += "'" + periodIdParts[0].substring(2,4);
-    }
-    
-    switch (period) {
-      case 'M': 
-        return formatted;
-      case 'Q':
-        return 'Q' + formatted;
-    }
-  };
+            var periodEnums = PERIOD_ENUMS[period];
+            if (!periodEnums) {
+                return false;
+            }
 
-  this.getAdjacentPeriodId = function (period, periodId, backwards) {
-    var periodIdParts = periodId.split(' ');
-    var year = parseInt(periodIdParts[0]);
-    if (!year) { 
-      return null;
-    }
+            if (
+                !year ||
+                year > new Date().getFullYear() ||
+                periodEnums.indexOf(parts[1]) === -1
+            ) {
+                return false;
+            }
 
-    var periodEnums = PERIOD_ENUMS[period];
-    if (!periodEnums) {
-      return null;
-    }
+            return true;
+        };
 
-    var index = periodEnums.indexOf(periodIdParts[1]);
-    var dir = backwards ? -1 : 1;
-    var wrapIndex = backwards ? periodEnums.length - 1 : 0;
-    var edgeIndex = backwards ? 0 : periodEnums.length - 1;
+        this.formatDisplayPeriodId = function(period, periodId, long) {
+            var periodIdParts = periodId.split(' ');
+            var formatted = periodIdParts[1];
+            formatted += ' ';
+            if (long) {
+                formatted += periodIdParts[0];
+            } else {
+                formatted += "'" + periodIdParts[0].substring(2, 4);
+            }
 
-    if (index === edgeIndex) {
-      return (year + dir) + ' ' + periodEnums[wrapIndex];
-    }
+            switch (period) {
+                case 'M':
+                    return formatted;
+                case 'Q':
+                    return 'Q' + formatted;
+            }
+        };
 
-    if (index > -1 ) {
-      return year + ' ' + periodEnums[index + dir];
-    }
+        this.getAdjacentPeriodId = function(period, periodId, backwards) {
+            var periodIdParts = periodId.split(' ');
+            var year = parseInt(periodIdParts[0]);
+            if (!year) {
+                return null;
+            }
 
-    return null;
-  };
+            var periodEnums = PERIOD_ENUMS[period];
+            if (!periodEnums) {
+                return null;
+            }
 
-  this.getNextPeriodId = function (period, periodId) {
-    return this.getAdjacentPeriodId(period, periodId, false);
-  };
+            var index = periodEnums.indexOf(periodIdParts[1]);
+            var dir = backwards ? -1 : 1;
+            var wrapIndex = backwards ? periodEnums.length - 1 : 0;
+            var edgeIndex = backwards ? 0 : periodEnums.length - 1;
 
-  this.getPrevPeriodId = function (period, periodId) {
-    return this.getAdjacentPeriodId(period, periodId, true);
-  };
+            if (index === edgeIndex) {
+                return year + dir + ' ' + periodEnums[wrapIndex];
+            }
 
-  this.getPeriodRange = function (period, startPeriodId, endPeriodId) {
-    var self = this;
+            if (index > -1) {
+                return year + ' ' + periodEnums[index + dir];
+            }
 
-    if (!period || !self.isValidPeriodId(period, startPeriodId) || !self.isValidPeriodId(period, endPeriodId)) {
-      return [];
-    }
-    
-    if (self.periodIdComparator(startPeriodId, endPeriodId) > 0) {
-      return [];
-    }
+            return null;
+        };
 
-    var periodEnums = PERIOD_ENUMS[period];
-    if (!periodEnums) {
-      return [];
-    }
+        this.getNextPeriodId = function(period, periodId) {
+            return this.getAdjacentPeriodId(period, periodId, false);
+        };
 
-    var periodIdParts = startPeriodId.split(' ');
-    var year = parseInt(periodIdParts[0]);
+        this.getPrevPeriodId = function(period, periodId) {
+            return this.getAdjacentPeriodId(period, periodId, true);
+        };
 
-    var index = PERIOD_ENUMS[period].indexOf(periodIdParts[1]);
-    if (index === -1) {
-      return [];
-    }
+        this.getPeriodRange = function(period, startPeriodId, endPeriodId) {
+            var self = this;
 
-    var range = [];
-    var size = periodEnums.length;
-    var nextPeriodId = null;
-    while (nextPeriodId !== endPeriodId) {
-      nextPeriodId = year + ' ' + periodEnums[index];
-      range.push(nextPeriodId);
-      if (index++ === size - 1) {
-        index = 0;
-        year++;
-      }
-    }
+            if (
+                !period ||
+                !self.isValidPeriodId(period, startPeriodId) ||
+                !self.isValidPeriodId(period, endPeriodId)
+            ) {
+                return [];
+            }
 
-    return range;
-  };
+            if (self.periodIdComparator(startPeriodId, endPeriodId) > 0) {
+                return [];
+            }
 
-  /*
-  * returns the periodId of the quarter the period is in
-  */
-  this.getQuarterFromPeriodId = function (period, periodId) {
-      var self = this;
-      switch (period) {
-          case 'M':
-              // set date to 1 (for firefox Date object)
-              return moment(new Date(periodId + ' 1')).format(self.periodToMomentFormat.Q);
-          case 'Q':
-              return periodId;
-      }
-  };
+            var periodEnums = PERIOD_ENUMS[period];
+            if (!periodEnums) {
+                return [];
+            }
 
-  /*
-  * return the previous quarter periodId
-  */
-  this.getPrevQuarterPeriod = function (period, periodId) {
-      var self = this;
-      var periodParts = periodId.split(' ');
-      var year = parseInt(periodParts[0]);
-      var quarter;
-      switch (period) {
-          case 'M':
-              quarter = self.getQuarterFromPeriodId(period, periodId);
-              return self.getPrevQuarterPeriod('Q', quarter);
-          case 'Q':
-              quarter = parseInt(periodParts[1]);
-              if (quarter && year) {
-                  var prevQuarter = (quarter > 1) ? quarter - 1 : 4;
-                  year = (prevQuarter === 4) ? year - 1 : year;
+            var periodIdParts = startPeriodId.split(' ');
+            var year = parseInt(periodIdParts[0]);
 
-                  return year + ' ' + prevQuarter;
-              }
-              return;
-      }
-  };
-});
+            var index = PERIOD_ENUMS[period].indexOf(periodIdParts[1]);
+            if (index === -1) {
+                return [];
+            }
+
+            var range = [];
+            var size = periodEnums.length;
+            var nextPeriodId = null;
+            while (nextPeriodId !== endPeriodId) {
+                nextPeriodId = year + ' ' + periodEnums[index];
+                range.push(nextPeriodId);
+                if (index++ === size - 1) {
+                    index = 0;
+                    year++;
+                }
+            }
+
+            return range;
+        };
+
+        /*
+         * returns the periodId of the quarter the period is in
+         */
+        this.getQuarterFromPeriodId = function(period, periodId) {
+            var self = this;
+            switch (period) {
+                case 'M':
+                    // set date to 1 (for firefox Date object)
+                    return moment(new Date(periodId + ' 1')).format(
+                        self.periodToMomentFormat.Q
+                    );
+                case 'Q':
+                    return periodId;
+            }
+        };
+
+        /*
+         * return the previous quarter periodId
+         */
+        this.getPrevQuarterPeriod = function(period, periodId) {
+            var self = this;
+            var periodParts = periodId.split(' ');
+            var year = parseInt(periodParts[0]);
+            var quarter;
+            switch (period) {
+                case 'M':
+                    quarter = self.getQuarterFromPeriodId(period, periodId);
+                    return self.getPrevQuarterPeriod('Q', quarter);
+                case 'Q':
+                    quarter = parseInt(periodParts[1]);
+                    if (quarter && year) {
+                        var prevQuarter = quarter > 1 ? quarter - 1 : 4;
+                        year = prevQuarter === 4 ? year - 1 : year;
+
+                        return year + ' ' + prevQuarter;
+                    }
+                    return;
+            }
+        };
+    });
