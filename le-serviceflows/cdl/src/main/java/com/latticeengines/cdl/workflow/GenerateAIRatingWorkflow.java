@@ -49,10 +49,10 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     private RecalculatePercentileScoreDataFlow recalculatePercentileScore;
 
     @Inject
-    private RecalculateExpectedRevenueDataFlow recalculateExpectedRevenueDataFlow;
+    private CalculatePredictedRevenuePercentileDataFlow calculatePredictedRevenuePercentileDataFlow;
 
     @Inject
-    private CalculatePredictedRevenuePercentileDataFlow calculatePredictedRevenuePercentileDataFlow;
+    private RecalculateExpectedRevenueDataFlow recalculateExpectedRevenueDataFlow;
 
     @Inject
     private CalculateExpectedRevenuePercentileDataFlow calculateExpectedRevenuePercentileDataFlow;
@@ -81,8 +81,8 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         if (!isLPI) {
             builder //
                     .next(recalculatePercentileScore) //
-                    .next(recalculateExpectedRevenueDataFlow) //
                     .next(calculatePredictedRevenuePercentileDataFlow) //
+                    .next(recalculateExpectedRevenueDataFlow) //
                     .next(calculateExpectedRevenuePercentileDataFlow) //
                     .next(scoreAggregate); //
         }

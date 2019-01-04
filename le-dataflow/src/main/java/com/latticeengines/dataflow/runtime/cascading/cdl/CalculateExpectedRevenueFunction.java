@@ -28,13 +28,13 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
     private FittedConversionRateCalculator predictedRevenueFitter;
 
     public CalculateExpectedRevenueFunction(Fields fieldDeclaration, String percentileFieldName,
-            String predictedRevenuePercentileFieldName, String expectedRevenuePercentileFieldName,
+            String predictedRevenuePercentileFieldName, String expectedRevenueFieldName,
             String evFitFunctionParamsStr) {
         super(fieldDeclaration);
 
         this.percentileFieldName = percentileFieldName;
         this.predictedRevenuePercentileFieldName = predictedRevenuePercentileFieldName;
-        this.expectedRevenueFieldPos = fieldDeclaration.getPos(expectedRevenuePercentileFieldName);
+        this.expectedRevenueFieldPos = fieldDeclaration.getPos(expectedRevenueFieldName);
 
         EVFitFunctionParameters evFitFunctionParameters = parseEVFitFunctionParams(evFitFunctionParamsStr);
         FitFunctionParameters probFitParams = evFitFunctionParameters.getProbabilityParameters();
@@ -44,7 +44,7 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
         log.info(String.format(
                 "percentileFieldName = %s, predictedRevenuePercentileFieldName = %s,  expectedRevenuePercentileFieldName = %s, "
                         + "expectedRevenueFieldPos = %d",
-                percentileFieldName, predictedRevenuePercentileFieldName, expectedRevenuePercentileFieldName,
+                percentileFieldName, predictedRevenuePercentileFieldName, expectedRevenueFieldName,
                 expectedRevenueFieldPos));
     }
 

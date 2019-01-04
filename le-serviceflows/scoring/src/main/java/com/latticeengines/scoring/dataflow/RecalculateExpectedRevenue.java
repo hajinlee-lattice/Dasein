@@ -50,7 +50,6 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
     private Node calculateExpectedRevenueByFieldMap(Map<String, String> originalScoreFieldMap,
             Map<String, String> fitFunctionParametersMap, String modelGuidFieldName, String percentileFieldName,
             String predictedRevenuePercentileFieldName, String expectedRevenueFieldName, Node input) {
-        input = input.addColumnWithFixedValue(predictedRevenuePercentileFieldName, null, Integer.class);
         Map<String, Node> nodes = splitNodes(input, originalScoreFieldMap, modelGuidFieldName);
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {

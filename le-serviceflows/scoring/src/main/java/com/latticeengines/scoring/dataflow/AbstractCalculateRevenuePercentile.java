@@ -105,6 +105,7 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
             return node;
         }
 
+        node = node.addColumnWithFixedValue(percentileFieldName, null, Integer.class);
         List<String> returnedFields = new ArrayList<>(node.getFieldNames());
         List<FieldMetadata> returnedMetadata = new ArrayList<>(node.getSchema());
         Node calculatePercentile = node
