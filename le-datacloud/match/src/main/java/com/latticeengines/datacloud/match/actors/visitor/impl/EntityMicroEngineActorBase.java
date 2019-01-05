@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -121,8 +121,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             EntityAssociationResponse associationResponse = (EntityAssociationResponse) response.getResult();
             if (StringUtils.isNotBlank(associationResponse.getAssociatedEntityId())) {
                 traveler.setMatched(true);
-                // TODO (ZDD) need to change the result after repeated run on decision graph is supported because
-                //           LatticeAccountId is actually serialized from result field and is overwritten here
                 traveler.setResult(associationResponse.getAssociatedEntityId());
                 traveler.debug(String.format(
                         "Associate to entity successfully. Entity=%s, EntityId=%s, AssociationErrors=%s",

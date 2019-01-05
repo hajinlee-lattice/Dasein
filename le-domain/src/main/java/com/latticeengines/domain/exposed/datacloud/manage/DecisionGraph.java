@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.actors.ActorType;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -53,11 +54,13 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "Edges", length = 1000)
     private String edges;
 
-
     // Content format
     // JunctionActorNameAbbr1:DecisionGraph1,JunctionActorNameAbbr2:DecisionGraph2,...
     @Column(name = "JunctionGraphs", length = 1000)
     private String junctionGraphs;
+
+    @Column(name = "Entity", length = 100)
+    private String entity;
 
     @Transient
     private List<Node> startingNodes;
@@ -68,6 +71,10 @@ public class DecisionGraph implements HasPid, Serializable {
     // JunctionName (short actor name) -> decision graph
     @Transient
     private Map<String, String> junctionGraphMap;
+
+    /*******************************
+     * Constructor & Getter/Setter
+     *******************************/
 
     @Override
     public Long getPid() {
@@ -107,12 +114,35 @@ public class DecisionGraph implements HasPid, Serializable {
         this.junctionGraphs = junctionGraphs;
     }
 
+    public String getEntity() {
+        return entity;
+    }
+
+    @VisibleForTesting
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
+
+    /********************
+     * Business methods
+     ********************/
+
+    /**
+     * Based on current junction name, decide next decision graph to jump to
+     * 
+     * @param junctionName
+     * @return
+     */
     public String getNextGraphForJunction(String junctionName) {
         junctionName = MatchActorUtils.getShortActorName(junctionName, ActorType.JUNCION);
         return getJunctionGraphMap().get(junctionName);
     }
 
-    private Map<String, String> getJunctionGraphMap() {
+    /**
+     * 
+     * @return Junction name -> decision graph to jump to
+     */
+    public Map<String, String> getJunctionGraphMap() {
         if (junctionGraphMap == null) {
             if (StringUtils.isBlank(junctionGraphs)) {
                 junctionGraphMap = new HashMap<>();

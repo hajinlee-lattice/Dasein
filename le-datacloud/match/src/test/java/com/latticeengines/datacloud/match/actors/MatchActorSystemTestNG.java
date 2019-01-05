@@ -2,14 +2,17 @@ package com.latticeengines.datacloud.match.actors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
@@ -21,21 +24,24 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
-import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchJunctionActor;
+import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphService;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityEmailBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Test
 public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -52,11 +58,17 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final String DOMAIN = "abc.xyz";
     private static final String LATTICE_ID = "280002626626";
 
+    private static final String DOMAIN_FIELD = "Domain";
+    private static final String DUNS_FIELD = "DUNS";
+
     @Autowired
     private FuzzyMatchService service;
 
     @Autowired
     private MatchActorSystem actorSystem;
+
+    @Autowired
+    private MatchDecisionGraphService matchDecisionGraphService;
 
     // Realtime and batch mode cannot run at same time. Must be prioritized
     @Test(groups = "functional", dataProvider = "actorSystemTestData", priority = 1)
@@ -94,13 +106,15 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
 
                 // Verify travel history
                 if (expectedTravelStopStr != null) {
-                    hasError = verifyTravelHistory(result.getMatchLogs(), expectedTravelStops);
+                    hasError = hasError || verifyTravelHistory(result.getMatchLogs(), expectedTravelStops);
                 }
 
                 // Verify match result
                 InternalOutputRecord record = (InternalOutputRecord) result;
                 if (decisionGraph.equals(ldcMatchDG)) {
-                    hasError = verifyLDCMatchResult(record, expectedID);
+                    hasError = hasError || verifyLDCMatchResult(record, expectedID);
+                } else {
+                    hasError = hasError || verifyEntityMatchResult(record);
                 }
 
             }
@@ -122,21 +136,23 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                 { 50, accountMatchDG, String.join(",", //
                         MatchPlannerMicroEngineActor.class.getSimpleName(), //
                         EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
-                        FuzzyMatchJunctionActor.class.getSimpleName(), //
+                        "FuzzyMatchJunctionActor", //
                         DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
                         EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
-                        EntityIdResolveMicroEngineActor.class.getSimpleName()), //
+                        EntityIdAssociateMicroEngineActor.class.getSimpleName()), //
                         null, DOMAIN, DUNS }, //
+                // Disble contact match test for now. More initialization work
+                // to be done
+                /*
                 { 50, contactMatchDG, String.join(",", //
                         MatchPlannerMicroEngineActor.class.getSimpleName(), //
                         EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
-                        AccountMatchJunctionActor.class.getSimpleName(), //
+                        "AccountMatchJunctionActor", //
                         MatchPlannerMicroEngineActor.class.getSimpleName(), //
                         EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
-                        FuzzyMatchJunctionActor.class.getSimpleName(), //
+                        "FuzzyMatchJunctionActor",  //
                         DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
                         EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
@@ -145,9 +161,9 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                         EntityIdResolveMicroEngineActor.class.getSimpleName(), //
                         EntityEmailBasedMicroEngineActor.class.getSimpleName(), //
                         EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
-                        EntityIdResolveMicroEngineActor.class.getSimpleName()), //
+                        EntityIdAssociateMicroEngineActor.class.getSimpleName()), //
                         null, DOMAIN, DUNS }, //
+                        */
         };
     }
 
@@ -165,7 +181,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             });
             Assert.assertTrue(expectedTravelStops.isEmpty());
         } catch (AssertionError e) {
-            log.error("Exception in verifing LDC match result", e);
+            log.error("Exception in verifing travel history", e);
             return true;
         }
         return false;
@@ -190,15 +206,55 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         return false;
     }
 
-    private MatchInput prepareMatchInput(String decisionGraph) {
+    private boolean verifyEntityMatchResult(InternalOutputRecord record) {
+        try {
+            Assert.assertNotNull(record.getEntityId());
+        } catch (AssertionError e) {
+            log.error("Exception in verifing entity match result", e);
+            return true;
+        }
+        return false;
+    }
+
+    private MatchInput prepareMatchInput(String dgName) {
         MatchInput matchInput = new MatchInput();
         matchInput.setLogLevelEnum(Level.DEBUG);
-        matchInput.setDecisionGraph(decisionGraph);
+        matchInput.setDecisionGraph(dgName);
         matchInput.setDataCloudVersion(currentDataCloudVersion);
         matchInput.setRootOperationUid(UUID.randomUUID().toString());
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(false);
+        matchInput.setTenant(new Tenant(this.getClass().getSimpleName()));
+        matchInput.setAllocateId(true);
+        matchInput.setEntityKeyMapList(prepareEntityKeyMap());
+        matchInput.setFields(Arrays.asList(DOMAIN_FIELD, DUNS_FIELD));
+        try {
+            DecisionGraph dg = matchDecisionGraphService.getDecisionGraph(dgName);
+            matchInput.setTargetEntity(dg.getEntity());
+            // OperationalMode.CDL_LOOKUP case is not covered here
+            if (matchInput.getTargetEntity().equals(BusinessEntity.LatticeAccount.name())) {
+                matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
+            } else {
+                matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
+            }
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Fail to load decision graph " + dgName, e);
+        }
         return matchInput;
+    }
+
+    private List<MatchInput.EntityKeyMap> prepareEntityKeyMap() {
+        List<MatchInput.EntityKeyMap> list = new ArrayList<>();
+
+        MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
+        entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList(DOMAIN_FIELD));
+        keyMap.put(MatchKey.DUNS, Collections.singletonList(DUNS_FIELD));
+        entityKeyMap.setKeyMap(keyMap);
+        list.add(entityKeyMap);
+
+        return list;
     }
 
     private List<OutputRecord> prepareData(int numRecords, String domain, String duns) {
@@ -207,6 +263,14 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             InternalOutputRecord matchRecord = new InternalOutputRecord();
             matchRecord.setParsedDuns(duns);
             matchRecord.setParsedDomain(domain);
+            // same order as matchInput.fields
+            Object[] rawData = new Object[] { domain, duns };
+            matchRecord.setInput(Arrays.asList(rawData));
+            // set position according to matchInput.fields
+            Map<MatchKey, List<Integer>> keyPosMap = new HashMap<>();
+            keyPosMap.put(MatchKey.Domain, Arrays.asList(0));
+            keyPosMap.put(MatchKey.DUNS, Arrays.asList(1));
+            matchRecord.setKeyPositionMap(keyPosMap);
             matchRecords.add(matchRecord);
         }
         return matchRecords;

@@ -119,10 +119,14 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
                 }
                 try {
                     execute(traveler);
+                    travel(traveler, self(), false);
                 } catch (Exception e) {
+                    traveler.warn(
+                            String.format("Force to return anchor due to exception encountered at %s: %s",
+                                    getActorName(self()), e.getMessage()),
+                            e);
                     forceReturnToAnchor(traveler);
                 }
-                travel(traveler, self(), false);
             }
         }
 

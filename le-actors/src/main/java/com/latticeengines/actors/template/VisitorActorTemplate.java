@@ -81,27 +81,41 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             if (msg instanceof Traveler) {
                 traveler = (Traveler) msg;
                 if (logCheckInNOut()) {
-                    traveler.checkIn(getClass().getSimpleName());
+                    traveler.checkIn(getCurrentActorName());
                 }
                 if (log.isDebugEnabled()) {
                     log.debug(self() + " received traveler " + traveler);
                 }
-
                 setOriginalSender(traveler, sender());
-                boolean sentToExternalActor = process(traveler);
-                if (sentToExternalActor) {
-                    // unblock current actor
+
+                try {
+                    boolean sentToExternalActor = process(traveler);
+                    if (sentToExternalActor) {
+                        // unblock current actor
+                        return;
+                    }
+                    rejected = true;
+                } catch (Exception e) {
+                    traveler.warn(String.format("Force to return anchor due to exception encountered at %s: %s",
+                            getActorName(self()), e.getMessage()), e);
+                    forceReturnToAnchor(traveler);
                     return;
                 }
-                rejected = true;
             } else if (msg instanceof Response) {
                 Response response = (Response) msg;
                 traveler = response.getTravelerContext();
                 if (log.isDebugEnabled()) {
                     log.debug(self() + " received a response for traveler " + traveler + ": " + response.getResult());
                 }
-                process(response);
-                rejected = false;
+                try {
+                    process(response);
+                    rejected = false;
+                } catch (Exception e) {
+                    traveler.warn(String.format("Force to return anchor due to exception encountered at %s: %s",
+                            getActorName(self()), e.getMessage()), e);
+                    forceReturnToAnchor(traveler);
+                    return;
+                }
             }
 
             if (traveler == null) {
@@ -123,7 +137,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         }
         ActorRef nextActorRef = getContext().actorFor(nextLocation);
         if (logCheckInNOut()) {
-            VisitingHistory visitingHistory = traveler.checkOut(getClass().getSimpleName(), getActorName(nextActorRef));
+            VisitingHistory visitingHistory = traveler.checkOut(getCurrentActorName(), getActorName(nextActorRef));
             visitingHistory.setRejected(rejected);
             writeVisitingHistory(visitingHistory);
         }
@@ -166,6 +180,10 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     protected String getActorName(ActorRef actorRef) {
         return getActorSystem().getActorName(actorRef);
+    }
+
+    protected String getCurrentActorName() {
+        return getActorName(self());
     }
 
     protected boolean logCheckInNOut() {

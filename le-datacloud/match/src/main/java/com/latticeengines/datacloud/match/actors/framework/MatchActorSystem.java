@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,7 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
-import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,6 @@ import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.ActorFactory;
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.MetricActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnBCacheLookupActor;
@@ -40,15 +41,17 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountr
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityEmailBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.MatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
 import com.latticeengines.domain.exposed.actors.ActorType;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 
 import akka.actor.ActorRef;
@@ -99,6 +102,9 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     private ExecutorService dataSourceServiceExecutor;
 
+    @Autowired
+    private MatchDecisionGraphService matchDecisionGraphService;
+
     /****************************
      * Initialization & Destroy
      ****************************/
@@ -134,19 +140,20 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 ActorType.ANCHOR);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void initJunctions() {
-        Class<? extends ActorTemplate>[] junctionClz = new Class[] { //
-                FuzzyMatchJunctionActor.class, //
-                AccountMatchJunctionActor.class, //
-        };
-        for (Class<? extends ActorTemplate> clz : junctionClz) {
-            initNamedActor(clz);
-            actorNameToType.put(clz.getSimpleName(), ActorType.JUNCION);
-            actorNameAbbrToType.put(MatchActorUtils.getShortActorName(clz.getSimpleName(), ActorType.JUNCION),
-                    ActorType.JUNCION);
-        }
+        List<DecisionGraph> decisionGraphs = matchDecisionGraphService.findAll();
+        Set<String> junctionAbbrs = new HashSet<>();
+        decisionGraphs.forEach(dg -> {
+            junctionAbbrs.addAll(dg.getJunctionGraphMap().keySet());
+        });
+
+        junctionAbbrs.forEach(junctionAbbr -> {
+            String junctionName = MatchActorUtils.getFullActorName(junctionAbbr, ActorType.JUNCION);
+            initNamedActor(MatchJunctionActor.class, false, 1, junctionName);
+            actorNameToType.put(junctionName, ActorType.JUNCION);
+            actorNameAbbrToType.put(junctionAbbr, ActorType.JUNCION);
+        });
     }
 
     @SuppressWarnings("unchecked")

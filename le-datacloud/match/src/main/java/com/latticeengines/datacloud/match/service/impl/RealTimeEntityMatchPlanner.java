@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -24,16 +25,18 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
     private int maxRealTimeInput;
 
 
+    @Override
     public MatchContext plan(MatchInput input) {
         return plan(input, null, false);
     }
 
+    @Override
     @MatchStep
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
 
         setDataCloudVersion(input);
-        setDecisionGraph(input);
+        setEntityDecisionGraph(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
@@ -59,6 +62,7 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
         context = scanInputData(input, context);
         context.setInput(input);
         context.setOutput(output);
+
         return context;
     }
 
@@ -75,6 +79,8 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
     }
 
     protected void validate(MatchInput input) {
-        MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+        DecisionGraph decisionGraph = findDecisionGraph(input);
+        MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput, decisionGraph);
     }
+
 }

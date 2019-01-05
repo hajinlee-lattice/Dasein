@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.framework.impl;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -64,6 +65,11 @@ public class MatchDecisionGraphServiceImpl implements MatchDecisionGraphService 
         DecisionGraph decisionGraph = getDecisionGraph(currentGraphName);
         String jumpToGraphName = decisionGraph.getNextGraphForJunction(junctionName);
         return getDecisionGraph(jumpToGraphName);
+    }
+
+    @Override
+    public List<DecisionGraph> findAll() {
+        return decisionGraphEntityMgr.findAll();
     }
 
 }

@@ -11,6 +11,7 @@ import java.util.Random;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -190,26 +191,10 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should fail on empty input fields.");
 
 
-        // Test 2:  Real time Entity Match but allocate ID set to true.
+        // Test 3:  Predefined Selection not set.
         failed = false;
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS",
                 "SfdcId", "MktoId"));
-        input.setAllocateId(true);
-
-        try {
-            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (UnsupportedOperationException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains("Real Time Entity Match only supports non-Allocate mode."),
-                    "Wrong error message: " + e.getMessage());
-        } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
-        }
-        Assert.assertTrue(failed, "Should fail when in Allocate ID mode for Real Time Entity Match.");
-
-
-        // Test 3:  Predefined Selection not set.
-        failed = false;
         input.setAllocateId(false);
 
         try {
@@ -444,10 +429,32 @@ public class MatchInputValidatorUnitTestNG {
         }
         Assert.assertTrue(failed, "Input data must not be longer than number of input fields.");
 
-
-        // Test 16:  Should pass on valid data.
+        // Test 16: Should fail on unmatched decision graph and target entity
         failed = false;
         input.setData(generateMockData(100, true));
+        // Fake some decision graph name just for testing purpose
+        input.setDecisionGraph("AccountDecisionGraph");
+        input.setTargetEntity(BusinessEntity.Contact.name());
+        DecisionGraph decisionGraph = new DecisionGraph();
+        decisionGraph.setEntity(BusinessEntity.Account.name());
+        try {
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput, decisionGraph);
+        } catch (IllegalArgumentException e) {
+            failed = true;
+            Assert.assertTrue(e.getMessage().contains(
+                    "Decision graph AccountDecisionGraph and target entity Contact are not matched. Target entity for decision graph AccountDecisionGraph is Account"),
+                    "Wrong error message: " + e.getMessage());
+        } catch (Exception e) {
+            Assert.fail("Failed on wrong exception: " + e.getMessage());
+        }
+        Assert.assertTrue(failed,
+                "Decision graph AccountDecisionGraph and target entity Contact are not matched. Target entity for decision graph AccountDecisionGraph is Account");
+
+
+        // Test 17: Should pass on valid data.
+        failed = false;
+        input.setData(generateMockData(100, true));
+        input.setDecisionGraph(null);
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);

@@ -15,24 +15,19 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.Level;
 
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
-/**
- * @author build
- *
- */
-/**
- * @author build
- *
- */
+import akka.util.Timeout;
+
 public abstract class Traveler {
 
     protected abstract Object getInputData();
 
     /*************************
      * Bound to whole travel
-     **************************/
+     *************************/
     private final String rootOperationUid;
     private final String travelerId;
     private final List<TravelLog> travelStory = new ArrayList<>();
@@ -51,16 +46,25 @@ public abstract class Traveler {
     private StopWatch stopWatch;
     private Level logLevel = Level.DEBUG;
     private String lastStop; // Only for metrics purpose
+    private Double totalTravelTime; // only for metric purpose
+
+    // If exceed time limit, treat as timeout failure
+    private Timeout travelTimeout;
 
     /***********************************
      * Bound to current decision graph
      ***********************************/
-    private String decisionGraph;
-    private Map<String, Set<String>> visitedHistory = new HashMap<>();
-    private Map<String, Long> checkpoints = new HashMap<>();
-    private Queue<String> visitingQueue = new LinkedList<>();
-    private TravelException travelException;
+    // Goal of travel
     private Object result;
+    private String decisionGraph;
+    // TODO(ZDD): Add comment
+    private Map<String, Set<String>> visitedHistory = new HashMap<>();
+    // TODO(ZDD): Add comment
+    private Map<String, Long> checkpoints = new HashMap<>();
+    // TODO(ZDD): Add comment
+    private Queue<String> visitingQueue = new LinkedList<>();
+    // TODO(ZDD): Add comment
+    private TravelException travelException;
     // When the 1st time anchor receives the traveler in current decision graph,
     // isProcessed will be set as true
     private boolean isProcessed = false;
@@ -158,6 +162,23 @@ public abstract class Traveler {
         this.decisionGraph = decisionGraph;
     }
 
+    @MetricField(name = "TravelTime", fieldType = MetricField.FieldType.DOUBLE)
+    public Double getTotalTravelTime() {
+        return totalTravelTime;
+    }
+
+    public void recordTotalTime() {
+        this.totalTravelTime = age().doubleValue();
+    }
+
+    public Timeout getTravelTimeout() {
+        return travelTimeout;
+    }
+
+    public void setTravelTimeout(Timeout travelTimeout) {
+        this.travelTimeout = travelTimeout;
+    }
+
     /********************
      * Business methods
      ********************/
@@ -166,9 +187,10 @@ public abstract class Traveler {
         if (!visitedHistory.containsKey(traversedActor)) {
             visitedHistory.put(traversedActor, new HashSet<String>());
         }
-        visitedHistory.get(traversedActor).add(getInputData().toString());
-        // TODO(ZDD): It is to avoid repeated traversing actor with same input data
-        // After supporting repeated runs in decision graph, this logic need to revisit
+        // TODO(ZDD): It is to avoid repeated traversing actor with same input
+        // data.
+        // After supporting repeated runs in decision graph, this logic need to
+        // revisit.
         // For entity match, match traveler starts with null matchKeyTuple, need
         // to revisit null handling
         visitedHistory.get(traversedActor)

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,10 +15,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
@@ -36,15 +37,15 @@ public class MatchInputValidator {
     private static Logger log = LoggerFactory.getLogger(MatchInputValidator.class);
 
     public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput) {
+        validateRealTimeInput(input, maxRealTimeInput, null);
+    }
+
+    public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput, DecisionGraph decisionGraph) {
         commonValidation(input);
 
         // Perform a different set of validation operations for Entity Match case.
         if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
-            // Check that for real time match, Entity Match is set to non-allocate.
-            if (input.isAllocateId()) {
-                throw new UnsupportedOperationException("Real Time Entity Match only supports non-Allocate mode.");
-            }
-            validateEntityMatch(input);
+            validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
             validateAccountMatchKeys(input.getKeyMap().keySet());
@@ -100,9 +101,13 @@ public class MatchInputValidator {
         }
     }
 
-    private static void validateEntityMatch(MatchInput input) {
+    private static void validateEntityMatch(MatchInput input, DecisionGraph decisionGraph) {
         // Verify that column selection is set appropriately for Entity Match.
         validateEntityMatchColumnSelection(input);
+
+        // Verify whether decision graph and entity are matched in match
+        // input
+        validateEntityMatchDecisionGraph(input, decisionGraph);
 
         // Verify that EntityKeyMap is set.
         if (CollectionUtils.isEmpty(input.getEntityKeyMapList())) {
@@ -182,6 +187,26 @@ public class MatchInputValidator {
             }
         } else {
             validatePredefinedSelection(input.getPredefinedSelection());
+        }
+    }
+
+    private static void validateEntityMatchDecisionGraph(MatchInput input, DecisionGraph decisionGraph) {
+        if (StringUtils.isBlank(input.getDecisionGraph())) {
+            return; // Use default decision graph
+        }
+        if (StringUtils.isNotBlank(input.getDecisionGraph()) && decisionGraph == null) {
+            throw new IllegalArgumentException("Cannot find decision graph with name " + input.getDecisionGraph());
+        }
+        if (StringUtils.isBlank(input.getDecisionGraph()) && StringUtils.isBlank(input.getTargetEntity())) {
+            throw new IllegalArgumentException(
+                    "Please provide either decision graph or target entity for entity match");
+        }
+        if (StringUtils.isNotBlank(input.getDecisionGraph()) && StringUtils.isNotBlank(input.getTargetEntity())
+                && !input.getTargetEntity().equals(decisionGraph.getEntity())) {
+            throw new IllegalArgumentException(String.format(
+                    "Decision graph %s and target entity %s are not matched. Target entity for decision graph %s is %s",
+                    input.getDecisionGraph(), input.getTargetEntity(), input.getDecisionGraph(),
+                    decisionGraph.getEntity()));
         }
     }
 
@@ -345,4 +370,5 @@ public class MatchInputValidator {
             }
         }
     }
+
 }

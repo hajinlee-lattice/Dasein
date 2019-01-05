@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.List;
+import java.util.Objects;
+
 import javax.inject.Inject;
 
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,9 +22,7 @@ import com.latticeengines.actors.template.ExecutorMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-
-import java.util.List;
-import java.util.Objects;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 
 /**
  * Pick the entity found by the highest priority match key from a list of lookup results. Only works in lookup mode.
@@ -67,8 +67,6 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
                 .findFirst()
                 .orElse(null);
         if (StringUtils.isNotBlank(entityId)) {
-            // found entity with some lookup entry
-            // TODO (ZDD) need to change the result the same way as in EntityMicroEngineActorBase
             matchTraveler.setMatched(true);
             matchTraveler.setResult(entityId);
             traveler.debug(String.format(

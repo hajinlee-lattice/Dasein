@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -19,12 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
+import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -34,6 +35,7 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -67,8 +69,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Inject
     private CDLLookupService cdlColumnSelectionService;
 
+    @Inject
+    private MatchDecisionGraphService matchDecisionGraphService;
+
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
+
+    @Value("${datacloud.match.default.decision.graph.account}")
+    private String defaultAccountGraph;
 
     void setDataCloudVersion(MatchInput input) {
         if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
@@ -83,6 +91,34 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             decisionGraph = defaultGraph;
             input.setDecisionGraph(decisionGraph);
             log.debug("Did not specify decision graph, use the default one: " + decisionGraph);
+        }
+    }
+
+    protected void setEntityDecisionGraph(MatchInput input) {
+        // No need to handle cases that both targetEntity and decisionGraph are
+        // empty or populated. These 2 cases are already handled in validator
+        if (StringUtils.isBlank(input.getDecisionGraph())) {
+            if (BusinessEntity.Account.name().equals(input.getTargetEntity())) {
+                input.setDecisionGraph(defaultAccountGraph);
+                log.debug(String.format("Did no specify decision graph for target entity %s, use default one %s",
+                        input.getTargetEntity(), defaultAccountGraph));
+            }
+            return;
+        }
+        if (StringUtils.isBlank(input.getTargetEntity())) {
+            DecisionGraph decisionGraph = findDecisionGraph(input);
+            input.setTargetEntity(decisionGraph.getEntity());
+        }
+    }
+
+    protected DecisionGraph findDecisionGraph(MatchInput input) {
+        if (StringUtils.isBlank(input.getDecisionGraph())) {
+            return null;
+        }
+        try {
+            return matchDecisionGraphService.getDecisionGraph(input.getDecisionGraph());
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Fail to find decision graph " + input.getDecisionGraph());
         }
     }
 

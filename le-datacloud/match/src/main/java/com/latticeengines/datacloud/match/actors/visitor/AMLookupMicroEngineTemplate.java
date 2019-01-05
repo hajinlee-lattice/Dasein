@@ -28,7 +28,8 @@ public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineT
             traveler.setResult((lookupEntry == null) ? null : lookupEntry.getLatticeAccountId());
             traveler.setMatched(true);
             traveler.debug(
-                    "Found a precious LatticeAccountId=" + traveler.getResult() + " at " + getClass().getSimpleName()
+                    "Found a precious LatticeAccountId=" + traveler.getLatticeAccountId() + " at "
+                            + getClass().getSimpleName()
                             + " using " + usedKeys(traveler.getMatchKeyTuple()) + ", so ready to go home.");
             if (lookupEntry != null) {
                 String logMessage = "The cacheId was " + lookupEntry.getId() + ".";

@@ -164,19 +164,19 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
 
-INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges, Description, JunctionGraphs)
+INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges, Description, JunctionGraphs, Entity)
 VALUES
-  ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', '0', '0:1|1:2', NULL, NULL),
-  ('DragonClaw', 'DunsDomainBased,DomainBased,DunsBased,LocationToDuns', '0', '0:1,2,3|3:0,2', NULL, NULL),
-  ('Halberd', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToDuns', '0', '0:1,2,3,4,5,6|6:0,5', NULL, NULL),
-  ('Pokemon', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,LocationToDuns', '0', '0:1,2,3,4,5,6,7|7:0,5', 'Default decision graph in M23 and before', NULL),
-  ('Pokemon2', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8|8:0,5', 'First graph with DUNS redirect functionality', NULL),
-  ('Gingerbread', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,CachedDunsValidate,LocationToDuns,DunsValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,5', 'Put DUNS validation functionality to a separate actor for better performance, no DUNS redirect, inherited from Pokemon', NULL),
-  ('Honeycomb', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,5', 'Put DUNS validation functionality to a separate actor for better performance, have DUNS redirect, inherited from Pokemon2', NULL),
-  ('IceCreamSandwich', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsValidate,LocationToDuns,DunsValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, no DUNS redirect', NULL),
-  ('JellyBean', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, have DUNS redirect', NULL),
-  ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich'),
-  ('Cupcake', 'MatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6', 'Default for Contact entity', 'AccountMatch:PetitFour');;
+  ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', '0', '0:1|1:2', NULL, NULL, 'LatticeAccount'),
+  ('DragonClaw', 'DunsDomainBased,DomainBased,DunsBased,LocationToDuns', '0', '0:1,2,3|3:0,2', NULL, NULL, 'LatticeAccount'),
+  ('Halberd', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToDuns', '0', '0:1,2,3,4,5,6|6:0,5', NULL, NULL, 'LatticeAccount'),
+  ('Pokemon', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,LocationToDuns', '0', '0:1,2,3,4,5,6,7|7:0,5', 'Default decision graph in M23 and before', NULL, 'LatticeAccount'),
+  ('Pokemon2', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8|8:0,5', 'First graph with DUNS redirect functionality', NULL, 'LatticeAccount'),
+  ('Gingerbread', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,CachedDunsValidate,LocationToDuns,DunsValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,5', 'Put DUNS validation functionality to a separate actor for better performance, no DUNS redirect, inherited from Pokemon', NULL, 'LatticeAccount'),
+  ('Honeycomb', 'DunsDomainBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,DunsBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,5', 'Put DUNS validation functionality to a separate actor for better performance, have DUNS redirect, inherited from Pokemon2', NULL, 'LatticeAccount'),
+  ('IceCreamSandwich', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsValidate,LocationToDuns,DunsValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, no DUNS redirect', NULL, 'LatticeAccount'),
+  ('JellyBean', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, have DUNS redirect', NULL, 'LatticeAccount'),
+  ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich', 'Account'),
+  ('Cupcake', 'MatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6', 'Default for Contact entity', 'AccountMatch:PetitFour', 'Contact');
 
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`

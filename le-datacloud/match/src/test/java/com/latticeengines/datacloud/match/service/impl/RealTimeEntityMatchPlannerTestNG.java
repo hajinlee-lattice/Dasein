@@ -1,5 +1,19 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -10,26 +24,14 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     @Inject
     private RealTimeEntityMatchPlanner matchPlanner;
 
-    @Value("${datacloud.match.default.decision.graph}")
-    private String defaultGraph;
+    @Value("${datacloud.match.default.decision.graph.account}")
+    private String defaultAccountGraph;
 
     @Test(groups = "functional")
     public void testMatchPlanner() {
@@ -39,7 +41,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         // Test changes to MatchInput.
         MatchContext context = matchPlanner.plan(input);
         Assert.assertEquals(input.getDataCollectionVersion(), null);
-        Assert.assertEquals(input.getDecisionGraph(), defaultGraph);
+        Assert.assertEquals(input.getDecisionGraph(), defaultAccountGraph);
         Assert.assertEquals(input.getMatchEngine(), MatchContext.MatchEngine.REAL_TIME.getName());
 
         // Test MatchContext creation.

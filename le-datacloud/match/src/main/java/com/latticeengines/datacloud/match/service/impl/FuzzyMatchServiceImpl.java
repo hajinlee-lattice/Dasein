@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -93,7 +94,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
-
+                // TODO: For transaction match, there are multiple entity id to
+                // fetch: traveler.getEntityIds()
                 if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
                     matchRecord.setEntityId(result);
                 } else {
@@ -104,6 +106,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 if (StringUtils.isNotEmpty(result)) {
                     matchRecord.setMatched(true);
                 }
+
                 if (StringUtils.isNotEmpty(traveler.getMatchKeyTuple().getDuns())) {
                     matchRecord.setMatchedDuns(traveler.getMatchKeyTuple().getDuns());
                 } else if (Level.DEBUG.equals(logLevel)) {

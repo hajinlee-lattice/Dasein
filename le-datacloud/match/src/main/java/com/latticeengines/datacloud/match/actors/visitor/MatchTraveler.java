@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import akka.util.Timeout;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -43,12 +41,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Actor name (class name) -> duns
     // Duns from different source could be treated differently
     private Map<String, String> dunsOriginMap;
-
-    // TODO(dzheng): Move these two fields to Traveler class.
-    // only for metric purpose
-    private Double totalTravelTime;
-
-    private Timeout travelTimeout;
 
     // TODO(jwinter): Refactor code to avoid needing to include InternalOutputRecord in MatchTraveler.
     // For Entity Match, the InternalOutputRecord is included in the MatchTraveler so that Match Standardization can
@@ -179,16 +171,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return entityIds.get(BusinessEntity.LatticeAccount.name());
     }
 
-    // TODO(dzheng): Move these getters and setters to Traveler class.
-    @MetricField(name = "TravelTime", fieldType = MetricField.FieldType.DOUBLE)
-    public Double getTotalTravelTime() {
-        return totalTravelTime;
-    }
-
-    public void recordTotalTime() {
-        this.totalTravelTime = age().doubleValue();
-    }
-
     @MetricTag(tag = "Mode")
     public String getMode() {
         return isBatchMode ? "Batch" : "RealTime";
@@ -212,16 +194,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         }
     }
 
-    // TODO(dzheng): Move these getters and setters to Traveler class.
-    public Timeout getTravelTimeout() {
-        return travelTimeout;
+    public InternalOutputRecord getInternalOutputRecord() {
+        return internalOutputRecord;
     }
-
-    public void setTravelTimeout(Timeout travelTimeout) {
-        this.travelTimeout = travelTimeout;
-    }
-
-    public InternalOutputRecord getInternalOutputRecord() { return internalOutputRecord; }
 
     public void setInternalOutputRecord(InternalOutputRecord internalOutputRecord) {
         this.internalOutputRecord = internalOutputRecord;
@@ -247,9 +222,13 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return entityIds;
     }
 
-    public String getEntity() { return entity; }
+    public String getEntity() {
+        return entity;
+    }
 
-    public void setEntity(String entity) { this.entity = entity; }
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
 
     public List<Pair<MatchKeyTuple, List<String>>> getEntityMatchLookupResults() {
         return entityMatchLookupResults;
