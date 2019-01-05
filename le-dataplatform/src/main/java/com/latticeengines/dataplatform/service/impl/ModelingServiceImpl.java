@@ -215,10 +215,12 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private void setContainerMemoryProperties(Properties properties) {
-        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), samplingMapReduceMemorySize);
-        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), samplingMapReduceMemorySize);
-        properties.put("mapreduce.map.memory.mb", samplingMapReduceMemorySize);
-        properties.put("mapreduce.reduce.memory.mb", samplingMapReduceMemorySize);
+        String memSize = samplingMapReduceMemorySize + "";
+        log.info(String.format("Setting container mem size for sampling: %s", memSize));
+        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), memSize);
+        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), memSize);
+        properties.put("mapreduce.map.memory.mb", memSize);
+        properties.put("mapreduce.reduce.memory.mb", memSize);
     }
 
     @Override
