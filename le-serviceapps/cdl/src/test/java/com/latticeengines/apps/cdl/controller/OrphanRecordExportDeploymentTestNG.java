@@ -84,7 +84,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         Map<String, Integer> expectedResults = new HashMap<>();
         expectedResults.put(NUM_FILES, 5);
-        expectedResults.put(NUM_RECORDS, 17218);
+        expectedResults.put(NUM_RECORDS, 18616);
         verifyResults(expectedResults);
     }
 

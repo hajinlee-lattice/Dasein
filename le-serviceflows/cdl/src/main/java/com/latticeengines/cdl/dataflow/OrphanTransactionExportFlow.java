@@ -32,11 +32,12 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         Node srcAccount = addSource(parameters.getAccountTable());
         Node srcProduct = addSource(parameters.getProductTable());
 
-        List<String> retainFields = srcTxn.getFieldNames();
+        // dedup by ProductId
+        srcProduct = srcProduct.groupByAndLimit(new FieldList(InterfaceName.ProductId.name()), 1);
 
+        List<String> retainFields = srcTxn.getFieldNames();
         String renamedAccount = RENAME_PREFIX + InterfaceName.AccountId.name();
         String renamedProduct = RENAME_PREFIX + InterfaceName.ProductId.name();
-
         srcAccount = renameFields(srcAccount, InterfaceName.AccountId.name(), renamedAccount);
         srcProduct = renameFields(srcProduct, InterfaceName.ProductId.name(), renamedProduct);
         Node result = srcTxn.join(new FieldList(InterfaceName.AccountId.name()), srcAccount, new FieldList(renamedAccount),

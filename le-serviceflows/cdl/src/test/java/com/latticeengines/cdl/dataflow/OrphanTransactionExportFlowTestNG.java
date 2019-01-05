@@ -41,6 +41,7 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
             { "P0002", "test_product_2" },
             { "P0003", "test_product_3" },
             { "P0004", "test_product_4" },
+            { "P0004", "test_product_4" },
             { "P0005", "test_product_5" }
     };
 

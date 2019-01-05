@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +20,15 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -34,6 +38,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class ExportData extends BaseExportData<ExportStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportData.class);
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
@@ -64,6 +71,8 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
     }
 
     protected void mergeCSVFiles() {
+        String tenant = configuration.getCustomerSpace().toString();
+        log.info("Tenant=" + tenant);
         String mergeToPath = configuration.getExportTargetPath();
         if (StringUtils.isNotBlank(getStringValueFromContext(EXPORT_MERGE_FILE_PATH))) {
             mergeToPath = getStringValueFromContext(EXPORT_MERGE_FILE_PATH);
@@ -111,36 +120,65 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 log.info("Merging file " + file.getName());
                 CSVReader csvReader = new CSVReader(new FileReader(file));
                 List<String[]> records = csvReader.readAll();
-                String[] headerLine = records.get(0);
-                List<String[]> dataLines = records.subList(1, records.size());
-
-                // get index of TransactionDate field
-                int transactionDateIndex = -1;
-                for (int i = 0; i < headerLine.length; i++) {
-                    if (headerLine[i].equalsIgnoreCase(InterfaceName.TransactionDate.name())) {
-                        transactionDateIndex = i;
-                        break;
+                String[] header = records.get(0);
+                log.info(String.format("There are %d rows in file %s.", records.size(), file.getName()));
+                boolean useSourceTable = false;
+                if (file.getName().toLowerCase().contains("orphantransactions"))  {
+                    Table sourceTable = getSourceTable(tenant, "transaction");
+                    if (sourceTable != null) {
+                        log.info("Source table=" + sourceTable.getName());
+                        useSourceTable = true;
+                        List<String> sourceFields = getSourceFields(tenant, sourceTable);
+                        log.info(String.format("Fields in source table %s: %s",
+                                sourceTable.getName(), JsonUtils.serialize(sourceFields)));
+                        Map<String, Integer> sourcePositionMap = buildPositionMap(sourceFields);
+                        Map<String, Integer> headerPositionMap = buildPositionMap(Arrays.asList(header));
+                        String[] sourceFieldAsHeader = sourceFields.toArray(new String[0]);
+                        if (!hasHeader) {
+                            writer.writeNext(sourceFieldAsHeader);
+                            hasHeader = true;
+                        }
+                        if (records.size() > 1) {
+                            records.subList(1, records.size()).forEach(record -> {
+                                String[] newRecord = generateNewRecord(record, sourceFieldAsHeader.length,
+                                        headerPositionMap, sourcePositionMap);
+                                writer.writeNext(newRecord);
+                            });
+                        }
+                    }
+                } else if (file.getName().toLowerCase().contains("orphancontacts")) {
+                    Table sourceTable = getSourceTable(tenant, "contact");
+                    if (sourceTable != null) {
+                        log.info("Source table=" + sourceTable.getName());
+                        useSourceTable = true;
+                        List<String> sourceFields = getSourceFields(tenant, sourceTable);
+                        log.info(String.format("Fields in source table %s: %s",
+                                sourceTable.getName(), JsonUtils.serialize(sourceFields)));
+                        Map<String, Integer> sourcePositionMap = buildPositionMap(sourceFields);
+                        Map<String, Integer> headerPositionMap = buildPositionMap(Arrays.asList(header));
+                        String[] sourceFieldAsHeader = sourceFields.toArray(new String[0]);
+                        if (!hasHeader) {
+                            writer.writeNext(sourceFieldAsHeader);
+                            hasHeader = true;
+                        }
+                        if (records.size() > 1) {
+                            records.subList(1, records.size()).forEach(record -> {
+                                String[] newRecord = generateNewRecord(record, sourceFieldAsHeader.length,
+                                        headerPositionMap, sourcePositionMap);
+                                writer.writeNext(newRecord);
+                            });
+                        }
                     }
                 }
 
-                Set<List<String>> recordsSet = new HashSet<>();
-                for (String[] line : dataLines) {
-                    if (transactionDateIndex > 0) {
-                        line[transactionDateIndex] = toDefaultDateFormat(line[transactionDateIndex]);
+                if (!useSourceTable) {
+                    if (!hasHeader) {
+                        writer.writeNext(header);
+                        hasHeader = true;
                     }
-                    recordsSet.add(Arrays.asList(line));
-                }
-                List<String[]> dataRecords = new ArrayList<>();
-                recordsSet.forEach(record -> {
-                    String[] dataArr = new String[record.size()];
-                    dataRecords.add(dataArr);
-                });
-                if (!hasHeader) {
-                    writer.writeNext(headerLine);
-                    hasHeader = true;
-                }
-                if (dataRecords.size() > 1) {
-                    writer.writeAll(dataRecords.subList(1, dataRecords.size()));
+                    if (records.size() > 1) {
+                        writer.writeAll(records.subList(1, records.size()));
+                    }
                 }
                 csvReader.close();
             }
@@ -176,10 +214,61 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         return StringUtils.isNotBlank(outputPath) ? outputPath : null;
     }
 
-    private String toDefaultDateFormat(String sourceDateString) throws Exception {
-        SimpleDateFormat srcFormat = new SimpleDateFormat(DateTimeUtils.DATE_ONLY_FORMAT_STRING);
-        SimpleDateFormat dstFormat = new SimpleDateFormat("M/d/yyyy");  // default format (M/d/yyyy)
-        return dstFormat.format(srcFormat.parse(sourceDateString));
+    private Table getSourceTable(String tenant, String tableInterpretation) {
+        List<String> tableNames = metadataProxy.getTableNames(tenant);
+        if (tableNames == null) {
+            return null;
+        }
+        for (String tableName : tableNames) {
+            if (tableName.toLowerCase().startsWith("sourcefile")) {
+                Table sourceTable = metadataProxy.getTable(tenant, tableName);
+                if (sourceTable.getInterpretation().equalsIgnoreCase(tableInterpretation)
+                        && sourceTable.getTableType() == TableType.IMPORTTABLE) {
+                    return sourceTable;
+                }
+            }
+        }
+        return null;
     }
 
+    private List<String> getSourceFields(String tenant, Table sourceTable) {
+        if (sourceTable == null) {
+            throw new RuntimeException("Source table is null. Tenant=" + tenant);
+        }
+
+        List<Attribute> sourceAttributes = metadataProxy.getTableAttributes(tenant, sourceTable.getName(), null);
+        return sourceAttributes.stream().map(Attribute::getDisplayName).collect(Collectors.toList());
+    }
+
+    private Map<String, Integer> buildPositionMap(List<String> fields) {
+        Map<String, Integer> positionMap = new HashMap<>();
+        for (int i = 0; i < fields.size(); i++) {
+            positionMap.put(fields.get(i), i);
+        }
+        return positionMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String[] generateNewRecord(String[] oldRecord, int recordSize,
+                                       Map<String, Integer> headerMap, Map<String, Integer> sourceMap) {
+        String[] result = new String[recordSize];
+        headerMap.forEach((field, index) -> {
+            String data = oldRecord[index];
+            // expand CustomTrxField
+            if (field.equalsIgnoreCase(InterfaceName.CustomTrxField.name())) {
+                Map<String, Object> customFields = JsonUtils.deserialize(data, Map.class);
+                String fieldPrefix = "user_";
+                customFields.forEach((rawFieldName, fieldValue) -> {
+                    String fieldName = rawFieldName.substring(fieldPrefix.length()).replace('_', ' ');
+                    if (sourceMap.containsKey(fieldName)) {
+                        result[sourceMap.get(fieldName)] = String.valueOf(fieldValue);
+                    }
+                });
+            }
+            if (sourceMap.containsKey(field)) {
+                result[sourceMap.get(field)] = data;
+            }
+        });
+        return result;
+    }
 }
