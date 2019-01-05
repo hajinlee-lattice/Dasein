@@ -42,16 +42,23 @@ class ModelDetailGenerator(State):
         result["TotalConversions"] = int(allData[schema["target"]].sum())
 
         if "__Revenue" in allData.columns:
-            if schema.has_key("config_metadata") and schema["config_metadata"].has_key("Metadata"):
-                for me in schema["config_metadata"]["Metadata"]:
-                    if me["ColumnName"] == "__Revenue":
-                        dataType = me["DataType"]
-                        if dataType in ["long", "int", "double", "float"]:
-                            self.logger.info("Calculating 'AverageRevenue' using '__Revenue'")
-                            result["AverageRevenue"] = float(allData["__Revenue"].sum()) / allData.shape[0]
-                        else:
-                            self.logger.info("Skip calculation of 'AverageRevenue' using '__Revenue'")
-                        break
+            try:
+                if schema.has_key("config_metadata") and schema["config_metadata"].has_key("Metadata"):
+                    for me in schema["config_metadata"]["Metadata"]:
+                        if me["ColumnName"] == "__Revenue":
+                            dataType = me["DataType"]
+                            if dataType in ["long", "int", "double", "float"]:
+                                self.logger.info("Calculating 'AverageRevenue' using '__Revenue'")
+                                result["AverageRevenue"] = float(allData["__Revenue"].sum()) / allData.shape[0]
+                            else:
+                                self.logger.info("Skip calculation of 'AverageRevenue' using '__Revenue'")
+                            break
+            except AttributeError:
+                self.logger.info("Got AttributeError as it may be for CG modelingi (PLS-11853), attempting to calculate AverageRevenue normally", exc_info=True)
+                try:
+                    result["AverageRevenue"] = float(allData["__Revenue"].sum()) / allData.shape[0]
+                except:
+                    self.logger.info("Ignoring secondary error as it may be for CG modeling (PLS-11853), skip calculation of AverageRevenue", exc_info=True)
 
         result["TestingConversions"] = int(testData[schema["target"]].sum())
         result["TrainingConversions"] = result["TotalConversions"] - result["TestingConversions"]
