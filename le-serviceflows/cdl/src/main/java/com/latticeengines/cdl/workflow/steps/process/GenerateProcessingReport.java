@@ -216,6 +216,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setOrphanContactCount(orphanCnts.get(OrphanRecordsType.CONTACT));
         detail.setUnmatchedAccountCount(orphanCnts.get(OrphanRecordsType.UNMATCHED_ACCOUNT));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
     }
