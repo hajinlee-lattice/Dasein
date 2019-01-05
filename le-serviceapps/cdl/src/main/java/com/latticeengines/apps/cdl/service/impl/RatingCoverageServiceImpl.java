@@ -554,6 +554,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             ratingEngineAccountFrontEndQuery.setRatingEngineId(ratingEngineId);
 
             log.info("Front end query for Account: " + JsonUtils.serialize(ratingEngineAccountFrontEndQuery));
+            log.info("hi");
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
                     tenant.getId(), //
                     ratingEngineAccountFrontEndQuery);
@@ -623,10 +624,19 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
 
             // Populate Unscored counts
+            String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
+            RestrictionBuilder unscoredRestrictionbuilder = Restriction.builder().let(BusinessEntity.Rating, ratingField);
+            RestrictionBuilder builder = Restriction.builder().and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestrictionbuilder.isNull().build());
+            
+            FrontEndRestriction unscoredRestriction = new FrontEndRestriction(builder.build());
+            FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
+            
+            unscoredFrontEndQuery.setAccountRestriction(unscoredRestriction);
+            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(),unscoredFrontEndQuery));
             if (targetSegment != null) {
-                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
-                    coverageInfo.setUnscoredAccountCount(targetSegment.getAccounts() - coverageInfo.getAccountCount());
-                }
+//                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
+//                    coverageInfo.setUnscoredAccountCount(targetSegment.getAccounts() - coverageInfo.getAccountCount());
+//                }
                 if (coverageInfo.getContactCount() != null && targetSegment.getContacts() != null
                         && targetSegment.getContacts() > 0) {
                     coverageInfo.setUnscoredContactCount(targetSegment.getContacts() - coverageInfo.getContactCount());
