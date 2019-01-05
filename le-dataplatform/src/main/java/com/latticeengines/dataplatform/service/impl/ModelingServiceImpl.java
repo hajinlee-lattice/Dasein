@@ -122,6 +122,9 @@ public class ModelingServiceImpl implements ModelingService {
     @Value("${dataplatform.container.memory}")
     private int memory;
 
+    @Value("${dataplatform.container.mapreduce.memory}")
+    private int samplingMapReduceMemorySize;
+
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
@@ -207,7 +210,15 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil
                 .getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        setContainerMemoryProperties(properties);
         return properties;
+    }
+
+    private void setContainerMemoryProperties(Properties properties) {
+        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), samplingMapReduceMemorySize);
+        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), samplingMapReduceMemorySize);
+        properties.put("mapreduce.map.memory.mb", samplingMapReduceMemorySize);
+        properties.put("mapreduce.reduce.memory.mb", samplingMapReduceMemorySize);
     }
 
     @Override
@@ -496,8 +507,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         // The model quality framework specifies the production version to run;
         // keep the path as-is
-        Pattern pattern_stack_and_version = Pattern
-                .compile("^/app/(a|b)/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
+        Pattern pattern_stack_and_version = Pattern.compile("^/app/(a|b)/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
         Matcher c_stack_and_version = pattern_stack_and_version.matcher(script);
         if (c_stack_and_version.matches()) {
             return script;
