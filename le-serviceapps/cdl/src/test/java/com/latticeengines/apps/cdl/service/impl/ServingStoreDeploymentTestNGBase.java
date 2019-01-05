@@ -69,7 +69,8 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 if (!cm.isEnabledFor(ColumnSelection.Predefined.Segment)) {
                     cannotSegmentAttrs.add(cm.getAttrName());
                 }
-                if (!cm.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {
+                if (!cm.isEnabledFor(ColumnSelection.Predefined.Enrichment)
+                        || Boolean.TRUE.equals(cm.getShouldDeprecate())) {
                     cannotEnrichmentAttrs.add(cm.getAttrName());
                 }
                 if (!cm.isEnabledFor(ColumnSelection.Predefined.Model)) {
