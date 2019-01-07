@@ -396,7 +396,8 @@ angular.module('lp.configureattributes.configure', [])
                 console.log('validateSendOvertime', 'start', {name: name, 'vm.options[name]': vm.options[name]});
             }
             var model = vm.options[name] || {},
-                spendOvertime = vm.spendOvertime[name] || [];
+                spendOvertime = vm.spendOvertime[name] || [],
+                pruneModel = false;
             if(!model) {
                 if(debug) {
                     console.log('if(!model)');
@@ -409,13 +410,32 @@ angular.module('lp.configureattributes.configure', [])
                     console.log('if(Object.keys(model).length !== spendOvertime.length)', {model: model, spendOvertime: spendOvertime});
                     console.groupEnd();
                 }
-                return false;
+                pruneModel = true;
+                //return false;
             }
             var valid = [];
+            if(pruneModel) {
+                for(var i in model) {
+                    for(var j in model[i]) {
+                        if(pruneModel && j === 'null') {
+                            if(debug) {
+                                console.log('pruneModel', 'if(pruneModel && j === "null")');
+                            }
+                            delete model[i];
+                        }
+                    }
+                }
+            }
             for(var i in model) {
                 for(var j in model[i]) {
                     if(debug) {
                         console.log('for(var j in model[i])', i, model[i]);
+                    }
+                    if(pruneModel && j === 'null') {
+                        if(debug) {
+                            console.log('pruneModel', 'if(pruneModel && j === "null")');
+                        }
+                        delete model[i];
                     }
                     if(model[i][j].Val && model[i][j].Period) {
                         if(debug) {
@@ -508,7 +528,6 @@ angular.module('lp.configureattributes.configure', [])
             vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
 
             if(vm.step === 'spend_over_time') {
-                
                 if(vm.options.TotalSpendOvertime) {
                     var makeTotalSpendOvertime = function() {
                         totalSpendOvertimeOptionsAr = [];
