@@ -58,7 +58,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private int slimInputStep;
     private int matchStep;
     private int slimDiffStep;
-    private int mergeMatchStep;
+    // private int mergeMatchStep;
     private int upsertMasterStep;
     private int slimMasterStep;
     private int diffStep;
@@ -70,32 +70,34 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             request.setName("MergeAccount");
 
             mergeStep = 0;
-            slimInputStep = 1;
-            matchStep = 2;
-            slimDiffStep = 3;
-            mergeMatchStep = 4;
-            upsertMasterStep = 5;
-            slimMasterStep = 6;
-            diffStep = 7;
+            // slimInputStep = 1;
+            matchStep = 1;
+            // slimDiffStep = 3;
+            upsertMasterStep = 2;
+            // slimMasterStep = 6;
+            diffStep = 3;
 
             TransformationStepConfig merge = mergeInputs(false, true, false);
-            TransformationStepConfig slimInputs = createSlimInputs();
+            // TransformationStepConfig slimInputs = createSlimInputs();
             TransformationStepConfig match = match();
-            TransformationStepConfig slimDiff = createSlimTable(matchStep, diffTablePrefix);
-            TransformationStepConfig mergeMatch = mergeMatch(mergeStep, matchStep);
+            // TransformationStepConfig slimDiff = createSlimTable(matchStep,
+            // diffTablePrefix);
+            // TransformationStepConfig mergeMatch = mergeMatch(mergeStep,
+            // matchStep);
             TransformationStepConfig upsertMaster = mergeMaster();
-            TransformationStepConfig slimMaster = createSlimTable(upsertMasterStep, batchStoreTablePrefix);
+            // TransformationStepConfig slimMaster =
+            // createSlimTable(upsertMasterStep, batchStoreTablePrefix);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
-            steps.add(slimInputs);
+            // steps.add(slimInputs);
             steps.add(match);
-            steps.add(slimDiff);
-            steps.add(mergeMatch);
+            // steps.add(slimDiff);
+            // steps.add(mergeMatch);
             steps.add(upsertMaster);
-            steps.add(slimMaster);
+            // steps.add(slimMaster);
             steps.add(diff);
             steps.add(report);
             request.setSteps(steps);
@@ -154,7 +156,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private TransformationStepConfig match() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(slimInputStep));
+        step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(TRANSFORMER_MATCH);
         step.setConfiguration(getMatchConfig());
         return step;
@@ -177,7 +179,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         TargetTable targetTable;
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
-        step.setInputSteps(Collections.singletonList(mergeMatchStep));
+        step.setInputSteps(Collections.singletonList(matchStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
         step.setConfiguration(getMergeMasterConfig());
 
@@ -282,8 +284,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
-        registerDiffSlim();
-        registerMasterSlim();
+        // registerDiffSlim();
+        // registerMasterSlim();
 
     }
 
