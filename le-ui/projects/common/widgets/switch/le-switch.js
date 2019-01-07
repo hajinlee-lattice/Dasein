@@ -8,6 +8,14 @@ class LeSwitch extends Component {
       isChecked: this.props.isChecked
     };
   }
+  
+  handleChange(event) {
+    this.setState({ isChecked: event.target.checked }, () => {
+      if (this.props.callback) {
+        this.props.callback(this.state.isChecked);
+      }
+    });
+  }
 
   render() {
     return (
@@ -21,14 +29,6 @@ class LeSwitch extends Component {
         <span className="le-slider round" />
       </label>
     );
-  }
-
-  handleChange(event) {
-    this.setState({ isChecked: event.target.checked }, () => {
-      if (this.props.callback) {
-        this.props.callback(this.state.isChecked);
-      }
-    });
   }
 }
 

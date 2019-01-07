@@ -7,7 +7,8 @@ angular
     'common.datacloud.query.builder.tree.edit.transaction.edit',
     'common.datacloud.query.builder.tree.edit.percent',
     'common.datacloud.query.builder.tree.edit.percent.edit',
-    'common.datacloud.query.builder.tree.edit.percent.item'
+    'common.datacloud.query.builder.tree.edit.percent.item',
+    'common.datacloud.query.builder.tree.edit.date.attribute'
 ])
 .directive('queryTreeDirective',function() {
     return {
@@ -177,7 +178,7 @@ angular
                 }
 
                 if (!vm.editing && !vm.root.draggedItem && 
-                    (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String' || vm.type == 'PercentChange')) {
+                    (vm.type == 'Date' || vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String' || vm.type == 'PercentChange')) {
                     if (vm.unused) {
                         vm.unused = false;
                         vm.tree.bucketRestriction.ignored = false;

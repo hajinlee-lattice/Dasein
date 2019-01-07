@@ -1747,7 +1747,9 @@ angular.module('common.datacloud.explorer', [
 
             return ret;
         });
-
+        // if(attribute.AttrName === 'Test_Date_2' || attribute.AttrName === 'Test_Date' || attribute.AttrName === 'Street'){
+        //     console.log('AAA ',attributes);
+        // }
         return attributes;
     }
 

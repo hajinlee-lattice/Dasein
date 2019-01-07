@@ -630,7 +630,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                     }
                 };
                 case 'Date': {
-                    return false;
+                    return typeToShow === type;
                 };
                 case 'String': {
                     return type === typeToShow;
@@ -812,10 +812,18 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.getCmp = function (bucketRestriction, type, subType) {
+            switch(type){
+                case 'Date': 
+                    return bucketRestriction.bkt.Fltr ? bucketRestriction.bkt.Fltr.Cmp : bucketRestriction.bkt.Cmp;
+            }
             return '';
         }
 
         this.getPeriodValue = function (bucketRestriction, type, subtype) {
+            switch(type){
+                case 'Date': 
+                    return bucketRestriction.bkt.Fltr ? bucketRestriction.bkt.Fltr.Period : bucketRestriction.bkt.Period;
+            }
             return '';
         }
 

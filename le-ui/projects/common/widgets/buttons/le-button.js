@@ -6,6 +6,7 @@ export const LEFT = "left";
 export const RIGHT = "right";
 
 export default class LeButton extends Component {
+  
   constructor(props) {
     super(props);
     this.state = this.props.state || { disabled: false };
@@ -36,6 +37,7 @@ export default class LeButton extends Component {
         break;
     }
   }
+
   getIcon(position) {
     if (this.props.config.icon) {
       return this.getIconByPosition(position);
@@ -43,6 +45,7 @@ export default class LeButton extends Component {
       return null;
     }
   }
+
   getLabel() {
     if (this.props.config.label && this.props.config.label !== "") {
       return <span className="le-button-title">{this.props.config.label}</span>;
@@ -50,13 +53,14 @@ export default class LeButton extends Component {
       return "";
     }
   }
+
   getClasses() {
-      
     let classes = `button ${
       this.props.config.classNames ? this.props.config.classNames : ""
     } ${(this.props.disabled || this.state.disabled == true) ? 'disabled': ''}`;
     return classes;
   }
+
   render() {
     return (
       <button
@@ -71,6 +75,7 @@ export default class LeButton extends Component {
     );
   }
 }
+
 LeButton.propTypes = {
   name: propTypes.string.isRequired,
   label: propTypes.string,

@@ -1,0 +1,62 @@
+<div class="query-section-item-operation">
+  <div class="flex-container">
+    <div class="flex-container time-frame">
+      <div class="date-element-title">in timeframe</div>
+
+      <select
+        ng-model="$ctrl.timeCmp"
+        ng-change="$ctrl.changeCmp($ctrl.timeCmp, 'Time')"
+        class="time-frame-select"
+      >
+        <option
+          ng-repeat="(key, value) in $ctrl.cmpsList"
+          value="{{ value.name }}"
+          >{{ value.displayName }}</option
+        >
+      </select>
+    </div>
+    <!-- Date picker -->
+    <date-range-directive
+      ng-if="$ctrl.showTimeFrame"
+      config="{{ $ctrl.periodTimeConfig }}"
+      vm="$ctrl.vm"
+      showfrom="$ctrl.showFromTime"
+      showto="$ctrl.showToTime"
+      form="$ctrl.form"
+      type="$ctrl.type"
+      bucketrestriction="$ctrl.bucketrestriction"
+      changed="$ctrl.changeValue(type, position, value)"
+    >
+    </date-range-directive>
+    <!--  -->
+    <numerical-range-directive
+      ng-if="$ctrl.showPeriodNumber"
+      config="{{ $ctrl.periodNumberConfig }}"
+      showmessage="false"
+      showfrom="$ctrl.showFromPeriod"
+      showto="$ctrl.showToPeriod"
+      vm="$ctrl.vm"
+      form="$ctrl.form"
+      type="$ctrl.type"
+      bucketrestriction="$ctrl.bucketrestriction"
+      changed="$ctrl.callbackChangedValue(type, position, value)"
+    >
+    </numerical-range-directive>
+    <strong
+      ng-if="!$ctrl.showTimeFrame && !$ctrl.showPeriodSelect && $ctrl.showPeriodNumber"
+    >
+      Day(s)
+    </strong>
+    <select
+      ng-if="$ctrl.showPeriodSelect"
+      ng-model="$ctrl.timeframePeriod"
+      ng-change="$ctrl.changePeriod()"
+    >
+      <option
+        ng-repeat="(key, value) in $ctrl.periodsList"
+        value="{{ value.name }}"
+        >{{ value.displayName }}</option
+      >
+    </select>
+  </div>
+</div>
