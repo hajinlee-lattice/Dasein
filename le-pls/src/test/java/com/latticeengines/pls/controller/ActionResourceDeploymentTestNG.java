@@ -54,7 +54,7 @@ public class ActionResourceDeploymentTestNG  extends PlsDeploymentTestNGBase {
         restTemplate = deploymentTestBed.getRestTemplate();
         log.info("resttemplate:"+restTemplate.getInterceptors());
         Map resultMap =
-                restTemplate.postForObject(getDeployedRestAPIHostPort() + "/pls/actions?actionPid=" + testAction.getPid(), null, Map.class);
+                restTemplate.postForObject(getDeployedRestAPIHostPort() + "/pls/actions/cancel?actionPid=" + testAction.getPid(), null, Map.class);
         Assert.assertNotNull(resultMap);
     }
 

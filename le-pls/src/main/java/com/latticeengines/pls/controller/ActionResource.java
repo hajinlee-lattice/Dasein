@@ -40,7 +40,7 @@ public class ActionResource {
 
     private static final String CANCELSUCCESS_MSG = "<p>Cancel this action success.</p>";
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @RequestMapping(value = "/cancel", method = RequestMethod.POST)
     @ApiOperation(value = "cancel action")
     public Map<String, UIAction> cancelAction(@RequestParam(value = "actionPid") Long actionPid) {
         try {
