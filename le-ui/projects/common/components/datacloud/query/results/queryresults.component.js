@@ -326,10 +326,10 @@ angular.module('common.datacloud.query.results', [
                         }
 
                         //only sets topNCount here if coming in for the first time
-                        if(vm.topNCount == null){
-                            vm.topNCount = vm.recommendationCounts.selected;
-                            PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
-                        }
+                        // if(vm.topNCount == null){
+                        //     vm.topNCount = vm.recommendationCounts.selected;
+                        //     PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
+                        // }
                         vm.updateTopNCount();
                         if(!vm.hasModel && vm.launchedUnscored) {
                             PlaybookWizardStore.setValidation('targets', true);
@@ -369,14 +369,22 @@ angular.module('common.datacloud.query.results', [
 
     vm.updateTopNCount = function() {
         //sync issue with vm.counts.accounts using vm.recommendationCounts.selected instead
-        vm.maxTargetValue = vm.recommendationCounts.selected;
-        if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
+        // vm.maxTargetValue = vm.recommendationCounts.selected;
+        // if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
+        //     vm.showError = false;
+        //     PlaybookWizardStore.setValidation('targets', true);
+        //     vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
+        // } else {
+        //     vm.showError = vm.maxTargetValue == 0 ? false : true;
+        //     PlaybookWizardStore.setValidation('targets', false || (vm.recommendationCounts.selected && !vm.topNClicked));
+        // }
+        if (vm.topNClicked && (vm.topNCount <= 0 || vm.topNCount == null)){
+            vm.showError = true;
+            PlaybookWizardStore.setValidation('targets', false);
+        } else {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
             vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
-        } else {
-            vm.showError = vm.maxTargetValue == 0 ? false : true;
-            PlaybookWizardStore.setValidation('targets', false || (vm.recommendationCounts.selected && !vm.topNClicked));
         }
     }
 
@@ -412,7 +420,7 @@ angular.module('common.datacloud.query.results', [
         PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
         //reset topNcount on bucket click, issue with sync and faster update speed
         updatePage();
-        vm.makeRecommendationCounts(true);
+        vm.makeRecommendationCounts();
     }
 
     vm.launchUnscoredClick = function() {
@@ -555,7 +563,7 @@ angular.module('common.datacloud.query.results', [
         };
     };
 
-    vm.makeRecommendationCounts = function(resetTopNCount) {
+    vm.makeRecommendationCounts = function() {
         //var opts = opts || {};
 
         if(!vm.accountsCoverage && !vm.accountsCoverage.bucketCoverageCounts) {
@@ -592,13 +600,27 @@ angular.module('common.datacloud.query.results', [
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
-        if(resetTopNCount){
-            vm.topNCount = sections.selected;
-        }
+        // if(resetTopNCount){
+        //     vm.topNCount = sections.selected;
+        // }
 
         sections.selected = vm.launchUnscored ? vm.accountsCoverage.unscoredAccountCount + sections.selected : sections.selected;
 
-        sections.launched = vm.topNClicked ? vm.topNCount : sections.selected;
+        // if(resetTopNCount){
+        //     vm.topNCount = sections.selected;
+        // }
+
+        if (vm.topNClicked && vm.topNCount <= sections.selected){
+            sections.launched = vm.topNCount <= 0 ? 0 : vm.topNCount;
+            // if(vm.topNCount <= 0){
+            //     sections.launched = 0;
+            // }
+            // else {
+            //     sections.launched = vm.topNCount;
+            // }
+        } else {
+            sections.launched = sections.selected;
+        }
 
         sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
 
