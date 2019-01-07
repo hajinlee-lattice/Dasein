@@ -4,31 +4,32 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -78,6 +79,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Inject
     private ImportFromS3Service importFromS3Service;
 
+    @Inject
+    private S3Service s3Service;
+
     private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
 
     @Override
@@ -111,35 +115,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public InputStream getScoreResults(String workflowJobId) {
-        return quoteProtectionValues(getResultFile(workflowJobId, WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH));
-    }
-
-    private InputStream  quoteProtectionValues(InputStream inputStream) {
-        StringBuilder sb = new StringBuilder();
-        try (InputStreamReader reader = new InputStreamReader(
-                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
-                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
-                        ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)) {
-            try (CSVParser parser = new CSVParser(reader, LECSVFormat.format)) {
-                try (CSVPrinter printer = new CSVPrinter(sb,
-                        CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL)
-                                .withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
-                    for (CSVRecord record : parser) {
-                        for (String val : record) {
-                            printer.print(val != null ? val : "");
-                        }
-                        printer.println();
-                    }
-                }
-            }
-        }
-        catch (IOException e) {
-            log.error("Error reading the input stream.");
-            e.printStackTrace();
-            return inputStream;
-        }
-
-        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
+        return getResultFile(workflowJobId, WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
     }
 
     @Override
@@ -164,18 +140,57 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         try {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
-            InputStream s3Stream = getResultStreamFromS3(hdfsDir, filePrefix);
-            if (s3Stream == null) {
-                List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
-                if (CollectionUtils.isEmpty(paths)) {
-                    throw new LedpException(LedpCode.LEDP_18103, new String[]{workflowJobId});
+
+            List<String> pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            if (CollectionUtils.isEmpty(pathsWithQuote)) {
+                InputStream inputStream = getResultStreamFromS3(hdfsDir, filePrefix);
+                if (inputStream == null) {
+                    List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
+                    if (CollectionUtils.isEmpty(paths)) {
+                        throw new LedpException(LedpCode.LEDP_18103, new String[]{workflowJobId});
+                    }
+
+                    inputStream = HdfsUtils.getInputStream(yarnConfiguration, paths.get(0));
                 }
-                return HdfsUtils.getInputStream(yarnConfiguration, paths.get(0));
-            } else {
-                return s3Stream;
+
+                try {
+                    writeToHdfsWithQuoteProtection(inputStream, hdfsDir+ "/qp_" + filePrefix);
+                    pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+                } catch (Exception e) {
+                    log.error("Error writing the input stream to hdfs.");
+                    e.printStackTrace();
+                    return inputStream;
+                }
             }
+
+            return HdfsUtils.getInputStream(yarnConfiguration, pathsWithQuote.get(0));
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18102, e, new String[] { workflowJobId });
+        }
+    }
+
+    private void writeToHdfsWithQuoteProtection(InputStream inputStream, String hdfsPath) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(
+                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
+                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                        ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)) {
+            try (CSVParser parser = new CSVParser(reader, LECSVFormat.format)) {
+                try (FileSystem fs = HdfsUtils.getFileSystem(yarnConfiguration, hdfsPath)) {
+                    Path filePath = new Path(hdfsPath);
+                    try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fs.create(filePath, true))) {
+                        try (CSVPrinter printer = new CSVPrinter(outputStreamWriter,
+                                CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL)
+                                        .withHeader(parser.getHeaderMap().keySet().toArray(new String[]{})))) {
+                            for (CSVRecord record : parser) {
+                                for (String val : record) {
+                                    printer.print(val != null ? val : "");
+                                }
+                                printer.println();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
