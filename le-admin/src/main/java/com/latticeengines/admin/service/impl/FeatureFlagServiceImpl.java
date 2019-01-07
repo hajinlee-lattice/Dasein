@@ -149,6 +149,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.PLAYBOOK_MODULE, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.IMPORT_WITHOUT_ID, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, cg).setDefaultValue(false);
 

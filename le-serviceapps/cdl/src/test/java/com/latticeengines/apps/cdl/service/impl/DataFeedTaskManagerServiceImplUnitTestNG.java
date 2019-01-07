@@ -62,12 +62,12 @@ public class DataFeedTaskManagerServiceImplUnitTestNG {
         Attribute attribute2 = new Attribute("TestAttr");
         attribute2.setPhysicalDataType("String");
         table2.addAttribute(attribute2);
-        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table1, "Account"));
-        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table2, "Account"));
+        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table1, "Account", false));
+        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table2, "Account", false));
         table1.getAttribute(InterfaceName.AccountId).setPhysicalDataType("Int");
-        Assert.assertFalse(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table1, "Account"));
+        Assert.assertFalse(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table1, "Account", false));
         table2.getAttribute("TestAttr").setPhysicalDataType("Int");
-        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table2, "Account"));
+        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table2, "Account", false));
 
     }
 

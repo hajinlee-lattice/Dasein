@@ -73,46 +73,11 @@ import static org.testng.Assert.assertTrue;
 
 import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
 
-public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
+public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
-
-    private static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
-    private static final String SOURCE = "File";
-    private static final String FEED_TYPE_SUFFIX = "Schema";
-
-    private static final String ENTITY_ACCOUNT = "Account";
-    private static final String ENTITY_CONTACT = "Contact";
-    private static final String ENTITY_TRANSACTION = "Transaction";
-
-    private static final String ACCOUNT_SOURCE_FILE = "Account_base.csv";
-    private static final String CONTACT_SOURCE_FILE = "Contact_base.csv";
-    private static final String TRANSACTION_SOURCE_FILE = "Transaction_base.csv";
-
-    private static final String ACCOUNT_SOURCE_FILE_FROMATDATE = "Account_FormatDate.csv";
-
-    private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
-    private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
-
-    @Autowired
-    private ModelingFileMetadataService modelingFileMetadataService;
-
-    @Autowired
-    private FileUploadService fileUploadService;
-
-    @Autowired
-    private SourceFileService sourceFileService;
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private WorkflowProxy workflowProxy;
-
-    @Autowired
-    private CDLService cdlService;
-
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
 
     @Inject
     private ActionProxy actionProxy;
@@ -123,24 +88,10 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    private SourceFile baseAccountFile;
-
-    private SourceFile baseContactFile;
-
-    private SourceFile baseTransactionFile;
-
     private SourceFile missingAccountFile;
 
-    private DataFeedTask accountDataFeedTask;
-
-    private DataFeedTask contactDataFeedTask;
-
-    private DataFeedTask transactionDataFeedTask;
-
     List<S3ImportTemplateDisplay> templates = null;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -423,71 +374,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         getDataFeedTask(ENTITY_TRANSACTION);
     }
 
-    private void prepareBaseData(String entity) {
-        switch (entity) {
-        case ENTITY_ACCOUNT:
-            baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
-            Assert.assertNotNull(baseAccountFile);
-            startCDLImport(baseAccountFile, ENTITY_ACCOUNT);
-            break;
-        case ENTITY_CONTACT:
-            baseContactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
-            Assert.assertNotNull(baseContactFile);
-            startCDLImport(baseContactFile, ENTITY_CONTACT);
-            break;
-        case ENTITY_TRANSACTION:
-            baseTransactionFile = uploadSourceFile(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
-            Assert.assertNotNull(baseTransactionFile);
-            startCDLImport(baseTransactionFile, ENTITY_TRANSACTION);
-            break;
-        }
-    }
 
-    private void getDataFeedTask(String entity) {
-        switch (entity) {
-        case ENTITY_ACCOUNT:
-            accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                    ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
-            break;
-        case ENTITY_CONTACT:
-            contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                    ENTITY_CONTACT + FEED_TYPE_SUFFIX, ENTITY_CONTACT);
-            break;
-        case ENTITY_TRANSACTION:
-            transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                    ENTITY_TRANSACTION + FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
-            break;
-        }
-    }
-
-    private SourceFile uploadSourceFile(String csvFileName, String entity) {
-        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(entity), entity, csvFileName,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
-
-        String feedType = entity + FEED_TYPE_SUFFIX;
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sourceFile.getName(), entity, SOURCE, feedType);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            }
-        }
-        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, entity, SOURCE,
-                feedType);
-        sourceFile = sourceFileService.findByName(sourceFile.getName());
-
-        return sourceFile;
-    }
-
-    private void startCDLImport(SourceFile sourceFile, String entity) {
-        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
-                sourceFile.getName(), SOURCE, entity, entity + FEED_TYPE_SUFFIX);
-
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-    }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")
     public void verifyTransaction() throws IOException {
@@ -664,9 +551,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "verifyTransaction")
     public void importS3Base() {
-
         prepareS3BaseData(ENTITY_ACCOUNT, EntityType.Accounts);
         prepareS3BaseData(ENTITY_CONTACT, EntityType.Contacts);
         prepareS3BaseData(ENTITY_TRANSACTION, EntityType.ProductPurchases);

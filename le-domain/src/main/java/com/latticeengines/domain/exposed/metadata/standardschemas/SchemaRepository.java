@@ -105,11 +105,11 @@ public class SchemaRepository {
         return MetadataSegmentExportType.getDefaultExportAttributes(entity);
     }
 
-    public Table getSchema(BusinessEntity entity, boolean cdlSchema) {
+    public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId) {
         Table table = null;
         switch (entity) {
             case Account:
-                table = getAccountSchema(cdlSchema);
+                table = getAccountSchema(cdlSchema, withoutId);
                 break;
             case Contact:
                 table = getContactSchema();
@@ -132,14 +132,18 @@ public class SchemaRepository {
     }
 
     public Table getSchema(BusinessEntity entity) {
-        return getSchema(entity, false);
+        return getSchema(entity, false, false);
     }
 
     public Table getSchema(SchemaInterpretation schema) {
-        return getSchema(schema, false);
+        return getSchema(schema, false, false);
     }
 
-    public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps) {
+    public Table getSchema(SchemaInterpretation schema, boolean withoutId) {
+        return getSchema(schema, false, withoutId);
+    }
+
+    public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps, boolean withoutId) {
         Table table = null;
         switch (schema) {
             case SalesforceAccount:
@@ -149,7 +153,7 @@ public class SchemaRepository {
                 table = getSalesforceLeadSchema();
                 break;
             case Account:
-                table = getAccountSchema();
+                table = getAccountSchema(false, withoutId);
                 break;
             case Contact:
                 table = getContactSchema();
@@ -524,24 +528,26 @@ public class SchemaRepository {
     }
 
     private Table getAccountSchema() {
-        return getAccountSchema(false);
+        return getAccountSchema(false, false);
     }
 
-    private Table getAccountSchema(boolean cdlSchema) {
+    private Table getAccountSchema(boolean cdlSchema, boolean withoutId) {
         Table table = createTable(SchemaInterpretation.Account);
         table.setPrimaryKey(createPrimaryKey(InterfaceName.AccountId.name()));
 
-        table.addAttribute(attr(InterfaceName.AccountId.name()) //
-                .allowedDisplayNames(
-                        Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
-                .type(Schema.Type.STRING) //
-                .notNull() //
-                .required() //
-                .interfaceName(InterfaceName.AccountId) //
-                .logicalType(LogicalDataType.Id) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .build());
+        if (!withoutId) {
+            table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
+                    .type(Schema.Type.STRING) //
+                    .notNull() //
+                    .required() //
+                    .interfaceName(InterfaceName.AccountId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .fundamentalType(FundamentalType.ALPHA.name()) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.Industry.name()) //
                 .allowedDisplayNames(Sets.newHashSet("INDUSTRY")) //
                 .type(Schema.Type.STRING) //

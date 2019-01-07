@@ -44,11 +44,13 @@ import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -120,6 +122,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private DropBoxProxy dropBoxProxy;
 
     @Inject
+    private BatonService batonService;
+
+    @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
             DataFeedProxy dataFeedProxy, TenantService tenantService, DLTenantMappingService dlTenantMappingService,
             CDLExternalSystemService cdlExternalSystemService, ActionService actionService, MetadataProxy metadataProxy,
@@ -154,7 +159,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Pair<Table, List<AttrConfig>> metadataPair = dataFeedMetadataService.getMetadata(importConfig, entity);
         Table newMeta = metadataPair.getLeft();
         List<AttrConfig> attrConfigs = metadataPair.getRight();
-        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true);
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId);
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
@@ -167,7 +173,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
-                if (!finalSchemaCheck(finalTemplate, entity)) {
+                if (!finalSchemaCheck(finalTemplate, entity, withoutId)) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
@@ -184,7 +190,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
-            if (!finalSchemaCheck(newMeta, entity)) {
+            if (!finalSchemaCheck(newMeta, entity, withoutId)) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
             }
             dataFeedTask = new DataFeedTask();
@@ -619,7 +625,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @VisibleForTesting
-    boolean finalSchemaCheck(Table finalTemplate, String entity) {
+    boolean finalSchemaCheck(Table finalTemplate, String entity, boolean withoutId) {
         if (finalTemplate == null) {
             log.error("Template cannot be null!");
             return false;
@@ -629,7 +635,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         Map<String, Attribute> standardAttrs = new HashMap<>();
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));

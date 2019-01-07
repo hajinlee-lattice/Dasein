@@ -69,6 +69,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, //
                 LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE,
+                LatticeFeatureFlag.IMPORT_WITHOUT_ID,
                 LatticeFeatureFlag.PLAYBOOK_MODULE, //
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
@@ -88,6 +89,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
                 LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE,
+                LatticeFeatureFlag.IMPORT_WITHOUT_ID,
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
         expectedNonLpiFlags.addAll(expectedLp2Flags);

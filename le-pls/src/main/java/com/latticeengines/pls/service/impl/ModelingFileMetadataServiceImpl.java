@@ -24,8 +24,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -73,11 +75,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private DataFeedProxy dataFeedProxy;
 
     @Autowired
+    private BatonService batonService;
+
+    @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters) {
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
@@ -85,7 +90,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), withoutId);
         return resolver.getFieldMappingsDocumentBestEffort(table);
     }
 
@@ -98,8 +103,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 entity, source, feedType));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         FieldMappingDocument fieldMappingFromSchemaRepo = getFieldMappingDocumentBestEffort(sourceFileName,
-                schemaInterpretation, null);
+                schemaInterpretation, null, withoutId);
         FieldMappingDocument resultDocument;
         if (dataFeedTask == null) {
             resultDocument = fieldMappingFromSchemaRepo;
@@ -135,8 +141,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return resolver.getFieldMappingsDocumentBestEffort(table);
     }
 
-    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation) {
-        Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
+    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation, boolean withoutId) {
+        Table table = SchemaRepository.instance().getSchema(schemaInterpretation, withoutId);
         SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
             Attribute domainAttribute = table.getAttribute(interfaceName);
             if (domainAttribute != null) {
@@ -151,7 +157,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false);
         resolveMetadata(sourceFile, fieldMappingDocument, table, false);
     }
 
@@ -164,7 +170,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
-            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true);
+            boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
         } else {
             table = dataFeedTask.getImportTemplate();
@@ -284,7 +291,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
             setCDLExternalSystems(fieldMappingDocument, entity);
         }
-        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true)
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true, withoutId)
                 : templateTable;
         Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
                 .collect(Collectors.toSet());
