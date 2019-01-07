@@ -230,9 +230,6 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 IsPmml: function(Model) {
                     return Model.ModelDetails.ModelType == 'PmmlModel';
                 },
-                // loadAlaSQL: function($ocLazyLoad) {
-                //     return $ocLazyLoad.load('lib/js/alasql.min.js');
-                // },
                 HasRatingsAvailable: function(
                     $q,
                     $stateParams,

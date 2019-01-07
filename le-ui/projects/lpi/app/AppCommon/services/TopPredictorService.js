@@ -351,7 +351,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
           return text
               .replace("\u2019", "'")
               .replace("\u201c", "\"")
-              .replace("\u201d", "\"");
+              .replace("\u201d", "\"")
+              .replace(/ *,/g, '');
         }
 
         var columns = [
@@ -396,15 +397,19 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     var lift = element.Lift.toPrecision(2);
                     var conversionRate = (element.Lift * averageConversionRate).toFixed(2);
                     var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
-                    var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+                    var attributeValueName = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+                    var attributeValue = cleanupForExcel(attributeValueName);
 
                     if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
                         attributeValue = NULL_BUCKET_NAME;
                     }
                     //PLS-352
                     attributeValue = "'"+ attributeValue + "'";
+
                     var predictivePower = (predictor.UncertaintyCoefficient * 100).toFixed(2);
-                    var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, conversionRate, predictivePower];
+                    var displayName = cleanupForExcel(predictor.DisplayName);
+
+                    var attributeRow = [predictor.Category, displayName, attributeValue, description, percentTotal, lift, conversionRate, predictivePower];
                     toReturn.push(attributeRow);
 
                     var foundMax = false;

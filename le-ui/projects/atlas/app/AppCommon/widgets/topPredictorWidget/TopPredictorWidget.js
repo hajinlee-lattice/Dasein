@@ -253,23 +253,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.drawSummaryChart();
 
     $scope.exportClicked = function () {
-        var fileName = "attributes.csv";
     	var csvRows = TopPredictorService.GetTopPredictorExport(data);
-
-        // let csv = csvRows.map(fields => fields.join("|")).join("\n");
-
-        // let dl = "data:text/csv;charset=utf-8," + csv;
-        // window.open(encodeURI(dl));
-
-
         var lineArray = [];
+
         csvRows.forEach(function (infoArray, index) {
             var line = infoArray.join(",");
             lineArray.push(line);
         });
+        
         var csvContent = lineArray.join("\n");
-
         var element = document.createElement("a");
+
         element.setAttribute(
           "href",
           "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
@@ -280,7 +274,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         element.click();
         document.body.removeChild(element);
 
-        // alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]); 
     };
 
     $scope.backToSummaryClicked = function () {

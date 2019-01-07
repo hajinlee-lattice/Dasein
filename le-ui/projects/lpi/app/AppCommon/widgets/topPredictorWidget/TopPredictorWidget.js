@@ -246,10 +246,26 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.drawSummaryChart();
 
     $scope.exportClicked = function () {
-        var fileName = "attributes.csv";
     	var csvRows = TopPredictorService.GetTopPredictorExport(data);
+        var lineArray = [];
 
-        alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]);
+        csvRows.forEach(function (infoArray, index) {
+            var line = infoArray.join(",");
+            lineArray.push(line);
+        });
+        
+        var csvContent = lineArray.join("\n");
+        var element = document.createElement("a");
+
+        element.setAttribute(
+          "href",
+          "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
+        );
+        element.setAttribute("download", "attributes.csv");
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     };
 
     $scope.backToSummaryClicked = function () {

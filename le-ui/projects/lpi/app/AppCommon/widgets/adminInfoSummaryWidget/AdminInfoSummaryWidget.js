@@ -50,7 +50,25 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
 
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
-        alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
+        var lineArray = [];
+
+        csvRows.forEach(function (infoArray, index) {
+            var line = infoArray.join(",");
+            lineArray.push(line);
+        });
+        
+        var csvContent = lineArray.join("\n");
+        var element = document.createElement("a");
+
+        element.setAttribute(
+          "href",
+          "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
+        );
+        element.setAttribute("download", "performance.csv");
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     };
 })
 .directive('healthScore', function() {

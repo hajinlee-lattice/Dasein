@@ -99,6 +99,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                         transformationGroup: (vm.filters.transformationGroup == 'NONE') ? false : true
                     }
 
+                    console.log(vm.checkboxModel);
+
                     vm.configFilters = angular.copy(vm.filters);
 
                     vm.configFilters.dataStores = [];
