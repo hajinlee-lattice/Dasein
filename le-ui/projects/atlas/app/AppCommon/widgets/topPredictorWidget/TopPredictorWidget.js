@@ -6,7 +6,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 ])
 
 .controller('TopPredictorWidgetController', function (
-        $scope, $sce, $compile, $rootScope, ResourceUtility, TopPredictorService, ModelStore, FeatureFlagService
+        $scope, $sce, $compile, $rootScope, $timeout, ResourceUtility, TopPredictorService, ModelStore, FeatureFlagService
     ) {
 
     var widgetConfig = ModelStore.widgetConfig;
@@ -256,7 +256,31 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         var fileName = "attributes.csv";
     	var csvRows = TopPredictorService.GetTopPredictorExport(data);
 
-        alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]);
+        // let csv = csvRows.map(fields => fields.join("|")).join("\n");
+
+        // let dl = "data:text/csv;charset=utf-8," + csv;
+        // window.open(encodeURI(dl));
+
+
+        var lineArray = [];
+        csvRows.forEach(function (infoArray, index) {
+            var line = infoArray.join(",");
+            lineArray.push(line);
+        });
+        var csvContent = lineArray.join("\n");
+
+        var element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
+        );
+        element.setAttribute("download", "attributes.csv");
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+
+        // alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]); 
     };
 
     $scope.backToSummaryClicked = function () {
