@@ -33,9 +33,6 @@ angular
             Y: 'YYYY'
         };
 
-        // set default timezone to GMT as per PLS-11875
-        moment.tz.setDefault('Etc/GMT');
-
         this.formatNumber = function(number, abbreviate) {
             number = Math.ceil(number);
 
@@ -116,7 +113,7 @@ angular
                     break;
             }
 
-            return moment(periodStartDate * 1000).add(periodOffset, key);
+            return moment.utc(periodStartDate * 1000).add(periodOffset, key);
         };
 
         this.isValidPeriodId = function(period, periodId) {
