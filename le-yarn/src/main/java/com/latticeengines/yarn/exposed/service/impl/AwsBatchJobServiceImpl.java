@@ -23,7 +23,7 @@ import com.latticeengines.aws.batch.AWSBatchConfig;
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.aws.LEApplicationId;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
@@ -73,7 +73,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
                 return runAwsBatchLocal(job);
             }
             String batchJobId = executeInAwsBatch(job);
-            LEApplicationId appId = new LEApplicationId();
+            AwsApplicationId appId = new AwsApplicationId();
             appId.setJobId(batchJobId);
             return appId;
         } finally {
@@ -90,7 +90,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
             status.setStatus(FinalApplicationStatus.SUCCEEDED);
             return status;
         }
-        jobId = LEApplicationId.getAwsBatchJob(jobId);
+        jobId = AwsApplicationId.getAwsBatchJob(jobId);
         String batchStatus = batchService.getJobStatus(jobId);
         log.info("Got Aws batch job status = " + batchStatus);
         status.setStatus(FinalApplicationStatus.UNDEFINED);
@@ -135,7 +135,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
     }
 
     private Map<String, String> getAwsBatchRuntimeEnvs(com.latticeengines.domain.exposed.dataplatform.Job job,
-            Properties appMasterProperties, Properties containerProperties, LEApplicationId applicationId) {
+            Properties appMasterProperties, Properties containerProperties, AwsApplicationId applicationId) {
 
         Map<String, String> envs = new HashMap<>();
         AWSBatchConfig config = new AWSBatchConfig();
@@ -185,7 +185,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
     /* run batch on localhost */
     private ApplicationId runAwsBatchLocal(com.latticeengines.domain.exposed.dataplatform.Job job) {
         localizePythonScripts(job);
-        LEApplicationId applicationId = new LEApplicationId();
+        AwsApplicationId applicationId = new AwsApplicationId();
         applicationId.setJobId(UUID.randomUUID().toString());
         Map<String, String> envs = getAwsBatchRuntimeEnvs(job, job.getAppMasterPropertiesObject(),
                 job.getContainerPropertiesObject(), applicationId);
