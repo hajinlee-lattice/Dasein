@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,8 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
             List<EntityLookupEntry> entries = entryLists
                     .stream()
                     .flatMap(List::stream)
+                    // can have systemId column but no value
+                    .filter(entry -> StringUtils.isNotBlank(entry.getSerializedValues())) //
                     .distinct()
                     .collect(Collectors.toList());
             List<String> seedIds = entityMatchInternalService.getIds(tenant, entries);

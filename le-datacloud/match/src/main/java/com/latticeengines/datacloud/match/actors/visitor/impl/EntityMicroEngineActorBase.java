@@ -90,8 +90,13 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                         // flatten system id, one system id name/value pair per result
                         int size = tuple.getSystemIds().size();
                         return IntStream.range(0, size).mapToObj(idx -> {
+                            Pair<String, String> systemIdPair = tuple.getSystemIds().get(idx);
+                            if (StringUtils.isBlank(systemIdPair.getValue())) {
+                                // user provide system column but blank value
+                                return null;
+                            }
                             MatchKeyTuple systemTuple = new MatchKeyTuple.Builder()
-                                    .withSystemIds(Collections.singletonList(tuple.getSystemIds().get(idx)))
+                                    .withSystemIds(Collections.singletonList(systemIdPair))
                                     .build();
                             // resulting entity id list should have the same size as systemIds
                             return Pair.of(systemTuple, pair.getValue().get(idx));
@@ -100,7 +105,8 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                         // non system id result, should only have one entity ID in the list
                         return Stream.of(Pair.of(pair.getKey(), pair.getValue().get(0)));
                     }
-                })
+                }) //
+                .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
         Map<String, String> extraAttributes = null;
         if (StringUtils.isNotBlank(traveler.getLatticeAccountId())) {
@@ -135,8 +141,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             // TODO retry if (a) association failed and (b) allocateId flag is true
 
             if (CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors())) {
-                // TODO (to DZheng & JWinter) currently I use a list of string to represent errors. not sure
-                //                            if this is enough or need to be more structured.
                 // TODO set association error to traveler
             }
         } else {
