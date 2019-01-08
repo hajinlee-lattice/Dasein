@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-public class LEApplicationId extends ApplicationId {
+public class AwsApplicationId extends ApplicationId {
 
     private String jobId;
 
@@ -77,7 +77,7 @@ public class LEApplicationId extends ApplicationId {
         if (!obj.getClass().equals(this.getClass())) {
             return false;
         }
-        LEApplicationId theOther = (LEApplicationId) obj;
+        AwsApplicationId theOther = (AwsApplicationId) obj;
         return new EqualsBuilder().append(this.jobId, theOther.jobId).isEquals();
     }
 
