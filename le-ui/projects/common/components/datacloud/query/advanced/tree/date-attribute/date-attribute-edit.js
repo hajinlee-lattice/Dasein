@@ -1,10 +1,10 @@
-import './date-attribute-edit.scss';
+import "./date-attribute-edit.scss";
 angular
   .module("common.datacloud.query.builder.tree.edit.date.attribute", [
     "common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range",
     "common.datacloud.query.builder.tree.edit.transaction.edit.date.range",
     "angularMoment",
-    'common.datacloud.query.builder.tree.transaction.service'
+    "common.datacloud.query.builder.tree.transaction.service"
   ])
   .component("dateAttributeEdit", {
     templateUrl:
@@ -16,18 +16,18 @@ angular
       form: "=",
       vm: "="
     },
-    controller: function(QueryTreeTransactionStore) {
+    controller: function(QueryTreeService, QueryTreeDateAttributeStore) {
       this.init = function() {
         // console.log("STarted");
         this.timeCmp = "EVER";
-        this.timeframePeriod = 'Week';
+        this.timeframePeriod = "Week";
         this.showTimeFrame = false;
         this.showPeriodSelect = false;
         this.showPeriodNumber = false;
         this.showFromPeriod = false;
         this.showToPeriod = false;
-        this.showFromTime = true;
-        this.showToTime = true;
+        this.showFromTime = false;
+        this.showToTime = false;
 
         this.periodTimeConfig = {
           from: {
@@ -35,7 +35,7 @@ angular
             initial: undefined,
             position: 0,
             type: "Time",
-            visible: true,
+            visible: this.showFromTime,
             pattern: "\\d+"
           },
           to: {
@@ -43,7 +43,7 @@ angular
             initial: undefined,
             position: 1,
             type: "Time",
-            visible: true,
+            visible: this.showToTime,
             pattern: "\\d+"
           }
         };
@@ -79,13 +79,13 @@ angular
           { name: "AFTER", displayName: "After" },
           { name: "IS_EMPTY", displayName: "Is Empty" }
         ];
-        this.periodsList = QueryTreeTransactionStore.periodList();
+        this.periodsList = QueryTreeDateAttributeStore.periodList();
       };
       this.changeValue = function(type, position, value) {
         console.log("TYPE ", type, " POSITION ", position, " VALUE ", value);
       };
       this.changeCmp = function(value, type) {
-        console.log("Changing", value, type);
+        this.showTimeFrame = false;
         setTimeout(() => {
           switch (value) {
             case "EVER":
@@ -93,6 +93,10 @@ angular
               this.showTimeFrame = false;
               this.showPeriodSelect = false;
               this.showPeriodNumber = false;
+              this.showFromPeriod = false;
+              this.showToPeriod = false;
+              this.showFromTime = false;
+              this.showToTime = false;
               break;
             case "IN_CURRENT_PERIOD":
               this.showTimeFrame = false;
@@ -100,6 +104,8 @@ angular
               this.showPeriodNumber = false;
               this.showFromPeriod = false;
               this.showToPeriod = false;
+              this.showFromTime = false;
+              this.showToTime = false;
               break;
             case "WITHIN":
               this.showTimeFrame = false;
@@ -107,6 +113,8 @@ angular
               this.showPeriodNumber = true;
               this.showFromPeriod = false;
               this.showToPeriod = true;
+              this.showFromTime = false;
+              this.showToTime = false;
               break;
             case "LAST":
               this.showTimeFrame = false;
@@ -114,6 +122,8 @@ angular
               this.showPeriodNumber = true;
               this.showFromPeriod = true;
               this.showToPeriod = false;
+              this.showFromTime = false;
+              this.showToTime = false;
               break;
             case "BETWEEN":
               this.showTimeFrame = false;
@@ -121,20 +131,43 @@ angular
               this.showPeriodNumber = true;
               this.showFromPeriod = true;
               this.showToPeriod = true;
+              this.showFromTime = false;
+              this.showToTime = false;
               break;
             case "BETWEEN_DATE":
+              this.showTimeFrame = true;
+              this.showPeriodSelect = false;
+              this.showPeriodNumber = false;
+              this.showFromPeriod = false;
+              this.showToPeriod = false;
+              this.showFromTime = true;
+              this.showToTime = true;
+              break;
+
             case "BEFORE":
+              this.showTimeFrame = true;
+              this.showPeriodSelect = false;
+              this.showPeriodNumber = false;
+              this.showFromPeriod = false;
+              this.showToPeriod = false;
+              this.showFromTime = false;
+              this.showToTime = true;
+              break;
+
             case "AFTER":
               this.showTimeFrame = true;
               this.showPeriodSelect = false;
               this.showPeriodNumber = false;
               this.showFromPeriod = false;
               this.showToPeriod = false;
+              this.showFromTime = true;
+              this.showToTime = false;
+              break;
           }
-        });
+        }, 0);
       };
       this.changePeriod = function() {
-
+        QueryTreeService.changeTimeframePeriod(this.bucketrestriction, this.type, {Period:this.timeframePeriod, Vals: []});
       };
       this.init();
     }

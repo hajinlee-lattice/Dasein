@@ -1,4 +1,4 @@
-<div class="query-section-item-operation">
+<div class="query-section-item-operation date-attribute">
   <div class="flex-container">
     <div class="flex-container time-frame">
       <div class="date-element-title">in timeframe</div>
@@ -16,18 +16,20 @@
       </select>
     </div>
     <!-- Date picker -->
-    <date-range-directive
-      ng-if="$ctrl.showTimeFrame"
-      config="{{ $ctrl.periodTimeConfig }}"
-      vm="$ctrl.vm"
-      showfrom="$ctrl.showFromTime"
-      showto="$ctrl.showToTime"
-      form="$ctrl.form"
-      type="$ctrl.type"
-      bucketrestriction="$ctrl.bucketrestriction"
-      changed="$ctrl.changeValue(type, position, value)"
-    >
-    </date-range-directive>
+    <div ng-if="$ctrl.showTimeFrame">
+      <date-range-directive
+        ng-if="$ctrl.showTimeFrame"
+        config="{{$ctrl.periodTimeConfig}}"
+        vm="$ctrl.vm"
+        showfrom="$ctrl.showFromTime"
+        showto="$ctrl.showToTime"
+        form="$ctrl.form"
+        type="$ctrl.type"
+        bucketrestriction="$ctrl.bucketrestriction"
+        changed="$ctrl.changeValue(type, position, value)"
+      >
+      </date-range-directive>
+    </div>
     <!--  -->
     <numerical-range-directive
       ng-if="$ctrl.showPeriodNumber"

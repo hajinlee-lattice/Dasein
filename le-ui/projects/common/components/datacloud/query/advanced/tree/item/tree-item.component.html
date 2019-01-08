@@ -12,8 +12,9 @@
     </span>
 
     <span class="query-section-item-value" ng-if="vm.showItem('Date')">
-        <span>in timeframe</span>
-        <strong>{{vm.getOperationValue('Date')}}</strong>
+        <date-attribute bucketrestriction="vm.tree.bucketRestriction" type="vm.type"></date-attribute>
+        <!-- <span>in timeframe</span>
+        <strong>{{vm.getOperationValue('Date')}}</strong> -->
     </span>
 
     <span class="query-section-item-value" ng-if="vm.showItem('Numerical')">

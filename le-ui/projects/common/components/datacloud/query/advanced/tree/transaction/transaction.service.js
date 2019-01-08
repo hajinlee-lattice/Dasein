@@ -50,7 +50,11 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
                 QueryTreeTransactionService.getPeriods().then(
                     function (result) {
                         result.forEach(function (element) {
-                            QueryTreeTransactionStore.periods.push({ 'name': element, 'displayName': element+'(s)' });
+                            var val = 7;
+                            if(element !== 'Week'){
+                                val = 1;
+                            }
+                            QueryTreeTransactionStore.periods.push({ 'name': element, 'displayName': element+'(s)', val: val});
                         });
 
                     }

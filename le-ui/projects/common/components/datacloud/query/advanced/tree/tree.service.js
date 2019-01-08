@@ -682,7 +682,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
                 case 'String':
                     return cmpMap[cmp];
-
+                case 'Date':
+                    return 'in timeframe';
                 default:
                     return 'has a value of';
             }
@@ -752,7 +753,13 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
         this.getValue = function (bucketRestriction, type, position, subType) { }
 
-        this.getValues = function (bucketRestriction, type, subType) { }
+        this.getValues = function (bucketRestriction, type, subType) {
+            switch(type){
+                case 'Date':
+                return bucketRestriction.bkt.Fltr.Vals;
+                default: return [];
+            }
+         };
 
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
@@ -779,7 +786,14 @@ angular.module('common.datacloud.query.builder.tree.service', [
         this.changeValue = function (bucketRestriction, type, value, position, subType) { }
 
         this.changeTimeframePeriod = function (bucketRestriction, type, value) {
-
+            switch(type){
+                case 'Date':
+                    if(bucketRestriction){
+                        bucketRestriction.bkt.Fltr.Period = value.Period;
+                        bucketRestriction.bkt.Fltr.Vals = value.Vals;
+                    }
+                break;
+            }
         }
 
         this.resetBktValues = function (bucketRestriction, type, subType) {
