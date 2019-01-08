@@ -1,8 +1,7 @@
 angular.module('lp.import.wizard.accountids', [])
 .controller('ImportWizardAccountIDs', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, ImportWizardStore, FieldDocument, 
-    UnmappedFields
+    ResourceUtility, FeatureFlagService, ImportWizardStore, FieldDocument, UnmappedFields
 ) {
     var vm = this;
 
@@ -30,6 +29,9 @@ angular.module('lp.import.wizard.accountids', [])
     });
 
     vm.init = function() {
+        var flags = FeatureFlagService.Flags();
+        vm.importWithoutId = FeatureFlagService.FlagIsEnabled(flags.IMPORT_WITHOUT_ID);
+
         vm.UnmappedFields = UnmappedFields;
         ImportWizardStore.setUnmappedFields(UnmappedFields);
         ImportWizardStore.setValidation('ids', false);

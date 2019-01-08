@@ -58,6 +58,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         // ====================
         // These are actually product flag (whether the customer has purchased the product or not)
         ENABLE_CDL: 'EnableCdl',
+        IMPORT_WITHOUT_ID: 'ImportWithoutId',
         // ====================
         // END: product flags
         // ====================
@@ -152,6 +153,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
 
             // product flags
             SetFlag(flags.ENABLE_CDL, false);
+            SetFlag(flags.IMPORT_WITHOUT_ID, true);
 
             // update user-level flags
             if (ApiHost !== '/ulysses') {
