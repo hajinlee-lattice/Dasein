@@ -55,6 +55,29 @@ public class DnBMatchUtils {
         return getContext(traveler);
     }
 
+    /**
+     * Helper to retrieve parent DUNS from {@link DnBMatchContext}. The rule to determine parent DUNS is listed below:
+     * (a) If DUDuns is not empty, return DUDuns
+     * (b) Else if GUDuns is not empty, return GUDuns
+     * (c) Else return Duns
+     *
+     * @param context target dnb match context
+     * @return parent DUNS
+     */
+    public static String getFinalParentDuns(DnBMatchContext context) {
+        if (context == null) {
+            return null;
+        }
+
+        if (StringUtils.isNotBlank(context.getFinalDuDuns())) {
+            return context.getFinalDuDuns();
+        } else if (StringUtils.isNotBlank(context.getFinalGuDuns())) {
+            return context.getFinalGuDuns();
+        } else {
+            return context.getFinalDuns();
+        }
+    }
+
     /*
      * retrieve DnB match result that matches the DUNS in the match key, null if no match found
      */
