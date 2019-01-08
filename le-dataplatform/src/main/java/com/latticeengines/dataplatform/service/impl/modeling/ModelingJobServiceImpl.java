@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.domain.exposed.aws.LEApplicationId;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -92,7 +92,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                 }
             }
         }
-        if (!LEApplicationId.isAwsBatchJob(applicationId)) {
+        if (!AwsApplicationId.isAwsBatchJob(applicationId)) {
             populateJobStatusFromYarnAppReport(jobStatus, applicationId);
         } else {
             populateJobStatusFromAwsBatchReport(jobStatus, applicationId);
