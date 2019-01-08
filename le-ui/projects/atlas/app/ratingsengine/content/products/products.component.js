@@ -173,13 +173,15 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.getProductCoverage = function(ratingEngine, filteredProducts) {
-        RatingsEngineStore.getProductCoverage(ratingEngine, filteredProducts, vm.purchasedBeforePeriod).then(function (result) {
-            for (var productId in result.ratingModelsCoverageMap) {
-                if (!vm.productCoverage.hasOwnProperty(productId)) {
-                    vm.productCoverage[productId] = result.ratingModelsCoverageMap[productId].unscoredAccountCount;
-                }
-            }
-        })
+        // RatingsEngineStore.getProductCoverage(ratingEngine, filteredProducts, vm.purchasedBeforePeriod).then(function (result) {
+        //     console.log(JSON.stringify(result));
+        //     console.log(JSON.stringify(vm.productCoverage));
+        //     for (var productId in result.ratingModelsCoverageMap) {
+        //         if (!vm.productCoverage.hasOwnProperty(productId)) {
+        //             vm.productCoverage[productId] = result.ratingModelsCoverageMap[productId].unscoredAccountCount;
+        //         }
+        //     }
+        // })
     }
 
     vm.init();

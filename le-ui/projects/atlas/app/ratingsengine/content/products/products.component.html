@@ -42,7 +42,7 @@
                         </th> -->
                         <th>&nbsp;</th>
                         <th>Product</th>
-                        <th>Accounts to be Scored * </th>
+                        <!-- <th>Accounts to be Scored * </th> -->
                         <!--<th>Accounts to be scored<sup>*</sup></th>-->
                     </tr>
                 </thead>
@@ -67,10 +67,10 @@
                         <td>
                             <label for="{{product.ProductId}}">{{product.ProductName}}</label>
                         </td>
-                        <td>
+<!--                         <td>
                             <label for="{{product.ProductId}}" ng-if="vm.productCoverage.hasOwnProperty(product.ProductId)">{{vm.productCoverage[product.ProductId].toLocaleString()}}</label>
                             <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverage.hasOwnProperty(product.ProductId)"></span>
-                        </td>
+                        </td> -->
                         <!--<td>
                             <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
                             <span ng-if="!segment.numAccounts">0</span>
